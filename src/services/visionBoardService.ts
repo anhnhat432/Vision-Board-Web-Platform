@@ -1,13 +1,16 @@
+import type { VisionBoardItemStyle, VisionBoardItemType, VisionBoardThemeId } from "@/app/utils/storage-types";
 import { get, post, put, delete as deleteReq } from "@/lib/api/apiClient";
 
 export interface ApiVisionBoardItem {
   id: string;
-  type: "image" | "quote" | "icon";
+  type: VisionBoardItemType;
   content: string;
   x: number;
   y: number;
   width: number;
   height: number;
+  lifeAreaId?: string;
+  style?: VisionBoardItemStyle;
 }
 
 export interface ApiVisionBoard {
@@ -16,6 +19,7 @@ export interface ApiVisionBoard {
   name: string;
   year: string;
   items: ApiVisionBoardItem[];
+  theme?: VisionBoardThemeId;
   goalId?: string;
   createdAt: string;
   updatedAt: string;
@@ -25,6 +29,7 @@ export interface CreateVisionBoardPayload {
   name: string;
   year: string;
   items: Omit<ApiVisionBoardItem, "id">[];
+  theme?: VisionBoardThemeId;
   goalId?: string;
 }
 
@@ -32,6 +37,7 @@ export interface UpdateVisionBoardPayload {
   name?: string;
   year?: string;
   items?: Omit<ApiVisionBoardItem, "id">[];
+  theme?: VisionBoardThemeId;
   goalId?: string;
 }
 

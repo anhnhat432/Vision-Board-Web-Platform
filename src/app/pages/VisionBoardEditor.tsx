@@ -1,5 +1,4 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type React from "react";
 import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import {
   Heart,
@@ -16,8 +15,8 @@ import {
   Star,
   Sun,
   Target,
-  Trash2,
   Trophy,
+  Type,
   Upload,
   Wand2,
   Zap,
@@ -27,6 +26,7 @@ import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { EmptyOrdersIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
@@ -54,12 +54,16 @@ import {
 import {
   type VisionBoard,
   type VisionBoardItem,
+  type VisionBoardThemeId,
   addVisionBoard,
+  calculateGoalProgress,
   getCurrentPlan,
   getUserData,
   updateVisionBoard,
 } from "../utils/storage";
 import { hasReachedLimit } from "../utils/feature-entitlements";
+import { LIFE_AREAS, LIFE_AREA_LABELS } from "../utils/storage-constants";
+import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS, VISION_BOARD_THEMES } from "../utils/vision-board-config";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   createVisionBoard as backendCreateVisionBoard,
@@ -69,18 +73,6 @@ import {
   getBackendVisionBoardId,
   saveVisionBoardLink,
 } from "@/lib/api/visionBoardLinkStore";
-
-interface DraggableItemProps {
-  item: VisionBoardItem;
-  onUpdate: (id: string, x: number, y: number) => void;
-  onDelete: (id: string) => void;
-}
-
-interface DragState {
-  offsetX: number;
-  offsetY: number;
-  pointerId: number;
-}
 
 const ICON_COMPONENTS = {
   Star,
@@ -94,6 +86,10 @@ const ICON_COMPONENTS = {
 };
 
 type IconName = keyof typeof ICON_COMPONENTS;
+type VisionBoardItemStyle = NonNullable<VisionBoardItem["style"]>;
+type ImageFrameId = NonNullable<VisionBoardItemStyle["imageFrame"]>;
+type QuoteFontId = NonNullable<VisionBoardItemStyle["quoteFont"]>;
+type IconSizePreset = NonNullable<VisionBoardItemStyle["sizePreset"]>;
 
 const ICON_OPTIONS = Object.keys(ICON_COMPONENTS) as IconName[];
 const IMAGE_SUGGESTIONS = ["không gian làm việc đẹp", "buổi sáng khỏe mạnh", "du lịch tự do", "ngôi nhà mơ ước"];
@@ -117,6 +113,35 @@ const CURATED_IMAGES: Array<{ label: string; url: string }> = [
   { label: "Nghệ thuật", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
   { label: "Vườn", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
 ];
+
+function createImageItem(
+  content: string,
+  items: VisionBoardItem[],
+  lifeArea: string | null,
+  frame: ImageFrameId,
+): VisionBoardItem {
+  return {
+    id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    type: "image",
+    content,
+    x: 10 + (items.length * 6) % 48,
+    y: 12 + (items.length * 5) % 42,
+    width: SIZE_PRESETS.M.width,
+    height: SIZE_PRESETS.M.width,
+    lifeAreaId: lifeArea ?? undefined,
+    style: { sizePreset: "M", imageFrame: frame },
+  };
+}
+
+function formatShortDate(iso: string): string | null {
+  try {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+  } catch {
+    return null;
+  }
+}
 
 // Upload hardening constants — module scope so they are not recreated on each render
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024; // 5 MB source file limit (compression handles reduction)
@@ -169,124 +194,6 @@ function compressImageFile(file: File): Promise<string> {
   });
 }
 
-function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStateRef = useRef<DragState | null>(null);
-
-  const updatePosition = (clientX: number, clientY: number, container: HTMLElement) => {
-    const dragState = dragStateRef.current;
-    if (!dragState) return;
-
-    const rect = container.getBoundingClientRect();
-    const x = ((clientX - rect.left - dragState.offsetX) / rect.width) * 100;
-    const y = ((clientY - rect.top - dragState.offsetY) / rect.height) * 100;
-
-    onUpdate(item.id, Math.max(0, Math.min(95, x)), Math.max(0, Math.min(95, y)));
-  };
-
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("button")) return;
-
-    const container = event.currentTarget.parentElement;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const offsetX = event.clientX - rect.left - (rect.width * item.x) / 100;
-    const offsetY = event.clientY - rect.top - (rect.height * item.y) / 100;
-
-    dragStateRef.current = {
-      offsetX,
-      offsetY,
-      pointerId: event.pointerId,
-    };
-
-    setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-    updatePosition(event.clientX, event.clientY, container);
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
-
-    const container = event.currentTarget.parentElement;
-    if (!container) return;
-
-    updatePosition(event.clientX, event.clientY, container);
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
-
-    dragStateRef.current = null;
-    setIsDragging(false);
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  const Icon = ICON_COMPONENTS[item.content as IconName] ?? Sparkles;
-
-  return (
-    <div
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerEnd}
-      onPointerCancel={handlePointerEnd}
-      className="absolute cursor-move touch-none select-none transition-transform duration-300 hover:scale-[1.015]"
-      style={{
-        left: `${item.x}%`,
-        top: `${item.y}%`,
-        width: `${item.width}px`,
-        opacity: isDragging ? 0.56 : 1,
-      }}
-    >
-      <div className="group relative">
-        {item.type === "image" && (
-          <div className="overflow-hidden rounded-[var(--r-card)] border border-white/85 bg-white/90 p-2 shadow-2xl">
-            <ImageWithFallback
-              src={item.content}
-              alt="Phần tử vision board"
-              className="rounded-[var(--r-tile)] shadow-sm"
-              style={{ width: `${item.width - 16}px` }}
-            />
-          </div>
-        )}
-
-        {item.type === "quote" && (
-          <div
-            className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-[var(--shadow-3)]"
-            style={{ width: `${item.width}px` }}
-          >
-            <div className="flex items-center gap-2 text-violet-600">
-              <MessageSquareQuote className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-[0.18em]">
-                Câu nói
-              </span>
-            </div>
-            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-700">{item.content}</p>
-          </div>
-        )}
-
-        {item.type === "icon" && (
-          <div className="flex h-24 w-24 items-center justify-center rounded-[var(--r-tile)] gradient-brand text-primary-foreground shadow-[var(--shadow-2)]">
-            <Icon className="h-10 w-10" />
-          </div>
-        )}
-
-        <Button
-          size="icon"
-          variant="destructive"
-          className="absolute -right-2 -top-2 h-8 w-8 rounded-[var(--r-pill)] opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={() => onDelete(item.id)}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 export function VisionBoardEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -295,10 +202,18 @@ export function VisionBoardEditor() {
   const [isResolvingBoard, setIsResolvingBoard] = useState(Boolean(id));
   const [boardName, setBoardName] = useState("");
   const [boardYear, setBoardYear] = useState(new Date().getFullYear().toString());
+  const [themeId, setThemeId] = useState<VisionBoardThemeId>("aurora");
+  const [showZones, setShowZones] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [quoteText, setQuoteText] = useState("");
   const [iconName, setIconName] = useState<IconName>("Sparkles");
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [selectedLifeArea, setSelectedLifeArea] = useState<string | null>(null);
+  const [selectedImageFrame, setSelectedImageFrame] = useState<ImageFrameId>("shadow");
+  const [selectedQuoteFont, setSelectedQuoteFont] = useState<QuoteFontId>("default");
+  const [selectedIconSize, setSelectedIconSize] = useState<IconSizePreset>("M");
   const [isSearching, setIsSearching] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isVisionBoardLimitPaywallOpen, setIsVisionBoardLimitPaywallOpen] = useState(false);
@@ -319,6 +234,16 @@ export function VisionBoardEditor() {
   useBeforeUnload(handleBeforeUnload);
 
   useEffect(() => {
+    if (!isAddingItem) {
+      setSelectedGoalId(null);
+      setSelectedLifeArea(null);
+      setSelectedImageFrame("shadow");
+      setSelectedQuoteFont("default");
+      setSelectedIconSize("M");
+    }
+  }, [isAddingItem]);
+
+  useEffect(() => {
     if (id) {
       const userData = getUserData();
       const existingBoard = userData.visionBoards.find((item) => item.id === id);
@@ -326,6 +251,7 @@ export function VisionBoardEditor() {
         setBoard(existingBoard);
         setBoardName(existingBoard.name);
         setBoardYear(existingBoard.year);
+        setThemeId(existingBoard.theme ?? "aurora");
         setIsResolvingBoard(false);
         return;
       }
@@ -342,6 +268,7 @@ export function VisionBoardEditor() {
       items: [],
       createdAt: new Date().toISOString(),
     });
+    setThemeId("aurora");
     setIsResolvingBoard(false);
   }, [id, navigate]);
 
@@ -359,6 +286,18 @@ export function VisionBoardEditor() {
     );
   }, [board]);
 
+  const goalsById = Object.fromEntries(
+    getUserData().goals.map((goal) => [
+      goal.id,
+      {
+        title: goal.title,
+        category: goal.category,
+        deadline: goal.deadline,
+        progress: calculateGoalProgress(goal),
+      },
+    ]),
+  );
+
   const handleSave = () => {
     if (!board || !boardName.trim()) return;
 
@@ -369,34 +308,34 @@ export function VisionBoardEditor() {
     }
 
     let savedBoardId = id ?? "";
+    const payload = {
+      name: boardName.trim(),
+      year: boardYear.trim(),
+      items: board.items,
+      theme: themeId,
+    };
 
     if (id) {
-      const updated = updateVisionBoard(id, {
-        name: boardName.trim(),
-        year: boardYear.trim(),
-        items: board.items,
-      });
+      const updated = updateVisionBoard(id, payload);
       if (!updated) return;
       savedBoardId = id;
     } else {
-      const newId = addVisionBoard({
-        name: boardName.trim(),
-        year: boardYear.trim(),
-        items: board.items,
-      });
+      const newId = addVisionBoard(payload);
       if (!newId) return;
       savedBoardId = newId;
     }
 
     // Fire-and-forget backend sync
     if (user) {
-      const itemsPayload = board.items.map(({ type, content, x, y, width, height }) => ({
+      const itemsPayload = board.items.map(({ type, content, x, y, width, height, lifeAreaId, style }) => ({
         type,
         content,
         x,
         y,
         width,
         height,
+        lifeAreaId,
+        style,
       }));
 
       const backendId = getBackendVisionBoardId(savedBoardId);
@@ -405,6 +344,7 @@ export function VisionBoardEditor() {
           name: boardName.trim(),
           year: boardYear.trim(),
           items: itemsPayload,
+          theme: themeId,
         }).catch((err: unknown) => {
           console.warn("Backend vision board update failed silently.", err);
         });
@@ -413,6 +353,7 @@ export function VisionBoardEditor() {
           name: boardName.trim(),
           year: boardYear.trim(),
           items: itemsPayload,
+          theme: themeId,
         })
           .then((created) => {
             saveVisionBoardLink(savedBoardId, created.id);
@@ -457,15 +398,7 @@ export function VisionBoardEditor() {
     const seed = encodeURIComponent(searchQuery.trim()) + Date.now();
     const imageUrl = `https://picsum.photos/seed/${seed}/480/360`;
 
-    const newItem: VisionBoardItem = {
-      id: `item_${Date.now()}`,
-      type: "image",
-      content: imageUrl,
-      x: 10 + (board.items.length * 6) % 48,
-      y: 12 + (board.items.length * 5) % 42,
-      width: 220,
-      height: 220,
-    };
+    const newItem = createImageItem(imageUrl, board.items, selectedLifeArea, selectedImageFrame);
 
     setBoard({ ...board, items: [...board.items, newItem] });
     setSearchQuery("");
@@ -484,15 +417,7 @@ export function VisionBoardEditor() {
       return;
     }
 
-    const newItem: VisionBoardItem = {
-      id: `item_${Date.now()}`,
-      type: "image",
-      content: trimmed,
-      x: 10 + (board.items.length * 6) % 48,
-      y: 12 + (board.items.length * 5) % 42,
-      width: 220,
-      height: 220,
-    };
+    const newItem = createImageItem(trimmed, board.items, selectedLifeArea, selectedImageFrame);
 
     setBoard({ ...board, items: [...board.items, newItem] });
     setImageUrl("");
@@ -503,15 +428,7 @@ export function VisionBoardEditor() {
   const handleAddCuratedImage = (url: string) => {
     if (!board) return;
 
-    const newItem: VisionBoardItem = {
-      id: `item_${Date.now()}`,
-      type: "image",
-      content: url,
-      x: 10 + (board.items.length * 6) % 48,
-      y: 12 + (board.items.length * 5) % 42,
-      width: 220,
-      height: 220,
-    };
+    const newItem = createImageItem(url, board.items, selectedLifeArea, selectedImageFrame);
 
     setBoard({ ...board, items: [...board.items, newItem] });
     setIsAddingItem(false);
@@ -538,15 +455,7 @@ export function VisionBoardEditor() {
       .then((dataUrl) => {
         setBoard((prev) => {
           if (!prev) return prev;
-          const newItem: VisionBoardItem = {
-            id: `item_${Date.now()}`,
-            type: "image",
-            content: dataUrl,
-            x: 10 + (prev.items.length * 6) % 48,
-            y: 12 + (prev.items.length * 5) % 42,
-            width: 220,
-            height: 220,
-          };
+          const newItem = createImageItem(dataUrl, prev.items, selectedLifeArea, selectedImageFrame);
           return { ...prev, items: [...prev.items, newItem] };
         });
         setIsAddingItem(false);
@@ -571,8 +480,10 @@ export function VisionBoardEditor() {
       content: quoteText.trim(),
       x: 12 + (board.items.length * 5) % 50,
       y: 14 + (board.items.length * 4) % 40,
-      width: 280,
+      width: SIZE_PRESETS.L.width,
       height: 120,
+      lifeAreaId: selectedLifeArea ?? undefined,
+      style: { sizePreset: "L", quoteFont: selectedQuoteFont },
     };
 
     setBoard({ ...board, items: [...board.items, newItem] });
@@ -581,17 +492,47 @@ export function VisionBoardEditor() {
     setHasUnsavedChanges(true);
   };
 
+  const handleAddGoalCard = () => {
+    if (!board || !selectedGoalId) return;
+
+    const goal = getUserData().goals.find((item) => item.id === selectedGoalId);
+    if (!goal) {
+      toast.error("Mục tiêu không còn tồn tại.");
+      return;
+    }
+
+    const newItem: VisionBoardItem = {
+      id: `item_${Date.now()}`,
+      type: "goal_card",
+      content: selectedGoalId,
+      x: 10 + (board.items.length * 6) % 48,
+      y: 12 + (board.items.length * 5) % 42,
+      width: SIZE_PRESETS.M.width,
+      height: 140,
+      lifeAreaId: goal.category,
+      style: { sizePreset: "M" },
+    };
+
+    setBoard({ ...board, items: [...board.items, newItem] });
+    setSelectedGoalId(null);
+    setIsAddingItem(false);
+    setHasUnsavedChanges(true);
+    toast.success(`Đã ghim mục tiêu "${goal.title}" lên bảng.`);
+  };
+
   const handleAddIcon = () => {
     if (!board) return;
 
+    const iconWidth = SIZE_PRESETS[selectedIconSize].width;
     const newItem: VisionBoardItem = {
       id: `item_${Date.now()}`,
       type: "icon",
       content: iconName,
       x: 16 + (board.items.length * 5) % 50,
       y: 16 + (board.items.length * 4) % 42,
-      width: 96,
-      height: 96,
+      width: iconWidth,
+      height: iconWidth,
+      style: { sizePreset: selectedIconSize },
     };
 
     setBoard({ ...board, items: [...board.items, newItem] });
@@ -612,6 +553,7 @@ export function VisionBoardEditor() {
   const handleDeleteItem = (itemId: string) => {
     if (!board) return;
     setBoard({ ...board, items: board.items.filter((item) => item.id !== itemId) });
+    setSelectedItemId((current) => (current === itemId ? null : current));
     setHasUnsavedChanges(true);
   };
 
@@ -711,6 +653,37 @@ export function VisionBoardEditor() {
                     </Button>
                   </div>
 
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Không gian</span>
+                    {VISION_BOARD_THEMES.map((theme) => (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() => {
+                          setThemeId(theme.id);
+                          setHasUnsavedChanges(true);
+                        }}
+                        className={`h-7 w-7 rounded-full border-2 transition-all ${
+                          themeId === theme.id ? "scale-110 border-foreground" : "border-slate-300 hover:border-slate-500"
+                        }`}
+                        style={{ background: theme.preview.gradient }}
+                        aria-label={theme.label}
+                        title={theme.label}
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setShowZones((prev) => !prev)}
+                      className={`ml-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                        showZones
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-300 bg-white/70 text-slate-600 hover:bg-white"
+                      }`}
+                    >
+                      {showZones ? "Ẩn vùng life area" : "Hiện vùng life area"}
+                    </button>
+                  </div>
+
                   <p className="text-sm text-muted-foreground">
                     Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên bảng.
                   </p>
@@ -752,7 +725,7 @@ export function VisionBoardEditor() {
             </DialogHeader>
 
             <Tabs defaultValue="image" className="mt-4">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="image">
                   <Image className="h-4 w-4" />
                   Hình ảnh
@@ -760,6 +733,10 @@ export function VisionBoardEditor() {
                 <TabsTrigger value="quote">
                   <MessageSquareQuote className="h-4 w-4" />
                   Câu nói
+                </TabsTrigger>
+                <TabsTrigger value="goal_card">
+                  <Target className="h-4 w-4" />
+                  Mục tiêu
                 </TabsTrigger>
                 <TabsTrigger value="icon">
                   <Sparkles className="h-4 w-4" />
@@ -856,6 +833,50 @@ export function VisionBoardEditor() {
                       </Button>
                     ))}
                   </div>
+                  <div className="stack-tight border-t border-slate-100 pt-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <LayoutGrid className="h-4 w-4" />
+                      Gắn ảnh vào vùng nào? <span className="text-xs font-normal text-slate-400">(tùy chọn)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {LIFE_AREAS.map((area) => (
+                        <button
+                          key={area.name}
+                          type="button"
+                          onClick={() => setSelectedLifeArea((prev) => (prev === area.name ? null : area.name))}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                            selectedLifeArea === area.name
+                              ? "border-violet-400 bg-violet-50 text-violet-700"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-violet-200"
+                          }`}
+                        >
+                          {LIFE_AREA_LABELS[area.name]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="stack-tight">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <Palette className="h-4 w-4" />
+                      Khung ảnh
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {IMAGE_FRAME_STYLES.map((frame) => (
+                        <button
+                          key={frame.id}
+                          type="button"
+                          onClick={() => setSelectedImageFrame(frame.id)}
+                          className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
+                            selectedImageFrame === frame.id
+                              ? "border-violet-400 bg-violet-50 text-violet-700"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-violet-200"
+                          }`}
+                        >
+                          {frame.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <Button variant="outline" className="w-full" onClick={handleAddImage} disabled={isSearching || !searchQuery.trim()}>
                     {isSearching ? "Đang thêm hình..." : "Thêm hình theo cảm giác"}
                   </Button>
@@ -881,9 +902,129 @@ export function VisionBoardEditor() {
                     </Button>
                   ))}
                 </div>
+                <div className="stack-tight">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <Type className="h-4 w-4" />
+                    Kiểu chữ
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {QUOTE_FONT_STYLES.map((font) => (
+                      <button
+                        key={font.id}
+                        type="button"
+                        onClick={() => setSelectedQuoteFont(font.id)}
+                        className={`rounded-lg border p-3 text-left transition ${
+                          selectedQuoteFont === font.id
+                            ? "border-violet-400 bg-violet-50"
+                            : "border-slate-200 bg-white hover:border-violet-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-base ${font.className}`}
+                          style={font.fontFamily ? { fontFamily: font.fontFamily } : undefined}
+                        >
+                          Aa
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">{font.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <Button className="w-full" onClick={handleAddQuote} disabled={!quoteText.trim()}>
                   Thêm câu nói vào bảng
                 </Button>
+              </TabsContent>
+
+              <TabsContent value="goal_card" className="stack-stack pt-4">
+                {(() => {
+                  const userData = getUserData();
+                  const goals = userData.goals;
+
+                  if (goals.length === 0) {
+                    return (
+                      <div className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/40 p-6 text-center">
+                        <Target className="mx-auto h-10 w-10 text-violet-400" />
+                        <p className="mt-3 text-base font-semibold text-slate-900">
+                          Bạn chưa có mục tiêu nào để ghim lên bảng
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Hãy tạo một SMART goal trước, rồi quay lại để ghim mục tiêu thành phần tử trên Vision Board.
+                        </p>
+                        <Button
+                          className="mt-4"
+                          onClick={() => {
+                            setIsAddingItem(false);
+                            navigate("/goals");
+                          }}
+                        >
+                          Đi tới Mục tiêu
+                        </Button>
+                      </div>
+                    );
+                  }
+
+                  const pinnedGoalIds = new Set(
+                    board?.items.filter((item) => item.type === "goal_card").map((item) => item.content) ?? [],
+                  );
+                  const availableGoals = goals.filter((goal) => !pinnedGoalIds.has(goal.id));
+
+                  return (
+                    <>
+                      <p className="text-sm text-slate-500">
+                        Chọn một mục tiêu để ghim lên bảng. Card sẽ tự cập nhật khi tiến độ thay đổi.
+                      </p>
+                      <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                        {availableGoals.map((goal) => {
+                          const area = LIFE_AREAS.find((item) => item.name === goal.category);
+                          const areaLabel = LIFE_AREA_LABELS[goal.category] ?? goal.category;
+                          const progress = calculateGoalProgress(goal);
+                          const isActive = selectedGoalId === goal.id;
+
+                          return (
+                            <button
+                              key={goal.id}
+                              type="button"
+                              onClick={() => setSelectedGoalId(goal.id)}
+                              className={`rounded-[var(--r-card)] border p-3 text-left transition ${
+                                isActive
+                                  ? "border-violet-400 bg-violet-50 ring-1 ring-violet-300"
+                                  : "border-slate-200 bg-white hover:border-violet-200"
+                              }`}
+                            >
+                              {area && (
+                                <span
+                                  className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                                  style={{ backgroundColor: `${area.color}22`, color: area.color }}
+                                >
+                                  {areaLabel}
+                                </span>
+                              )}
+                              <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-900">{goal.title}</p>
+                              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                                <span>HSD: {formatShortDate(goal.deadline)}</span>
+                                <span className="font-semibold">{progress}%</span>
+                              </div>
+                              <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-100">
+                                <div
+                                  className="h-full bg-gradient-to-r from-violet-500 to-pink-500"
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                            </button>
+                          );
+                        })}
+                        {availableGoals.length === 0 && (
+                          <p className="col-span-full rounded-[var(--r-card)] border border-amber-200 bg-amber-50/50 p-4 text-center text-sm text-amber-700">
+                            Tất cả mục tiêu đã được ghim trên bảng này.
+                          </p>
+                        )}
+                      </div>
+                      <Button className="w-full" onClick={handleAddGoalCard} disabled={!selectedGoalId}>
+                        Ghim mục tiêu vào bảng
+                      </Button>
+                    </>
+                  );
+                })()}
               </TabsContent>
 
               <TabsContent value="icon" className="stack-stack pt-4">
@@ -911,6 +1052,25 @@ export function VisionBoardEditor() {
                     );
                   })}
                 </div>
+                <div className="stack-tight">
+                  <span className="text-sm font-semibold text-slate-700">Kích thước</span>
+                  <div className="flex gap-2">
+                    {(["S", "M", "L", "XL"] as const).map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setSelectedIconSize(size)}
+                        className={`flex-1 rounded-md border px-3 py-2 text-sm ${
+                          selectedIconSize === size
+                            ? "border-violet-400 bg-violet-50 text-violet-700"
+                            : "border-slate-200 bg-white text-slate-600"
+                        }`}
+                      >
+                        {SIZE_PRESETS[size].label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <Button className="w-full" onClick={handleAddIcon}>
                   Thêm biểu tượng vào bảng
                 </Button>
@@ -922,43 +1082,47 @@ export function VisionBoardEditor() {
         <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="min-w-0 overflow-hidden">
             <CardContent className="p-0">
-              <div
-                className="relative h-[520px] min-w-0 overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.82),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)] sm:h-[580px] lg:h-[620px] xl:h-[600px]"
-              >
-                <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:36px_36px] opacity-70" />
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(168,85,247,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(56,189,248,0.14),_transparent_22%)]" />
-
-                {board.items.length === 0 ? (
-                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="w-full max-w-md rounded-[var(--r-card)] border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
-                      <EmptyOrdersIllustration className="mx-auto mb-4 w-32 text-violet-500 opacity-70 sm:w-40" />
-                      <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
-                        <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
+              <VisionBoardCanvas
+                items={board.items}
+                themeId={themeId}
+                showZones={showZones}
+                focusAreaIds={board.storyAnswers?.focusAreas}
+                goalsById={goalsById}
+                selectedItemId={selectedItemId}
+                onItemPositionChange={handleUpdateItemPosition}
+                onItemDelete={handleDeleteItem}
+                onItemSelect={setSelectedItemId}
+                emptyStateSlot={
+                  board.items.length === 0 ? (
+                    <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
+                      <div className="w-full max-w-md rounded-[var(--r-card)] border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
+                        <EmptyOrdersIllustration className="mx-auto mb-4 w-32 text-violet-500 opacity-70 sm:w-40" />
+                        <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
+                          <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
+                        </div>
+                        <h2 className="mt-[var(--space-stack)] text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
+                          Bảng của bạn đang chờ câu chuyện đầu tiên
+                        </h2>
+                        <p className="mt-[var(--space-inline)] text-base text-slate-500">
+                          Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
+                        </p>
+                        <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsAddingItem(true)}>
+                          <Plus className="h-4 w-4" />
+                          Bắt đầu Story Mode
+                        </Button>
+                        <button
+                          type="button"
+                          className="mt-2 text-sm text-slate-500 underline-offset-2 hover:underline"
+                          onClick={() => setIsAddingItem(true)}
+                        >
+                          Hoặc tự thêm phần tử
+                        </button>
                       </div>
-                      <h2 className="mt-[var(--space-stack)] text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
-                        Bảng của bạn đang chờ câu chuyện đầu tiên
-                      </h2>
-                      <p className="mt-[var(--space-inline)] text-base text-slate-500">
-                        Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
-                      </p>
-                      <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsAddingItem(true)}>
-                        <Plus className="h-4 w-4" />
-                        Thêm phần tử đầu tiên
-                      </Button>
                     </div>
-                  </div>
-                ) : (
-                  board.items.map((item) => (
-                    <DraggableItem
-                      key={item.id}
-                      item={item}
-                      onUpdate={handleUpdateItemPosition}
-                      onDelete={handleDeleteItem}
-                    />
-                  ))
-                )}
-              </div>
+                  ) : null
+                }
+              />
             </CardContent>
           </Card>
 

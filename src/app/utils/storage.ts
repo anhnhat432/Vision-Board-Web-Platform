@@ -82,7 +82,12 @@ import {
   trackAppEventInData,
   updateAppPreferencesInData,
 } from "./storage-local-ops";
-import { addVisionBoardToData, deleteVisionBoardFromData, updateVisionBoardInData } from "./storage-vision-board-ops";
+import {
+  addVisionBoardToData,
+  deleteVisionBoardFromData,
+  normalizeVisionBoard,
+  updateVisionBoardInData,
+} from "./storage-vision-board-ops";
 import { toast } from "sonner";
 import { addAchievementToData, checkAchievementsInData } from "./storage-achievement-ops";
 import {
@@ -163,6 +168,10 @@ export type {
   UserData,
   VisionBoard,
   VisionBoardItem,
+  VisionBoardItemStyle,
+  VisionBoardItemType,
+  VisionBoardSizePreset,
+  VisionBoardThemeId,
   WeeklyPlanEntry,
   WeeklyReview,
   WheelOfLifeRecord,
@@ -365,6 +374,9 @@ function normalizeUserData(data: UserData): UserData {
     ),
     eventLog: Array.isArray(data.eventLog) ? data.eventLog : [],
     syncOutbox: Array.isArray(data.syncOutbox) ? data.syncOutbox : [],
+    visionBoards: Array.isArray(data.visionBoards)
+      ? data.visionBoards.map(normalizeVisionBoard).filter((board): board is VisionBoard => board !== null)
+      : [],
     appPreferences: {
       ...DEFAULT_APP_PREFERENCES,
       ...(data.appPreferences ?? {}),

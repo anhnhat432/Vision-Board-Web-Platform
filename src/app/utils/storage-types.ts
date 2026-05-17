@@ -241,15 +241,29 @@ export interface Goal {
   createdAt: string;
 }
 
+export type VisionBoardItemType = "image" | "quote" | "icon" | "goal_card";
+
+export type VisionBoardSizePreset = "S" | "M" | "L" | "XL";
+
+export interface VisionBoardItemStyle {
+  sizePreset?: VisionBoardSizePreset;
+  quoteFont?: "default" | "handwriting" | "serif" | "bold";
+  imageFrame?: "shadow" | "polaroid" | "washi" | "minimal";
+}
+
 export interface VisionBoardItem {
   id: string;
-  type: "image" | "quote" | "icon";
+  type: VisionBoardItemType;
   content: string;
   x: number;
   y: number;
   width: number;
   height: number;
+  lifeAreaId?: string;
+  style?: VisionBoardItemStyle;
 }
+
+export type VisionBoardThemeId = "aurora" | "sunset" | "forest" | "nightsky" | "minimal";
 
 export interface VisionBoard {
   id: string;
@@ -257,6 +271,12 @@ export interface VisionBoard {
   year: string;
   items: VisionBoardItem[];
   createdAt: string;
+  theme?: VisionBoardThemeId;
+  storyAnswers?: {
+    feelings?: string[];
+    focusAreas?: string[];
+    coreQuote?: string;
+  };
 }
 
 export interface Achievement {

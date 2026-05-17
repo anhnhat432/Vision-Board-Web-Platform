@@ -1,0 +1,421 @@
+import type {
+  VisionBoardItemStyle,
+  VisionBoardSizePreset,
+  VisionBoardThemeId,
+} from "./storage-types";
+
+export interface VisionBoardTheme {
+  id: VisionBoardThemeId;
+  label: string;
+  description: string;
+  canvasBackground: string;
+  gridColor: string;
+  accentZone: string;
+  textColor: string;
+  defaultQuoteFont: NonNullable<VisionBoardItemStyle["quoteFont"]>;
+  preview: { gradient: string };
+}
+
+export const VISION_BOARD_THEMES: VisionBoardTheme[] = [
+  {
+    id: "aurora",
+    label: "Cực quang",
+    description: "Năng lượng buổi sáng dịu nhẹ.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(236, 72, 153, 0.16), rgba(56, 189, 248, 0.18))",
+    gridColor: "rgba(255, 255, 255, 0.36)",
+    accentZone: "rgba(255, 255, 255, 0.28)",
+    textColor: "#334155",
+    defaultQuoteFont: "default",
+    preview: {
+      gradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 52%, #38bdf8 100%)",
+    },
+  },
+  {
+    id: "sunset",
+    label: "Hoàng hôn",
+    description: "Hoàng hôn ấm áp và đầy động lực.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(251, 146, 60, 0.24), rgba(244, 114, 182, 0.2), rgba(254, 202, 202, 0.24))",
+    gridColor: "rgba(154, 52, 18, 0.18)",
+    accentZone: "rgba(251, 146, 60, 0.18)",
+    textColor: "#7c2d12",
+    defaultQuoteFont: "handwriting",
+    preview: {
+      gradient: "linear-gradient(135deg, #fb923c 0%, #f472b6 58%, #fecaca 100%)",
+    },
+  },
+  {
+    id: "forest",
+    label: "Rừng xanh",
+    description: "Sắc xanh đất giúp tâm trí vững vàng.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(20, 83, 45, 0.16), rgba(74, 124, 89, 0.2), rgba(187, 247, 208, 0.22))",
+    gridColor: "rgba(21, 128, 61, 0.18)",
+    accentZone: "rgba(34, 197, 94, 0.16)",
+    textColor: "#14532d",
+    defaultQuoteFont: "serif",
+    preview: {
+      gradient: "linear-gradient(135deg, #14532d 0%, #4a7c59 55%, #bbf7d0 100%)",
+    },
+  },
+  {
+    id: "nightsky",
+    label: "Trời đêm",
+    description: "Bầu trời đêm yên tĩnh để nhìn xa hơn.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(49, 46, 129, 0.88), rgba(88, 28, 135, 0.82))",
+    gridColor: "rgba(255, 255, 255, 0.14)",
+    accentZone: "rgba(255, 255, 255, 0.1)",
+    textColor: "#f8fafc",
+    defaultQuoteFont: "serif",
+    preview: {
+      gradient: "linear-gradient(135deg, #0f172a 0%, #312e81 58%, #581c87 100%)",
+    },
+  },
+  {
+    id: "minimal",
+    label: "Tối giản",
+    description: "Nền kem tinh gọn cho mục tiêu rõ nét.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(250, 247, 237, 1), rgba(241, 245, 249, 0.94), rgba(229, 231, 235, 0.88))",
+    gridColor: "rgba(100, 116, 139, 0.16)",
+    accentZone: "rgba(148, 163, 184, 0.14)",
+    textColor: "#111827",
+    defaultQuoteFont: "bold",
+    preview: {
+      gradient: "linear-gradient(135deg, #faf7ed 0%, #f1f5f9 58%, #e5e7eb 100%)",
+    },
+  },
+];
+
+export interface QuoteFontStyle {
+  id: NonNullable<VisionBoardItemStyle["quoteFont"]>;
+  label: string;
+  className: string;
+  fontFamily?: string;
+}
+
+export const QUOTE_FONT_STYLES: QuoteFontStyle[] = [
+  {
+    id: "default",
+    label: "Mặc định",
+    className: "font-medium text-slate-700",
+  },
+  {
+    id: "handwriting",
+    label: "Viết tay",
+    className: "italic text-xl leading-snug",
+    fontFamily: '"Caveat", "Patrick Hand", "Segoe Script", cursive',
+  },
+  {
+    id: "serif",
+    label: "Cổ điển",
+    className: "font-semibold text-lg leading-relaxed",
+    fontFamily: '"Playfair Display", "Georgia", "Cormorant Garamond", serif',
+  },
+  {
+    id: "bold",
+    label: "Mạnh mẽ",
+    className: "font-black tracking-wider uppercase text-base",
+  },
+];
+
+export interface ImageFrameStyle {
+  id: NonNullable<VisionBoardItemStyle["imageFrame"]>;
+  label: string;
+  wrapperClassName: string;
+  imageClassName: string;
+  decorationsLayout?: "polaroid" | "washi" | null;
+}
+
+export const IMAGE_FRAME_STYLES: ImageFrameStyle[] = [
+  {
+    id: "shadow",
+    label: "Đổ bóng",
+    wrapperClassName: "rounded-[var(--r-card)] border border-white/85 bg-white/90 p-2 shadow-2xl",
+    imageClassName: "rounded-[calc(var(--r-card)-0.35rem)] object-cover",
+    decorationsLayout: null,
+  },
+  {
+    id: "polaroid",
+    label: "Polaroid",
+    wrapperClassName: "rounded-sm border border-white bg-white p-3 pb-8 shadow-xl",
+    imageClassName: "rounded-[2px] object-cover",
+    decorationsLayout: "polaroid",
+  },
+  {
+    id: "washi",
+    label: "Băng dán washi",
+    wrapperClassName: "rounded-lg border border-white/80 bg-white/85 p-2 shadow-lg",
+    imageClassName: "rounded-md object-cover",
+    decorationsLayout: "washi",
+  },
+  {
+    id: "minimal",
+    label: "Tối giản",
+    wrapperClassName: "rounded-md border border-slate-200",
+    imageClassName: "rounded-md object-cover",
+    decorationsLayout: null,
+  },
+];
+
+export const SIZE_PRESETS: Record<VisionBoardSizePreset, { width: number; label: string }> = {
+  S: { width: 140, label: "Nhỏ" },
+  M: { width: 220, label: "Vừa" },
+  L: { width: 320, label: "Lớn" },
+  XL: { width: 440, label: "Rất lớn" },
+};
+
+export interface StoryFeelingOption {
+  id: string;
+  label: string;
+}
+
+export const STORY_FEELING_OPTIONS: StoryFeelingOption[] = [
+  { id: "binh-an", label: "Bình an" },
+  { id: "manh-me", label: "Mạnh mẽ" },
+  { id: "tu-do", label: "Tự do" },
+  { id: "ket-noi", label: "Kết nối" },
+  { id: "sang-tao", label: "Sáng tạo" },
+  { id: "an-toan", label: "An toàn" },
+  { id: "thinh-vuong", label: "Thịnh vượng" },
+  { id: "tinh-thuc", label: "Tỉnh thức" },
+  { id: "but-pha", label: "Bứt phá" },
+  { id: "tu-te", label: "Tử tế" },
+  { id: "cham-rai", label: "Chậm rãi" },
+  { id: "toa-sang", label: "Tỏa sáng" },
+];
+
+export interface CuratedQuoteByFeeling {
+  feelingId: string;
+  quotes: string[];
+}
+
+export const CURATED_QUOTES_BY_FEELING: CuratedQuoteByFeeling[] = [
+  {
+    feelingId: "binh-an",
+    quotes: [
+      "Bình an đến khi tôi không cần thắng mọi điều, chỉ cần giữ đúng điều quan trọng.",
+      "Một ngày đủ yên có thể làm lại cân bằng cho cả tuần dài.",
+      "Tôi chọn nói nhỏ hơn, thói quen đều hơn, trái tim rộng hơn.",
+    ],
+  },
+  {
+    feelingId: "manh-me",
+    quotes: [
+      "Mạnh mẽ là biết run nhưng vẫn bước thêm một bước đúng hướng.",
+      "Tôi không đợi hết sợ hãi mới làm; tôi làm để nỗi sợ nhỏ lại.",
+      "Sức bền được xây bằng những lời hứa nhỏ mình giữ với chính mình.",
+    ],
+  },
+  {
+    feelingId: "tu-do",
+    quotes: [
+      "Tự do không phải là làm gì cũng được, mà là chọn được điều mình thật sự muốn làm.",
+      "Đi xa để hiểu mình nhỏ bé, đi gần để biết mình đủ đầy.",
+      "Một cuộc đời tự do bắt đầu bằng một thói quen tự kỷ luật.",
+    ],
+  },
+  {
+    feelingId: "ket-noi",
+    quotes: [
+      "Kết nối sâu không cần nhiều lời, chỉ cần mình có mặt thật lòng.",
+      "Tôi muốn xây những mối quan hệ nơi cả hai đều được thở thành thật.",
+      "Mỗi lần lắng nghe trọn vẹn là một sợi dây được đan lại.",
+    ],
+  },
+  {
+    feelingId: "sang-tao",
+    quotes: [
+      "Sáng tạo là để ý tia sáng nhỏ trước khi nó biến thành ngọn lửa.",
+      "Tôi cho phép bản nháp xấu tồn tại để ý tưởng đẹp có đường ra đời.",
+      "Mỗi thử nghiệm nhỏ là một câu hỏi đang được trả lời bằng hành động.",
+    ],
+  },
+  {
+    feelingId: "an-toan",
+    quotes: [
+      "An toàn là nền móng để tôi mở rộng, không phải bức tường để tôi ẩn mình.",
+      "Tôi chọn những hệ thống giúp mình bình tĩnh khi ngày đổi gió.",
+      "Khi gốc rễ được chăm sóc, cành lá có thể lớn lên không vội vã.",
+    ],
+  },
+  {
+    feelingId: "thinh-vuong",
+    quotes: [
+      "Thịnh vượng bắt đầu từ cách tôi tôn trọng từng dòng năng lượng mình có.",
+      "Tôi muốn giàu có theo cách có thời gian, sức khỏe và lòng rộng rãi.",
+      "Mỗi quyết định sáng suốt hôm nay là một viên gạch cho sự đủ đầy ngày mai.",
+    ],
+  },
+  {
+    feelingId: "tinh-thuc",
+    quotes: [
+      "Tỉnh thức là quay về kịp lúc, trước khi ngày cuốn mình đi qua.",
+      "Tôi tập nhìn rõ điều đang có, để không sống bằng những tiếng ồn vay mượn.",
+      "Một hơi thở sâu có thể đổi hướng cả một quyết định.",
+    ],
+  },
+  {
+    feelingId: "but-pha",
+    quotes: [
+      "Bứt phá thường bắt đầu như một vết nứt nhỏ trên chiếc trần quen cũ.",
+      "Tôi sẵn sàng lớn hơn bản kể chuyện cũ về giới hạn của mình.",
+      "Ngày hôm nay cần một hành động đủ rõ để tương lai không còn mờ.",
+    ],
+  },
+  {
+    feelingId: "tu-te",
+    quotes: [
+      "Tử tế với mình là kỷ luật có lòng thương, không phải nuông chiều vô hướng.",
+      "Tôi muốn thành công theo cách vẫn nhìn người khác bằng đôi mắt mềm.",
+      "Một lời nói dịu dàng có thể giữ lại can đảm cho cả một ngày dài.",
+    ],
+  },
+  {
+    feelingId: "cham-rai",
+    quotes: [
+      "Chậm rãi không phải là chậm tiến, mà là đủ tỉnh để không lạc mình.",
+      "Tôi cho những điều bền vững thời gian để chúng mọc rễ.",
+      "Nhịp sống tốt là nhịp mình có thể lặp lại mà không đánh mất trái tim.",
+    ],
+  },
+  {
+    feelingId: "toa-sang",
+    quotes: [
+      "Tỏa sáng là đứng trong phần ánh sáng của mình mà không xin lỗi.",
+      "Tôi không cần nhỏ lại để người khác thấy dễ chịu hơn.",
+      "Khi tôi làm việc bằng sự thật, ánh sáng tự nó tìm được đường ra.",
+    ],
+  },
+];
+
+export interface CuratedImageByLifeArea {
+  lifeAreaName: string;
+  label: string;
+  url: string;
+}
+
+export const CURATED_IMAGES_BY_LIFE_AREA: CuratedImageByLifeArea[] = [
+  {
+    lifeAreaName: "Career",
+    label: "Góc làm việc",
+    url: "https://picsum.photos/seed/vision-career-workspace/480/360",
+  },
+  {
+    lifeAreaName: "Career",
+    label: "Làm việc sâu",
+    url: "https://picsum.photos/seed/vision-career-deep-work/480/360",
+  },
+  {
+    lifeAreaName: "Career",
+    label: "Dẫn dắt",
+    url: "https://picsum.photos/seed/vision-career-leadership/480/360",
+  },
+  {
+    lifeAreaName: "Finance",
+    label: "Ngân sách",
+    url: "https://picsum.photos/seed/vision-finance-budget/480/360",
+  },
+  {
+    lifeAreaName: "Finance",
+    label: "Đủ đầy",
+    url: "https://picsum.photos/seed/vision-finance-abundance/480/360",
+  },
+  {
+    lifeAreaName: "Finance",
+    label: "Đầu tư",
+    url: "https://picsum.photos/seed/vision-finance-investment/480/360",
+  },
+  {
+    lifeAreaName: "Health",
+    label: "Vận động",
+    url: "https://picsum.photos/seed/vision-health-run/480/360",
+  },
+  {
+    lifeAreaName: "Health",
+    label: "Thiền",
+    url: "https://picsum.photos/seed/vision-health-meditation/480/360",
+  },
+  {
+    lifeAreaName: "Health",
+    label: "Dinh dưỡng",
+    url: "https://picsum.photos/seed/vision-health-nutrition/480/360",
+  },
+  {
+    lifeAreaName: "Education",
+    label: "Đọc sách",
+    url: "https://picsum.photos/seed/vision-education-reading/480/360",
+  },
+  {
+    lifeAreaName: "Education",
+    label: "Học nhóm",
+    url: "https://picsum.photos/seed/vision-education-workshop/480/360",
+  },
+  {
+    lifeAreaName: "Education",
+    label: "Bàn học",
+    url: "https://picsum.photos/seed/vision-education-study-desk/480/360",
+  },
+  {
+    lifeAreaName: "Relationships",
+    label: "Trò chuyện",
+    url: "https://picsum.photos/seed/vision-relationships-conversation/480/360",
+  },
+  {
+    lifeAreaName: "Relationships",
+    label: "Cộng đồng",
+    url: "https://picsum.photos/seed/vision-relationships-community/480/360",
+  },
+  {
+    lifeAreaName: "Relationships",
+    label: "Nâng đỡ",
+    url: "https://picsum.photos/seed/vision-relationships-support/480/360",
+  },
+  {
+    lifeAreaName: "Family",
+    label: "Tổ ấm",
+    url: "https://picsum.photos/seed/vision-family-home/480/360",
+  },
+  {
+    lifeAreaName: "Family",
+    label: "Bữa tối",
+    url: "https://picsum.photos/seed/vision-family-dinner/480/360",
+  },
+  {
+    lifeAreaName: "Family",
+    label: "Cuối tuần",
+    url: "https://picsum.photos/seed/vision-family-weekend/480/360",
+  },
+  {
+    lifeAreaName: "Personal Growth",
+    label: "Viết nhật ký",
+    url: "https://picsum.photos/seed/vision-personal-growth-journal/480/360",
+  },
+  {
+    lifeAreaName: "Personal Growth",
+    label: "Suy ngẫm",
+    url: "https://picsum.photos/seed/vision-personal-growth-reflection/480/360",
+  },
+  {
+    lifeAreaName: "Personal Growth",
+    label: "Thực hành",
+    url: "https://picsum.photos/seed/vision-personal-growth-practice/480/360",
+  },
+  {
+    lifeAreaName: "Leisure",
+    label: "Du lịch",
+    url: "https://picsum.photos/seed/vision-leisure-travel/480/360",
+  },
+  {
+    lifeAreaName: "Leisure",
+    label: "Thiên nhiên",
+    url: "https://picsum.photos/seed/vision-leisure-nature/480/360",
+  },
+  {
+    lifeAreaName: "Leisure",
+    label: "Nghỉ ngơi sáng tạo",
+    url: "https://picsum.photos/seed/vision-leisure-creative-rest/480/360",
+  },
+];
