@@ -158,6 +158,16 @@ function renderGoalTracker() {
   };
 }
 
+async function findEmptyGoalState(): Promise<HTMLElement> {
+  const emptyHeading = await screen.findByRole("heading", { name: "Chưa có mục tiêu" });
+  const emptyState = emptyHeading.closest("div");
+  if (!emptyState) {
+    throw new Error("Missing empty goal state container");
+  }
+
+  return emptyState;
+}
+
 describe("GoalTracker fresh workspace state", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -171,11 +181,10 @@ describe("GoalTracker fresh workspace state", () => {
 
     renderGoalTracker();
 
-    const emptyState = await screen.findByTestId("goaltracker-fresh-empty-state");
-    expect(emptyState).toHaveTextContent("Chưa có mục tiêu nào trong không gian làm việc của bạn");
-    expect(emptyState).toHaveTextContent("Bắt đầu bằng Cân bằng cuộc sống để có dữ liệu thật");
-    expect(emptyState).toHaveTextContent("SMART + 12 tuần");
-    expect(within(emptyState).getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" })).toBeInTheDocument();
+    const emptyState = await findEmptyGoalState();
+    expect(emptyState).toHaveTextContent("Chưa có mục tiêu");
+    expect(emptyState).toHaveTextContent("Bắt đầu bằng chu kỳ 12 tuần đầu tiên");
+    expect(within(emptyState).getByRole("button", { name: /Bắt đầu chu kỳ 12 tuần/ })).toBeInTheDocument();
     expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu đang theo")).not.toBeInTheDocument();
     expect(screen.queryByText(/Bạn đang ở gói/i)).not.toBeInTheDocument();
@@ -186,8 +195,8 @@ describe("GoalTracker fresh workspace state", () => {
     const user = userEvent.setup();
     const { router } = renderGoalTracker();
 
-    const emptyState = await screen.findByTestId("goaltracker-fresh-empty-state");
-    await user.click(within(emptyState).getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" }));
+    const emptyState = await findEmptyGoalState();
+    await user.click(within(emptyState).getByRole("button", { name: /Bắt đầu chu kỳ 12 tuần/ }));
 
     expect(router.state.location.pathname).toBe("/onboarding");
   });

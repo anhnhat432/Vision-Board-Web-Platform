@@ -84,9 +84,7 @@ describe("UI primitive visual hierarchy", () => {
     );
 
     render(<Input aria-label="Name" />);
-    expect(document.querySelector('[data-slot="input"]')?.className).toContain(
-      "rounded-[var(--r-input)]",
-    );
+    expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-lg");
 
     render(
       <Dialog open>

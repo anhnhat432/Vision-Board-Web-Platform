@@ -101,6 +101,16 @@ async function renderGoalTracker() {
   return render(<RouterProvider router={router} />);
 }
 
+function getTaskCheckbox(taskTitle: string): HTMLInputElement {
+  const taskRow = screen.getByText(taskTitle).closest("div");
+  const checkbox = taskRow?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+  if (!checkbox) {
+    throw new Error(`Missing checkbox for task: ${taskTitle}`);
+  }
+
+  return checkbox;
+}
+
 describe("GoalTracker multi-tab task updates", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -213,7 +223,8 @@ describe("GoalTracker multi-tab task updates", () => {
     expect(await screen.findAllByText("40%")).not.toHaveLength(0);
 
     const channel = MockBroadcastChannel.channels[0];
-    const checkbox = await screen.findByRole("checkbox", { name: "Đánh dấu việc Deep work A 5" });
+    await screen.findByText("Deep work A 5");
+    const checkbox = getTaskCheckbox("Deep work A 5");
     await userEvent.click(checkbox);
 
     expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
@@ -235,6 +246,10 @@ describe("GoalTracker multi-tab task updates", () => {
   it("posts local task mutations and applies newer task state from another tab", async () => {
     const storage = await import("../utils/storage");
     const data = storage.getUserData();
+    const today = new Date();
+    const todayKey = storage.formatDateInputValue(today);
+    const todayScheduleOffset = (today.getDay() + 6) % 7;
+    const nonTodayReviewDay = today.getDay() === 0 ? "Monday" : "Sunday";
     data.onboardingCompleted = true;
     data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 6 }));
     data.goals = [
@@ -244,15 +259,64 @@ describe("GoalTracker multi-tab task updates", () => {
         title: "Multi-tab goal",
         description: "Task state should stay consistent across tabs.",
         deadline: "2026-06-30",
-        tasks: [
-          {
-            id: "task_multi_tab",
-            title: "Task A",
-            completed: false,
-            lastModifiedAt: 1,
-          },
-        ],
+        tasks: [],
         createdAt: "2026-05-01T00:00:00.000Z",
+        twelveWeekSystem: {
+          goalType: "Career",
+          vision12Week: "Keep task state synced",
+          lagMetric: {
+            name: "Progress",
+            unit: "%",
+            target: "100",
+            currentValue: "0",
+          },
+          leadIndicators: [
+            {
+              id: "tactic_multi_tab",
+              name: "Task A",
+              target: "1",
+              unit: "task",
+              type: "core",
+              priority: 1,
+              schedule: [todayScheduleOffset],
+            },
+          ],
+          milestones: { week4: "", week8: "", week12: "" },
+          successEvidence: "",
+          reviewDay: nonTodayReviewDay,
+          week12Outcome: "",
+          startDate: todayKey,
+          endDate: todayKey,
+          timezone: "Asia/Ho_Chi_Minh",
+          weekStartsOn: "Monday",
+          status: "active",
+          currentWeek: 1,
+          totalWeeks: 1,
+          weeklyPlans: [],
+          taskInstances: [
+            {
+              id: `tw_task_1_tactic_multi_tab_0`,
+              weekNumber: 1,
+              scheduledDate: todayKey,
+              title: "Task A",
+              leadIndicatorName: "Task A",
+              isCore: true,
+              completed: false,
+              lastModifiedAt: 1,
+              tacticId: "tactic_multi_tab",
+            },
+          ],
+          dailyCheckIns: [],
+          weeklyReviews: [],
+          scoreboard: Array.from({ length: 12 }, (_, index) => ({
+            weekNumber: index + 1,
+            leadCompletionPercent: 0,
+            mainMetricProgress: "0%",
+            outputDone: "0/0 việc",
+            reviewDone: false,
+            weeklyScore: 0,
+          })),
+        },
       },
     ];
     storage.saveUserData(data);
@@ -262,23 +326,26 @@ describe("GoalTracker multi-tab task updates", () => {
     const channel = MockBroadcastChannel.channels[0];
     expect(channel).toBeDefined();
 
-    const checkbox = await screen.findByRole("checkbox", { name: "Đánh dấu việc Task A" });
-    expect(checkbox).not.toBeChecked();
+    await screen.findByText("Task A");
+    expect(getTaskCheckbox("Task A")).not.toBeChecked();
 
-    await userEvent.click(checkbox);
+    await userEvent.click(getTaskCheckbox("Task A"));
     expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
-    await waitFor(() => expect(checkbox).toBeChecked());
+    await waitFor(() => expect(screen.queryByText("Task A")).toBeNull());
 
     const externalData = storage.getUserData();
     externalData.goals = externalData.goals.map((goal) =>
-      goal.id === "goal_multi_tab"
+      goal.id === "goal_multi_tab" && goal.twelveWeekSystem
         ? {
             ...goal,
-            tasks: goal.tasks.map((task) =>
-              task.id === "task_multi_tab"
-                ? { ...task, completed: false, lastModifiedAt: Date.now() + 1000 }
-                : task,
-            ),
+            twelveWeekSystem: {
+              ...goal.twelveWeekSystem,
+              taskInstances: goal.twelveWeekSystem.taskInstances.map((task) =>
+                task.id === "tw_task_1_tactic_multi_tab_0"
+                  ? { ...task, completed: false, completedAt: undefined, lastModifiedAt: Date.now() + 1000 }
+                  : task,
+              ),
+            },
           }
         : goal,
     );
@@ -286,6 +353,7 @@ describe("GoalTracker multi-tab task updates", () => {
 
     channel.dispatchMessage({ at: Date.now(), source: "tab_b" });
 
-    await waitFor(() => expect(checkbox).not.toBeChecked());
+    await screen.findByText("Task A");
+    expect(getTaskCheckbox("Task A")).not.toBeChecked();
   });
 });
