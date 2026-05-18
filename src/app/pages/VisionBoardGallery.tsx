@@ -265,7 +265,7 @@ export function VisionBoardGallery() {
             value: userData.visionBoards.length,
             note: "bảng đang lưu",
             icon: Images,
-            color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
+            color: "from-app-accent/20 to-app-accent/5 text-app-accent",
           },
           {
             title: "Năm bao quát",
@@ -321,12 +321,12 @@ export function VisionBoardGallery() {
       {userData.visionBoards.length === 0 ? (
         <Card className="overflow-hidden">
           <CardContent className="p-10 text-center lg:p-14">
-            <VisionMapIllustration className="mx-auto mb-4 w-56 text-violet-500 sm:w-64" />
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
+            <VisionMapIllustration className="mx-auto mb-4 w-56 text-app-accent sm:w-64" />
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
               <Images className="h-10 w-10" />
             </div>
-            <h2 className="mt-6 text-3xl font-bold text-slate-900">Thư viện của bạn vẫn còn trống</h2>
-            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
+            <h2 className="mt-6 text-3xl font-semibold text-app-ink">Thư viện của bạn vẫn còn trống</h2>
+            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-app-ink-soft">
               Hãy tạo vision board đầu tiên để biến những hình dung trong đầu thành một không gian trực quan thật sự.
             </p>
             <Button className="mt-8" onClick={() => navigate("/vision-board")}>
@@ -340,12 +340,12 @@ export function VisionBoardGallery() {
           {years.map((year) => (
             <section key={year} className="stack-stack">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
                   <Calendar className="h-6 w-6" />
                 </div>
                 <div className="stack-tight">
-                  <h2 className="text-2xl font-bold text-slate-900">{year}</h2>
-                  <p className="text-sm text-slate-500">{boardsByYear[year].length} bảng được lưu trong năm này.</p>
+                  <h2 className="text-2xl font-semibold text-app-ink">{year}</h2>
+                  <p className="text-sm text-app-ink-soft">{boardsByYear[year].length} bảng được lưu trong năm này.</p>
                 </div>
               </div>
 

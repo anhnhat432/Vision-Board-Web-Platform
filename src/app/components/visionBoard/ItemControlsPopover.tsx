@@ -121,7 +121,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                   type="button"
                   onClick={() => updateStyle({ quoteFont: font.id })}
                   className={`rounded-md border px-2 py-2 text-left transition ${
-                    currentFont === font.id ? "border-app-accent bg-violet-50" : "border-app-line bg-app-surface"
+                    currentFont === font.id ? "border-app-accent bg-app-accent-soft" : "border-app-line bg-app-surface"
                   }`}
                 >
                   <p

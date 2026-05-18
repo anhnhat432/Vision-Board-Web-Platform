@@ -128,15 +128,15 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
   };
 
   return (
-    <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
+    <Card className="border border-app-line bg-app-surface shadow-sm">
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2 text-slate-950">
-              <CalendarClock className="h-5 w-5 text-violet-700" />
+            <CardTitle className="flex items-center gap-2 text-app-ink">
+              <CalendarClock className="h-5 w-5 text-app-accent" />
               Performance Time Blocking
             </CardTitle>
-            <CardDescription className="mt-2 text-slate-700">
+            <CardDescription className="mt-2 text-app-ink-soft">
               Gợi ý nhịp tuần theo 12 Week Year: Khung chiến lược, Khung dự phòng và Khung đột phá. Lịch này chỉ lưu trên thiết bị, không đồng bộ lịch.
             </CardDescription>
           </div>

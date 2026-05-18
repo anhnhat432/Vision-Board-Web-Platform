@@ -149,21 +149,21 @@ export function BillingConfirm() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[var(--r-card)] border border-slate-200 bg-white/95 p-6 shadow-xl shadow-slate-200/60">
+        <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-6 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-violet-100 text-violet-700">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
               <ReceiptText className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-600">Xác nhận trước khi thanh toán</p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">Bạn đang mua gì?</h1>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Xác nhận trước khi thanh toán</p>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-app-ink">Bạn đang mua gì?</h1>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                 Vui lòng kiểm tra gói, số tiền và email nhận biên nhận trước khi tạo mã QR chuyển khoản.
               </p>
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 rounded-[var(--r-card)] border border-slate-100 bg-slate-50/80 p-4">
+          <div className="mt-6 grid gap-4 rounded-[var(--r-card)] border border-app-line bg-app-bg p-4">
             <ConfirmRow label="Tên gói" value={planName} />
             <ConfirmRow
               label="Số tiền"
@@ -175,9 +175,9 @@ export function BillingConfirm() {
 
           <BillingTrustSignals className="mt-6" supportEmail={BILLING_SUPPORT_EMAIL} />
 
-          <div className="mt-6 rounded-[var(--r-card)] border border-indigo-100 bg-indigo-50/60 p-4">
-            <label htmlFor="receipt-email" className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Mail className="h-4 w-4 text-indigo-600" />
+          <div className="mt-6 rounded-[var(--r-card)] border border-app-line bg-app-bg p-4">
+            <label htmlFor="receipt-email" className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+              <Mail className="h-4 w-4 text-app-accent" />
               Email sẽ nhận biên nhận
             </label>
             <input
@@ -186,10 +186,10 @@ export function BillingConfirm() {
               value={receiptEmail}
               onChange={(event) => setReceiptEmail(event.target.value)}
               disabled={!canEditEmail}
-              className="mt-3 w-full rounded-[var(--r-control)] border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100 disabled:text-slate-500"
+              className="mt-3 w-full rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2 text-sm text-app-ink shadow-sm outline-none transition focus:border-app-accent focus:ring-2 focus:ring-app-accent/20 disabled:bg-app-bg disabled:text-app-ink-muted"
               placeholder="you@example.com"
             />
-            <p className="mt-2 text-xs leading-5 text-slate-600">
+            <p className="mt-2 text-xs leading-5 text-app-ink-soft">
               {emailVerified
                 ? "Email tài khoản đã xác minh nên biên nhận sẽ gửi về địa chỉ này."
                 : "Nếu email tài khoản chưa xác minh hoặc bạn chưa đăng nhập, bạn có thể sửa email nhận biên nhận."}
@@ -197,20 +197,20 @@ export function BillingConfirm() {
             {emailInvalid && <p className="mt-2 text-xs font-medium text-red-600">Email nhận biên nhận chưa đúng định dạng.</p>}
           </div>
 
-          <label className="mt-6 flex items-start gap-3 rounded-[var(--r-card)] border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
+          <label className="mt-6 flex items-start gap-3 rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft">
             <input
               type="checkbox"
               checked={agreed}
               onChange={(event) => setAgreed(event.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+              className="mt-1 h-4 w-4 rounded border-app-line text-app-accent focus:ring-app-accent/30"
             />
             <span>
               Tôi đồng ý với{" "}
-              <Link to="/terms" className="font-semibold text-violet-700 underline-offset-4 hover:underline">
+              <Link to="/terms" className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline">
                 Điều khoản
               </Link>{" "}
               và{" "}
-              <Link to="/refund-policy" className="font-semibold text-violet-700 underline-offset-4 hover:underline">
+              <Link to="/refund-policy" className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline">
                 Chính sách hoàn tiền
               </Link>
               .
@@ -245,7 +245,7 @@ export function BillingConfirm() {
               type="button"
               onClick={handleConfirm}
               disabled={!canSubmit}
-              className="inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              className="inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-app-accent px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-app-ink disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none"
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
               {submitLabel}
@@ -253,25 +253,25 @@ export function BillingConfirm() {
             <button
               type="button"
               onClick={() => navigate("/billing/plan")}
-              className="text-sm font-medium text-slate-500 underline decoration-slate-300 transition hover:text-slate-700"
+              className="text-sm font-medium text-app-ink-muted underline decoration-app-line transition hover:text-app-ink"
             >
               Quay lại trang gói
             </button>
           </div>
         </section>
 
-        <aside className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/70 p-6">
+        <aside className="rounded-[var(--r-card)] border border-app-accent-soft bg-app-accent-soft/40 p-6">
           <BillingPlusIllustration className="mx-auto w-44 text-app-accent opacity-80" />
           <div className="mt-6 space-y-4">
             <div className="flex gap-3">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-              <p className="text-sm leading-6 text-slate-700">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
+              <p className="text-sm leading-6 text-app-ink-soft">
                 Mã QR chỉ được tạo sau khi bạn xác nhận rõ số tiền và email nhận biên nhận.
               </p>
             </div>
             <div className="flex gap-3">
-              <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" />
-              <p className="text-sm leading-6 text-slate-700">
+              <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
+              <p className="text-sm leading-6 text-app-ink-soft">
                 Sau khi Casso xác nhận giao dịch, Dear Our Future gửi biên nhận thanh toán đơn giản qua email.
               </p>
             </div>
@@ -285,8 +285,8 @@ export function BillingConfirm() {
 function ConfirmRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
-      <span className="text-slate-500">{label}</span>
-      <span className={highlight ? "text-lg font-bold text-violet-700" : "font-semibold text-slate-900"}>{value}</span>
+      <span className="text-app-ink-muted">{label}</span>
+      <span className={highlight ? "text-lg font-bold text-app-accent" : "font-semibold text-app-ink"}>{value}</span>
     </div>
   );
 }

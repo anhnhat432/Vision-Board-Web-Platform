@@ -219,7 +219,7 @@ export function VisionBoardStoryWizard({
           {step === 1 && (
             <section className="space-y-5" aria-labelledby="vision-story-step-1">
               <div>
-                <h2 id="vision-story-step-1" className="text-2xl font-bold tracking-tight text-slate-950">
+                <h2 id="vision-story-step-1" className="text-2xl font-semibold tracking-tight text-app-ink">
                   Năm {year} bạn muốn cảm thấy như thế nào?
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-app-ink-soft">
@@ -240,8 +240,8 @@ export function VisionBoardStoryWizard({
                       className={cn(
                         "rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45",
                         active
-                          ? "border-violet-300 bg-violet-100 text-app-accent"
-                          : "border-app-line bg-app-surface text-slate-700 hover:border-app-accent/50 hover:bg-app-bg",
+                          ? "border-app-accent bg-app-accent-soft text-app-accent"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:bg-app-bg",
                       )}
                     >
                       {feeling.label}
@@ -256,7 +256,7 @@ export function VisionBoardStoryWizard({
           {step === 2 && (
             <section className="space-y-5" aria-labelledby="vision-story-step-2">
               <div>
-                <h2 id="vision-story-step-2" className="text-2xl font-bold tracking-tight text-slate-950">
+                <h2 id="vision-story-step-2" className="text-2xl font-semibold tracking-tight text-app-ink">
                   Vùng nào bạn muốn nâng cấp mạnh nhất?
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-app-ink-soft">
@@ -299,7 +299,7 @@ export function VisionBoardStoryWizard({
           {step === 3 && (
             <section className="space-y-5" aria-labelledby="vision-story-step-3">
               <div>
-                <h2 id="vision-story-step-3" className="text-2xl font-bold tracking-tight text-slate-950">
+                <h2 id="vision-story-step-3" className="text-2xl font-semibold tracking-tight text-app-ink">
                   Một câu nói nào đang trong đầu bạn?
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-app-ink-soft">
@@ -320,7 +320,7 @@ export function VisionBoardStoryWizard({
                       key={suggestion}
                       type="button"
                       onClick={() => setCoreQuote(suggestion)}
-                      className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-slate-700 shadow-sm transition-colors hover:border-app-accent/50 hover:bg-app-bg"
+                      className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-app-ink-soft shadow-sm transition-colors hover:border-app-accent/50 hover:bg-app-bg"
                     >
                       {suggestion}
                     </button>
@@ -333,7 +333,7 @@ export function VisionBoardStoryWizard({
           {step === 4 && (
             <section className="space-y-5" aria-labelledby="vision-story-step-4">
               <div>
-                <h2 id="vision-story-step-4" className="text-2xl font-bold tracking-tight text-slate-950">
+                <h2 id="vision-story-step-4" className="text-2xl font-semibold tracking-tight text-app-ink">
                   Chọn không gian cho bảng
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-app-ink-soft">
@@ -350,7 +350,7 @@ export function VisionBoardStoryWizard({
                       aria-pressed={active}
                       onClick={() => setSelectedThemeId(theme.id)}
                       className={cn(
-                        "rounded-[var(--r-card)] border border-app-line bg-app-surface p-3 text-left shadow-sm transition-all hover:border-violet-200",
+                        "rounded-[var(--r-card)] border border-app-line bg-app-surface p-3 text-left shadow-sm transition-all hover:border-app-accent/40",
                         active && "ring-2 ring-app-accent ring-offset-2",
                       )}
                     >

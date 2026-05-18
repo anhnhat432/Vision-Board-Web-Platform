@@ -46,9 +46,9 @@ const TIMELINE_PHASES = [
     weekEnd: 4,
     icon: PhaseRampChipIcon,
     tileClassName:
-      "border-violet-200 bg-violet-50 text-violet-800 hover:border-violet-300 dark:border-violet-500/30 dark:bg-violet-950/30 dark:text-violet-100",
+      "border-app-accent-soft bg-app-accent-soft/40 text-app-accent hover:border-app-accent/60",
     activeClassName:
-      "border-violet-500 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 dark:from-violet-500 dark:to-fuchsia-500",
+      "border-app-accent bg-app-accent text-white shadow-sm",
   },
   {
     label: FEATURE_TERMS.peak,
@@ -56,9 +56,9 @@ const TIMELINE_PHASES = [
     weekEnd: 8,
     icon: PhasePeakChipIcon,
     tileClassName:
-      "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-800 hover:border-fuchsia-300 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/30 dark:text-fuchsia-100",
+      "border-app-warm-border bg-app-warm/30 text-app-warm-strong hover:border-app-warm-strong/40",
     activeClassName:
-      "border-fuchsia-500 bg-gradient-to-br from-fuchsia-600 to-rose-500 text-white shadow-lg shadow-fuchsia-500/20 dark:from-fuchsia-500 dark:to-rose-400",
+      "border-app-warm-strong bg-app-warm-strong text-white shadow-sm",
   },
   {
     label: FEATURE_TERMS.harvest,
@@ -68,7 +68,7 @@ const TIMELINE_PHASES = [
     tileClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100",
     activeClassName:
-      "border-emerald-500 bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20 dark:from-emerald-500 dark:to-teal-500",
+      "border-emerald-600 bg-emerald-700 text-white shadow-sm",
   },
 ];
 
@@ -109,8 +109,8 @@ export function PlanPreview({
   const selectedTimelinePhase = getTimelinePhase(selectedTimelineWeekData?.weekNumber ?? 1);
   const SelectedTimelinePhaseIcon = selectedTimelinePhase.icon;
   const totalWeekOneTasks = week1?.tasks.length ?? 0;
-  const accordionItemClass = "rounded-[var(--r-card)] border border-slate-200 bg-white/92 px-5 shadow-sm";
-  const accordionTriggerClass = "text-base font-semibold text-slate-900 hover:no-underline";
+  const accordionItemClass = "rounded-[var(--r-card)] border border-app-line bg-app-surface px-5 shadow-sm";
+  const accordionTriggerClass = "text-base font-semibold text-app-ink hover:no-underline";
 
   return (
     <div className="stack-section">
@@ -122,15 +122,15 @@ export function PlanPreview({
         </p>
       </div>
 
-      <section className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm dark:border-slate-700/70 dark:bg-slate-950/70">
+      <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/70 dark:to-fuchsia-950/50 dark:text-violet-200">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
               <CalendarDays className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <h3 className="text-base font-semibold text-slate-950 dark:text-slate-50">Timeline 12 tuần</h3>
-              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              <h3 className="text-base font-semibold text-app-ink">Timeline 12 tuần</h3>
+              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                 {FEATURE_TERMS.ramp} 4 tuần đầu, {FEATURE_TERMS.peak} 4 tuần giữa, {FEATURE_TERMS.harvest} 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
               </p>
             </div>
@@ -163,9 +163,9 @@ export function PlanPreview({
           })}
         </div>
         {selectedTimelineWeekData ? (
-          <div className="mt-4 rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700/70 dark:bg-slate-900/60">
+          <div className="mt-4 rounded-[var(--r-tile)] border border-app-line bg-app-bg p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+              <p className="text-sm font-semibold text-app-ink">
                 <SelectedTimelinePhaseIcon className="mr-1 inline h-4 w-4 align-[-0.125em]" />
                 Tuần {selectedTimelineWeekData.weekNumber} · {selectedTimelinePhase.label}
               </p>
@@ -175,15 +175,15 @@ export function PlanPreview({
                   : `${selectedTimelineWeekData.leadMetrics.length} việc lặp lại`}
               </Badge>
             </div>
-            <div className="mt-3 stack-tight text-sm leading-6 text-slate-700 dark:text-slate-300">
+            <div className="mt-3 stack-tight text-sm leading-6 text-app-ink-soft">
               {selectedTimelineWeekData.tasks.length > 0 ? (
                 selectedTimelineWeekData.tasks.slice(0, 3).map((task) => (
-                  <p key={task.id} className="rounded-[var(--r-control)] bg-white/82 px-3 py-2 dark:bg-slate-950/70">
+                  <p key={task.id} className="rounded-[var(--r-control)] bg-app-surface px-3 py-2">
                     {task.title}
                   </p>
                 ))
               ) : (
-                <p className="rounded-[var(--r-control)] bg-white/82 px-3 py-2 dark:bg-slate-950/70">
+                <p className="rounded-[var(--r-control)] bg-app-surface px-3 py-2">
                   Tuần này giữ cùng nhịp việc lặp lại và dùng review tuần để điều chỉnh tải.
                 </p>
               )}
@@ -191,22 +191,22 @@ export function PlanPreview({
           </div>
         ) : null}
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[var(--r-tile)] border border-violet-200 bg-violet-50/70 p-3 dark:border-violet-500/30 dark:bg-violet-950/30">
-            <Target className="h-4 w-4 text-violet-700 dark:text-violet-200" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">Kết quả</p>
-            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">1 mục tiêu 12 tuần</p>
+          <div className="rounded-[var(--r-tile)] border border-app-accent-soft bg-app-accent-soft/30 p-3">
+            <Target className="h-4 w-4 text-app-accent" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-accent">Kết quả</p>
+            <p className="mt-1 text-sm font-semibold text-app-ink">1 mục tiêu 12 tuần</p>
           </div>
           <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-500/30 dark:bg-emerald-950/30">
             <Zap className="h-4 w-4 text-emerald-700 dark:text-emerald-200" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-200">Lead</p>
-            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">
+            <p className="mt-1 text-sm font-semibold text-app-ink">
               {weekOneLeadMetrics.length} việc lặp lại
             </p>
           </div>
           <div className="rounded-[var(--r-tile)] border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/30">
             <CalendarDays className="h-4 w-4 text-amber-700 dark:text-amber-200" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-amber-700 dark:text-amber-200">Week 1</p>
-            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">
+            <p className="mt-1 text-sm font-semibold text-app-ink">
               {totalWeekOneTasks} việc đầu tiên
             </p>
           </div>
@@ -248,8 +248,8 @@ export function PlanPreview({
           <AccordionContent className="space-y-3 pb-5">
             {weekOneLeadMetrics.length > 0 ? (
               weekOneLeadMetrics.map((leadMetric) => (
-                <div key={leadMetric.name} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-sm font-medium text-slate-900">{leadMetric.name}</p>
+                <div key={leadMetric.name} className="rounded-[var(--r-control)] border border-app-line bg-app-bg p-3">
+                  <p className="text-sm font-medium text-app-ink">{leadMetric.name}</p>
                   <p className="mt-1 text-sm text-muted-foreground">Mục tiêu tuần: {leadMetric.weeklyTarget}</p>
                 </div>
               ))
