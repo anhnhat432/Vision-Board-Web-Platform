@@ -57,7 +57,7 @@ function StepList({ userData }: { userData: UserData }) {
               ? "border-emerald-200 bg-emerald-50/90"
               : step.id === progress.nextStep?.id
                 ? "border-sky-200 bg-sky-50/90 shadow-lg"
-                : "border-slate-200 bg-white"
+                : "border-app-line bg-app-surface"
           }`}
         >
           <div className="flex items-start gap-3">
@@ -66,8 +66,8 @@ function StepList({ userData }: { userData: UserData }) {
                 step.completed
                   ? "bg-emerald-600 text-white"
                   : step.id === progress.nextStep?.id
-                    ? "bg-slate-950 text-white"
-                    : "bg-slate-100 text-slate-700"
+                    ? "bg-app-accent text-white"
+                    : "bg-app-bg text-app-ink-soft"
               }`}
             >
               {step.completed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
@@ -78,8 +78,8 @@ function StepList({ userData }: { userData: UserData }) {
                   step.completed
                     ? "text-emerald-900"
                     : step.id === progress.nextStep?.id
-                      ? "text-slate-950"
-                      : "text-slate-900"
+                      ? "text-app-ink"
+                      : "text-app-ink"
                 }`}
               >
                 {step.title}
@@ -89,8 +89,8 @@ function StepList({ userData }: { userData: UserData }) {
                   step.completed
                     ? "text-emerald-800/80"
                     : step.id === progress.nextStep?.id
-                      ? "text-slate-600"
-                      : "text-slate-600"
+                      ? "text-app-ink-soft"
+                      : "text-app-ink-soft"
                 }`}
               >
                 {step.description}
@@ -123,19 +123,19 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
     ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ luồng thật của sản phẩm."
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng luồng: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
   const surfaceClass = compact
-    ? "max-w-full overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm"
-    : "max-w-full overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm";
+    ? "max-w-full overflow-hidden border border-app-line bg-app-surface shadow-sm"
+    : "max-w-full overflow-hidden border border-app-line bg-app-surface text-app-ink shadow-sm";
   const contentClass = compact ? "p-4" : "p-5 sm:p-6 lg:p-7";
   const layoutClass = compact
     ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-center"
     : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]";
-  const badgeClass = "border-slate-200 bg-slate-50 text-slate-600";
-  const demoBadgeClass = "border-amber-200 bg-amber-50 text-amber-800";
-  const descriptionClass = "text-slate-600";
-  const primaryButtonClass = "w-full justify-center bg-slate-950 text-white hover:bg-slate-800 sm:w-auto";
+  const badgeClass = "border-app-line bg-app-bg text-app-ink-soft";
+  const demoBadgeClass = "border-app-warm-border bg-app-warm/30 text-app-warm-strong";
+  const descriptionClass = "text-app-ink-soft";
+  const primaryButtonClass = "w-full justify-center bg-app-accent text-white hover:bg-app-ink sm:w-auto";
   const secondaryButtonClass =
-    "w-full justify-center border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto";
-  const ghostButtonClass = "w-full justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:w-auto";
+    "w-full justify-center border-app-line bg-app-surface text-app-ink hover:bg-app-bg sm:w-auto";
+  const ghostButtonClass = "w-full justify-center text-app-ink-muted hover:bg-app-bg hover:text-app-ink sm:w-auto";
 
   return (
     <Card className={surfaceClass}>
@@ -147,7 +147,7 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
               Hướng dẫn cho người mới
             </Badge>
             <div>
-              <h2 className={`${compact ? "text-lg" : "text-2xl"} font-bold tracking-normal text-slate-950`}>
+              <h2 className={`${compact ? "text-lg" : "text-2xl"} font-bold tracking-normal text-app-ink`}>
                 {title}
               </h2>
               <p className={`mt-2 max-w-2xl text-sm leading-7 ${compact ? "line-clamp-2" : ""} ${descriptionClass}`}>
@@ -192,17 +192,17 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
           </div>
 
           {!compact && (
-            <div className="space-y-3 rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Trạng thái hiện tại</p>
+            <div className="space-y-3 rounded-[var(--r-control)] border border-app-line bg-app-bg p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Trạng thái hiện tại</p>
               <StepList userData={userData} />
             </div>
           )}
 
           {compact && nextStep && (
-            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước nên làm tiếp</p>
-              <p className="mt-2 text-base font-semibold text-slate-950">{nextStep.title}</p>
-              <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-600">{nextStep.description}</p>
+            <div className="rounded-[var(--r-control)] border border-app-line bg-app-bg p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Bước nên làm tiếp</p>
+              <p className="mt-2 text-base font-semibold text-app-ink">{nextStep.title}</p>
+              <p className="mt-2 line-clamp-2 text-sm leading-7 text-app-ink-soft">{nextStep.description}</p>
             </div>
           )}
         </div>
@@ -221,16 +221,16 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[88vh] max-w-[calc(100%-1rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+          <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
             <Sparkles className="h-3.5 w-3.5" />
             Hướng dẫn sử dụng
           </div>
-          <DialogTitle className="text-xl tracking-normal text-slate-950 sm:text-2xl">
+          <DialogTitle className="text-xl tracking-normal text-app-ink sm:text-2xl">
             {userData.isHydratedFromDemo
               ? "Khám phá sản phẩm theo checklist."
               : `Đi web này theo ${progress.totalSteps} bước là dễ nhất.`}
           </DialogTitle>
-          <DialogDescription className="text-sm leading-7 text-slate-600">
+          <DialogDescription className="text-sm leading-7 text-app-ink-soft">
             {userData.isHydratedFromDemo
               ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Checklist này giúp bạn hiểu luồng thật của sản phẩm mà không bị lạc giữa quá nhiều màn."
               : "Nếu bạn mới dùng lần đầu, cứ coi đây là đường đi ngắn nhất để hiểu web và không bị lạc giữa quá nhiều màn."}
@@ -247,7 +247,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="outline" className="border-slate-200 bg-white text-slate-700">
+            <Badge variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
               {progress.completedCount}/{progress.totalSteps} bước đã xong
             </Badge>
             {progress.isComplete && (

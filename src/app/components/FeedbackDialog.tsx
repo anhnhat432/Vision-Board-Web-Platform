@@ -117,7 +117,7 @@ export function FeedbackDialog({
             <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
               Cảm ơn bạn. Góp ý đã được ghi nhận trên thiết bị này.
             </div>
-            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
+            <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg px-4 py-4 text-sm leading-6 text-app-ink-soft">
               Nếu muốn gửi lại qua kênh riêng, bạn có thể sao chép nội dung vừa nhập. App không yêu cầu email và không
               bắt buộc kết nối tài khoản.
             </div>
@@ -184,14 +184,14 @@ export function FeedbackDialog({
                 placeholder="Ví dụ: không rõ bước tiếp theo, Setup 12 tuần dài, tab Hôm nay chưa dễ hiểu..."
                 onChange={(event) => setConfusingText(event.target.value)}
               />
-              <p className="text-xs leading-5 text-slate-500">
+              <p className="text-xs leading-5 text-app-ink-muted">
                 Không nhập email, số điện thoại hoặc thông tin nhạy cảm.
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="demo-feedback-next-help">
-                Bạn muốn app giúp gì tiếp theo? <span className="text-slate-400">(tuỳ chọn)</span>
+                Bạn muốn app giúp gì tiếp theo? <span className="text-app-ink-muted">(tuỳ chọn)</span>
               </Label>
               <Textarea
                 id="demo-feedback-next-help"
