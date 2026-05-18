@@ -582,9 +582,9 @@ function GoalTrackerContent({
                   <GoalArchetypeIcon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-semibold text-app-ink line-clamp-2">{goal.title}</h3>
+                  <h3 className="text-[16px] font-semibold text-app-ink leading-snug break-words">{goal.title}</h3>
                   <p className="text-[13px] text-app-ink-muted mt-1">
-                    Tu {systemCurrentWeek ?? "-"}/12 · {getLifeAreaLabel(goal.category)}
+                    Tuần {systemCurrentWeek ?? "-"}/12 · {getLifeAreaLabel(goal.category)}
                   </p>
                 </div>
               </div>

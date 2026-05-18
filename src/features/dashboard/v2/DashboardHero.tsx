@@ -47,7 +47,7 @@ export function DashboardHero({
 
       <div data-tour-id="dashboard-plan-card" className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
         <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Mục tiêu nổi bật</p>
-        <p className="mt-2 line-clamp-2 text-[15px] font-medium leading-5 text-app-ink">{featuredGoalTitle}</p>
+        <p className="mt-2 line-clamp-3 break-words text-[15px] font-medium leading-5 text-app-ink">{featuredGoalTitle}</p>
         <div className="mt-4 flex items-center gap-3">
           <div className="h-1.5 w-[160px] overflow-hidden rounded-full bg-app-accent-soft" aria-hidden="true">
             <div className="h-full rounded-full bg-app-accent" style={{ width: `${safeProgress}%` }} />

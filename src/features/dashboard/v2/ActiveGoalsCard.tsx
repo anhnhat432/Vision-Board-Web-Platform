@@ -74,7 +74,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                   <Target className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="line-clamp-2 text-[15px] font-medium leading-5 text-app-ink">{goal.title}</h3>
+                  <h3 className="line-clamp-3 break-words text-[15px] font-medium leading-5 text-app-ink">{goal.title}</h3>
                   <p className="mt-1 text-[13px] text-app-ink-muted">
                     {getWeekLabel(goal)} · {domain}
                   </p>
