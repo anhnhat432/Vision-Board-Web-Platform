@@ -255,7 +255,17 @@ Optional backend env:
 MONGODB_BACKUP_DIR=backups/mongodb
 MONGODB_BACKUP_RETENTION_DAYS=14
 MONGODUMP_BIN=mongodump
+GPG_BIN=gpg
+MONGODB_BACKUP_GPG_PASSPHRASE=
+MONGODB_BACKUP_R2_PREFIX=mongodb/vision-board
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET=
+R2_ENDPOINT=
 ```
+
+When `MONGODB_BACKUP_GPG_PASSPHRASE` is set, the script also creates an encrypted `.archive.gz.gpg` file. When the complete `R2_*` config is set, it uploads that encrypted file to Cloudflare R2, verifies it with a `HEAD` request, and prunes old encrypted R2 backups using the same retention window. The script refuses R2 upload without a GPG passphrase.
 
 For production, run this from a trusted operator machine or a secure scheduled job that has access to `MONGODB_URI`. Do not upload unencrypted backups to public CI artifacts. To restore, test on staging first:
 
