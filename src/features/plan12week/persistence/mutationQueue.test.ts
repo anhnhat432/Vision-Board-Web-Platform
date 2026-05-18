@@ -15,7 +15,9 @@ import {
   markMutationFailed,
   markMutationInFlight,
   markMutationSucceeded,
+  MUTATION_QUEUE_TRIM_RETENTION_DAYS,
   summarizeMutationQueueStore,
+  writeMutationQueueStore,
 } from "./mutationQueue";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
@@ -819,5 +821,296 @@ describe("data mutation queue", () => {
       "goal_user_b",
     ]);
     expect(listStoredPendingMutations(null, { storage: localStorage })).toEqual([]);
+  });
+
+  it("exports MUTATION_QUEUE_TRIM_RETENTION_DAYS as 14", () => {
+    expect(MUTATION_QUEUE_TRIM_RETENTION_DAYS).toBe(14);
+  });
+
+  it("trims items applied older than 14 days", () => {
+    const today = new Date("2026-05-18T00:00:00.000Z");
+    const appliedOlder20Days = "2026-04-28T00:00:00.000Z"; // 20 ngày trước
+    const appliedRecent5Days = "2026-05-13T00:00:00.000Z"; // 5 ngày trước
+    const pendingOld30Days = "2026-04-18T00:00:00.000Z"; // 30 ngày trước
+
+    const store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: today });
+    store.items = [
+      {
+        id: "applied_older",
+        idempotencyKey: "user_a:device_1:applied_older",
+        collapseKey: "task:goal_1:task_1",
+        kind: "task_completed_changed",
+        status: "applied",
+        createdAt: appliedOlder20Days,
+        updatedAt: appliedOlder20Days,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: {
+          taskId: "task_1",
+          weekNumber: 1,
+          completed: true,
+          scheduledDate: "2026-04-28",
+        },
+      },
+      {
+        id: "applied_recent",
+        idempotencyKey: "user_a:device_1:applied_recent",
+        collapseKey: "task:goal_1:task_2",
+        kind: "task_completed_changed",
+        status: "applied",
+        createdAt: appliedRecent5Days,
+        updatedAt: appliedRecent5Days,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: {
+          taskId: "task_2",
+          weekNumber: 1,
+          completed: true,
+          scheduledDate: "2026-05-13",
+        },
+      },
+      {
+        id: "pending_old",
+        idempotencyKey: "user_a:device_1:pending_old",
+        collapseKey: "task:goal_1:task_3",
+        kind: "task_completed_changed",
+        status: "pending",
+        createdAt: pendingOld30Days,
+        updatedAt: pendingOld30Days,
+        attemptCount: 0,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: {
+          taskId: "task_3",
+          weekNumber: 1,
+          completed: false,
+          scheduledDate: "2026-04-18",
+        },
+      },
+    ];
+
+    const consoleSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    writeMutationQueueStore(store, { storage: localStorage });
+    consoleSpy.mockRestore();
+
+    const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
+    expect(stored.items).toHaveLength(2);
+    expect(stored.items.map((item: { id: string }) => item.id)).toEqual(["applied_recent", "pending_old"]);
+  });
+
+  it("trims items archived older than 14 days", () => {
+    const today = new Date("2026-05-18T00:00:00.000Z");
+    const archivedOlder20Days = "2026-04-28T00:00:00.000Z";
+    const archivedRecent5Days = "2026-05-13T00:00:00.000Z";
+
+    const store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: today });
+    store.items = [
+      {
+        id: "archived_old",
+        idempotencyKey: "user_a:device_1:archived_old",
+        collapseKey: "delete:goal_deleted:goal_1",
+        kind: "goal_deleted",
+        status: "archived",
+        createdAt: archivedOlder20Days,
+        updatedAt: archivedOlder20Days,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: {
+          clientGoalId: "goal_1",
+          deletedAt: archivedOlder20Days,
+        },
+      },
+      {
+        id: "archived_recent",
+        idempotencyKey: "user_a:device_1:archived_recent",
+        collapseKey: "delete:goal_deleted:goal_2",
+        kind: "goal_deleted",
+        status: "archived",
+        createdAt: archivedRecent5Days,
+        updatedAt: archivedRecent5Days,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_2",
+        payload: {
+          clientGoalId: "goal_2",
+          deletedAt: archivedRecent5Days,
+        },
+      },
+    ];
+
+    writeMutationQueueStore(store, { storage: localStorage });
+
+    const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
+    expect(stored.items).toHaveLength(1);
+    expect(stored.items[0].id).toBe("archived_recent");
+  });
+
+  it("does not trim items pending/in_flight/blocked even if very old", () => {
+    const today = new Date("2026-05-18T00:00:00.000Z");
+    const veryOldDate = "2025-05-18T00:00:00.000Z"; // 1 năm cũ
+
+    const store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: today });
+    store.items = [
+      {
+        id: "pending_old",
+        idempotencyKey: "user_a:device_1:pending_old",
+        collapseKey: "task:goal_1:task_1",
+        kind: "task_completed_changed",
+        status: "pending",
+        createdAt: veryOldDate,
+        updatedAt: veryOldDate,
+        attemptCount: 0,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_1", weekNumber: 1, completed: false, scheduledDate: "2025-05-18" },
+      },
+      {
+        id: "in_flight_old",
+        idempotencyKey: "user_a:device_1:in_flight_old",
+        collapseKey: "task:goal_1:task_2",
+        kind: "task_completed_changed",
+        status: "in_flight",
+        createdAt: veryOldDate,
+        updatedAt: veryOldDate,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_2", weekNumber: 1, completed: true, scheduledDate: "2025-05-18" },
+      },
+      {
+        id: "blocked_auth_old",
+        idempotencyKey: "user_a:device_1:blocked_auth_old",
+        collapseKey: "task:goal_1:task_3",
+        kind: "task_completed_changed",
+        status: "blocked_auth",
+        createdAt: veryOldDate,
+        updatedAt: veryOldDate,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_3", weekNumber: 1, completed: true, scheduledDate: "2025-05-18" },
+      },
+      {
+        id: "retry_scheduled_old",
+        idempotencyKey: "user_a:device_1:retry_scheduled_old",
+        collapseKey: "task:goal_1:task_4",
+        kind: "task_completed_changed",
+        status: "retry_scheduled",
+        createdAt: veryOldDate,
+        updatedAt: veryOldDate,
+        attemptCount: 3,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_4", weekNumber: 1, completed: true, scheduledDate: "2025-05-18" },
+      },
+    ];
+
+    writeMutationQueueStore(store, { storage: localStorage });
+
+    const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
+    expect(stored.items).toHaveLength(4);
+    expect(stored.items.map((item: { id: string }) => item.id)).toEqual([
+      "pending_old",
+      "in_flight_old",
+      "blocked_auth_old",
+      "retry_scheduled_old",
+    ]);
+  });
+
+  it("is idempotent - second write does not trim more items", () => {
+    const today = new Date("2026-05-18T00:00:00.000Z");
+    const appliedRecent = "2026-05-13T00:00:00.000Z";
+
+    const store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: today });
+    store.items = [
+      {
+        id: "applied_recent",
+        idempotencyKey: "user_a:device_1:applied_recent",
+        collapseKey: "task:goal_1:task_1",
+        kind: "task_completed_changed",
+        status: "applied",
+        createdAt: appliedRecent,
+        updatedAt: appliedRecent,
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_1", weekNumber: 1, completed: true, scheduledDate: "2026-05-13" },
+      },
+      {
+        id: "pending",
+        idempotencyKey: "user_a:device_1:pending",
+        collapseKey: "task:goal_1:task_2",
+        kind: "task_completed_changed",
+        status: "pending",
+        createdAt: today.toISOString(),
+        updatedAt: today.toISOString(),
+        attemptCount: 0,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_2", weekNumber: 1, completed: false, scheduledDate: "2026-05-18" },
+      },
+    ];
+
+    const consoleSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    writeMutationQueueStore(store, { storage: localStorage });
+    const firstCallCount = consoleSpy.mock.calls.length;
+    consoleSpy.mockRestore();
+
+    expect(firstCallCount).toBe(0);
+
+    const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
+    const storedItems = stored.items;
+
+    const consoleSpy2 = vi.spyOn(console, "info").mockImplementation(() => {});
+    writeMutationQueueStore({ ...store, items: storedItems }, { storage: localStorage });
+    const secondCallCount = consoleSpy2.mock.calls.length;
+    consoleSpy2.mockRestore();
+
+    expect(secondCallCount).toBe(0);
+
+    const stored2 = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
+    expect(stored2.items).toHaveLength(2);
+  });
+
+  it("does not trim items with invalid updatedAt parsing", () => {
+    const today = new Date("2026-05-18T00:00:00.000Z");
+
+    const store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: today });
+    store.items = [
+      {
+        id: "applied_invalid_date",
+        idempotencyKey: "user_a:device_1:applied_invalid_date",
+        collapseKey: "task:goal_1:task_1",
+        kind: "task_completed_changed",
+        status: "applied",
+        createdAt: "invalid-date-string",
+        updatedAt: "not-a-date",
+        attemptCount: 1,
+        maxAttempts: 7,
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: { taskId: "task_1", weekNumber: 1, completed: true, scheduledDate: "2026-05-18" },
+      },
+    ];
+
+    writeMutationQueueStore(store, { storage: localStorage });
+
+    const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
+    expect(stored.items).toHaveLength(1);
+    expect(stored.items[0].id).toBe("applied_invalid_date");
   });
 });

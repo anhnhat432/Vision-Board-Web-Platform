@@ -3,6 +3,7 @@ import { readActiveAuthOwnerUid } from "@/app/utils/storage-auth-scope";
 
 export const DATA_MUTATION_QUEUE_VERSION = 1;
 export const DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY = "visionboard_data_mutation_queue";
+export const MUTATION_QUEUE_TRIM_RETENTION_DAYS = 14;
 export const DATA_MUTATION_QUEUE_ANONYMOUS_STORAGE_KEY = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:anonymous`;
 export const DATA_MUTATION_QUEUE_AUTH_STORAGE_PREFIX = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:auth:`;
 export const DATA_MUTATION_QUEUE_DEVICE_ID_STORAGE_KEY = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:device_id`;
@@ -258,6 +259,8 @@ const COLLAPSIBLE_STATUSES = new Set<DataMutationStatus>([
   "blocked_config",
 ]);
 
+const TRIM_TERMINAL_STATUSES = new Set<DataMutationStatus>(["applied", "archived"]);
+
 function toIso(value?: string | Date): string {
   if (value instanceof Date) return value.toISOString();
   if (value) return new Date(value).toISOString();
@@ -271,6 +274,12 @@ function compareIso(left: string, right: string): number {
 function normalizeOwnerUid(ownerUid: string | null | undefined): string | null {
   const normalized = ownerUid?.trim() ?? "";
   return normalized.length > 0 ? normalized : null;
+}
+
+function resolveNow(input?: string | Date): Date {
+  if (input instanceof Date) return input;
+  if (typeof input === "string") return new Date(input);
+  return new Date();
 }
 
 function ownerMatches(itemOwnerUid: string | null, ownerUid: string | null): boolean {
@@ -427,6 +436,29 @@ function preserveInvalidQueue(storage: Storage, sourceKey: string, rawValue: str
   safeSetItem(storage, recoveryKey, rawValue);
 }
 
+function trimTerminalMutations(
+  store: DataMutationQueueStore,
+  now: Date,
+): { store: DataMutationQueueStore; removed: number } {
+  const cutoff = now.getTime() - MUTATION_QUEUE_TRIM_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const kept: DataMutationItem[] = [];
+  let removed = 0;
+
+  for (const item of store.items) {
+    if (TRIM_TERMINAL_STATUSES.has(item.status)) {
+      const updatedAtMs = Date.parse(item.updatedAt);
+      if (Number.isFinite(updatedAtMs) && updatedAtMs < cutoff) {
+        removed += 1;
+        continue;
+      }
+    }
+    kept.push(item);
+  }
+
+  if (removed === 0) return { store, removed: 0 };
+  return { store: { ...store, items: kept }, removed };
+}
+
 function getExplicitOwnerUid(input: {
   inputOwnerUid?: string | null;
   optionsOwnerUid?: string | null;
@@ -515,7 +547,18 @@ export function writeMutationQueueStore(
   const storage = getBrowserStorage(options.storage);
   if (!storage) return false;
 
-  return safeSetItem(storage, getMutationQueueStorageKey(store.ownerUid), JSON.stringify(store));
+  const trimResult = trimTerminalMutations(store, resolveNow());
+  const finalStore = trimResult.store;
+
+  if (trimResult.removed > 0) {
+    console.info("[mutation-queue-reaper] trimmed", {
+      ownerUid: finalStore.ownerUid,
+      removed: trimResult.removed,
+      kept: finalStore.items.length,
+    });
+  }
+
+  return safeSetItem(storage, getMutationQueueStorageKey(finalStore.ownerUid), JSON.stringify(finalStore));
 }
 
 export function enqueueStoredMutation(
