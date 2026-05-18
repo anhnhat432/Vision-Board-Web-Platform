@@ -1,5 +1,6 @@
 import { isDemoMode } from "@/app/utils/app-mode";
 import { getApiBaseUrl, post } from "@/lib/api/apiClient";
+import { AuthError, authedFetch } from "@/lib/auth/authedFetch";
 import { mockProvider } from "./assistantEngine";
 import type { AssistantContext } from "./buildAssistantContext";
 import { sanitizeAssistantContext } from "./sanitizeContext";
@@ -104,21 +105,33 @@ export async function sendAssistantMessageStream(
     history: sanitizedHistory,
   };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
+  let response: Response;
+  try {
+    response = await authedFetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      const wrapped = new Error(error.message) as Error & { errorCode?: string; status?: number };
+      wrapped.errorCode = "ASSISTANT_AUTH_ERROR";
+      wrapped.status = error.status;
+      throw wrapped;
+    }
+    throw error;
+  }
 
   if (!response.ok || !response.body) {
-    throw {
-      message: "Không thể kết nối với trợ lý AI.",
-      errorCode: "ASSISTANT_CONNECTION_ERROR",
+    const err = new Error("Không thể kết nối với trợ lý AI.") as Error & {
+      errorCode?: string;
     };
+    err.errorCode = "ASSISTANT_CONNECTION_ERROR";
+    throw err;
   }
 
   const reader = response.body.getReader();
@@ -140,20 +153,22 @@ export async function sendAssistantMessageStream(
       const line = event.startsWith("data: ") ? event.slice(6) : event;
       if (!line) continue;
 
+      let parsed: StreamingAssistantEvent;
       try {
-        const parsed = JSON.parse(line) as StreamingAssistantEvent;
-        if (parsed.type === "delta") {
-          onDelta(parsed.text);
-        } else if (parsed.type === "done") {
-          return;
-        } else if (parsed.type === "error") {
-          throw {
-            message: parsed.message,
-            errorCode: parsed.errorCode,
-          };
-        }
+        parsed = JSON.parse(line) as StreamingAssistantEvent;
       } catch {
         // Skip invalid JSON
+        continue;
+      }
+
+      if (parsed.type === "delta") {
+        onDelta(parsed.text);
+      } else if (parsed.type === "done") {
+        return;
+      } else if (parsed.type === "error") {
+        const err = new Error(parsed.message) as Error & { errorCode?: string };
+        err.errorCode = parsed.errorCode;
+        throw err;
       }
     }
   }

@@ -5,12 +5,20 @@ export interface AssistantProvider {
   send(userText: string, ctx: AssistantContext, history?: ChatHistoryMessage[]): Promise<string>;
 }
 
-type Intent = "today" | "week" | "goals" | "reflection" | "fallback";
+type Intent = "today" | "week" | "goals" | "reflection" | "definition" | "greeting" | "fallback";
 
 let firstCallInSession = true;
 
 function detectIntent(text: string): Intent {
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase().trim();
+
+  if (/^(hi|hello|hey|chào|xin chào|chào cú|cảm ơn|thanks|thank you)(\s|[!.?,]|$)/.test(lower)) {
+    return "greeting";
+  }
+
+  if (/(^|\s)(là gì|nghĩa là|giải thích|định nghĩa|smart là|okr là|12-week là|12 tuần là|reflection là)(\s|[!.?,]|$)/.test(lower)) {
+    return "definition";
+  }
 
   if (/\b(hôm nay|today|task|việc)\b/.test(lower)) return "today";
   if (/\b(tuần|week|progress|tiến độ)\b/.test(lower)) return "week";
@@ -122,6 +130,37 @@ function buildFallbackResponse(): string {
   });
 }
 
+function buildDefinitionResponse(userText: string): string {
+  const lower = userText.toLowerCase();
+
+  if (/smart/.test(lower)) {
+    return "SMART là khung đặt mục tiêu: Specific (cụ thể), Measurable (đo được), Achievable (khả thi), Relevant (liên quan), Time-bound (có hạn). Trong Vision Board, bạn dùng nó ở bước SMART Goal để biến ý tưởng thành mục tiêu rõ ràng cho 12 tuần.";
+  }
+
+  if (/12.?week|12 tuần/.test(lower)) {
+    return "12-week execution là hệ thống chia mục tiêu lớn thành chu kỳ 12 tuần, mỗi tuần có vài hành động dẫn dắt (lead indicator). Ý tưởng là 12 tuần đủ ngắn để giữ động lực, đủ dài để tạo thay đổi thực sự.";
+  }
+
+  if (/okr/.test(lower)) {
+    return "OKR (Objectives and Key Results) là khung đặt mục tiêu định tính (Objective) đi kèm 2-5 kết quả định lượng (Key Results) để đo tiến độ. Khác SMART ở chỗ OKR cho phép mục tiêu tham vọng và đo bằng nhiều chỉ số.";
+  }
+
+  if (/reflection|nhật ký/.test(lower)) {
+    return "Reflection là việc dừng lại nhìn lại đã làm gì, học được gì, điều chỉnh ra sao. Trong Vision Board, bạn viết reflection cuối tuần để chốt bài học và chọn ưu tiên cho tuần tới.";
+  }
+
+  return "Mình hiểu bạn đang muốn hỏi định nghĩa nhưng cần thêm chi tiết. Bạn muốn biết về khái niệm gì cụ thể — SMART, OKR, 12-week, hay reflection?";
+}
+
+function buildGreetingResponse(): string {
+  const variations = [
+    "Chào bạn. Tuần này tiến độ thế nào, mình rà lại 1 việc cụ thể nhé?",
+    "Chào bạn. Bạn muốn xem việc hôm nay, tóm tắt tuần, hay gì khác?",
+    "Chào nhé. Mình ở đây để giúp bạn đi tiếp trong chu kỳ 12 tuần.",
+  ];
+  return variations[Math.floor(Math.random() * variations.length)];
+}
+
 export const mockProvider: AssistantProvider = {
   async send(userText: string, ctx: AssistantContext, _history?: ChatHistoryMessage[]): Promise<string> {
     const intent = detectIntent(userText);
@@ -140,11 +179,18 @@ export const mockProvider: AssistantProvider = {
       case "reflection":
         response = buildReflectionResponse(ctx);
         break;
+      case "definition":
+        response = buildDefinitionResponse(userText);
+        break;
+      case "greeting":
+        response = buildGreetingResponse();
+        break;
       default:
         response = buildFallbackResponse();
     }
 
-    if (firstCallInSession) {
+    const isActionIntent = intent !== "definition" && intent !== "greeting";
+    if (firstCallInSession && isActionIntent) {
       firstCallInSession = false;
       response += "\n\n_(Đây là chế độ demo, gợi ý mang tính tham khảo.)_";
     }

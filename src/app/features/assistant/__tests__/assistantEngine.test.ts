@@ -81,8 +81,26 @@ describe("mockProvider", () => {
     expect(response).toContain("Hôm nay bạn học được gì?");
   });
 
+  it("returns definition response for SMART question", async () => {
+    const promise = mockProvider.send("SMART là gì?", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("Specific");
+    expect(response).not.toContain("Việc nên làm ngay");
+  });
+
+  it("returns greeting response for hi", async () => {
+    const promise = mockProvider.send("chào", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response.length).toBeLessThan(200);
+    expect(response).not.toContain("Việc nên làm ngay");
+  });
+
   it("falls back when no keyword matches", async () => {
-    const promise = mockProvider.send("Xin chào", sampleContext);
+    const promise = mockProvider.send("Tôi cần hỗ trợ thêm", sampleContext);
     await vi.advanceTimersByTimeAsync(1000);
     const response = await promise;
 
