@@ -358,7 +358,7 @@ export function LoginPage() {
                   {/* Mode switch */}
                   <div className="mt-5 inline-flex w-full gap-1 p-1 rounded-full border border-app-line bg-app-bg">
                     <Link
-                      to={{ pathname: "/login", search: isSignIn ? "" : "?mode=signup" }}
+                      to={{ pathname: "/login", search: "" }}
                       className={`flex-1 text-[14px] font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
                         isSignIn
                           ? "bg-app-surface text-app-ink shadow-sm"
@@ -368,7 +368,7 @@ export function LoginPage() {
                       Đăng nhập
                     </Link>
                     <Link
-                      to={{ pathname: "/login", search: isSignIn ? "?mode=signup" : "" }}
+                      to={{ pathname: "/login", search: "?mode=signup" }}
                       className={`flex-1 text-[14px] font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
                         !isSignIn
                           ? "bg-app-surface text-app-ink shadow-sm"

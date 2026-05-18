@@ -96,9 +96,9 @@ describe("LoginPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Bắt đầu hành trình")).toBeInTheDocument();
+    expect(screen.getAllByText("BẮT ĐẦU HÀNH TRÌNH").length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Tạo tài khoản" })).toBeInTheDocument();
-    expect(screen.getByText("Khoảng 30 giây để bắt đầu.")).toBeInTheDocument();
+    expect(screen.getByText("Khoảng 30 giây.")).toBeInTheDocument();
   });
 
   it("shows two password fields in sign-up mode", () => {
@@ -115,6 +115,22 @@ describe("LoginPage", () => {
     expect(screen.getByText("Ít nhất 8 ký tự")).toBeInTheDocument();
     expect(screen.getByText("Có ít nhất 1 chữ số")).toBeInTheDocument();
     expect(screen.getByText("Khớp với mật khẩu xác nhận")).toBeInTheDocument();
+  });
+
+  it("can switch back from sign-up mode to sign-in mode", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole("link", { name: "Đăng nhập" }));
+
+    expect(screen.getByRole("heading", { name: "Đăng nhập" })).toBeInTheDocument();
+    expect(screen.getAllByPlaceholderText("••••••••")).toHaveLength(1);
+    expect(screen.queryByLabelText("Xác nhận mật khẩu")).not.toBeInTheDocument();
   });
 
   it("keeps sign-up disabled until password confirmation matches", async () => {
