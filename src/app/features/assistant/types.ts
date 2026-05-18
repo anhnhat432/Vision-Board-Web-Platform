@@ -5,3 +5,8 @@ export type Message = {
   createdAt: number;
   status?: "streaming" | "complete";
 };
+
+export type ChatHistoryMessage = {
+  role: "user" | "assistant";
+  content: string;
+};

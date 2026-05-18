@@ -16,6 +16,9 @@ export interface SanitizedAssistantContext extends AssistantContext {
 }
 
 const MAX_TEXT = 200;
+const MAX_DEADLINES = 3;
+const MAX_STREAK_DAYS = 365;
+const MAX_DAYS_UNTIL = 365;
 
 export function sanitizeAssistantContext(
   ctx: AssistantContext & { route: string },
@@ -37,6 +40,9 @@ export function sanitizeAssistantContext(
     feasibility: sanitizeFeasibility(ctx.feasibility),
     latestWeeklyReview: sanitizeLatestWeeklyReview(ctx.latestWeeklyReview),
     stuckSignals: sanitizeStuckSignals(ctx.stuckSignals),
+    trend: sanitizeTrend(ctx.trend),
+    streak: sanitizeStreak(ctx.streak),
+    upcomingDeadlines: sanitizeUpcomingDeadlines(ctx.upcomingDeadlines),
     route: text(ctx.route || "", 50),
   };
 }
@@ -97,4 +103,45 @@ function sanitizeStuckSignals(stuckSignals: AssistantContext["stuckSignals"]): A
       isCore: !!task.isCore,
     })),
   };
+}
+
+function sanitizeTrend(trend: AssistantContext["trend"]): AssistantContext["trend"] {
+  if (!trend) {
+    return { completionLast4Weeks: [], direction: "unknown" };
+  }
+
+  const completions = (trend.completionLast4Weeks || [])
+    .slice(0, 4)
+    .map((val) => clamp(val, 0, 100, 0));
+
+  const direction = trend.direction === "up" || trend.direction === "down" || trend.direction === "flat"
+    ? trend.direction
+    : "unknown";
+
+  return { completionLast4Weeks: completions, direction };
+}
+
+function sanitizeStreak(streak: AssistantContext["streak"]): AssistantContext["streak"] {
+  if (!streak) {
+    return { daysWithCompletedTask: 0 };
+  }
+
+  return { daysWithCompletedTask: clamp(streak.daysWithCompletedTask, 0, MAX_STREAK_DAYS, 0) };
+}
+
+function sanitizeUpcomingDeadlines(
+  deadlines: AssistantContext["upcomingDeadlines"],
+): AssistantContext["upcomingDeadlines"] {
+  if (!Array.isArray(deadlines)) {
+    return [];
+  }
+
+  return deadlines
+    .slice(0, MAX_DEADLINES)
+    .map((d) => ({
+      goalId: text(d.goalId, 100),
+      title: text(d.title, MAX_TEXT),
+      daysUntil: clamp(d.daysUntil, -MAX_DAYS_UNTIL, MAX_DAYS_UNTIL, 0),
+    }))
+    .slice(0, MAX_DEADLINES);
 }

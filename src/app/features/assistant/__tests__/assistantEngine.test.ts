@@ -23,6 +23,14 @@ const sampleContext: AssistantContext = {
     overdueOpenCount: 0,
     overdueTasks: [],
   },
+  trend: {
+    completionLast4Weeks: [],
+    direction: "unknown",
+  },
+  streak: {
+    daysWithCompletedTask: 0,
+  },
+  upcomingDeadlines: [],
 };
 
 describe("mockProvider", () => {

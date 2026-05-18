@@ -1,5 +1,5 @@
 import { sendToGemini } from "./geminiAssistantProvider";
-import { sendToGroq } from "./groqAssistantProvider";
+import { sendToGroq, sendToGroqStream } from "./groqAssistantProvider";
 import { env } from "../config/env";
 
 export interface AssistantContext {
@@ -16,7 +16,6 @@ export interface AssistantContext {
     done: boolean;
   }>;
   lastReflectionDate: string | null;
-  route: string;
   feasibility: {
     readinessScore: number | null;
     bottleneckLabel: string | null;
@@ -41,11 +40,25 @@ export interface AssistantContext {
       isCore: boolean;
     }>;
   };
+  trend: {
+    completionLast4Weeks: number[];
+    direction: "up" | "down" | "flat" | "unknown";
+  };
+  streak: {
+    daysWithCompletedTask: number;
+  };
+  upcomingDeadlines: Array<{
+    goalId: string;
+    title: string;
+    daysUntil: number;
+  }>;
+  route: string;
 }
 
 export interface AssistantRequest {
   message: string;
   context: AssistantContext;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
 export interface AssistantResponse {
@@ -58,12 +71,17 @@ export interface AssistantError {
 }
 
 const MAX_MESSAGE_LENGTH = 2000;
+const MAX_HISTORY = 6;
+const MAX_HISTORY_CONTENT = 500;
 const MAX_GOALS = 5;
 const MAX_TASKS = 8;
 const MAX_OVERDUE_TASKS = 5;
 const MAX_MISSED_COMMITMENTS = 3;
 const MAX_ROUTE_LENGTH = 80;
 const MAX_TEXT_LENGTH = 200;
+const MAX_DEADLINES = 3;
+const MAX_STREAK_DAYS = 365;
+const MAX_DAYS_UNTIL = 365;
 
 export function validateAssistantRequest(request: unknown): {
   valid: boolean;
@@ -103,6 +121,33 @@ export function validateAssistantRequest(request: unknown): {
     };
   }
 
+  // Validate history if provided
+  if (req.history !== undefined && req.history !== null) {
+    if (!Array.isArray(req.history)) {
+      return {
+        valid: false,
+        error: { message: "Lịch sử chat không hợp lệ.", errorCode: "ASSISTANT_INVALID_HISTORY" },
+      };
+    }
+
+    const invalidHistory = req.history.some((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return true;
+      const historyItem = item as Record<string, unknown>;
+      const role = historyItem.role;
+      const content = historyItem.content;
+      if (role !== "user" && role !== "assistant") return true;
+      if (typeof content !== "string") return true;
+      return false;
+    });
+
+    if (invalidHistory) {
+      return {
+        valid: false,
+        error: { message: "Định dạng lịch sử chat không đúng.", errorCode: "ASSISTANT_INVALID_HISTORY" },
+      };
+    }
+  }
+
   return { valid: true };
 }
 
@@ -125,6 +170,24 @@ function sanitizeText(value: unknown, maxLength: number): string {
 function nullableText(value: unknown, maxLength = MAX_TEXT_LENGTH): string | null {
   const text = sanitizeText(value, maxLength);
   return text || null;
+}
+
+export function sanitizeHistory(
+  history: unknown,
+): Array<{ role: "user" | "assistant"; content: string }> {
+  if (!Array.isArray(history)) return [];
+
+  return history
+    .filter((item): item is { role: unknown; content: unknown } =>
+      item && typeof item === "object" && !Array.isArray(item) && "role" in item && "content" in item
+    )
+    .filter((item) => item.role === "user" || item.role === "assistant")
+    .filter((item) => typeof item.content === "string" && item.content.trim())
+    .slice(-MAX_HISTORY)
+    .map((item) => ({
+      role: item.role as "user" | "assistant",
+      content: sanitizeText(item.content, MAX_HISTORY_CONTENT),
+    }));
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -164,6 +227,9 @@ export function sanitizeContext(context: unknown): AssistantContext {
     feasibility: sanitizeFeasibility(raw.feasibility),
     latestWeeklyReview: sanitizeLatestWeeklyReview(raw.latestWeeklyReview),
     stuckSignals: sanitizeStuckSignals(raw.stuckSignals),
+    trend: sanitizeTrend(raw.trend),
+    streak: sanitizeStreak(raw.streak),
+    upcomingDeadlines: sanitizeUpcomingDeadlines(raw.upcomingDeadlines),
   };
 }
 
@@ -216,17 +282,92 @@ function sanitizeStuckSignals(value: unknown): AssistantContext["stuckSignals"] 
   };
 }
 
+function sanitizeTrend(value: unknown): AssistantContext["trend"] {
+  const raw = record(value);
+  const rawCompletions = Array.isArray(raw.completionLast4Weeks) ? raw.completionLast4Weeks : [];
+
+  const direction =
+    raw.direction === "up" || raw.direction === "down" || raw.direction === "flat"
+      ? raw.direction
+      : "unknown";
+
+  return {
+    completionLast4Weeks: rawCompletions.slice(0, 4).map((val) => clampNumber(val, 0, 100, 0)),
+    direction: direction as "up" | "down" | "flat" | "unknown",
+  };
+}
+
+function sanitizeStreak(value: unknown): AssistantContext["streak"] {
+  const raw = record(value);
+  return {
+    daysWithCompletedTask: clampNumber(raw.daysWithCompletedTask, 0, MAX_STREAK_DAYS, 0),
+  };
+}
+
+function sanitizeUpcomingDeadlines(value: unknown): AssistantContext["upcomingDeadlines"] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .slice(0, MAX_DEADLINES)
+    .map((item) => {
+      const raw = record(item);
+      return {
+        goalId: sanitizeText(raw.goalId, 100),
+        title: sanitizeText(raw.title, MAX_TEXT_LENGTH),
+        daysUntil: clampNumber(raw.daysUntil, -MAX_DAYS_UNTIL, MAX_DAYS_UNTIL, 0),
+      };
+    })
+    .slice(0, MAX_DEADLINES);
+}
+
 export async function processAssistantRequest(
   request: AssistantRequest,
 ): Promise<AssistantResponse | AssistantError> {
   const sanitizedContext = sanitizeContext(request.context);
+  const sanitizedHistory = sanitizeHistory(request.history);
   const result = env.ASSISTANT_PROVIDER === "gemini"
-    ? await sendToGemini(request.message.trim(), sanitizedContext)
-    : await sendToGroq(request.message.trim(), sanitizedContext);
+    ? await sendToGemini(request.message.trim(), sanitizedContext, sanitizedHistory)
+    : await sendToGroq(request.message.trim(), sanitizedContext, sanitizedHistory);
 
   if ("errorCode" in result) {
     return result;
   }
 
   return { message: result.message };
+}
+
+export async function processAssistantRequestStream(
+  request: AssistantRequest,
+  onDelta: (text: string) => void,
+): Promise<void | AssistantError> {
+  const sanitizedContext = sanitizeContext(request.context);
+  const sanitizedHistory = sanitizeHistory(request.history);
+
+  if (env.ASSISTANT_PROVIDER === "gemini") {
+    // Gemini stream not implemented yet - fallback to non-streaming
+    const result = await sendToGemini(request.message.trim(), sanitizedContext, sanitizedHistory);
+    if ("errorCode" in result) {
+      return result;
+    }
+    onDelta(result.message);
+    return;
+  }
+
+  // Groq streaming
+  try {
+    await sendToGroqStream(
+      request.message.trim(),
+      sanitizedContext,
+      sanitizedHistory,
+      onDelta,
+    );
+  } catch (error) {
+    if (error && typeof error === "object" && "errorCode" in error) {
+      return error as AssistantError;
+    }
+    return {
+      message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
+      errorCode: "ASSISTANT_PROVIDER_ERROR",
+    };
+  }
 }

@@ -1,7 +1,8 @@
 import type { AssistantContext } from "./buildAssistantContext";
+import type { ChatHistoryMessage } from "./types";
 
 export interface AssistantProvider {
-  send(userText: string, ctx: AssistantContext): Promise<string>;
+  send(userText: string, ctx: AssistantContext, history?: ChatHistoryMessage[]): Promise<string>;
 }
 
 type Intent = "today" | "week" | "goals" | "reflection" | "fallback";
@@ -122,7 +123,7 @@ function buildFallbackResponse(): string {
 }
 
 export const mockProvider: AssistantProvider = {
-  async send(userText: string, ctx: AssistantContext): Promise<string> {
+  async send(userText: string, ctx: AssistantContext, _history?: ChatHistoryMessage[]): Promise<string> {
     const intent = detectIntent(userText);
     let response: string;
 

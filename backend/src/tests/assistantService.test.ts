@@ -56,3 +56,69 @@ describe("assistantService sanitizeContext", () => {
     assert.equal(context.stuckSignals.overdueTasks.length, 5);
   });
 });
+
+describe("assistantService sanitizeHistory", () => {
+  it("bounds history to 6 messages and sanitizes content", async () => {
+    ensureBackendEnvForServiceImports();
+    const { sanitizeHistory } = await import("../services/assistantService");
+
+    const history = sanitizeHistory([
+      { role: "user" as const, content: "Hello" },
+      { role: "assistant" as const, content: "Hi there" },
+      { role: "user" as const, content: "What should I do?" },
+      { role: "assistant" as const, content: "Check your tasks" },
+      { role: "user" as const, content: "Okay thanks" },
+      { role: "assistant" as const, content: "You're welcome" },
+      { role: "user" as const, content: "One more thing" },
+      { role: "assistant" as const, content: "Sure, what is it?" },
+    ]);
+
+    assert.equal(history.length, 6);
+    assert.equal(history[0].role, "user");
+    assert.equal(history[0].content, "What should I do?");
+    assert.equal(history[5].role, "assistant");
+    assert.equal(history[5].content, "Sure, what is it?");
+  });
+
+  it("truncates content over 500 characters", async () => {
+    ensureBackendEnvForServiceImports();
+    const { sanitizeHistory } = await import("../services/assistantService");
+
+    const longContent = "x".repeat(600);
+    const history = sanitizeHistory([
+      { role: "user" as const, content: longContent },
+    ]);
+
+    assert.equal(history.length, 1);
+    assert.equal(history[0].content.length, 500);
+  });
+
+  it("filters out invalid role values", async () => {
+    ensureBackendEnvForServiceImports();
+    const { sanitizeHistory } = await import("../services/assistantService");
+
+    const history = sanitizeHistory([
+      { role: "user" as const, content: "Hello" },
+      { role: "system" as unknown as "user" | "assistant", content: "System message" },
+      { role: "assistant" as const, content: "Hi" },
+    ]);
+
+    assert.equal(history.length, 2);
+    assert.equal(history[0].role, "user");
+    assert.equal(history[1].role, "assistant");
+  });
+
+  it("filters out empty content", async () => {
+    ensureBackendEnvForServiceImports();
+    const { sanitizeHistory } = await import("../services/assistantService");
+
+    const history = sanitizeHistory([
+      { role: "user" as const, content: "Hello" },
+      { role: "assistant" as const, content: "" },
+      { role: "assistant" as const, content: "   " },
+      { role: "assistant" as const, content: "Hi" },
+    ]);
+
+    assert.equal(history.length, 2);
+  });
+});

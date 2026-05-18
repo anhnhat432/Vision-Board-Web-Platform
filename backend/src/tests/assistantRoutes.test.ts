@@ -163,4 +163,101 @@ describe("assistantRoutes", () => {
       env.GROQ_API_KEY = previousGroqKey;
     }
   });
+
+  it("accepts valid history in request", async () => {
+    const app = await createTestApp();
+    const response = await requestJson(app, "/api/assistant/chat", "verified-token", {
+      message: "Hôm nay tôi nên làm gì?",
+      context: {
+        currentWeek: 1,
+        weeksTotal: 12,
+        goals: [],
+        todayTasks: [],
+        lastReflectionDate: null,
+        route: "/12-week-system",
+      },
+      history: [
+        { role: "user", content: "Hello" },
+        { role: "assistant", content: "Hi there, how can I help?" },
+      ],
+    });
+
+    // History accepted (not 400), actual status depends on provider config
+    assert.notEqual(response.status, 400);
+    assert.notEqual(response.body.errorCode, "ASSISTANT_INVALID_HISTORY");
+  });
+
+  it("rejects invalid history shape with 400", async () => {
+    const app = await createTestApp();
+    const response = await requestJson(app, "/api/assistant/chat", "verified-token", {
+      message: "Hôm nay tôi nên làm gì?",
+      context: {
+        currentWeek: 1,
+        weeksTotal: 12,
+        goals: [],
+        todayTasks: [],
+        lastReflectionDate: null,
+        route: "/12-week-system",
+      },
+      history: [
+        { role: "invalid_role", content: "test" },
+      ],
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "ASSISTANT_INVALID_HISTORY");
+  });
+
+  it("requires auth for stream endpoint", async () => {
+    const app = await createTestApp();
+    const server = app.listen(0);
+    await new Promise<void>((resolve) => server.once("listening", resolve));
+    const address = server.address() as import("node:net").AddressInfo;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${address.port}/api/assistant/chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "test",
+          context: { currentWeek: 1, weeksTotal: 12, goals: [], todayTasks: [], lastReflectionDate: null, route: "/" },
+        }),
+      });
+
+      assert.equal(response.status, 401);
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+  });
+
+  it("returns SSE stream with correct content-type", async () => {
+    const app = await createTestApp();
+    const server = app.listen(0);
+    await new Promise<void>((resolve) => server.once("listening", resolve));
+    const address = server.address() as import("node:net").AddressInfo;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${address.port}/api/assistant/chat/stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer verified-token",
+        },
+        body: JSON.stringify({
+          message: "test",
+          context: { currentWeek: 1, weeksTotal: 12, goals: [], todayTasks: [], lastReflectionDate: null, route: "/" },
+        }),
+      });
+
+      assert.equal(response.status, 200);
+      const contentType = response.headers.get("Content-Type");
+      assert.ok(contentType?.includes("text/event-stream"));
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+  });
 });

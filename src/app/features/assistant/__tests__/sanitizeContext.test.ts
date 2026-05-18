@@ -34,6 +34,19 @@ describe("sanitizeAssistantContext", () => {
           isCore: index % 2 === 0,
         })),
       },
+      trend: {
+        completionLast4Weeks: [10, 20, 30, 40, 50],
+        direction: "up" as const,
+      },
+      streak: {
+        daysWithCompletedTask: 500,
+      },
+      upcomingDeadlines: [
+        { goalId: "g1", title: "Goal A", daysUntil: 5 },
+        { goalId: "g2", title: "Goal B", daysUntil: -10 },
+        { goalId: "g3", title: "Goal C", daysUntil: 500 },
+        { goalId: "g4", title: "Goal D", daysUntil: 10 },
+      ],
     });
 
     expect(context.feasibility).toEqual({
@@ -46,5 +59,12 @@ describe("sanitizeAssistantContext", () => {
     expect(context.stuckSignals.latestObstacle).toHaveLength(200);
     expect(context.stuckSignals.missedCommitments).toEqual(["a", "b", "c"]);
     expect(context.stuckSignals.overdueTasks).toHaveLength(5);
+    expect(context.trend.completionLast4Weeks).toHaveLength(4);
+    expect(context.trend.direction).toBe("up");
+    expect(context.streak.daysWithCompletedTask).toBe(365);
+    expect(context.upcomingDeadlines).toHaveLength(3);
+    expect(context.upcomingDeadlines[0].daysUntil).toBe(5);
+    expect(context.upcomingDeadlines[1].daysUntil).toBe(-10);
+    expect(context.upcomingDeadlines[2].daysUntil).toBe(365);
   });
 });

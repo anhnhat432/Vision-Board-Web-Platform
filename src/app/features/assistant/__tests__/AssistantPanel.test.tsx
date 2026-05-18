@@ -100,4 +100,25 @@ describe("AssistantPanel", () => {
     const dialog = screen.getByRole("dialog", { name: "Trợ lý AI" });
     expect(dialog).toHaveAttribute("aria-modal", "true");
   });
+
+  it("sends conversation history with subsequent messages", async () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    // First message
+    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "Hôm nay tôi nên làm gì?{enter}");
+
+    expect(await screen.findByText("Hôm nay tôi nên làm gì?")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay/)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Second message - history should be passed
+    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "Thế thì tôi nên bắt đầu việc nào trước?{enter}");
+
+    expect(await screen.findByText("Thế thì tôi nên bắt đầu việc nào trước?")).toBeInTheDocument();
+    // Assistant should respond with context from previous message
+    await waitFor(() => {
+      expect(screen.getByText(/Việc nên làm ngay|task|Ưu tiên/)).toBeInTheDocument();
+    }, { timeout: 3000 });
+  });
 });

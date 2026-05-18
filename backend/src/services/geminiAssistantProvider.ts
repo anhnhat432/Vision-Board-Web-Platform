@@ -7,7 +7,7 @@ export interface GeminiRequest {
     parts: Array<{ text: string }>;
   };
   contents: Array<{
-    role: "user";
+    role: "user" | "model";
     parts: Array<{ text: string }>;
   }>;
   generationConfig?: {
@@ -40,12 +40,23 @@ function getGeminiApiUrl(): string {
   return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.GEMINI_MODEL)}:generateContent`;
 }
 
-function buildRequestBody(userMessage: string, context: AssistantContext): GeminiRequest {
+function buildRequestBody(
+  userMessage: string,
+  context: AssistantContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+): GeminiRequest {
+  // Map conversation history to Gemini format
+  const mappedHistory = history.map((msg) => {
+    const role: "user" | "model" = msg.role === "assistant" ? "model" : "user";
+    return { role, parts: [{ text: msg.content }] };
+  });
+
   return {
     system_instruction: {
       parts: [{ text: buildSystemPrompt() }],
     },
     contents: [
+      ...mappedHistory,
       {
         role: "user",
         parts: [{ text: `${summarizeContext(context)}\n\nNgười dùng hỏi: ${userMessage}` }],
@@ -68,6 +79,7 @@ function extractGeminiText(data: GeminiResponse): string {
 export async function sendToGemini(
   userMessage: string,
   context: AssistantContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
   if (!env.GEMINI_API_KEY) {
     return {
@@ -86,7 +98,7 @@ export async function sendToGemini(
         "Content-Type": "application/json",
         "x-goog-api-key": env.GEMINI_API_KEY,
       },
-      body: JSON.stringify(buildRequestBody(userMessage, context)),
+      body: JSON.stringify(buildRequestBody(userMessage, context, history)),
       signal: abortController.signal,
     });
 

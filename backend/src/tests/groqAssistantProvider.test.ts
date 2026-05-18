@@ -36,6 +36,14 @@ const context: AssistantContext = {
     overdueOpenCount: 1,
     overdueTasks: [{ id: "late_1", title: "Lam bai tap cu", scheduledDate: "2026-05-10", isCore: true }],
   },
+  trend: {
+    completionLast4Weeks: [],
+    direction: "unknown",
+  },
+  streak: {
+    daysWithCompletedTask: 0,
+  },
+  upcomingDeadlines: [],
 };
 
 describe("groqAssistantProvider prompt", () => {

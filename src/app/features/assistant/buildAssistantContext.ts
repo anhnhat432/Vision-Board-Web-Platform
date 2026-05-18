@@ -8,8 +8,13 @@
 
 import { getUserData } from "@/app/utils/storage";
 import { APP_STORAGE_KEYS } from "@/app/utils/storage-constants";
-import { formatDateInputValue, getCalendarDateKey } from "@/app/utils/storage-date-utils";
-import { getActiveTwelveWeekGoal, getTwelveWeekCurrentWeek, getTwelveWeekTodayTasks } from "@/app/utils/storage-twelve-week";
+import { formatDateInputValue, getCalendarDateKey, parseCalendarDate } from "@/app/utils/storage-date-utils";
+import {
+  getActiveTwelveWeekGoal,
+  getTwelveWeekCurrentWeek,
+  getTwelveWeekTodayTasks,
+  getTwelveWeekWeekRange,
+} from "@/app/utils/storage-twelve-week";
 import type {
   Goal,
   TwelveWeekSystem,
@@ -56,6 +61,18 @@ export interface AssistantContext {
       isCore: boolean;
     }>;
   };
+  trend: {
+    completionLast4Weeks: number[];
+    direction: "up" | "down" | "flat" | "unknown";
+  };
+  streak: {
+    daysWithCompletedTask: number;
+  };
+  upcomingDeadlines: Array<{
+    goalId: string;
+    title: string;
+    daysUntil: number;
+  }>;
 }
 
 /**
@@ -111,6 +128,9 @@ export function buildAssistantContext(referenceDate = new Date()): AssistantCont
       feasibility: buildFeasibilityContext(activeGoal),
       latestWeeklyReview,
       stuckSignals: buildStuckSignals(system, latestWeeklyReview, referenceDate),
+      trend: buildTrendContext(system, currentWeek),
+      streak: buildStreakContext(system, referenceDate),
+      upcomingDeadlines: buildUpcomingDeadlines(data.goals, referenceDate),
     };
   } catch {
     // Storage read error -> safe defaults.
@@ -133,6 +153,14 @@ function emptyContext(): AssistantContext {
       overdueOpenCount: 0,
       overdueTasks: [],
     },
+    trend: {
+      completionLast4Weeks: [],
+      direction: "unknown",
+    },
+    streak: {
+      daysWithCompletedTask: 0,
+    },
+    upcomingDeadlines: [],
   };
 }
 
@@ -249,4 +277,146 @@ function buildStuckSignals(
       isCore: task.isCore,
     })),
   };
+}
+
+/**
+ * Build trend context: completion rate for last 4 weeks and direction.
+ */
+function buildTrendContext(
+  system: TwelveWeekSystem,
+  currentWeek: number | null,
+): AssistantContext["trend"] {
+  if (currentWeek === null) {
+    return { completionLast4Weeks: [], direction: "unknown" };
+  }
+
+  const weeksToCheck = [currentWeek - 3, currentWeek - 2, currentWeek - 1, currentWeek];
+  const completions: number[] = [];
+
+  for (const weekNum of weeksToCheck) {
+    if (weekNum < 1) {
+      completions.push(NaN); // Mark as missing
+      continue;
+    }
+
+    const range = getTwelveWeekWeekRange(system, weekNum);
+    const startDate = parseCalendarDate(range.start);
+    if (!startDate) {
+      completions.push(NaN);
+      continue;
+    }
+
+    const weekTasks = system.taskInstances.filter((task) => task.weekNumber === weekNum && !task.skipped);
+    const completedTasks = weekTasks.filter((task) => task.completed).length;
+    const totalTasks = weekTasks.length;
+
+    if (totalTasks === 0) {
+      completions.push(0);
+    } else {
+      completions.push(Math.round((completedTasks / totalTasks) * 100));
+    }
+  }
+
+  // Filter out NaN values for direction calculation
+  const validCompletions = completions.filter((val) => !Number.isNaN(val));
+
+  const direction = calculateDirection(validCompletions);
+
+  return {
+    completionLast4Weeks: completions.filter((val) => !Number.isNaN(val)),
+    direction,
+  };
+}
+
+/**
+ * Calculate trend direction from completion rates.
+ */
+function calculateDirection(completions: number[]): "up" | "down" | "flat" | "unknown" {
+  if (completions.length < 2) return "unknown";
+
+  // Simple linear regression slope
+  const count = completions.length;
+  const first = completions[0];
+  const last = completions[count - 1];
+  const slope = (last - first) / count;
+
+  if (slope > 5) return "up";
+  if (slope < -5) return "down";
+  return "flat";
+}
+
+/**
+ * Build streak context: consecutive days with at least one completed task.
+ */
+function buildStreakContext(
+  system: TwelveWeekSystem,
+  referenceDate: Date,
+): AssistantContext["streak"] {
+  let streak = 0;
+
+  // Check from today backwards
+  for (let daysBack = 0; daysBack < 365; daysBack++) {
+    const checkDate = new Date(referenceDate);
+    checkDate.setDate(checkDate.getDate() - daysBack);
+    const checkDateKey = formatDateInputValue(checkDate);
+
+    // Check if any task was completed on this date
+    const hasCompletedTask = system.taskInstances.some(
+      (task) => task.completed && getCalendarDateKey(task.completedAt || "") === checkDateKey,
+    );
+
+    // Also check daily check-ins
+    const hasCheckIn = system.dailyCheckIns.some(
+      (checkIn) => checkIn.didWorkToday && checkIn.date === checkDateKey,
+    );
+
+    if (hasCompletedTask || hasCheckIn) {
+      streak++;
+    } else {
+      // Streak broken
+      break;
+    }
+  }
+
+  return { daysWithCompletedTask: streak };
+}
+
+/**
+ * Build upcoming deadlines from goals with deadlines.
+ */
+function buildUpcomingDeadlines(
+  goals: Goal[],
+referenceDate: Date,
+  ): AssistantContext["upcomingDeadlines"] {
+    const _todayKey = formatDateInputValue(referenceDate);
+    const deadlines: Array<{ goalId: string; title: string; daysUntil: number }> = [];
+
+  for (const goal of goals) {
+    if (!goal.deadline) continue;
+
+    const deadlineDate = parseCalendarDate(goal.deadline);
+    if (!deadlineDate) continue;
+
+    const _deadlineKey = formatDateInputValue(deadlineDate);
+    const today = new Date(referenceDate);
+    today.setHours(0, 0, 0, 0);
+    const deadline = new Date(deadlineDate);
+    deadline.setHours(0, 0, 0, 0);
+
+    const daysUntil = Math.round((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Skip if already passed by more than a year
+    if (daysUntil < -365) continue;
+
+    deadlines.push({
+      goalId: goal.id,
+      title: goal.title,
+      daysUntil,
+    });
+  }
+
+  // Sort by daysUntil ascending and take top 3
+  return deadlines
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 3);
 }
