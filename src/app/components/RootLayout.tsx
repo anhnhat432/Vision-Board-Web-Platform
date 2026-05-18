@@ -980,13 +980,14 @@ export function RootLayout() {
                     aria-label="Về trang chủ Dear Our Future"
                   >
                     <img
-                      src="/favicon-192.png"
+                      src="/favicon-512.png"
                       alt=""
                       aria-hidden="true"
-                      className="size-9 rounded-md object-cover shadow-md ring-1 ring-app-accent/20"
+                      loading="eager"
+                      className="size-10 rounded-lg object-cover shadow-md ring-1 ring-app-accent/20"
                     />
                     <div className="min-w-0">
-                      <span className="block truncate text-[15px] font-medium tracking-tight text-app-ink">
+                      <span className="hidden sm:inline-block text-[15px] font-medium tracking-tight text-app-ink">
                         Dear Our Future
                       </span>
                     </div>

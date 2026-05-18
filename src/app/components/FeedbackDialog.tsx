@@ -100,9 +100,16 @@ export function FeedbackDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <Button type="button" variant="outline" size="sm" className={triggerClassName} onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className={triggerClassName}
+        onClick={() => setOpen(true)}
+        aria-label={triggerLabel || "Góp ý"}
+      >
         <MessageSquareText className="h-4 w-4" />
-        {triggerLabel}
+        {triggerLabel && <span>{triggerLabel}</span>}
       </Button>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>

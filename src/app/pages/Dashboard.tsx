@@ -603,11 +603,23 @@ function DashboardContent({
 
         {!isSignedOut ? <DashboardFooter lastSavedLabel={lastSavedLabel} /> : null}
 
-        <div className="mt-5 flex justify-end">
+        {/* Desktop feedback button - inline */}
+        <div className="hidden md:block mt-5 flex justify-end">
           <FeedbackDialog
             source="dashboard"
             context="dashboard"
+            triggerLabel="Góp ý"
             triggerClassName="border-app-line bg-app-surface text-app-ink-muted hover:bg-app-bg"
+          />
+        </div>
+
+        {/* Mobile floating feedback button */}
+        <div className="fixed bottom-4 right-4 z-30 md:hidden">
+          <FeedbackDialog
+            source="dashboard"
+            context="dashboard"
+            triggerLabel=""
+            triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface/90 shadow-sm opacity-70 transition-all duration-200 hover:opacity-100 hover:bg-app-surface hover:text-app-ink hover:shadow-md backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           />
         </div>
       </div>

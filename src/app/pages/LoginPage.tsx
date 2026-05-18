@@ -322,13 +322,30 @@ export function LoginPage() {
             <div className="w-full">
               <div className="w-full max-w-md mx-auto lg:mx-0">
                 {/* Mobile hero - simplified */}
-                <div className="lg:hidden text-center mb-6">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-                    {captionText}
-                  </p>
-                  <h1 className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink">
-                    {isSignIn ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
-                  </h1>
+                <div className="lg:hidden mb-6">
+                  <div className="text-center">
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                      {captionText}
+                    </p>
+                    <h1 className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink">
+                      {isSignIn ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
+                    </h1>
+                  </div>
+
+                  {/* 3 trust chip ngang scrollable trên mobile */}
+                  <div className="mt-5 -mx-4 px-4 overflow-x-auto">
+                    <ul className="flex gap-2 w-max">
+                      {TRUST_FEATURES.map(({ icon: Icon, title }) => (
+                        <li
+                          key={title}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-[12px] text-app-ink-soft whitespace-nowrap"
+                        >
+                          <Icon className="h-3.5 w-3.5 text-app-accent" />
+                          {title}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 <div className="rounded-[14px] border border-app-line bg-app-surface p-6 md:p-8">

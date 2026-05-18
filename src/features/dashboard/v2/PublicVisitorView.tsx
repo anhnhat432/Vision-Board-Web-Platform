@@ -109,21 +109,25 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           const Icon = feature.icon;
 
           return (
-            <article key={feature.title} className="rounded-card border border-app-line bg-app-surface p-5">
+            <a
+              key={feature.title}
+              href={feature.href}
+              className="group rounded-card border border-app-line bg-app-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-app-accent/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            >
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent transition-colors duration-200 group-hover:bg-app-accent group-hover:text-white">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">Bước {feature.step}</p>
                   <h2 className="mt-1 text-[16px] font-semibold text-app-ink">{feature.title}</h2>
                   <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{feature.description}</p>
-                  <a className="mt-3 inline-flex text-[14px] font-medium text-app-accent" href={feature.href}>
+                  <span className="mt-3 inline-flex text-[14px] font-medium text-app-accent transition-transform duration-200 group-hover:translate-x-0.5">
                     Khám phá →
-                  </a>
+                  </span>
                 </div>
               </div>
-            </article>
+            </a>
           );
         })}
       </section>
