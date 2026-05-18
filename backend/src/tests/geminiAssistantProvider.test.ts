@@ -1,0 +1,62 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import type { AssistantContext } from "../services/assistantService";
+
+function ensureBackendEnvForProviderImports(): void {
+  process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/assistant-test";
+  process.env.FIREBASE_PROJECT_ID ??= "assistant-test";
+  process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
+  process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
+  process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+}
+
+const context: AssistantContext = {
+  currentWeek: 3,
+  weeksTotal: 12,
+  goals: [{ id: "goal_1", title: "Hoc React", progress: 45 }],
+  todayTasks: [{ id: "task_1", title: "Lam bai tap hom nay", done: false }],
+  lastReflectionDate: null,
+  route: "/12-week-system",
+  feasibility: {
+    readinessScore: 11,
+    bottleneckLabel: "Thoi gian",
+    bottleneckAction: "Chon mot khoang 20 phut co dinh moi ngay.",
+  },
+  latestWeeklyReview: {
+    weekNumber: 2,
+    leadCompletionPercent: 40,
+    mainObstacle: "Lich lam viec day",
+    nextWeekPriority: "Giu 1 viec cot loi moi ngay",
+    workloadDecision: "reduce slightly",
+    reviewedAt: "2026-05-17T10:00:00.000Z",
+  },
+  stuckSignals: {
+    latestObstacle: "Bi ket vi qua met",
+    missedCommitments: ["Bo lo 2 buoi hoc"],
+    overdueOpenCount: 1,
+    overdueTasks: [{ id: "late_1", title: "Lam bai tap cu", scheduledDate: "2026-05-10", isCore: true }],
+  },
+};
+
+describe("geminiAssistantProvider prompt", () => {
+  it("requires the stable three-part answer format", async () => {
+    ensureBackendEnvForProviderImports();
+    const { buildSystemPrompt } = await import("../services/geminiAssistantProvider");
+    const prompt = buildSystemPrompt();
+
+    assert.match(prompt, /Việc nên làm ngay/);
+    assert.match(prompt, /Lý do/);
+    assert.match(prompt, /Nếu chỉ có 10 phút/);
+  });
+
+  it("summarizes enriched context for Gemini", async () => {
+    ensureBackendEnvForProviderImports();
+    const { summarizeContext } = await import("../services/geminiAssistantProvider");
+    const summary = summarizeContext(context);
+
+    assert.match(summary, /Thoi gian/);
+    assert.match(summary, /Lich lam viec day/);
+    assert.match(summary, /Bi ket vi qua met/);
+    assert.match(summary, /Lam bai tap cu/);
+  });
+});

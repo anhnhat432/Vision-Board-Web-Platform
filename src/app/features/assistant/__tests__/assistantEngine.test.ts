@@ -15,6 +15,14 @@ const sampleContext: AssistantContext = {
     { id: "t3", title: "Review PR", done: false },
   ],
   lastReflectionDate: "2025-01-10",
+  feasibility: null,
+  latestWeeklyReview: null,
+  stuckSignals: {
+    latestObstacle: null,
+    missedCommitments: [],
+    overdueOpenCount: 0,
+    overdueTasks: [],
+  },
 };
 
 describe("mockProvider", () => {
@@ -151,5 +159,15 @@ describe("mockProvider", () => {
     const response = await promise;
 
     expect(response.split("- ").length - 1).toBeLessThanOrEqual(5);
+  });
+
+  it("uses the stable three-part assistant format", async () => {
+    const promise = mockProvider.send("today", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("Việc nên làm ngay:");
+    expect(response).toContain("Lý do:");
+    expect(response).toContain("Nếu chỉ có 10 phút:");
   });
 });

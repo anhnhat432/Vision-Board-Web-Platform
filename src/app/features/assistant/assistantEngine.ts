@@ -19,22 +19,38 @@ function detectIntent(text: string): Intent {
   return "fallback";
 }
 
+function formatAssistantResponse(input: {
+  action: string;
+  reason: string;
+  tenMinuteAction: string;
+}): string {
+  return [
+    `Việc nên làm ngay: ${input.action}`,
+    `Lý do: ${input.reason}`,
+    `Nếu chỉ có 10 phút: ${input.tenMinuteAction}`,
+  ].join("\n\n");
+}
+
 function buildTodayResponse(ctx: AssistantContext): string {
   const tasks = ctx.todayTasks || [];
 
   if (tasks.length === 0) {
-    return "Bạn chưa có task nào cho hôm nay. Nếu bạn đã có mục tiêu, hãy vào hệ thống 12 tuần để chọn một việc nhỏ có thể làm ngay.";
+    return formatAssistantResponse({
+      action: "Bạn chưa có task nào cho hôm nay. Nếu đã có mục tiêu, hãy vào hệ thống 12 tuần để chọn một việc nhỏ có thể làm ngay.",
+      reason: "Assistant chưa thấy dữ liệu task hôm nay trong máy của bạn.",
+      tenMinuteAction: "Mở kế hoạch 12 tuần và viết ra 1 việc nhỏ nhất cho hôm nay.",
+    });
   }
 
   const displayTasks = tasks.slice(0, 5);
   const lines = displayTasks.map((task) => `- ${task.title}${task.done ? " (đã xong)" : ""}`);
+  const firstOpenTask = displayTasks.find((task) => !task.done) ?? displayTasks[0];
 
-  const variants = [
-    `Hôm nay bạn có ${tasks.length} việc:\n${lines.join("\n")}`,
-    `Danh sách việc hôm nay (${tasks.length} task):\n${lines.join("\n")}`,
-  ];
-
-  return variants[Math.floor(Math.random() * variants.length)];
+  return formatAssistantResponse({
+    action: `Ưu tiên danh sách việc hôm nay (${tasks.length} task):\n${lines.join("\n")}`,
+    reason: "Đây là các việc đang gắn với ngày hôm nay trong kế hoạch hiện tại của bạn.",
+    tenMinuteAction: `Mở việc "${firstOpenTask.title}" và làm bước nhỏ đầu tiên.`,
+  });
 }
 
 function buildWeekResponse(ctx: AssistantContext): string {
@@ -43,54 +59,66 @@ function buildWeekResponse(ctx: AssistantContext): string {
   const topGoal = ctx.goals && ctx.goals.length > 0 ? ctx.goals[0].title : "mục tiêu chính";
 
   if (currentWeek === null) {
-    return `Bạn chưa có 12-week plan active. Đây là lúc tốt để bắt đầu với ${topGoal}.`;
+    return formatAssistantResponse({
+      action: `Bắt đầu tạo 12-week plan cho ${topGoal}.`,
+      reason: "Bạn chưa có 12-week plan active nên assistant chưa có tuần hiện tại để tóm tắt.",
+      tenMinuteAction: "Viết outcome 12 tuần và chọn 1 lead indicator dễ đo.",
+    });
   }
 
-  const variants = [
-    `Bạn đang ở tuần ${currentWeek}/${weeksTotal}. Hôm nay là lúc tốt để rà soát ${topGoal}.`,
-    `Tuần ${currentWeek} của ${weeksTotal} tuần. Hãy dành chút thời gian check-in với ${topGoal}.`,
-  ];
+  const review = ctx.latestWeeklyReview;
+  const reviewReason = review?.mainObstacle
+    ? `Review gần nhất ghi nhận điểm kẹt là: ${review.mainObstacle}.`
+    : `Bạn đang ở tuần ${currentWeek}/${weeksTotal}.`;
 
-  return variants[Math.floor(Math.random() * variants.length)];
+  return formatAssistantResponse({
+    action: `Rà soát tuần ${currentWeek}/${weeksTotal} và chọn 1 việc quan trọng nhất cho ${topGoal}.`,
+    reason: reviewReason,
+    tenMinuteAction: "Tick lại việc đã xong, rồi chọn 1 task còn mở để làm ngay.",
+  });
 }
 
 function buildGoalsResponse(ctx: AssistantContext): string {
   const goals = ctx.goals || [];
 
   if (goals.length === 0) {
-    return "Bạn chưa đặt mục tiêu nào. Hãy bắt đầu ở bước SMART goal để có một mục tiêu đủ rõ cho 12 tuần.";
+    return formatAssistantResponse({
+      action: "Bắt đầu ở bước SMART goal để tạo một mục tiêu đủ rõ cho 12 tuần.",
+      reason: "Bạn chưa đặt mục tiêu nào trong dữ liệu hiện tại.",
+      tenMinuteAction: "Viết một câu: Tôi muốn đạt điều gì trong 12 tuần tới?",
+    });
   }
 
   const lines = goals.map((goal) => `- ${goal.title} — ${goal.progress}%`);
 
-  const variants = [
-    `Mục tiêu của bạn:\n${lines.join("\n")}`,
-    `Danh sách mục tiêu:\n${lines.join("\n")}`,
-  ];
-
-  return variants[Math.floor(Math.random() * variants.length)];
+  return formatAssistantResponse({
+    action: `Mục tiêu của bạn:\n${lines.join("\n")}`,
+    reason: "Đây là các mục tiêu đang có trong dữ liệu local của app.",
+    tenMinuteAction: `Mở mục tiêu "${goals[0].title}" và chọn một hành động tiếp theo.`,
+  });
 }
 
-function buildReflectionResponse(): string {
+function buildReflectionResponse(ctx: AssistantContext): string {
+  const stuckReason = ctx.stuckSignals?.latestObstacle;
   const prompts = [
     "Hôm nay bạn học được gì?",
     "Việc nào khiến bạn tự hào nhất?",
     "Ngày mai bạn muốn ưu tiên điều gì?",
   ];
 
-  return `Gợi ý reflection:\n${prompts.map((prompt, index) => `${index + 1}. ${prompt}`).join("\n")}`;
+  return formatAssistantResponse({
+    action: `Viết reflection ngắn với 3 câu hỏi:\n${prompts.map((prompt, index) => `${index + 1}. ${prompt}`).join("\n")}`,
+    reason: stuckReason ? `Lần check-in gần nhất có điểm kẹt: ${stuckReason}.` : "Reflection giúp bạn chốt lại điều đã học và chọn bước tiếp theo.",
+    tenMinuteAction: "Trả lời câu 1 và câu 3, mỗi câu một dòng.",
+  });
 }
 
 function buildFallbackResponse(): string {
-  const greetings = [
-    "Chào bạn, mình có thể giúp gì?",
-    "Bạn cần hỗ trợ gì không?",
-    "Mình đây. Bạn muốn xem việc hôm nay, tiến độ tuần này, hay reflection?",
-  ];
-
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-
-  return `${greeting}\n\nMình có thể giúp bạn:\n1. Xem việc hôm nay\n2. Tóm tắt tuần này\n3. Liệt kê mục tiêu\n4. Gợi ý reflection`;
+  return formatAssistantResponse({
+    action: "Mình có thể giúp bạn chọn một hướng: xem việc hôm nay, tóm tắt tuần này, mục tiêu chính, hoặc gợi ý reflection.",
+    reason: "Assistant cần một câu hỏi cụ thể hơn để bám vào core flow của app.",
+    tenMinuteAction: "Gõ: Hôm nay tôi nên làm gì?",
+  });
 }
 
 export const mockProvider: AssistantProvider = {
@@ -109,7 +137,7 @@ export const mockProvider: AssistantProvider = {
         response = buildGoalsResponse(ctx);
         break;
       case "reflection":
-        response = buildReflectionResponse();
+        response = buildReflectionResponse(ctx);
         break;
       default:
         response = buildFallbackResponse();

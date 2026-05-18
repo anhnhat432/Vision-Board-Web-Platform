@@ -15,6 +15,14 @@ vi.mock("../buildAssistantContext", () => ({
       { id: "t1", title: "Đọc chapter", done: false },
     ],
     lastReflectionDate: "2025-01-10",
+    feasibility: null,
+    latestWeeklyReview: null,
+    stuckSignals: {
+      latestObstacle: null,
+      missedCommitments: [],
+      overdueOpenCount: 0,
+      overdueTasks: [],
+    },
   })),
 }));
 
@@ -48,7 +56,7 @@ describe("AssistantPanel", () => {
     expect(await screen.findByText("Hôm nay tôi nên làm gì?")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText(/Hôm nay bạn có|Danh sách việc hôm nay|Bạn chưa có task/)).toBeInTheDocument();
+      expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay|Bạn chưa có task/)).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 
