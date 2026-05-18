@@ -50,12 +50,22 @@ describe("SyncStatusPill", () => {
     ["syncing", createSyncState({ syncing: true, loading: true }), "Đang sao lưu"],
     ["offline", createSyncState({ online: false }), "Đã lưu trên thiết bị"],
     ["pending", createSyncState({ pendingCount: 3 }), "3 chờ sao lưu"],
-    ["ok", createSyncState({ lastSyncedAt: "2026-05-10T09:55:00.000Z" }), "Đã sao lưu 5 phút trước"],
-    ["idle", createSyncState(), "Chưa sao lưu"],
   ])("renders the %s state", (_stateName, state, text) => {
     renderPill(state);
 
     expect(screen.getByText(text)).toBeInTheDocument();
+  });
+
+  it("hides pill when state is ok (lastSyncedAt set, nothing pending)", () => {
+    renderPill(createSyncState({ lastSyncedAt: "2026-05-10T09:55:00.000Z" }));
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("hides pill when state is idle (no lastSyncedAt, nothing pending)", () => {
+    renderPill(createSyncState());
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("uses a compact tooltip without promising multi-device sync", () => {

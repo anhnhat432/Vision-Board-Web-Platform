@@ -398,7 +398,7 @@ describe("useAutoCloudSync", () => {
     vi.setSystemTime(new Date("2026-05-10T10:00:00.000Z"));
     setSignedIn("firebase_uid_rate");
 
-    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 5_000 }));
 
     await flushMicrotasks();
     expect(manualSyncMock.syncNow).toHaveBeenCalledTimes(1);
@@ -423,7 +423,7 @@ describe("useAutoCloudSync", () => {
     vi.setSystemTime(new Date("2026-05-10T10:00:00.000Z"));
     setSignedIn("firebase_uid_interval");
 
-    renderHook(() => useAutoCloudSync({ intervalMs: 60_000, minSyncIntervalMs: 30_000 }));
+    renderHook(() => useAutoCloudSync({ intervalMs: 60_000, minSyncIntervalMs: 5_000 }));
 
     await flushMicrotasks();
     expect(manualSyncMock.syncNow).toHaveBeenCalledTimes(1);
@@ -443,7 +443,7 @@ describe("useAutoCloudSync", () => {
     visibilityState = "hidden";
     setSignedIn("firebase_uid_hidden");
 
-    renderHook(() => useAutoCloudSync({ intervalMs: 60_000, minSyncIntervalMs: 30_000 }));
+    renderHook(() => useAutoCloudSync({ intervalMs: 60_000, minSyncIntervalMs: 5_000 }));
 
     await act(async () => {
       vi.advanceTimersByTime(180_000);
@@ -458,7 +458,7 @@ describe("useAutoCloudSync", () => {
     visibilityState = "hidden";
     setSignedIn("firebase_uid_visible");
 
-    renderHook(() => useAutoCloudSync({ intervalMs: 60_000, minSyncIntervalMs: 30_000 }));
+    renderHook(() => useAutoCloudSync({ intervalMs: 60_000, minSyncIntervalMs: 5_000 }));
 
     vi.setSystemTime(new Date("2026-05-10T10:02:00.000Z"));
     visibilityState = "visible";
@@ -480,7 +480,7 @@ describe("useAutoCloudSync", () => {
     };
     setSignedIn("firebase_uid_reconnect");
 
-    const { rerender } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    const { rerender } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 5_000 }));
 
     expect(manualSyncMock.syncNow).not.toHaveBeenCalled();
     expect(networkStatusMock.lastOptions?.reconnectDebounceMs).toBe(3000);
@@ -667,7 +667,7 @@ describe("useAutoCloudSync", () => {
     setSignedIn("firebase_uid_auto_keep");
     manualSyncMock.syncNow.mockResolvedValue(conflictResultWithMutation);
 
-    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 5_000 }));
 
     await waitFor(() => {
       expect(result.current.lastResult?.status).toBe("conflict");
@@ -721,7 +721,7 @@ describe("useAutoCloudSync", () => {
       syncNow: manualSyncMock.syncNow,
     }));
 
-    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 5_000 }));
     await flushMicrotasks();
     manualSyncMock.syncNow.mockClear();
 
@@ -748,7 +748,7 @@ describe("useAutoCloudSync", () => {
       syncNow: manualSyncMock.syncNow,
     }));
 
-    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 5_000 }));
     await flushMicrotasks();
     manualSyncMock.syncNow.mockClear();
 
@@ -802,7 +802,7 @@ describe("useAutoCloudSync", () => {
       syncNow: manualSyncMock.syncNow,
     }));
 
-    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 5_000 }));
     await flushMicrotasks();
     manualSyncMock.syncNow.mockClear();
 

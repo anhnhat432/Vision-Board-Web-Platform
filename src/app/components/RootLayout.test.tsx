@@ -491,9 +491,9 @@ describe("RootLayout onboarding redirect", () => {
     seedPlusSubscription();
     autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
       loading: false,
-      syncing: false,
+      syncing: true,
       lastResult: null,
-      lastSyncedAt: "2026-05-10T09:55:00.000Z",
+      lastSyncedAt: null,
       pendingCount: 0,
       online: true,
       conflictPending: false,
@@ -523,7 +523,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(within(demoMenu).getByText("Plus")).toBeInTheDocument();
     expect(
       within(demoMenu).getByRole("button", {
-        name: /(đồng bộ|Đã sao lưu \d+ giờ trước)/i,
+        name: /(đồng bộ|Đã sao lưu|Đang sao lưu)/i,
       }),
     ).toBeInTheDocument();
     expect(within(demoMenu).getByRole("menuitem", { name: "Cài đặt" })).toBeInTheDocument();
