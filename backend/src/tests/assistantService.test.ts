@@ -45,6 +45,30 @@ describe("assistantService sanitizeContext", () => {
           isCore: index % 2 === 0,
         })),
       },
+      pageContext: {
+        route: "/12-week-setup",
+        currentStep: "twelve_week_setup",
+        nextSuggestedStep: "n".repeat(250),
+        formDraft: {
+          focusArea: "Career",
+          smartGoalTitle: "t".repeat(250),
+          smartGoalMetric: "m".repeat(250),
+          missingSmartGoalFields: ["specific", "measurable", "achievable", "relevant", "time_bound", "extra1", "extra2", "extra3", "extra4"],
+          feasibilityAnsweredCount: 99,
+          feasibilityBottleneck: "b".repeat(250),
+          goalCount: 200,
+          goalsWithoutTwelveWeekPlan: 150,
+          activeGoalTitle: "a".repeat(250),
+          twelveWeekDraftSummary: {
+            leadIndicatorCount: 99,
+            hasReviewDay: true,
+            hasWeek12Outcome: false,
+            hasLagMetric: true,
+            tacticLoadPreference: "lighter",
+            personalConstraint: "p".repeat(250),
+          },
+        },
+      },
     });
 
     assert.equal(context.feasibility?.readinessScore, 20);
@@ -54,6 +78,14 @@ describe("assistantService sanitizeContext", () => {
     assert.equal(context.stuckSignals.latestObstacle?.length, 200);
     assert.deepEqual(context.stuckSignals.missedCommitments, ["a", "b", "c"]);
     assert.equal(context.stuckSignals.overdueTasks.length, 5);
+    assert.equal(context.pageContext.nextSuggestedStep?.length, 200);
+    assert.equal(context.pageContext.formDraft.smartGoalTitle?.length, 200);
+    assert.equal(context.pageContext.formDraft.missingSmartGoalFields?.length, 8);
+    assert.equal(context.pageContext.formDraft.feasibilityAnsweredCount, 50);
+    assert.equal(context.pageContext.formDraft.goalCount, 100);
+    assert.equal(context.pageContext.formDraft.goalsWithoutTwelveWeekPlan, 100);
+    assert.equal(context.pageContext.formDraft.twelveWeekDraftSummary?.leadIndicatorCount, 20);
+    assert.equal(context.pageContext.formDraft.twelveWeekDraftSummary?.personalConstraint?.length, 200);
   });
 });
 

@@ -22,6 +22,11 @@ Nếu chỉ có 10 phút: 1 bước nhỏ để bắt đầu.
 CHÀO HỎI / NÓI CHUYỆN NGẮN ("hi", "cảm ơn", "chào Cú"):
 → 1-2 câu thân mật. Có thể gợi mở 1 câu hỏi tiếp theo nếu hợp lý.
 
+Khi user đang ở trang setup/form:
+- Dùng Page context để hiểu họ đang điền phần nào và bước kế tiếp là gì.
+- Nếu có phần còn thiếu, ưu tiên giúp họ điền phần đó bằng gợi ý có thể chỉnh sửa.
+- Không biến gợi ý thành sự thật về user; nói rõ đó là đề xuất nếu dữ liệu chưa có.
+
 Ràng buộc:
 - Chỉ dùng context được cung cấp. Nếu thiếu data, nói THẲNG "Mình chưa thấy [X] trong dữ liệu của bạn" — KHÔNG bịa mục tiêu, task, tiến độ, billing, hay tài khoản.
 - Không khuyên y tế, pháp lý, tài chính như chuyên gia.
@@ -95,9 +100,50 @@ export function summarizeContext(context: AssistantContext): string {
     deadlineParts.push(`Deadlines sắp tới: ${deadlineStr}`);
   }
 
+  const page = context.pageContext;
+  const draft = page?.formDraft ?? {};
+  const pageParts = page
+    ? [
+      `Page step: ${page.currentStep ?? "Chưa xác định"}`,
+      page.nextSuggestedStep ? `next: ${page.nextSuggestedStep}` : null,
+      draft.focusArea ? `focus area: ${draft.focusArea}` : null,
+      draft.smartGoalTitle ? `SMART title: ${draft.smartGoalTitle}` : null,
+      draft.smartGoalMetric ? `SMART metric: ${draft.smartGoalMetric}` : null,
+      draft.missingSmartGoalFields?.length
+        ? `missing SMART: ${draft.missingSmartGoalFields.join(", ")}`
+        : null,
+      typeof draft.feasibilityAnsweredCount === "number"
+        ? `feasibility answers: ${draft.feasibilityAnsweredCount}`
+        : null,
+      draft.feasibilityBottleneck ? `page bottleneck: ${draft.feasibilityBottleneck}` : null,
+      typeof draft.goalCount === "number" ? `goals count: ${draft.goalCount}` : null,
+      typeof draft.goalsWithoutTwelveWeekPlan === "number"
+        ? `goals without 12-week plan: ${draft.goalsWithoutTwelveWeekPlan}`
+        : null,
+      draft.activeGoalTitle ? `active goal: ${draft.activeGoalTitle}` : null,
+    ].filter(Boolean)
+    : [];
+
+  const setupSummary = draft.twelveWeekDraftSummary
+    ? [
+      `lead indicators: ${draft.twelveWeekDraftSummary.leadIndicatorCount}`,
+      `has review day: ${draft.twelveWeekDraftSummary.hasReviewDay ? "yes" : "no"}`,
+      `has week 12 outcome: ${draft.twelveWeekDraftSummary.hasWeek12Outcome ? "yes" : "no"}`,
+      `has lag metric: ${draft.twelveWeekDraftSummary.hasLagMetric ? "yes" : "no"}`,
+      draft.twelveWeekDraftSummary.tacticLoadPreference
+        ? `load: ${draft.twelveWeekDraftSummary.tacticLoadPreference}`
+        : null,
+      draft.twelveWeekDraftSummary.personalConstraint
+        ? `constraint: ${draft.twelveWeekDraftSummary.personalConstraint}`
+        : null,
+    ].filter(Boolean)
+    : [];
+
   return [
     "Context người dùng:",
     `- Route: ${context.route}`,
+    `- Page context: ${pageParts.join("; ") || "Chưa có"}`,
+    `- 12-week setup draft: ${setupSummary.join("; ") || "Chưa có"}`,
     `- Tuần hiện tại: ${context.currentWeek ?? "Chưa có 12-week plan"} / ${context.weeksTotal}`,
     `- Mục tiêu: ${goals || "Chưa có"}`,
     `- Việc hôm nay: ${tasks || "Chưa có"}`,

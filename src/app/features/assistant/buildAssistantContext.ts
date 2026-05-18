@@ -73,6 +73,32 @@ export interface AssistantContext {
     title: string;
     daysUntil: number;
   }>;
+  pageContext: AssistantPageContext;
+}
+
+export interface AssistantPageContext {
+  route: string;
+  currentStep: string | null;
+  nextSuggestedStep: string | null;
+  formDraft: {
+    focusArea?: string | null;
+    smartGoalTitle?: string | null;
+    smartGoalMetric?: string | null;
+    missingSmartGoalFields?: string[];
+    feasibilityAnsweredCount?: number;
+    feasibilityBottleneck?: string | null;
+    goalCount?: number;
+    goalsWithoutTwelveWeekPlan?: number;
+    activeGoalTitle?: string | null;
+    twelveWeekDraftSummary?: {
+      leadIndicatorCount: number;
+      hasReviewDay: boolean;
+      hasWeek12Outcome: boolean;
+      hasLagMetric: boolean;
+      tacticLoadPreference: string | null;
+      personalConstraint: string | null;
+    };
+  };
 }
 
 /**
@@ -85,12 +111,12 @@ export interface AssistantContext {
  *   - todayTasks: []
  *   - lastReflectionDate: null
  */
-export function buildAssistantContext(referenceDate = new Date()): AssistantContext {
+export function buildAssistantContext(referenceDate = new Date(), route = getCurrentRoute()): AssistantContext {
   try {
     const data = getUserData();
 
     if (!data?.goals || data.goals.length === 0) {
-      return emptyContext();
+      return emptyContext(route);
     }
 
     const activeGoal = getActiveTwelveWeekGoal(data.goals);
@@ -103,10 +129,11 @@ export function buildAssistantContext(referenceDate = new Date()): AssistantCont
 
     if (!activeGoal?.twelveWeekSystem) {
       return {
-        ...emptyContext(),
+        ...emptyContext(route),
         goals,
         lastReflectionDate,
         feasibility: buildFeasibilityContext(data.goals[0]),
+        pageContext: buildPageContext(route, data.goals),
       };
     }
 
@@ -131,14 +158,15 @@ export function buildAssistantContext(referenceDate = new Date()): AssistantCont
       trend: buildTrendContext(system, currentWeek),
       streak: buildStreakContext(system, referenceDate),
       upcomingDeadlines: buildUpcomingDeadlines(data.goals, referenceDate),
+      pageContext: buildPageContext(route, data.goals),
     };
   } catch {
     // Storage read error -> safe defaults.
-    return emptyContext();
+    return emptyContext(route);
   }
 }
 
-function emptyContext(): AssistantContext {
+function emptyContext(route = getCurrentRoute()): AssistantContext {
   return {
     currentWeek: null,
     weeksTotal: 12,
@@ -161,6 +189,7 @@ function emptyContext(): AssistantContext {
       daysWithCompletedTask: 0,
     },
     upcomingDeadlines: [],
+    pageContext: buildPageContext(route, []),
   };
 }
 
@@ -190,6 +219,38 @@ function readPendingFeasibility():
   }
 }
 
+function readJsonStorage<T = Record<string, unknown>>(key: string): T | null {
+  if (typeof localStorage === "undefined") return null;
+
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as T : null;
+  } catch {
+    return null;
+  }
+}
+
+function readStorageText(key: string): string | null {
+  if (typeof localStorage === "undefined") return null;
+
+  try {
+    return boundedText(localStorage.getItem(key));
+  } catch {
+    return null;
+  }
+}
+
+function getCurrentRoute(): string {
+  return typeof window !== "undefined" ? window.location.pathname : "/";
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
 function boundedText(value: unknown, maxLength = 200): string | null {
   const text = String(value ?? "").trim();
   return text ? text.slice(0, maxLength) : null;
@@ -214,6 +275,206 @@ function buildFeasibilityContext(goal: Goal | undefined): AssistantContext["feas
     bottleneckLabel,
     bottleneckAction,
   };
+}
+
+function buildPageContext(route: string, goals: Goal[]): AssistantPageContext {
+  const formDraft: AssistantPageContext["formDraft"] = {};
+  const normalizedRoute = boundedText(route, 80) ?? "/";
+  const currentStep = getCurrentStep(normalizedRoute);
+
+  if (normalizedRoute === "/" || normalizedRoute === "/dashboard") {
+    Object.assign(formDraft, buildGoalSummary(goals));
+    formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
+    Object.assign(
+      formDraft,
+      readSmartGoalDraftSummary(),
+      readFeasibilityDraftSummary(),
+      readTwelveWeekDraftSummary(),
+    );
+  }
+
+  if (normalizedRoute === "/goals") {
+    Object.assign(formDraft, buildGoalSummary(goals));
+  }
+
+  if (normalizedRoute === "/smart-goal-setup") {
+    formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
+    Object.assign(formDraft, readSmartGoalDraftSummary());
+  }
+
+  if (normalizedRoute === "/feasibility") {
+    formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
+    Object.assign(formDraft, readSmartGoalDraftSummary(), readFeasibilityDraftSummary());
+  }
+
+  if (normalizedRoute === "/12-week-setup") {
+    formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
+    Object.assign(
+      formDraft,
+      readSmartGoalDraftSummary(),
+      readFeasibilityDraftSummary(),
+      readTwelveWeekDraftSummary(),
+    );
+  }
+
+  return {
+    route: normalizedRoute,
+    currentStep,
+    nextSuggestedStep: buildNextSuggestedStep(normalizedRoute, formDraft),
+    formDraft,
+  };
+}
+
+function getCurrentStep(route: string): string | null {
+  if (route === "/" || route === "/dashboard") return "dashboard";
+  if (route === "/goals") return "goals";
+  if (route === "/smart-goal-setup") return "smart_goal_setup";
+  if (route === "/feasibility") return "feasibility";
+  if (route === "/12-week-setup") return "twelve_week_setup";
+  return null;
+}
+
+function buildGoalSummary(goals: Goal[]): AssistantPageContext["formDraft"] {
+  const activeGoal = getActiveTwelveWeekGoal(goals) ?? goals[0];
+
+  return {
+    goalCount: goals.length,
+    goalsWithoutTwelveWeekPlan: goals.filter((goal) => !goal.twelveWeekSystem).length,
+    activeGoalTitle: boundedText(activeGoal?.title),
+  };
+}
+
+function readSmartGoalDraftSummary(): AssistantPageContext["formDraft"] {
+  const draft = readJsonStorage(APP_STORAGE_KEYS.pendingSmartGoal);
+  if (!draft) return {};
+
+  return {
+    smartGoalTitle: getSmartGoalTitle(draft),
+    smartGoalMetric: getSmartGoalMetric(draft),
+    missingSmartGoalFields: getMissingSmartGoalFields(draft),
+  };
+}
+
+function getSmartGoalTitle(draft: unknown): string | null {
+  const raw = asRecord(draft);
+  const specific = asRecord(raw.specific);
+
+  return boundedText(raw.title ?? raw.goal_statement ?? specific.goal_statement ?? raw.specific);
+}
+
+function getSmartGoalMetric(draft: unknown): string | null {
+  const raw = asRecord(draft);
+  const measurable = asRecord(raw.measurable);
+  const metricName = boundedText(raw.metric_name ?? measurable.metric_name);
+  const targetValue = raw.target_value ?? measurable.target_value;
+
+  if (metricName && targetValue !== undefined && targetValue !== null && String(targetValue).trim()) {
+    return boundedText(`${metricName}: ${String(targetValue).trim()}`);
+  }
+
+  return boundedText(raw.measurable);
+}
+
+function getMissingSmartGoalFields(draft: unknown): string[] {
+  const raw = asRecord(draft);
+  const specific = asRecord(raw.specific);
+  const measurable = asRecord(raw.measurable);
+  const achievable = asRecord(raw.achievable);
+  const relevant = asRecord(raw.relevant);
+  const timeBound = asRecord(raw.time_bound ?? raw.timeBound);
+
+  const missing: string[] = [];
+  if (!boundedText(raw.goal_statement ?? specific.goal_statement ?? raw.specific)) missing.push("specific");
+  if (!boundedText(raw.metric_name ?? measurable.metric_name ?? raw.measurable)) missing.push("measurable");
+  if (!boundedText(raw.weekly_time_commitment_hours ?? achievable.weekly_time_commitment_hours ?? raw.achievable)) {
+    missing.push("achievable");
+  }
+  if (!boundedText(raw.motivation_reason ?? relevant.motivation_reason ?? raw.relevant)) missing.push("relevant");
+  if (!boundedText(raw.target_date ?? raw.target_weeks ?? timeBound.target_date ?? timeBound.target_weeks ?? raw.timeBound)) {
+    missing.push("time_bound");
+  }
+
+  return missing;
+}
+
+function readFeasibilityDraftSummary(): AssistantPageContext["formDraft"] {
+  const answers = readJsonStorage(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
+  const result = readJsonStorage(APP_STORAGE_KEYS.pendingFeasibilityResult);
+  const bottleneck = asRecord(result?.bottleneck);
+
+  return {
+    feasibilityAnsweredCount: answers ? Object.keys(answers).length : 0,
+    feasibilityBottleneck: boundedText(bottleneck.label ?? result?.feasibilityResult),
+  };
+}
+
+function readTwelveWeekDraftSummary(): AssistantPageContext["formDraft"] {
+  const draft = readJsonStorage(APP_STORAGE_KEYS.pending12WeekSetupDraft);
+  if (!draft) return {};
+
+  const leadIndicators = Array.isArray(draft.leadIndicators) ? draft.leadIndicators : [];
+  const namedLeadIndicators = leadIndicators.filter((indicator) => boundedText(asRecord(indicator).name));
+
+  return {
+    twelveWeekDraftSummary: {
+      leadIndicatorCount: namedLeadIndicators.length,
+      hasReviewDay: !!boundedText(draft.reviewDay),
+      hasWeek12Outcome: !!boundedText(draft.week12Outcome),
+      hasLagMetric: !!boundedText(draft.lagMetricName),
+      tacticLoadPreference: boundedText(draft.tacticLoadPreference),
+      personalConstraint: boundedText(draft.personalConstraint),
+    },
+  };
+}
+
+function buildNextSuggestedStep(route: string, formDraft: AssistantPageContext["formDraft"]): string | null {
+  if (route === "/" || route === "/dashboard") {
+    const missingSmart = formDraft.missingSmartGoalFields ?? [];
+    if (missingSmart.length > 0) return `Điền phần SMART còn thiếu: ${missingSmart.join(", ")}`;
+    if (formDraft.smartGoalTitle && !formDraft.feasibilityBottleneck) return "Tiếp tục feasibility cho SMART goal hiện tại";
+    if (formDraft.feasibilityBottleneck && !formDraft.twelveWeekDraftSummary) return "Lập kế hoạch 12 tuần từ feasibility hiện tại";
+    if (!formDraft.goalCount) return "Bắt đầu bằng Life Insight hoặc SMART Goal";
+    if ((formDraft.goalsWithoutTwelveWeekPlan ?? 0) > 0) return "Chọn một goal để lập kế hoạch 12 tuần";
+    return "Mở hệ 12 tuần và chọn việc hôm nay";
+  }
+
+  if (route === "/goals") {
+    if (!formDraft.goalCount) return "Tạo SMART goal đầu tiên";
+    if ((formDraft.goalsWithoutTwelveWeekPlan ?? 0) > 0) return "Chọn một goal để lập kế hoạch 12 tuần";
+    return "Mở goal đang chạy để xem tiến độ";
+  }
+
+  if (route === "/smart-goal-setup") {
+    const missing = formDraft.missingSmartGoalFields ?? [];
+    return missing.length > 0
+      ? `Điền phần SMART còn thiếu: ${missing.join(", ")}`
+      : "Chuyển sang feasibility để kiểm tra độ khả thi";
+  }
+
+  if (route === "/feasibility") {
+    if (!formDraft.smartGoalTitle) return "Hoàn thiện SMART goal trước khi chấm feasibility";
+    if (!formDraft.feasibilityAnsweredCount) return "Trả lời các câu hỏi feasibility đầu tiên";
+    if (!formDraft.feasibilityBottleneck) return "Hoàn tất feasibility để tìm bottleneck";
+    return "Dùng bottleneck để chỉnh kế hoạch khả thi hơn";
+  }
+
+  if (route === "/12-week-setup") {
+    const summary = formDraft.twelveWeekDraftSummary;
+    if (!summary) return "Bắt đầu điền outcome 12 tuần";
+
+    const missing = [
+      summary.hasWeek12Outcome ? null : "week12Outcome",
+      summary.hasLagMetric ? null : "lagMetric",
+      summary.leadIndicatorCount > 0 ? null : "leadIndicators",
+      summary.hasReviewDay ? null : "reviewDay",
+    ].filter((item): item is string => item !== null);
+
+    return missing.length > 0
+      ? `Điền phần 12-week setup còn thiếu: ${missing.join(", ")}`
+      : "Tạo hệ 12 tuần từ bản nháp hiện tại";
+  }
+
+  return null;
 }
 
 function getLatestWeeklyReview(reviews: UniversalWeeklyReview[]): AssistantContext["latestWeeklyReview"] {

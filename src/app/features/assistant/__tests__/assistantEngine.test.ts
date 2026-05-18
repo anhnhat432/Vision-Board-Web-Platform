@@ -31,6 +31,12 @@ const sampleContext: AssistantContext = {
     daysWithCompletedTask: 0,
   },
   upcomingDeadlines: [],
+  pageContext: {
+    route: "/12-week-system",
+    currentStep: null,
+    nextSuggestedStep: null,
+    formDraft: {},
+  },
 };
 
 describe("mockProvider", () => {

@@ -19,6 +19,7 @@ const MAX_TEXT = 200;
 const MAX_DEADLINES = 3;
 const MAX_STREAK_DAYS = 365;
 const MAX_DAYS_UNTIL = 365;
+const MAX_MISSING_FIELDS = 8;
 
 export function sanitizeAssistantContext(
   ctx: AssistantContext & { route: string },
@@ -43,6 +44,7 @@ export function sanitizeAssistantContext(
     trend: sanitizeTrend(ctx.trend),
     streak: sanitizeStreak(ctx.streak),
     upcomingDeadlines: sanitizeUpcomingDeadlines(ctx.upcomingDeadlines),
+    pageContext: sanitizePageContext(ctx.pageContext),
     route: text(ctx.route || "", 50),
   };
 }
@@ -144,4 +146,40 @@ function sanitizeUpcomingDeadlines(
       daysUntil: clamp(d.daysUntil, -MAX_DAYS_UNTIL, MAX_DAYS_UNTIL, 0),
     }))
     .slice(0, MAX_DEADLINES);
+}
+
+function sanitizePageContext(pageContext: AssistantContext["pageContext"]): AssistantContext["pageContext"] {
+  return {
+    route: text(pageContext?.route || "", 80),
+    currentStep: nullableText(pageContext?.currentStep, 80),
+    nextSuggestedStep: nullableText(pageContext?.nextSuggestedStep),
+    formDraft: sanitizePageFormDraft(pageContext?.formDraft),
+  };
+}
+
+function sanitizePageFormDraft(formDraft: AssistantContext["pageContext"]["formDraft"] | undefined): AssistantContext["pageContext"]["formDraft"] {
+  return {
+    focusArea: nullableText(formDraft?.focusArea),
+    smartGoalTitle: nullableText(formDraft?.smartGoalTitle),
+    smartGoalMetric: nullableText(formDraft?.smartGoalMetric),
+    missingSmartGoalFields: (formDraft?.missingSmartGoalFields || [])
+      .slice(0, MAX_MISSING_FIELDS)
+      .map((item) => text(item, 80))
+      .filter(Boolean),
+    feasibilityAnsweredCount: clamp(formDraft?.feasibilityAnsweredCount, 0, 50, 0),
+    feasibilityBottleneck: nullableText(formDraft?.feasibilityBottleneck),
+    goalCount: clamp(formDraft?.goalCount, 0, 100, 0),
+    goalsWithoutTwelveWeekPlan: clamp(formDraft?.goalsWithoutTwelveWeekPlan, 0, 100, 0),
+    activeGoalTitle: nullableText(formDraft?.activeGoalTitle),
+    twelveWeekDraftSummary: formDraft?.twelveWeekDraftSummary
+      ? {
+        leadIndicatorCount: clamp(formDraft.twelveWeekDraftSummary.leadIndicatorCount, 0, 20, 0),
+        hasReviewDay: !!formDraft.twelveWeekDraftSummary.hasReviewDay,
+        hasWeek12Outcome: !!formDraft.twelveWeekDraftSummary.hasWeek12Outcome,
+        hasLagMetric: !!formDraft.twelveWeekDraftSummary.hasLagMetric,
+        tacticLoadPreference: nullableText(formDraft.twelveWeekDraftSummary.tacticLoadPreference, 80),
+        personalConstraint: nullableText(formDraft.twelveWeekDraftSummary.personalConstraint),
+      }
+      : undefined,
+  };
 }

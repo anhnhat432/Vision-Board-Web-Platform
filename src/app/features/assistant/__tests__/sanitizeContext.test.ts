@@ -47,6 +47,30 @@ describe("sanitizeAssistantContext", () => {
         { goalId: "g3", title: "Goal C", daysUntil: 500 },
         { goalId: "g4", title: "Goal D", daysUntil: 10 },
       ],
+      pageContext: {
+        route: "/smart-goal-setup".repeat(10),
+        currentStep: "smart_goal_setup".repeat(10),
+        nextSuggestedStep: "n".repeat(250),
+        formDraft: {
+          focusArea: "Career",
+          smartGoalTitle: "t".repeat(250),
+          smartGoalMetric: "m".repeat(250),
+          missingSmartGoalFields: ["specific", "measurable", "achievable", "relevant", "time_bound", "extra1", "extra2", "extra3", "extra4"],
+          feasibilityAnsweredCount: 99,
+          feasibilityBottleneck: "b".repeat(250),
+          goalCount: 200,
+          goalsWithoutTwelveWeekPlan: 150,
+          activeGoalTitle: "a".repeat(250),
+          twelveWeekDraftSummary: {
+            leadIndicatorCount: 99,
+            hasReviewDay: true,
+            hasWeek12Outcome: false,
+            hasLagMetric: true,
+            tacticLoadPreference: "lighter",
+            personalConstraint: "p".repeat(250),
+          },
+        },
+      },
     });
 
     expect(context.feasibility).toEqual({
@@ -66,5 +90,15 @@ describe("sanitizeAssistantContext", () => {
     expect(context.upcomingDeadlines[0].daysUntil).toBe(5);
     expect(context.upcomingDeadlines[1].daysUntil).toBe(-10);
     expect(context.upcomingDeadlines[2].daysUntil).toBe(365);
+    expect(context.pageContext.route).toHaveLength(80);
+    expect(context.pageContext.currentStep).toHaveLength(80);
+    expect(context.pageContext.nextSuggestedStep).toHaveLength(200);
+    expect(context.pageContext.formDraft.smartGoalTitle).toHaveLength(200);
+    expect(context.pageContext.formDraft.missingSmartGoalFields).toHaveLength(8);
+    expect(context.pageContext.formDraft.feasibilityAnsweredCount).toBe(50);
+    expect(context.pageContext.formDraft.goalCount).toBe(100);
+    expect(context.pageContext.formDraft.goalsWithoutTwelveWeekPlan).toBe(100);
+    expect(context.pageContext.formDraft.twelveWeekDraftSummary?.leadIndicatorCount).toBe(20);
+    expect(context.pageContext.formDraft.twelveWeekDraftSummary?.personalConstraint).toHaveLength(200);
   });
 });

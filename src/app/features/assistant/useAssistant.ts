@@ -182,7 +182,7 @@ export function useAssistant(options?: UseAssistantOptions) {
 
     try {
       const context: AssistantContext & { route: string } = {
-        ...buildAssistantContext(),
+        ...buildAssistantContext(undefined, route),
         route,
       };
 

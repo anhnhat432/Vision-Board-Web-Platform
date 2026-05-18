@@ -323,4 +323,93 @@ describe("buildAssistantContext", () => {
     expect(context.upcomingDeadlines[1].title).toBe("Finish Course");
     expect(context.upcomingDeadlines[1].daysUntil).toBe(7);
   });
+
+  it("builds route-specific page context from core flow drafts", () => {
+    localStorage.setItem("selected_focus_area", "Career");
+    localStorage.setItem(
+      "pending_smart_goal",
+      JSON.stringify({
+        specific: { goal_statement: "Build a portfolio that can win interviews" },
+        measurable: { metric_name: "Portfolio projects", target_value: 3 },
+        achievable: { weekly_time_commitment_hours: 5 },
+        relevant: { motivation_reason: "" },
+        time_bound: { target_weeks: 12 },
+      }),
+    );
+    localStorage.setItem(
+      "pending_feasibility_answers",
+      JSON.stringify({ 1: "often", 2: "sometimes", 3: "rarely" }),
+    );
+    localStorage.setItem(
+      "pending_feasibility_result",
+      JSON.stringify({
+        readinessScore: 12,
+        bottleneck: { label: "Energy", action: "Keep the first week lighter." },
+      }),
+    );
+    localStorage.setItem(
+      "pending_12_week_setup_draft",
+      JSON.stringify({
+        week12Outcome: "Ship 3 polished case studies",
+        reviewDay: "Sunday",
+        lagMetricName: "Portfolio projects",
+        tacticLoadPreference: "lighter",
+        leadIndicators: [
+          { id: "lead_1", name: "Write one case study section", target: "3", unit: "times/week", type: "core" },
+          { id: "lead_2", name: "", target: "1", unit: "times/week", type: "optional" },
+        ],
+      }),
+    );
+
+    mockedGetUserData.mockReturnValue({
+      goals: [
+        {
+          id: "goal_1",
+          category: "Career",
+          title: "Build portfolio",
+          description: "",
+          deadline: "",
+          tasks: [],
+          createdAt: "2026-05-01",
+        },
+      ],
+      reflections: [],
+    } as unknown as ReturnType<typeof getUserData>);
+
+    const smartContext = buildAssistantContext(new Date(2026, 4, 18), "/smart-goal-setup");
+    expect(smartContext.pageContext).toMatchObject({
+      route: "/smart-goal-setup",
+      currentStep: "smart_goal_setup",
+      nextSuggestedStep: "Điền phần SMART còn thiếu: relevant",
+      formDraft: {
+        focusArea: "Career",
+        smartGoalTitle: "Build a portfolio that can win interviews",
+        smartGoalMetric: "Portfolio projects: 3",
+        missingSmartGoalFields: ["relevant"],
+      },
+    });
+
+    const feasibilityContext = buildAssistantContext(new Date(2026, 4, 18), "/feasibility");
+    expect(feasibilityContext.pageContext.formDraft).toMatchObject({
+      feasibilityAnsweredCount: 3,
+      feasibilityBottleneck: "Energy",
+    });
+
+    const setupContext = buildAssistantContext(new Date(2026, 4, 18), "/12-week-setup");
+    expect(setupContext.pageContext.formDraft.twelveWeekDraftSummary).toEqual({
+      leadIndicatorCount: 1,
+      hasReviewDay: true,
+      hasWeek12Outcome: true,
+      hasLagMetric: true,
+      tacticLoadPreference: "lighter",
+      personalConstraint: null,
+    });
+
+    const goalsContext = buildAssistantContext(new Date(2026, 4, 18), "/goals");
+    expect(goalsContext.pageContext.formDraft).toMatchObject({
+      goalCount: 1,
+      goalsWithoutTwelveWeekPlan: 1,
+      activeGoalTitle: "Build portfolio",
+    });
+  });
 });

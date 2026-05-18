@@ -44,6 +44,30 @@ const context: AssistantContext = {
     daysWithCompletedTask: 0,
   },
   upcomingDeadlines: [],
+  pageContext: {
+    route: "/12-week-setup",
+    currentStep: "twelve_week_setup",
+    nextSuggestedStep: "Dien lead indicator con thieu",
+    formDraft: {
+      focusArea: "Career",
+      smartGoalTitle: "Hoc React",
+      smartGoalMetric: "Bai tap: 12",
+      missingSmartGoalFields: ["relevant"],
+      feasibilityAnsweredCount: 6,
+      feasibilityBottleneck: "Thoi gian",
+      goalCount: 1,
+      goalsWithoutTwelveWeekPlan: 1,
+      activeGoalTitle: "Hoc React",
+      twelveWeekDraftSummary: {
+        leadIndicatorCount: 1,
+        hasReviewDay: true,
+        hasWeek12Outcome: false,
+        hasLagMetric: true,
+        tacticLoadPreference: "lighter",
+        personalConstraint: "Chi co 30 phut moi ngay",
+      },
+    },
+  },
 };
 
 describe("groqAssistantProvider prompt", () => {
@@ -66,5 +90,8 @@ describe("groqAssistantProvider prompt", () => {
     assert.match(summary, /Lich lam viec day/);
     assert.match(summary, /Bi ket vi qua met/);
     assert.match(summary, /Lam bai tap cu/);
+    assert.match(summary, /twelve_week_setup/);
+    assert.match(summary, /Dien lead indicator con thieu/);
+    assert.match(summary, /Chi co 30 phut moi ngay/);
   });
 });

@@ -52,6 +52,30 @@ export interface AssistantContext {
     title: string;
     daysUntil: number;
   }>;
+  pageContext: {
+    route: string;
+    currentStep: string | null;
+    nextSuggestedStep: string | null;
+    formDraft: {
+      focusArea?: string | null;
+      smartGoalTitle?: string | null;
+      smartGoalMetric?: string | null;
+      missingSmartGoalFields?: string[];
+      feasibilityAnsweredCount?: number;
+      feasibilityBottleneck?: string | null;
+      goalCount?: number;
+      goalsWithoutTwelveWeekPlan?: number;
+      activeGoalTitle?: string | null;
+      twelveWeekDraftSummary?: {
+        leadIndicatorCount: number;
+        hasReviewDay: boolean;
+        hasWeek12Outcome: boolean;
+        hasLagMetric: boolean;
+        tacticLoadPreference: string | null;
+        personalConstraint: string | null;
+      };
+    };
+  };
   route: string;
 }
 
@@ -82,6 +106,7 @@ const MAX_TEXT_LENGTH = 200;
 const MAX_DEADLINES = 3;
 const MAX_STREAK_DAYS = 365;
 const MAX_DAYS_UNTIL = 365;
+const MAX_MISSING_FIELDS = 8;
 
 export function validateAssistantRequest(request: unknown): {
   valid: boolean;
@@ -230,6 +255,7 @@ export function sanitizeContext(context: unknown): AssistantContext {
     trend: sanitizeTrend(raw.trend),
     streak: sanitizeStreak(raw.streak),
     upcomingDeadlines: sanitizeUpcomingDeadlines(raw.upcomingDeadlines),
+    pageContext: sanitizePageContext(raw.pageContext, sanitizeText(raw.route || "/", MAX_ROUTE_LENGTH) || "/"),
   };
 }
 
@@ -318,6 +344,49 @@ function sanitizeUpcomingDeadlines(value: unknown): AssistantContext["upcomingDe
       };
     })
     .slice(0, MAX_DEADLINES);
+}
+
+function sanitizePageContext(value: unknown, fallbackRoute: string): AssistantContext["pageContext"] {
+  const raw = record(value);
+  const route = sanitizeText(raw.route || fallbackRoute, MAX_ROUTE_LENGTH) || fallbackRoute;
+
+  return {
+    route,
+    currentStep: nullableText(raw.currentStep, 80),
+    nextSuggestedStep: nullableText(raw.nextSuggestedStep),
+    formDraft: sanitizePageFormDraft(raw.formDraft),
+  };
+}
+
+function sanitizePageFormDraft(value: unknown): AssistantContext["pageContext"]["formDraft"] {
+  const raw = record(value);
+  const draftSummary = record(raw.twelveWeekDraftSummary);
+  const rawMissingFields = Array.isArray(raw.missingSmartGoalFields) ? raw.missingSmartGoalFields : [];
+
+  return {
+    focusArea: nullableText(raw.focusArea),
+    smartGoalTitle: nullableText(raw.smartGoalTitle),
+    smartGoalMetric: nullableText(raw.smartGoalMetric),
+    missingSmartGoalFields: rawMissingFields
+      .slice(0, MAX_MISSING_FIELDS)
+      .map((item) => sanitizeText(item, 80))
+      .filter(Boolean),
+    feasibilityAnsweredCount: clampNumber(raw.feasibilityAnsweredCount, 0, 50, 0),
+    feasibilityBottleneck: nullableText(raw.feasibilityBottleneck),
+    goalCount: clampNumber(raw.goalCount, 0, 100, 0),
+    goalsWithoutTwelveWeekPlan: clampNumber(raw.goalsWithoutTwelveWeekPlan, 0, 100, 0),
+    activeGoalTitle: nullableText(raw.activeGoalTitle),
+    twelveWeekDraftSummary: Object.keys(draftSummary).length === 0
+      ? undefined
+      : {
+        leadIndicatorCount: clampNumber(draftSummary.leadIndicatorCount, 0, 20, 0),
+        hasReviewDay: draftSummary.hasReviewDay === true,
+        hasWeek12Outcome: draftSummary.hasWeek12Outcome === true,
+        hasLagMetric: draftSummary.hasLagMetric === true,
+        tacticLoadPreference: nullableText(draftSummary.tacticLoadPreference, 80),
+        personalConstraint: nullableText(draftSummary.personalConstraint),
+      },
+  };
 }
 
 export async function processAssistantRequest(
