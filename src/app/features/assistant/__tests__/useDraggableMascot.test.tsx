@@ -123,6 +123,7 @@ describe("useDraggableMascot", () => {
 
   it("updates position on drag and saves to localStorage", async () => {
     mockWindowSize(mockInnerWidth, mockInnerHeight);
+    localStorage.setItem("assistant.mascot.position", JSON.stringify({ x: 100, y: 100 }));
 
     const { result } = renderHook(() => useDraggableMascot());
 
@@ -190,12 +191,10 @@ describe("useDraggableMascot", () => {
     expect(result.current.position.y).toBe(initialY + 50);
 
     await waitFor(() => {
-      expect(localStorage.getItem("assistant.mascot.position")).toBeTruthy();
-    }, { timeout: 300 });
-
-    const saved = JSON.parse(localStorage.getItem("assistant.mascot.position") || "{}");
-    expect(saved.x).toBe(initialX + 50);
-    expect(saved.y).toBe(initialY + 50);
+      const saved = JSON.parse(localStorage.getItem("assistant.mascot.position") || "{}");
+      expect(saved.x).toBe(initialX + 50);
+      expect(saved.y).toBe(initialY + 50);
+    }, { timeout: 500 });
   });
 
   it("constrains position when dragged beyond viewport", () => {
