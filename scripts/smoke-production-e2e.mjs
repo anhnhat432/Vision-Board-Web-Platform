@@ -480,8 +480,15 @@ async function seedFullSmokeData(page) {
   await page.evaluate(
     ({ serializedUserData, goalId }) => {
       const authOwnerUid = localStorage.getItem("visionboard_user_data:auth_owner_uid");
-      localStorage.clear();
-      sessionStorage.clear();
+      const appDataKeys = [
+        "visionboard_user_data",
+        "latest_12_week_goal_id",
+        "latest_12_week_system_goal_id",
+        "latest_12_week_plan_goal_id",
+      ];
+      for (const key of appDataKeys) {
+        localStorage.removeItem(key);
+      }
       localStorage.setItem("visionboard_user_data", serializedUserData);
       localStorage.setItem("latest_12_week_goal_id", goalId);
       localStorage.setItem("latest_12_week_system_goal_id", goalId);
