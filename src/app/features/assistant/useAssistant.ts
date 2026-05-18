@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { buildAssistantContext, type AssistantContext } from "./buildAssistantContext";
 import { sendAssistantMessageStream } from "./assistantApi";
 import type { ChatHistoryMessage, Message } from "./types";
@@ -9,6 +9,9 @@ const SUGGESTIONS = [
   "Mục tiêu chính của tôi là gì?",
   "Gợi ý reflection",
 ];
+
+const STORAGE_KEY = "assistant.chat.history";
+const MAX_PERSISTED = 30;
 
 export interface AssistantError {
   message: string;
@@ -43,13 +46,74 @@ function createMessage(role: Message["role"], content: string): Message {
   };
 }
 
+function normalizePersistedMessage(value: unknown): Message | null {
+  if (!value || typeof value !== "object") return null;
+
+  const message = value as Partial<Message>;
+  if (typeof message.id !== "string" || !message.id.trim()) return null;
+  if (message.role !== "user" && message.role !== "assistant") return null;
+  if (typeof message.content !== "string" || !message.content.trim()) return null;
+  if (typeof message.createdAt !== "number" || !Number.isFinite(message.createdAt)) return null;
+
+  const status = message.status === "streaming" || message.status === "complete" ? "complete" : undefined;
+
+  return {
+    id: message.id,
+    role: message.role,
+    content: message.content,
+    createdAt: message.createdAt,
+    status,
+  };
+}
+
+function loadPersistedMessages(): Message[] {
+  if (typeof localStorage === "undefined") return [];
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map(normalizePersistedMessage)
+      .filter((message): message is Message => message !== null)
+      .slice(-MAX_PERSISTED);
+  } catch {
+    return [];
+  }
+}
+
+function savePersistedMessages(messages: Message[]): void {
+  if (typeof localStorage === "undefined") return;
+
+  try {
+    const persisted = messages
+      .filter((message) => message.content.trim() && message.status !== "streaming")
+      .slice(-MAX_PERSISTED);
+    if (persisted.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+  } catch {}
+}
+
 export function useAssistant(options?: UseAssistantOptions) {
   const route = options?.route ?? (typeof window !== "undefined" ? window.location.pathname : "/");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadPersistedMessages);
   const [isTyping, setIsTyping] = useState(false);
   const [lastError, setLastError] = useState<AssistantError | null>(null);
   const [lastUserText, setLastUserText] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (isTyping) return undefined;
+
+    const id = window.setTimeout(() => savePersistedMessages(messages), 300);
+    return () => window.clearTimeout(id);
+  }, [messages, isTyping]);
 
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
@@ -135,6 +199,15 @@ export function useAssistant(options?: UseAssistantOptions) {
     void send(lastUserText);
   }, [isTyping, lastUserText, send]);
 
+  const clearHistory = useCallback(() => {
+    setMessages([]);
+    setLastError(null);
+    setLastUserText(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  }, []);
+
   return {
     messages,
     isTyping,
@@ -143,5 +216,6 @@ export function useAssistant(options?: UseAssistantOptions) {
     error: lastError,
     retry,
     stopGeneration,
+    clearHistory,
   };
 }

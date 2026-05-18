@@ -1,4 +1,4 @@
-import { Send, X } from "lucide-react";
+import { Send, Square, Trash2, X } from "lucide-react";
 import { motion } from "motion/react";
 import {
   useCallback,
@@ -19,7 +19,7 @@ interface AssistantPanelProps {
 }
 
 export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
-  const { messages, isTyping, send, suggestions, error, retry } = useAssistant({ route });
+  const { messages, isTyping, send, suggestions, error, retry, stopGeneration, clearHistory } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -82,6 +82,12 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     if (event.target === event.currentTarget) onClose();
   };
 
+  const handleClearHistory = () => {
+    if (window.confirm("Xóa toàn bộ lịch sử chat?")) {
+      clearHistory();
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -111,6 +117,16 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
           <OwlIcon size={32} />
           <span className="font-semibold text-gray-900">Trợ lý</span>
           <div className="flex-1" />
+          {messages.length > 0 ? (
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              aria-label="Xóa lịch sử chat"
+              className="rounded p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              <Trash2 size={18} />
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onClose}
@@ -201,20 +217,32 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               value={inputText}
               onChange={handleChange}
               onKeyDown={handleTextareaKeyDown}
-              placeholder="Nhập tin nhắn..."
+              placeholder={isTyping ? "Đợi trợ lý xong rồi gõ nhé..." : "Nhập tin nhắn..."}
               rows={1}
-              className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              disabled={isTyping}
+              className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
               style={{ maxHeight: "72px", minHeight: "36px" }}
             />
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!inputText.trim() || isTyping}
-              className="rounded-lg bg-indigo-600 p-2 text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Gửi"
-            >
-              <Send size={18} />
-            </button>
+            {isTyping ? (
+              <button
+                type="button"
+                onClick={stopGeneration}
+                className="rounded-lg bg-red-50 p-2 text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                aria-label="Dừng"
+              >
+                <Square size={18} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!inputText.trim()}
+                className="rounded-lg bg-indigo-600 p-2 text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Gửi"
+              >
+                <Send size={18} />
+              </button>
+            )}
           </div>
         </div>
       </motion.div>

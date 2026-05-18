@@ -42,6 +42,32 @@ export interface StreamingAssistantError {
 
 export type StreamingAssistantEvent = StreamingAssistantDelta | StreamingAssistantDone | StreamingAssistantError;
 
+function createAbortError(): Error & { errorCode: string } {
+  const error = new Error("Generation stopped.") as Error & { errorCode: string };
+  error.errorCode = "ABORT_ERROR";
+  return error;
+}
+
+function isAbortError(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "name" in error &&
+      (error as { name?: unknown }).name === "AbortError",
+  );
+}
+
+async function runWithAbort<T>(task: Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) return task;
+  if (signal.aborted) throw createAbortError();
+
+  return new Promise<T>((resolve, reject) => {
+    const handleAbort = () => reject(createAbortError());
+    signal.addEventListener("abort", handleAbort, { once: true });
+    task.then(resolve, reject).finally(() => signal.removeEventListener("abort", handleAbort));
+  });
+}
+
 function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
   if (!Array.isArray(history)) return [];
 
@@ -93,7 +119,10 @@ export async function sendAssistantMessageStream(
 
   if (isDemoMode()) {
     // Demo mode: non-streaming, call onDelta once with full response
-    const message = await mockProvider.send(request.message, sanitizedContext, sanitizedHistory);
+    const message = await runWithAbort(
+      mockProvider.send(request.message, sanitizedContext, sanitizedHistory),
+      signal,
+    );
     onDelta(message);
     return;
   }
@@ -117,6 +146,9 @@ export async function sendAssistantMessageStream(
       signal,
     });
   } catch (error) {
+    if (isAbortError(error)) {
+      throw createAbortError();
+    }
     if (error instanceof AuthError) {
       const wrapped = new Error(error.message) as Error & { errorCode?: string; status?: number };
       wrapped.errorCode = "ASSISTANT_AUTH_ERROR";
@@ -137,39 +169,56 @@ export async function sendAssistantMessageStream(
   const reader = response.body.getReader();
   const decoder = new TextDecoder("utf-8");
   let buffer = "";
+  const handleAbort = () => {
+    void reader.cancel().catch(() => {});
+  };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  signal?.addEventListener("abort", handleAbort, { once: true });
 
-    buffer += decoder.decode(value, { stream: true });
+  try {
+    while (true) {
+      if (signal?.aborted) throw createAbortError();
 
-    const events = buffer.split("\n\n");
-    buffer = events.pop() || "";
+      const { done, value } = await reader.read();
+      if (signal?.aborted) throw createAbortError();
+      if (done) break;
 
-    for (const event of events) {
-      if (!event.trim()) continue;
+      buffer += decoder.decode(value, { stream: true });
 
-      const line = event.startsWith("data: ") ? event.slice(6) : event;
-      if (!line) continue;
+      const events = buffer.split("\n\n");
+      buffer = events.pop() || "";
 
-      let parsed: StreamingAssistantEvent;
-      try {
-        parsed = JSON.parse(line) as StreamingAssistantEvent;
-      } catch {
-        // Skip invalid JSON
-        continue;
-      }
+      for (const event of events) {
+        if (!event.trim()) continue;
 
-      if (parsed.type === "delta") {
-        onDelta(parsed.text);
-      } else if (parsed.type === "done") {
-        return;
-      } else if (parsed.type === "error") {
-        const err = new Error(parsed.message) as Error & { errorCode?: string };
-        err.errorCode = parsed.errorCode;
-        throw err;
+        const line = event.startsWith("data: ") ? event.slice(6) : event;
+        if (!line) continue;
+
+        let parsed: StreamingAssistantEvent;
+        try {
+          parsed = JSON.parse(line) as StreamingAssistantEvent;
+        } catch {
+          // Skip invalid JSON
+          continue;
+        }
+
+        if (parsed.type === "delta") {
+          onDelta(parsed.text);
+        } else if (parsed.type === "done") {
+          return;
+        } else if (parsed.type === "error") {
+          const err = new Error(parsed.message) as Error & { errorCode?: string };
+          err.errorCode = parsed.errorCode;
+          throw err;
+        }
       }
     }
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw createAbortError();
+    }
+    throw error;
+  } finally {
+    signal?.removeEventListener("abort", handleAbort);
   }
 }

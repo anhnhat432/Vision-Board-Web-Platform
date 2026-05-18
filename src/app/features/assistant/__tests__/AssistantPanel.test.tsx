@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AssistantPanel } from "../AssistantPanel";
+import * as assistantApi from "../assistantApi";
 import { resetAssistantSession } from "../assistantEngine";
 
 vi.mock("../buildAssistantContext", () => ({
@@ -31,7 +32,12 @@ describe("AssistantPanel", () => {
 
   beforeEach(() => {
     mockOnClose.mockClear();
+    localStorage.clear();
     resetAssistantSession();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("renders suggestions when open", () => {
@@ -92,6 +98,74 @@ describe("AssistantPanel", () => {
 
     expect(screen.getByLabelText("Trợ lý đang trả lời")).toBeInTheDocument();
     expect(await screen.findByText(/chế độ demo/, undefined, { timeout: 3000 })).toBeInTheDocument();
+  });
+
+  it("shows stop button while typing and calls stopGeneration on click", async () => {
+    let aborted = false;
+
+    vi.spyOn(assistantApi, "sendAssistantMessageStream").mockImplementation((_request, onDelta, signal) => {
+      onDelta("partial");
+
+      return new Promise<void>((_resolve, reject) => {
+        signal?.addEventListener(
+          "abort",
+          () => {
+            aborted = true;
+            const error = new Error("Aborted") as Error & { errorCode?: string };
+            error.errorCode = "ABORT_ERROR";
+            reject(error);
+          },
+          { once: true },
+        );
+      });
+    });
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText(/Nhập tin nhắn|Đợi trợ lý/), "test{enter}");
+
+    const stopBtn = await screen.findByRole("button", { name: "Dừng" });
+    expect(stopBtn).toBeInTheDocument();
+
+    await userEvent.click(stopBtn);
+
+    expect(aborted).toBe(true);
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Dừng" })).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: "Gửi" })).toBeInTheDocument();
+  });
+
+  it("persists messages to localStorage and reloads on remount", async () => {
+    const { unmount } = render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText(/Nhập tin nhắn/), "test{enter}");
+    await waitFor(() => {
+      expect(screen.getByText(/Việc nên làm ngay|chế độ demo|Mình/)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    await waitFor(() => {
+      expect(localStorage.getItem("assistant.chat.history")).not.toBeNull();
+    });
+
+    unmount();
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    expect(screen.getByText("test")).toBeInTheDocument();
+  });
+
+  it("clears history when user confirms", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    localStorage.setItem("assistant.chat.history", JSON.stringify([
+      { id: "1", role: "user", content: "hello", createdAt: Date.now() },
+    ]));
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+    expect(screen.getByText("hello")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
+
+    expect(screen.queryByText("hello")).not.toBeInTheDocument();
+    expect(localStorage.getItem("assistant.chat.history")).toBeNull();
   });
 
   it("has correct ARIA attributes", () => {
