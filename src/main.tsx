@@ -1,6 +1,7 @@
 
   import { createRoot } from "react-dom/client";
   import "@fontsource-variable/source-serif-4/wght.css";
+  import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
   import { getAppMode } from "./app/utils/app-mode";
   import "./lib/monitoring/sentry";
   import App from "./app/App.tsx";
@@ -12,6 +13,8 @@
   import "@fontsource/be-vietnam-pro/700.css";
   import "@fontsource/be-vietnam-pro/400-italic.css";
   import "@fontsource/be-vietnam-pro/500-italic.css";
+
+  cleanupLegacyAssistantHistory();
 
   // Inject GA4 script only for explicitly configured real-mode analytics.
   const appMode = getAppMode();

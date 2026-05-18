@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import { buildAssistantContext, type AssistantContext } from "./buildAssistantContext";
 import { sendAssistantMessageStream } from "./assistantApi";
 import type { ChatHistoryMessage, Message } from "./types";
@@ -10,8 +11,13 @@ const SUGGESTIONS = [
   "Gợi ý reflection",
 ];
 
-const STORAGE_KEY = "assistant.chat.history";
 const MAX_PERSISTED = 30;
+
+interface PersistedHistory {
+  userId: string | null;
+  savedAt: number;
+  messages: Message[];
+}
 
 export interface AssistantError {
   message: string;
@@ -46,6 +52,10 @@ function createMessage(role: Message["role"], content: string): Message {
   };
 }
 
+function getStorageKey(userId: string | null): string {
+  return `assistant.chat.history:${userId ?? "anon"}`;
+}
+
 function normalizePersistedMessage(value: unknown): Message | null {
   if (!value || typeof value !== "object") return null;
 
@@ -66,17 +76,27 @@ function normalizePersistedMessage(value: unknown): Message | null {
   };
 }
 
-function loadPersistedMessages(): Message[] {
+function loadPersistedMessages(userId: string | null): Message[] {
   if (typeof localStorage === "undefined") return [];
 
+  const key = getStorageKey(userId);
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
 
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
+    const parsed = JSON.parse(raw) as Partial<PersistedHistory>;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return [];
 
-    return parsed
+    if (parsed.userId !== userId) {
+      localStorage.removeItem(key);
+      return [];
+    }
+
+    if (typeof parsed.savedAt !== "number" || !Number.isFinite(parsed.savedAt)) return [];
+    if (!Array.isArray(parsed.messages)) return [];
+
+    return parsed.messages
       .map(normalizePersistedMessage)
       .filter((message): message is Message => message !== null)
       .slice(-MAX_PERSISTED);
@@ -85,35 +105,50 @@ function loadPersistedMessages(): Message[] {
   }
 }
 
-function savePersistedMessages(messages: Message[]): void {
+function savePersistedMessages(messages: Message[], userId: string | null): void {
   if (typeof localStorage === "undefined") return;
 
   try {
     const persisted = messages
       .filter((message) => message.content.trim() && message.status !== "streaming")
       .slice(-MAX_PERSISTED);
+    const key = getStorageKey(userId);
     if (persisted.length === 0) {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(key);
       return;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+
+    const payload: PersistedHistory = {
+      userId,
+      savedAt: Date.now(),
+      messages: persisted,
+    };
+    localStorage.setItem(key, JSON.stringify(payload));
   } catch {}
 }
 
 export function useAssistant(options?: UseAssistantOptions) {
   const route = options?.route ?? (typeof window !== "undefined" ? window.location.pathname : "/");
-  const [messages, setMessages] = useState<Message[]>(loadPersistedMessages);
+  const { user } = useAuthContext();
+  const userId = user?.uid ?? null;
+  const [messages, setMessages] = useState<Message[]>(() => loadPersistedMessages(userId));
   const [isTyping, setIsTyping] = useState(false);
   const [lastError, setLastError] = useState<AssistantError | null>(null);
   const [lastUserText, setLastUserText] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    setMessages(loadPersistedMessages(userId));
+    setLastError(null);
+    setLastUserText(null);
+  }, [userId]);
+
+  useEffect(() => {
     if (isTyping) return undefined;
 
-    const id = window.setTimeout(() => savePersistedMessages(messages), 300);
+    const id = window.setTimeout(() => savePersistedMessages(messages, userId), 300);
     return () => window.clearTimeout(id);
-  }, [messages, isTyping]);
+  }, [messages, isTyping, userId]);
 
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
@@ -204,9 +239,9 @@ export function useAssistant(options?: UseAssistantOptions) {
     setLastError(null);
     setLastUserText(null);
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(getStorageKey(userId));
     } catch {}
-  }, []);
+  }, [userId]);
 
   return {
     messages,

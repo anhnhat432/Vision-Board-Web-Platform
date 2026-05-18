@@ -2,6 +2,14 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAssistant } from "../useAssistant";
 
+const authContextMock = vi.hoisted(() => ({
+  useAuthContext: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/AuthContext", () => ({
+  useAuthContext: authContextMock.useAuthContext,
+}));
+
 vi.mock("../buildAssistantContext", () => ({
   buildAssistantContext: vi.fn(() => ({
     currentWeek: 5,
@@ -30,9 +38,26 @@ vi.mock("../assistantApi", () => ({
 import { sendAssistantMessageStream } from "../assistantApi";
 const mockedSendAssistantMessageStream = vi.mocked(sendAssistantMessageStream);
 
+function setAuthContext(userId: string | null = null) {
+  authContextMock.useAuthContext.mockReturnValue({
+    user: userId ? { uid: userId } : null,
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    authLoading: false,
+    error: null,
+    login: vi.fn().mockResolvedValue(null),
+    logout: vi.fn().mockResolvedValue(undefined),
+    refreshUserProfile: vi.fn(),
+    isConfigured: true,
+  });
+}
+
 describe("useAssistant streaming", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
+    setAuthContext();
   });
 
   afterEach(() => {

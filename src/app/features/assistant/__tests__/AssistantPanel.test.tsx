@@ -5,6 +5,14 @@ import { AssistantPanel } from "../AssistantPanel";
 import * as assistantApi from "../assistantApi";
 import { resetAssistantSession } from "../assistantEngine";
 
+const authContextMock = vi.hoisted(() => ({
+  useAuthContext: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/AuthContext", () => ({
+  useAuthContext: authContextMock.useAuthContext,
+}));
+
 vi.mock("../buildAssistantContext", () => ({
   buildAssistantContext: vi.fn(() => ({
     currentWeek: 5,
@@ -27,12 +35,28 @@ vi.mock("../buildAssistantContext", () => ({
   })),
 }));
 
+function setAuthContext(userId: string | null = null) {
+  authContextMock.useAuthContext.mockReturnValue({
+    user: userId ? { uid: userId } : null,
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    authLoading: false,
+    error: null,
+    login: vi.fn().mockResolvedValue(null),
+    logout: vi.fn().mockResolvedValue(undefined),
+    refreshUserProfile: vi.fn(),
+    isConfigured: true,
+  });
+}
+
 describe("AssistantPanel", () => {
   const mockOnClose = vi.fn();
 
   beforeEach(() => {
     mockOnClose.mockClear();
     localStorage.clear();
+    setAuthContext();
     resetAssistantSession();
   });
 
@@ -144,7 +168,7 @@ describe("AssistantPanel", () => {
       expect(screen.getByText(/Việc nên làm ngay|chế độ demo|Mình/)).toBeInTheDocument();
     }, { timeout: 3000 });
     await waitFor(() => {
-      expect(localStorage.getItem("assistant.chat.history")).not.toBeNull();
+      expect(localStorage.getItem("assistant.chat.history:anon")).not.toBeNull();
     });
 
     unmount();
@@ -153,11 +177,52 @@ describe("AssistantPanel", () => {
     expect(screen.getByText("test")).toBeInTheDocument();
   });
 
+  it("does not load history from another user", () => {
+    localStorage.setItem("assistant.chat.history:alice", JSON.stringify({
+      userId: "alice",
+      savedAt: Date.now(),
+      messages: [{ id: "1", role: "user", content: "secret", createdAt: Date.now() }],
+    }));
+    setAuthContext("bob");
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    expect(screen.queryByText("secret")).not.toBeInTheDocument();
+  });
+
+  it("clears messages when user switches", async () => {
+    setAuthContext("alice");
+    const { rerender } = render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText(/Nhập tin nhắn/), "secret{enter}");
+    expect(await screen.findByText("secret")).toBeInTheDocument();
+
+    setAuthContext("bob");
+    rerender(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await waitFor(() => {
+      expect(screen.queryByText("secret")).not.toBeInTheDocument();
+    });
+  });
+
+  it("uses 'anon' bucket for unauthenticated users", async () => {
+    setAuthContext(null);
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText(/Nhập tin nhắn/), "anonymous{enter}");
+    await waitFor(() => {
+      expect(localStorage.getItem("assistant.chat.history:anon")).not.toBeNull();
+    });
+  });
+
   it("clears history when user confirms", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    localStorage.setItem("assistant.chat.history", JSON.stringify([
-      { id: "1", role: "user", content: "hello", createdAt: Date.now() },
-    ]));
+    localStorage.setItem("assistant.chat.history:anon", JSON.stringify({
+      userId: null,
+      savedAt: Date.now(),
+      messages: [{ id: "1", role: "user", content: "hello", createdAt: Date.now() }],
+    }));
 
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
     expect(screen.getByText("hello")).toBeInTheDocument();
@@ -165,7 +230,7 @@ describe("AssistantPanel", () => {
     await userEvent.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
 
     expect(screen.queryByText("hello")).not.toBeInTheDocument();
-    expect(localStorage.getItem("assistant.chat.history")).toBeNull();
+    expect(localStorage.getItem("assistant.chat.history:anon")).toBeNull();
   });
 
   it("has correct ARIA attributes", () => {
