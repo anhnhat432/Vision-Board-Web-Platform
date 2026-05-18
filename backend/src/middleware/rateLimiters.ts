@@ -1,11 +1,19 @@
-import { ipKeyGenerator, rateLimit, type RateLimitExceededEventHandler } from "express-rate-limit";
+import {
+  ipKeyGenerator,
+  rateLimit,
+  type RateLimitExceededEventHandler,
+  type ValueDeterminingMiddleware,
+} from "express-rate-limit";
 import type { Request } from "express";
 
 import { captureBackendException } from "../monitoring/sentry";
+import { billingService } from "../services/billingServiceInstance";
 import { errorResponse } from "../utils/apiResponse";
 
 const ONE_MINUTE_MS = 60 * 1000;
 const FIFTEEN_MINUTES_MS = 15 * ONE_MINUTE_MS;
+const ASSISTANT_FREE_LIMIT = 20;
+const ASSISTANT_PAID_LIMIT = 120;
 
 function getHeaderValue(req: Request, name: string): string | undefined {
   const value = req.headers[name.toLowerCase()];
@@ -64,6 +72,30 @@ function ipKey(req: Request): string {
   return `ip:${ipKeyGenerator(req.ip ?? "unknown")}`;
 }
 
+async function getAssistantLimit(req: Request): Promise<number> {
+  const userId = req.user?.uid;
+  if (!userId) return ASSISTANT_FREE_LIMIT;
+
+  try {
+    const entitlement = await billingService.getCurrentEntitlementForUser(userId);
+    return entitlement.planCode === "FREE" ? ASSISTANT_FREE_LIMIT : ASSISTANT_PAID_LIMIT;
+  } catch (error) {
+    console.warn("[assistant-rate-limit] Entitlement lookup failed", {
+      userId,
+      error: error instanceof Error ? error.name : "UnknownError",
+    });
+    captureBackendException(error, {
+      tags: {
+        event: "assistant_rate_limit_entitlement_lookup_failed",
+      },
+      extra: {
+        userId,
+      },
+    });
+    return ASSISTANT_FREE_LIMIT;
+  }
+}
+
 function createLimiter({
   keyPrefix,
   limit,
@@ -72,7 +104,7 @@ function createLimiter({
   errorCode,
 }: {
   keyPrefix: string;
-  limit: number;
+  limit: number | ValueDeterminingMiddleware<number>;
   windowMs: number;
   keyGenerator: (req: Request) => string;
   errorCode?: string;
@@ -168,7 +200,7 @@ export const planBulkSyncRateLimiter = createLimiter({
 export const assistantRateLimiter = createLimiter({
   keyPrefix: "assistant",
   windowMs: FIFTEEN_MINUTES_MS,
-  limit: 20,
+  limit: getAssistantLimit,
   keyGenerator: userOrIpKey,
   errorCode: "ASSISTANT_RATE_LIMITED",
 });

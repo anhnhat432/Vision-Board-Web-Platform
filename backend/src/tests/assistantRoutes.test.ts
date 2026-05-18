@@ -35,6 +35,9 @@ async function createTestApp(): Promise<Express> {
         if (token === "verified-token") {
           return { uid: "user_verified", email: "buyer@example.test", email_verified: true };
         }
+        if (token === "paid-token") {
+          return { uid: "user_paid", email: "paid@example.test", email_verified: true };
+        }
         throw new Error("Invalid test token");
       },
     }),
@@ -115,6 +118,22 @@ describe("assistantRoutes", () => {
 
     assert.equal(response.status, 400);
     assert.equal(response.body.errorCode, "ASSISTANT_EMPTY_MESSAGE");
+  });
+
+  it("allows paid users beyond the free assistant request window", async () => {
+    const { billingService } = await import("../services/billingServiceInstance");
+    await billingService.createMockOrManualEntitlement("user_paid", "PLUS", "manual");
+
+    const app = await createTestApp();
+    for (let index = 0; index < 21; index++) {
+      const response = await requestJson(app, "/api/assistant/chat", "paid-token", {
+        message: " ",
+        context: {},
+      });
+
+      assert.equal(response.status, 400);
+      assert.equal(response.body.errorCode, "ASSISTANT_EMPTY_MESSAGE");
+    }
   });
 
   it("does not register the old /api/chat path", async () => {
