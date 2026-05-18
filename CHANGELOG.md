@@ -6,6 +6,8 @@ and the project uses [Conventional Commits](https://www.conventionalcommits.org/
 
 ## [Unreleased]
 
+- Added 12-week goal/plan tombstone sync. Goal, plan, week, task, lead metric, daily check-in, and weekly review deletes after this change are retained as tombstones for pull sync; documents hard-deleted before this migration cannot produce tombstones retroactively.
+
 (Pending changes will be moved here when next tag is cut.)
 
 ## [v1.0-soft-launch-rc5] — 2026-05-10

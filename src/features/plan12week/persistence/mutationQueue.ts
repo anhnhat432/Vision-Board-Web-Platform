@@ -15,7 +15,9 @@ export type DataMutationKind =
   | "daily_check_in_upserted"
   | "weekly_review_upserted"
   | "plan_snapshot_updated"
-  | "lead_metric_upserted";
+  | "lead_metric_upserted"
+  | "goal_deleted"
+  | "plan_deleted";
 
 export type DataMutationStatus =
   | "pending"
@@ -143,12 +145,28 @@ export interface LeadMetricUpsertedMutationPayload {
   clientUpdatedAt: string;
 }
 
+export interface GoalDeletedMutationPayload {
+  clientGoalId: string;
+  backendGoalId?: string;
+  backendPlanId?: string;
+  deletedAt: string;
+}
+
+export interface PlanDeletedMutationPayload {
+  clientPlanId: string;
+  backendPlanId?: string;
+  clientGoalId?: string;
+  deletedAt: string;
+}
+
 export type DataMutationPayloadByKind = {
   task_completed_changed: TaskCompletedChangedMutationPayload;
   daily_check_in_upserted: DailyCheckInUpsertedMutationPayload;
   weekly_review_upserted: WeeklyReviewUpsertedMutationPayload;
   plan_snapshot_updated: PlanSnapshotUpdatedMutationPayload;
   lead_metric_upserted: LeadMetricUpsertedMutationPayload;
+  goal_deleted: GoalDeletedMutationPayload;
+  plan_deleted: PlanDeletedMutationPayload;
 };
 
 export type DataMutationPayload = DataMutationPayloadByKind[DataMutationKind];
@@ -284,6 +302,10 @@ function getCollapseKey(input: DataMutationEnqueueInput): string {
       return `plan-snapshot:${input.goalId}`;
     case "lead_metric_upserted":
       return `lead-metric:${input.goalId}:${input.payload.clientMetricId}`;
+    case "goal_deleted":
+      return `delete:goal_deleted:${input.payload.clientGoalId}`;
+    case "plan_deleted":
+      return `delete:plan_deleted:${input.payload.clientPlanId}`;
   }
 }
 

@@ -2,6 +2,7 @@ import type { Types } from "mongoose";
 
 import { WeekModel } from "../../models/WeekModel";
 import { ConflictError } from "../../utils/conflictError";
+import { softDeleteUpdate, withoutTombstones } from "../../utils/tombstone";
 
 export interface WeekReviewData {
   weekNumber: number;
@@ -92,17 +93,17 @@ export class MongoWeekRepository {
   }
 
   async getWeekById(id: string): Promise<WeekEntity | null> {
-    const doc = await WeekModel.findById(id).lean();
+    const doc = await WeekModel.findOne(withoutTombstones({ _id: id })).lean();
     return doc ? mapWeek(doc) : null;
   }
 
   async getWeeksByPlanId(planId: string): Promise<WeekEntity[]> {
-    const docs = await WeekModel.find({ planId }).sort({ weekNumber: 1 }).lean();
+    const docs = await WeekModel.find(withoutTombstones({ planId })).sort({ weekNumber: 1 }).lean();
     return docs.map((doc) => mapWeek(doc));
   }
 
   async updateWeek(id: string, updates: UpdateWeekData): Promise<WeekEntity | null> {
-    const existing = await WeekModel.findById(id).lean();
+    const existing = await WeekModel.findOne(withoutTombstones({ _id: id })).lean();
     if (!existing) return null;
 
     if (updates.baseRevision !== undefined && existing.revision != null) {
@@ -125,8 +126,8 @@ export class MongoWeekRepository {
       delete (normalizedUpdates as Record<string, unknown>).baseRevision;
     }
 
-    const doc = await WeekModel.findByIdAndUpdate(
-      id,
+    const doc = await WeekModel.findOneAndUpdate(
+      withoutTombstones({ _id: id }),
       { $set: normalizedUpdates, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
@@ -135,7 +136,7 @@ export class MongoWeekRepository {
   }
 
   async submitWeeklyReview(id: string, review: WeekReviewData): Promise<WeekEntity | null> {
-    const existing = await WeekModel.findById(id).lean();
+    const existing = await WeekModel.findOne(withoutTombstones({ _id: id })).lean();
     if (!existing) return null;
 
     if (review.baseRevision !== undefined && existing.revision != null) {
@@ -144,8 +145,8 @@ export class MongoWeekRepository {
       }
     }
 
-    const doc = await WeekModel.findByIdAndUpdate(
-      id,
+    const doc = await WeekModel.findOneAndUpdate(
+      withoutTombstones({ _id: id }),
       { $set: { review: { weekNumber: review.weekNumber, executionScore: review.executionScore, reflection: review.reflection, adjustments: review.adjustments } }, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
@@ -153,8 +154,8 @@ export class MongoWeekRepository {
     return doc ? mapWeek(doc) : null;
   }
 
-  async deleteWeeksByPlanId(planId: string): Promise<number> {
-    const result = await WeekModel.deleteMany({ planId });
-    return result.deletedCount ?? 0;
+  async deleteWeeksByPlanId(planId: string, deletedAt = new Date()): Promise<number> {
+    const result = await WeekModel.updateMany(withoutTombstones({ planId }), softDeleteUpdate(deletedAt));
+    return result.modifiedCount ?? 0;
   }
 }

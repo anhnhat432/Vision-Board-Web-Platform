@@ -60,6 +60,7 @@ const weekSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -76,20 +77,26 @@ const weekSchema = new Schema(
   },
 );
 
-weekSchema.index({ planId: 1, weekNumber: 1 }, { unique: true });
+weekSchema.index(
+  { planId: 1, weekNumber: 1 },
+  { unique: true, name: "week_active_plan_week_number_unique", partialFilterExpression: { deletedAt: null } },
+);
 weekSchema.index(
   { planId: 1, clientWeekId: 1 },
   {
     unique: true,
-    partialFilterExpression: { clientWeekId: { $type: "string" } },
+    name: "week_active_client_week_unique",
+    partialFilterExpression: { clientWeekId: { $type: "string" }, deletedAt: null },
   },
 );
 weekSchema.index(
   { planId: 1, clientPlanId: 1 },
   {
-    partialFilterExpression: { clientPlanId: { $type: "string" } },
+    name: "week_active_client_plan_lookup",
+    partialFilterExpression: { clientPlanId: { $type: "string" }, deletedAt: null },
   },
 );
+weekSchema.index({ planId: 1, deletedAt: 1 });
 weekSchema.index({ planId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export const WeekModel = model("Week", weekSchema);

@@ -3,6 +3,7 @@ import { isValidObjectId } from "mongoose";
 import { TaskModel } from "../../../models/TaskModel";
 import { PlanModel } from "../../../models/PlanModel";
 import { WeekModel } from "../../../models/WeekModel";
+import { withoutTombstones } from "../../../utils/tombstone";
 import type {
   SyncTaskMutationRepository,
   TaskCompletedChangedApplyInput,
@@ -90,7 +91,7 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
             $inc: { revision: 1 },
           };
 
-    const updatedTask = await TaskModel.findByIdAndUpdate(existingTask.id, update, {
+    const updatedTask = await TaskModel.findOneAndUpdate(withoutTombstones({ _id: existingTask.id }), update, {
       new: true,
       runValidators: true,
     }).lean();
@@ -103,30 +104,34 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
     input: TaskCompletedChangedApplyInput,
   ): Promise<AppliedTaskMutationEntity | null> {
     if (input.backendTaskId) {
-      const task = await TaskModel.findById(input.backendTaskId).lean();
+      const task = await TaskModel.findOne(withoutTombstones({ _id: input.backendTaskId })).lean();
       return task ? this.toOwnedTask(userId, task as unknown as MongoTaskDoc, input) : null;
     }
 
     if (!input.clientTaskId) return null;
 
     if (input.clientPlanId && input.clientWeekId) {
-      const plan = await PlanModel.findOne({ userId, clientPlanId: input.clientPlanId }).lean();
+      const plan = await PlanModel.findOne(withoutTombstones({ userId, clientPlanId: input.clientPlanId })).lean();
       if (!plan) return null;
 
-      const week = await WeekModel.findOne({
-        planId: getDocId(plan as unknown as MongoPlanDoc),
-        clientWeekId: input.clientWeekId,
-      }).lean();
+      const week = await WeekModel.findOne(
+        withoutTombstones({
+          planId: getDocId(plan as unknown as MongoPlanDoc),
+          clientWeekId: input.clientWeekId,
+        }),
+      ).lean();
       if (!week) return null;
 
-      const task = await TaskModel.findOne({
-        weekId: getDocId(week as unknown as MongoWeekDoc),
-        clientTaskId: input.clientTaskId,
-      }).lean();
+      const task = await TaskModel.findOne(
+        withoutTombstones({
+          weekId: getDocId(week as unknown as MongoWeekDoc),
+          clientTaskId: input.clientTaskId,
+        }),
+      ).lean();
       return task ? this.toOwnedTask(userId, task as unknown as MongoTaskDoc, input) : null;
     }
 
-    const candidates = await TaskModel.find({ clientTaskId: input.clientTaskId }).limit(10).lean();
+    const candidates = await TaskModel.find(withoutTombstones({ clientTaskId: input.clientTaskId })).limit(10).lean();
     const ownedTasks: AppliedTaskMutationEntity[] = [];
     for (const candidate of candidates) {
       const ownedTask = await this.toOwnedTask(userId, candidate as unknown as MongoTaskDoc, input);
@@ -141,13 +146,13 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
     task: MongoTaskDoc,
     input: Pick<TaskCompletedChangedApplyInput, "clientPlanId" | "clientWeekId">,
   ): Promise<AppliedTaskMutationEntity | null> {
-    const week = await WeekModel.findById(task.weekId).lean();
+    const week = await WeekModel.findOne(withoutTombstones({ _id: task.weekId })).lean();
     if (!week) return null;
 
     const mappedWeek = week as unknown as MongoWeekDoc;
     if (input.clientWeekId && mappedWeek.clientWeekId !== input.clientWeekId) return null;
 
-    const plan = await PlanModel.findById(mappedWeek.planId).lean();
+    const plan = await PlanModel.findOne(withoutTombstones({ _id: mappedWeek.planId })).lean();
     if (!plan) return null;
 
     const mappedPlan = plan as unknown as MongoPlanDoc;

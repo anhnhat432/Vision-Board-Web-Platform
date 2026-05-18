@@ -8,9 +8,8 @@ const authContextMock = vi.hoisted(() => ({
   useOptionalAuthContext: vi.fn(),
 }));
 
-const remoteDeleteMocks = vi.hoisted(() => ({
-  deleteGoal: vi.fn(),
-  deletePlan: vi.fn(),
+const mutationQueueMocks = vi.hoisted(() => ({
+  enqueueStoredMutation: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
@@ -18,13 +17,13 @@ vi.mock("@/lib/auth/AuthContext", () => ({
   useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
 
-vi.mock("@/services/goalService", () => ({
-  deleteGoal: remoteDeleteMocks.deleteGoal,
-}));
-
-vi.mock("@/services/planService", () => ({
-  deletePlan: remoteDeleteMocks.deletePlan,
-}));
+vi.mock("@/features/plan12week/persistence/mutationQueue", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/features/plan12week/persistence/mutationQueue")>();
+  return {
+    ...actual,
+    enqueueStoredMutation: mutationQueueMocks.enqueueStoredMutation,
+  };
+});
 
 vi.mock("../hooks/useBackendProgressOverlay", () => ({
   useBackendProgressOverlayMap: () => new Map(),
@@ -34,6 +33,7 @@ vi.mock("../utils/app-mode", () => ({
   getAppMode: () => "real",
   isDemoMode: () => false,
   isRealMode: () => true,
+  shouldEnable12WeekGoalTombstoneSync: () => true,
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
 }));
@@ -131,10 +131,8 @@ describe("GoalTracker multi-tab task updates", () => {
     MockBroadcastChannel.channels = [];
     vi.stubGlobal("BroadcastChannel", MockBroadcastChannel);
     vi.stubEnv("VITE_API_BASE_URL", "https://api.example.test");
-    remoteDeleteMocks.deleteGoal.mockReset();
-    remoteDeleteMocks.deletePlan.mockReset();
-    remoteDeleteMocks.deleteGoal.mockResolvedValue({ deleted: true });
-    remoteDeleteMocks.deletePlan.mockResolvedValue({ deleted: true });
+    mutationQueueMocks.enqueueStoredMutation.mockReset();
+    mutationQueueMocks.enqueueStoredMutation.mockReturnValue({ ok: true, store: null, item: null });
     setSignedInAuthContext();
   });
 
@@ -323,8 +321,28 @@ describe("GoalTracker multi-tab task updates", () => {
     await userEvent.click(within(dialog).getByRole("button", { name: "Xóa" }));
 
     await waitFor(() => expect(screen.queryByText("Delete synced goal")).not.toBeInTheDocument());
-    await waitFor(() => expect(remoteDeleteMocks.deletePlan).toHaveBeenCalledWith("507f1f77bcf86cd799439021"));
-    expect(remoteDeleteMocks.deleteGoal).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
+    expect(mutationQueueMocks.enqueueStoredMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "goal_deleted",
+        goalId: "goal_synced_delete",
+        payload: expect.objectContaining({
+          clientGoalId: "goal_synced_delete",
+          backendGoalId: "507f1f77bcf86cd799439011",
+          backendPlanId: "507f1f77bcf86cd799439021",
+        }),
+      }),
+    );
+    expect(mutationQueueMocks.enqueueStoredMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "plan_deleted",
+        goalId: "goal_synced_delete",
+        payload: expect.objectContaining({
+          clientPlanId: "goal_synced_delete:12-week-system",
+          backendPlanId: "507f1f77bcf86cd799439021",
+          clientGoalId: "goal_synced_delete",
+        }),
+      }),
+    );
   });
 
   it("posts local task mutations and applies newer task state from another tab", async () => {

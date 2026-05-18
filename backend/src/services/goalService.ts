@@ -2,9 +2,18 @@ import {
   MongoGoalRepository,
   type OnboardingTask,
 } from "../repositories/mongo/MongoGoalRepository";
+import { MongoMetricRepository } from "../repositories/mongo/MongoMetricRepository";
+import { MongoPlanRepository } from "../repositories/mongo/MongoPlanRepository";
+import { MongoTaskRepository } from "../repositories/mongo/MongoTaskRepository";
+import { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
 import { ApiError } from "../utils/apiError";
 import type { GoalStatus } from "../models/GoalModel";
 import { assertFreeTierLimit, hasPlusAccess } from "./freeTierLimits";
+import {
+  MongoPlanDeletionSideEffectRepository,
+  softDeletePlanTree,
+  type PlanDeletionSideEffectRepository,
+} from "./planService";
 import { assertValidObjectId } from "./serviceGuards";
 
 export interface CreateGoalPayload {
@@ -187,10 +196,19 @@ function validateUpdateGoalPayload(payload: unknown): Parameters<MongoGoalReposi
   return updates;
 }
 
+interface GoalDeletionDependencies {
+  planRepository: MongoPlanRepository;
+  weekRepository: MongoWeekRepository;
+  taskRepository: MongoTaskRepository;
+  metricRepository: MongoMetricRepository;
+  sideEffects?: PlanDeletionSideEffectRepository;
+}
+
 export class GoalService {
   constructor(
     private readonly goalRepository: MongoGoalRepository,
     private readonly hasPlusAccessForUser: (userId: string) => Promise<boolean> = hasPlusAccess,
+    private readonly deletionDependencies?: GoalDeletionDependencies,
   ) {}
 
   async createGoal(userId: string, payload: unknown) {
@@ -266,10 +284,45 @@ export class GoalService {
     if (goal.userId !== userId) {
       throw new ApiError(403, "You do not have access to this goal.");
     }
-    await this.goalRepository.deleteGoal(goalId);
+
+    const deletedAt = new Date();
+    if (this.deletionDependencies) {
+      const linkedPlans = await this.deletionDependencies.planRepository.getPlansByGoalReference({
+        userId,
+        goalId: goal.id,
+        clientGoalId: goal.clientGoalId,
+        planId: goal.planId,
+      });
+
+      for (const plan of linkedPlans) {
+        await softDeletePlanTree({
+          userId,
+          plan,
+          deletedAt,
+          weekRepository: this.deletionDependencies.weekRepository,
+          taskRepository: this.deletionDependencies.taskRepository,
+          metricRepository: this.deletionDependencies.metricRepository,
+          sideEffects: this.deletionDependencies.sideEffects,
+        });
+        await this.deletionDependencies.planRepository.deletePlan(plan.id, deletedAt);
+      }
+    }
+
+    await this.goalRepository.deleteGoal(goalId, deletedAt);
   }
 }
 
 const goalRepository = new MongoGoalRepository();
+const goalPlanRepository = new MongoPlanRepository();
+const goalWeekRepository = new MongoWeekRepository();
+const goalTaskRepository = new MongoTaskRepository();
+const goalMetricRepository = new MongoMetricRepository();
+const goalDeletionSideEffects = new MongoPlanDeletionSideEffectRepository();
 
-export const goalService = new GoalService(goalRepository);
+export const goalService = new GoalService(goalRepository, hasPlusAccess, {
+  planRepository: goalPlanRepository,
+  weekRepository: goalWeekRepository,
+  taskRepository: goalTaskRepository,
+  metricRepository: goalMetricRepository,
+  sideEffects: goalDeletionSideEffects,
+});

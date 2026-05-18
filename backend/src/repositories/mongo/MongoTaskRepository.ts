@@ -2,6 +2,7 @@ import type { Types } from "mongoose";
 
 import { TaskModel } from "../../models/TaskModel";
 import { ConflictError } from "../../utils/conflictError";
+import { softDeleteUpdate, withoutTombstones } from "../../utils/tombstone";
 
 export type TaskStatus = "todo" | "doing" | "done";
 
@@ -65,17 +66,17 @@ export class MongoTaskRepository {
   }
 
   async getTaskById(id: string): Promise<TaskEntity | null> {
-    const doc = await TaskModel.findById(id).lean();
+    const doc = await TaskModel.findOne(withoutTombstones({ _id: id })).lean();
     return doc ? mapTask(doc) : null;
   }
 
   async getTasksByWeekId(weekId: string): Promise<TaskEntity[]> {
-    const docs = await TaskModel.find({ weekId }).sort({ createdAt: 1 }).lean();
+    const docs = await TaskModel.find(withoutTombstones({ weekId })).sort({ createdAt: 1 }).lean();
     return docs.map((doc) => mapTask(doc));
   }
 
   async updateTask(id: string, updates: UpdateTaskData): Promise<TaskEntity | null> {
-    const existing = await TaskModel.findById(id).lean();
+    const existing = await TaskModel.findOne(withoutTombstones({ _id: id })).lean();
     if (!existing) return null;
 
     if (updates.baseRevision !== undefined && existing.revision != null) {
@@ -89,8 +90,8 @@ export class MongoTaskRepository {
     if (updates.status !== undefined) updateOps.status = updates.status;
     if (updates.scheduledDate !== undefined) updateOps.scheduledDate = updates.scheduledDate;
 
-    const doc = await TaskModel.findByIdAndUpdate(
-      id,
+    const doc = await TaskModel.findOneAndUpdate(
+      withoutTombstones({ _id: id }),
       { $set: updateOps, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
@@ -98,14 +99,18 @@ export class MongoTaskRepository {
     return doc ? mapTask(doc) : null;
   }
 
-  async deleteTask(id: string): Promise<boolean> {
-    const deleted = await TaskModel.findByIdAndDelete(id).lean();
+  async deleteTask(id: string, deletedAt = new Date()): Promise<boolean> {
+    const deleted = await TaskModel.findOneAndUpdate(
+      withoutTombstones({ _id: id }),
+      softDeleteUpdate(deletedAt),
+      { new: true },
+    ).lean();
     return Boolean(deleted);
   }
 
-  async deleteTasksByWeekIds(weekIds: string[]): Promise<number> {
+  async deleteTasksByWeekIds(weekIds: string[], deletedAt = new Date()): Promise<number> {
     if (weekIds.length === 0) return 0;
-    const result = await TaskModel.deleteMany({ weekId: { $in: weekIds } });
-    return result.deletedCount ?? 0;
+    const result = await TaskModel.updateMany(withoutTombstones({ weekId: { $in: weekIds } }), softDeleteUpdate(deletedAt));
+    return result.modifiedCount ?? 0;
   }
 }

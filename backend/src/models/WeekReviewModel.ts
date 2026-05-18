@@ -18,8 +18,6 @@ const weekReviewSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Week",
       required: true,
-      unique: true,
-      index: true,
     },
     weekNumber: {
       type: Number,
@@ -137,6 +135,7 @@ const weekReviewSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -154,19 +153,26 @@ const weekReviewSchema = new Schema(
 );
 
 weekReviewSchema.index(
+  { weekId: 1 },
+  { unique: true, name: "week_review_active_week_unique", partialFilterExpression: { deletedAt: null } },
+);
+weekReviewSchema.index(
   { userId: 1, clientPlanId: 1, weekNumber: 1 },
   {
     unique: true,
-    partialFilterExpression: { userId: { $type: "string" }, clientPlanId: { $type: "string" } },
+    name: "week_review_active_plan_week_unique",
+    partialFilterExpression: { userId: { $type: "string" }, clientPlanId: { $type: "string" }, deletedAt: null },
   },
 );
 weekReviewSchema.index(
   { userId: 1, clientReviewId: 1 },
   {
     unique: true,
-    partialFilterExpression: { userId: { $type: "string" }, clientReviewId: { $type: "string" } },
+    name: "week_review_active_client_review_unique",
+    partialFilterExpression: { userId: { $type: "string" }, clientReviewId: { $type: "string" }, deletedAt: null },
   },
 );
+weekReviewSchema.index({ userId: 1, deletedAt: 1 });
 weekReviewSchema.index({ userId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export const WeekReviewModel = model("WeekReview", weekReviewSchema);

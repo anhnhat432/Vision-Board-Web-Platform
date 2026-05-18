@@ -43,6 +43,7 @@ const planSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -63,15 +64,18 @@ planSchema.index(
   { userId: 1, clientPlanId: 1 },
   {
     unique: true,
-    partialFilterExpression: { clientPlanId: { $type: "string" } },
+    name: "plan_active_client_plan_unique",
+    partialFilterExpression: { clientPlanId: { $type: "string" }, deletedAt: null },
   },
 );
 planSchema.index(
   { userId: 1, clientGoalId: 1 },
   {
-    partialFilterExpression: { clientGoalId: { $type: "string" } },
+    name: "plan_active_client_goal_lookup",
+    partialFilterExpression: { clientGoalId: { $type: "string" }, deletedAt: null },
   },
 );
+planSchema.index({ userId: 1, deletedAt: 1 });
 planSchema.index({ userId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export type PlanDocument = {
@@ -83,7 +87,7 @@ export type PlanDocument = {
   clientPlanId?: string;
   clientGoalId?: string;
   revision?: number;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
   lastMutationId?: string;
   syncUpdatedAt?: Date;
   createdAt: Date;

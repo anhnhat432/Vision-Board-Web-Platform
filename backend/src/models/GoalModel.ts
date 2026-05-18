@@ -88,6 +88,7 @@ const goalSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -108,9 +109,11 @@ goalSchema.index(
   { userId: 1, clientGoalId: 1 },
   {
     unique: true,
-    partialFilterExpression: { clientGoalId: { $type: "string" } },
+    name: "goal_active_client_goal_unique",
+    partialFilterExpression: { clientGoalId: { $type: "string" }, deletedAt: null },
   },
 );
+goalSchema.index({ userId: 1, deletedAt: 1 });
 goalSchema.index({ userId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export type GoalStatus = "active" | "completed" | "archived";

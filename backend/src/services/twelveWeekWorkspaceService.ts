@@ -5,6 +5,7 @@ import { PlanModel } from "../models/PlanModel";
 import { TaskModel } from "../models/TaskModel";
 import { WeekModel } from "../models/WeekModel";
 import { WeekReviewModel } from "../models/WeekReviewModel";
+import { withoutTombstones } from "../utils/tombstone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,13 +69,13 @@ function stripInternalFields(doc: Record<string, unknown>): Record<string, unkno
 
 class MongoTwelveWeekWorkspaceRepository implements TwelveWeekWorkspaceRepository {
   async exportWorkspace(userId: string): Promise<WorkspaceExportResult> {
-    const plans = (await PlanModel.find({ userId }).sort({ startDate: 1, _id: 1 }).lean()) as Record<string, unknown>[];
+    const plans = (await PlanModel.find(withoutTombstones({ userId })).sort({ startDate: 1, _id: 1 }).lean()) as Record<string, unknown>[];
     const planIds = plans.map((p) => p._id);
 
     const [goals, weeks] = await Promise.all([
-      GoalModel.find({ userId }).sort({ createdAt: 1, _id: 1 }).lean() as Promise<Record<string, unknown>[]>,
+      GoalModel.find(withoutTombstones({ userId })).sort({ createdAt: 1, _id: 1 }).lean() as Promise<Record<string, unknown>[]>,
       planIds.length > 0
-        ? (WeekModel.find({ planId: { $in: planIds } }).sort({ weekNumber: 1, _id: 1 }).lean() as Promise<
+        ? (WeekModel.find(withoutTombstones({ planId: { $in: planIds } })).sort({ weekNumber: 1, _id: 1 }).lean() as Promise<
             Record<string, unknown>[]
           >)
         : Promise.resolve([]),
@@ -84,28 +85,30 @@ class MongoTwelveWeekWorkspaceRepository implements TwelveWeekWorkspaceRepositor
 
     const [tasks, leadMetrics, dailyCheckIns, weeklyReviews] = await Promise.all([
       weekIds.length > 0
-        ? (TaskModel.find({ weekId: { $in: weekIds } }).sort({ scheduledDate: 1, _id: 1 }).lean() as Promise<
+        ? (TaskModel.find(withoutTombstones({ weekId: { $in: weekIds } })).sort({ scheduledDate: 1, _id: 1 }).lean() as Promise<
             Record<string, unknown>[]
           >)
         : Promise.resolve([]),
       weekIds.length > 0
-        ? (LeadMetricModel.find({ weekId: { $in: weekIds } }).sort({ name: 1, _id: 1 }).lean() as Promise<
+        ? (LeadMetricModel.find(withoutTombstones({ weekId: { $in: weekIds } })).sort({ name: 1, _id: 1 }).lean() as Promise<
             Record<string, unknown>[]
           >)
         : Promise.resolve([]),
       planIds.length > 0
-        ? (DailyCheckInModel.find({ userId, planId: { $in: planIds } })
+        ? (DailyCheckInModel.find(withoutTombstones({ userId, planId: { $in: planIds } }))
             .sort({ localDate: 1, _id: 1 })
             .lean() as Promise<Record<string, unknown>[]>)
         : Promise.resolve([]),
       weekIds.length > 0
-        ? (WeekReviewModel.find({
-            $or: [
-              { userId, planId: { $in: planIds } },
-              { userId: { $exists: false }, weekId: { $in: weekIds } },
-              { userId: null, weekId: { $in: weekIds } },
-            ],
-          })
+        ? (WeekReviewModel.find(
+            withoutTombstones({
+              $or: [
+                { userId, planId: { $in: planIds } },
+                { userId: { $exists: false }, weekId: { $in: weekIds } },
+                { userId: null, weekId: { $in: weekIds } },
+              ],
+            }),
+          )
             .sort({ weekNumber: 1, _id: 1 })
             .lean() as Promise<Record<string, unknown>[]>)
         : Promise.resolve([]),

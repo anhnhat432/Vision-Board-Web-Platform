@@ -1,7 +1,10 @@
+import { DailyCheckInModel } from "../models/DailyCheckInModel";
+import { WeekReviewModel } from "../models/WeekReviewModel";
 import { MongoMetricRepository } from "../repositories/mongo/MongoMetricRepository";
-import { MongoPlanRepository } from "../repositories/mongo/MongoPlanRepository";
+import { MongoPlanRepository, type PlanEntity } from "../repositories/mongo/MongoPlanRepository";
 import { MongoTaskRepository } from "../repositories/mongo/MongoTaskRepository";
 import { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
+import { softDeleteUpdate, withoutTombstones } from "../utils/tombstone";
 import { ApiError } from "../utils/apiError";
 import { requirePlanOwnership } from "./serviceGuards";
 import { assertFreeTierLimit, hasPlusAccess } from "./freeTierLimits";
@@ -33,6 +36,62 @@ const EDITABLE_PLAN_FIELDS = new Set(["vision", "smartGoalId", "startDate", "bas
 const PLAN_CREATE_FIELDS = new Set(["vision", "smartGoalId", "startDate", "initializeWeeks", "totalWeeks"]);
 const MIN_PLAN_WEEKS = 1;
 const MAX_PLAN_WEEKS = 12;
+
+export interface PlanDeletionSideEffectRepository {
+  softDeleteDailyCheckInsForPlan(userId: string, planId: string, deletedAt: Date): Promise<number>;
+  softDeleteWeekReviewsForPlan(input: {
+    userId: string;
+    planId: string;
+    weekIds: string[];
+    deletedAt: Date;
+  }): Promise<number>;
+}
+
+class NoopPlanDeletionSideEffectRepository implements PlanDeletionSideEffectRepository {
+  async softDeleteDailyCheckInsForPlan(): Promise<number> {
+    return 0;
+  }
+
+  async softDeleteWeekReviewsForPlan(): Promise<number> {
+    return 0;
+  }
+}
+
+export class MongoPlanDeletionSideEffectRepository implements PlanDeletionSideEffectRepository {
+  async softDeleteDailyCheckInsForPlan(userId: string, planId: string, deletedAt: Date): Promise<number> {
+    const result = await DailyCheckInModel.updateMany(
+      withoutTombstones({ userId, planId }),
+      softDeleteUpdate(deletedAt),
+    );
+    return result.modifiedCount ?? 0;
+  }
+
+  async softDeleteWeekReviewsForPlan(input: {
+    userId: string;
+    planId: string;
+    weekIds: string[];
+    deletedAt: Date;
+  }): Promise<number> {
+    const result = await WeekReviewModel.updateMany(
+      withoutTombstones({
+        $or: [
+          { userId: input.userId, planId: input.planId },
+          ...(input.weekIds.length > 0
+            ? [
+                { userId: input.userId, weekId: { $in: input.weekIds } },
+                { userId: { $exists: false }, weekId: { $in: input.weekIds } },
+                { userId: null, weekId: { $in: input.weekIds } },
+              ]
+            : []),
+        ],
+      }),
+      softDeleteUpdate(input.deletedAt),
+    );
+    return result.modifiedCount ?? 0;
+  }
+}
+
+const noopPlanDeletionSideEffects = new NoopPlanDeletionSideEffectRepository();
 
 function isPayloadRecord(payload: unknown): payload is Record<string, unknown> {
   return Boolean(payload) && typeof payload === "object" && !Array.isArray(payload);
@@ -155,6 +214,34 @@ function validateUpdatePlanPayload(payload: unknown): UpdatePlanPayload {
   return updates;
 }
 
+export async function softDeletePlanTree(input: {
+  userId: string;
+  plan: PlanEntity;
+  deletedAt: Date;
+  weekRepository: MongoWeekRepository;
+  taskRepository: MongoTaskRepository;
+  metricRepository: MongoMetricRepository;
+  sideEffects?: PlanDeletionSideEffectRepository;
+}): Promise<void> {
+  const weeks = await input.weekRepository.getWeeksByPlanId(input.plan.id);
+  const weekIds = weeks.map((week) => week.id);
+  const sideEffects = input.sideEffects ?? noopPlanDeletionSideEffects;
+
+  await Promise.all([
+    input.taskRepository.deleteTasksByWeekIds(weekIds, input.deletedAt),
+    input.metricRepository.deleteMetricsByWeekIds(weekIds, input.deletedAt),
+    sideEffects.softDeleteDailyCheckInsForPlan(input.userId, input.plan.id, input.deletedAt),
+    sideEffects.softDeleteWeekReviewsForPlan({
+      userId: input.userId,
+      planId: input.plan.id,
+      weekIds,
+      deletedAt: input.deletedAt,
+    }),
+  ]);
+
+  await input.weekRepository.deleteWeeksByPlanId(input.plan.id, input.deletedAt);
+}
+
 export class PlanService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
@@ -162,6 +249,7 @@ export class PlanService {
     private readonly taskRepository: MongoTaskRepository,
     private readonly metricRepository: MongoMetricRepository,
     private readonly hasPlusAccessForUser: (userId: string) => Promise<boolean> = hasPlusAccess,
+    private readonly deletionSideEffects: PlanDeletionSideEffectRepository = noopPlanDeletionSideEffects,
   ) {}
 
   async createPlanForUser(userId: string, payload: CreatePlanPayload) {
@@ -223,14 +311,19 @@ export class PlanService {
 
   async deletePlanForUser(userId: string, planId: string) {
     const plan = await requirePlanOwnership(this.planRepository, userId, planId);
-    const weeks = await this.weekRepository.getWeeksByPlanId(plan.id);
-    const weekIds = weeks.map((week) => week.id);
+    const deletedAt = new Date();
 
-    await this.taskRepository.deleteTasksByWeekIds(weekIds);
-    await this.metricRepository.deleteMetricsByWeekIds(weekIds);
-    await this.weekRepository.deleteWeeksByPlanId(plan.id);
+    await softDeletePlanTree({
+      userId,
+      plan,
+      deletedAt,
+      weekRepository: this.weekRepository,
+      taskRepository: this.taskRepository,
+      metricRepository: this.metricRepository,
+      sideEffects: this.deletionSideEffects,
+    });
 
-    const deleted = await this.planRepository.deletePlan(plan.id);
+    const deleted = await this.planRepository.deletePlan(plan.id, deletedAt);
     if (!deleted) {
       throw new ApiError(404, "Plan not found.");
     }
@@ -266,10 +359,13 @@ const planRepository = new MongoPlanRepository();
 const weekRepository = new MongoWeekRepository();
 const taskRepository = new MongoTaskRepository();
 const metricRepository = new MongoMetricRepository();
+const planDeletionSideEffects = new MongoPlanDeletionSideEffectRepository();
 
 export const planService = new PlanService(
   planRepository,
   weekRepository,
   taskRepository,
   metricRepository,
+  hasPlusAccess,
+  planDeletionSideEffects,
 );

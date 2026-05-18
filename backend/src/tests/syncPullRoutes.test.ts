@@ -47,6 +47,8 @@ function replaceMethod<T extends object, K extends keyof T>(target: T, key: K, v
 
 function createPullRepository(): TwelveWeekPullRepository {
   const baseSyncTime = new Date("2026-04-30T01:00:00.000Z");
+  const deletedGoalSyncTime = new Date("2026-04-30T01:20:00.000Z");
+  const deletedPlanSyncTime = new Date("2026-04-30T01:20:00.000Z");
   const deletedTaskSyncTime = new Date("2026-04-30T01:20:00.000Z");
   const taskSyncTime = new Date("2026-04-30T02:00:00.000Z");
   const goals: PullGoalSource[] = [
@@ -64,6 +66,19 @@ function createPullRepository(): TwelveWeekPullRepository {
       planId: "plan_owner_1",
       revision: 2,
       syncUpdatedAt: baseSyncTime,
+    },
+    {
+      _id: "goal_deleted_1",
+      userId: ownerUserId,
+      clientGoalId: "goal_deleted_local_1",
+      title: "Deleted owner goal",
+      category: "Career",
+      description: "This deleted goal should only appear as a tombstone.",
+      deadline: new Date("2026-07-22T00:00:00.000Z"),
+      status: "active",
+      revision: 3,
+      deletedAt: deletedGoalSyncTime,
+      syncUpdatedAt: deletedGoalSyncTime,
     },
     {
       _id: "goal_other_1",
@@ -90,6 +105,18 @@ function createPullRepository(): TwelveWeekPullRepository {
       startDate: new Date("2026-04-30T00:00:00.000Z"),
       revision: 1,
       syncUpdatedAt: baseSyncTime,
+    },
+    {
+      _id: "plan_deleted_1",
+      userId: ownerUserId,
+      smartGoalId: "goal_deleted_1",
+      clientGoalId: "goal_deleted_local_1",
+      clientPlanId: "goal_deleted_local_1:12-week-system",
+      vision: "Deleted owner plan",
+      startDate: new Date("2026-04-30T00:00:00.000Z"),
+      revision: 2,
+      deletedAt: deletedPlanSyncTime,
+      syncUpdatedAt: deletedPlanSyncTime,
     },
     {
       _id: "plan_other_1",
@@ -462,10 +489,17 @@ describe("12-week pull route", () => {
     const data = getPullResult(response);
 
     assert.equal(data.mode, "delta");
+    assert.equal(data.tombstones.goals.length, 1);
+    assert.equal(data.tombstones.goals[0].clientId, "goal_deleted_local_1");
+    assert.equal(data.tombstones.plans.length, 1);
+    assert.equal(data.tombstones.plans[0].clientId, "goal_deleted_local_1:12-week-system");
     assert.equal(data.tombstones.tasks.length, 1);
     assert.equal(data.tombstones.tasks[0].clientId, "task_deleted_1");
     assert.equal(data.tombstones.tasks[0].deletedAt, "2026-04-30T01:20:00.000Z");
+    assert.equal(JSON.stringify(data.workspace.goals).includes("goal_deleted_local_1"), false);
+    assert.equal(JSON.stringify(data.workspace.plans).includes("goal_deleted_local_1:12-week-system"), false);
     assert.equal(JSON.stringify(data.workspace.tasks).includes("task_deleted_1"), false);
+    assert.equal(data.warnings.some((warning) => warning.code === "delta_context_entities_require_full_pull"), false);
   });
 
   it("does not leak another user's workspace, even with the same clientPlanId", async () => {

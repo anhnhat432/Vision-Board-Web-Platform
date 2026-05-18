@@ -65,6 +65,7 @@ vi.mock("./utils/app-mode", () => ({
   isRealMode: () => !appModeMock.isDemoMode(),
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
+  shouldEnable12WeekGoalTombstoneSync: () => true,
   shouldEnable12WeekImportDryRun: () => false,
   shouldEnable12WeekCloudImport: () => false,
 }));

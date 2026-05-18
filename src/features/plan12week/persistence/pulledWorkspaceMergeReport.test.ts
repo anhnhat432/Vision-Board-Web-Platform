@@ -198,6 +198,46 @@ function createUserData(goals: Goal[]): UserData {
   };
 }
 
+function createPendingDeleteMutation(kind: "goal_deleted" | "plan_deleted"): DataMutationItem {
+  const base = {
+    id: `mutation_${kind}`,
+    idempotencyKey: `user_1:device_1:mutation_${kind}`,
+    collapseKey: kind === "goal_deleted" ? "delete:goal_deleted:goal_1" : "delete:plan_deleted:goal_1:12-week-system",
+    kind,
+    status: "pending" as const,
+    createdAt: at(1),
+    updatedAt: at(1),
+    attemptCount: 0,
+    maxAttempts: 7,
+    ownerUid: "user_1",
+    goalId: "goal_1",
+    planId: "goal_1:12-week-system",
+  };
+
+  if (kind === "goal_deleted") {
+    return {
+      ...base,
+      kind,
+      payload: {
+        clientGoalId: "goal_1",
+        backendGoalId: "backend_goal_1",
+        deletedAt: at(1),
+      },
+    };
+  }
+
+  return {
+    ...base,
+    kind,
+    payload: {
+      clientPlanId: "goal_1:12-week-system",
+      backendPlanId: "backend_plan_1",
+      clientGoalId: "goal_1",
+      deletedAt: at(1),
+    },
+  };
+}
+
 function createPendingTaskMutation(): DataMutationItem {
   return {
     id: "mutation_task_1",
@@ -383,6 +423,38 @@ describe("pulled workspace merge report", () => {
         }),
       ]),
     );
+  });
+
+  it("ignores local-only goal and plan when delete mutations are pending", () => {
+    const report = createPulledWorkspaceMergeReport(createGoal(), createEmptyWorkspace(), {
+      pendingMutations: [createPendingDeleteMutation("goal_deleted"), createPendingDeleteMutation("plan_deleted")],
+    });
+
+    expect(report.localOnlyChanges).toEqual([]);
+  });
+
+  it("ignores cloud-only goal and plan when pull response contains matching tombstones", () => {
+    const response = createDeltaPullResponse(createCloudWorkspace());
+    response.mode = "full";
+    response.tombstones.goals = [
+      {
+        id: "backend_goal_1",
+        clientId: "goal_1",
+        deletedAt: at(20),
+      },
+    ];
+    response.tombstones.plans = [
+      {
+        id: "backend_plan_1",
+        clientId: "goal_1:12-week-system",
+        deletedAt: at(20),
+      },
+    ];
+
+    const report = createPulledWorkspaceMergeReport(createUserData([]), response);
+
+    expect(report.cloudOnlyChanges.some((change) => change.kind === "goal" && change.clientId === "goal_1")).toBe(false);
+    expect(report.cloudOnlyChanges.some((change) => change.kind === "plan" && change.clientId === "goal_1:12-week-system")).toBe(false);
   });
 
   it("does not mutate UserData input", () => {

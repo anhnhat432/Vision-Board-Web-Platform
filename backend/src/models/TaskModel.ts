@@ -75,6 +75,7 @@ const taskSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -95,15 +96,18 @@ taskSchema.index(
   { weekId: 1, clientTaskId: 1 },
   {
     unique: true,
-    partialFilterExpression: { clientTaskId: { $type: "string" } },
+    name: "task_active_client_task_unique",
+    partialFilterExpression: { clientTaskId: { $type: "string" }, deletedAt: null },
   },
 );
 taskSchema.index(
   { weekId: 1, clientWeekId: 1 },
   {
-    partialFilterExpression: { clientWeekId: { $type: "string" } },
+    name: "task_active_client_week_lookup",
+    partialFilterExpression: { clientWeekId: { $type: "string" }, deletedAt: null },
   },
 );
+taskSchema.index({ weekId: 1, deletedAt: 1 });
 taskSchema.index({ weekId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export const TaskModel = model("Task", taskSchema);

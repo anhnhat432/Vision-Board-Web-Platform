@@ -43,6 +43,8 @@ http://localhost:4000/api
 - `GET /api/weeks/:weekId/metrics`
 - `POST /api/metrics/:metricId/logs`
 
+Deletes for 12-week goals/plans now soft-delete records and expose tombstones through `GET /api/sync/12-week/pull`. Tombstones cover deletes made after the soft-delete migration only; records hard-deleted before this change cannot be surfaced to offline clients. Run `npm --prefix backend run rebuild:soft-delete-indexes` during rollout so old unique indexes stop blocking re-created client IDs.
+
 All routes except `/api/health` require Firebase Bearer token.
 
 ## 4. Payload Examples

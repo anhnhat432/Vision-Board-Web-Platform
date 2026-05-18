@@ -298,6 +298,21 @@ function applyPulledDeltaToUserData(userData: UserData, pullResponse: TwelveWeek
     });
   });
 
+  pullResponse.tombstones.goals.forEach((tombstone) => {
+    const clientGoalId = getTombstoneClientId(tombstone);
+    if (!clientGoalId) return;
+    nextGoals = nextGoals.filter((goal) => goal.id !== clientGoalId);
+  });
+
+  pullResponse.tombstones.plans.forEach((tombstone) => {
+    const clientPlanId = getTombstoneClientId(tombstone);
+    if (!clientPlanId) return;
+    nextGoals = nextGoals.filter((goal) => {
+      if (!goal.twelveWeekSystem) return true;
+      return getTwelveWeekClientPlanId(goal.id) !== clientPlanId;
+    });
+  });
+
   pullResponse.tombstones.tasks.forEach((tombstone) => {
     const clientTaskId = getTombstoneClientId(tombstone);
     if (!clientTaskId) return;
@@ -572,6 +587,21 @@ export function applyPulledWorkspaceToUserData(
     });
     if (nextGoal) nextGoalsById.set(nextGoal.id, nextGoal);
   });
+
+  if (isPullResponse(pulledWorkspace)) {
+    pulledWorkspace.tombstones.goals.forEach((tombstone) => {
+      const clientGoalId = getTombstoneClientId(tombstone);
+      if (clientGoalId) nextGoalsById.delete(clientGoalId);
+    });
+    pulledWorkspace.tombstones.plans.forEach((tombstone) => {
+      const clientPlanId = getTombstoneClientId(tombstone);
+      if (!clientPlanId) return;
+      for (const [goalId, goal] of nextGoalsById) {
+        if (!goal.twelveWeekSystem) continue;
+        if (getTwelveWeekClientPlanId(goalId) === clientPlanId) nextGoalsById.delete(goalId);
+      }
+    });
+  }
 
   return {
     ...userData,

@@ -1,24 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate } from "react-router";
 import { cn } from "../components/ui/utils";
 import {
   ArrowRight,
   BookOpen,
-  Calendar,
   Frown,
-  Flag,
   Meh,
-  NotebookPen,
   Plus,
   Search,
   Smile,
-  Sparkles,
-  Trash2,
   MoreVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { EmptyHintArrow } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +25,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
+import { Card } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
 import {
   Dialog,
@@ -52,7 +46,6 @@ import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { getDayKey, getPreviousDayKey, getTodayDayKey } from "../utils/day-key";
 import {
   celebrateAchievementUnlock,
   celebrateSpotlight,
@@ -65,7 +58,6 @@ import {
   deleteReflection,
   formatCalendarDate,
   formatDateInputValue,
-  getReviewDayLabel,
   getUserData,
   parseCalendarDate,
   saveUserData,
@@ -156,7 +148,7 @@ function getMoodConfig(mood?: string) {
   }
 }
 
-function getJournalPhaseTone(weekNumber?: number) {
+function getJournalPhaseTone() {
   return {
     stripe: "bg-app-warm",
     soft: "border-app-line bg-app-warm-soft text-app-warm",
@@ -273,48 +265,11 @@ export function ReflectionJournal() {
     }).length;
   }, [sortedReflections, userData]);
 
-  const moodCounts = useMemo(() => {
-    if (!userData) return { happy: 0, neutral: 0, sad: 0 };
-    return sortedReflections.reduce(
-      (acc, reflection) => {
-        if (reflection.mood === "happy") acc.happy += 1;
-        if (reflection.mood === "neutral") acc.neutral += 1;
-        if (reflection.mood === "sad") acc.sad += 1;
-        return acc;
-      },
-      { happy: 0, neutral: 0, sad: 0 },
-    );
-  }, [sortedReflections, userData]);
-  const moodTotal = moodCounts.happy + moodCounts.neutral + moodCounts.sad;
-
   const weeklyReviewCount = useMemo(
     () => sortedReflections.filter((reflection) => reflection.entryType === "weekly-review").length,
     [sortedReflections],
   );
-  const weeklyReviewReflections = useMemo(
-    () => sortedReflections.filter((reflection) => reflection.entryType === "weekly-review"),
-    [sortedReflections],
-  );
-  const latestWeeklyReview = weeklyReviewReflections[0] ?? null;
   const hasReflections = sortedReflections.length > 0;
-
-  const recentMood = getMoodConfig(sortedReflections[0]?.mood);
-
-  const currentStreak = useMemo(() => {
-    if (sortedReflections.length === 0) return 0;
-    const todayKey = getTodayDayKey();
-    const writtenDays = new Set(sortedReflections.map((r) => getDayKey(r.date)));
-    let cursorKey = todayKey;
-    if (!writtenDays.has(cursorKey)) {
-      cursorKey = getPreviousDayKey(cursorKey);
-    }
-    let streak = 0;
-    while (writtenDays.has(cursorKey)) {
-      streak += 1;
-      cursorKey = getPreviousDayKey(cursorKey);
-    }
-    return streak;
-  }, [sortedReflections]);
 
   const filteredReflections = useMemo(() => {
     let result = sortedReflections;
@@ -601,7 +556,7 @@ export function ReflectionJournal() {
             {filteredReflections.map((reflection) => {
               const mood = getMoodConfig(reflection.mood);
               const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
-              const phaseTone = getJournalPhaseTone(reflection.linkedWeekNumber);
+              const phaseTone = getJournalPhaseTone();
 
               return (
                 <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">

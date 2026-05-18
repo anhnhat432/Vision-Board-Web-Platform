@@ -77,6 +77,7 @@ vi.mock("../utils/app-mode", () => ({
   shouldShowBillingDebugUi: () => false,
   shouldEnable12WeekMutationSync: () => false,
   shouldEnable12WeekPullSync: () => false,
+  shouldEnable12WeekGoalTombstoneSync: () => true,
   shouldEnable12WeekImportDryRun: () => false,
   shouldEnable12WeekCloudImport: () => false,
 }));

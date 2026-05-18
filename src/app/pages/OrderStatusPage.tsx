@@ -1,6 +1,5 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -548,17 +547,6 @@ if (paymentLoading && !paymentOrder) {
   const hasGoalLink = Boolean(order.goalId || (order.goalTitle.trim() && order.goalTitle !== UNLINKED_GOAL_TITLE));
   const hasKeywords = order.keywords.length > 0;
   const hasNote = order.note.trim().length > 0;
-  const createdAtLabel = formatCalendarDate(order.createdAt, "vi-VN", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-  const updatedAtLabel = formatCalendarDate(order.updatedAt, "vi-VN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
   const refreshOrders = (fallbackOrder?: LocalOrder) => {
     const nextRecentOrders = getOrders();
     const matchedOrder = params.orderId ? getOrderById(params.orderId) : getLatestOrder();
@@ -583,33 +571,6 @@ if (paymentLoading && !paymentOrder) {
 
     navigate("/order");
   };
-
-  const summaryItems = [
-    {
-      label: "Mã đơn",
-      value: order.id,
-      note: "Dùng để mở lại đúng đơn trong local flow.",
-      icon: ClipboardList,
-    },
-    {
-      label: "Ngày tạo",
-      value: createdAtLabel,
-      note: `Cập nhật gần nhất: ${updatedAtLabel}.`,
-      icon: CalendarDays,
-    },
-    {
-      label: "Trạng thái",
-      value: getOrderStatusLabel(order.status),
-      note: "Timeline bên dưới sẽ phản ánh đúng trạng thái hiện tại.",
-      icon: Truck,
-    },
-    {
-      label: "Loại kit",
-      value: getKitTypeLabel(order.kitType),
-      note: hasGoalLink ? order.focusArea : "Đơn đang ở chế độ độc lập.",
-      icon: Package,
-    },
-  ];
 
   return (
     <div className="stack-section mx-auto max-w-5xl px-4 pb-12 sm:px-6 lg:px-8">

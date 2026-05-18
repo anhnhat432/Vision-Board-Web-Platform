@@ -1,5 +1,7 @@
 import { isRealMode, shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
 import { isApiBaseUrlConfigured, toAppError } from "@/lib/api/apiClient";
+import { deleteGoal } from "@/services/goalService";
+import { deletePlan } from "@/services/planService";
 import {
   post12WeekMutations,
   toTwelveWeekMutationRequestItem,
@@ -14,6 +16,7 @@ import {
   markMutationSucceeded,
   readMutationQueueStore,
   writeMutationQueueStore,
+  type DataMutationItem,
   type DataMutationQueueStore,
   type MutationFailureInput,
 } from "./mutationQueue";
@@ -48,6 +51,8 @@ export interface SendPending12WeekMutationsOptions {
   now?: string | Date;
   batchSize?: number;
   postMutations?: typeof post12WeekMutations;
+  deleteGoalFn?: typeof deleteGoal;
+  deletePlanFn?: typeof deletePlan;
 }
 
 const DEFAULT_BATCH_SIZE = 25;
@@ -171,6 +176,52 @@ function countRemainingPending(store: DataMutationQueueStore, ownerUid: string, 
   return listPendingMutations(store, { ownerUid, now }).length;
 }
 
+function isDeleteMutation(item: DataMutationItem): item is Extract<DataMutationItem, { kind: "goal_deleted" | "plan_deleted" }> {
+  return item.kind === "goal_deleted" || item.kind === "plan_deleted";
+}
+
+function isAlreadyDeletedError(error: unknown): boolean {
+  return toAppError(error).status === 404;
+}
+
+async function sendDeleteMutation(
+  item: Extract<DataMutationItem, { kind: "goal_deleted" | "plan_deleted" }>,
+  options: Pick<SendPending12WeekMutationsOptions, "deleteGoalFn" | "deletePlanFn">,
+): Promise<void> {
+  if (item.kind === "goal_deleted") {
+    const backendGoalId = item.payload.backendGoalId?.trim();
+    if (!backendGoalId) return;
+    await (options.deleteGoalFn ?? deleteGoal)(backendGoalId);
+    return;
+  }
+
+  const backendPlanId = item.payload.backendPlanId?.trim();
+  if (!backendPlanId) return;
+  await (options.deletePlanFn ?? deletePlan)(backendPlanId);
+}
+
+function createDrainResult(input: {
+  pendingMutationsLength: number;
+  latestStore: DataMutationQueueStore;
+  ownerUid: string;
+  now: string;
+  succeededCount: number;
+  duplicateCount: number;
+  failedCount: number;
+  hadRequestError: boolean;
+  error?: unknown;
+}): MutationQueueSyncResult {
+  return {
+    status: input.failedCount > 0 ? (input.hadRequestError && input.succeededCount === 0 ? "error" : "partial") : input.hadRequestError ? "error" : "success",
+    attemptedCount: input.pendingMutationsLength,
+    succeededCount: input.succeededCount,
+    duplicateCount: input.duplicateCount,
+    failedCount: input.failedCount,
+    pendingCount: countRemainingPending(input.latestStore, input.ownerUid, input.now),
+    error: input.error,
+  };
+}
+
 export async function sendPending12WeekMutations(
   options: SendPending12WeekMutationsOptions = {},
 ): Promise<MutationQueueSyncResult> {
@@ -205,84 +256,118 @@ export async function sendPending12WeekMutations(
   };
   writeMutationQueueStore(inFlightStore, { storage: options.storage });
 
-  const request = {
-    batchId: buildBatchId(ownerUid, now),
-    clientGeneratedAt: now,
-    mutations: pendingMutations.map(toTwelveWeekMutationRequestItem),
-  };
+  const deleteMutations = pendingMutations.filter(isDeleteMutation);
+  const batchMutations = pendingMutations.filter((item) => !isDeleteMutation(item));
+  let latestStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
+  let succeededCount = 0;
+  let duplicateCount = 0;
+  let failedCount = 0;
+  let hadRequestError = false;
+  let latestError: unknown;
 
-  try {
-    const response = await (options.postMutations ?? post12WeekMutations)(request);
-    const results = collectResponseResults(response);
-    let latestStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
-    let succeededCount = 0;
-    let duplicateCount = 0;
-    let failedCount = 0;
-
-    for (const item of pendingMutations) {
-      const result = results.get(item.id);
-      if (isSuccessStatus(result?.status)) {
+  for (const item of deleteMutations) {
+    try {
+      await sendDeleteMutation(item, options);
+      latestStore = markMutationSucceeded(latestStore, item.id, { now });
+      succeededCount += 1;
+    } catch (error) {
+      if (isAlreadyDeletedError(error)) {
         latestStore = markMutationSucceeded(latestStore, item.id, { now });
         succeededCount += 1;
-        if (result?.status === "duplicate") duplicateCount += 1;
+        duplicateCount += 1;
         continue;
       }
 
-      const failure = result
-        ? getFailureInput(result, "Đồng bộ thất bại, sẽ thử lại sau.")
-        : {
-            code: "missing_sync_result",
-            message: "Máy chủ không trả về kết quả cho thay đổi này.",
-            retryable: true,
-          };
+      const failure = getRequestFailureInput(error);
       const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
       latestStore = markMutationFailed(latestStore, item.id, failure, {
         now,
         nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
       });
-      failedCount += 1;
+      if (failure.httpStatus !== 429) failedCount += 1;
+      hadRequestError = true;
+      latestError = error;
     }
-
-    latestStore = {
-      ...latestStore,
-      lastDrainFinishedAt: now,
-    };
-    writeMutationQueueStore(latestStore, { storage: options.storage });
-
-    return {
-      status: failedCount > 0 ? "partial" : "success",
-      attemptedCount: pendingMutations.length,
-      succeededCount,
-      duplicateCount,
-      failedCount,
-      pendingCount: countRemainingPending(latestStore, ownerUid, now),
-    };
-  } catch (error) {
-    const failure = getRequestFailureInput(error);
-    let latestStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
-
-    for (const item of pendingMutations) {
-      const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
-      latestStore = markMutationFailed(latestStore, item.id, failure, {
-        now,
-        nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
-      });
-    }
-
-    latestStore = {
-      ...latestStore,
-      lastDrainFinishedAt: now,
-    };
-    writeMutationQueueStore(latestStore, { storage: options.storage });
-
-    return {
-      status: "error",
-      attemptedCount: pendingMutations.length,
-      succeededCount: 0,
-      duplicateCount: 0,
-      failedCount: failure.httpStatus === 429 ? 0 : pendingMutations.length,
-      pendingCount: countRemainingPending(latestStore, ownerUid, now),
-      error,
-    };
   }
+
+  if (deleteMutations.length > 0) {
+    writeMutationQueueStore(latestStore, { storage: options.storage });
+  }
+
+  if (batchMutations.length > 0) {
+    const request = {
+      batchId: buildBatchId(ownerUid, now),
+      clientGeneratedAt: now,
+      mutations: batchMutations.map(toTwelveWeekMutationRequestItem),
+    };
+
+    try {
+      const response = await (options.postMutations ?? post12WeekMutations)(request);
+      const results = collectResponseResults(response);
+      latestStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
+
+      for (const item of deleteMutations) {
+        const appliedDelete = latestStore.items.find((candidate) => candidate.id === item.id && candidate.status === "applied");
+        if (!appliedDelete) continue;
+        latestStore = markMutationSucceeded(latestStore, item.id, { now });
+      }
+
+      for (const item of batchMutations) {
+        const result = results.get(item.id);
+        if (isSuccessStatus(result?.status)) {
+          latestStore = markMutationSucceeded(latestStore, item.id, { now });
+          succeededCount += 1;
+          if (result?.status === "duplicate") duplicateCount += 1;
+          continue;
+        }
+
+        const failure = result
+          ? getFailureInput(result, "Đồng bộ thất bại, sẽ thử lại sau.")
+          : {
+              code: "missing_sync_result",
+              message: "Máy chủ không trả về kết quả cho thay đổi này.",
+              retryable: true,
+            };
+        const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
+        latestStore = markMutationFailed(latestStore, item.id, failure, {
+          now,
+          nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
+        });
+        failedCount += 1;
+      }
+    } catch (error) {
+      const failure = getRequestFailureInput(error);
+      latestStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
+
+      for (const item of batchMutations) {
+        const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
+        latestStore = markMutationFailed(latestStore, item.id, failure, {
+          now,
+          nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
+        });
+      }
+
+      if (failure.httpStatus !== 429) failedCount += batchMutations.length;
+      hadRequestError = true;
+      latestError = error;
+    }
+  }
+
+  latestStore = {
+    ...latestStore,
+    lastDrainFinishedAt: now,
+  };
+  writeMutationQueueStore(latestStore, { storage: options.storage });
+
+  return createDrainResult({
+    pendingMutationsLength: pendingMutations.length,
+    latestStore,
+    ownerUid,
+    now,
+    succeededCount,
+    duplicateCount,
+    failedCount,
+    hadRequestError,
+    error: latestError,
+  });
 }

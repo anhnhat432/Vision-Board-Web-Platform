@@ -102,6 +102,7 @@ const dailyCheckInSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -118,14 +119,19 @@ const dailyCheckInSchema = new Schema(
   },
 );
 
-dailyCheckInSchema.index({ userId: 1, clientPlanId: 1, localDate: 1 }, { unique: true });
+dailyCheckInSchema.index(
+  { userId: 1, clientPlanId: 1, localDate: 1 },
+  { unique: true, name: "daily_checkin_active_plan_date_unique", partialFilterExpression: { deletedAt: null } },
+);
 dailyCheckInSchema.index(
   { userId: 1, clientCheckInId: 1 },
   {
     unique: true,
-    partialFilterExpression: { clientCheckInId: { $type: "string" } },
+    name: "daily_checkin_active_client_checkin_unique",
+    partialFilterExpression: { clientCheckInId: { $type: "string" }, deletedAt: null },
   },
 );
+dailyCheckInSchema.index({ userId: 1, deletedAt: 1 });
 dailyCheckInSchema.index({ userId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export const DailyCheckInModel = model("DailyCheckIn", dailyCheckInSchema);

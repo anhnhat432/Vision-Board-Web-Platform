@@ -444,6 +444,10 @@ function getPendingMutationClientId(item: DataMutationItem): string | undefined 
       return item.payload.clientPlanId ?? item.planId ?? getTwelveWeekClientPlanId(item.goalId);
     case "lead_metric_upserted":
       return item.payload.clientMetricId;
+    case "goal_deleted":
+      return item.payload.clientGoalId;
+    case "plan_deleted":
+      return item.payload.clientPlanId;
   }
 }
 
@@ -459,6 +463,10 @@ function getPendingMutationKind(item: DataMutationItem): PulledWorkspaceMergeEnt
       return "plan";
     case "lead_metric_upserted":
       return "leadMetric";
+    case "goal_deleted":
+      return "goal";
+    case "plan_deleted":
+      return "plan";
   }
 }
 
@@ -563,12 +571,58 @@ function buildValueDiffConflicts(
   return conflicts;
 }
 
+function getPendingDeleteKeys(pendingMutations: DataMutationItem[]): Set<string> {
+  const keys = new Set<string>();
+  pendingMutations
+    .filter((item) => UNRESOLVED_MUTATION_STATUSES.has(item.status))
+    .forEach((item) => {
+      if (item.kind === "goal_deleted") keys.add(`goal:${item.payload.clientGoalId}`);
+      if (item.kind === "plan_deleted") keys.add(`plan:${item.payload.clientPlanId}`);
+    });
+  return keys;
+}
+
+function getTombstoneKeys(input: TwelveWeekPulledWorkspace | TwelveWeekPullResponse): Set<string> {
+  const keys = new Set<string>();
+  if (!isPullResponse(input)) return keys;
+
+  input.tombstones.goals.forEach((tombstone) => {
+    const clientId = tombstone.clientId?.trim();
+    if (clientId) keys.add(`goal:${clientId}`);
+  });
+  input.tombstones.plans.forEach((tombstone) => {
+    const clientId = tombstone.clientId?.trim();
+    if (clientId) keys.add(`plan:${clientId}`);
+  });
+  return keys;
+}
+
+function getGoalIdFromPath(path: string): string | null {
+  const match = path.match(/^goals\.([^.]+)/);
+  return match?.[1] ?? null;
+}
+
+function isEntityCoveredByDelete(entity: ComparableEntity, deleteKeys: ReadonlySet<string>): boolean {
+  const key = `${entity.kind}:${entity.clientId}`;
+  if (deleteKeys.has(key)) return true;
+
+  const goalId = getGoalIdFromPath(entity.path);
+  if (!goalId) return false;
+  return deleteKeys.has(`goal:${goalId}`) || deleteKeys.has(`plan:${getTwelveWeekClientPlanId(goalId)}`);
+}
+
 function buildLocalOnlyChanges(
   localIndex: ReadonlyMap<string, ComparableEntity>,
   cloudIndex: ReadonlyMap<string, ComparableEntity>,
+  pendingDeleteKeys: ReadonlySet<string>,
+  tombstoneKeys: ReadonlySet<string>,
 ): PulledWorkspaceMergeIssue[] {
+  const deleteKeys = new Set([...pendingDeleteKeys, ...tombstoneKeys]);
   return [...localIndex.values()]
-    .filter((entity) => !cloudIndex.has(`${entity.kind}:${entity.clientId}`))
+    .filter((entity) => {
+      const key = `${entity.kind}:${entity.clientId}`;
+      return !cloudIndex.has(key) && !isEntityCoveredByDelete(entity, deleteKeys);
+    })
     .map((entity) => ({
       kind: entity.kind,
       source: "local" as const,
@@ -582,9 +636,13 @@ function buildLocalOnlyChanges(
 function buildCloudOnlyChanges(
   localIndex: ReadonlyMap<string, ComparableEntity>,
   cloudIndex: ReadonlyMap<string, ComparableEntity>,
+  tombstoneKeys: ReadonlySet<string>,
 ): PulledWorkspaceMergeIssue[] {
   return [...cloudIndex.values()]
-    .filter((entity) => !localIndex.has(`${entity.kind}:${entity.clientId}`))
+    .filter((entity) => {
+      const key = `${entity.kind}:${entity.clientId}`;
+      return !localIndex.has(key) && !tombstoneKeys.has(key);
+    })
     .map((entity) => ({
       kind: entity.kind,
       source: "cloud" as const,
@@ -652,15 +710,18 @@ export function createPulledWorkspaceMergeReport(
   const missingClientIds: PulledWorkspaceMergeIssue[] = [];
   const localIndex = createLocalIndex(localGoals);
   const cloudIndex = createCloudIndex(workspace, missingClientIds);
-  const pendingConflicts = buildPendingMutationConflicts(cloudIndex, options.pendingMutations ?? []);
+  const pendingMutations = options.pendingMutations ?? [];
+  const pendingDeleteKeys = getPendingDeleteKeys(pendingMutations);
+  const tombstoneKeys = getTombstoneKeys(pulledWorkspace);
+  const pendingConflicts = buildPendingMutationConflicts(cloudIndex, pendingMutations);
   const pendingConflictKeys = new Set(pendingConflicts.map((conflict) => `${conflict.kind}:${conflict.clientId}`));
   const valueConflicts = isDelta ? [] : buildValueDiffConflicts(localIndex, cloudIndex, pendingConflictKeys);
   const conflicts = [...pendingConflicts, ...valueConflicts];
   const cloudOnlyChanges = [
-    ...buildCloudOnlyChanges(localIndex, cloudIndex),
+    ...buildCloudOnlyChanges(localIndex, cloudIndex, tombstoneKeys),
     ...buildMatchedCloudChanges(localIndex, cloudIndex),
   ];
-  const localOnlyChanges = isDelta ? [] : buildLocalOnlyChanges(localIndex, cloudIndex);
+  const localOnlyChanges = isDelta ? [] : buildLocalOnlyChanges(localIndex, cloudIndex, pendingDeleteKeys, tombstoneKeys);
   const unsupportedFields = isDelta ? [] : collectUnsupportedFields(localGoals, cloudIndex);
 
   return {

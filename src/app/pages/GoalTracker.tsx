@@ -1,16 +1,15 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
+import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
-import { isApiBaseUrlConfigured, toAppError } from "@/lib/api/apiClient";
+import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twelveWeekImportPayload";
+import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { deleteGoal as deleteBackendGoal } from "@/services/goalService";
-import { deletePlan as deleteBackendPlan } from "@/services/planService";
 import {
   AlertTriangle,
-  CalendarDays,
   CheckCircle2,
-  Clock3,
   Plus,
   Search,
   Target,
@@ -38,78 +37,30 @@ import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { celebrateSpark, celebrateSpotlight } from "../utils/experience";
-import { FREE_TIER_LIMITS, getFreeTierUsage, hasReachedLimit } from "../utils/feature-entitlements";
+import { hasReachedLimit } from "../utils/feature-entitlements";
 import {
   APP_STORAGE_KEYS,
-  LIFE_AREAS,
   type UserData,
   calculateGoalProgress,
   clearGoalPlanningDrafts,
   deleteGoal as deleteLocalGoal,
-  formatCalendarDate,
   getCalendarDayDifference,
   getGoalExecutionStats,
   getLifeAreaLabel,
   getTwelveWeekCurrentWeek,
-  getTwelveWeekTasksForWeek,
   getTwelveWeekTodayTasks,
-  getTwelveWeekWeekRange,
   getUserData,
-  isTwelveWeekReviewDueToday,
   recomputeGoalProgressFromWeeks,
   saveUserData,
   toggleTwelveWeekTask,
   updateGoal,
 } from "../utils/storage";
-import { isRealMode } from "../utils/app-mode";
-import { generateId } from "../utils/storage-types";
+import { isRealMode, shouldEnable12WeekGoalTombstoneSync } from "../utils/app-mode";
 import { getPlanLabel } from "../utils/twelve-week-premium";
-
-const formatDeadline = (deadline: string) => {
-  const formatted = formatCalendarDate(deadline);
-  if (formatted !== "--") return formatted;
-
-  const date = new Date(deadline);
-  return Number.isNaN(date.getTime()) ? "Chưa có hạn" : date.toLocaleDateString("vi-VN");
-};
-
-const getSystemStatusLabel = (status?: string) => {
-  if (status === "paused") return "Tạm dừng";
-  if (status === "completed") return "Đã hoàn tất";
-  return "Đang chạy";
-};
-
-async function deleteRemoteGoalRecords({
-  backendGoalId,
-  backendPlanId,
-}: {
-  backendGoalId: string | null;
-  backendPlanId: string | null;
-}): Promise<void> {
-  const operations: Promise<unknown>[] = [];
-  if (backendPlanId) operations.push(deleteBackendPlan(backendPlanId));
-  if (backendGoalId) operations.push(deleteBackendGoal(backendGoalId));
-  if (operations.length === 0) return;
-
-  const results = await Promise.allSettled(operations);
-  const hasFailure = results.some((result) => result.status === "rejected");
-  if (!hasFailure) return;
-
-  const firstFailure = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
-  const message = firstFailure
-    ? toAppError(firstFailure.reason).message
-    : "Chưa xóa được dữ liệu trên tài khoản.";
-
-  toast.warning("Mục tiêu đã xóa trên thiết bị này, nhưng chưa xóa xong trên tài khoản.", {
-    description: message,
-  });
-}
 
 export function GoalTracker() {
   const { userData, reloadUserData } = useSyncedUserData();
   const authContext = useOptionalAuthContext();
-  const [newTask, setNewTask] = useState("");
-  const [addingTaskToGoalId, setAddingTaskToGoalId] = useState<string | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
 
   if (!userData) {
@@ -123,10 +74,6 @@ export function GoalTracker() {
   return (
     <GoalTrackerContent
       userData={userData}
-      newTask={newTask}
-      setNewTask={setNewTask}
-      addingTaskToGoalId={addingTaskToGoalId}
-      setAddingTaskToGoalId={setAddingTaskToGoalId}
       goalToDelete={goalToDelete}
       setGoalToDelete={setGoalToDelete}
       onReload={reloadUserData}
@@ -137,28 +84,20 @@ export function GoalTracker() {
 
 function GoalTrackerContent({
   userData,
-  newTask,
-  setNewTask,
-  addingTaskToGoalId,
-  setAddingTaskToGoalId,
   goalToDelete,
   setGoalToDelete,
   onReload,
   canSyncRemoteDelete,
 }: {
   userData: UserData;
-  newTask: string;
-  setNewTask: (value: string) => void;
-  addingTaskToGoalId: string | null;
-  setAddingTaskToGoalId: (value: string | null) => void;
   goalToDelete: string | null;
   setGoalToDelete: (value: string | null) => void;
   onReload: () => void;
   canSyncRemoteDelete: boolean;
 }) {
   const navigate = useNavigate();
+  const autoCloudSync = useOptionalAutoCloudSyncContext();
   const reload = onReload;
-  const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [viewUserData, setViewUserData] = useState(userData);
   const [isGoalLimitPaywallOpen, setIsGoalLimitPaywallOpen] = useState(false);
@@ -173,7 +112,7 @@ function GoalTrackerContent({
     return () => window.removeEventListener("focus", reload);
   }, [reload]);
 
-  const { currentPlanCode, hasPremiumReviewInsights } = usePlanEntitlements(viewUserData);
+  const { currentPlanCode } = usePlanEntitlements(viewUserData);
 
   const goals = useMemo(
     () =>
@@ -220,11 +159,8 @@ function GoalTrackerContent({
     [backendSystemsByGoalId, goals, locallyUpdatedSystemGoalIds],
   );
   const hasGoals = effectiveGoals.length > 0;
-  const goalLimitUsage = getFreeTierUsage(viewUserData, "maxActiveGoals");
-  const shouldShowFreeGoalLimit = currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
   const hasRealLifeBalance = viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
-  const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ góc nhìn" : "Bắt đầu Cân bằng cuộc sống";
   const twelveWeekGoals = useMemo(
     () => effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem)),
     [effectiveGoals],
@@ -257,30 +193,6 @@ function GoalTrackerContent({
 
     clearGoalPlanningDrafts();
     navigate(goalFlowStartHref);
-  };
-
-  const handleAddTask = (goalId: string) => {
-    if (!newTask.trim()) return;
-
-    const goal = viewUserData.goals.find((item) => item.id === goalId);
-    if (!goal) return;
-
-    if (goal.twelveWeekSystem) {
-      toast.info("Chu kỳ 12 tuần được quản lý ở trung tâm 12 tuần.", {
-        description: "Phần việc hằng ngày, check-in và review tuần đều nằm trong cùng một flow.",
-      });
-      openTwelveWeekCenter(goalId);
-      return;
-    }
-
-    const now = Date.now();
-    updateGoal(goalId, {
-      tasks: [...goal.tasks, { id: generateId("task"), title: newTask.trim(), completed: false, lastModifiedAt: now }],
-    });
-
-    setNewTask("");
-    setAddingTaskToGoalId(null);
-    reload();
   };
 
   const handleToggleTask = (goalId: string, taskId: string) => {
@@ -393,29 +305,14 @@ function GoalTrackerContent({
     reload();
   };
 
-  const handleDeleteTask = (goalId: string, taskId: string) => {
-    const goal = viewUserData.goals.find((item) => item.id === goalId);
-    if (!goal) return;
-
-    if (goal.twelveWeekSystem) {
-      toast.info("Việc của chu kỳ 12 tuần nên xử lý ở trung tâm 12 tuần.", {
-        description: "Màn này chỉ giữ phần tổng quan và điều hướng.",
-      });
-      openTwelveWeekCenter(goalId);
-      return;
-    }
-
-    updateGoal(goalId, { tasks: goal.tasks.filter((task) => task.id !== taskId) });
-    reload();
-  };
-
   const handleConfirmDeleteGoal = () => {
     if (!goalToDelete) return;
     const deletedGoalId = goalToDelete;
     const snapshot = getUserData();
     const backendGoalId = getBackendGoalId(deletedGoalId);
     const backendPlanId = getPlanLink(deletedGoalId)?.planId ?? null;
-    const shouldDeleteRemote = canSyncRemoteDelete && Boolean(backendPlanId || backendGoalId);
+    const clientPlanId = getTwelveWeekClientPlanId(deletedGoalId);
+    const shouldQueueRemoteDelete = canSyncRemoteDelete && shouldEnable12WeekGoalTombstoneSync() && Boolean(backendPlanId || backendGoalId);
 
     deleteLocalGoal(deletedGoalId);
     // Optimistic local update so the card disappears immediately without
@@ -426,11 +323,35 @@ function GoalTrackerContent({
     }));
     setGoalToDelete(null);
     reload();
-    if (shouldDeleteRemote) {
-      void deleteRemoteGoalRecords({
-        backendGoalId,
-        backendPlanId,
-      });
+    if (shouldQueueRemoteDelete) {
+      const deletedAt = new Date().toISOString();
+      if (backendGoalId) {
+        enqueueStoredMutation({
+          kind: "goal_deleted",
+          goalId: deletedGoalId,
+          planId: clientPlanId,
+          payload: {
+            clientGoalId: deletedGoalId,
+            backendGoalId,
+            backendPlanId: backendPlanId ?? undefined,
+            deletedAt,
+          },
+        });
+      }
+      if (backendPlanId) {
+        enqueueStoredMutation({
+          kind: "plan_deleted",
+          goalId: deletedGoalId,
+          planId: clientPlanId,
+          payload: {
+            clientPlanId,
+            backendPlanId,
+            clientGoalId: deletedGoalId,
+            deletedAt,
+          },
+        });
+      }
+      void autoCloudSync?.triggerDrainOnly();
       toast.success("Mục tiêu đã được xóa.");
       return;
     }
@@ -466,64 +387,6 @@ function GoalTrackerContent({
   };
 
   const completionRate = summary.totalTasks > 0 ? Math.round((summary.completedTasks / summary.totalTasks) * 100) : 0;
-  const priority = summary.reviewDue
-    ? {
-        icon: CalendarDays,
-        eyebrow: "Ưu tiên hôm nay",
-        title: "Chốt review tuần trước",
-        note: "Có chu kỳ cần review. Chốt lại tuần cũ sẽ giúp tuần sau rõ hơn.",
-        tone: "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]",
-        cta: "Mở 12 tuần",
-      }
-    : summary.overdue
-      ? {
-          icon: AlertTriangle,
-          eyebrow: "Cần xử lý",
-          title: `${summary.overdue} mục tiêu quá hạn`,
-          note: "Nhìn nhóm này trước để quyết định giữ, chỉnh hoặc dừng.",
-          tone: "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]",
-          cta: "Xem mục tiêu",
-        }
-      : summary.dueSoon
-        ? {
-            icon: Clock3,
-            eyebrow: "Sắp đến hạn",
-            title: `${summary.dueSoon} mục tiêu trong 7 ngày tới`,
-            note: "Kiểm tra việc kế tiếp để tránh nước rút quá muộn.",
-            tone: "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
-            cta: "Xem mục tiêu",
-          }
-        : twelveWeekGoals.length
-          ? {
-              icon: Zap,
-              eyebrow: "Đang chạy tốt",
-              title: "Tiếp tục chu kỳ 12 tuần",
-              note: "Mở trung tâm 12 tuần để tick việc, check-in và review đúng nhịp.",
-              tone: "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]",
-              cta: "Mở 12 tuần",
-            }
-          : {
-              icon: Target,
-              eyebrow: "Bắt đầu",
-              title: "Tạo mục tiêu đầu tiên",
-              note: "Đi từ Cân bằng cuộc sống để mục tiêu không bị viết vội hoặc quá rộng.",
-              tone: "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
-              cta: goalFlowStartLabel,
-            };
-  const PriorityIcon = priority.icon;
-  const handlePriorityAction = () => {
-    if (priority.cta === "Xem mục tiêu" && hasGoals) {
-      document.querySelector('[data-tour-id="goaltracker-goals"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-
-    if (twelveWeekGoals[0]) {
-      openTwelveWeekCenter(twelveWeekGoals[0].id);
-      return;
-    }
-
-    handleStartGuidedGoalFlow();
-  };
   const overviewItems = [
     {
       title: "Mục tiêu",
@@ -553,23 +416,13 @@ function GoalTrackerContent({
 
   const renderGoalCard = (goal: UserData["goals"][number]) => {
     const progress = calculateGoalProgress(goal);
-    const execution = getGoalExecutionStats(goal);
     const system = goal.twelveWeekSystem;
-    const areaMeta = LIFE_AREAS.find((area) => area.name === goal.category);
     const daysLeft = getCalendarDayDifference(goal.deadline);
     const isOverdue = daysLeft !== null && daysLeft < 0 && progress < 100;
     const isNearDeadline = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
-    const standardNextTask = !system ? (goal.tasks.find((task) => !task.completed) ?? null) : null;
     const systemCurrentWeek = system ? getTwelveWeekCurrentWeek(system) : null;
-    const systemWeekRange = system && systemCurrentWeek ? getTwelveWeekWeekRange(system, systemCurrentWeek) : null;
-    const systemReviewDueToday = Boolean(system && isTwelveWeekReviewDueToday(system));
     const systemTodayOpenTasks = system ? getTwelveWeekTodayTasks(system).filter((task) => !task.completed) : [];
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
-    const nextSystemTask =
-      systemTodayOpenTasks[0] ??
-      (system && systemCurrentWeek
-        ? (getTwelveWeekTasksForWeek(system, systemCurrentWeek).find((task) => !task.completed) ?? null)
-        : null);
 
     return (
       <div key={goal.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">

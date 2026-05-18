@@ -106,6 +106,7 @@ const leadMetricSchema = new Schema(
     deletedAt: {
       type: Date,
       required: false,
+      default: null,
     },
     lastMutationId: {
       type: String,
@@ -126,11 +127,13 @@ leadMetricSchema.index(
   { userId: 1, clientPlanId: 1, clientWeekId: 1, clientMetricId: 1 },
   {
     unique: true,
+    name: "lead_metric_active_client_metric_unique",
     partialFilterExpression: {
       userId: { $type: "string" },
       clientPlanId: { $type: "string" },
       clientWeekId: { $type: "string" },
       clientMetricId: { $type: "string" },
+      deletedAt: null,
     },
   },
 );
@@ -138,15 +141,18 @@ leadMetricSchema.index(
   { weekId: 1, clientMetricId: 1 },
   {
     unique: true,
-    partialFilterExpression: { clientMetricId: { $type: "string" } },
+    name: "lead_metric_active_week_metric_unique",
+    partialFilterExpression: { clientMetricId: { $type: "string" }, deletedAt: null },
   },
 );
 leadMetricSchema.index(
   { weekId: 1, clientWeekId: 1 },
   {
-    partialFilterExpression: { clientWeekId: { $type: "string" } },
+    name: "lead_metric_active_client_week_lookup",
+    partialFilterExpression: { clientWeekId: { $type: "string" }, deletedAt: null },
   },
 );
+leadMetricSchema.index({ weekId: 1, deletedAt: 1 });
 leadMetricSchema.index({ weekId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export const LeadMetricModel = model("LeadMetric", leadMetricSchema);

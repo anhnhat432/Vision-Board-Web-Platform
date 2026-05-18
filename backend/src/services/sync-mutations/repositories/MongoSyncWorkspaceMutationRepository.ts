@@ -5,6 +5,7 @@ import { LeadMetricModel } from "../../../models/LeadMetricModel";
 import { PlanModel } from "../../../models/PlanModel";
 import { WeekModel } from "../../../models/WeekModel";
 import { WeekReviewModel } from "../../../models/WeekReviewModel";
+import { withoutTombstones } from "../../../utils/tombstone";
 import type {
   SyncWorkspaceMutationRepository,
   DailyCheckInUpsertApplyInput,
@@ -120,7 +121,7 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     userId: string,
     input: PlanSnapshotUpdatedApplyInput,
   ): Promise<AppliedWorkspaceMutationEntity | null> {
-    const existingPlan = await PlanModel.findOne({ userId, clientPlanId: input.clientPlanId }).lean();
+    const existingPlan = await PlanModel.findOne(withoutTombstones({ userId, clientPlanId: input.clientPlanId })).lean();
     if (!existingPlan) return null;
 
     const mappedPlan = existingPlan as unknown as MongoPlanDoc;
@@ -138,8 +139,8 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     try {
       session.startTransaction();
 
-      const updatedPlan = await PlanModel.findByIdAndUpdate(
-        planId,
+      const updatedPlan = await PlanModel.findOneAndUpdate(
+        withoutTombstones({ _id: planId }),
         { $set: planSet, $inc: { revision: 1 } },
         { new: true, runValidators: true, session },
       ).lean();
@@ -162,7 +163,7 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
         if (week.expectedOutput !== undefined) weekSet.expectedOutput = week.expectedOutput;
 
         await WeekModel.findOneAndUpdate(
-          weekQuery,
+          withoutTombstones(weekQuery),
           { $set: weekSet, $inc: { revision: 1 } },
           { runValidators: true, session },
         ).lean();
@@ -185,20 +186,22 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     const ownedWeek = await this.findOwnedWeek(userId, input);
     if (!ownedWeek) return null;
 
-    const existing = await LeadMetricModel.findOne({
-      $or: [
-        {
-          userId,
-          clientPlanId: ownedWeek.clientPlanId,
-          clientWeekId: ownedWeek.clientWeekId,
-          clientMetricId: input.clientMetricId,
-        },
-        {
-          weekId: ownedWeek.weekId,
-          clientMetricId: input.clientMetricId,
-        },
-      ],
-    }).lean();
+    const existing = await LeadMetricModel.findOne(
+      withoutTombstones({
+        $or: [
+          {
+            userId,
+            clientPlanId: ownedWeek.clientPlanId,
+            clientWeekId: ownedWeek.clientWeekId,
+            clientMetricId: input.clientMetricId,
+          },
+          {
+            weekId: ownedWeek.weekId,
+            clientMetricId: input.clientMetricId,
+          },
+        ],
+      }),
+    ).lean();
     const update = {
       userId,
       weekId: ownedWeek.weekId,
@@ -220,8 +223,8 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     };
 
     if (existing) {
-      const doc = await LeadMetricModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoLeadMetricDoc),
+      const doc = await LeadMetricModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoLeadMetricDoc) }),
         { $set: update, $inc: { revision: 1 } },
         { new: true, runValidators: true },
       ).lean();
@@ -240,11 +243,13 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     const ownedWeek = await this.findOwnedWeek(userId, input);
     if (!ownedWeek) return null;
 
-    const existing = await DailyCheckInModel.findOne({
-      userId,
-      clientPlanId: ownedWeek.clientPlanId,
-      localDate: input.localDate,
-    }).lean();
+    const existing = await DailyCheckInModel.findOne(
+      withoutTombstones({
+        userId,
+        clientPlanId: ownedWeek.clientPlanId,
+        localDate: input.localDate,
+      }),
+    ).lean();
     const update = {
       userId,
       planId: ownedWeek.planId,
@@ -268,8 +273,8 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     };
 
     if (existing) {
-      const doc = await DailyCheckInModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoDailyCheckInDoc),
+      const doc = await DailyCheckInModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoDailyCheckInDoc) }),
         { $set: update, $inc: { revision: 1 } },
         { new: true, runValidators: true },
       ).lean();
@@ -288,11 +293,13 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     const ownedWeek = await this.findOwnedWeek(userId, input);
     if (!ownedWeek) return null;
 
-    const existing = await WeekReviewModel.findOne({
-      userId,
-      clientPlanId: ownedWeek.clientPlanId,
-      weekNumber: ownedWeek.weekNumber,
-    }).lean();
+    const existing = await WeekReviewModel.findOne(
+      withoutTombstones({
+        userId,
+        clientPlanId: ownedWeek.clientPlanId,
+        weekNumber: ownedWeek.weekNumber,
+      }),
+    ).lean();
 
     const update = {
       userId,
@@ -327,8 +334,8 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     try {
       session.startTransaction();
 
-      const updatedWeek = await WeekModel.findByIdAndUpdate(
-        ownedWeek.weekId,
+      const updatedWeek = await WeekModel.findOneAndUpdate(
+        withoutTombstones({ _id: ownedWeek.weekId }),
         {
           $set: {
             review: {
@@ -352,8 +359,8 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
       let reviewDoc: MongoWeekReviewDoc | null = null;
 
       if (existing) {
-        reviewDoc = await WeekReviewModel.findByIdAndUpdate(
-          getDocId(existing as unknown as MongoWeekReviewDoc),
+        reviewDoc = await WeekReviewModel.findOneAndUpdate(
+          withoutTombstones({ _id: getDocId(existing as unknown as MongoWeekReviewDoc) }),
           { $set: update, $inc: { revision: 1 } },
           { new: true, runValidators: true, session },
         ).lean() as unknown as MongoWeekReviewDoc | null;
@@ -377,7 +384,7 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     userId: string,
     input: { clientPlanId: string; clientWeekId?: string; weekNumber: number },
   ): Promise<OwnedWeekRef | null> {
-    const plan = await PlanModel.findOne({ userId, clientPlanId: input.clientPlanId }).lean();
+    const plan = await PlanModel.findOne(withoutTombstones({ userId, clientPlanId: input.clientPlanId })).lean();
     if (!plan) return null;
 
     const mappedPlan = plan as unknown as MongoPlanDoc;
@@ -387,7 +394,7 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     if (input.clientWeekId) weekQuery.clientWeekId = input.clientWeekId;
     else weekQuery.weekNumber = input.weekNumber;
 
-    const week = await WeekModel.findOne(weekQuery).lean();
+    const week = await WeekModel.findOne(withoutTombstones(weekQuery)).lean();
     if (!week) return null;
 
     const mappedWeek = week as unknown as MongoWeekDoc;

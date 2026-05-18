@@ -276,6 +276,8 @@ function getClientPlanId(item: DataMutationItem): string | null | undefined {
   if (item.kind === "weekly_review_upserted") return item.payload.clientPlanId ?? item.planId;
   if (item.kind === "plan_snapshot_updated") return item.payload.clientPlanId ?? item.planId;
   if (item.kind === "lead_metric_upserted") return item.payload.clientPlanId ?? item.planId;
+  if (item.kind === "goal_deleted") return item.planId;
+  if (item.kind === "plan_deleted") return item.payload.clientPlanId ?? item.planId;
   return undefined;
 }
 

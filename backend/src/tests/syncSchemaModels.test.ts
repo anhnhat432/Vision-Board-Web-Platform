@@ -43,7 +43,7 @@ function hasMatchingKeys(actual: Record<string, unknown>, expected: Record<strin
 function assertIndex(
   model: ModelLike,
   keys: Record<string, unknown>,
-  options: { unique?: boolean; partialField?: string } = {},
+  options: { unique?: boolean; partialField?: string; tombstoneScoped?: boolean; partialExpression?: Record<string, unknown> } = {},
 ): void {
   const index = model.schema.indexes().find(([candidateKeys]) => hasMatchingKeys(candidateKeys, keys));
   assert.ok(index, `Expected index ${JSON.stringify(keys)} to exist`);
@@ -52,10 +52,15 @@ function assertIndex(
   if (options.unique !== undefined) {
     assert.equal(indexOptions.unique, options.unique);
   }
-  if (options.partialField) {
+  if (options.partialExpression) {
+    assert.deepEqual(indexOptions.partialFilterExpression, options.partialExpression);
+  } else if (options.partialField) {
     assert.deepEqual(indexOptions.partialFilterExpression, {
       [options.partialField]: { $type: "string" },
+      ...(options.tombstoneScoped ? { deletedAt: null } : {}),
     });
+  } else if (options.tombstoneScoped) {
+    assert.deepEqual(indexOptions.partialFilterExpression, { deletedAt: null });
   }
 }
 
@@ -96,47 +101,76 @@ describe("sync-ready schema metadata", () => {
   });
 
   it("adds safe partial indexes for client id lookup and future delta pull", () => {
-    assertIndex(asModelLike(GoalModel), { userId: 1, clientGoalId: 1 }, { unique: true, partialField: "clientGoalId" });
+    assertIndex(asModelLike(GoalModel), { userId: 1, clientGoalId: 1 }, { unique: true, partialField: "clientGoalId", tombstoneScoped: true });
+    assertIndex(asModelLike(GoalModel), { userId: 1, deletedAt: 1 });
     assertIndex(asModelLike(GoalModel), { userId: 1, syncUpdatedAt: 1, _id: 1 });
 
-    assertIndex(asModelLike(PlanModel), { userId: 1, clientPlanId: 1 }, { unique: true, partialField: "clientPlanId" });
-    assertIndex(asModelLike(PlanModel), { userId: 1, clientGoalId: 1 }, { partialField: "clientGoalId" });
+    assertIndex(asModelLike(PlanModel), { userId: 1, clientPlanId: 1 }, { unique: true, partialField: "clientPlanId", tombstoneScoped: true });
+    assertIndex(asModelLike(PlanModel), { userId: 1, clientGoalId: 1 }, { partialField: "clientGoalId", tombstoneScoped: true });
+    assertIndex(asModelLike(PlanModel), { userId: 1, deletedAt: 1 });
     assertIndex(asModelLike(PlanModel), { userId: 1, syncUpdatedAt: 1, _id: 1 });
 
-    assertIndex(asModelLike(WeekModel), { planId: 1, clientWeekId: 1 }, { unique: true, partialField: "clientWeekId" });
-    assertIndex(asModelLike(WeekModel), { planId: 1, clientPlanId: 1 }, { partialField: "clientPlanId" });
+    assertIndex(asModelLike(WeekModel), { planId: 1, weekNumber: 1 }, { unique: true, tombstoneScoped: true });
+    assertIndex(asModelLike(WeekModel), { planId: 1, clientWeekId: 1 }, { unique: true, partialField: "clientWeekId", tombstoneScoped: true });
+    assertIndex(asModelLike(WeekModel), { planId: 1, clientPlanId: 1 }, { partialField: "clientPlanId", tombstoneScoped: true });
+    assertIndex(asModelLike(WeekModel), { planId: 1, deletedAt: 1 });
     assertIndex(asModelLike(WeekModel), { planId: 1, syncUpdatedAt: 1, _id: 1 });
 
-    assertIndex(asModelLike(TaskModel), { weekId: 1, clientTaskId: 1 }, { unique: true, partialField: "clientTaskId" });
-    assertIndex(asModelLike(TaskModel), { weekId: 1, clientWeekId: 1 }, { partialField: "clientWeekId" });
+    assertIndex(asModelLike(TaskModel), { weekId: 1, clientTaskId: 1 }, { unique: true, partialField: "clientTaskId", tombstoneScoped: true });
+    assertIndex(asModelLike(TaskModel), { weekId: 1, clientWeekId: 1 }, { partialField: "clientWeekId", tombstoneScoped: true });
+    assertIndex(asModelLike(TaskModel), { weekId: 1, deletedAt: 1 });
     assertIndex(asModelLike(TaskModel), { weekId: 1, syncUpdatedAt: 1, _id: 1 });
 
     assertIndex(
       asModelLike(LeadMetricModel),
-      { weekId: 1, clientMetricId: 1 },
-      { unique: true, partialField: "clientMetricId" },
+      { userId: 1, clientPlanId: 1, clientWeekId: 1, clientMetricId: 1 },
+      {
+        unique: true,
+        partialExpression: {
+          userId: { $type: "string" },
+          clientPlanId: { $type: "string" },
+          clientWeekId: { $type: "string" },
+          clientMetricId: { $type: "string" },
+          deletedAt: null,
+        },
+      },
     );
-    assertIndex(asModelLike(LeadMetricModel), { weekId: 1, clientWeekId: 1 }, { partialField: "clientWeekId" });
+    assertIndex(
+      asModelLike(LeadMetricModel),
+      { weekId: 1, clientMetricId: 1 },
+      { unique: true, partialField: "clientMetricId", tombstoneScoped: true },
+    );
+    assertIndex(asModelLike(LeadMetricModel), { weekId: 1, clientWeekId: 1 }, { partialField: "clientWeekId", tombstoneScoped: true });
+    assertIndex(asModelLike(LeadMetricModel), { weekId: 1, deletedAt: 1 });
     assertIndex(asModelLike(LeadMetricModel), { weekId: 1, syncUpdatedAt: 1, _id: 1 });
 
-    assertIndex(asModelLike(DailyCheckInModel), { userId: 1, clientPlanId: 1, localDate: 1 }, { unique: true });
+    assertIndex(asModelLike(DailyCheckInModel), { userId: 1, clientPlanId: 1, localDate: 1 }, { unique: true, tombstoneScoped: true });
     assertIndex(
       asModelLike(DailyCheckInModel),
       { userId: 1, clientCheckInId: 1 },
-      { unique: true, partialField: "clientCheckInId" },
+      { unique: true, partialField: "clientCheckInId", tombstoneScoped: true },
     );
+    assertIndex(asModelLike(DailyCheckInModel), { userId: 1, deletedAt: 1 });
     assertIndex(asModelLike(DailyCheckInModel), { userId: 1, syncUpdatedAt: 1, _id: 1 });
 
+    assertIndex(asModelLike(WeekReviewModel), { weekId: 1 }, { unique: true, tombstoneScoped: true });
     assertIndex(
       asModelLike(WeekReviewModel),
       { userId: 1, clientPlanId: 1, weekNumber: 1 },
-      { unique: true },
+      {
+        unique: true,
+        partialExpression: { userId: { $type: "string" }, clientPlanId: { $type: "string" }, deletedAt: null },
+      },
     );
     assertIndex(
       asModelLike(WeekReviewModel),
       { userId: 1, clientReviewId: 1 },
-      { unique: true },
+      {
+        unique: true,
+        partialExpression: { userId: { $type: "string" }, clientReviewId: { $type: "string" }, deletedAt: null },
+      },
     );
+    assertIndex(asModelLike(WeekReviewModel), { userId: 1, deletedAt: 1 });
     assertIndex(asModelLike(WeekReviewModel), { userId: 1, syncUpdatedAt: 1, _id: 1 });
   });
 });

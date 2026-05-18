@@ -227,6 +227,60 @@ function seedLeadMetricMutation(input: {
   );
 }
 
+function seedGoalDeleteMutation(input: {
+  ownerUid?: string | null;
+  mutationId?: string;
+  backendGoalId?: string;
+} = {}): void {
+  enqueueStoredMutation(
+    {
+      kind: "goal_deleted",
+      goalId: "goal_1",
+      planId: "goal_1:12-week-system",
+      payload: {
+        clientGoalId: "goal_1",
+        backendGoalId: input.backendGoalId ?? "backend_goal_1",
+        backendPlanId: "backend_plan_1",
+        deletedAt: at(1),
+      },
+    },
+    {
+      ownerUid: input.ownerUid ?? "user_1",
+      storage: localStorage,
+      deviceId: "device_1",
+      now: at(1),
+      createId: () => input.mutationId ?? "goal_delete_mutation_1",
+    },
+  );
+}
+
+function seedPlanDeleteMutation(input: {
+  ownerUid?: string | null;
+  mutationId?: string;
+  backendPlanId?: string;
+} = {}): void {
+  enqueueStoredMutation(
+    {
+      kind: "plan_deleted",
+      goalId: "goal_1",
+      planId: "goal_1:12-week-system",
+      payload: {
+        clientPlanId: "goal_1:12-week-system",
+        backendPlanId: input.backendPlanId ?? "backend_plan_1",
+        clientGoalId: "goal_1",
+        deletedAt: at(1),
+      },
+    },
+    {
+      ownerUid: input.ownerUid ?? "user_1",
+      storage: localStorage,
+      deviceId: "device_1",
+      now: at(1),
+      createId: () => input.mutationId ?? "plan_delete_mutation_1",
+    },
+  );
+}
+
 function readItem(ownerUid = "user_1", mutationId = "mutation_1"): DataMutationItem {
   const item = readMutationQueueStore(ownerUid, { storage: localStorage, now: at(5) }).items.find(
     (candidate) => candidate.id === mutationId,
@@ -534,6 +588,82 @@ describe("mutation queue sender", () => {
 
     expect(result.status).toBe("success");
     expect(readItem("user_1", "metric_success").status).toBe("applied");
+  });
+
+  it("sends goal and plan delete mutations through idempotent delete endpoints", async () => {
+    seedGoalDeleteMutation({ mutationId: "goal_delete_success" });
+    seedPlanDeleteMutation({ mutationId: "plan_delete_success" });
+    const postMutations = vi.fn();
+    const deleteGoalFn = vi.fn(async () => ({ deleted: true }));
+    const deletePlanFn = vi.fn(async () => ({ deleted: true }));
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+      deleteGoalFn,
+      deletePlanFn,
+    });
+
+    expect(result.status).toBe("success");
+    expect(postMutations).not.toHaveBeenCalled();
+    expect(deleteGoalFn).toHaveBeenCalledWith("backend_goal_1");
+    expect(deletePlanFn).toHaveBeenCalledWith("backend_plan_1");
+    expect(readItem("user_1", "goal_delete_success").status).toBe("applied");
+    expect(readItem("user_1", "plan_delete_success").status).toBe("applied");
+  });
+
+  it("treats 404 delete responses as already-applied tombstones", async () => {
+    seedGoalDeleteMutation({ mutationId: "goal_delete_404" });
+    const deleteGoalFn = vi.fn(async () => {
+      throw { status: 404, message: "Goal not found" };
+    });
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations: vi.fn(),
+      deleteGoalFn,
+    });
+
+    expect(result.status).toBe("success");
+    expect(result.duplicateCount).toBe(1);
+    expect(readItem("user_1", "goal_delete_404").status).toBe("applied");
+  });
+
+  it("keeps failed delete mutations retryable", async () => {
+    seedPlanDeleteMutation({ mutationId: "plan_delete_network" });
+    const deletePlanFn = vi.fn(async () => {
+      throw { message: "Network down", isNetworkError: true };
+    });
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations: vi.fn(),
+      deletePlanFn,
+    });
+
+    const item = readItem("user_1", "plan_delete_network");
+    expect(result.status).toBe("error");
+    expect(item.status).toBe("retry_scheduled");
+    expect(item.error?.retryable).toBe(true);
+    expect(item.nextRetryAt).toBeTruthy();
   });
 
   it("does not call the backend for queued lead metrics in demo mode", async () => {

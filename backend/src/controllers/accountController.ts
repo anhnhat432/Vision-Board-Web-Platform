@@ -17,6 +17,7 @@ import { VisionBoardModel } from "../models/VisionBoardModel";
 import { WeekModel } from "../models/WeekModel";
 import { WeekReviewModel } from "../models/WeekReviewModel";
 import { successResponse } from "../utils/apiResponse";
+import { withoutTombstones } from "../utils/tombstone";
 
 interface AccountDeleteCounts {
   billingEvents: number;
@@ -138,8 +139,8 @@ async function getUserAccountExport(userId: string) {
   const [profile, goals, plans, orders, paymentOrders, billingSubscriptions, billingEvents, syncMutationLogs, visionBoards] =
     await Promise.all([
       UserModel.findOne({ firebaseUid: userId }).select("-__v").lean(),
-      GoalModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
-      PlanModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
+      GoalModel.find(withoutTombstones({ userId })).select("-__v").sort({ createdAt: 1 }).lean(),
+      PlanModel.find(withoutTombstones({ userId })).select("-__v").sort({ createdAt: 1 }).lean(),
       OrderModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       PaymentOrderModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       BillingSubscriptionModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
@@ -150,23 +151,23 @@ async function getUserAccountExport(userId: string) {
 
   const planIds = plans.map((plan) => plan._id);
   const weeks = planIds.length > 0
-    ? await WeekModel.find({ planId: { $in: planIds } }).select("-__v").sort({ weekNumber: 1 }).lean()
+    ? await WeekModel.find(withoutTombstones({ planId: { $in: planIds } })).select("-__v").sort({ weekNumber: 1 }).lean()
     : [];
   const weekIds = weeks.map((week) => week._id);
 
   const [tasks, leadMetrics, dailyCheckIns, weeklyReviews] = await Promise.all([
-    weekIds.length > 0 ? TaskModel.find({ weekId: { $in: weekIds } }).select("-__v").sort({ createdAt: 1 }).lean() : [],
-    LeadMetricModel.find({
+    weekIds.length > 0 ? TaskModel.find(withoutTombstones({ weekId: { $in: weekIds } })).select("-__v").sort({ createdAt: 1 }).lean() : [],
+    LeadMetricModel.find(withoutTombstones({
       $or: [{ userId }, ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : [])],
-    }).select("-__v").sort({ createdAt: 1 }).lean(),
-    DailyCheckInModel.find({ userId }).select("-__v").sort({ localDate: 1 }).lean(),
-    WeekReviewModel.find({
+    })).select("-__v").sort({ createdAt: 1 }).lean(),
+    DailyCheckInModel.find(withoutTombstones({ userId })).select("-__v").sort({ localDate: 1 }).lean(),
+    WeekReviewModel.find(withoutTombstones({
       $or: [
         { userId },
         ...(planIds.length > 0 ? [{ planId: { $in: planIds } }] : []),
         ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : []),
       ],
-    }).select("-__v").sort({ createdAt: 1 }).lean(),
+    })).select("-__v").sort({ createdAt: 1 }).lean(),
   ]);
 
   const counts: AccountExportCounts = {

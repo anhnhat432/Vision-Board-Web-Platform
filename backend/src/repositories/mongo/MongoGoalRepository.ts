@@ -1,6 +1,7 @@
 import type { Types } from "mongoose";
 
 import { GoalModel, type GoalStatus } from "../../models/GoalModel";
+import { softDeleteUpdate, withoutTombstones } from "../../utils/tombstone";
 
 export interface OnboardingTask {
   title: string;
@@ -20,6 +21,7 @@ export interface GoalEntity {
   readinessScore?: number;
   tasks?: OnboardingTask[];
   planId?: string;
+  clientGoalId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +38,7 @@ export interface CreateGoalData {
   readinessScore?: number;
   tasks?: OnboardingTask[];
   planId?: string;
+  clientGoalId?: string;
 }
 
 export interface UpdateGoalData {
@@ -64,6 +67,7 @@ function mapGoal(doc: {
   readinessScore?: number | null;
   tasks?: OnboardingTask[] | null;
   planId?: string | null;
+  clientGoalId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): GoalEntity {
@@ -80,6 +84,7 @@ function mapGoal(doc: {
     readinessScore: doc.readinessScore ?? undefined,
     tasks: doc.tasks ?? undefined,
     planId: doc.planId ?? undefined,
+    clientGoalId: doc.clientGoalId ?? undefined,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -99,24 +104,25 @@ export class MongoGoalRepository {
       readinessScore: data.readinessScore,
       tasks: data.tasks,
       planId: data.planId,
+      clientGoalId: data.clientGoalId,
     });
 
     return mapGoal(doc.toObject());
   }
 
   async getGoalById(id: string): Promise<GoalEntity | null> {
-    const doc = await GoalModel.findById(id).lean();
+    const doc = await GoalModel.findOne(withoutTombstones({ _id: id })).lean();
     return doc ? mapGoal(doc) : null;
   }
 
   async getGoalsByUserId(userId: string): Promise<GoalEntity[]> {
-    const docs = await GoalModel.find({ userId }).sort({ createdAt: -1 }).lean();
+    const docs = await GoalModel.find(withoutTombstones({ userId })).sort({ createdAt: -1 }).lean();
     return docs.map((doc) => mapGoal(doc));
   }
 
   async updateGoal(id: string, updates: UpdateGoalData): Promise<GoalEntity | null> {
-    const doc = await GoalModel.findByIdAndUpdate(
-      id,
+    const doc = await GoalModel.findOneAndUpdate(
+      withoutTombstones({ _id: id }),
       { $set: updates },
       { new: true, runValidators: true },
     ).lean();
@@ -124,8 +130,12 @@ export class MongoGoalRepository {
     return doc ? mapGoal(doc) : null;
   }
 
-  async deleteGoal(id: string): Promise<boolean> {
-    const result = await GoalModel.findByIdAndDelete(id).lean();
+  async deleteGoal(id: string, deletedAt = new Date()): Promise<boolean> {
+    const result = await GoalModel.findOneAndUpdate(
+      withoutTombstones({ _id: id }),
+      softDeleteUpdate(deletedAt),
+      { new: true },
+    ).lean();
     return result !== null;
   }
 }

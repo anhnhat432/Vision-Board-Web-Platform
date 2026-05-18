@@ -392,6 +392,66 @@ describe("data mutation queue", () => {
     }
   });
 
+  it("serializes and collapses goal and plan delete mutations", () => {
+    let store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: at(0) });
+
+    store = enqueueMutation(
+      store,
+      {
+        kind: "goal_deleted",
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        planId: "goal_1:12-week-system",
+        payload: {
+          clientGoalId: "goal_1",
+          backendGoalId: "backend_goal_1",
+          backendPlanId: "backend_plan_1",
+          deletedAt: at(1),
+        },
+      },
+      { now: at(1), createId: () => "goal_delete_1" },
+    );
+    store = enqueueMutation(
+      store,
+      {
+        kind: "goal_deleted",
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        planId: "goal_1:12-week-system",
+        payload: {
+          clientGoalId: "goal_1",
+          backendGoalId: "backend_goal_1",
+          backendPlanId: "backend_plan_1",
+          deletedAt: at(2),
+        },
+      },
+      { now: at(2), createId: () => "goal_delete_2" },
+    );
+    store = enqueueMutation(
+      store,
+      {
+        kind: "plan_deleted",
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        planId: "goal_1:12-week-system",
+        payload: {
+          clientPlanId: "goal_1:12-week-system",
+          backendPlanId: "backend_plan_1",
+          clientGoalId: "goal_1",
+          deletedAt: at(2),
+        },
+      },
+      { now: at(2), createId: () => "plan_delete_1" },
+    );
+
+    expect(store.items.map((item) => item.id)).toEqual(["goal_delete_2", "plan_delete_1"]);
+    expect(store.items[0].collapseKey).toBe("delete:goal_deleted:goal_1");
+    expect(store.items[0].supersedes).toEqual(["goal_delete_1"]);
+    expect(store.items[1].collapseKey).toBe("delete:plan_deleted:goal_1:12-week-system");
+    if (store.items[0].kind === "goal_deleted") expect(store.items[0].payload.deletedAt).toBe(at(2));
+    if (store.items[1].kind === "plan_deleted") expect(store.items[1].payload.backendPlanId).toBe("backend_plan_1");
+  });
+
   it("lists pending mutations by auth owner and keeps anonymous separate", () => {
     let store = createEmptyMutationQueueStore({ ownerUid: null, deviceId: "device_1", now: at(0) });
 

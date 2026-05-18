@@ -20,6 +20,7 @@ const SHOW_BILLING_DEBUG_UI = import.meta.env.VITE_SHOW_BILLING_DEBUG === "true"
 const SHOW_SYNC_DEBUG_UI = import.meta.env.VITE_SHOW_SYNC_DEBUG === "true";
 const ENABLE_12_WEEK_MUTATION_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_MUTATION_SYNC === "true";
 const ENABLE_12_WEEK_PULL_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_PULL_SYNC === "true";
+const ENABLE_12_WEEK_GOAL_TOMBSTONE_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_GOAL_TOMBSTONE_SYNC !== "false";
 const ENABLE_12_WEEK_IMPORT_DRY_RUN = import.meta.env.VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN === "true";
 const ENABLE_12_WEEK_CLOUD_IMPORT = import.meta.env.VITE_ENABLE_12_WEEK_CLOUD_IMPORT === "true";
 
@@ -53,6 +54,10 @@ export function shouldEnable12WeekMutationSync(): boolean {
 
 export function shouldEnable12WeekPullSync(): boolean {
   return ENABLE_12_WEEK_PULL_SYNC;
+}
+
+export function shouldEnable12WeekGoalTombstoneSync(): boolean {
+  return ENABLE_12_WEEK_GOAL_TOMBSTONE_SYNC;
 }
 
 export function shouldEnable12WeekImportDryRun(): boolean {

@@ -1,6 +1,7 @@
 import type { Types } from "mongoose";
 
 import { LeadMetricModel } from "../../models/LeadMetricModel";
+import { softDeleteUpdate, withoutTombstones } from "../../utils/tombstone";
 
 export interface MetricLogEntity {
   id: string;
@@ -87,18 +88,18 @@ export class MongoMetricRepository {
   }
 
   async getMetricById(id: string): Promise<MetricEntity | null> {
-    const doc = await LeadMetricModel.findById(id).lean();
+    const doc = await LeadMetricModel.findOne(withoutTombstones({ _id: id })).lean();
     return doc ? mapMetric(doc) : null;
   }
 
   async getMetricsByWeekId(weekId: string): Promise<MetricEntity[]> {
-    const docs = await LeadMetricModel.find({ weekId }).sort({ createdAt: 1 }).lean();
+    const docs = await LeadMetricModel.find(withoutTombstones({ weekId })).sort({ createdAt: 1 }).lean();
     return docs.map((doc) => mapMetric(doc));
   }
 
   async logMetric(metricId: string, log: LogMetricData): Promise<MetricEntity | null> {
-    const doc = await LeadMetricModel.findByIdAndUpdate(
-      metricId,
+    const doc = await LeadMetricModel.findOneAndUpdate(
+      withoutTombstones({ _id: metricId }),
       {
         $push: {
           logs: {
@@ -129,7 +130,7 @@ export class MongoMetricRepository {
     }
 
     const doc = await LeadMetricModel.findOneAndUpdate(
-      { _id: metricId, "logs._id": logId },
+      withoutTombstones({ _id: metricId, "logs._id": logId }),
       { $set: setPayload },
       { new: true, runValidators: true },
     ).lean();
@@ -138,8 +139,8 @@ export class MongoMetricRepository {
   }
 
   async updateMetric(metricId: string, updates: UpdateMetricData): Promise<MetricEntity | null> {
-    const doc = await LeadMetricModel.findByIdAndUpdate(
-      metricId,
+    const doc = await LeadMetricModel.findOneAndUpdate(
+      withoutTombstones({ _id: metricId }),
       { $set: updates },
       { new: true, runValidators: true },
     ).lean();
@@ -147,9 +148,12 @@ export class MongoMetricRepository {
     return doc ? mapMetric(doc) : null;
   }
 
-  async deleteMetricsByWeekIds(weekIds: string[]): Promise<number> {
+  async deleteMetricsByWeekIds(weekIds: string[], deletedAt = new Date()): Promise<number> {
     if (weekIds.length === 0) return 0;
-    const result = await LeadMetricModel.deleteMany({ weekId: { $in: weekIds } });
-    return result.deletedCount ?? 0;
+    const result = await LeadMetricModel.updateMany(
+      withoutTombstones({ weekId: { $in: weekIds } }),
+      softDeleteUpdate(deletedAt),
+    );
+    return result.modifiedCount ?? 0;
   }
 }

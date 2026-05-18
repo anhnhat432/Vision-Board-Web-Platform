@@ -15,8 +15,12 @@ export function AutoCloudSyncProvider({ children }: AutoCloudSyncProviderProps) 
   return <AutoCloudSyncContext.Provider value={value}>{children}</AutoCloudSyncContext.Provider>;
 }
 
+export function useOptionalAutoCloudSyncContext(): AutoCloudSyncState | null {
+  return useContext(AutoCloudSyncContext);
+}
+
 export function useAutoCloudSyncContext(): AutoCloudSyncState {
-  const context = useContext(AutoCloudSyncContext);
+  const context = useOptionalAutoCloudSyncContext();
 
   if (!context) {
     throw new Error("useAutoCloudSyncContext must be used inside AutoCloudSyncProvider");

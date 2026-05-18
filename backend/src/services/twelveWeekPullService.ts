@@ -893,17 +893,11 @@ export class TwelveWeekPullService {
         message: "Pull v1 returns current backend fields only; some local setup metadata is not yet persisted.",
       });
     }
-    if (
-      mode === "delta" &&
-      (responseWorkspace.goals.length > 0 ||
-        responseWorkspace.plans.length > 0 ||
-        responseWorkspace.weeks.length > 0 ||
-        responseWorkspace.leadMetrics.length > 0)
-    ) {
+    if (mode === "delta" && (responseWorkspace.weeks.length > 0 || responseWorkspace.leadMetrics.length > 0)) {
       warnings.push({
         code: "delta_context_entities_require_full_pull",
         message:
-          "Delta pull includes goal/plan/week/metric context changes; clients should retry with a full pull before applying.",
+          "Delta pull includes week/metric context changes; clients should retry with a full pull before applying.",
       });
     }
 

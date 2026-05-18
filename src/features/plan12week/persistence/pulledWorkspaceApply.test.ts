@@ -309,4 +309,54 @@ describe("applyPulledWorkspaceToUserData", () => {
     expect(nextData.goals[0].twelveWeekSystem?.dailyCheckIns).toHaveLength(1);
     expect(nextData.eventLog).toBe(userData.eventLog);
   });
+
+  it("removes a local goal when a goal tombstone is pulled", () => {
+    const userData = applyPulledWorkspaceToUserData(createUserData(), createWorkspace(), { now: baseNow });
+    const delta = createDeltaResponse({});
+    delta.tombstones.goals = [
+      {
+        id: "backend_goal_1",
+        clientId: "goal_1",
+        deletedAt: "2026-04-30T02:00:00.000Z",
+      },
+    ];
+
+    const nextData = applyPulledWorkspaceToUserData(userData, delta, { now: baseNow });
+
+    expect(nextData.goals.some((goal) => goal.id === "goal_1")).toBe(false);
+    expect(nextData.eventLog).toBe(userData.eventLog);
+  });
+
+  it("removes the local 12-week goal when a plan tombstone is pulled", () => {
+    const userData = applyPulledWorkspaceToUserData(createUserData(), createWorkspace(), { now: baseNow });
+    const delta = createDeltaResponse({});
+    delta.tombstones.plans = [
+      {
+        id: "backend_plan_1",
+        clientId: "goal_1:12-week-system",
+        deletedAt: "2026-04-30T02:00:00.000Z",
+      },
+    ];
+
+    const nextData = applyPulledWorkspaceToUserData(userData, delta, { now: baseNow });
+
+    expect(nextData.goals.some((goal) => goal.id === "goal_1")).toBe(false);
+  });
+
+  it("does not restore a local goal from full pull when the response includes its tombstone", () => {
+    const userData = applyPulledWorkspaceToUserData(createUserData(), createWorkspace(), { now: baseNow });
+    const response = createDeltaResponse(createWorkspace());
+    response.mode = "full";
+    response.tombstones.goals = [
+      {
+        id: "backend_goal_1",
+        clientId: "goal_1",
+        deletedAt: "2026-04-30T02:00:00.000Z",
+      },
+    ];
+
+    const nextData = applyPulledWorkspaceToUserData(userData, response, { now: baseNow });
+
+    expect(nextData.goals.some((goal) => goal.id === "goal_1")).toBe(false);
+  });
 });

@@ -13,6 +13,7 @@ import {
   type SyncMutationLogEntity,
 } from "../repositories/mongo/MongoSyncMutationLogRepository";
 import { ApiError } from "../utils/apiError";
+import { withoutTombstones } from "../utils/tombstone";
 import {
   twelveWeekImportValidationService,
   type TwelveWeekImportValidationReport,
@@ -705,7 +706,9 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertGoal(data: ImportGoalData): Promise<UpsertResult<ImportedGoalEntity>> {
-    const existing = await GoalModel.findOne({ userId: data.userId, clientGoalId: data.clientGoalId }).lean();
+    const existing = await GoalModel.findOne(
+      withoutTombstones({ userId: data.userId, clientGoalId: data.clientGoalId }),
+    ).lean();
     const update = {
       title: data.title,
       category: data.category,
@@ -719,8 +722,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     };
 
     if (existing) {
-      const doc = await GoalModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoGoalDoc),
+      const doc = await GoalModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoGoalDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
@@ -736,7 +739,7 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async linkGoalToPlan(goalId: string, planId: string, importId: string, syncUpdatedAt: Date): Promise<void> {
-    await GoalModel.findByIdAndUpdate(goalId, {
+    await GoalModel.findOneAndUpdate(withoutTombstones({ _id: goalId }), {
       $set: {
         planId,
         lastMutationId: importId,
@@ -746,7 +749,9 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertPlan(data: ImportPlanData): Promise<UpsertResult<ImportedPlanEntity>> {
-    const existing = await PlanModel.findOne({ userId: data.userId, clientPlanId: data.clientPlanId }).lean();
+    const existing = await PlanModel.findOne(
+      withoutTombstones({ userId: data.userId, clientPlanId: data.clientPlanId }),
+    ).lean();
     const update = {
       userId: data.userId,
       vision: data.vision,
@@ -759,8 +764,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     };
 
     if (existing) {
-      const doc = await PlanModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoPlanDoc),
+      const doc = await PlanModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoPlanDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
@@ -773,10 +778,12 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertWeek(data: ImportWeekData): Promise<UpsertResult<ImportedWeekEntity>> {
-    const existing = await WeekModel.findOne({
-      planId: data.planId,
-      $or: [{ clientWeekId: data.clientWeekId }, { weekNumber: data.weekNumber }],
-    }).lean();
+    const existing = await WeekModel.findOne(
+      withoutTombstones({
+        planId: data.planId,
+        $or: [{ clientWeekId: data.clientWeekId }, { weekNumber: data.weekNumber }],
+      }),
+    ).lean();
     const update = {
       planId: data.planId,
       weekNumber: data.weekNumber,
@@ -789,8 +796,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     };
 
     if (existing) {
-      const doc = await WeekModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoWeekDoc),
+      const doc = await WeekModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoWeekDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
@@ -803,7 +810,9 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertTask(data: ImportTaskData): Promise<UpsertResult<ImportedTaskEntity>> {
-    const existing = await TaskModel.findOne({ weekId: data.weekId, clientTaskId: data.clientTaskId }).lean();
+    const existing = await TaskModel.findOne(
+      withoutTombstones({ weekId: data.weekId, clientTaskId: data.clientTaskId }),
+    ).lean();
     const update = {
       weekId: data.weekId,
       title: data.title,
@@ -821,8 +830,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     };
 
     if (existing) {
-      const doc = await TaskModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoTaskDoc),
+      const doc = await TaskModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoTaskDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
@@ -835,20 +844,22 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertLeadMetric(data: ImportLeadMetricData): Promise<UpsertResult<ImportedLeadMetricEntity>> {
-    const existing = await LeadMetricModel.findOne({
-      $or: [
-        {
-          userId: data.userId,
-          clientPlanId: data.clientPlanId,
-          clientWeekId: data.clientWeekId,
-          clientMetricId: data.clientMetricId,
-        },
-        {
-          weekId: data.weekId,
-          clientMetricId: data.clientMetricId,
-        },
-      ],
-    }).lean();
+    const existing = await LeadMetricModel.findOne(
+      withoutTombstones({
+        $or: [
+          {
+            userId: data.userId,
+            clientPlanId: data.clientPlanId,
+            clientWeekId: data.clientWeekId,
+            clientMetricId: data.clientMetricId,
+          },
+          {
+            weekId: data.weekId,
+            clientMetricId: data.clientMetricId,
+          },
+        ],
+      }),
+    ).lean();
     const update = {
       userId: data.userId,
       weekId: data.weekId,
@@ -870,8 +881,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     };
 
     if (existing) {
-      const doc = await LeadMetricModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoLeadMetricDoc),
+      const doc = await LeadMetricModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoLeadMetricDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
@@ -884,11 +895,13 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertDailyCheckIn(data: ImportDailyCheckInData): Promise<UpsertResult<ImportedDailyCheckInEntity>> {
-    const existing = await DailyCheckInModel.findOne({
-      userId: data.userId,
-      clientPlanId: data.clientPlanId,
-      localDate: data.localDate,
-    }).lean();
+    const existing = await DailyCheckInModel.findOne(
+      withoutTombstones({
+        userId: data.userId,
+        clientPlanId: data.clientPlanId,
+        localDate: data.localDate,
+      }),
+    ).lean();
     const update = {
       userId: data.userId,
       planId: data.planId,
@@ -912,8 +925,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     };
 
     if (existing) {
-      const doc = await DailyCheckInModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoDailyCheckInDoc),
+      const doc = await DailyCheckInModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoDailyCheckInDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
@@ -926,11 +939,13 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
   }
 
   async upsertWeeklyReview(data: ImportWeeklyReviewData): Promise<UpsertResult<ImportedWeeklyReviewEntity>> {
-    const existing = await WeekReviewModel.findOne({
-      userId: data.userId,
-      clientPlanId: data.clientPlanId,
-      weekNumber: data.weekNumber,
-    }).lean();
+    const existing = await WeekReviewModel.findOne(
+      withoutTombstones({
+        userId: data.userId,
+        clientPlanId: data.clientPlanId,
+        weekNumber: data.weekNumber,
+      }),
+    ).lean();
     const update = {
       userId: data.userId,
       planId: data.planId,
@@ -959,8 +974,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
       syncUpdatedAt: data.syncUpdatedAt,
     };
 
-    await WeekModel.findByIdAndUpdate(
-      data.weekId,
+    await WeekModel.findOneAndUpdate(
+      withoutTombstones({ _id: data.weekId }),
       {
         $set: {
           review: {
@@ -977,8 +992,8 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
     );
 
     if (existing) {
-      const doc = await WeekReviewModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoWeeklyReviewDoc),
+      const doc = await WeekReviewModel.findOneAndUpdate(
+        withoutTombstones({ _id: getDocId(existing as unknown as MongoWeeklyReviewDoc) }),
         { $set: update },
         { new: true, runValidators: true },
       ).lean();
