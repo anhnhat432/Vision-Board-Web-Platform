@@ -203,6 +203,51 @@ node scripts/check-runtime-env.mjs --full-stack
 
 If these fail due to missing env, MongoDB, Firebase, or backend health, report the exact blocker and the env/setup needed to rerun.
 
+## LWW Sync E2E Tests
+
+Playwright E2E tests for Last-Write-Wins auto-resolve sync conflicts.
+
+### Setup
+
+```bash
+# Required env vars
+export LWW_E2E_URL=https://your-staging-url.com
+export LWW_E2E_EMAIL=test@example.com
+export LWW_E2E_PASSWORD=your-password
+
+# Run tests
+npm run test:e2e:lww
+
+# Or with inline env vars
+LWW_E2E_URL=https://your-staging-url.com LWW_E2E_EMAIL=test@example.com LWW_E2E_PASSWORD=your-password npm run test:e2e:lww
+```
+
+### Test Cases
+
+1. **Local wins** — Context A modifies task → offline A → Context B modifies same task (cloud wins temporarily) → A comes online with newer timestamp → both contexts show A's version
+2. **Cloud wins** — Context A modifies task → sync → offline A → Context B modifies same task (cloud newer) → A comes online → both show B's version
+3. **Tombstone wins** — Context A has pending mutation → Context B deletes goal (tombstone) → A comes online → goal disappears on both, A's pending mutation archived
+
+### Requirements
+
+- Staging/preview deployment with `VITE_APP_MODE=real`
+- Test account with credentials
+- Backend sync endpoints available
+- No hardcoded secrets in test files
+
+### CI Integration
+
+To add to CI/CD, create a workflow step that:
+1. Sets up env vars from secrets
+2. Runs `npm run test:e2e:lww`
+3. Reports results (HTML report in `playwright-report/`)
+
+### Risks
+
+- DOM selectors depend on current UI structure (selectors may need update if UI changes)
+- Test data cleanup relies on prefix matching (`[LWW-E2E-{timestamp}]`)
+- Requires authenticated staging environment
+
 ## Documentation Rules
 
 - Keep docs aligned with code. If docs and code disagree, either fix the doc in scope or report the mismatch.
