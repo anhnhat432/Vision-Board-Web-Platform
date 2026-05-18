@@ -242,7 +242,7 @@ export async function sendPending12WeekMutations(
   const rawStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
   const store = compactMutations(rawStore, { now });
   if (store.items.length !== rawStore.items.length) {
-    writeMutationQueueStore(store, { storage: options.storage });
+    writeMutationQueueStore(store, { storage: options.storage, now });
   }
   const pendingMutations = listPendingMutations(store, { ownerUid, now }).slice(0, options.batchSize ?? DEFAULT_BATCH_SIZE);
   if (pendingMutations.length === 0) return createSkippedResult("empty");
@@ -254,7 +254,7 @@ export async function sendPending12WeekMutations(
     ),
     lastDrainStartedAt: now,
   };
-  writeMutationQueueStore(inFlightStore, { storage: options.storage });
+  writeMutationQueueStore(inFlightStore, { storage: options.storage, now });
 
   const deleteMutations = pendingMutations.filter(isDeleteMutation);
   const batchMutations = pendingMutations.filter((item) => !isDeleteMutation(item));
@@ -291,7 +291,7 @@ export async function sendPending12WeekMutations(
   }
 
   if (deleteMutations.length > 0) {
-    writeMutationQueueStore(latestStore, { storage: options.storage });
+    writeMutationQueueStore(latestStore, { storage: options.storage, now });
   }
 
   if (batchMutations.length > 0) {
@@ -357,7 +357,7 @@ export async function sendPending12WeekMutations(
     ...latestStore,
     lastDrainFinishedAt: now,
   };
-  writeMutationQueueStore(latestStore, { storage: options.storage });
+  writeMutationQueueStore(latestStore, { storage: options.storage, now });
 
   return createDrainResult({
     pendingMutationsLength: pendingMutations.length,

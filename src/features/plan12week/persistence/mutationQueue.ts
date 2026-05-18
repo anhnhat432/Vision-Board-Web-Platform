@@ -542,12 +542,12 @@ export function readMutationQueueStore(
 
 export function writeMutationQueueStore(
   store: DataMutationQueueStore,
-  options: Pick<ReadStoredMutationQueueOptions, "storage"> = {},
+  options: Pick<ReadStoredMutationQueueOptions, "storage" | "now"> = {},
 ): boolean {
   const storage = getBrowserStorage(options.storage);
   if (!storage) return false;
 
-  const trimResult = trimTerminalMutations(store, resolveNow());
+  const trimResult = trimTerminalMutations(store, resolveNow(options.now));
   const finalStore = trimResult.store;
 
   if (trimResult.removed > 0) {
@@ -859,7 +859,7 @@ export function archiveMutationsByIds(
       updatedAt: now,
       items,
     },
-    { storage: options.storage },
+    { storage: options.storage, now: options.now },
   );
 }
 
@@ -892,6 +892,6 @@ export function requeueMutationsAsPending(
       updatedAt: now,
       items,
     },
-    { storage: options.storage },
+    { storage: options.storage, now: options.now },
   );
 }
