@@ -40,3 +40,7 @@ services:
         value: production
       - key: SENTRY_TRACES_SAMPLE_RATE
         value: "0.05"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash

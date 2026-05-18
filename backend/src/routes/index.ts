@@ -8,6 +8,7 @@ import {
 } from "../middleware/rateLimiters";
 import { accountRoutes } from "./accountRoutes";
 import { adminRoutes } from "./adminRoutes";
+import { assistantRoutes } from "./assistantRoutes";
 import { authRoutes } from "./authRoutes";
 import { billingRoutes, publicBillingRoutes } from "./billingRoutes";
 import { goalRoutes } from "./goalRoutes";
@@ -43,5 +44,6 @@ apiRoutes.use(weekRoutes);
 apiRoutes.use(taskRoutes);
 apiRoutes.use(metricRoutes);
 apiRoutes.use(visionBoardRoutes);
+apiRoutes.use(assistantRoutes);
 
 export { apiRoutes };

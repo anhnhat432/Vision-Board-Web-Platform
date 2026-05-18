@@ -26,32 +26,34 @@ function getRetryAfterSeconds(req: Request, windowMs: number): number {
   return Math.max(1, Math.ceil(windowMs / 1000));
 }
 
-const rateLimitHandler: RateLimitExceededEventHandler = (req, res, _next, options) => {
-  const route = req.route?.path ?? req.originalUrl ?? req.path;
-  const merchantId = getMerchantId(req);
-  const context = {
-    event: "rate_limit_hit",
-    route,
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-    merchantId,
-    userId: req.user?.uid,
-    statusCode: options.statusCode,
-  };
-  console.warn("[rate-limit]", context);
-  captureBackendException(new Error("Rate limit exceeded."), {
-    tags: {
+function createRateLimitHandler(errorCode = "rate_limited"): RateLimitExceededEventHandler {
+  return (req, res, _next, options) => {
+    const route = req.route?.path ?? req.originalUrl ?? req.path;
+    const merchantId = getMerchantId(req);
+    const context = {
       event: "rate_limit_hit",
-      route: String(route),
-    },
-    extra: context,
-  });
-  res.setHeader("Retry-After", String(getRetryAfterSeconds(req, options.windowMs)));
-  const payload = errorResponse("Too many requests. Please wait a moment and try again.");
-  (payload as unknown as Record<string, unknown>).errorCode = "rate_limited";
-  res.status(options.statusCode).json(payload);
-};
+      route,
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+      merchantId,
+      userId: req.user?.uid,
+      statusCode: options.statusCode,
+    };
+    console.warn("[rate-limit]", context);
+    captureBackendException(new Error("Rate limit exceeded."), {
+      tags: {
+        event: "rate_limit_hit",
+        route: String(route),
+      },
+      extra: context,
+    });
+    res.setHeader("Retry-After", String(getRetryAfterSeconds(req, options.windowMs)));
+    const payload = errorResponse("Too many requests. Please wait a moment and try again.");
+    (payload as unknown as Record<string, unknown>).errorCode = errorCode;
+    res.status(options.statusCode).json(payload);
+  };
+}
 
 function userOrIpKey(req: Request): string {
   if (req.user?.uid) return `user:${req.user.uid}`;
@@ -67,11 +69,13 @@ function createLimiter({
   limit,
   windowMs,
   keyGenerator,
+  errorCode,
 }: {
   keyPrefix: string;
   limit: number;
   windowMs: number;
   keyGenerator: (req: Request) => string;
+  errorCode?: string;
 }) {
   return rateLimit({
     windowMs,
@@ -79,7 +83,7 @@ function createLimiter({
     keyGenerator: (req) => `${keyPrefix}:${keyGenerator(req)}`,
     standardHeaders: "draft-7",
     legacyHeaders: false,
-    handler: rateLimitHandler,
+    handler: createRateLimitHandler(errorCode),
   });
 }
 
@@ -159,4 +163,12 @@ export const planBulkSyncRateLimiter = createLimiter({
   windowMs: ONE_MINUTE_MS,
   limit: 10,
   keyGenerator: userOrIpKey,
+});
+
+export const assistantRateLimiter = createLimiter({
+  keyPrefix: "assistant",
+  windowMs: FIFTEEN_MINUTES_MS,
+  limit: 20,
+  keyGenerator: userOrIpKey,
+  errorCode: "ASSISTANT_RATE_LIMITED",
 });

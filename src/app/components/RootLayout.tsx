@@ -107,6 +107,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Toaster } from "./ui/sonner";
+import { AIAssistant } from "@/app/features/assistant/AIAssistant";
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -176,6 +177,20 @@ function getRouteTone(pathname: string): string | undefined {
 export function RootLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  // Assistant only available on core flow routes (real mode)
+  const ASSISTANT_ROUTES = new Set([
+    "/",
+    "/onboarding",
+    "/life-balance",
+    "/life-insight",
+    "/smart-goal-setup",
+    "/feasibility",
+    "/12-week-setup",
+    "/12-week-system",
+    "/today-v2",
+    "/journal",
+  ]);
+  const showAssistant = ASSISTANT_ROUTES.has(location.pathname);
   const outlet = useOutlet();
   const demoMode = isDemoMode();
   const {
@@ -1516,6 +1531,7 @@ export function RootLayout() {
         <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
         {localDataMigrationPrompt}
         <Toaster />
+        {showAssistant && <AIAssistant />}
       </div>
       {!demoMode && user ? <FirstLoginRestoreToast /> : null}
     </AutoCloudSyncProvider>
