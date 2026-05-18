@@ -19,6 +19,7 @@ const autoCloudSyncMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+  useOptionalAuthContext: authContextMock.useAuthContext,
 }));
 
 vi.mock("@/features/plan12week/hooks/useAutoCloudSync", () => ({
@@ -69,7 +70,12 @@ vi.mock("./utils/app-mode", () => ({
 }));
 
 vi.mock("@/lib/api/apiClient", () => ({
+  apiClient: {
+    get: vi.fn().mockResolvedValue({ orders: [] }),
+    post: vi.fn(),
+  },
   isApiBaseUrlConfigured: () => false,
+  toAppError: (error: unknown) => error,
 }));
 
 vi.mock("@/services/syncService", () => ({
@@ -78,8 +84,21 @@ vi.mock("@/services/syncService", () => ({
 }));
 
 vi.mock("./utils/production", () => ({
+  getBillingProviderStatus: () => ({
+    mode: "local_test",
+    providerLabel: "Test billing",
+    checkoutReady: true,
+    restoreReady: true,
+    entitlementSyncReady: true,
+    manageBillingReady: true,
+  }),
+  getLastEntitlementSyncSnapshot: () => null,
+  getLastRestoreAccessSnapshot: () => null,
   maybeShowBrowserReminderNotification: vi.fn(),
-  syncEntitlementsWithProvider: vi.fn(),
+  openBillingCustomerPortal: vi.fn().mockResolvedValue({ ok: true, message: "Opened" }),
+  resolveAppReturnPath: (path: string) => path,
+  restorePlanAccess: vi.fn().mockResolvedValue({ ok: true, message: "Restored" }),
+  syncEntitlementsWithProvider: vi.fn().mockResolvedValue({ ok: true, planCode: "FREE", message: "Synced" }),
   syncPendingOutbox: vi.fn(),
 }));
 
@@ -125,6 +144,27 @@ describe("app routes", () => {
     expect(await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i })).toBeInTheDocument();
     expect(screen.getByText("Làm sao tôi biết đã thanh toán thành công?")).toBeInTheDocument();
     expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
+  });
+
+  it("redirects /billing to the billing plan page", async () => {
+    authContextMock.useAuthContext.mockReturnValue({
+      user: { displayName: "Test User", email: "test@example.com" },
+      userProfile: { email: "test@example.com", id: "test-user", role: "user" },
+      userProfileLoading: false,
+      userProfileError: null,
+      authLoading: false,
+      error: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refreshUserProfile: vi.fn(),
+      isConfigured: true,
+    });
+    const userData = initializeUserData();
+    saveUserData({ ...userData, onboardingCompleted: true });
+
+    renderRoute("/billing");
+
+    expect(await screen.findByRole("heading", { name: /Chọn gói phù hợp với bạn/i })).toBeInTheDocument();
   });
 
   it("resolves /today-v2 through the app route table", async () => {

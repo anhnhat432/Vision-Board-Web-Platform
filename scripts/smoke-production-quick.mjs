@@ -288,6 +288,9 @@ async function submitEmailAuth(page, { mode, nextPath }) {
   });
   await page.locator("#login-email").fill(EMAIL);
   await page.locator("#login-password").fill(PASSWORD);
+  if (mode === "signup") {
+    await page.locator("#login-confirm-password").fill(PASSWORD);
+  }
   await page.locator('form button[type="submit"]').click();
   await page.waitForFunction(
     (expectedPath) => location.pathname === expectedPath || Boolean(document.querySelector('[role="alert"]')),
