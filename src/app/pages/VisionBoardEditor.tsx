@@ -425,8 +425,8 @@ export function VisionBoardEditor() {
     if (!searchQuery.trim() || !board) return;
 
     setIsSearching(true);
-    const seed = encodeURIComponent(searchQuery.trim()) + Date.now();
-    const imageUrl = `https://picsum.photos/seed/${seed}/480/360`;
+    const keyword = encodeURIComponent(searchQuery.trim());
+    const imageUrl = `https://source.unsplash.com/480x360/?${keyword}`;
 
     const newItem = createImageItem(imageUrl, board.items, selectedLifeArea, selectedImageFrame);
 
