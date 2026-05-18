@@ -550,6 +550,7 @@ describe("RootLayout onboarding redirect", () => {
           conflicts: [],
           missingClientIds: [],
           unsupportedFields: [],
+          autoResolvable: false,
           summary: {
             localEntityCount: 0,
             cloudEntityCount: 0,

@@ -107,6 +107,8 @@ function createConflictLastResult(): TwelveWeekManualCloudSyncResult {
           message: "Private obstacle should stay hidden.",
           reason: "weekly_review_differs",
           cloudSyncUpdatedAt: "2026-04-30T08:01:00.000Z",
+          winner: "cloud",
+          winnerSource: "no_local_mutation",
         },
       ],
       localOnlyChanges: [
@@ -147,6 +149,7 @@ function createConflictLastResult(): TwelveWeekManualCloudSyncResult {
         missingClientIdCount: 0,
         unsupportedFieldCount: 1,
       },
+      autoResolvable: false,
     },
   };
 }

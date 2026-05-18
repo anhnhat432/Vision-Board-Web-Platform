@@ -31,6 +31,9 @@ const conflictResult = {
         message: "Cloud record changed after an unresolved local mutation for the same entity.",
         mutationId: "mutation_1",
         reason: "pending_local_mutation_cloud_newer",
+        winner: "cloud",
+        winnerSource: "timestamp",
+        clockSkewMs: 1000,
       },
       {
         kind: "dailyCheckIn",
@@ -39,10 +42,13 @@ const conflictResult = {
         path: "goals.goal_1.dailyCheckIns.2026-05-10",
         message: "Local and cloud values differ for a field-complete sync entity.",
         reason: "daily_check_in_differs",
+        winner: "cloud",
+        winnerSource: "no_local_mutation",
       },
     ],
     missingClientIds: [],
     unsupportedFields: [],
+    autoResolvable: false,
     summary: {
       localEntityCount: 2,
       cloudEntityCount: 2,

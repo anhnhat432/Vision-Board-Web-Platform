@@ -786,3 +786,69 @@ export function clearMutationsForAuthOwner(
     items: store.items.filter((item) => !ownerMatches(item.ownerUid, normalizedOwnerUid)),
   };
 }
+
+export function archiveMutationsByIds(
+  ownerUid: string,
+  ids: string[],
+  options: MutationQueueOptions & { storage?: Storage | null } = {},
+): boolean {
+  const store = readMutationQueueStore(ownerUid, { ...options });
+  const idSet = new Set(ids);
+  let changed = false;
+  const now = toIso(options.now);
+
+  const items = store.items.map((item) => {
+    if (item.ownerUid !== ownerUid || !idSet.has(item.id)) return item;
+    changed = true;
+    return {
+      ...item,
+      status: "archived" as const,
+      error: undefined,
+      nextRetryAt: undefined,
+      updatedAt: now,
+    };
+  });
+
+  if (!changed) return false;
+  return writeMutationQueueStore(
+    {
+      ...store,
+      updatedAt: now,
+      items,
+    },
+    { storage: options.storage },
+  );
+}
+
+export function requeueMutationsAsPending(
+  ownerUid: string,
+  ids: string[],
+  options: MutationQueueOptions & { storage?: Storage | null } = {},
+): boolean {
+  const store = readMutationQueueStore(ownerUid, { ...options });
+  const idSet = new Set(ids);
+  let changed = false;
+  const now = toIso(options.now);
+
+  const items = store.items.map((item) => {
+    if (item.ownerUid !== ownerUid || !idSet.has(item.id)) return item;
+    changed = true;
+    return {
+      ...item,
+      status: "pending" as const,
+      error: undefined,
+      nextRetryAt: undefined,
+      updatedAt: now,
+    };
+  });
+
+  if (!changed) return false;
+  return writeMutationQueueStore(
+    {
+      ...store,
+      updatedAt: now,
+      items,
+    },
+    { storage: options.storage },
+  );
+}

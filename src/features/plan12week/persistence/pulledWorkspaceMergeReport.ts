@@ -33,6 +33,14 @@ export interface PulledWorkspaceMergeIssue {
   cloudSyncUpdatedAt?: string;
 }
 
+export type PulledWorkspaceConflictWinner = "local" | "cloud";
+
+export type PulledWorkspaceConflictWinnerSource =
+  | "timestamp"
+  | "tombstone"
+  | "no_local_mutation"
+  | "missing_timestamp";
+
 export interface PulledWorkspaceConflict extends PulledWorkspaceMergeIssue {
   mutationId?: string;
   reason:
@@ -40,6 +48,9 @@ export interface PulledWorkspaceConflict extends PulledWorkspaceMergeIssue {
     | "task_completion_differs"
     | "daily_check_in_differs"
     | "weekly_review_differs";
+  winner: PulledWorkspaceConflictWinner;
+  winnerSource: PulledWorkspaceConflictWinnerSource;
+  clockSkewMs?: number;
 }
 
 export interface PulledWorkspaceUnsupportedField {
@@ -56,6 +67,7 @@ export interface PulledWorkspaceMergeReport {
   conflicts: PulledWorkspaceConflict[];
   missingClientIds: PulledWorkspaceMergeIssue[];
   unsupportedFields: PulledWorkspaceUnsupportedField[];
+  autoResolvable: boolean;
   summary: {
     localEntityCount: number;
     cloudEntityCount: number;
@@ -83,6 +95,8 @@ interface ComparableEntity {
 }
 
 type LocalGoalOrUserData = Goal | UserData | null | undefined;
+
+const CLOCK_SKEW_TOLERANCE_MS = 60_000;
 
 const UNRESOLVED_MUTATION_STATUSES = new Set<DataMutationStatus>([
   "pending",
@@ -477,9 +491,58 @@ function isCloudNewerThanMutation(cloudUpdatedAt: string | undefined, mutationUp
   return Number.isFinite(cloudTime) && Number.isFinite(localTime) && cloudTime > localTime;
 }
 
+function classifyConflictWinner(input: {
+  reason: PulledWorkspaceConflict["reason"];
+  localUpdatedAt?: string;
+  cloudSyncUpdatedAt?: string;
+  cloudHasTombstone?: boolean;
+}): {
+  winner: PulledWorkspaceConflictWinner;
+  winnerSource: PulledWorkspaceConflictWinnerSource;
+  clockSkewMs?: number;
+} {
+  // Tombstone always wins - deletion is destructive
+  if (input.cloudHasTombstone) {
+    return { winner: "cloud", winnerSource: "tombstone" };
+  }
+
+  // For non-pending-mutation conflicts (task_completion_differs, etc.), cloud wins
+  if (input.reason !== "pending_local_mutation_cloud_newer") {
+    return { winner: "cloud", winnerSource: "no_local_mutation" };
+  }
+
+  const localTs = input.localUpdatedAt ? Date.parse(input.localUpdatedAt) : NaN;
+  const cloudTs = input.cloudSyncUpdatedAt ? Date.parse(input.cloudSyncUpdatedAt) : NaN;
+
+  // Missing timestamps - fallback to local to preserve user work
+  if (!Number.isFinite(localTs) || !Number.isFinite(cloudTs)) {
+    return { winner: "local", winnerSource: "missing_timestamp" };
+  }
+
+  const clockSkewMs = Math.abs(localTs - cloudTs);
+
+  // Log warning for significant clock skew (but still resolve)
+  if (clockSkewMs > CLOCK_SKEW_TOLERANCE_MS) {
+    console.info("[auto-sync-lww] clock skew detected", {
+      clockSkewMs,
+      localTs,
+      cloudTs,
+      reason: input.reason,
+    });
+  }
+
+  // Last-write-wins: local wins if same time or newer
+  return {
+    winner: localTs >= cloudTs ? "local" : "cloud",
+    winnerSource: "timestamp",
+    clockSkewMs,
+  };
+}
+
 function buildPendingMutationConflicts(
   cloudIndex: ReadonlyMap<string, ComparableEntity>,
   pendingMutations: DataMutationItem[],
+  tombstoneKeys: ReadonlySet<string>,
 ): PulledWorkspaceConflict[] {
   return pendingMutations
     .filter((item) => UNRESOLVED_MUTATION_STATUSES.has(item.status))
@@ -490,6 +553,17 @@ function buildPendingMutationConflicts(
 
       const cloudEntity = cloudIndex.get(`${kind}:${clientId}`);
       if (!cloudEntity || !isCloudNewerThanMutation(cloudEntity.syncUpdatedAt, item.updatedAt)) return [];
+
+      // Check if cloud has tombstone for this entity
+      const key = `${kind}:${clientId}`;
+      const cloudHasTombstone = tombstoneKeys.has(key);
+
+      const classification = classifyConflictWinner({
+        reason: "pending_local_mutation_cloud_newer",
+        localUpdatedAt: item.updatedAt,
+        cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
+        cloudHasTombstone,
+      });
 
       return [
         {
@@ -503,6 +577,9 @@ function buildPendingMutationConflicts(
           reason: "pending_local_mutation_cloud_newer" as const,
           localUpdatedAt: item.updatedAt,
           cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
+          winner: classification.winner,
+          winnerSource: classification.winnerSource,
+          clockSkewMs: classification.clockSkewMs,
         },
       ];
     });
@@ -555,6 +632,14 @@ function buildValueDiffConflicts(
 
     const reason = getFieldDifferenceReason(cloudEntity.kind);
     if (!reason) return;
+
+    const classification = classifyConflictWinner({
+      reason,
+      localUpdatedAt: localEntity.syncUpdatedAt,
+      cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
+      cloudHasTombstone: false,
+    });
+
     conflicts.push({
       kind: cloudEntity.kind,
       source: "cloud",
@@ -565,6 +650,9 @@ function buildValueDiffConflicts(
       message: "Giá trị trên thiết bị và trên máy chủ đang khác nhau.",
       reason,
       cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
+      winner: classification.winner,
+      winnerSource: classification.winnerSource,
+      clockSkewMs: classification.clockSkewMs,
     });
   });
 
@@ -713,7 +801,7 @@ export function createPulledWorkspaceMergeReport(
   const pendingMutations = options.pendingMutations ?? [];
   const pendingDeleteKeys = getPendingDeleteKeys(pendingMutations);
   const tombstoneKeys = getTombstoneKeys(pulledWorkspace);
-  const pendingConflicts = buildPendingMutationConflicts(cloudIndex, pendingMutations);
+  const pendingConflicts = buildPendingMutationConflicts(cloudIndex, pendingMutations, tombstoneKeys);
   const pendingConflictKeys = new Set(pendingConflicts.map((conflict) => `${conflict.kind}:${conflict.clientId}`));
   const valueConflicts = isDelta ? [] : buildValueDiffConflicts(localIndex, cloudIndex, pendingConflictKeys);
   const conflicts = [...pendingConflicts, ...valueConflicts];
@@ -723,6 +811,19 @@ export function createPulledWorkspaceMergeReport(
   ];
   const localOnlyChanges = isDelta ? [] : buildLocalOnlyChanges(localIndex, cloudIndex, pendingDeleteKeys, tombstoneKeys);
   const unsupportedFields = isDelta ? [] : collectUnsupportedFields(localGoals, cloudIndex);
+
+  // Determine auto-resolvability:
+  // - OK if all conflicts have a clear winner (even if missing_timestamp but local wins)
+  // - NOT auto-resolvable if missingClientIds or unsupportedFields exist
+  // - NOT auto-resolvable if any conflict has missing_timestamp + cloud wins (uncertain)
+  const autoResolvable =
+    conflicts.every((c) => {
+      // If missing_timestamp and cloud wins, we cannot auto-resolve safely
+      if (c.winnerSource === "missing_timestamp" && c.winner === "cloud") return false;
+      return true;
+    }) &&
+    missingClientIds.length === 0 &&
+    unsupportedFields.length === 0;
 
   return {
     safeToApply:
@@ -735,6 +836,7 @@ export function createPulledWorkspaceMergeReport(
     conflicts,
     missingClientIds,
     unsupportedFields,
+    autoResolvable,
     summary: {
       localEntityCount: localIndex.size,
       cloudEntityCount: cloudIndex.size,

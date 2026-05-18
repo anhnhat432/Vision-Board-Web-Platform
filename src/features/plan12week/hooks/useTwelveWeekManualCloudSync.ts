@@ -12,6 +12,8 @@ import {
   type DataMutationItem,
   type DataMutationStatus,
   readMutationQueueStore,
+  archiveMutationsByIds,
+  requeueMutationsAsPending,
 } from "../persistence/mutationQueue";
 import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
 import {
@@ -63,6 +65,10 @@ export interface TwelveWeekManualCloudSyncResult {
   unresolvedLocalMutationCount?: number;
   appliedGoalCount?: number;
   error?: unknown;
+  autoResolved?: {
+    cloudWinsCount: number;
+    localWinsCount: number;
+  };
 }
 
 export interface RunTwelveWeekManualCloudSyncOptions {
@@ -264,7 +270,7 @@ export async function runTwelveWeekManualCloudSync(
       pullResponse = await pullWorkspace();
     }
 
-    const localData = (options.readUserData ?? getUserData)();
+const localData = (options.readUserData ?? getUserData)();
     const unresolvedLocalMutations = getBlockingLocalMutations(ownerUid, {
       storage: options.storage,
       now: options.now,
@@ -273,13 +279,98 @@ export async function runTwelveWeekManualCloudSync(
       pendingMutations: unresolvedLocalMutations,
     });
 
-    if (unresolvedLocalMutations.length > 0) {
+    // Auto-resolve conflicts using Last-Write-Wins if autoResolvable
+    if (
+      mergeReport.conflicts.length > 0 ||
+      mergeReport.localOnlyChanges.length > 0
+    ) {
+      if (mergeReport.autoResolvable) {
+        // 1. Archive mutations that cloud wins
+        const cloudWinsMutationIds = mergeReport.conflicts
+          .filter((c) => c.winner === "cloud" && c.mutationId)
+          .map((c) => c.mutationId!);
+
+        if (cloudWinsMutationIds.length > 0) {
+          archiveMutationsByIds(ownerUid, cloudWinsMutationIds, {
+            storage: options.storage,
+            now: options.now,
+          });
+        }
+
+        // 2. Apply cloud, but skip entities where local wins
+        const localWinsKeys = new Set(
+          mergeReport.conflicts
+            .filter((c) => c.winner === "local")
+            .map((c) => `${c.kind}:${c.clientId}`),
+        );
+
+        const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
+          now: options.now,
+          skipEntities: localWinsKeys,
+        });
+
+        const didWrite = (options.writeUserData ?? saveUserData)(nextData);
+        if (!didWrite) {
+          const recordErrorFn = options.recordErrorFn ?? ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
+          recordErrorFn(ownerUid);
+          return {
+            status: "error",
+            message: "Không thể lưu bản gộp vào thiết bị này. Dữ liệu cũ trên thiết bị vẫn được giữ.",
+            drainResult,
+            pullResponse,
+            mergeReport,
+          };
+        }
+
+        // 3. Re-enqueue mutations that local wins (to push on next drain)
+        const localWinsMutationIds = mergeReport.conflicts
+          .filter((c) => c.winner === "local" && c.mutationId)
+          .map((c) => c.mutationId!);
+
+        if (localWinsMutationIds.length > 0) {
+          requeueMutationsAsPending(ownerUid, localWinsMutationIds, {
+            storage: options.storage,
+            now: options.now,
+          });
+        }
+
+        // 4. Write cursor and log
+        const writeCursorFn = options.writeCursor ?? ((uid: string, cursor: string | null) => recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
+        writeCursorFn(ownerUid, pullResponse.nextCursor);
+
+        const maxClockSkewMs = Math.max(
+          0,
+          ...mergeReport.conflicts.map((c) => c.clockSkewMs ?? 0),
+        );
+
+        console.info("[auto-sync-lww] resolved", {
+          cloudWins: cloudWinsMutationIds.length,
+          localWins: localWinsMutationIds.length,
+          cloudOnly: mergeReport.cloudOnlyChanges.length,
+          maxClockSkewMs,
+        });
+
+        return {
+          status: "applied",
+          message: `Đã tự xử lý chênh lệch: ${cloudWinsMutationIds.length} bản cloud, ${localWinsMutationIds.length} bản máy được giữ.`,
+          drainResult,
+          pullResponse,
+          mergeReport,
+          appliedGoalCount: nextData.goals.length,
+          autoResolved: {
+            cloudWinsCount: cloudWinsMutationIds.length,
+            localWinsCount: localWinsMutationIds.length,
+          },
+        };
+      }
+
+      // Not auto-resolvable: fallback to conflict dialog
       const recordConflictFn = options.recordConflictFn ?? ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
       recordConflictFn(ownerUid);
       return {
         status: "conflict",
         message:
-          "Vẫn còn thay đổi trên thiết bị chưa được xác nhận. Dữ liệu tài khoản đã được kiểm tra nhưng chưa áp dụng.",
+          "Có xung đột dữ liệu không thể tự động giải quyết. Vui lòng chọn phiên bản cần giữ.",
         drainResult,
         pullResponse,
         mergeReport,
@@ -287,6 +378,7 @@ export async function runTwelveWeekManualCloudSync(
       };
     }
 
+    // No conflicts: check if safe to apply
     if (!mergeReport.safeToApply) {
       const recordConflictFn = options.recordConflictFn ?? ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
       recordConflictFn(ownerUid);
@@ -322,7 +414,7 @@ export async function runTwelveWeekManualCloudSync(
 
     return {
       status: "applied",
-        message: "Đã gửi việc đang chờ đồng bộ, nhận dữ liệu tài khoản và gộp an toàn vào thiết bị.",
+      message: "Đã gửi việc đang chờ đồng bộ, nhận dữ liệu tài khoản và gộp an toàn vào thiết bị.",
       drainResult,
       pullResponse,
       mergeReport,

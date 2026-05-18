@@ -439,7 +439,7 @@ describe("runTwelveWeekManualCloudSync", () => {
     );
   });
 
-  it("keeps local data untouched when unresolved local mutations remain after drain", async () => {
+  it("applies cloud safely when local mutation does not conflict with cloud", async () => {
     enqueueStoredMutation(
       {
         kind: "task_completed_changed",
@@ -481,9 +481,66 @@ describe("runTwelveWeekManualCloudSync", () => {
       writeUserData,
     });
 
-    expect(result.status).toBe("conflict");
-    expect(result.unresolvedLocalMutationCount).toBe(1);
-    expect(writeUserData).not.toHaveBeenCalled();
+    // No conflict: cloud is not newer than local mutation, so auto-resolve applies safely
+    expect(result.status).toBe("applied");
+    expect(result.autoResolved).toBeUndefined(); // no actual conflicts to resolve
+    expect(writeUserData).toHaveBeenCalled();
+  });
+
+  it("returns conflict when unresolved local mutations exist and cloud has newer data", async () => {
+    // Cloud timestamp is newer than mutation timestamp
+    const atCloudNewer = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    enqueueStoredMutation(
+      {
+        kind: "task_completed_changed",
+        goalId: "goal_1",
+        payload: {
+          taskId: "tw_task_1_tactic_write_0",
+          clientTaskId: "tw_task_1_tactic_write_0",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
+          weekNumber: 1,
+          completed: false, // different from cloud
+          scheduledDate: "2026-04-27",
+        },
+      },
+      {
+        ownerUid: "user_1",
+        storage: localStorage,
+        deviceId: "device_1",
+        now: at(1), // mutation at T+1
+        createId: () => "mutation_pending",
+      },
+    );
+    const writeUserData = vi.fn(() => true);
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      drainMutations: vi.fn(async () => ({
+        status: "idle" as const,
+        skipReason: "empty" as const,
+        attemptedCount: 0,
+        succeededCount: 0,
+        duplicateCount: 0,
+        failedCount: 0,
+        pendingCount: 0,
+      })),
+      pullWorkspace: vi.fn(async () => {
+        const workspace = createSafeCloudWorkspace();
+        // Make cloud newer by setting future timestamp
+        workspace.tasks[0].syncUpdatedAt = atCloudNewer(1); // T+1 day
+        return createPullResponse(workspace);
+      }),
+      readUserData: () => createUserData(),
+      writeUserData,
+    });
+
+    // Cloud wins because it's newer - auto-resolve applied
+    expect(result.status).toBe("applied");
+    expect(result.autoResolved).toBeDefined();
+    expect(result.autoResolved?.cloudWinsCount).toBe(1);
+    expect(writeUserData).toHaveBeenCalled();
   });
 
   it("saves the nextCursor after a successful pull+apply", async () => {

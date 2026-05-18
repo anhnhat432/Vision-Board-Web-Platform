@@ -253,11 +253,18 @@ function getPlanIdFromReviewClientId(clientId: string): string | null {
   return markerIndex > 0 ? clientId.slice(0, markerIndex) : null;
 }
 
-function applyPulledDeltaToUserData(userData: UserData, pullResponse: TwelveWeekPullResponse): UserData {
+function applyPulledDeltaToUserData(
+  userData: UserData,
+  pullResponse: TwelveWeekPullResponse,
+  skipEntities?: ReadonlySet<string>,
+): UserData {
   let nextGoals = userData.goals;
+  const skipSet = skipEntities ?? new Set<string>();
 
   pullResponse.workspace.tasks.forEach((task) => {
     if (!task.clientPlanId || !task.clientTaskId) return;
+    // Skip this task if its clientTaskId is in skipEntities
+    if (skipSet.has(`task:${task.clientTaskId}`)) return;
     nextGoals = applySystemDelta(nextGoals, task.clientPlanId, (system) => {
       const pulledTask = buildTaskInstances([task], system.totalWeeks)[0];
       if (!pulledTask) return system;
@@ -270,6 +277,8 @@ function applyPulledDeltaToUserData(userData: UserData, pullResponse: TwelveWeek
 
   pullResponse.workspace.dailyCheckIns.forEach((checkIn) => {
     if (!checkIn.clientPlanId) return;
+    // Skip this check-in if its clientCheckInId is in skipEntities
+    if (checkIn.clientCheckInId && skipSet.has(`dailyCheckIn:${checkIn.clientCheckInId}`)) return;
     nextGoals = applySystemDelta(nextGoals, checkIn.clientPlanId, (system) => {
       const pulledCheckIn = buildDailyCheckIns([checkIn])[0];
       if (!pulledCheckIn) return system;
@@ -285,6 +294,8 @@ function applyPulledDeltaToUserData(userData: UserData, pullResponse: TwelveWeek
 
   pullResponse.workspace.weeklyReviews.forEach((review) => {
     if (!review.clientPlanId) return;
+    // Skip this review if its clientReviewId is in skipEntities
+    if (review.clientReviewId && skipSet.has(`weeklyReview:${review.clientReviewId}`)) return;
     nextGoals = applySystemDelta(nextGoals, review.clientPlanId, (system) => {
       const pulledReview = buildWeeklyReviews([review], system.totalWeeks)[0];
       if (!pulledReview) return system;
@@ -521,10 +532,10 @@ function buildPulledGoal(input: {
 export function applyPulledWorkspaceToUserData(
   userData: UserData,
   pulledWorkspace: PulledWorkspaceInput,
-  options: { now?: string | Date } = {},
+  options: { now?: string | Date; skipEntities?: ReadonlySet<string> } = {},
 ): UserData {
   if (isDeltaPullResponse(pulledWorkspace)) {
-    return applyPulledDeltaToUserData(userData, pulledWorkspace);
+    return applyPulledDeltaToUserData(userData, pulledWorkspace, options.skipEntities);
   }
 
   const workspace = getWorkspace(pulledWorkspace);
@@ -534,6 +545,7 @@ export function applyPulledWorkspaceToUserData(
       : options.now
         ? new Date(options.now).toISOString()
         : new Date().toISOString();
+  const skipEntities = options.skipEntities ?? new Set<string>();
   const goalsById = new Map(userData.goals.map((goal) => [goal.id, goal]));
   const nextGoalsById = new Map(goalsById);
   const pulledGoalByClientId = new Map(
@@ -546,6 +558,9 @@ export function applyPulledWorkspaceToUserData(
     const clientPlanId = plan.clientPlanId?.trim();
     const clientGoalId = plan.clientGoalId?.trim();
     if (!clientPlanId || !clientGoalId) return;
+
+    // Skip this plan if its clientPlanId is in skipEntities
+    if (skipEntities.has(`plan:${clientPlanId}`)) return;
 
     const pulledGoal = pulledGoalByClientId.get(clientGoalId);
     const nextGoal = buildPulledGoal({
@@ -566,6 +581,10 @@ export function applyPulledWorkspaceToUserData(
   workspace.goals.forEach((goal) => {
     const clientGoalId = goal.clientGoalId?.trim();
     if (!clientGoalId || nextGoalsById.has(clientGoalId)) return;
+    
+    // Skip this goal if its clientGoalId is in skipEntities
+    if (skipEntities.has(`goal:${clientGoalId}`)) return;
+    
     const clientPlanId = getTwelveWeekClientPlanId(clientGoalId);
     const fallbackPlan: TwelveWeekPulledPlan = {
       id: goal.planId ?? clientPlanId,
