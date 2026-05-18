@@ -1,0 +1,13 @@
+# Dear Our Future — vision-board-web-platform
+# https://vision-board-web-platform.vercel.app
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /billing/checkout
+Disallow: /billing/confirm
+Disallow: /order
+Disallow: /order-status
+
+Sitemap: https://vision-board-web-platform.vercel.app/sitemap.xml

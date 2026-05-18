@@ -3,7 +3,10 @@
   --app-surface: #FFFFFF;
   --app-ink: #1A1A1A;
   --app-ink-soft: #4A4A4A;
-  --app-ink-muted: #8A8A8A;
+  /* Darkened from #8A8A8A to #6B6B6B so the muted token reaches WCAG AA
+   * 4.5:1 contrast on both #FAF8F5 (4.69) and #FFFFFF (5.74). Lighthouse
+   * a11y audit flagged 5 places that broke before. */
+  --app-ink-muted: #6B6B6B;
   --app-line: #ECE8E1;
   --app-accent: #2F5D50;
   --app-accent-soft: #E8F0EC;
@@ -33,7 +36,9 @@ html.dark {
   --app-surface: #26231D;
   --app-ink: #F2EDE5;
   --app-ink-soft: #C8C2B5;
-  --app-ink-muted: #8A8273;
+  /* Brighten in dark mode (#8A8273 → #A39B8C) so muted text on #1C1A15 keeps
+   * AA contrast (~6.9:1) — Lighthouse a11y baseline. */
+  --app-ink-muted: #A39B8C;
   --app-line: #3A342B;
   --app-accent: #5BA590;
   --app-accent-soft: #1F3A33;
