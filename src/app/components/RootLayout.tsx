@@ -1231,20 +1231,22 @@ export function RootLayout() {
                       <Compass className="h-[1.05rem] w-[1.05rem]" />
                     </button>
                   )}
-                  <button
-                    type="button"
-                    className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                    onClick={() => setMobileMenuOpen((open) => !open)}
-                    aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
-                    aria-expanded={mobileMenuOpen}
-                    aria-controls="mobile-nav-menu"
-                  >
-                    {mobileMenuOpen ? (
-                      <X className="h-[1.05rem] w-[1.05rem]" />
-                    ) : (
-                      <Menu className="h-[1.05rem] w-[1.05rem]" />
-                    )}
-                  </button>
+                  {!isSignedOutVisitor && (
+                    <button
+                      type="button"
+                      className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      onClick={() => setMobileMenuOpen((open) => !open)}
+                      aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+                      aria-expanded={mobileMenuOpen}
+                      aria-controls="mobile-nav-menu"
+                    >
+                      {mobileMenuOpen ? (
+                        <X className="h-[1.05rem] w-[1.05rem]" />
+                      ) : (
+                        <Menu className="h-[1.05rem] w-[1.05rem]" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
