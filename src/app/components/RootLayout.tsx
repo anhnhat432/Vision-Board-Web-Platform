@@ -272,7 +272,20 @@ export function RootLayout() {
 
     if (!demoMode && (isAuthProtectedPath(location.pathname) || isPublicCheckoutPath(location.pathname))) return;
 
-    if (!demoMode && user && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
+    // Only force first-time users onto /onboarding once. If they explicitly
+    // chose "Để sau" / "Thoát" during this session, respect that and let them
+    // explore the dashboard. The flag lives in sessionStorage so a fresh tab
+    // still nudges them back to onboarding.
+    const onboardingDeferred =
+      typeof window !== "undefined" && window.sessionStorage.getItem("onboarding-deferred") === "1";
+
+    if (
+      !demoMode &&
+      user &&
+      !userData.onboardingCompleted &&
+      !onboardingDeferred &&
+      location.pathname !== "/onboarding"
+    ) {
       navigate("/onboarding");
     }
   }, [

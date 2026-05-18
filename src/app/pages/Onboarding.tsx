@@ -314,12 +314,24 @@ export function Onboarding() {
     } else {
       toast.info("Chưa có điểm nào được chỉnh. Dữ liệu chưa lưu.");
     }
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("onboarding-deferred", "1");
+    }
     navigate("/");
   };
 
   const progressHeader = (
     <div>
-      <CoreFlowProgress currentStepId="life_balance" onExit={() => navigate("/")} className="mb-2" />
+      <CoreFlowProgress
+        currentStepId="life_balance"
+        onExit={() => {
+          if (typeof window !== "undefined") {
+            window.sessionStorage.setItem("onboarding-deferred", "1");
+          }
+          navigate("/");
+        }}
+        className="mb-2"
+      />
       <div className="flex justify-end">
         <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
       </div>
