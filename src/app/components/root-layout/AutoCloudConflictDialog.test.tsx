@@ -106,6 +106,8 @@ describe("AutoCloudConflictDialog", () => {
     expect(screen.getByRole("button", { name: "Lấy bản tài khoản" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Để sau" })).toBeInTheDocument();
     expect(screen.getByText(/task_1/)).toBeInTheDocument();
+    expect(screen.getByText(/Đa số chênh lệch/)).toBeInTheDocument();
+    expect(screen.getByText(/tự xử lý/i)).toBeInTheDocument();
   });
 
   it("calls resolveConflictKeepLocal when the user keeps the device version", async () => {

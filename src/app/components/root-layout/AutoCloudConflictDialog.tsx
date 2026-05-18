@@ -126,6 +126,10 @@ export function AutoCloudConflictDialog() {
           <DialogDescription className="leading-6">
             Đồng bộ tự động đã dừng trước khi ghi đè. Chọn bản bạn muốn ưu tiên để tiếp tục dùng hệ 12 tuần an toàn.
           </DialogDescription>
+          <p className="text-sm text-app-ink-soft leading-6">
+            Đa số chênh lệch được hệ thống tự xử lý theo bản mới nhất. Dialog này chỉ hiện khi không thể tự quyết định
+            an toàn.
+          </p>
         </DialogHeader>
 
         <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900">
