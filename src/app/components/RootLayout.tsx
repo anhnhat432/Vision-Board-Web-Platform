@@ -3,13 +3,17 @@ import {
   ChevronDown,
   Compass,
   CreditCard,
+  FileText,
   HardDrive,
+  HelpCircle,
+  LogIn,
   LogOut,
   Menu,
   Moon,
   RefreshCw,
   Search,
   Settings2,
+  Shield,
   Sun,
   User2,
   X,
@@ -210,6 +214,7 @@ export function RootLayout() {
     null,
   );
   const [isLocalDataMigrationPromptOpen, setIsLocalDataMigrationPromptOpen] = useState(false);
+  const [mobileVisitorMenuOpen, setMobileVisitorMenuOpen] = useState(false);
   const entitlementAutoSyncScopeRef = useRef<string | null>(null);
 
   const routeScrollKey = `${location.pathname}${location.search}`;
@@ -990,96 +995,100 @@ export function RootLayout() {
 
                 <nav className="hidden flex-1 items-center justify-center md:flex">
                   <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
-                    {primaryNavItems.map((item) => {
-                      const Icon = item.icon;
-                      const active = isActive(item.path);
-
-                      return (
-                        <Button
-                          key={item.path}
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigateAppRoute(item.path)}
-                          onPointerEnter={() => handlePrefetch(item.path)}
-                          aria-current={active ? "page" : undefined}
-                          title={item.label}
-                          className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
-                            active
-                              ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
-                              : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
-                          }`}
-                        >
-                          <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
-                          <span>{item.compactLabel ?? item.label}</span>
-                        </Button>
-                      );
-                    })}
-
-                    {secondaryNavItems.length > 0 ? (
+                    {!isSignedOutVisitor ? (
                       <>
-                        <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
+                        {primaryNavItems.map((item) => {
+                          const Icon = item.icon;
+                          const active = isActive(item.path);
 
-                        <div ref={desktopMoreRef} className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
-                            aria-expanded={desktopMoreOpen}
-                            aria-haspopup="menu"
-                            className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
-                              isDesktopMoreNavActive
-                                ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
-                                : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
-                            }`}
-                            onClick={() => setDesktopMoreOpen((open) => !open)}
-                          >
-                            <Menu className="h-3.5 w-3.5" />
-                            <span>Khác</span>
-                            <ChevronDown
-                              className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
-                            />
-                          </Button>
-
-                          {desktopMoreOpen ? (
-                            <div
-                              role="menu"
-                              aria-label="Mục khác"
-                              className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
+                          return (
+                            <Button
+                              key={item.path}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigateAppRoute(item.path)}
+                              onPointerEnter={() => handlePrefetch(item.path)}
+                              aria-current={active ? "page" : undefined}
+                              title={item.label}
+                              className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
+                                active
+                                  ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                                  : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
+                              }`}
                             >
-                              <div className="px-2.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
-                                Mục khác
-                              </div>
-                              {secondaryNavItems.map((item) => {
-                                const Icon = item.icon;
-                                const active = isActive(item.path);
+                              <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
+                              <span>{item.compactLabel ?? item.label}</span>
+                            </Button>
+                          );
+                        })}
 
-                                return (
-                                  <button
-                                    key={item.path}
-                                    type="button"
-                                    role="menuitem"
-                                    aria-current={active ? "page" : undefined}
-                                    onPointerEnter={() => handlePrefetch(item.path)}
-                                    onClick={() => {
-                                      setDesktopMoreOpen(false);
-                                      navigateAppRoute(item.path);
-                                    }}
-                                    className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[14px] font-medium tracking-tight outline-none transition-colors ${
-                                      active
-                                        ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
-                                        : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
-                                    }`}
-                                  >
-                                    <Icon
-                                      className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
-                                    />
-                                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                                  </button>
-                                );
-                              })}
+                        {secondaryNavItems.length > 0 ? (
+                          <>
+                            <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
+
+                            <div ref={desktopMoreRef} className="relative">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
+                                aria-expanded={desktopMoreOpen}
+                                aria-haspopup="menu"
+                                className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
+                                  isDesktopMoreNavActive
+                                    ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                                    : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
+                                }`}
+                                onClick={() => setDesktopMoreOpen((open) => !open)}
+                              >
+                                <Menu className="h-3.5 w-3.5" />
+                                <span>Khác</span>
+                                <ChevronDown
+                                  className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                                />
+                              </Button>
+
+                              {desktopMoreOpen ? (
+                                <div
+                                  role="menu"
+                                  aria-label="Mục khác"
+                                  className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
+                                >
+                                  <div className="px-2.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
+                                    Mục khác
+                                  </div>
+                                  {secondaryNavItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const active = isActive(item.path);
+
+                                    return (
+                                      <button
+                                        key={item.path}
+                                        type="button"
+                                        role="menuitem"
+                                        aria-current={active ? "page" : undefined}
+                                        onPointerEnter={() => handlePrefetch(item.path)}
+                                        onClick={() => {
+                                          setDesktopMoreOpen(false);
+                                          navigateAppRoute(item.path);
+                                        }}
+                                        className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[14px] font-medium tracking-tight outline-none transition-colors ${
+                                          active
+                                            ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
+                                            : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
+                                        }`}
+                                      >
+                                        <Icon
+                                          className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
+                                        />
+                                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              ) : null}
                             </div>
-                          ) : null}
-                        </div>
+                          </>
+                        ) : null}
                       </>
                     ) : null}
                   </div>
@@ -1134,14 +1143,63 @@ export function RootLayout() {
                     )}
                   </button>
                   {isSignedOutVisitor ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-10 rounded-lg bg-app-accent px-3 text-[14px] text-white hover:bg-[#284f45] hover:text-white"
-                      onClick={() => handleAuthNavigate("signup")}
-                    >
-                      Đăng ký
-                    </Button>
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-10 rounded-lg bg-app-accent px-3 text-[14px] text-white hover:bg-[#284f45] hover:text-white"
+                        onClick={() => handleAuthNavigate("signup")}
+                      >
+                        Đăng ký
+                      </Button>
+                      <DropdownMenu open={mobileVisitorMenuOpen} onOpenChange={setMobileVisitorMenuOpen}>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                            aria-label="Mở menu"
+                          >
+                            <Menu className="h-[1.05rem] w-[1.05rem]" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuItem onSelect={() => handleAuthNavigate("signin")}>
+                            <LogIn className="mr-2 h-4 w-4" />
+                            Đăng nhập
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => {
+                            setGuideUserData(getUserData());
+                            setIsGuideOpen(true);
+                            setMobileVisitorMenuOpen(false);
+                          }}>
+                            <Compass className="mr-2 h-4 w-4" />
+                            Hướng dẫn sử dụng
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onSelect={() => {
+                            navigateAppRoute("/billing/faq");
+                            setMobileVisitorMenuOpen(false);
+                          }}>
+                            <HelpCircle className="mr-2 h-4 w-4" />
+                            Câu hỏi thường gặp
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => {
+                            navigateAppRoute("/terms");
+                            setMobileVisitorMenuOpen(false);
+                          }}>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Điều khoản
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => {
+                            navigateAppRoute("/privacy");
+                            setMobileVisitorMenuOpen(false);
+                          }}>
+                            <Shield className="mr-2 h-4 w-4" />
+                            Chính sách bảo mật
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
                   ) : user ? (
                     renderAccountMenu("mobile")
                   ) : (

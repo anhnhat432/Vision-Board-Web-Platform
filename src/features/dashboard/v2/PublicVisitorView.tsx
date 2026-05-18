@@ -1,4 +1,4 @@
-import { CalendarDays, Compass, HardDrive, LogIn, Target, UserPlus } from "lucide-react";
+import { CalendarDays, Compass, HardDrive, Lock, LogIn, RefreshCw, Smartphone, Target, UserPlus } from "lucide-react";
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -10,18 +10,21 @@ interface PublicVisitorViewProps {
 
 const FEATURE_ROWS = [
   {
+    step: "01",
     title: "Cân bằng trước mục tiêu",
     description: "Chấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.",
     href: "/life-balance",
     icon: Compass,
   },
   {
+    step: "02",
     title: "SMART Goal có nhịp",
     description: "Biến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.",
     href: "/smart-goal-setup",
     icon: Target,
   },
   {
+    step: "03",
     title: "Review để không trôi",
     description: "Mỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.",
     href: "/journal",
@@ -34,7 +37,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_280px] md:items-end">
+      <section className="space-y-5 md:space-y-6">
         <div>
           <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             Xin chào, đây là Vision Board
@@ -45,17 +48,26 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
             Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.
           </p>
-        </div>
 
-        <div className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Nhịp sản phẩm</p>
-          <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
-            Local-first. Lưu trước trên thiết bị, đồng bộ khi bạn đăng nhập và kết nối sẵn sàng.
-          </p>
+          {/* 3 trust chip thay thế card sidebar cũ */}
+          <ul className="mt-5 flex flex-wrap gap-2">
+            <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
+              <Lock className="h-3.5 w-3.5 text-app-accent" />
+              Local-first, không cần đăng nhập để xem
+            </li>
+            <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
+              <RefreshCw className="h-3.5 w-3.5 text-app-accent" />
+              Đồng bộ khi sẵn sàng
+            </li>
+            <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
+              <Smartphone className="h-3.5 w-3.5 text-app-accent" />
+              Hoạt động trên mobile
+            </li>
+          </ul>
         </div>
       </section>
 
-      {hasLocalData ? (
+        {hasLocalData ? (
         <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-labelledby="dashboard-local-data-title">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 gap-3">
@@ -103,7 +115,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-[16px] font-semibold text-app-ink">{feature.title}</h2>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">Bước {feature.step}</p>
+                  <h2 className="mt-1 text-[16px] font-semibold text-app-ink">{feature.title}</h2>
                   <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{feature.description}</p>
                   <a className="mt-3 inline-flex text-[14px] font-medium text-app-accent" href={feature.href}>
                     Khám phá →
@@ -120,13 +133,13 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Bắt đầu đúng thứ tự</p>
             <h2 id="dashboard-public-cta-title" className="mt-2 font-serif text-[26px] font-medium leading-8 text-app-ink">
-              Đăng nhập để bắt đầu
+              Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?
             </h2>
             <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
-              Tạo không gian 12 tuần đầu tiên, rồi quay lại Trang chính để theo dõi nhịp tuần.
+              Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.
             </p>
           </div>
-          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <div className="shrink-0">
             <button
               type="button"
               onClick={onStart}
@@ -134,13 +147,6 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             >
               <UserPlus className="h-4 w-4" />
               {primaryLabel}
-            </button>
-            <button
-              type="button"
-              onClick={onSignIn}
-              className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-            >
-              Đăng nhập
             </button>
           </div>
         </div>

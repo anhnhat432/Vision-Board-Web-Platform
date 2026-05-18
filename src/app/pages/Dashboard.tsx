@@ -601,7 +601,7 @@ function DashboardContent({
           <DemoDataNotice onOpenLifeBalance={() => navigate("/life-balance")} />
         ) : null}
 
-        <DashboardFooter lastSavedLabel={lastSavedLabel} />
+        {!isSignedOut ? <DashboardFooter lastSavedLabel={lastSavedLabel} /> : null}
 
         <div className="mt-5 flex justify-end">
           <FeedbackDialog
