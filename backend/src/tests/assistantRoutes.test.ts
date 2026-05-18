@@ -142,9 +142,14 @@ describe("assistantRoutes", () => {
     assert.equal(response.status, 404);
   });
 
-  it("returns a clear error when Gemini is not configured", async () => {
+  it("returns a clear error when provider is not configured", async () => {
     const { env } = await import("../config/env");
+    const previousProvider = env.ASSISTANT_PROVIDER;
     const previousKey = env.GEMINI_API_KEY;
+    const previousGroqKey = env.GROQ_API_KEY;
+    
+    // Test with gemini provider not configured
+    env.ASSISTANT_PROVIDER = "gemini";
     env.GEMINI_API_KEY = undefined;
 
     try {
@@ -153,7 +158,9 @@ describe("assistantRoutes", () => {
       assert.equal(response.status, 503);
       assert.equal(response.body.errorCode, "ASSISTANT_PROVIDER_NOT_CONFIGURED");
     } finally {
+      env.ASSISTANT_PROVIDER = previousProvider;
       env.GEMINI_API_KEY = previousKey;
+      env.GROQ_API_KEY = previousGroqKey;
     }
   });
 });

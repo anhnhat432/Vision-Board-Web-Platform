@@ -38,7 +38,7 @@ const context: AssistantContext = {
   },
 };
 
-describe("geminiAssistantProvider prompt", () => {
+describe("groqAssistantProvider prompt", () => {
   it("requires the stable three-part answer format", async () => {
     ensureBackendEnvForProviderImports();
     const { buildSystemPrompt } = await import("../services/assistantPromptUtils");
@@ -49,7 +49,7 @@ describe("geminiAssistantProvider prompt", () => {
     assert.match(prompt, /Nếu chỉ có 10 phút/);
   });
 
-  it("summarizes enriched context for Gemini", async () => {
+  it("summarizes enriched context for Groq", async () => {
     ensureBackendEnvForProviderImports();
     const { summarizeContext } = await import("../services/assistantPromptUtils");
     const summary = summarizeContext(context);

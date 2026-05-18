@@ -2,27 +2,26 @@ import { env } from "../config/env";
 import type { AssistantContext } from "./assistantService";
 import { buildSystemPrompt, summarizeContext } from "./assistantPromptUtils";
 
-export interface GeminiRequest {
-  system_instruction: {
-    parts: Array<{ text: string }>;
-  };
-  contents: Array<{
-    role: "user";
-    parts: Array<{ text: string }>;
-  }>;
-  generationConfig?: {
-    temperature: number;
-    maxOutputTokens: number;
+interface GroqMessage {
+  role: "system" | "user";
+  content: string;
+}
+
+interface GroqRequest {
+  model: string;
+  messages: GroqMessage[];
+  temperature: number;
+  max_tokens: number;
+}
+
+interface GroqChoice {
+  message?: {
+    content?: string;
   };
 }
 
-export interface GeminiResponse {
-  candidates?: Array<{
-    finishReason?: string;
-    content?: {
-      parts?: Array<{ text?: string }>;
-    };
-  }>;
+interface GroqResponse {
+  choices?: GroqChoice[];
 }
 
 export interface AssistantProviderResponse {
@@ -34,42 +33,29 @@ export interface AssistantProviderError {
   errorCode: string;
 }
 
-const GEMINI_TIMEOUT_MS = 15_000;
+const GROQ_TIMEOUT_MS = 15_000;
 
-function getGeminiApiUrl(): string {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.GEMINI_MODEL)}:generateContent`;
-}
-
-function buildRequestBody(userMessage: string, context: AssistantContext): GeminiRequest {
+function buildRequestBody(userMessage: string, context: AssistantContext): GroqRequest {
   return {
-    system_instruction: {
-      parts: [{ text: buildSystemPrompt() }],
-    },
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: `${summarizeContext(context)}\n\nNgười dùng hỏi: ${userMessage}` }],
-      },
+    model: env.GROQ_MODEL,
+    messages: [
+      { role: "system", content: buildSystemPrompt() },
+      { role: "user", content: `${summarizeContext(context)}\n\nNgười dùng hỏi: ${userMessage}` },
     ],
-    generationConfig: {
-      temperature: 0.5,
-      maxOutputTokens: 420,
-    },
+    temperature: 0.5,
+    max_tokens: 420,
   };
 }
 
-function extractGeminiText(data: GeminiResponse): string {
-  return data.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text ?? "")
-    .join("")
-    .trim() ?? "";
+function extractGroqText(data: GroqResponse): string {
+  return data.choices?.[0]?.message?.content?.trim() ?? "";
 }
 
-export async function sendToGemini(
+export async function sendToGroq(
   userMessage: string,
   context: AssistantContext,
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
-  if (!env.GEMINI_API_KEY) {
+  if (!env.GROQ_API_KEY) {
     return {
       message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
       errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
@@ -77,14 +63,14 @@ export async function sendToGemini(
   }
 
   const abortController = new AbortController();
-  const timeoutId = setTimeout(() => abortController.abort(), GEMINI_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => abortController.abort(), GROQ_TIMEOUT_MS);
 
   try {
-    const response = await fetch(getGeminiApiUrl(), {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": env.GEMINI_API_KEY,
+        "Authorization": `Bearer ${env.GROQ_API_KEY}`,
       },
       body: JSON.stringify(buildRequestBody(userMessage, context)),
       signal: abortController.signal,
@@ -93,15 +79,15 @@ export async function sendToGemini(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error("[Gemini] API error status:", response.status);
+      console.error("[Groq] API error status:", response.status);
       return {
         message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
         errorCode: "ASSISTANT_PROVIDER_ERROR",
       };
     }
 
-    const data = await response.json() as GeminiResponse;
-    const text = extractGeminiText(data);
+    const data = await response.json() as GroqResponse;
+    const text = extractGroqText(data);
 
     if (!text) {
       return {
@@ -121,7 +107,7 @@ export async function sendToGemini(
       };
     }
 
-    console.error("[Gemini] Request failed:", error instanceof Error ? error.name : "UnknownError");
+    console.error("[Groq] Request failed:", error instanceof Error ? error.name : "UnknownError");
     return {
       message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
       errorCode: "ASSISTANT_PROVIDER_ERROR",

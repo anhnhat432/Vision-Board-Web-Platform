@@ -1,4 +1,6 @@
 import { sendToGemini } from "./geminiAssistantProvider";
+import { sendToGroq } from "./groqAssistantProvider";
+import { env } from "../config/env";
 
 export interface AssistantContext {
   currentWeek: number | null;
@@ -218,7 +220,9 @@ export async function processAssistantRequest(
   request: AssistantRequest,
 ): Promise<AssistantResponse | AssistantError> {
   const sanitizedContext = sanitizeContext(request.context);
-  const result = await sendToGemini(request.message.trim(), sanitizedContext);
+  const result = env.ASSISTANT_PROVIDER === "gemini"
+    ? await sendToGemini(request.message.trim(), sanitizedContext)
+    : await sendToGroq(request.message.trim(), sanitizedContext);
 
   if ("errorCode" in result) {
     return result;

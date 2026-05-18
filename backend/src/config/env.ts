@@ -37,8 +37,13 @@ function parsePort(rawPort: string | undefined): number {
 const nodeEnv = process.env.NODE_ENV ?? "development";
 const billingProvider = getOptionalEnv("BILLING_PROVIDER")?.toLowerCase();
 const rawPrivateKey = getRequiredEnv("FIREBASE_PRIVATE_KEY");
+const assistantProvider = getOptionalEnv("ASSISTANT_PROVIDER")?.toLowerCase();
 const geminiApiKey = getOptionalEnv("GEMINI_API_KEY");
 const geminiModel = getOptionalEnv("GEMINI_MODEL") ?? "gemini-2.5-flash";
+const groqApiKey = getOptionalEnv("GROQ_API_KEY");
+const groqModel = getOptionalEnv("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
+
+const resolvedAssistantProvider: "groq" | "gemini" = assistantProvider === "gemini" ? "gemini" : "groq";
 
 export const env = {
   NODE_ENV: nodeEnv,
@@ -51,8 +56,11 @@ export const env = {
   SENTRY_DSN: getOptionalEnv("SENTRY_DSN"),
   CASSO_WEBHOOK_SECRET:
     billingProvider === "casso" ? getRequiredEnvInProduction("CASSO_WEBHOOK_SECRET") : getOptionalEnv("CASSO_WEBHOOK_SECRET"),
+  ASSISTANT_PROVIDER: resolvedAssistantProvider,
   GEMINI_API_KEY: geminiApiKey,
   GEMINI_MODEL: geminiModel,
+  GROQ_API_KEY: groqApiKey,
+  GROQ_MODEL: groqModel,
 };
 
 export type Env = typeof env;
