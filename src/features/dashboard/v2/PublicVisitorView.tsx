@@ -1,4 +1,4 @@
-import { CalendarDays, Compass, HardDrive, Lock, LogIn, RefreshCw, Smartphone, Target, UserPlus } from "lucide-react";
+import { Compass, HardDrive, Lock, LogIn, RefreshCw, Smartphone, Target, UserPlus } from "lucide-react";
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -28,7 +28,7 @@ const FEATURE_ROWS = [
     title: "Review để không trôi",
     description: "Mỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.",
     href: "/journal",
-    icon: CalendarDays,
+    icon: RefreshCw,
   },
 ] as const;
 

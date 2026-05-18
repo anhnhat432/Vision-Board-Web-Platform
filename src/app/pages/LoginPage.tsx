@@ -259,11 +259,11 @@ export function LoginPage() {
   const isSignIn = mode === "signin";
   const captionText = isSignIn ? "CHÀO BẠN QUAY LẠI" : "BẮT ĐẦU HÀNH TRÌNH";
   const heroTitle = isSignIn
-    ? "Tiếp tục kế hoạch 12 tuần của bạn."
-    : "Tạo không gian phát triển bản thân của riêng bạn.";
+    ? "Quay lại với 12 tuần của bạn"
+    : "Mở không gian 12 tuần đầu tiên";
   const heroSubline = isSignIn
-    ? "Lưu tiến độ và tiếp tục trên thiết bị khác."
-    : "Khoảng 30 giây để bắt đầu.";
+    ? "Đăng nhập để tiếp tục theo dõi tiến độ và đồng bộ giữa các thiết bị."
+    : "Tạo tài khoản để lưu kế hoạch 12 tuần và đồng bộ giữa các thiết bị.";
   const formTitle = isSignIn ? "Đăng nhập" : "Tạo tài khoản";
   const formDescription = isSignIn ? "Tiếp tục hành trình bạn đã bắt đầu." : "Khoảng 30 giây.";
   const displayError = localError ?? authError;
@@ -328,7 +328,7 @@ export function LoginPage() {
                       {captionText}
                     </p>
                     <h1 className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink">
-                      {isSignIn ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
+                      {isSignIn ? "Quay lại với 12 tuần của bạn" : "Mở không gian 12 tuần đầu tiên"}
                     </h1>
                   </div>
 
@@ -383,7 +383,7 @@ export function LoginPage() {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={googleSubmitting || authLoading}
-                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Đăng nhập với Google"
                   >
                     {googleSubmitting ? (
@@ -546,7 +546,7 @@ export function LoginPage() {
                     {/* Submit button */}
                     <Button
                       type="submit"
-                      className="w-full bg-app-accent text-white py-2.5 text-[15px] font-medium hover:bg-[#284f45] disabled:bg-app-ink-muted disabled:cursor-not-allowed transition-colors duration-150"
+                      className="w-full bg-app-accent text-white py-2.5 text-[15px] font-medium hover:bg-[#284f45] transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
                       disabled={submitting || authLoading || !email || !password || !canSubmitSignup}
                     >
                       {submitting ? (

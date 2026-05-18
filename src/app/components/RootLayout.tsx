@@ -105,6 +105,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Toaster } from "./ui/sonner";
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -1117,32 +1118,46 @@ export function RootLayout() {
                       </Button>
                     </>
                   ) : null}
-                  <button
-                    type="button"
-                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                    aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-                  >
-                    {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                        aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+                      >
+                        {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      {resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
 
                 <div className="md:hidden flex min-w-0 items-center gap-1.5">
                   <span className="hidden max-w-[120px] truncate text-[15px] font-medium tracking-tight text-app-ink sm:inline">
                     {pageMeta.label}
                   </span>
-                  <button
-                    type="button"
-                    className="hidden size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
-                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                    aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
-                  >
-                    {resolvedTheme === "dark" ? (
-                      <Sun className="h-[1.05rem] w-[1.05rem]" />
-                    ) : (
-                      <Moon className="h-[1.05rem] w-[1.05rem]" />
-                    )}
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="hidden size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
+                        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                        aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                      >
+                        {resolvedTheme === "dark" ? (
+                          <Sun className="h-[1.05rem] w-[1.05rem]" />
+                        ) : (
+                          <Moon className="h-[1.05rem] w-[1.05rem]" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      {resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                    </TooltipContent>
+                  </Tooltip>
                   {isSignedOutVisitor ? (
                     <>
                       <Button
