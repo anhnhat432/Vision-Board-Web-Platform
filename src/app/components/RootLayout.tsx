@@ -181,6 +181,7 @@ export function RootLayout() {
   const ASSISTANT_ROUTES = new Set([
     "/",
     "/onboarding",
+    "/goals",
     "/life-balance",
     "/life-insight",
     "/smart-goal-setup",
@@ -929,6 +930,7 @@ export function RootLayout() {
             {localDataMigrationPrompt}
             <Toaster />
           </main>
+          {showAssistant && <AIAssistant />}
         </div>
         {!demoMode && user ? <FirstLoginRestoreToast /> : null}
       </AutoCloudSyncProvider>

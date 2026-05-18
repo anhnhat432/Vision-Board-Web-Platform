@@ -111,6 +111,10 @@ vi.mock("../utils/production", () => ({
   syncPendingOutbox: productionMock.syncPendingOutbox,
 }));
 
+vi.mock("@/app/features/assistant/AIAssistant", () => ({
+  AIAssistant: () => <div data-testid="ai-assistant" />,
+}));
+
 function setAuthContext(overrides: Record<string, unknown> = {}) {
   authContextMock.useAuthContext.mockReturnValue({
     user: null,
@@ -278,6 +282,8 @@ function renderAppShell(initialEntry: string) {
         children: [
           { index: true, element: <div data-testid="home-page">Home page</div> },
           { path: "onboarding", element: <div data-testid="onboarding-page">Onboarding page</div> },
+          { path: "smart-goal-setup", element: <div data-testid="smart-goal-setup-page">Smart goal setup page</div> },
+          { path: "feasibility", element: <div data-testid="feasibility-page">Feasibility page</div> },
           { path: "12-week-setup", element: <div data-testid="twelve-week-setup-page">12-week setup page</div> },
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
           { path: "settings", element: <div data-testid="settings-page">Settings page</div> },
@@ -425,11 +431,39 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/");
     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Đăng ký" }).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Trang chính" })).toBeInTheDocument();
+    expect(screen.getAllByText("Trang chính").length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Mục tiêu" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "12 tuần" })).not.toBeInTheDocument();
     expect(productionMock.maybeShowBrowserReminderNotification).not.toHaveBeenCalled();
     expect(productionMock.syncPendingOutbox).not.toHaveBeenCalled();
+  });
+
+  it("shows the AI assistant on dashboard, goal, and setup help routes", async () => {
+    appModeMock.isDemoMode.mockReturnValue(true);
+
+    for (const [path, testId] of [
+      ["/", "home-page"],
+      ["/goals", "goals-page"],
+      ["/smart-goal-setup", "smart-goal-setup-page"],
+      ["/feasibility", "feasibility-page"],
+      ["/12-week-setup", "twelve-week-setup-page"],
+    ] as const) {
+      const { ui } = renderAppShell(path);
+
+      expect(await screen.findByTestId(testId)).toBeInTheDocument();
+      expect(screen.getByTestId("ai-assistant")).toBeInTheDocument();
+
+      ui.unmount();
+    }
+  });
+
+  it("does not show the AI assistant on non-core support routes", async () => {
+    appModeMock.isDemoMode.mockReturnValue(true);
+    const { router } = renderAppShell("/billing/plan");
+
+    expect(await screen.findByTestId("billing-plan-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/billing/plan");
+    expect(screen.queryByTestId("ai-assistant")).not.toBeInTheDocument();
   });
 
   it("resets the viewport to the top when the app route changes", async () => {
