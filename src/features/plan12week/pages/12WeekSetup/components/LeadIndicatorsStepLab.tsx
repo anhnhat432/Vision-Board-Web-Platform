@@ -206,28 +206,19 @@ export function LeadIndicatorsStepLab({
 
       <details className="rounded-lg border border-app-line bg-app-surface p-3 sm:p-4">
         <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
-          Việc lặp lại là gì? Khác kết quả cuối thế nào?
+          Việc lặp lại khác kết quả cuối thế nào?
         </summary>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Ví dụ tốt</p>
-            <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
-              <li>- Viết bản nháp 800 từ</li>
-              <li>- Tập gym 45 phút</li>
-              <li>- Gửi 5 email chủ động liên hệ</li>
-              <li>- Học flashcard tiếng Anh 30 phút</li>
-            </ul>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Việc lặp lại</p>
+            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+              Hành động bạn chủ động làm trong tuần: viết 800 từ, tập 45 phút, gửi 5 email.
+            </p>
           </div>
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chưa hợp</p>
-            <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
-              <li>- Tăng 100 followers</li>
-              <li>- Giảm 5kg</li>
-              <li>- Có job mới</li>
-              <li>- Đạt IELTS 7.0</li>
-            </ul>
-            <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">
-              Đây là kết quả cuối — đo ở chỉ số chính, không phải việc tuần.
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chỉ số kết quả</p>
+            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+              Kết quả đo cuối chu kỳ: tăng follower, giảm kg, có job mới, đạt IELTS 7.0.
             </p>
           </div>
         </div>

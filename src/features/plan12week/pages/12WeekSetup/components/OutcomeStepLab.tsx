@@ -78,7 +78,7 @@ export function OutcomeStepLab({
     : "";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 sm:space-y-5">
+    <div className="mx-auto max-w-4xl space-y-4 px-3 sm:space-y-5 sm:px-0">
       {smartGoal.measurable ? (
         <div role="note" className={cn(infoBoxClass, "flex items-start gap-2")}>
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
@@ -88,14 +88,14 @@ export function OutcomeStepLab({
         </div>
       ) : null}
 
-      <section className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="outcome-required-title">
+      <section className="rounded-card border border-app-line bg-app-surface p-4 shadow-sm sm:p-5" aria-labelledby="outcome-required-title">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p id="outcome-required-title" className="text-[15px] font-medium text-app-ink">
               Chốt phần bắt buộc trước
             </p>
             <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
-              Ba mục này đủ để đi tiếp. Khung gợi ý phía dưới chỉ giúp thiết lập nhanh hơn.
+              Ba mục này đủ để đi tiếp. Khung gợi ý phía dưới chỉ là phần hỗ trợ nhanh.
             </p>
           </div>
           <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[13px] font-medium text-app-ink-muted">
@@ -218,10 +218,7 @@ export function OutcomeStepLab({
       </section>
 
       {selectedTemplate ? (
-        <details
-          className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5"
-          aria-labelledby="template-personalize-title"
-        >
+        <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-personalize-title">
           <summary
             id="template-personalize-title"
             className="cursor-pointer list-none text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
@@ -342,8 +339,8 @@ export function OutcomeStepLab({
         </details>
       ) : null}
 
-      <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-picker-title">
-        <summary className="flex cursor-pointer list-none items-start gap-2">
+      <details className="rounded-card border border-app-line bg-app-surface p-4 shadow-sm sm:p-5" aria-labelledby="template-picker-title">
+        <summary className="flex cursor-pointer list-none items-start gap-2 py-1">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <span>
             <span id="template-picker-title" className="block text-[15px] font-medium text-app-ink">
@@ -372,7 +369,7 @@ export function OutcomeStepLab({
             <button
               type="button"
               className={cn(
-                "mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-[15px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-4 py-2.5 text-[15px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto",
                 selectedTemplate?.id === recommendedTemplate.id
                   ? "border border-app-accent bg-app-accent-soft text-app-accent"
                   : "bg-app-accent text-white hover:bg-[#284f45]",
@@ -428,7 +425,7 @@ export function OutcomeStepLab({
                   aria-pressed={isSelected}
                   aria-label={templateAriaLabel}
                   className={cn(
-                    "rounded-lg border p-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    "min-h-11 rounded-lg border p-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isSelected && "border-app-accent bg-app-accent-soft text-app-accent",
                     !isSelected &&
                       isLocked &&

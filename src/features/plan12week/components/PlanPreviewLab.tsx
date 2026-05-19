@@ -1,4 +1,4 @@
-import { CalendarDays, Target, Zap } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Target, Zap } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
 import type { TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
@@ -26,6 +26,18 @@ const formatDateLabel = (value: string) => {
     month: "numeric",
   });
 };
+
+const REVIEW_DAY_LABELS: Record<string, string> = {
+  Monday: "Thứ Hai",
+  Tuesday: "Thứ Ba",
+  Wednesday: "Thứ Tư",
+  Thursday: "Thứ Năm",
+  Friday: "Thứ Sáu",
+  Saturday: "Thứ Bảy",
+  Sunday: "Chủ Nhật",
+};
+
+const formatReviewDayLabel = (value: string) => REVIEW_DAY_LABELS[value] ?? (value || "Chưa chọn");
 
 export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
   const week1 = previewPlan.weeks.find((week) => week.weekNumber === 1);
@@ -82,7 +94,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
             <CalendarDays className="h-4 w-4 text-app-ink-soft" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Ngày nhìn lại tuần</p>
-            <p className="mt-1 text-sm font-semibold text-app-ink">{draft.reviewDay || "Chưa chọn"}</p>
+            <p className="mt-1 text-sm font-semibold text-app-ink">{formatReviewDayLabel(draft.reviewDay)}</p>
           </div>
 
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3 sm:col-span-2 lg:col-span-1">
@@ -96,15 +108,24 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
       </section>
 
       <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h4 className="text-base font-semibold text-app-ink">2–4 việc lặp lại</h4>
             <p className="mt-1 text-sm leading-6 text-app-ink-soft">Giữ danh sách ngắn để dễ kiểm tra và không bị quá tải.</p>
           </div>
-          <Badge variant="neutral">{leadMetrics.length} việc</Badge>
+          <Badge variant="neutral" className="shrink-0">
+            {leadMetrics.length} việc
+          </Badge>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 flex gap-2 rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3 text-sm leading-6 text-app-ink-soft">
+          <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+          <p>
+            Mỗi tuần bạn sẽ được tính điểm thực thi dựa trên số việc lặp lại đã hoàn thành. Ví dụ 8/10 việc = 80%.
+          </p>
+        </div>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {repeatedItems.length > 0 ? (
             repeatedItems.map((leadMetric) => (
               <div key={leadMetric.name} className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
