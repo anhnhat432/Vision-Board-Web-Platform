@@ -1008,7 +1008,7 @@ export function RootLayout() {
                         className="size-10 rounded-lg object-cover shadow-md ring-1 ring-app-accent/20"
                       />
                       <div className="min-w-0">
-                        <span className="hidden sm:inline-block text-[15px] font-medium tracking-tight text-app-ink">
+                        <span className="inline-block text-[15px] font-medium tracking-tight text-app-ink">
                           Dear Our Future
                         </span>
                       </div>
