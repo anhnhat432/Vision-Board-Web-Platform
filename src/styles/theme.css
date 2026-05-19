@@ -3084,13 +3084,67 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-/* ── Owl mascot animations ───────────────────────────────────
- * Blink: scaleY 1 → 0.1 → 1 in 150ms, random 3-6s interval.
- * Breath: scale 1 → 1.03 → 1 in 4s, gentle "alive" feeling.
+/* ── AI assistant mascot animations ──────────────────────────
+ * Breath: badge scale 1 → 1.03 → 1 in 4s, gentle "alive" feel.
+ * Twinkle: sparkle icon rotates 0° → 12° → 0° + opacity 1 → 0.75
+ *          in 6s, signaling AI presence without being noisy.
  * Both respect prefers-reduced-motion.
+ *
+ * Legacy .owl-* classes kept below for backwards compatibility
+ * with the OwlIcon component (still imported by tests).
  * ─────────────────────────────────────────────────────────── */
 
+@keyframes mascot-breath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-mascot-breath {
+  animation: mascot-breath 4s ease-in-out infinite;
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(12deg) scale(0.94);
+    opacity: 0.75;
+  }
+}
+
+.animate-sparkle-twinkle {
+  animation: sparkle-twinkle 6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Pause animations on hover so the user can aim at the badge */
+@media (hover: hover) {
+  .assistant-mascot-shell:hover .animate-mascot-breath,
+  .assistant-mascot-shell:hover .animate-sparkle-twinkle {
+    animation-play-state: paused;
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-mascot-breath,
+  .animate-sparkle-twinkle {
+    animation: none;
+  }
+}
+
+/* ── Legacy owl mascot (kept for tests / backwards compat) ─── */
+
 .owl-eyes {
+  transform-box: fill-box;
   transform-origin: center;
   transform: scaleY(1);
 }
@@ -3109,38 +3163,8 @@
   }
 }
 
-@keyframes owl-breath {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.03);
-  }
-}
-
-.animate-owl-breath {
-  animation: owl-breath 4s ease-in-out infinite;
-}
-
-/* Pause breathing when hovering to keep the mascot stable */
-@media (hover: hover) {
-  .owl-mascot-shell:hover .animate-owl-breath {
-    animation-play-state: paused;
-  }
-}
-
-/* Hover scale for the mascot shell */
-@media (hover: hover) {
-  .owl-mascot-shell:hover {
-    transform: scale(1.05);
-  }
-}
-
-/* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  .owl-eyes.is-blinking,
-  .animate-owl-breath {
+  .owl-eyes.is-blinking {
     animation: none;
   }
 }

@@ -9,7 +9,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
 } from "react";
-import { OwlIcon } from "./OwlIcon";
+import { Sparkles } from "lucide-react";
 import { useAssistant } from "./useAssistant";
 import { AssistantMessageContent } from "./AssistantMessageContent";
 import { AssistantActionCard } from "./AssistantActionCard";
@@ -204,7 +204,9 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         </div>
 
         <div className="flex h-14 items-center gap-3 border-b px-4">
-          <OwlIcon size={32} />
+          <span className="flex size-8 items-center justify-center rounded-full bg-app-accent text-white">
+            <Sparkles className="h-4 w-4" />
+          </span>
           <span className="font-semibold text-gray-900">Trợ lý</span>
           <div className="flex-1" />
           {messages.length > 0 ? (

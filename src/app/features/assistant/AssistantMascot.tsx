@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
-import { OwlIcon } from "./OwlIcon";
 import type { NudgeState } from "./useProactiveNudge";
 import type { Position } from "./useDraggableMascot";
-import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 
 interface AssistantMascotProps {
   onClick: () => void;
@@ -32,8 +30,6 @@ export function AssistantMascot({
   const tooltipAutoCloseRef = useRef<number | null>(null);
   const pointerFocusRef = useRef(false);
   const lastNudgeKeyRef = useRef<string | null>(null);
-
-  const { blinking } = useOwlIdleAnimation({ pause: isDragging || isOpen });
 
   useEffect(() => {
     return () => {
@@ -138,17 +134,17 @@ export function AssistantMascot({
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="z-50 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 p-1 shadow-lg transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:p-0.5 owl-mascot-shell"
+          className="assistant-mascot-shell z-50 inline-flex items-center gap-2 rounded-full bg-app-accent px-4 py-2.5 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
         >
-          <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-indigo-400/30" />
-          <span
-            className={`relative flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 sm:size-11 ${isDragging || isOpen ? "" : "animate-owl-breath"}`}
-          >
-            <OwlIcon size={28} blinking={blinking} />
-            {nudge.active ? (
-              <span className="absolute -top-1 -right-1 size-3 rounded-full bg-red-500 ring-2 ring-white animate-pulse" />
-            ) : null}
-          </span>
+          <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-app-accent/25" />
+          <Sparkles
+            className={`relative h-4 w-4 text-white ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
+            strokeWidth={2.2}
+          />
+          <span className="relative text-[14px] font-semibold tracking-tight">Hỏi AI</span>
+          {nudge.active ? (
+            <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
+          ) : null}
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-[240px] text-sm">
