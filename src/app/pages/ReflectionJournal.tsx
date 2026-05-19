@@ -341,13 +341,13 @@ export function ReflectionJournal() {
                   filterType === type ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
-                {type === "all" ? "Tất cả" : type === "weekly-review" ? "Review tuần" : "Tự do"}
+                {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
               </button>
             ))}
             <span className="hidden sm:inline w-px h-5 bg-app-line" />
             {(["", "happy", "neutral", "sad"] as const).map((mood) => {
               const labels: Record<string, string> = {
-                "": "Tất cả",
+                "": "Mọi tâm trạng",
                 happy: "Vui vẻ",
                 neutral: "Bình thường",
                 sad: "Suy tư",

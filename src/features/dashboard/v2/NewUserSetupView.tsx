@@ -1,7 +1,8 @@
 import { Check } from "lucide-react";
 
-import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
+import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
+import { capitalizeVietnameseName } from "@/app/utils/text";
 
 interface NewUserSetupViewProps {
   userData: UserData;
@@ -70,7 +71,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
       <section>
         <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Không gian mới</p>
         <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
-          Chào {displayName}, hãy bắt đầu chu kỳ 12 tuần đầu tiên.
+          Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu chu kỳ 12 tuần đầu tiên.
         </h1>
         <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
           Trang chính sẽ sáng rõ hơn sau khi có một mục tiêu thật, một kế hoạch tuần và vài việc hôm nay.

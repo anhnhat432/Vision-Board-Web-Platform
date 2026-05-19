@@ -1,7 +1,8 @@
-import { Check, Plus } from "lucide-react";
+import { Calendar, Check, Plus } from "lucide-react";
 import { useMemo } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
+import { Button } from "../../components/ui/button";
 import { useSyncedUserData } from "../../hooks/useSyncedUserData";
 import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
 import {
@@ -544,16 +545,43 @@ function TodayV2Footer({ lastSavedLabel }: { lastSavedLabel: string }) {
     <footer className="border-t border-app-line py-5 text-[13px] text-app-ink-muted">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <span>Đã lưu cục bộ · {lastSavedLabel}</span>
-        <span>v0.4 · Design preview</span>
+        <span>Hôm nay · Dear Our Future</span>
       </div>
     </footer>
   );
 }
 
+function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void }) {
+  return (
+    <div className="min-h-screen bg-app-bg text-app-ink">
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+        <section className="rounded-card border border-app-line bg-app-surface p-8 text-center md:p-12">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+            <Calendar className="h-7 w-7" />
+          </div>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-accent">HÔM NAY</p>
+          <h1 className="mt-3 font-serif text-3xl font-medium leading-tight text-app-ink">
+            Bạn chưa có chu kỳ 12 tuần đang chạy.
+          </h1>
+          <p className="mx-auto mt-3 max-w-md text-[15px] leading-7 text-app-ink-soft">
+            Tạo một mục tiêu 12 tuần để Hôm nay biết bạn nên làm gì, tuần đang ở đâu và khi nào cần review.
+          </p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
+            <Button type="button" onClick={() => onNavigate("/12-week-setup")}>Tạo mục tiêu 12 tuần</Button>
+            <Button type="button" variant="outline" onClick={() => onNavigate("/")}>Về Trang chính</Button>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export function TodayV2Page() {
+  const navigate = useNavigate();
   const { userData, reloadUserData } = useSyncedUserData();
   const today = useMemo(() => new Date(), []);
   const viewModel = useMemo(() => buildTodayV2ViewModel(userData, today), [userData, today]);
+  const hasRealSystem = Boolean(viewModel.activeGoalId);
 
   useSetAssistantPageContext({
     pageType: "today",
@@ -565,6 +593,10 @@ export function TodayV2Page() {
     toggleTwelveWeekTask(viewModel.activeGoalId, taskId, completed);
     reloadUserData();
   };
+
+  if (!hasRealSystem) {
+    return <TodayV2EmptyState onNavigate={navigate} />;
+  }
 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
