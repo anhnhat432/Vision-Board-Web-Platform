@@ -268,9 +268,11 @@ export function BillingPlan() {
   // Handle checkout return URL
   const returnStatus = searchParams.get("status");
   const isCheckoutReturn = returnStatus === "success" && realMode;
+  const signedInUserId = authContext?.user?.uid ?? null;
+  const canLoadPaymentHistory = realMode && signedInUserId !== null;
 
   const loadPaymentHistory = useCallback(async () => {
-    if (!realMode) return;
+    if (!canLoadPaymentHistory) return;
     setIsLoadingPaymentHistory(true);
     setPaymentHistoryError(null);
 
@@ -287,12 +289,12 @@ export function BillingPlan() {
     } finally {
       setIsLoadingPaymentHistory(false);
     }
-  }, [realMode]);
+  }, [canLoadPaymentHistory]);
 
   useEffect(() => {
-    if (!realMode) return;
+    if (!canLoadPaymentHistory) return;
     void loadPaymentHistory();
-  }, [realMode, loadPaymentHistory]);
+  }, [canLoadPaymentHistory, loadPaymentHistory]);
 
   const pollServerEntitlement = useCallback(async () => {
     if (!isCheckoutReturn) return;

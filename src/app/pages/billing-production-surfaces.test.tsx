@@ -113,6 +113,29 @@ function stubRealBillingEnv(
 
 const UI_TEST_TIMEOUT_MS = 30_000;
 
+function stubAuthContext(user: { email: string; emailVerified?: boolean; uid?: string } | null) {
+  vi.doMock("@/lib/auth/AuthContext", () => ({
+    useOptionalAuthContext: () => ({
+      user: user
+        ? {
+            uid: user.uid ?? "billing-test-user",
+            email: user.email,
+            emailVerified: user.emailVerified ?? true,
+          }
+        : null,
+      userProfile: null,
+      userProfileLoading: false,
+      userProfileError: null,
+      authLoading: false,
+      error: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refreshUserProfile: vi.fn(),
+      isConfigured: true,
+    }),
+  }));
+}
+
 describe("production billing surfaces", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -161,6 +184,26 @@ describe("production billing surfaces", () => {
   );
 
   it(
+    "does not request protected payment history before a user signs in",
+    async () => {
+      const apiClient = stubRealBillingEnv("Casso + VietQR");
+      stubAuthContext(null);
+      const { BillingPlan } = await import("./BillingPlan");
+
+      const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+        initialEntries: ["/billing/plan"],
+      });
+      render(<RouterProvider router={router} />);
+
+      await screen.findByRole("heading", { name: "Chọn gói phù hợp với bạn" });
+      await waitFor(() => {
+        expect(apiClient.get).not.toHaveBeenCalledWith("/billing/payment-history");
+      });
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
     "localizes payment history rate-limit errors",
     async () => {
       stubRealBillingEnv(
@@ -181,6 +224,7 @@ describe("production billing surfaces", () => {
           },
         },
       );
+      stubAuthContext({ email: "billing-user@example.test" });
       const { BillingPlan } = await import("./BillingPlan");
 
       const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
