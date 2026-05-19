@@ -145,9 +145,9 @@ export function AssistantMascot({
             className={`relative flex size-12 items-center justify-center rounded-full bg-app-accent text-white sm:size-11 ${isDragging || isOpen ? "" : "animate-owl-breath"}`}
           >
             <OwlIcon
-              size={28}
+              size={32}
               blinking={blinking}
-              className="text-white [&_.owl-beak]:text-[color:var(--app-warm)]"
+              className="text-white [&_.owl-eye-disc]:text-[#1a1a1a] [&_.owl-pupil]:text-[#1a1a1a] [&_.owl-beak]:text-[color:var(--app-warm)] [&_.owl-belly]:text-[color:var(--app-warm-soft)] [&_.owl-wing]:text-[color:var(--app-accent)]"
             />
             {nudge.active ? (
               <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
