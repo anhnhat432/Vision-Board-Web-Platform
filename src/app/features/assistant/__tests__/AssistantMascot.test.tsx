@@ -70,21 +70,21 @@ describe("AssistantMascot", () => {
     expect(screen.queryAllByText(proactiveNudge.message)).toHaveLength(0);
   });
 
-  it("renders OwlIcon with blinking prop and animate-owl-breath class", () => {
+  it("renders the decorative sparkle icon inside the mascot button", () => {
     render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
 
     const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
     const owlIcon = button.querySelector("svg");
 
     expect(owlIcon).toBeInTheDocument();
-    expect(owlIcon).toHaveAttribute("aria-hidden", "true");
+    expect(owlIcon).toHaveClass("lucide-sparkles");
   });
 
-  it("applies animate-owl-breath class to mascot inner shell when not open/dragging", () => {
+  it("applies twinkle animation to the sparkle icon when not open/dragging", () => {
     render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
 
     const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
-    const innerShell = button.querySelector(".animate-owl-breath");
+    const innerShell = button.querySelector(".animate-sparkle-twinkle");
 
     expect(innerShell).toBeInTheDocument();
   });
