@@ -39,9 +39,25 @@ const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element #root not found in document");
 createRoot(rootElement).render(<App />);
 
-// Register service worker for offline support
+// Register service worker only in production. In dev, stale SW caches can serve old CSS/JS and break layout.
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  });
+  if (import.meta.env.PROD) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  } else {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister().catch(() => {});
+      }
+    });
+
+    if ("caches" in window) {
+      window.caches.keys().then((keys) => {
+        for (const key of keys) {
+          if (key.startsWith("vbweb-")) window.caches.delete(key).catch(() => {});
+        }
+      });
+    }
+  }
 }

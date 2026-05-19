@@ -109,6 +109,10 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
       },
       {
+        path: "12-week-setup-lab",
+        ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetupLab"), "TwelveWeekSetup"),
+      },
+      {
         path: "12-week-dashboard",
         Component: RedirectToTwelveWeekSystem,
       },
