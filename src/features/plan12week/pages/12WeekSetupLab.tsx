@@ -202,7 +202,7 @@ function readTwelveWeekSetupPrerequisites(): TwelveWeekSetupPrerequisites {
   };
 }
 
-export function TwelveWeekSetup() {
+export function TwelveWeekSetupLab() {
   const navigate = useNavigate();
   const { actions: planSetupActions } = usePlanSetupSync();
   const auth = useAuthContext();
@@ -1104,6 +1104,15 @@ export function TwelveWeekSetup() {
         />
 
         <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
+
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+            LAB · UX thử nghiệm
+          </span>
+          <Link to="/12-week-setup" className="text-[13px] font-medium text-app-accent hover:underline">
+            Quay lại bản hiện tại
+          </Link>
+        </div>
 
         {!isVisionPromptDismissed ? (
           <section

@@ -110,7 +110,7 @@ export const appRoutes = [
       },
       {
         path: "12-week-setup-lab",
-        ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetupLab"), "TwelveWeekSetup"),
+        ...lazyRoute(() => import("./pages/12WeekSetupLab"), "TwelveWeekSetupLab"),
       },
       {
         path: "12-week-dashboard",

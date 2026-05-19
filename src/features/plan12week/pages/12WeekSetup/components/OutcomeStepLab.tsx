@@ -218,17 +218,17 @@ export function OutcomeStepLab({
       </section>
 
       {selectedTemplate ? (
-        <section
+        <details
           className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5"
           aria-labelledby="template-personalize-title"
         >
+          <summary
+            id="template-personalize-title"
+            className="cursor-pointer list-none text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
+          >
+            Cá nhân hóa khung
+          </summary>
           <div>
-            <p
-              id="template-personalize-title"
-              className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
-            >
-              Cá nhân hóa khung
-            </p>
             <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
               Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
             </p>
@@ -339,11 +339,12 @@ export function OutcomeStepLab({
               </p>
             </div>
           </div>
-        </section>
+        </details>
       ) : null}
 
-      <section className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-picker-title">
-        <div className="flex items-start gap-2">
+      <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-picker-title">
+        <summary className="cursor-pointer list-none">
+          <div className="flex items-start gap-2">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
             <p id="template-picker-title" className="text-[15px] font-medium text-app-ink">
@@ -353,7 +354,8 @@ export function OutcomeStepLab({
               Dùng khung nếu muốn có nhịp ban đầu. Bạn vẫn sửa được mọi trường.
             </p>
           </div>
-        </div>
+          </div>
+        </summary>
 
         {recommendedTemplate && adaptiveTemplateRecommendation ? (
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
@@ -487,7 +489,7 @@ export function OutcomeStepLab({
             })}
           </div>
         </details>
-      </section>
+      </details>
 
       {selectedTemplate ? (
         <section className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">

@@ -32,6 +32,9 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
   const leadMetrics = week1?.leadMetrics ?? [];
   const weekOneTasks = week1?.tasks ?? [];
   const repeatedItems = leadMetrics.slice(0, 4);
+  const lagMetricLabel = draft.lagMetricName.trim()
+    ? `${draft.lagMetricName.trim()}: ${[draft.lagMetricTarget.trim(), draft.lagMetricUnit.trim()].filter(Boolean).join(" ")}`.trim()
+    : "";
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
@@ -53,17 +56,21 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
             <Target className="h-4 w-4 text-app-accent" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Kết quả cuối 12 tuần</p>
-            <p className="mt-1 text-sm font-semibold text-app-ink">
-              {previewPlan.vision || draft.vision12Week || "Chưa có nội dung"}
-            </p>
+            <p className="mt-1 text-sm font-semibold text-app-ink">{draft.week12Outcome || "Chưa có nội dung"}</p>
           </div>
 
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
             <Zap className="h-4 w-4 text-app-ink-soft" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Chỉ số kết quả</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">
-              {leadMetrics.length > 0 ? `${leadMetrics.length} chỉ số đang theo dõi` : "Chưa có chỉ số kết quả"}
+              {lagMetricLabel || "Chưa có chỉ số kết quả"}
             </p>
+          </div>
+
+          <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
+            <Target className="h-4 w-4 text-app-ink-soft" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Vì sao mục tiêu này quan trọng</p>
+            <p className="mt-1 text-sm font-semibold text-app-ink">{draft.vision12Week || "Chưa có nội dung"}</p>
           </div>
 
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
