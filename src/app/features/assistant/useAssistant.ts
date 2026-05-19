@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { buildAssistantContext, type AssistantContext } from "./buildAssistantContext";
 import { sendAssistantMessageStream } from "./assistantApi";
-import type { ChatHistoryMessage, Message } from "./types";
+import { captureAssistantFeedback } from "./assistantFeedback";
+import type { ChatHistoryMessage, Message, FeedbackEntry, FeedbackRating } from "./types";
+import { parseAssistantReply } from "./parseActions";
 
 const SUGGESTIONS = [
   "Hôm nay tôi nên làm gì?",
@@ -12,11 +14,17 @@ const SUGGESTIONS = [
 ];
 
 const MAX_PERSISTED = 30;
+const MAX_FEEDBACK = 100;
 
 interface PersistedHistory {
   userId: string | null;
   savedAt: number;
   messages: Message[];
+}
+
+interface AssistantTurnSnapshot {
+  userMessage: string;
+  context: AssistantContext & { route: string };
 }
 
 export interface AssistantError {
@@ -26,6 +34,22 @@ export interface AssistantError {
 
 export interface UseAssistantOptions {
   route?: string;
+}
+
+function getStorageKey(userId: string | null): string {
+  return `assistant.chat.history:${userId ?? "anon"}`;
+}
+
+function getOnboardKey(userId: string | null): string {
+  return `assistant.onboarded:${userId ?? "anon"}`;
+}
+
+function getFeedbackStorageKey(userId: string | null): string {
+  return `assistant.feedback:${userId ?? "anon"}`;
+}
+
+function getFeedbackMapStorageKey(userId: string | null): string {
+  return `assistant.feedback.map:${userId ?? "anon"}`;
 }
 
 function getErrorMessage(error: unknown): string {
@@ -43,17 +67,14 @@ function getErrorCode(error: unknown): string | undefined {
   return typeof errorCode === "string" ? errorCode : undefined;
 }
 
-function createMessage(role: Message["role"], content: string): Message {
+function createMessage(role: Message["role"], content: string, isWelcome?: boolean): Message {
   return {
     id: crypto.randomUUID(),
     role,
     content,
     createdAt: Date.now(),
+    isWelcome,
   };
-}
-
-function getStorageKey(userId: string | null): string {
-  return `assistant.chat.history:${userId ?? "anon"}`;
 }
 
 function normalizePersistedMessage(value: unknown): Message | null {
@@ -66,6 +87,7 @@ function normalizePersistedMessage(value: unknown): Message | null {
   if (typeof message.createdAt !== "number" || !Number.isFinite(message.createdAt)) return null;
 
   const status = message.status === "streaming" || message.status === "complete" ? "complete" : undefined;
+  const feedback = message.feedback === "helpful" || message.feedback === "not_helpful" ? message.feedback : undefined;
 
   return {
     id: message.id,
@@ -73,6 +95,7 @@ function normalizePersistedMessage(value: unknown): Message | null {
     content: message.content,
     createdAt: message.createdAt,
     status,
+    feedback,
   };
 }
 
@@ -110,7 +133,7 @@ function savePersistedMessages(messages: Message[], userId: string | null): void
 
   try {
     const persisted = messages
-      .filter((message) => message.content.trim() && message.status !== "streaming")
+      .filter((message) => message.content.trim() && message.status !== "streaming" && !message.isWelcome)
       .slice(-MAX_PERSISTED);
     const key = getStorageKey(userId);
     if (persisted.length === 0) {
@@ -136,12 +159,70 @@ export function useAssistant(options?: UseAssistantOptions) {
   const [lastError, setLastError] = useState<AssistantError | null>(null);
   const [lastUserText, setLastUserText] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const turnSnapshotsRef = useRef<Record<string, AssistantTurnSnapshot>>({});
+
+  const [messageFeedback, setMessageFeedback] = useState<Record<string, FeedbackRating>>(() => {
+    try {
+      const raw = typeof localStorage !== "undefined" ? localStorage.getItem(getFeedbackMapStorageKey(userId)) : null;
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [onboarded, setOnboarded] = useState<boolean>(() => {
+    try {
+      return typeof localStorage !== "undefined" ? localStorage.getItem(getOnboardKey(userId)) === "1" : false;
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     setMessages(loadPersistedMessages(userId));
     setLastError(null);
     setLastUserText(null);
+    setMessageFeedback(() => {
+      try {
+        const raw = typeof localStorage !== "undefined" ? localStorage.getItem(getFeedbackMapStorageKey(userId)) : null;
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    });
+    try {
+      setOnboarded(localStorage.getItem(getOnboardKey(userId)) === "1");
+    } catch {
+      setOnboarded(false);
+    }
   }, [userId]);
+
+  useEffect(() => {
+    if (onboarded || messages.length > 0) return;
+
+    const welcomeMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: `Chào bạn 👋 Mình là **Cú**, trợ lý 12-week của bạn trong Vision Board.
+
+Mình có thể giúp bạn:
+- Xem việc cần làm hôm nay
+- Tóm tắt tiến độ tuần này
+- Gợi ý reflection cuối tuần
+- Giải thích các khái niệm như SMART, OKR, 12-week
+
+Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn.`,
+      createdAt: Date.now(),
+      status: "complete",
+      isWelcome: true,
+    };
+
+    setMessages([welcomeMessage]);
+    setOnboarded(true);
+    try {
+      localStorage.setItem(getOnboardKey(userId), "1");
+    } catch {}
+  }, [onboarded, messages.length, userId]);
 
   useEffect(() => {
     if (isTyping) return undefined;
@@ -157,77 +238,90 @@ export function useAssistant(options?: UseAssistantOptions) {
     }
   }, []);
 
-  const send = useCallback(async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || isTyping) return;
+  const send = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || isTyping) return;
 
-    setMessages((prev) => [...prev, createMessage("user", trimmed)]);
-    setLastUserText(trimmed);
-    setIsTyping(true);
-    setLastError(null);
+      setMessages((prev) => [...prev, createMessage("user", trimmed)]);
+      setLastUserText(trimmed);
+      setIsTyping(true);
+      setLastError(null);
 
-    const messageId = crypto.randomUUID();
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: messageId,
-        role: "assistant",
-        content: "",
-        createdAt: Date.now(),
-        status: "streaming",
-      },
-    ]);
-
-    abortControllerRef.current = new AbortController();
-
-    try {
-      const context: AssistantContext & { route: string } = {
-        ...buildAssistantContext(undefined, route),
-        route,
-      };
-
-      const history: ChatHistoryMessage[] = messages
-        .slice(-6)
-        .map(m => ({ role: m.role, content: m.content }));
-
-      await sendAssistantMessageStream(
-        { message: trimmed, context, history },
-        (delta) => {
-          setMessages((prev) =>
-            prev.map((message) =>
-              message.id === messageId ? { ...message, content: message.content + delta } : message,
-            ),
-          );
+      const messageId = crypto.randomUUID();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId,
+          role: "assistant",
+          content: "",
+          createdAt: Date.now(),
+          status: "streaming",
         },
-        abortControllerRef.current.signal,
-      );
+      ]);
 
-      setMessages((prev) =>
-        prev.map((message) =>
-          message.id === messageId ? { ...message, status: "complete" } : message,
-        ),
-      );
-    } catch (error) {
-      if (error && typeof error === "object" && "errorCode" in error && (error as { errorCode?: string }).errorCode === "ABORT_ERROR") {
-        // User aborted, don't show error
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const context: AssistantContext & { route: string } = {
+          ...buildAssistantContext(undefined, route),
+          route,
+        };
+        turnSnapshotsRef.current[messageId] = {
+          userMessage: trimmed,
+          context,
+        };
+
+        const history: ChatHistoryMessage[] = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }));
+
+        let finalContent = "";
+        await sendAssistantMessageStream(
+          { message: trimmed, context, history },
+          (delta) => {
+            finalContent += delta;
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === messageId ? { ...message, content: message.content + delta } : message,
+              ),
+            );
+          },
+          abortControllerRef.current.signal,
+        );
+
+        const parsed = parseAssistantReply(finalContent);
         setMessages((prev) =>
           prev.map((message) =>
-            message.id === messageId ? { ...message, status: "complete" } : message,
+            message.id === messageId
+              ? { ...message, content: parsed.textContent, actions: parsed.actions, status: "complete" }
+              : message,
           ),
         );
-      } else {
-        const message = getErrorMessage(error);
-        setLastError({
-          message,
-          errorCode: getErrorCode(error),
-        });
-        setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      } catch (error) {
+        if (
+          error &&
+          typeof error === "object" &&
+          "errorCode" in error &&
+          (error as { errorCode?: string }).errorCode === "ABORT_ERROR"
+        ) {
+          // User aborted, don't show error
+          setMessages((prev) =>
+            prev.map((message) => (message.id === messageId ? { ...message, status: "complete" } : message)),
+          );
+        } else {
+          const message = getErrorMessage(error);
+          setLastError({
+            message,
+            errorCode: getErrorCode(error),
+          });
+          setMessages((prev) => prev.filter((m) => m.id !== messageId));
+        }
+      } finally {
+        setIsTyping(false);
+        abortControllerRef.current = null;
       }
-    } finally {
-      setIsTyping(false);
-      abortControllerRef.current = null;
-    }
-  }, [isTyping, messages, route]);
+    },
+    [isTyping, messages, route],
+  );
 
   const retry = useCallback(() => {
     if (!lastUserText || isTyping) return;
@@ -238,13 +332,84 @@ export function useAssistant(options?: UseAssistantOptions) {
     setMessages([]);
     setLastError(null);
     setLastUserText(null);
+    turnSnapshotsRef.current = {};
     try {
       localStorage.removeItem(getStorageKey(userId));
+      localStorage.removeItem(getOnboardKey(userId));
+      setOnboarded(false);
     } catch {}
   }, [userId]);
 
+  const submitFeedback = useCallback(
+    (messageId: string, rating: FeedbackRating) => {
+      try {
+        setMessages((prev) => {
+          const targetIndex = prev.findIndex((message) => message.id === messageId);
+          const target = prev[targetIndex];
+          if (!target || target.role !== "assistant" || !target.content.trim()) return prev;
+
+          const snapshot = turnSnapshotsRef.current[messageId];
+          const previousUserMessage =
+            [...prev.slice(0, targetIndex)].reverse().find((message) => message.role === "user")?.content ?? "";
+
+          // Capture feedback via existing helper (keeps compatibility)
+          const context = snapshot?.context ?? {
+            ...buildAssistantContext(undefined, route),
+            route,
+          };
+
+          captureAssistantFeedback({
+            userId,
+            route,
+            rating: rating === "up" ? "helpful" : "not_helpful",
+            userMessage: snapshot?.userMessage ?? previousUserMessage,
+            assistantMessage: target.content,
+            context,
+          });
+
+          // Save to new feedback storage with user-scoped key
+          const entry: FeedbackEntry = {
+            messageId,
+            userText: snapshot?.userMessage ?? previousUserMessage,
+            replyText: target.content,
+            rating,
+            timestamp: Date.now(),
+            route,
+          };
+
+          if (typeof localStorage !== "undefined") {
+            const raw = localStorage.getItem(getFeedbackStorageKey(userId));
+            const entries: FeedbackEntry[] = raw ? JSON.parse(raw) : [];
+            const nextEntries = [...entries, entry].slice(-MAX_FEEDBACK);
+            localStorage.setItem(getFeedbackStorageKey(userId), JSON.stringify(nextEntries));
+
+            // Update map for quick lookup
+            const mapKey = getFeedbackMapStorageKey(userId);
+            const rawMap = localStorage.getItem(mapKey);
+            const map: Record<string, FeedbackRating> = rawMap ? JSON.parse(rawMap) : {};
+            map[messageId] = rating;
+            localStorage.setItem(mapKey, JSON.stringify(map));
+          }
+
+          setMessageFeedback((prevFeedback) => ({
+            ...prevFeedback,
+            [messageId]: rating,
+          }));
+
+          return prev.map((message) =>
+            message.id === messageId ? { ...message, feedback: rating === "up" ? "helpful" : "not_helpful" } : message,
+          );
+        });
+      } catch {
+        // Silent fail for feedback storage
+      }
+    },
+    [route, userId],
+  );
+
   return {
     messages,
+    setMessages,
     isTyping,
     send,
     suggestions: SUGGESTIONS,
@@ -252,5 +417,7 @@ export function useAssistant(options?: UseAssistantOptions) {
     retry,
     stopGeneration,
     clearHistory,
+    submitFeedback,
+    messageFeedback,
   };
 }
