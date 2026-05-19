@@ -933,7 +933,7 @@ export function RootLayout() {
               {localDataMigrationPrompt}
               <Toaster />
             </main>
-            {showAssistant && <AIAssistant />}
+            {showAssistant && user && <AIAssistant />}
           </div>
         </AssistantPageContextProvider>
       </AutoCloudSyncProvider>
@@ -1552,7 +1552,7 @@ export function RootLayout() {
           <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
           {localDataMigrationPrompt}
           <Toaster />
-          {showAssistant && <AIAssistant />}
+          {showAssistant && user && <AIAssistant />}
         </div>
       </AssistantPageContextProvider>
       {!demoMode && user ? <FirstLoginRestoreToast /> : null}
