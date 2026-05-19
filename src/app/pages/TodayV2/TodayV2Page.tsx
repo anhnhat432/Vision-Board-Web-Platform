@@ -554,7 +554,7 @@ function TodayV2Footer({ lastSavedLabel }: { lastSavedLabel: string }) {
 function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void }) {
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
-      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
         <section className="rounded-card border border-app-line bg-app-surface p-8 text-center md:p-12">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
             <Calendar className="h-7 w-7" />
@@ -600,7 +600,7 @@ export function TodayV2Page() {
 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
-      <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-0">
+      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
         <TodayV2Hero viewModel={viewModel} />
 
         <div className="mt-8 grid gap-5 lg:grid-cols-3">

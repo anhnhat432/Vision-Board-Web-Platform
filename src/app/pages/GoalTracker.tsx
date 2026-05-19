@@ -546,7 +546,7 @@ function GoalTrackerContent({
   };
 
   return (
-    <div className="stack-section mx-auto max-w-5xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+    <div className="stack-section mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}

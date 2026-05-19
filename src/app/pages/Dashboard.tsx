@@ -184,7 +184,7 @@ export function Dashboard() {
   if (!userData) {
     return (
       <div className="min-h-screen bg-app-bg text-app-ink">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-0">
+        <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
           <div className="space-y-5">
             <Skeleton className="h-14 rounded-card bg-app-surface" />
             <Skeleton className="h-56 rounded-card bg-app-surface" />
@@ -542,7 +542,7 @@ function DashboardContent({
         showMobileStickyCTA ? "min-h-screen bg-app-bg pb-24 text-app-ink" : "min-h-screen bg-app-bg text-app-ink"
       }
     >
-      <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-0">
+      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
         {shouldShowFreeGoalLimit ? (
           <FreeGoalLimitCard
             current={goalLimitUsage.current}

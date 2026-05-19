@@ -255,7 +255,7 @@ export function SettingsPage() {
   const SyncIcon = syncIcon;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <header>
         <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CÀI ĐẶT</p>
         <h1 className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink">

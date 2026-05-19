@@ -175,7 +175,7 @@ export function VisionBoardGallery() {
     latestBoard;
 
   return (
-    <div className="stack-section pb-12">
+    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <AlertDialog
         open={Boolean(boardToDelete)}
         onOpenChange={(open) => {
