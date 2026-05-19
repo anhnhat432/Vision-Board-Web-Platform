@@ -205,7 +205,7 @@ export function LeadIndicatorsStepLab({
       </section>
 
       <details className="rounded-lg border border-app-line bg-app-surface p-3 sm:p-4">
-        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
           Việc lặp lại khác kết quả cuối thế nào?
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -250,7 +250,7 @@ export function LeadIndicatorsStepLab({
                       type="button"
                       onClick={() => onRemoveIndicator(index)}
                       aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
                       Xoá
@@ -326,7 +326,7 @@ export function LeadIndicatorsStepLab({
                 <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-3 text-left text-[14px] font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-[14px] font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-expanded={Boolean(expandedCommitments[indicator.id])}
                     aria-controls={`tactic-commitment-${index}`}
                     onClick={() => toggleCommitmentEditor(indicator.id)}
@@ -364,7 +364,7 @@ export function LeadIndicatorsStepLab({
                                   type="button"
                                   aria-pressed={active}
                                   onClick={() => onIndicatorChange(index, "type", option.value as TacticType)}
-                                  className={cn(optionButtonClass, active && optionButtonActiveClass)}
+                                  className={cn(optionButtonClass, "min-h-11 px-4 py-3", active && optionButtonActiveClass)}
                                 >
                                   <span>{option.label}</span>
                                   <span className="text-[12px] font-normal opacity-80">{option.hint}</span>
@@ -453,7 +453,7 @@ export function LeadIndicatorsStepLab({
           >
             Xem trước tuần 1
           </p>
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
+          <span className="inline-flex min-h-10 items-center rounded-full bg-app-accent-soft px-3 py-2 text-[13px] font-medium text-app-accent">
             {coreCount} cốt lõi · {optionalCount} tùy chọn
           </span>
         </div>
@@ -482,7 +482,7 @@ export function LeadIndicatorsStepLab({
               <div key={group.id} className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-[14px] font-medium text-app-ink">{group.name}</p>
-                  <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
+                  <span className="inline-flex min-h-10 items-center rounded-full bg-app-accent-soft px-3 py-2 text-[13px] font-medium text-app-accent">
                     {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                   </span>
                 </div>

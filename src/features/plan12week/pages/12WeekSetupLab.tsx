@@ -1103,13 +1103,17 @@ export function TwelveWeekSetupLab() {
           onCheckoutComplete={handleCheckoutComplete}
         />
 
-        <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
+        <CoreFlowProgress
+          currentStepId="twelve_week_setup"
+          onExit={() => navigate("/")}
+          className="[&_button]:min-h-10 [&_button]:px-3 [&_button]:py-2"
+        />
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+          <span className="inline-flex min-h-10 items-center rounded-full border border-app-line bg-app-bg px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
             LAB · UX thử nghiệm
           </span>
-          <Link to="/12-week-setup" className="text-[13px] font-medium text-app-accent hover:underline">
+          <Link to="/12-week-setup" className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[13px] font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30">
             Quay lại bản hiện tại
           </Link>
         </div>
@@ -1119,7 +1123,7 @@ export function TwelveWeekSetupLab() {
             className="rounded-card border border-app-warm-border bg-app-warm-soft p-4 sm:p-5 md:p-6"
             aria-label="Tầm nhìn dài hạn"
           >
-            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[13px] font-medium text-app-warm">
+            <span className="inline-flex min-h-10 items-center rounded-full bg-app-surface px-3 py-2 text-[13px] font-medium text-app-warm">
               Tầm nhìn dài hạn
             </span>
             {aspirationalVision ? (
@@ -1134,13 +1138,13 @@ export function TwelveWeekSetupLab() {
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     to="/vision"
-                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-app-warm px-3.5 py-3 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                   >
                     Điền 2 phút →
                   </Link>
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-[14px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-3 text-[14px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
                     Bỏ qua
@@ -1180,7 +1184,7 @@ export function TwelveWeekSetupLab() {
               ) : null}
               <Link
                 to="/smart-goal-setup"
-                className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="inline-flex min-h-10 items-center rounded-full border border-app-line bg-app-surface px-3 py-2 font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
                 Sửa mục tiêu
               </Link>

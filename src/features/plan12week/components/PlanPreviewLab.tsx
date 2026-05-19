@@ -59,7 +59,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               Chỉ hiển thị phần cần kiểm tra trước khi lưu kế hoạch.
             </p>
           </div>
-          <Badge variant="brand" className="shrink-0">
+          <Badge variant="brand" className="inline-flex min-h-10 shrink-0 items-center px-3 py-2">
             12 tuần
           </Badge>
         </div>
@@ -113,7 +113,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             <h4 className="text-base font-semibold text-app-ink">2–4 việc lặp lại</h4>
             <p className="mt-1 text-sm leading-6 text-app-ink-soft">Giữ danh sách ngắn để dễ kiểm tra và không bị quá tải.</p>
           </div>
-          <Badge variant="neutral" className="shrink-0">
+          <Badge variant="neutral" className="inline-flex min-h-10 shrink-0 items-center px-3 py-2">
             {leadMetrics.length} việc
           </Badge>
         </div>

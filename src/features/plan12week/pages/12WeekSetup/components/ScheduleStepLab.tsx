@@ -68,7 +68,7 @@ function CollapsibleScheduleSection({
     <details className="group rounded-lg border border-app-line bg-app-bg p-3 sm:p-4">
       <summary
         id={id}
-        className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-medium text-app-ink marker:hidden"
+        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-[14px] font-medium text-app-ink marker:hidden"
       >
         <span>{title}</span>
         <span className="text-[12px] font-medium text-app-ink-muted group-open:hidden">Mở</span>
@@ -183,7 +183,7 @@ export function ScheduleStepLab({
                   aria-pressed={isActive}
                   onClick={() => onChange("reviewDay", day.value)}
                   className={cn(
-                    "rounded-md border border-app-line bg-app-surface px-2 py-2 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    "min-h-10 rounded-md border border-app-line bg-app-surface px-2.5 py-2.5 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
                   )}
                 >
@@ -209,7 +209,7 @@ export function ScheduleStepLab({
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => onChange("dailyTimeBudget", option.value)}
-                  className={cn(radioButtonClass, isActive && radioButtonActiveClass)}
+                  className={cn(radioButtonClass, "min-h-11 px-3.5 py-3", isActive && radioButtonActiveClass)}
                 >
                   <span>{option.label}</span>
                   <span className="text-[12px] font-normal opacity-80">{option.hint}</span>
@@ -234,7 +234,7 @@ export function ScheduleStepLab({
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => onChange("tacticLoadPreference", option.value)}
-                  className={cn(radioButtonClass, isActive && radioButtonActiveClass)}
+                  className={cn(radioButtonClass, "min-h-11 px-3.5 py-3", isActive && radioButtonActiveClass)}
                 >
                   <span>{option.label}</span>
                   <span className="text-[12px] font-normal opacity-80">{LOAD_HINTS[option.value]}</span>

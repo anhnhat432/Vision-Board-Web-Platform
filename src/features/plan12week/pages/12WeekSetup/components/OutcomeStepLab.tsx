@@ -221,7 +221,7 @@ export function OutcomeStepLab({
         <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-personalize-title">
           <summary
             id="template-personalize-title"
-            className="cursor-pointer list-none text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
+            className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
           >
             Cá nhân hóa khung
           </summary>
@@ -380,7 +380,7 @@ export function OutcomeStepLab({
             </button>
             {recommendedTemplateSupport ? (
               <details className="mt-4 rounded-lg border border-app-line bg-app-surface px-4 py-3">
-                <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
                   Xem gợi ý tuần 1 và nhịp giữ
                 </summary>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -406,7 +406,7 @@ export function OutcomeStepLab({
         ) : null}
 
         <details className="mt-4 rounded-lg border border-dashed border-app-line bg-app-bg px-3 py-3 sm:px-4">
-          <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
             Xem tất cả khung mẫu
           </summary>
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
@@ -488,7 +488,7 @@ export function OutcomeStepLab({
 
       {selectedTemplate ? (
         <details className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
-          <summary id="selected-template-title" className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+          <summary id="selected-template-title" className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
             Khung đang dùng: {selectedTemplate.name}
           </summary>
           <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
@@ -505,7 +505,7 @@ export function OutcomeStepLab({
       ) : null}
 
       <details className="rounded-lg border border-dashed border-app-line bg-app-bg p-4">
-        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
           Xem mục tiêu đã viết
         </summary>
         <div className="mt-4 grid gap-3">
@@ -522,7 +522,7 @@ export function OutcomeStepLab({
 
       {planRationaleReasons.length > 0 ? (
         <details className="rounded-lg border border-app-line bg-app-bg p-3">
-          <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Vì sao kế hoạch này được đề xuất</summary>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">Vì sao kế hoạch này được đề xuất</summary>
           <ul className="mt-3 grid gap-2 md:grid-cols-2">
             {planRationaleReasons.map((reason) => (
               <li key={reason.id} className="rounded-lg border border-app-line bg-app-surface p-3">
@@ -541,7 +541,7 @@ export function OutcomeStepLab({
 
       {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
         <details className="rounded-lg border border-app-line bg-app-bg p-3">
-          <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Các hint từ feasibility</summary>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">Các hint từ feasibility</summary>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div className={infoBoxClass}>
               <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Cần chú ý</p>

@@ -103,7 +103,7 @@ export function SetupStepShellLab({
         </h2>
         <div className="mt-2 text-[15px] leading-6 text-app-ink-soft">{description}</div>
 
-        <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="mt-5 flex w-full gap-1.5">
+        <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="mt-5 flex w-full gap-2">
           {stepDefinitions.map((step, index) => {
             const isActive = index === currentStep;
             const isCompleted = index < currentStep;
@@ -114,7 +114,7 @@ export function SetupStepShellLab({
                 <button
                   type="button"
                   className={cn(
-                    "h-1.5 w-full rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    "min-h-10 w-full rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isActive && "bg-app-accent",
                     isCompleted && !isActive && "bg-app-accent/40",
                     !isActive && !isCompleted && "bg-app-line",
@@ -138,7 +138,7 @@ export function SetupStepShellLab({
 
         {whyThisMatters ? (
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
-            <button type="button" className="flex min-h-11 w-full items-center justify-between gap-2 text-left text-[13px] font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30" onClick={() => setIsWhyOpen((isOpen) => !isOpen)} aria-expanded={isWhyOpen} aria-controls="twelve-week-step-why">
+            <button type="button" className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-[13px] font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30" onClick={() => setIsWhyOpen((isOpen) => !isOpen)} aria-expanded={isWhyOpen} aria-controls="twelve-week-step-why">
               <span>Tại sao bước này quan trọng?</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform duration-150", isWhyOpen && "rotate-180")} aria-hidden="true" />
             </button>
@@ -164,7 +164,7 @@ export function SetupStepShellLab({
           Bước {currentStep + 1} / {stepCount}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button type="button" className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
+          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Quay lại
           </button>
