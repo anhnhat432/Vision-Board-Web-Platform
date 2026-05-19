@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
-import { OwlIcon } from "./OwlIcon";
 import type { NudgeState } from "./useProactiveNudge";
 import type { Position } from "./useDraggableMascot";
-import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 
 interface AssistantMascotProps {
   onClick: () => void;
@@ -32,8 +30,6 @@ export function AssistantMascot({
   const tooltipAutoCloseRef = useRef<number | null>(null);
   const pointerFocusRef = useRef(false);
   const lastNudgeKeyRef = useRef<string | null>(null);
-
-  const { blinking } = useOwlIdleAnimation({ pause: isDragging || isOpen });
 
   useEffect(() => {
     return () => {
@@ -138,16 +134,15 @@ export function AssistantMascot({
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="owl-mascot-shell z-50 flex items-center justify-center rounded-full bg-app-accent p-1 shadow-md transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg sm:p-0.5"
+          className="assistant-mascot-shell z-50 flex items-center justify-center rounded-full bg-app-accent p-1 shadow-md transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg sm:p-0.5"
         >
           <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-app-accent/25" />
           <span
-            className={`relative flex size-12 items-center justify-center rounded-full bg-app-accent text-white sm:size-11 ${isDragging || isOpen ? "" : "animate-owl-breath"}`}
+            className={`relative flex size-12 items-center justify-center rounded-full bg-app-accent text-white sm:size-11 ${isDragging || isOpen ? "" : "animate-mascot-breath"}`}
           >
-            <OwlIcon
-              size={32}
-              blinking={blinking}
-              className="text-white [&_.owl-eye-disc]:text-[#1a1a1a] [&_.owl-pupil]:text-[#1a1a1a] [&_.owl-beak]:text-[color:var(--app-warm)] [&_.owl-belly]:text-[color:var(--app-warm-soft)] [&_.owl-wing]:text-[color:var(--app-accent)]"
+            <Sparkles
+              className={`h-7 w-7 text-white ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
+              strokeWidth={2}
             />
             {nudge.active ? (
               <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
