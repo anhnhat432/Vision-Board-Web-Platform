@@ -1909,6 +1909,25 @@
     pointer-events: none;
   }
 
+  /* ── Hand-drawn underline for hero keywords ─────────── */
+  .appear-stroke path {
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    animation: stroke-draw 1.2s ease-out 0.4s forwards;
+  }
+  @keyframes stroke-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .appear-stroke path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+
   @keyframes skeleton-sweep {
     0% {
       transform: translateX(-100%);

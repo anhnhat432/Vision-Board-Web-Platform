@@ -37,34 +37,106 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
   return (
     <div className="space-y-6">
-      <section className="space-y-5 md:space-y-6">
+      <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)] md:items-center">
         <div>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-            Xin chào, đây là Vision Board
-          </p>
-          <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
-            Một chỗ tĩnh để bạn nhìn lại tuần sống của mình.
-          </h1>
-          <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
-            Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp
-            theo hơn.
-          </p>
+          <div>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+              Xin chào, đây là Vision Board
+            </p>
+            <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
+              Một chỗ tĩnh để bạn nhìn lại{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10">tuần sống</span>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 200 12"
+                  preserveAspectRatio="none"
+                  className="absolute inset-x-0 -bottom-1 h-2 w-full text-app-warm appear-stroke"
+                >
+                  <path
+                    d="M2 8 C 40 2, 80 10, 120 4 S 180 8, 198 5"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </svg>
+              </span>{" "}
+              của mình.
+            </h1>
+            <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
+              Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp
+              theo hơn.
+            </p>
 
-          {/* 3 trust chip thay thế card sidebar cũ */}
-          <ul className="mt-5 flex flex-wrap gap-2">
-            <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
-              <Lock className="h-3.5 w-3.5 text-app-accent" />
-              Local-first, không cần đăng nhập để xem
-            </li>
-            <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
-              <RefreshCw className="h-3.5 w-3.5 text-app-accent" />
-              Đồng bộ khi sẵn sàng
-            </li>
-            <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
-              <Smartphone className="h-3.5 w-3.5 text-app-accent" />
-              Hoạt động trên mobile
-            </li>
-          </ul>
+            {/* 3 trust chip thay thế card sidebar cũ */}
+            <ul className="mt-5 flex flex-wrap gap-2">
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
+                <Lock className="h-3.5 w-3.5 text-app-accent" />
+                Local-first, không cần đăng nhập để xem
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
+                <RefreshCw className="h-3.5 w-3.5 text-app-accent" />
+                Đồng bộ khi sẵn sàng
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
+                <Smartphone className="h-3.5 w-3.5 text-app-accent" />
+                Hoạt động trên mobile
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Mockup preview card */}
+        <div className="hidden rounded-card border border-app-line bg-app-surface p-5 shadow-sm md:block">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
+                <Target className="h-3.5 w-3.5" />
+              </span>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Mục tiêu</p>
+                <p className="text-[13px] font-medium text-app-ink">Đọc 12 cuốn sách trong năm</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[11px] font-semibold text-app-accent">
+              Tuần 4/12
+            </span>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-[12px] text-app-ink-soft">
+              <span>Tiến độ chu kỳ</span>
+              <span className="font-semibold tabular-nums text-app-accent">42%</span>
+            </div>
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-app-bg">
+              <div className="h-full rounded-full bg-app-accent" style={{ width: "42%" }} />
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc hôm nay · 7/14</p>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="flex h-4 w-4 items-center justify-center rounded-[4px] bg-app-accent text-white">
+                  <Check className="h-2.5 w-2.5" />
+                </span>
+                <span className="text-[13px] text-app-ink-muted line-through">Đọc 30 trang "Atomic Habits"</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-4 w-4 rounded-[4px] border border-app-line" aria-hidden="true" />
+                <span className="text-[13px] text-app-ink">Ghi 3 dòng phản tư</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-4 w-4 rounded-[4px] border border-app-line" aria-hidden="true" />
+                <span className="text-[13px] text-app-ink">Review tuần lúc 21h</span>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-4 border-t border-app-line pt-3 text-[11px] italic text-app-ink-muted">
+            Ảnh chụp giao diện — dữ liệu mô phỏng.
+          </p>
         </div>
       </section>
 
