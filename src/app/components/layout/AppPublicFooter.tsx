@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Facebook, Instagram } from "lucide-react";
+import { Facebook } from "lucide-react";
 
 type ProductLink = { label: string; to: string };
 type CompanyLink = { label: string; to?: string; href?: string };
@@ -26,16 +26,6 @@ const LEGAL_LINKS: LegalLink[] = [
 const FACEBOOK_HREF = "https://www.facebook.com/profile.php?id=61589773962146";
 const SOCIAL_ICON_CLASS =
   "flex size-9 items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-soft transition-colors duration-150 hover:border-app-accent/40 hover:text-app-accent";
-const SOCIAL_PLACEHOLDER_ICON_CLASS =
-  "flex size-9 cursor-not-allowed items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-muted opacity-60";
-
-function TikTokIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
-    </svg>
-  );
-}
 
 export function AppPublicFooter() {
   const year = new Date().getFullYear();
@@ -54,24 +44,6 @@ export function AppPublicFooter() {
               Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
             </p>
             <div className="mt-4 flex items-center gap-2">
-              <button
-                type="button"
-                disabled
-                aria-label="TikTok dang cap nhat"
-                title="TikTok dang cap nhat link"
-                className={SOCIAL_PLACEHOLDER_ICON_CLASS}
-              >
-                <TikTokIcon className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                disabled
-                aria-label="Instagram dang cap nhat"
-                title="Instagram dang cap nhat link"
-                className={SOCIAL_PLACEHOLDER_ICON_CLASS}
-              >
-                <Instagram className="h-4 w-4" />
-              </button>
               <a
                 href={FACEBOOK_HREF}
                 target="_blank"
