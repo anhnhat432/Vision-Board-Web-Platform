@@ -11,7 +11,9 @@ export function isChunkLoadError(error: unknown): boolean {
   return (
     message.includes("Failed to fetch dynamically imported module") ||
     message.includes("Importing a module script failed") ||
+    message.includes("error loading dynamically imported module") ||
     message.includes("Loading chunk") ||
+    message.includes("Loading CSS chunk") ||
     message.includes("ChunkLoadError")
   );
 }
@@ -36,7 +38,15 @@ function writeReloadMarker(key: string): void {
   }
 }
 
-function reloadOnceForChunkError(error: unknown): boolean {
+function clearReloadMarker(): void {
+  try {
+    sessionStorage.removeItem(CHUNK_RELOAD_STORAGE_KEY);
+  } catch {
+    // Ignore storage failures; clearing this marker is a best-effort cleanup.
+  }
+}
+
+export function reloadOnceForChunkError(error: unknown): boolean {
   if (typeof window === "undefined" || !isChunkLoadError(error)) return false;
 
   const key = `${window.location.pathname}${window.location.search}`;
@@ -52,7 +62,9 @@ function reloadOnceForChunkError(error: unknown): boolean {
 
 export async function loadWithChunkReload<T>(loader: () => Promise<T>): Promise<T> {
   try {
-    return await loader();
+    const result = await loader();
+    clearReloadMarker();
+    return result;
   } catch (error) {
     if (reloadOnceForChunkError(error)) {
       return new Promise<T>(() => {
@@ -61,4 +73,25 @@ export async function loadWithChunkReload<T>(loader: () => Promise<T>): Promise<
     }
     throw error;
   }
+}
+
+type VitePreloadErrorEvent = Event & {
+  payload?: unknown;
+};
+
+export function installChunkLoadRecovery(): void {
+  if (typeof window === "undefined") return;
+
+  window.addEventListener("vite:preloadError", (event) => {
+    const payload = (event as VitePreloadErrorEvent).payload;
+    if (reloadOnceForChunkError(payload)) {
+      event.preventDefault();
+    }
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    if (reloadOnceForChunkError(event.reason)) {
+      event.preventDefault();
+    }
+  });
 }

@@ -3,40 +3,15 @@ import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
-
-const RELOAD_STORAGE_KEY = "vb:chunk-reload";
-
-function isChunkLoadError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  const msg = error.message;
-  return (
-    msg.includes("Failed to fetch dynamically imported module") ||
-    msg.includes("Importing a module script failed") ||
-    msg.includes("error loading dynamically imported module") ||
-    msg.includes("Loading chunk") ||
-    msg.includes("Loading CSS chunk")
-  );
-}
+import { loadWithChunkReload } from "./utils/chunkLoad";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
   loader: () => Promise<TModule>,
   exportName: keyof TModule,
 ) {
   return async () => {
-    try {
-      const module = await loader();
-      sessionStorage.removeItem(RELOAD_STORAGE_KEY);
-      return { Component: module[exportName] as ComponentType };
-    } catch (error) {
-      const alreadyReloaded = sessionStorage.getItem(RELOAD_STORAGE_KEY);
-      if (isChunkLoadError(error) && !alreadyReloaded) {
-        sessionStorage.setItem(RELOAD_STORAGE_KEY, "1");
-        window.location.reload();
-        return new Promise<never>(() => {});
-      }
-      sessionStorage.removeItem(RELOAD_STORAGE_KEY);
-      throw error;
-    }
+    const module = await loadWithChunkReload(loader);
+    return { Component: module[exportName] as ComponentType };
   };
 }
 
@@ -52,20 +27,8 @@ function RouteHydrateFallback() {
 }
 
 const TwelveWeekSystemPage = lazy(async () => {
-  try {
-    const mod = await import("./pages/12WeekSystem");
-    sessionStorage.removeItem(RELOAD_STORAGE_KEY);
-    return { default: mod.TwelveWeekSystem };
-  } catch (error) {
-    const alreadyReloaded = sessionStorage.getItem(RELOAD_STORAGE_KEY);
-    if (isChunkLoadError(error) && !alreadyReloaded) {
-      sessionStorage.setItem(RELOAD_STORAGE_KEY, "1");
-      window.location.reload();
-      return new Promise<never>(() => {});
-    }
-    sessionStorage.removeItem(RELOAD_STORAGE_KEY);
-    throw error;
-  }
+  const mod = await loadWithChunkReload(() => import("./pages/12WeekSystem"));
+  return { default: mod.TwelveWeekSystem };
 });
 
 function TwelveWeekSystemRoute() {

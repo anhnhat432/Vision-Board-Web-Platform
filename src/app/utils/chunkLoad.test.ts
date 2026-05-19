@@ -11,6 +11,9 @@ describe("chunkLoad", () => {
         ),
       ),
     ).toBe(true);
+
+    expect(isChunkLoadError(new Error("error loading dynamically imported module"))).toBe(true);
+    expect(isChunkLoadError(new Error("Loading CSS chunk app failed"))).toBe(true);
   });
 
   it("ignores non-chunk errors", () => {
