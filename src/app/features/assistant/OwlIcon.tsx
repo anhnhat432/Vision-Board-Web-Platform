@@ -10,13 +10,12 @@ export interface OwlIconProps extends SVGProps<SVGSVGElement> {
  * on the forest-green badge background instead of looking like a
  * white-on-white smudge with two pinpoint dots.
  *
- * The owl is intentionally minimal: rounded body, two clear eye discs
- * with solid pupils inside, a small warm-tone beak (via .owl-beak), and
- * tucked ear tufts. All colors come through CSS currentColor so dark
- * mode and reduced contrast just work.
+ * Each eye is its own `<g class="owl-eyes">` so `useOwlIdleAnimation`
+ * blink animation (transform scaleY 1 → 0.1) and the breath wrapper
+ * animation both work — the SVG attribute `transform` translates the
+ * eye to its slot, and the CSS animation applies a scale on top of it.
  *
- * `blinking` is forwarded as an `is-blinking` class on the eyes group so
- * the idle blink animation (useOwlIdleAnimation) can squash the eyes.
+ * `blinking=true` toggles the `is-blinking` class so the squash happens.
  */
 export function OwlIcon({ size = 24, className, blinking = false, ...props }: OwlIconProps) {
   const stroke = 1.6;
@@ -58,17 +57,16 @@ export function OwlIcon({ size = 24, className, blinking = false, ...props }: Ow
         fill="none"
       />
 
-      {/* Eyes — outer disc + solid pupil, grouped so .owl-eyes.is-blinking
-          can squash them via transform. */}
-      <g className={eyeClass}>
-        <g transform="translate(12.5, 15)">
-          <circle r="3" stroke="currentColor" strokeWidth={stroke} fill="none" />
-          <circle r="1.1" fill="currentColor" />
-        </g>
-        <g transform="translate(19.5, 15)">
-          <circle r="3" stroke="currentColor" strokeWidth={stroke} fill="none" />
-          <circle r="1.1" fill="currentColor" />
-        </g>
+      {/* Eyes — each eye is its own .owl-eyes group with its own translate,
+          so the blink scaleY animation squashes around the eye's own center
+          (not the SVG canvas center). */}
+      <g className={eyeClass} transform="translate(12.5, 15)" style={{ transformBox: "fill-box", transformOrigin: "center" }}>
+        <circle r="3" stroke="currentColor" strokeWidth={stroke} fill="none" />
+        <circle r="1.1" fill="currentColor" />
+      </g>
+      <g className={eyeClass} transform="translate(19.5, 15)" style={{ transformBox: "fill-box", transformOrigin: "center" }}>
+        <circle r="3" stroke="currentColor" strokeWidth={stroke} fill="none" />
+        <circle r="1.1" fill="currentColor" />
       </g>
 
       {/* Beak — warm tone via .owl-beak class (forwarded from parent) */}

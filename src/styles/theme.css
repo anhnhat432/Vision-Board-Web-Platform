@@ -3091,6 +3091,10 @@
  * ─────────────────────────────────────────────────────────── */
 
 .owl-eyes {
+  /* Each eye <g> has its own translate; transform-box: fill-box makes
+   * the CSS scaleY animation pivot around the eye's own center instead
+   * of the SVG canvas origin. */
+  transform-box: fill-box;
   transform-origin: center;
   transform: scaleY(1);
 }
