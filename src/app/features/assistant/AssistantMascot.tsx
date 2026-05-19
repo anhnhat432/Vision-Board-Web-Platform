@@ -134,20 +134,17 @@ export function AssistantMascot({
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="assistant-mascot-shell z-50 flex items-center justify-center rounded-full bg-app-accent p-1 shadow-md transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg sm:p-0.5"
+          className="assistant-mascot-shell z-50 inline-flex items-center gap-2 rounded-full bg-app-accent px-4 py-2.5 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
         >
           <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-app-accent/25" />
-          <span
-            className={`relative flex size-12 items-center justify-center rounded-full bg-app-accent text-white sm:size-11 ${isDragging || isOpen ? "" : "animate-mascot-breath"}`}
-          >
-            <Sparkles
-              className={`h-7 w-7 text-white ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
-              strokeWidth={2}
-            />
-            {nudge.active ? (
-              <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
-            ) : null}
-          </span>
+          <Sparkles
+            className={`relative h-4 w-4 text-white ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
+            strokeWidth={2.2}
+          />
+          <span className="relative text-[14px] font-semibold tracking-tight">Hỏi AI</span>
+          {nudge.active ? (
+            <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
+          ) : null}
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-[240px] text-sm">
