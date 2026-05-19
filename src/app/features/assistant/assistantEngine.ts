@@ -16,7 +16,11 @@ function detectIntent(text: string): Intent {
     return "greeting";
   }
 
-  if (/(^|\s)(là gì|nghĩa là|giải thích|định nghĩa|smart là|okr là|12-week là|12 tuần là|reflection là)(\s|[!.?,]|$)/.test(lower)) {
+  if (
+    /(^|\s)(là gì|nghĩa là|giải thích|định nghĩa|smart là|okr là|12-week là|12 tuần là|reflection là)(\s|[!.?,]|$)/.test(
+      lower,
+    )
+  ) {
     return "definition";
   }
 
@@ -28,11 +32,7 @@ function detectIntent(text: string): Intent {
   return "fallback";
 }
 
-function formatAssistantResponse(input: {
-  action: string;
-  reason: string;
-  tenMinuteAction: string;
-}): string {
+function formatAssistantResponse(input: { action: string; reason: string; tenMinuteAction: string }): string {
   return [
     `Việc nên làm ngay: ${input.action}`,
     `Lý do: ${input.reason}`,
@@ -45,7 +45,8 @@ function buildTodayResponse(ctx: AssistantContext): string {
 
   if (tasks.length === 0) {
     return formatAssistantResponse({
-      action: "Bạn chưa có task nào cho hôm nay. Nếu đã có mục tiêu, hãy vào hệ thống 12 tuần để chọn một việc nhỏ có thể làm ngay.",
+      action:
+        "Bạn chưa có task nào cho hôm nay. Nếu đã có mục tiêu, hãy vào hệ thống 12 tuần để chọn một việc nhỏ có thể làm ngay.",
       reason: "Assistant chưa thấy dữ liệu task hôm nay trong máy của bạn.",
       tenMinuteAction: "Mở kế hoạch 12 tuần và viết ra 1 việc nhỏ nhất cho hôm nay.",
     });
@@ -109,22 +110,21 @@ function buildGoalsResponse(ctx: AssistantContext): string {
 
 function buildReflectionResponse(ctx: AssistantContext): string {
   const stuckReason = ctx.stuckSignals?.latestObstacle;
-  const prompts = [
-    "Hôm nay bạn học được gì?",
-    "Việc nào khiến bạn tự hào nhất?",
-    "Ngày mai bạn muốn ưu tiên điều gì?",
-  ];
+  const prompts = ["Hôm nay bạn học được gì?", "Việc nào khiến bạn tự hào nhất?", "Ngày mai bạn muốn ưu tiên điều gì?"];
 
   return formatAssistantResponse({
     action: `Viết reflection ngắn với 3 câu hỏi:\n${prompts.map((prompt, index) => `${index + 1}. ${prompt}`).join("\n")}`,
-    reason: stuckReason ? `Lần check-in gần nhất có điểm kẹt: ${stuckReason}.` : "Reflection giúp bạn chốt lại điều đã học và chọn bước tiếp theo.",
+    reason: stuckReason
+      ? `Lần check-in gần nhất có điểm kẹt: ${stuckReason}.`
+      : "Reflection giúp bạn chốt lại điều đã học và chọn bước tiếp theo.",
     tenMinuteAction: "Trả lời câu 1 và câu 3, mỗi câu một dòng.",
   });
 }
 
 function buildFallbackResponse(): string {
   return formatAssistantResponse({
-    action: "Mình có thể giúp bạn chọn một hướng: xem việc hôm nay, tóm tắt tuần này, mục tiêu chính, hoặc gợi ý reflection.",
+    action:
+      "Mình có thể giúp bạn chọn một hướng: xem việc hôm nay, tóm tắt tuần này, mục tiêu chính, hoặc gợi ý reflection.",
     reason: "Assistant cần một câu hỏi cụ thể hơn để bám vào core flow của app.",
     tenMinuteAction: "Gõ: Hôm nay tôi nên làm gì?",
   });

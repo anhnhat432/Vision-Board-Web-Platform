@@ -17,12 +17,8 @@ vi.mock("../buildAssistantContext", () => ({
   buildAssistantContext: vi.fn(() => ({
     currentWeek: 5,
     weeksTotal: 12,
-    goals: [
-      { id: "g1", title: "Học React nâng cao", progress: 60 },
-    ],
-    todayTasks: [
-      { id: "t1", title: "Đọc chapter", done: false },
-    ],
+    goals: [{ id: "g1", title: "Học React nâng cao", progress: 60 }],
+    todayTasks: [{ id: "t1", title: "Đọc chapter", done: false }],
     lastReflectionDate: "2025-01-10",
     feasibility: null,
     latestWeeklyReview: null,
@@ -31,6 +27,18 @@ vi.mock("../buildAssistantContext", () => ({
       missedCommitments: [],
       overdueOpenCount: 0,
       overdueTasks: [],
+    },
+    trend: { completionLast4Weeks: [], direction: "unknown" },
+    streak: { daysWithCompletedTask: 0 },
+    upcomingDeadlines: [],
+    pageContext: {
+      route: "/smart-goal-setup",
+      currentStep: "smart_goal_setup",
+      nextSuggestedStep: "Điền phần SMART còn thiếu: specific",
+      formDraft: {
+        focusArea: "Personal Growth",
+        missingSmartGoalFields: ["specific"],
+      },
     },
   })),
 }));
@@ -56,6 +64,8 @@ describe("AssistantPanel", () => {
   beforeEach(() => {
     mockOnClose.mockClear();
     localStorage.clear();
+    // Pre-set onboarded flag for anonymous user to skip welcome message
+    localStorage.setItem("assistant.onboarded:anon", "1");
     setAuthContext();
     resetAssistantSession();
   });
@@ -85,9 +95,42 @@ describe("AssistantPanel", () => {
 
     expect(await screen.findByText("Hôm nay tôi nên làm gì?")).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay|Bạn chưa có task/)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay|Bạn chưa có task/),
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+  });
+
+  it("captures assistant feedback as a local golden example", async () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} route="/smart-goal-setup" />);
+
+    await userEvent.type(
+      screen.getByPlaceholderText(/Nhập tin nhắn/),
+      "tôi muốn học TOEIC thì phần này nên điền như thế nào{enter}",
+    );
+
+    const thumbsUpButton = await screen.findByRole("button", { name: /Phản hồi tốt/ }, { timeout: 3000 });
+
+    await userEvent.click(thumbsUpButton);
+
+    const stored = JSON.parse(localStorage.getItem("assistant.golden_examples") ?? "[]") as Array<{
+      route: string;
+      rating: string;
+      userMessage: string;
+      assistantMessage: string;
+      context: { pageContext: { currentStep: string } };
+    }>;
+
+    expect(stored).toHaveLength(1);
+    expect(stored[0].route).toBe("/smart-goal-setup");
+    expect(stored[0].rating).toBe("helpful");
+    expect(stored[0].userMessage).toContain("TOEIC");
+    expect(stored[0].assistantMessage.length).toBeGreaterThan(0);
+    expect(stored[0].context.pageContext.currentStep).toBe("smart_goal_setup");
   });
 
   it("sends message on Enter", async () => {
@@ -164,9 +207,12 @@ describe("AssistantPanel", () => {
     const { unmount } = render(<AssistantPanel open={true} onClose={mockOnClose} />);
 
     await userEvent.type(screen.getByPlaceholderText(/Nhập tin nhắn/), "test{enter}");
-    await waitFor(() => {
-      expect(screen.getByText(/Việc nên làm ngay|chế độ demo|Mình/)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Việc nên làm ngay|chế độ demo|Mình/)).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
     await waitFor(() => {
       expect(localStorage.getItem("assistant.chat.history:anon")).not.toBeNull();
     });
@@ -178,11 +224,14 @@ describe("AssistantPanel", () => {
   });
 
   it("does not load history from another user", () => {
-    localStorage.setItem("assistant.chat.history:alice", JSON.stringify({
-      userId: "alice",
-      savedAt: Date.now(),
-      messages: [{ id: "1", role: "user", content: "secret", createdAt: Date.now() }],
-    }));
+    localStorage.setItem(
+      "assistant.chat.history:alice",
+      JSON.stringify({
+        userId: "alice",
+        savedAt: Date.now(),
+        messages: [{ id: "1", role: "user", content: "secret", createdAt: Date.now() }],
+      }),
+    );
     setAuthContext("bob");
 
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
@@ -211,18 +260,24 @@ describe("AssistantPanel", () => {
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
 
     await userEvent.type(screen.getByPlaceholderText(/Nhập tin nhắn/), "anonymous{enter}");
-    await waitFor(() => {
-      expect(localStorage.getItem("assistant.chat.history:anon")).not.toBeNull();
-    });
+    await waitFor(
+      () => {
+        expect(localStorage.getItem("assistant.chat.history:anon")).not.toBeNull();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("clears history when user confirms", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    localStorage.setItem("assistant.chat.history:anon", JSON.stringify({
-      userId: null,
-      savedAt: Date.now(),
-      messages: [{ id: "1", role: "user", content: "hello", createdAt: Date.now() }],
-    }));
+    localStorage.setItem(
+      "assistant.chat.history:anon",
+      JSON.stringify({
+        userId: null,
+        savedAt: Date.now(),
+        messages: [{ id: "1", role: "user", content: "hello", createdAt: Date.now() }],
+      }),
+    );
 
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
     expect(screen.getByText("hello")).toBeInTheDocument();
@@ -240,6 +295,97 @@ describe("AssistantPanel", () => {
     expect(dialog).toHaveAttribute("aria-modal", "true");
   });
 
+  it("shows feedback buttons on complete assistant message and saves to localStorage", async () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "test feedback{enter}");
+
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay|chế độ demo/)).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    const thumbsUpButton = await screen.findByRole("button", { name: "Phản hồi tốt" });
+    expect(thumbsUpButton).toBeInTheDocument();
+
+    await userEvent.click(thumbsUpButton);
+
+    expect(thumbsUpButton).toHaveClass("bg-green-100");
+    expect(thumbsUpButton).toHaveClass("text-green-700");
+
+    await waitFor(() => {
+      const feedbackEntries = JSON.parse(localStorage.getItem("assistant.feedback:anon") ?? "[]");
+      expect(Array.isArray(feedbackEntries)).toBe(true);
+      expect(feedbackEntries.length).toBeGreaterThan(0);
+      expect(feedbackEntries[feedbackEntries.length - 1].rating).toBe("up");
+    });
+
+    const feedbackMap = JSON.parse(localStorage.getItem("assistant.feedback.map:anon") ?? "{}");
+    const assistantMessageId = Object.keys(feedbackMap).find((key) => feedbackMap[key] === "up");
+    expect(assistantMessageId).toBeDefined();
+  });
+
+  it("clears history when user confirms", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    localStorage.setItem(
+      "assistant.chat.history:anon",
+      JSON.stringify({
+        userId: null,
+        savedAt: Date.now(),
+        messages: [{ id: "1", role: "user", content: "hello", createdAt: Date.now() }],
+      }),
+    );
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+    expect(screen.getByText("hello")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
+
+    expect(screen.queryByText("hello")).not.toBeInTheDocument();
+    expect(localStorage.getItem("assistant.chat.history:anon")).toBeNull();
+  });
+
+  it("has correct ARIA attributes", () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    const dialog = screen.getByRole("dialog", { name: "Trợ lý AI" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+  });
+
+  it("shows feedback buttons on complete assistant message and saves to localStorage", async () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "test feedback{enter}");
+
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay|chế độ demo/)).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    const thumbsUpButton = await screen.findByRole("button", { name: "Phản hồi tốt" });
+    expect(thumbsUpButton).toBeInTheDocument();
+
+    await userEvent.click(thumbsUpButton);
+
+    expect(thumbsUpButton).toHaveClass("bg-green-100");
+    expect(thumbsUpButton).toHaveClass("text-green-700");
+
+    await waitFor(() => {
+      const feedbackEntries = JSON.parse(localStorage.getItem("assistant.feedback:anon") ?? "[]");
+      expect(Array.isArray(feedbackEntries)).toBe(true);
+      expect(feedbackEntries.length).toBeGreaterThan(0);
+      expect(feedbackEntries[feedbackEntries.length - 1].rating).toBe("up");
+    });
+
+    const feedbackMap = JSON.parse(localStorage.getItem("assistant.feedback.map:anon") ?? "{}");
+    const assistantMessageId = Object.keys(feedbackMap).find((key) => feedbackMap[key] === "up");
+    expect(assistantMessageId).toBeDefined();
+  });
+
   it("sends conversation history with subsequent messages", async () => {
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
 
@@ -247,17 +393,66 @@ describe("AssistantPanel", () => {
     await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "Hôm nay tôi nên làm gì?{enter}");
 
     expect(await screen.findByText("Hôm nay tôi nên làm gì?")).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay/)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Việc nên làm ngay|Ưu tiên danh sách việc hôm nay/)).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
     // Second message - history should be passed
-    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "Thế thì tôi nên bắt đầu việc nào trước?{enter}");
+    await userEvent.type(
+      screen.getByPlaceholderText("Nhập tin nhắn..."),
+      "Thế thì tôi nên bắt đầu việc nào trước?{enter}",
+    );
 
     expect(await screen.findByText("Thế thì tôi nên bắt đầu việc nào trước?")).toBeInTheDocument();
     // Assistant should respond with context from previous message
-    await waitFor(() => {
-      expect(screen.getByText(/Việc nên làm ngay|task|Ưu tiên/)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Việc nên làm ngay|task|Ưu tiên/)).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+  });
+
+it("executes /clear command", async () => {
+    // Add some messages first
+    localStorage.setItem(
+      "assistant.chat.history:anon",
+      JSON.stringify({
+        userId: null,
+        savedAt: Date.now(),
+        messages: [{ id: "1", role: "user", content: "hello", createdAt: Date.now() }],
+      }),
+    );
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    expect(screen.getByText("hello")).toBeInTheDocument();
+
+    const textarea = screen.getByPlaceholderText("Nhập tin nhắn...");
+    await userEvent.type(textarea, "/clear");
+    await userEvent.keyboard("{Enter}");
+
+    // Messages should be cleared
+    expect(screen.queryByText("hello")).not.toBeInTheDocument();
+    expect(localStorage.getItem("assistant.chat.history:anon")).toBeNull();
+  });
+
+  it("clears input on Escape when dropdown is open", async () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    const textarea = screen.getByPlaceholderText("Nhập tin nhắn...");
+    await userEvent.type(textarea, "/");
+
+    // Dropdown should be visible
+    expect(await screen.findByText("Xem việc cần làm hôm nay")).toBeInTheDocument();
+
+    // Press Escape
+    await userEvent.keyboard("{Escape}");
+
+    // Input should be cleared
+    expect(textarea).toHaveValue("");
   });
 });

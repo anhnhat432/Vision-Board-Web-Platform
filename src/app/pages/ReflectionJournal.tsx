@@ -1,16 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { cn } from "../components/ui/utils";
-import {
-  ArrowRight,
-  BookOpen,
-  Frown,
-  Meh,
-  Plus,
-  Search,
-  Smile,
-  MoreVertical,
-} from "lucide-react";
+import { ArrowRight, BookOpen, Frown, Meh, Plus, Search, Smile, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -27,13 +18,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +31,7 @@ import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import {
   celebrateAchievementUnlock,
   celebrateSpotlight,
@@ -167,6 +153,11 @@ export function ReflectionJournal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMood, setFilterMood] = useState<MoodValue | "">("");
   const [filterType, setFilterType] = useState<"all" | "weekly-review" | "freeform">("all");
+
+  useSetAssistantPageContext({
+    pageType: "reflection",
+    hint: "Đang viết reflection",
+  });
 
   useEffect(() => {
     if (!isAddingReflection) return;
@@ -355,7 +346,12 @@ export function ReflectionJournal() {
             ))}
             <span className="hidden sm:inline w-px h-5 bg-app-line" />
             {(["", "happy", "neutral", "sad"] as const).map((mood) => {
-              const labels: Record<string, string> = { "": "Tất cả", happy: "Vui vẻ", neutral: "Bình thường", sad: "Suy tư" };
+              const labels: Record<string, string> = {
+                "": "Tất cả",
+                happy: "Vui vẻ",
+                neutral: "Bình thường",
+                sad: "Suy tư",
+              };
               return (
                 <button
                   key={mood}
@@ -446,7 +442,9 @@ export function ReflectionJournal() {
 
               {/* Mood Selector */}
               <div className="mt-4">
-                <Label className="mb-2 block text-[14px] font-medium text-app-ink">Hôm nay bạn đang cảm thấy thế nào?</Label>
+                <Label className="mb-2 block text-[14px] font-medium text-app-ink">
+                  Hôm nay bạn đang cảm thấy thế nào?
+                </Label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {[
                     { value: "happy" as MoodValue, label: "Vui vẻ", emoji: "😊" },
@@ -547,9 +545,7 @@ export function ReflectionJournal() {
         <section>
           <div className="mb-4">
             <p className="text-[12px] uppercase tracking-[0.2em] text-app-ink-muted">GHI CHÉP CŨ</p>
-            <h2 className="mt-1 text-[22px] font-medium text-app-ink">
-              {filteredReflections.length} bài viết
-            </h2>
+            <h2 className="mt-1 text-[22px] font-medium text-app-ink">{filteredReflections.length} bài viết</h2>
           </div>
 
           <div className="space-y-4">
@@ -574,12 +570,18 @@ export function ReflectionJournal() {
                           {mood.label}
                         </Badge>
                         {reflection.entryType === "weekly-review" && (
-                          <Badge variant="outline" className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-[12px] text-app-ink-soft">
+                          <Badge
+                            variant="outline"
+                            className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-[12px] text-app-ink-soft"
+                          >
                             Review tuần
                           </Badge>
                         )}
                         {reflection.linkedWeekNumber && (
-                          <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-[12px]", phaseTone.soft)}>
+                          <Badge
+                            variant="outline"
+                            className={cn("rounded-full px-2.5 py-0.5 text-[12px]", phaseTone.soft)}
+                          >
                             Tuần {reflection.linkedWeekNumber}
                           </Badge>
                         )}
@@ -603,7 +605,11 @@ export function ReflectionJournal() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 text-app-ink-soft hover:text-app-ink">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 shrink-0 text-app-ink-soft hover:text-app-ink"
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

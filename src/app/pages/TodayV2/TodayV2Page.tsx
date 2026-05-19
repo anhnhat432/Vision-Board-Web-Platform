@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Link } from "react-router";
 
 import { useSyncedUserData } from "../../hooks/useSyncedUserData";
+import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
 import {
   formatDateInputValue,
   getActiveTwelveWeekGoal,
@@ -289,7 +290,9 @@ function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
 
       <div className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
         <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">12-Week Goal</p>
-        <p className="mt-2 line-clamp-3 break-words text-[15px] font-medium leading-5 text-app-ink">{viewModel.goalTitle}</p>
+        <p className="mt-2 line-clamp-3 break-words text-[15px] font-medium leading-5 text-app-ink">
+          {viewModel.goalTitle}
+        </p>
         <div className="mt-4 flex items-center gap-3">
           <div className="h-1.5 w-[160px] overflow-hidden rounded-full bg-app-accent-soft" aria-hidden="true">
             <div className="h-full rounded-full bg-app-accent" style={{ width: `${viewModel.goalProgressPercent}%` }} />
@@ -479,7 +482,10 @@ function ReflectionPrompt() {
       <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
         Phản tư cuối ngày
       </span>
-      <h2 id="today-v2-reflection-title" className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong">
+      <h2
+        id="today-v2-reflection-title"
+        className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong"
+      >
         Hôm nay điều gì khiến bạn cảm thấy gần với phiên bản tốt hơn của chính mình?
       </h2>
       <Link
@@ -548,6 +554,11 @@ export function TodayV2Page() {
   const { userData, reloadUserData } = useSyncedUserData();
   const today = useMemo(() => new Date(), []);
   const viewModel = useMemo(() => buildTodayV2ViewModel(userData, today), [userData, today]);
+
+  useSetAssistantPageContext({
+    pageType: "today",
+    hint: "Đang xem task hôm nay",
+  });
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     if (!viewModel.activeGoalId) return;

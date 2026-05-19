@@ -50,10 +50,7 @@ function createAbortError(): Error & { errorCode: string } {
 
 function isAbortError(error: unknown): boolean {
   return Boolean(
-    error &&
-      typeof error === "object" &&
-      "name" in error &&
-      (error as { name?: unknown }).name === "AbortError",
+    error && typeof error === "object" && "name" in error && (error as { name?: unknown }).name === "AbortError",
   );
 }
 
@@ -82,9 +79,7 @@ function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
     }));
 }
 
-export async function sendAssistantMessage(
-  request: AssistantChatRequest,
-): Promise<AssistantChatResponse> {
+export async function sendAssistantMessage(request: AssistantChatRequest): Promise<AssistantChatResponse> {
   const sanitizedContext = sanitizeAssistantContext(request.context);
   const sanitizedHistory = sanitizeHistory(request.history);
 
@@ -119,10 +114,7 @@ export async function sendAssistantMessageStream(
 
   if (isDemoMode()) {
     // Demo mode: non-streaming, call onDelta once with full response
-    const message = await runWithAbort(
-      mockProvider.send(request.message, sanitizedContext, sanitizedHistory),
-      signal,
-    );
+    const message = await runWithAbort(mockProvider.send(request.message, sanitizedContext, sanitizedHistory), signal);
     onDelta(message);
     return;
   }

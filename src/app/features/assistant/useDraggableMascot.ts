@@ -33,7 +33,11 @@ function getViewportSize() {
   };
 }
 
-function constrainPosition(pos: Position, width = getViewportSize().width, height = getViewportSize().height): Position {
+function constrainPosition(
+  pos: Position,
+  width = getViewportSize().width,
+  height = getViewportSize().height,
+): Position {
   const maxX = width - MASCOT_SIZE - MIN_GAP;
   const maxY = height - MASCOT_SIZE - MIN_GAP;
 
@@ -46,10 +50,14 @@ function constrainPosition(pos: Position, width = getViewportSize().width, heigh
 function getFallbackPosition(): Position {
   const { width, height } = getViewportSize();
 
-  return constrainPosition({
-    x: width - MASCOT_SIZE - MIN_GAP,
-    y: height - MASCOT_SIZE - MIN_GAP,
-  }, width, height);
+  return constrainPosition(
+    {
+      x: width - MASCOT_SIZE - MIN_GAP,
+      y: height - MASCOT_SIZE - MIN_GAP,
+    },
+    width,
+    height,
+  );
 }
 
 function getInitialPosition(): Position {
@@ -164,10 +172,12 @@ export function useDraggableMascot() {
       }
 
       if (isDraggingRef.current) {
-        setPosition(constrainPosition({
-          x: posX + dx,
-          y: posY + dy,
-        }));
+        setPosition(
+          constrainPosition({
+            x: posX + dx,
+            y: posY + dy,
+          }),
+        );
       }
     };
 
@@ -187,10 +197,12 @@ export function useDraggableMascot() {
 
       setWasDragged(actuallyDragged);
       if (actuallyDragged) {
-        setPosition(constrainPosition({
-          x: posX + dx,
-          y: posY + dy,
-        }));
+        setPosition(
+          constrainPosition({
+            x: posX + dx,
+            y: posY + dy,
+          }),
+        );
       }
 
       dragStartRef.current = null;

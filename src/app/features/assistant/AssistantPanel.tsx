@@ -48,10 +48,6 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   const filteredCommands = filterCommands(trimmedInput);
   const isShowingCommands = trimmedInput.startsWith("/") && filteredCommands.length > 0;
 
-  useEffect(() => {
-    setSelectedCommandIndex(0);
-  }, [filteredCommands.length]);
-
   const handleExecuteAction = useCallback(async (action: AssistantAction) => {
     setActionStatus((prev) => ({ ...prev, [action.id]: { status: "executing" } }));
     try {
@@ -96,13 +92,13 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     const trimmed = inputText.trim();
     if (!trimmed || isTyping) return;
     void send(trimmed);
     setInputText("");
     window.requestAnimationFrame(resizeTextarea);
-  };
+  }, [inputText, isTyping, resizeTextarea, send]);
 
   const handleSelectCommand = useCallback((cmd: SlashCommand) => {
     if (cmd.action === "clear") {
@@ -167,6 +163,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(event.target.value);
+    setSelectedCommandIndex(0);
     window.requestAnimationFrame(resizeTextarea);
   };
 

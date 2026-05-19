@@ -74,6 +74,7 @@ export interface AssistantContext {
     daysUntil: number;
   }>;
   pageContext: AssistantPageContext;
+  pageContextHint?: AssistantPageContextHint;
 }
 
 export interface AssistantPageContext {
@@ -101,6 +102,12 @@ export interface AssistantPageContext {
   };
 }
 
+export interface AssistantPageContextHint {
+  pageType: string;
+  currentStep?: string;
+  hint?: string;
+}
+
 /**
  * Build context from localStorage.
  *
@@ -111,7 +118,11 @@ export interface AssistantPageContext {
  *   - todayTasks: []
  *   - lastReflectionDate: null
  */
-export function buildAssistantContext(referenceDate = new Date(), route = getCurrentRoute()): AssistantContext {
+export function buildAssistantContext(
+  referenceDate = new Date(),
+  route = getCurrentRoute(),
+  pageContextHint?: AssistantPageContextHint,
+): AssistantContext {
   try {
     const data = getUserData();
 
@@ -134,6 +145,7 @@ export function buildAssistantContext(referenceDate = new Date(), route = getCur
         lastReflectionDate,
         feasibility: buildFeasibilityContext(data.goals[0]),
         pageContext: buildPageContext(route, data.goals),
+        pageContextHint,
       };
     }
 
@@ -159,6 +171,7 @@ export function buildAssistantContext(referenceDate = new Date(), route = getCur
       streak: buildStreakContext(system, referenceDate),
       upcomingDeadlines: buildUpcomingDeadlines(data.goals, referenceDate),
       pageContext: buildPageContext(route, data.goals),
+      pageContextHint,
     };
   } catch {
     // Storage read error -> safe defaults.
@@ -166,7 +179,7 @@ export function buildAssistantContext(referenceDate = new Date(), route = getCur
   }
 }
 
-function emptyContext(route = getCurrentRoute()): AssistantContext {
+function emptyContext(route = getCurrentRoute(), pageContextHint?: AssistantPageContextHint): AssistantContext {
   return {
     currentWeek: null,
     weeksTotal: 12,
@@ -190,6 +203,7 @@ function emptyContext(route = getCurrentRoute()): AssistantContext {
     },
     upcomingDeadlines: [],
     pageContext: buildPageContext(route, []),
+    pageContextHint,
   };
 }
 
@@ -205,9 +219,10 @@ function calculateGoalProgress(goal: Goal): number {
   return Math.round((completed / goal.tasks.length) * 100);
 }
 
-function readPendingFeasibility():
-  | { readinessScore?: unknown; bottleneck?: { label?: unknown; action?: unknown } }
-  | null {
+function readPendingFeasibility(): {
+  readinessScore?: unknown;
+  bottleneck?: { label?: unknown; action?: unknown };
+} | null {
   const raw = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
   if (!raw) return null;
 
@@ -227,7 +242,7 @@ function readJsonStorage<T = Record<string, unknown>>(key: string): T | null {
     if (!raw) return null;
 
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as T : null;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as T) : null;
   } catch {
     return null;
   }
@@ -248,7 +263,7 @@ function getCurrentRoute(): string {
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
 }
 
 function boundedText(value: unknown, maxLength = 200): string | null {
@@ -285,12 +300,7 @@ function buildPageContext(route: string, goals: Goal[]): AssistantPageContext {
   if (normalizedRoute === "/" || normalizedRoute === "/dashboard") {
     Object.assign(formDraft, buildGoalSummary(goals));
     formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
-    Object.assign(
-      formDraft,
-      readSmartGoalDraftSummary(),
-      readFeasibilityDraftSummary(),
-      readTwelveWeekDraftSummary(),
-    );
+    Object.assign(formDraft, readSmartGoalDraftSummary(), readFeasibilityDraftSummary(), readTwelveWeekDraftSummary());
   }
 
   if (normalizedRoute === "/goals") {
@@ -309,12 +319,7 @@ function buildPageContext(route: string, goals: Goal[]): AssistantPageContext {
 
   if (normalizedRoute === "/12-week-setup") {
     formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
-    Object.assign(
-      formDraft,
-      readSmartGoalDraftSummary(),
-      readFeasibilityDraftSummary(),
-      readTwelveWeekDraftSummary(),
-    );
+    Object.assign(formDraft, readSmartGoalDraftSummary(), readFeasibilityDraftSummary(), readTwelveWeekDraftSummary());
   }
 
   return {
@@ -390,7 +395,11 @@ function getMissingSmartGoalFields(draft: unknown): string[] {
     missing.push("achievable");
   }
   if (!boundedText(raw.motivation_reason ?? relevant.motivation_reason ?? raw.relevant)) missing.push("relevant");
-  if (!boundedText(raw.target_date ?? raw.target_weeks ?? timeBound.target_date ?? timeBound.target_weeks ?? raw.timeBound)) {
+  if (
+    !boundedText(
+      raw.target_date ?? raw.target_weeks ?? timeBound.target_date ?? timeBound.target_weeks ?? raw.timeBound,
+    )
+  ) {
     missing.push("time_bound");
   }
 
@@ -431,8 +440,10 @@ function buildNextSuggestedStep(route: string, formDraft: AssistantPageContext["
   if (route === "/" || route === "/dashboard") {
     const missingSmart = formDraft.missingSmartGoalFields ?? [];
     if (missingSmart.length > 0) return `Điền phần SMART còn thiếu: ${missingSmart.join(", ")}`;
-    if (formDraft.smartGoalTitle && !formDraft.feasibilityBottleneck) return "Tiếp tục feasibility cho SMART goal hiện tại";
-    if (formDraft.feasibilityBottleneck && !formDraft.twelveWeekDraftSummary) return "Lập kế hoạch 12 tuần từ feasibility hiện tại";
+    if (formDraft.smartGoalTitle && !formDraft.feasibilityBottleneck)
+      return "Tiếp tục feasibility cho SMART goal hiện tại";
+    if (formDraft.feasibilityBottleneck && !formDraft.twelveWeekDraftSummary)
+      return "Lập kế hoạch 12 tuần từ feasibility hiện tại";
     if (!formDraft.goalCount) return "Bắt đầu bằng Life Insight hoặc SMART Goal";
     if ((formDraft.goalsWithoutTwelveWeekPlan ?? 0) > 0) return "Chọn một goal để lập kế hoạch 12 tuần";
     return "Mở hệ 12 tuần và chọn việc hôm nay";
@@ -500,11 +511,13 @@ function getLatestWeeklyReview(reviews: UniversalWeeklyReview[]): AssistantConte
 }
 
 function getLatestObstacle(checkIns: UniversalDailyCheckIn[]): string | null {
-  return checkIns
-    .filter((checkIn) => boundedText(checkIn.obstacleOrIssue))
-    .sort((left, right) => right.date.localeCompare(left.date))[0]
-    ?.obstacleOrIssue?.trim()
-    .slice(0, 200) ?? null;
+  return (
+    checkIns
+      .filter((checkIn) => boundedText(checkIn.obstacleOrIssue))
+      .sort((left, right) => right.date.localeCompare(left.date))[0]
+      ?.obstacleOrIssue?.trim()
+      .slice(0, 200) ?? null
+  );
 }
 
 function buildStuckSignals(
@@ -520,12 +533,13 @@ function buildStuckSignals(
     })
     .sort((left, right) => left.scheduledDate.localeCompare(right.scheduledDate));
 
-  const missedCommitments = system.weeklyReviews
-    .filter((review) => review.reviewCompleted)
-    .sort((left, right) => right.weekNumber - left.weekNumber)[0]
-    ?.commitmentsMissed?.map((commitment) => commitment.trim().slice(0, 200))
-    .filter(Boolean)
-    .slice(0, 3) ?? [];
+  const missedCommitments =
+    system.weeklyReviews
+      .filter((review) => review.reviewCompleted)
+      .sort((left, right) => right.weekNumber - left.weekNumber)[0]
+      ?.commitmentsMissed?.map((commitment) => commitment.trim().slice(0, 200))
+      .filter(Boolean)
+      .slice(0, 3) ?? [];
 
   return {
     latestObstacle: getLatestObstacle(system.dailyCheckIns) ?? latestWeeklyReview?.mainObstacle ?? null,
@@ -543,10 +557,7 @@ function buildStuckSignals(
 /**
  * Build trend context: completion rate for last 4 weeks and direction.
  */
-function buildTrendContext(
-  system: TwelveWeekSystem,
-  currentWeek: number | null,
-): AssistantContext["trend"] {
+function buildTrendContext(system: TwelveWeekSystem, currentWeek: number | null): AssistantContext["trend"] {
   if (currentWeek === null) {
     return { completionLast4Weeks: [], direction: "unknown" };
   }
@@ -609,10 +620,7 @@ function calculateDirection(completions: number[]): "up" | "down" | "flat" | "un
 /**
  * Build streak context: consecutive days with at least one completed task.
  */
-function buildStreakContext(
-  system: TwelveWeekSystem,
-  referenceDate: Date,
-): AssistantContext["streak"] {
+function buildStreakContext(system: TwelveWeekSystem, referenceDate: Date): AssistantContext["streak"] {
   let streak = 0;
 
   // Check from today backwards
@@ -627,9 +635,7 @@ function buildStreakContext(
     );
 
     // Also check daily check-ins
-    const hasCheckIn = system.dailyCheckIns.some(
-      (checkIn) => checkIn.didWorkToday && checkIn.date === checkDateKey,
-    );
+    const hasCheckIn = system.dailyCheckIns.some((checkIn) => checkIn.didWorkToday && checkIn.date === checkDateKey);
 
     if (hasCompletedTask || hasCheckIn) {
       streak++;
@@ -645,12 +651,9 @@ function buildStreakContext(
 /**
  * Build upcoming deadlines from goals with deadlines.
  */
-function buildUpcomingDeadlines(
-  goals: Goal[],
-referenceDate: Date,
-  ): AssistantContext["upcomingDeadlines"] {
-    const _todayKey = formatDateInputValue(referenceDate);
-    const deadlines: Array<{ goalId: string; title: string; daysUntil: number }> = [];
+function buildUpcomingDeadlines(goals: Goal[], referenceDate: Date): AssistantContext["upcomingDeadlines"] {
+  const _todayKey = formatDateInputValue(referenceDate);
+  const deadlines: Array<{ goalId: string; title: string; daysUntil: number }> = [];
 
   for (const goal of goals) {
     if (!goal.deadline) continue;
@@ -677,7 +680,5 @@ referenceDate: Date,
   }
 
   // Sort by daysUntil ascending and take top 3
-  return deadlines
-    .sort((a, b) => a.daysUntil - b.daysUntil)
-    .slice(0, 3);
+  return deadlines.sort((a, b) => a.daysUntil - b.daysUntil).slice(0, 3);
 }

@@ -73,7 +73,7 @@ export async function executeAction(action: AssistantAction): Promise<ActionExec
         const { taskId } = payload;
 
         const data = loadUserData();
-        if (!data || !data.goals || data.goals.length === 0) {
+        if (!data?.goals || data.goals.length === 0) {
           return { success: false, message: "Không tìm thấy dữ liệu." };
         }
 
