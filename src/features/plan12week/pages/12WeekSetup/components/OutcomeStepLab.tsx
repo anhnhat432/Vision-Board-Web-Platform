@@ -343,18 +343,16 @@ export function OutcomeStepLab({
       ) : null}
 
       <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-picker-title">
-        <summary className="cursor-pointer list-none">
-          <div className="flex items-start gap-2">
+        <summary className="flex cursor-pointer list-none items-start gap-2">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-          <div>
-            <p id="template-picker-title" className="text-[15px] font-medium text-app-ink">
+          <span>
+            <span id="template-picker-title" className="block text-[15px] font-medium text-app-ink">
               Bắt đầu nhanh bằng khung gợi ý
-            </p>
-            <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+            </span>
+            <span className="mt-1 block text-[14px] leading-6 text-app-ink-soft">
               Dùng khung nếu muốn có nhịp ban đầu. Bạn vẫn sửa được mọi trường.
-            </p>
-          </div>
-          </div>
+            </span>
+          </span>
         </summary>
 
         {recommendedTemplate && adaptiveTemplateRecommendation ? (
@@ -492,12 +490,13 @@ export function OutcomeStepLab({
       </details>
 
       {selectedTemplate ? (
-        <section className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+        <details className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
+          <summary id="selected-template-title" className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+            Khung đang dùng: {selectedTemplate.name}
+          </summary>
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p id="selected-template-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-                Khung đang dùng
-              </p>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Khung đang dùng</p>
               <p className="mt-2 text-[16px] font-medium text-app-ink">{selectedTemplate.name}</p>
               <p className="mt-1 text-[14px] leading-5 text-app-ink-soft">{selectedTemplate.subtitle}</p>
             </div>
@@ -505,7 +504,7 @@ export function OutcomeStepLab({
               {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Miễn phí"}
             </span>
           </div>
-        </section>
+        </details>
       ) : null}
 
       <details className="rounded-lg border border-dashed border-app-line bg-app-bg p-4">
