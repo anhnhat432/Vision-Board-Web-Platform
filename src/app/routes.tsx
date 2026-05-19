@@ -3,14 +3,6 @@ import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
-import { Achievements } from "./pages/Achievements";
-import { BillingCheckoutQR } from "./pages/BillingCheckoutQR";
-import { BillingPlan } from "./pages/BillingPlan";
-import { Dashboard } from "./pages/Dashboard";
-import { GoalTracker } from "./pages/GoalTracker";
-import { ReflectionJournal } from "./pages/ReflectionJournal";
-import { VisionBoardEditor } from "./pages/VisionBoardEditor";
-import { VisionBoardGallery } from "./pages/VisionBoardGallery";
 
 const RELOAD_STORAGE_KEY = "vb:chunk-reload";
 
@@ -115,7 +107,7 @@ export const appRoutes = [
     children: [
       {
         index: true,
-        Component: Dashboard,
+        ...lazyRoute(() => import("./pages/Dashboard"), "Dashboard"),
       },
       {
         path: "terms",
@@ -183,11 +175,11 @@ export const appRoutes = [
       },
       {
         path: "billing/checkout/:orderId?",
-        Component: BillingCheckoutQR,
+        ...lazyRoute(() => import("./pages/BillingCheckoutQR"), "BillingCheckoutQR"),
       },
       {
         path: "billing/plan",
-        Component: BillingPlan,
+        ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
       },
       {
         path: "billing/faq",
@@ -209,7 +201,7 @@ export const appRoutes = [
       },
       {
         path: "vision-board/:id?",
-        Component: VisionBoardEditor,
+        ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
       },
       {
         path: "admin/orders",
@@ -217,7 +209,7 @@ export const appRoutes = [
       },
       {
         path: "goals",
-        Component: GoalTracker,
+        ...lazyRoute(() => import("./pages/GoalTracker"), "GoalTracker"),
       },
       {
         path: "life-balance",
@@ -225,15 +217,15 @@ export const appRoutes = [
       },
       {
         path: "achievements",
-        Component: Achievements,
+        ...lazyRoute(() => import("./pages/Achievements"), "Achievements"),
       },
       {
         path: "journal",
-        Component: ReflectionJournal,
+        ...lazyRoute(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
       },
       {
         path: "gallery",
-        Component: VisionBoardGallery,
+        ...lazyRoute(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
       },
     ],
   },
