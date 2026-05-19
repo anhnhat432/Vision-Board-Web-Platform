@@ -283,7 +283,7 @@ export function ReflectionJournal() {
   if (!userData) return null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <AlertDialog
         open={Boolean(reflectionToDelete)}
         onOpenChange={(open) => {

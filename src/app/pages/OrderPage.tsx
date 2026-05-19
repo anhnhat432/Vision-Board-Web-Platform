@@ -382,7 +382,7 @@ export function OrderPage() {
   ];
 
   return (
-    <div className="stack-section pb-12">
+    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <Card className="overflow-hidden">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
