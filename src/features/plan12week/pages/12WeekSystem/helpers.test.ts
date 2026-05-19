@@ -47,9 +47,7 @@ describe("translateBackendErrorMessage", () => {
   });
 
   it("preserves Vietnamese messages as-is", () => {
-    expect(translateBackendErrorMessage("Đã đồng bộ 3 mục lên backend.")).toBe(
-      "Đã đồng bộ 3 mục lên backend.",
-    );
+    expect(translateBackendErrorMessage("Đã đồng bộ 3 mục lên backend.")).toBe("Đã đồng bộ 3 mục lên backend.");
   });
 });
 

@@ -185,9 +185,19 @@ describe("twelve-week-system-ui helpers", () => {
         status: "active",
         startDate: "2026-03-17",
         dailyCheckIns: [],
-        leadIndicators: [{ id: "t1", name: "Focus", type: "core", schedule: [1, 3, 5], target: "3", unit: "lần/tuần", priority: 1 }],
+        leadIndicators: [
+          { id: "t1", name: "Focus", type: "core", schedule: [1, 3, 5], target: "3", unit: "lần/tuần", priority: 1 },
+        ],
         taskInstances: [
-          { id: "task_1", weekNumber: 3, scheduledDate: "2026-03-25", title: "A", leadIndicatorName: "Focus", isCore: true, completed: false },
+          {
+            id: "task_1",
+            weekNumber: 3,
+            scheduledDate: "2026-03-25",
+            title: "A",
+            leadIndicatorName: "Focus",
+            isCore: true,
+            completed: false,
+          },
         ],
         ...overrides,
       }) as unknown as TwelveWeekSystem;
@@ -263,9 +273,7 @@ describe("twelve-week-system-ui helpers", () => {
       if (triggers.length >= 2) {
         const severityOrder = { urgent: 0, caution: 1, watch: 2 };
         for (let i = 1; i < triggers.length; i++) {
-          expect(severityOrder[triggers[i].severity]).toBeGreaterThanOrEqual(
-            severityOrder[triggers[i - 1].severity],
-          );
+          expect(severityOrder[triggers[i].severity]).toBeGreaterThanOrEqual(severityOrder[triggers[i - 1].severity]);
         }
       }
     });

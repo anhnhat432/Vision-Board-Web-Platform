@@ -1,10 +1,6 @@
 ﻿import { ArrowRight, Compass, ShieldCheck } from "lucide-react";
 
-import type {
-  NextWeekAdjustment,
-  NextWeekConfidence,
-  NextWeekRecommendation,
-} from "@/features/plan12week/logic";
+import type { NextWeekAdjustment, NextWeekConfidence, NextWeekRecommendation } from "@/features/plan12week/logic";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -62,9 +58,7 @@ export function TwelveWeekNextWeekRecommendationCard({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-80">
-              Gợi ý cho tuần sau
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-80">Gợi ý cho tuần sau</p>
             <Badge variant="outline" className="border-white/60 bg-white/85">
               {ADJUSTMENT_BADGE_LABEL[recommendation.recommendation]}
             </Badge>
@@ -84,10 +78,7 @@ export function TwelveWeekNextWeekRecommendationCard({
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               Khung ưu tiên tuần sau
             </p>
-            <p
-              data-testid="next-week-recommendation-priority"
-              className="mt-1 text-sm leading-6 text-app-ink-soft"
-            >
+            <p data-testid="next-week-recommendation-priority" className="mt-1 text-sm leading-6 text-app-ink-soft">
               {recommendation.suggestedNextWeekPriority}
             </p>
           </div>
@@ -97,20 +88,12 @@ export function TwelveWeekNextWeekRecommendationCard({
             className="mt-3 flex items-start gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs leading-5 text-app-ink-soft"
           >
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-app-ink-muted" />
-            <span>
-              Bạn vẫn kiểm soát kế hoạch — đây chỉ là gợi ý dựa trên tuần này, không tự đổi
-              plan cho bạn.
-            </span>
+            <span>Bạn vẫn kiểm soát kế hoạch — đây chỉ là gợi ý dựa trên tuần này, không tự đổi plan cho bạn.</span>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {onAcceptRecommendation && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white"
-                onClick={onAcceptRecommendation}
-              >
+              <Button size="sm" variant="outline" className="bg-white" onClick={onAcceptRecommendation}>
                 <ArrowRight className="mr-1 h-3.5 w-3.5" />
                 Áp dụng cho tuần sau
               </Button>

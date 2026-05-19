@@ -8,11 +8,7 @@ import { Textarea } from "@/app/components/ui/textarea";
 import { cn } from "@/app/components/ui/utils";
 import type { TacticType } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
-import {
-  getArchetypeForIntent,
-  getUserIntentId,
-  hasActionableArchetypeHint,
-} from "@/app/utils/user-intent";
+import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 import type { GoalArchetype } from "@/lib/smart-goal";
 import {
   errorTextClass,
@@ -42,11 +38,7 @@ interface LeadIndicatorsStepProps {
   weekOneTaskGroups: IndicatorPreviewGroup[];
   onAddIndicator: () => void;
   onRemoveIndicator: (index: number) => void;
-  onIndicatorChange: <K extends keyof LeadIndicatorDraft>(
-    index: number,
-    key: K,
-    value: LeadIndicatorDraft[K],
-  ) => void;
+  onIndicatorChange: <K extends keyof LeadIndicatorDraft>(index: number, key: K, value: LeadIndicatorDraft[K]) => void;
 }
 
 const COMMITMENT_FIELDS = [
@@ -289,10 +281,12 @@ export function LeadIndicatorsStep({
                     <div>
                       <p className={labelClass}>Loại</p>
                       <div className="grid grid-cols-2 gap-2">
-                        {([
-                          { value: "core", label: "Cốt lõi", hint: "Tính vào điểm tuần" },
-                          { value: "optional", label: "Tùy chọn", hint: "Làm thêm khi còn sức" },
-                        ] as const).map((option) => {
+                        {(
+                          [
+                            { value: "core", label: "Cốt lõi", hint: "Tính vào điểm tuần" },
+                            { value: "optional", label: "Tùy chọn", hint: "Làm thêm khi còn sức" },
+                          ] as const
+                        ).map((option) => {
                           const active = indicator.type === option.value;
                           return (
                             <button
@@ -320,13 +314,23 @@ export function LeadIndicatorsStep({
                           onIndicatorChange(index, "cadence", value as LeadIndicatorDraft["cadence"])
                         }
                       >
-                        <SelectTrigger id={`tactic-cadence-${index}`} aria-label={`Chọn nhịp cho việc ${index + 1}`} className={selectTriggerClass}>
+                        <SelectTrigger
+                          id={`tactic-cadence-${index}`}
+                          aria-label={`Chọn nhịp cho việc ${index + 1}`}
+                          className={selectTriggerClass}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className={selectContentClass}>
-                          <SelectItem value="spread" className={selectItemClass}>Trải đều</SelectItem>
-                          <SelectItem value="frontload" className={selectItemClass}>Đầu tuần</SelectItem>
-                          <SelectItem value="backload" className={selectItemClass}>Cuối tuần</SelectItem>
+                          <SelectItem value="spread" className={selectItemClass}>
+                            Trải đều
+                          </SelectItem>
+                          <SelectItem value="frontload" className={selectItemClass}>
+                            Đầu tuần
+                          </SelectItem>
+                          <SelectItem value="backload" className={selectItemClass}>
+                            Cuối tuần
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -443,7 +447,10 @@ export function LeadIndicatorsStep({
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="week-one-preview-title">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p id="week-one-preview-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+          <p
+            id="week-one-preview-title"
+            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+          >
             Xem trước tuần 1
           </p>
           <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
@@ -495,7 +502,10 @@ export function LeadIndicatorsStep({
         </div>
 
         {weekOneTaskWarning ? (
-          <p role="status" className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]">
+          <p
+            role="status"
+            className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
+          >
             <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>
               <span className="font-medium">Cảnh báo:</span> {weekOneTaskWarning}

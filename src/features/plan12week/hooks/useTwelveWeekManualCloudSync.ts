@@ -1,11 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { getUserData, saveUserData } from "@/app/utils/storage";
-import {
-  isRealMode,
-  shouldEnable12WeekMutationSync,
-  shouldEnable12WeekPullSync,
-} from "@/app/utils/app-mode";
+import { isRealMode, shouldEnable12WeekMutationSync, shouldEnable12WeekPullSync } from "@/app/utils/app-mode";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -47,13 +43,7 @@ export type TwelveWeekManualCloudSyncSkipReason =
   | "mutation_feature_disabled"
   | "pull_feature_disabled";
 
-export type TwelveWeekManualCloudSyncStatus =
-  | "skipped"
-  | "drain_failed"
-  | "unsafe"
-  | "conflict"
-  | "applied"
-  | "error";
+export type TwelveWeekManualCloudSyncStatus = "skipped" | "drain_failed" | "unsafe" | "conflict" | "applied" | "error";
 
 export interface TwelveWeekManualCloudSyncResult {
   status: TwelveWeekManualCloudSyncStatus;
@@ -81,9 +71,7 @@ export interface RunTwelveWeekManualCloudSyncOptions {
   online?: boolean;
   storage?: Storage | null;
   now?: string | Date;
-  drainMutations?: (
-    options: SendPending12WeekMutationsOptions,
-  ) => Promise<MutationQueueSyncResult>;
+  drainMutations?: (options: SendPending12WeekMutationsOptions) => Promise<MutationQueueSyncResult>;
   pullWorkspace?: (options?: TwelveWeekPullOptions) => Promise<TwelveWeekPullResponse>;
   readUserData?: () => UserData;
   writeUserData?: (data: UserData) => boolean;
@@ -121,7 +109,10 @@ function normalizeOwnerUid(value: string | null | undefined): string | null {
   return normalized.length > 0 ? normalized : null;
 }
 
-function getBlockingLocalMutations(ownerUid: string, options: Pick<RunTwelveWeekManualCloudSyncOptions, "storage" | "now">): DataMutationItem[] {
+function getBlockingLocalMutations(
+  ownerUid: string,
+  options: Pick<RunTwelveWeekManualCloudSyncOptions, "storage" | "now">,
+): DataMutationItem[] {
   return readMutationQueueStore(ownerUid, options).items.filter(
     (item) => item.ownerUid === ownerUid && BLOCKING_MUTATION_STATUSES.has(item.status),
   );
@@ -241,7 +232,8 @@ export async function runTwelveWeekManualCloudSync(
     const pullWorkspace = options.pullWorkspace ?? pullTwelveWeekWorkspace;
 
     // Read stored cursor for this user
-    const readCursorFn = options.readCursor ?? ((uid: string) => readPullCursorState(uid, options.storage).lastSuccessfulPullCursor);
+    const readCursorFn =
+      options.readCursor ?? ((uid: string) => readPullCursorState(uid, options.storage).lastSuccessfulPullCursor);
     const storedCursor = readCursorFn(ownerUid);
     const clearCursorFn = options.clearCursorFn ?? ((uid: string) => clearPullCursor(uid, options.storage));
     let cursorClearedForFallback = false;
@@ -270,7 +262,7 @@ export async function runTwelveWeekManualCloudSync(
       pullResponse = await pullWorkspace();
     }
 
-const localData = (options.readUserData ?? getUserData)();
+    const localData = (options.readUserData ?? getUserData)();
     const unresolvedLocalMutations = getBlockingLocalMutations(ownerUid, {
       storage: options.storage,
       now: options.now,
@@ -280,10 +272,7 @@ const localData = (options.readUserData ?? getUserData)();
     });
 
     // Auto-resolve conflicts using Last-Write-Wins if autoResolvable
-    if (
-      mergeReport.conflicts.length > 0 ||
-      mergeReport.localOnlyChanges.length > 0
-    ) {
+    if (mergeReport.conflicts.length > 0 || mergeReport.localOnlyChanges.length > 0) {
       if (mergeReport.autoResolvable) {
         // 1. Archive mutations that cloud wins
         const cloudWinsMutationIds = mergeReport.conflicts
@@ -299,9 +288,7 @@ const localData = (options.readUserData ?? getUserData)();
 
         // 2. Apply cloud, but skip entities where local wins
         const localWinsKeys = new Set(
-          mergeReport.conflicts
-            .filter((c) => c.winner === "local")
-            .map((c) => `${c.kind}:${c.clientId}`),
+          mergeReport.conflicts.filter((c) => c.winner === "local").map((c) => `${c.kind}:${c.clientId}`),
         );
 
         const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
@@ -311,7 +298,9 @@ const localData = (options.readUserData ?? getUserData)();
 
         const didWrite = (options.writeUserData ?? saveUserData)(nextData);
         if (!didWrite) {
-          const recordErrorFn = options.recordErrorFn ?? ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
+          const recordErrorFn =
+            options.recordErrorFn ??
+            ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
           recordErrorFn(ownerUid);
           return {
             status: "error",
@@ -335,13 +324,13 @@ const localData = (options.readUserData ?? getUserData)();
         }
 
         // 4. Write cursor and log
-        const writeCursorFn = options.writeCursor ?? ((uid: string, cursor: string | null) => recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
+        const writeCursorFn =
+          options.writeCursor ??
+          ((uid: string, cursor: string | null) =>
+            recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
         writeCursorFn(ownerUid, pullResponse.nextCursor);
 
-        const maxClockSkewMs = Math.max(
-          0,
-          ...mergeReport.conflicts.map((c) => c.clockSkewMs ?? 0),
-        );
+        const maxClockSkewMs = Math.max(0, ...mergeReport.conflicts.map((c) => c.clockSkewMs ?? 0));
 
         console.info("[auto-sync-lww] resolved", {
           cloudWins: cloudWinsMutationIds.length,
@@ -365,12 +354,13 @@ const localData = (options.readUserData ?? getUserData)();
       }
 
       // Not auto-resolvable: fallback to conflict dialog
-      const recordConflictFn = options.recordConflictFn ?? ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
+      const recordConflictFn =
+        options.recordConflictFn ??
+        ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
       recordConflictFn(ownerUid);
       return {
         status: "conflict",
-        message:
-          "Có xung đột dữ liệu không thể tự động giải quyết. Vui lòng chọn phiên bản cần giữ.",
+        message: "Có xung đột dữ liệu không thể tự động giải quyết. Vui lòng chọn phiên bản cần giữ.",
         drainResult,
         pullResponse,
         mergeReport,
@@ -380,7 +370,9 @@ const localData = (options.readUserData ?? getUserData)();
 
     // No conflicts: check if safe to apply
     if (!mergeReport.safeToApply) {
-      const recordConflictFn = options.recordConflictFn ?? ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
+      const recordConflictFn =
+        options.recordConflictFn ??
+        ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
       recordConflictFn(ownerUid);
       return {
         status: mergeReport.conflicts.length > 0 ? "conflict" : "unsafe",
@@ -397,7 +389,9 @@ const localData = (options.readUserData ?? getUserData)();
     const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
     const didWrite = (options.writeUserData ?? saveUserData)(nextData);
     if (!didWrite) {
-      const recordErrorFn = options.recordErrorFn ?? ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
+      const recordErrorFn =
+        options.recordErrorFn ??
+        ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
       recordErrorFn(ownerUid);
       return {
         status: "error",
@@ -409,7 +403,10 @@ const localData = (options.readUserData ?? getUserData)();
     }
 
     // Success: save the nextCursor
-    const writeCursorFn = options.writeCursor ?? ((uid: string, cursor: string | null) => recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
+    const writeCursorFn =
+      options.writeCursor ??
+      ((uid: string, cursor: string | null) =>
+        recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
     writeCursorFn(ownerUid, pullResponse.nextCursor);
 
     return {
@@ -421,7 +418,8 @@ const localData = (options.readUserData ?? getUserData)();
       appliedGoalCount: nextData.goals.length,
     };
   } catch (error) {
-    const recordErrorFn = options.recordErrorFn ?? ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
+    const recordErrorFn =
+      options.recordErrorFn ?? ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
     recordErrorFn(ownerUid);
     return {
       status: "error",

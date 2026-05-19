@@ -7,4 +7,3 @@ export type TaskBoardProps = ComponentProps<typeof TwelveWeekTodayTab>;
 export function TaskBoard(props: TaskBoardProps) {
   return <TwelveWeekTodayTab {...props} />;
 }
-

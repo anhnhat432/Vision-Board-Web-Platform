@@ -53,11 +53,104 @@ function setAuthContext(userId: string | null = null) {
   });
 }
 
-describe("useAssistant streaming", () => {
+describe("useAssistant onboarding", () => {
+  const TEST_USER_ID = "test-user-123";
+
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    setAuthContext();
+    vi.useFakeTimers();
+    setAuthContext(TEST_USER_ID);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("injects welcome message on first open (localStorage empty)", () => {
+    const { result } = renderHook(() => useAssistant());
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0]).toMatchObject({
+      role: "assistant",
+      isWelcome: true,
+    });
+    expect(localStorage.getItem("assistant.onboarded:test-user-123")).toBe("1");
+  });
+
+  it("does not inject welcome message on second open (onboarded flag exists)", () => {
+    localStorage.setItem("assistant.onboarded:test-user-123", "1");
+
+    const { result } = renderHook(() => useAssistant());
+
+    expect(result.current.messages).toHaveLength(0);
+  });
+
+  it("clearHistory resets onboarded flag and allows welcome to reappear", () => {
+    const { result } = renderHook(() => useAssistant());
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0].isWelcome).toBe(true);
+
+    act(() => {
+      result.current.clearHistory();
+    });
+
+    // After clear, welcome message will be re-injected by useEffect
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0].isWelcome).toBe(true);
+    expect(localStorage.getItem("assistant.onboarded:test-user-123")).toBe("1");
+  });
+
+  it("does not persist welcome message to localStorage", () => {
+    const { result } = renderHook(() => useAssistant());
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0].isWelcome).toBe(true);
+
+    // Wait for debounce
+    vi.advanceTimersByTime(500);
+
+    const storageKey = "assistant.chat.history:test-user-123";
+    const persistedRaw = localStorage.getItem(storageKey);
+
+    // Welcome message should NOT be persisted, so storage should be empty or have no welcome messages
+    if (persistedRaw) {
+      const persisted = JSON.parse(persistedRaw) as {
+        messages: Array<{ isWelcome?: boolean }>;
+      };
+      expect(persisted.messages.every((m) => !m.isWelcome)).toBe(true);
+    }
+  });
+
+  it("shows separate welcome message for different users", () => {
+    const { result: result1 } = renderHook(() => useAssistant());
+
+    expect(result1.current.messages).toHaveLength(1);
+    expect(result1.current.messages[0].isWelcome).toBe(true);
+
+    // Clear storage and simulate different user
+    localStorage.clear();
+    setAuthContext("another-user-456");
+
+    const { result: result2 } = renderHook(() => useAssistant());
+
+    expect(result2.current.messages).toHaveLength(1);
+    expect(result2.current.messages[0].isWelcome).toBe(true);
+    expect(localStorage.getItem("assistant.onboarded:another-user-456")).toBe("1");
+  });
+});
+
+describe("useAssistant streaming", () => {
+  const ANON_USER = "anon-streaming-test";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    // Pre-set onboarded flag to skip welcome message injection in tests
+    localStorage.setItem(`assistant.onboarded:${ANON_USER}`, "1");
+    setAuthContext(ANON_USER);
   });
 
   afterEach(() => {
@@ -78,10 +171,10 @@ describe("useAssistant streaming", () => {
       result.current.send("test message");
     });
 
-    const assistantMessage = result.current.messages[1];
-    expect(assistantMessage.role).toBe("assistant");
-    expect(assistantMessage.content).toBe("hello world");
-    expect(assistantMessage.status).toBe("complete");
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.role).toBe("assistant");
+    expect(assistantMessage?.content).toBe("hello world");
+    expect(assistantMessage?.status).toBe("complete");
   });
 
   it("calls sendAssistantMessageStream with correct arguments", async () => {

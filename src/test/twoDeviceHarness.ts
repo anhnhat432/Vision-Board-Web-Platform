@@ -672,5 +672,8 @@ export function createMockBackend(options: MockBackendOptions = {}) {
 }
 
 export function getAppliedMutationKinds(device: TwoDevice): DataMutationItem["kind"][] {
-  return device.getQueue().items.filter((item) => item.status === "applied").map((item) => item.kind);
+  return device
+    .getQueue()
+    .items.filter((item) => item.status === "applied")
+    .map((item) => item.kind);
 }

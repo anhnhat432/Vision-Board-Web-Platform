@@ -52,7 +52,12 @@ describe("ItemControlsPopover", () => {
   });
 
   it("renders quote controls", () => {
-    renderPopover({ ...BASE_ITEM, type: "quote", content: "Tập trung", style: { sizePreset: "M", quoteFont: "default" } });
+    renderPopover({
+      ...BASE_ITEM,
+      type: "quote",
+      content: "Tập trung",
+      style: { sizePreset: "M", quoteFont: "default" },
+    });
 
     expect(screen.getByText("Kích thước")).toBeInTheDocument();
     expect(screen.getByText("Life area")).toBeInTheDocument();

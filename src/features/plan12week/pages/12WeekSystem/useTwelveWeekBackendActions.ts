@@ -96,7 +96,16 @@ export function useTwelveWeekBackendActions({
     }
 
     toast.error(snapshot.message);
-  }, [activeGoal, system, isBackendProfileReady, executionSyncActions, activeGoalIdRef, refreshBackendProgressOverlay, setLastSyncSnapshot, refreshSnapshotMeta]);
+  }, [
+    activeGoal,
+    system,
+    isBackendProfileReady,
+    executionSyncActions,
+    activeGoalIdRef,
+    refreshBackendProgressOverlay,
+    setLastSyncSnapshot,
+    refreshSnapshotMeta,
+  ]);
 
   const handleHydrateBackendPlans = useCallback(async () => {
     if (!activeGoal) return;
@@ -135,7 +144,14 @@ export function useTwelveWeekBackendActions({
     } finally {
       setIsHydratingBackendPlans(false);
     }
-  }, [activeGoal, isBackendProfileReady, lastBackendSyncKeyRef, loadGoalData, refreshBackendProgressOverlay, refreshSnapshotMeta]);
+  }, [
+    activeGoal,
+    isBackendProfileReady,
+    lastBackendSyncKeyRef,
+    loadGoalData,
+    refreshBackendProgressOverlay,
+    refreshSnapshotMeta,
+  ]);
 
   const refreshBackendConflictReview = useCallback(
     async (preferredGoalId: string, options?: { preserveSyncKey?: boolean }) => {
@@ -152,68 +168,82 @@ export function useTwelveWeekBackendActions({
     [lastBackendSyncKeyRef, loadGoalData, refreshBackendProgressOverlay, refreshSnapshotMeta],
   );
 
-  const handleUseBackendPlanForConflicts = useCallback(async (goalId: string) => {
-    if (isResolvingBackendPlanConflicts) return;
-    setIsResolvingBackendPlanConflicts(true);
+  const handleUseBackendPlanForConflicts = useCallback(
+    async (goalId: string) => {
+      if (isResolvingBackendPlanConflicts) return;
+      setIsResolvingBackendPlanConflicts(true);
 
-    try {
-      const result = await applyBackendPlanSnapshotToLocal(goalId);
-      if (result.status === "error") {
+      try {
+        const result = await applyBackendPlanSnapshotToLocal(goalId);
+        if (result.status === "error") {
+          toast.error("Không thể áp dụng bản đã đồng bộ cho chu kỳ này lúc này.");
+          return;
+        }
+
+        toast.success("Đã dùng bản đã đồng bộ cho chu kỳ này.");
+        const reviewResult = await refreshBackendConflictReview(goalId);
+        if (reviewResult.conflictCount > 0) {
+          toast.info(reviewResult.message);
+        }
+      } catch (error) {
+        console.error("Failed to apply backend plan snapshot.", error);
         toast.error("Không thể áp dụng bản đã đồng bộ cho chu kỳ này lúc này.");
+      } finally {
+        setIsResolvingBackendPlanConflicts(false);
+      }
+    },
+    [isResolvingBackendPlanConflicts, refreshBackendConflictReview],
+  );
+
+  const handleKeepLocalPlanForConflicts = useCallback(
+    async (goalId: string) => {
+      if (!activeGoal || !system) return;
+      if (isResolvingBackendPlanConflicts) return;
+
+      if (goalId !== activeGoal.id) {
+        loadGoalData(goalId);
+        toast.info("Đã mở chu kỳ này. Bấm Giữ bản trên thiết bị lần nữa để đồng bộ lựa chọn này.");
         return;
       }
 
-      toast.success("Đã dùng bản đã đồng bộ cho chu kỳ này.");
-      const reviewResult = await refreshBackendConflictReview(goalId);
-      if (reviewResult.conflictCount > 0) {
-        toast.info(reviewResult.message);
+      setIsResolvingBackendPlanConflicts(true);
+
+      try {
+        const localSystem = activeGoal.twelveWeekSystem ?? system;
+        const snapshot = await executionSyncActions.syncLocalSnapshot({ system: localSystem });
+        if (snapshot.status === "error") {
+          toast.error(snapshot.message);
+          return;
+        }
+
+        if (snapshot.status === "partial") {
+          toast.info(snapshot.message);
+        } else {
+          toast.success("Đã giữ bản trên thiết bị và đồng bộ lại.");
+        }
+
+        lastBackendSyncKeyRef.current = buildBackendSyncKey(goalId, localSystem);
+        const reviewResult = await refreshBackendConflictReview(goalId, { preserveSyncKey: true });
+        if (reviewResult.conflictCount > 0) {
+          toast.info(reviewResult.message);
+        }
+      } catch (error) {
+        console.error("Failed to keep local plan snapshot.", error);
+        toast.error("Không thể đồng bộ bản trên thiết bị lúc này.");
+      } finally {
+        setIsResolvingBackendPlanConflicts(false);
       }
-    } catch (error) {
-      console.error("Failed to apply backend plan snapshot.", error);
-      toast.error("Không thể áp dụng bản đã đồng bộ cho chu kỳ này lúc này.");
-    } finally {
-      setIsResolvingBackendPlanConflicts(false);
-    }
-  }, [isResolvingBackendPlanConflicts, refreshBackendConflictReview]);
-
-  const handleKeepLocalPlanForConflicts = useCallback(async (goalId: string) => {
-    if (!activeGoal || !system) return;
-    if (isResolvingBackendPlanConflicts) return;
-
-    if (goalId !== activeGoal.id) {
-      loadGoalData(goalId);
-      toast.info("Đã mở chu kỳ này. Bấm Giữ bản trên thiết bị lần nữa để đồng bộ lựa chọn này.");
-      return;
-    }
-
-    setIsResolvingBackendPlanConflicts(true);
-
-    try {
-      const localSystem = activeGoal.twelveWeekSystem ?? system;
-      const snapshot = await executionSyncActions.syncLocalSnapshot({ system: localSystem });
-      if (snapshot.status === "error") {
-        toast.error(snapshot.message);
-        return;
-      }
-
-      if (snapshot.status === "partial") {
-        toast.info(snapshot.message);
-      } else {
-        toast.success("Đã giữ bản trên thiết bị và đồng bộ lại.");
-      }
-
-      lastBackendSyncKeyRef.current = buildBackendSyncKey(goalId, localSystem);
-      const reviewResult = await refreshBackendConflictReview(goalId, { preserveSyncKey: true });
-      if (reviewResult.conflictCount > 0) {
-        toast.info(reviewResult.message);
-      }
-    } catch (error) {
-      console.error("Failed to keep local plan snapshot.", error);
-      toast.error("Không thể đồng bộ bản trên thiết bị lúc này.");
-    } finally {
-      setIsResolvingBackendPlanConflicts(false);
-    }
-  }, [activeGoal, system, isResolvingBackendPlanConflicts, executionSyncActions, lastBackendSyncKeyRef, loadGoalData, refreshBackendConflictReview]);
+    },
+    [
+      activeGoal,
+      system,
+      isResolvingBackendPlanConflicts,
+      executionSyncActions,
+      lastBackendSyncKeyRef,
+      loadGoalData,
+      refreshBackendConflictReview,
+    ],
+  );
 
   return {
     isHydratingBackendPlans,

@@ -165,8 +165,8 @@ export function UpgradePaywallDialog({
                 </p>
                 <h3 className="mt-2 text-[20px] font-medium text-app-ink">{blockedFeatureLabel}</h3>
                 <p className="mt-2 text-[15px] leading-7 text-app-ink-soft">
-                  Gói Miễn phí vẫn giúp bạn chạy một chu kỳ 12 tuần cơ bản. Plus mở thêm lớp nâng cao để setup nhanh hơn,
-                  giữ nhịp tốt hơn và review rõ hơn.
+                  Gói Miễn phí vẫn giúp bạn chạy một chu kỳ 12 tuần cơ bản. Plus mở thêm lớp nâng cao để setup nhanh
+                  hơn, giữ nhịp tốt hơn và review rõ hơn.
                 </p>
                 <p className="mt-4 text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
                   Plus mở khóa
@@ -198,13 +198,17 @@ export function UpgradePaywallDialog({
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán</p>
+                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
+                        Thanh toán
+                      </p>
                       <p className="mt-2 text-[15px] font-medium text-app-ink">
                         {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Khôi phục</p>
+                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
+                        Khôi phục
+                      </p>
                       <p className="mt-2 text-[15px] font-medium text-app-ink">
                         {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
@@ -273,9 +277,7 @@ export function UpgradePaywallDialog({
                     </div>
 
                     <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
-                      <p className="text-[13px] uppercase tracking-[0.16em] text-app-ink-muted">
-                        Giá gói
-                      </p>
+                      <p className="text-[13px] uppercase tracking-[0.16em] text-app-ink-muted">Giá gói</p>
                       <p className="mt-2 font-serif text-[32px] font-medium text-app-ink">{plusPriceLabel}</p>
                       <p className="mt-2 flex items-center gap-2 text-[15px] font-medium text-app-ink-soft">
                         <CreditCard className="h-4 w-4 text-app-accent" />

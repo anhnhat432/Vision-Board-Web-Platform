@@ -88,11 +88,7 @@ describe("MeasurableStep — archetype examples", () => {
   it("hides the panel when intentArchetype is omitted (backwards compat)", () => {
     const setSmartData = vi.fn();
     render(
-      <MeasurableStep
-        smartData={makeSmartData()}
-        setSmartData={setSmartData}
-        currentStepHasDraftContent={false}
-      />,
+      <MeasurableStep smartData={makeSmartData()} setSmartData={setSmartData} currentStepHasDraftContent={false} />,
     );
     expect(screen.queryByTestId("goal-archetype-examples")).toBeNull();
   });

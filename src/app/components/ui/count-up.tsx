@@ -94,9 +94,7 @@ export function CountUp({
     });
   }, [precision]);
 
-  const content = formatter
-    ? formatter(displayValue)
-    : `${prefix}${defaultFormatter.format(displayValue)}${suffix}`;
+  const content = formatter ? formatter(displayValue) : `${prefix}${defaultFormatter.format(displayValue)}${suffix}`;
 
   return (
     <span ref={ref} className={cn("count-up stat-value", className)} {...props}>

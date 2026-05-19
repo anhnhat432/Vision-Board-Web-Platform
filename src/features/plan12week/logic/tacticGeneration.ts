@@ -1,22 +1,20 @@
-
-
 /**
  * Generated tactic - actionable, measurable, time-bound recurring task
  */
 export interface GeneratedTactic {
   id: string;
-  name: string;           // Actionable: "Write 500 words every weekday"
-  target: number;         // Times per week: 1-7
-  schedule: number[];     // [0,1,2,3,4] = Mon-Fri (0 = Monday)
+  name: string; // Actionable: "Write 500 words every weekday"
+  target: number; // Times per week: 1-7
+  schedule: number[]; // [0,1,2,3,4] = Mon-Fri (0 = Monday)
   type: "core" | "optional";
-  priority: number;       // 1-7 (1 = highest)
-  unit: string;           // e.g., "lần", "giờ", "từ"
+  priority: number; // 1-7 (1 = highest)
+  unit: string; // e.g., "lần", "giờ", "từ"
 }
 
 export interface WeekOneTask {
   id: string;
   title: string;
-  scheduledDate: string;  // ISO date string
+  scheduledDate: string; // ISO date string
   tacticId: string;
   isCore: boolean;
 }
@@ -36,10 +34,7 @@ export interface TacticGenerationOptions {
 /**
  * Map from archetype to default tactic suggestions
  */
-export const ARCHETYPE_TACTIC_SUGGESTIONS: Record<
-  string,
-  Array<{ name: string; target: number; unit: string }>
-> = {
+export const ARCHETYPE_TACTIC_SUGGESTIONS: Record<string, Array<{ name: string; target: number; unit: string }>> = {
   skill_learning: [
     { name: "Học [kỹ năng] qua video/khóa học", target: 3, unit: "buổi" },
     { name: "Thực hành [kỹ năng] với bài tập nhỏ", target: 4, unit: "lần" },
@@ -119,10 +114,7 @@ export function getSuggestionsForArchetype(archetype: string) {
 /**
  * Adjust target based on feasibility
  */
-export function adjustTargetForFeasibility(
-  baseTarget: number,
-  feasibilityHint?: "low" | "medium" | "high"
-): number {
+export function adjustTargetForFeasibility(baseTarget: number, feasibilityHint?: "low" | "medium" | "high"): number {
   if (!feasibilityHint) return baseTarget;
 
   switch (feasibilityHint) {
@@ -166,7 +158,7 @@ export function generateSchedule(target: number): number[] {
 
   // If we didn't get enough days, fill remaining with first available
   while (schedule.length < target) {
-    const firstMissing = [0, 1, 2, 3, 4, 5, 6].find(d => !schedule.includes(d));
+    const firstMissing = [0, 1, 2, 3, 4, 5, 6].find((d) => !schedule.includes(d));
     if (firstMissing !== undefined) {
       schedule.push(firstMissing);
     } else {
@@ -181,11 +173,7 @@ export function generateSchedule(target: number): number[] {
  * Make name actionable by adding verb and time-bound context
  * Template: "[Verb] [measure] [timeframe]"
  */
-export function makeActionable(
-  baseName: string,
-  target: number,
-  unit: string
-): string {
+export function makeActionable(baseName: string, target: number, unit: string): string {
   const verbs = ["Thực hiện", "Hoàn thành", "Làm", "Tham gia", "Tập"];
   const verb = verbs[Math.floor(Math.random() * verbs.length)];
 
@@ -214,23 +202,15 @@ function getTimeframeFromTarget(target: number): string {
  * - Generates schedule for each tactic
  * - Assigns core/optional type and priority
  */
-export function generateTacticsFromArchetype(
-  archetype: string,
-  options?: TacticGenerationOptions
-): GeneratedTactic[] {
+export function generateTacticsFromArchetype(archetype: string, options?: TacticGenerationOptions): GeneratedTactic[] {
   const suggestions = getSuggestionsForArchetype(archetype);
-  const tacticCount = options?.tacticCount
-    ? clampTacticCount(options.tacticCount)
-    : randomTacticCount();
+  const tacticCount = options?.tacticCount ? clampTacticCount(options.tacticCount) : randomTacticCount();
 
   // Keep the archetype's highest-signal tactics first so seeded plans are stable.
   const selected = suggestions.slice(0, tacticCount);
 
   return selected.map((suggestion, index) => {
-    const adjustedTarget = adjustTargetForFeasibility(
-      suggestion.target,
-      options?.feasibilityHint
-    );
+    const adjustedTarget = adjustTargetForFeasibility(suggestion.target, options?.feasibilityHint);
 
     const schedule = generateSchedule(adjustedTarget);
 
@@ -258,8 +238,8 @@ function clampTacticCount(count: number): number {
  */
 function randomTacticCount(): number {
   const rand = Math.random();
-  if (rand < 0.45) return 3;  // 45% chance
-  if (rand < 0.75) return 2;  // 30% chance
-  if (rand < 0.95) return 4;  // 20% chance
-  return 2;                   // 5% chance
+  if (rand < 0.45) return 3; // 45% chance
+  if (rand < 0.75) return 2; // 30% chance
+  if (rand < 0.95) return 4; // 20% chance
+  return 2; // 5% chance
 }

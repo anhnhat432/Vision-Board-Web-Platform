@@ -11,7 +11,10 @@ interface ReviewStepProps {
 
 export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, onJumpToStep }: ReviewStepProps) {
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-labelledby="smart-review-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      aria-labelledby="smart-review-title"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 id="smart-review-title" className="font-serif text-[24px] font-medium leading-7 text-app-ink">

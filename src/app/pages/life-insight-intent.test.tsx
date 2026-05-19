@@ -54,9 +54,7 @@ describe("LifeInsight — intent picker", () => {
       </MemoryRouter>,
     );
 
-    expect(
-      await screen.findByRole("heading", { name: "Mục đích chính của bạn với lĩnh vực này" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Mục đích chính của bạn với lĩnh vực này" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Hoàn thành một dự án/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Xây một thói quen/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Học một kỹ năng/i })).toBeInTheDocument();
@@ -83,8 +81,7 @@ describe("LifeInsight — intent picker", () => {
     expect(target).toHaveClass("bg-app-accent-soft");
     const raw = localStorage.getItem("user_intent");
     expect(raw).toBeTruthy();
-    expect(JSON.parse(raw ?? "{}"))
-      .toMatchObject({ intent: "learn_skill" });
+    expect(JSON.parse(raw ?? "{}")).toMatchObject({ intent: "learn_skill" });
   });
 
   it("lets the user skip by not choosing (default state is nothing stored)", async () => {
@@ -112,8 +109,7 @@ describe("LifeInsight — intent picker", () => {
 
     const raw = localStorage.getItem("user_intent");
     expect(raw).toBeTruthy();
-    expect(JSON.parse(raw ?? "{}"))
-      .toMatchObject({ intent: "unsure" });
+    expect(JSON.parse(raw ?? "{}")).toMatchObject({ intent: "unsure" });
   });
 
   it("clears the stored intent when 'Bỏ chọn' is clicked", async () => {

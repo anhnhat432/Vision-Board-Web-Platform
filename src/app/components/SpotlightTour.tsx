@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 
 export interface SpotlightTourStep {
@@ -60,9 +53,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{currentStep === 0 ? title : step.title}</DialogTitle>
-          <DialogDescription>
-            {currentStep === 0 ? description : step.description}
-          </DialogDescription>
+          <DialogDescription>{currentStep === 0 ? description : step.description}</DialogDescription>
         </DialogHeader>
 
         {currentStep > 0 && (

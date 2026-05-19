@@ -40,8 +40,7 @@ function makeGoal(overrides: Partial<SmartGoal> = {}): SmartGoal {
 function makeStrongGoal(): SmartGoal {
   return makeGoal({
     specific: {
-      goal_statement:
-        "Hoàn thành chứng chỉ AWS Solutions Architect và áp dụng vào dự án nội bộ trước cuối quý 3.",
+      goal_statement: "Hoàn thành chứng chỉ AWS Solutions Architect và áp dụng vào dự án nội bộ trước cuối quý 3.",
     },
     measurable: {
       metric_name: "Số module hoàn thành",
@@ -55,8 +54,7 @@ function makeStrongGoal(): SmartGoal {
       support_resources: ["Khóa Udemy", "Mentor nội bộ"],
     },
     relevant: {
-      motivation_reason:
-        "Vì chứng chỉ này gắn trực tiếp với lộ trình thăng chức và tăng thu nhập 20% trong 2 năm tới.",
+      motivation_reason: "Vì chứng chỉ này gắn trực tiếp với lộ trình thăng chức và tăng thu nhập 20% trong 2 năm tới.",
       life_dimension_alignment: "sự nghiệp",
     },
     time_bound: {
@@ -149,11 +147,7 @@ describe("metric có target nhưng không có baseline", () => {
     const btDim = result.dimensions.find((d) => d.dimension === "baselineTargetQuality");
     // Should have target credit (3) but not full baseline credit (4)
     expect(btDim?.score).toBe(3);
-    expect(result.suggestions).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("mốc hiện tại"),
-      ]),
-    );
+    expect(result.suggestions).toEqual(expect.arrayContaining([expect.stringContaining("mốc hiện tại")]));
   });
 
   it("gives full baselineTargetQuality when both baseline and target exist", () => {
@@ -184,11 +178,7 @@ describe("weekly commitment quá cao so với target", () => {
       time_bound: { target_weeks: 12 },
     });
     const result = evaluateSmartGoalQuality(goal);
-    expect(result.warnings).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("vượt mức khuyến nghị"),
-      ]),
-    );
+    expect(result.warnings).toEqual(expect.arrayContaining([expect.stringContaining("vượt mức khuyến nghị")]));
   });
 
   it("gives partial score for high but not extreme hours", () => {
@@ -236,8 +226,7 @@ describe("goal có motivation rõ", () => {
   it("gives high relevanceMotivation for detailed motivation with alignment", () => {
     const goal = makeGoal({
       relevant: {
-        motivation_reason:
-          "Vì chứng chỉ này gắn trực tiếp với lộ trình thăng chức và tăng thu nhập trong 2 năm tới.",
+        motivation_reason: "Vì chứng chỉ này gắn trực tiếp với lộ trình thăng chức và tăng thu nhập trong 2 năm tới.",
         life_dimension_alignment: "sự nghiệp",
       },
     });
@@ -319,8 +308,7 @@ describe("legacy parsed goal vẫn đánh giá được", () => {
         support_resources: ["Tài liệu nội bộ"],
       },
       relevant: {
-        motivation_reason:
-          "Để tự chủ hơn trong việc theo dõi tiến độ và không phụ thuộc vào công cụ bên ngoài.",
+        motivation_reason: "Để tự chủ hơn trong việc theo dõi tiến độ và không phụ thuộc vào công cụ bên ngoài.",
       },
       time_bound: {
         target_date: "2026-06-30",
@@ -414,26 +402,20 @@ describe("canProceedToFeasibility", () => {
 describe("getSmartGoalQualityScore", () => {
   it("returns same score as evaluateSmartGoalQuality", () => {
     const goal = makeStrongGoal();
-    expect(getSmartGoalQualityScore(goal)).toBe(
-      evaluateSmartGoalQuality(goal).overallScore,
-    );
+    expect(getSmartGoalQualityScore(goal)).toBe(evaluateSmartGoalQuality(goal).overallScore);
   });
 });
 
 describe("getSmartGoalQualityWarnings", () => {
   it("returns same warnings as evaluateSmartGoalQuality", () => {
     const goal = makeGoal();
-    expect(getSmartGoalQualityWarnings(goal)).toEqual(
-      evaluateSmartGoalQuality(goal).warnings,
-    );
+    expect(getSmartGoalQualityWarnings(goal)).toEqual(evaluateSmartGoalQuality(goal).warnings);
   });
 });
 
 describe("getSmartGoalImprovementSuggestions", () => {
   it("returns same suggestions as evaluateSmartGoalQuality", () => {
     const goal = makeGoal();
-    expect(getSmartGoalImprovementSuggestions(goal)).toEqual(
-      evaluateSmartGoalQuality(goal).suggestions,
-    );
+    expect(getSmartGoalImprovementSuggestions(goal)).toEqual(evaluateSmartGoalQuality(goal).suggestions);
   });
 });

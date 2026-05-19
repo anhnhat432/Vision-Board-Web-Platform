@@ -31,13 +31,7 @@ interface LocalOnlyNoticeProps {
 const DEFAULT_MESSAGE =
   "Dữ liệu đang lưu trên thiết bị này. Bạn vẫn dùng được khi mất mạng; đăng nhập hoặc xuất bản sao nếu muốn giữ thêm một lớp phòng hờ.";
 
-export function LocalOnlyNotice({
-  variant = "inline",
-  message,
-  action,
-  className,
-  testId,
-}: LocalOnlyNoticeProps) {
+export function LocalOnlyNotice({ variant = "inline", message, action, className, testId }: LocalOnlyNoticeProps) {
   const body = message ?? DEFAULT_MESSAGE;
 
   if (variant === "compact") {

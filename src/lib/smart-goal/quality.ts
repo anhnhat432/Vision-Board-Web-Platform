@@ -65,18 +65,17 @@ const DIMENSION_LABELS: Record<QualityDimension, string> = {
 // ---------------------------------------------------------------------------
 
 function countWords(text: string): number {
-  return text.trim().split(/\s+/).filter((w) => w.length > 0).length;
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0).length;
 }
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function makeDimension(
-  dimension: QualityDimension,
-  score: number,
-  maxScore: number,
-): DimensionScore {
+function makeDimension(dimension: QualityDimension, score: number, maxScore: number): DimensionScore {
   return {
     dimension,
     score: clamp(Math.round(score), 0, maxScore),
@@ -120,9 +119,7 @@ function evaluateSpecificity(goal: SmartGoal): DimensionEval {
   if (hasOutcomeIndicator(statement)) {
     score += 5;
   } else {
-    suggestions.push(
-      "Thêm động từ kết quả như đạt, hoàn thành, xây dựng, ra mắt để mục tiêu rõ hướng hơn.",
-    );
+    suggestions.push("Thêm động từ kết quả như đạt, hoàn thành, xây dựng, ra mắt để mục tiêu rõ hướng hơn.");
   }
 
   // Word richness
@@ -200,9 +197,7 @@ function evaluateBaselineTargetQuality(goal: SmartGoal): DimensionEval {
       warnings.push("Mốc đích phải lớn hơn mốc hiện tại.");
     }
   } else {
-    suggestions.push(
-      "Thêm mốc hiện tại để hệ thống đánh giá khoảng cách cần vượt qua.",
-    );
+    suggestions.push("Thêm mốc hiện tại để hệ thống đánh giá khoảng cách cần vượt qua.");
   }
 
   return { score: clamp(score, 0, MAX), warnings, suggestions };
@@ -229,14 +224,10 @@ function evaluateAchievableRealism(goal: SmartGoal): DimensionEval {
     score += 5;
   } else if (weeklyHours <= MAX_REALISTIC_WEEKLY_HOURS) {
     score += 3;
-    suggestions.push(
-      `${weeklyHours} giờ/tuần là khá cao. Cân nhắc bắt đầu với mức thấp hơn để dễ giữ nhịp.`,
-    );
+    suggestions.push(`${weeklyHours} giờ/tuần là khá cao. Cân nhắc bắt đầu với mức thấp hơn để dễ giữ nhịp.`);
   } else {
     score += 1;
-    warnings.push(
-      `${weeklyHours} giờ/tuần vượt mức khuyến nghị (tối đa 40 giờ). Nguy cơ kiệt sức cao.`,
-    );
+    warnings.push(`${weeklyHours} giờ/tuần vượt mức khuyến nghị (tối đa 40 giờ). Nguy cơ kiệt sức cao.`);
   }
 
   // Ratio check: if target and baseline exist, check if commitment seems proportional
@@ -285,9 +276,7 @@ function evaluateResourceSupportClarity(goal: SmartGoal): DimensionEval {
   if (resources.length > 0) {
     score += 5;
   } else {
-    suggestions.push(
-      "Thêm ít nhất 1 nguồn hỗ trợ (mentor, khóa học, tài liệu) giúp mục tiêu rõ hơn.",
-    );
+    suggestions.push("Thêm ít nhất 1 nguồn hỗ trợ (mentor, khóa học, tài liệu) giúp mục tiêu rõ hơn.");
   }
 
   return { score: clamp(score, 0, MAX), warnings, suggestions };
@@ -328,9 +317,7 @@ function evaluateRelevanceMotivation(goal: SmartGoal): DimensionEval {
   if (alignment && alignment.length > 0) {
     score += 5;
   } else {
-    suggestions.push(
-      "Gắn mục tiêu với một lĩnh vực cuộc sống (sự nghiệp, sức khỏe...) để tăng sự cam kết.",
-    );
+    suggestions.push("Gắn mục tiêu với một lĩnh vực cuộc sống (sự nghiệp, sức khỏe...) để tăng sự cam kết.");
   }
 
   return { score: clamp(score, 0, MAX), warnings, suggestions };
@@ -345,8 +332,7 @@ function evaluateTimeBoundClarity(goal: SmartGoal): DimensionEval {
   let score = 0;
 
   const hasDate = targetDate !== undefined && targetDate.length > 0;
-  const hasWeeks =
-    targetWeeks !== undefined && Number.isFinite(targetWeeks) && targetWeeks > 0;
+  const hasWeeks = targetWeeks !== undefined && Number.isFinite(targetWeeks) && targetWeeks > 0;
 
   if (!hasDate && !hasWeeks) {
     warnings.push("Chưa có mốc thời gian.");
@@ -362,14 +348,10 @@ function evaluateTimeBoundClarity(goal: SmartGoal): DimensionEval {
       score += 5;
     } else if (targetWeeks > TWELVE_WEEK_MAX) {
       score += 2;
-      suggestions.push(
-        `${targetWeeks} tuần khá dài. Cân nhắc chia thành các chu kỳ 12 tuần nhỏ hơn.`,
-      );
+      suggestions.push(`${targetWeeks} tuần khá dài. Cân nhắc chia thành các chu kỳ 12 tuần nhỏ hơn.`);
     } else {
       score += 3;
-      suggestions.push(
-        `${targetWeeks} tuần có thể quá ngắn. Kiểm tra lại mốc đích có thực tế không.`,
-      );
+      suggestions.push(`${targetWeeks} tuần có thể quá ngắn. Kiểm tra lại mốc đích có thực tế không.`);
     }
   } else if (hasDate) {
     // Date mode: give full credit since we can't easily validate without current date context
@@ -387,16 +369,13 @@ function evaluateTwelveWeekCompatibility(goal: SmartGoal): DimensionEval {
   const suggestions: string[] = [];
   let score = 0;
 
-  const hasWeeks =
-    targetWeeks !== undefined && Number.isFinite(targetWeeks) && targetWeeks > 0;
+  const hasWeeks = targetWeeks !== undefined && Number.isFinite(targetWeeks) && targetWeeks > 0;
 
   if (!hasWeeks) {
     // If using date mode, give partial credit
     if (goal.time_bound.target_date?.trim()) {
       score += 4;
-      suggestions.push(
-        "Dùng số tuần thay vì ngày cụ thể sẽ tương thích tốt hơn với hệ thống 12 tuần.",
-      );
+      suggestions.push("Dùng số tuần thay vì ngày cụ thể sẽ tương thích tốt hơn với hệ thống 12 tuần.");
     } else {
       suggestions.push("Cần mốc thời gian để đánh giá tương thích với chu kỳ 12 tuần.");
     }
@@ -410,17 +389,11 @@ function evaluateTwelveWeekCompatibility(goal: SmartGoal): DimensionEval {
     targetWeeks <= TWELVE_WEEK_SWEET_SPOT_MAX
   ) {
     score += 6;
-  } else if (
-    targetWeeks !== undefined &&
-    targetWeeks >= TWELVE_WEEK_MIN &&
-    targetWeeks <= TWELVE_WEEK_MAX
-  ) {
+  } else if (targetWeeks !== undefined && targetWeeks >= TWELVE_WEEK_MIN && targetWeeks <= TWELVE_WEEK_MAX) {
     score += 4;
   } else {
     score += 1;
-    suggestions.push(
-      "Chu kỳ 8-16 tuần là vùng lý tưởng cho hệ thống 12 tuần. Cân nhắc điều chỉnh.",
-    );
+    suggestions.push("Chu kỳ 8-16 tuần là vùng lý tưởng cho hệ thống 12 tuần. Cân nhắc điều chỉnh.");
   }
 
   // Weekly commitment compatibility
@@ -430,9 +403,7 @@ function evaluateTwelveWeekCompatibility(goal: SmartGoal): DimensionEval {
       score += 4;
     } else if (totalHours < 12) {
       score += 1;
-      suggestions.push(
-        "Tổng thời gian cam kết trong chu kỳ khá thấp. Xem lại mục tiêu có đủ thách thức không.",
-      );
+      suggestions.push("Tổng thời gian cam kết trong chu kỳ khá thấp. Xem lại mục tiêu có đủ thách thức không.");
     } else {
       score += 2;
     }
@@ -483,12 +454,10 @@ export function evaluateSmartGoalQuality(goal: SmartGoal): SmartGoalQualityResul
 
   const overallScore = clamp(totalScore, 0, 100);
 
-  const level: QualityLevel =
-    overallScore >= 70 ? "strong" : overallScore >= 40 ? "okay" : "weak";
+  const level: QualityLevel = overallScore >= 70 ? "strong" : overallScore >= 40 ? "okay" : "weak";
 
   // Lenient gate: user can proceed if they have a meaningful statement and a target value.
-  const hasGoalStatement =
-    goal.specific.goal_statement.trim().length >= MIN_FEASIBILITY_STATEMENT_LENGTH;
+  const hasGoalStatement = goal.specific.goal_statement.trim().length >= MIN_FEASIBILITY_STATEMENT_LENGTH;
   const hasTargetValue = Number.isFinite(goal.measurable.target_value) && goal.measurable.target_value > 0;
   const canProceedToFeasibility = hasGoalStatement && hasTargetValue && overallScore >= 20;
 
@@ -630,7 +599,11 @@ const CLARITY_CHECK_LABELS: Record<GoalClarityDimensionId, string> = {
 
 export function assessGoalClarity(goal: SmartGoal): GoalClarityAssessment {
   const checks: GoalClarityCheck[] = [
-    { id: "outcome_verb", label: CLARITY_CHECK_LABELS.outcome_verb, passed: hasOutcomeIndicator(goal.specific.goal_statement) },
+    {
+      id: "outcome_verb",
+      label: CLARITY_CHECK_LABELS.outcome_verb,
+      passed: hasOutcomeIndicator(goal.specific.goal_statement),
+    },
     { id: "measurable_target", label: CLARITY_CHECK_LABELS.measurable_target, passed: checkMeasurableTarget(goal) },
     {
       id: "achievable_weekly_hours",
@@ -662,14 +635,12 @@ export function assessGoalClarity(goal: SmartGoal): GoalClarityAssessment {
 }
 
 const SUGGESTION_BY_CLARITY_DIMENSION: Record<GoalClarityDimensionId, string> = {
-  outcome_verb:
-    "Thêm động từ kết quả rõ vào câu mục tiêu (ví dụ: đạt, hoàn thành, ra mắt, duy trì, chạm mốc).",
+  outcome_verb: "Thêm động từ kết quả rõ vào câu mục tiêu (ví dụ: đạt, hoàn thành, ra mắt, duy trì, chạm mốc).",
   measurable_target:
     "Thêm chỉ số đo và một con số mục tiêu rõ ràng. Nếu có mốc hiện tại, mốc mục tiêu phải lớn hơn mốc hiện tại.",
   achievable_weekly_hours:
     "Đặt quỹ thời gian mỗi tuần trong khoảng 1-60 giờ. Quá ít sẽ không tạo nhịp; quá nhiều khó duy trì.",
-  relevant_motivation:
-    "Viết một câu ngắn vì sao mục tiêu này quan trọng với bạn ở thời điểm hiện tại.",
+  relevant_motivation: "Viết một câu ngắn vì sao mục tiêu này quan trọng với bạn ở thời điểm hiện tại.",
   time_bound: "Chốt deadline: hoặc số tuần (ví dụ 12) hoặc ngày cụ thể.",
 };
 

@@ -27,19 +27,9 @@ interface ReviewSummaryGridProps {
  *   ]}
  * />
  */
-export function ReviewSummaryGrid({
-  items,
-  columns = 2,
-  className,
-}: ReviewSummaryGridProps) {
+export function ReviewSummaryGrid({ items, columns = 2, className }: ReviewSummaryGridProps) {
   return (
-    <div
-      className={cn(
-        "grid gap-4",
-        columns === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2",
-        className
-      )}
-    >
+    <div className={cn("grid gap-4", columns === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2", className)}>
       {items.map((item) => (
         <div key={item.label} className="space-y-1">
           <div className="flex items-center gap-2">

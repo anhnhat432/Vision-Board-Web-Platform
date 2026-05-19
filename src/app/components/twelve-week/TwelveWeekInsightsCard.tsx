@@ -130,10 +130,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
               Gợi ý hành động tiếp theo
             </p>
-            <p
-              data-testid="execution-insights-next-action-hint"
-              className="mt-1 text-sm leading-6 text-app-ink"
-            >
+            <p data-testid="execution-insights-next-action-hint" className="mt-1 text-sm leading-6 text-app-ink">
               {nextAction.hint}
             </p>
           </div>

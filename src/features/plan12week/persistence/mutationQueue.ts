@@ -324,11 +324,7 @@ function hasDueRetry(item: DataMutationItem, now: string): boolean {
   return compareIso(item.nextRetryAt, now) <= 0;
 }
 
-function shouldListAsPending(
-  item: DataMutationItem,
-  now: string,
-  options: ListPendingMutationsOptions,
-): boolean {
+function shouldListAsPending(item: DataMutationItem, now: string, options: ListPendingMutationsOptions): boolean {
   if (item.status === "pending") return true;
   if (hasDueRetry(item, now)) return true;
   if (options.includeBlockedAuth && item.status === "blocked_auth") return true;
@@ -459,10 +455,7 @@ function trimTerminalMutations(
   return { store: { ...store, items: kept }, removed };
 }
 
-function getExplicitOwnerUid(input: {
-  inputOwnerUid?: string | null;
-  optionsOwnerUid?: string | null;
-}): string | null {
+function getExplicitOwnerUid(input: { inputOwnerUid?: string | null; optionsOwnerUid?: string | null }): string | null {
   if (input.inputOwnerUid !== undefined) return normalizeOwnerUid(input.inputOwnerUid);
   if (input.optionsOwnerUid !== undefined) return normalizeOwnerUid(input.optionsOwnerUid);
   return readActiveAuthOwnerUid();
@@ -583,8 +576,9 @@ export function enqueueStoredMutation(
     });
     const collapseKey = getCollapseKey(scopedInput);
     const item =
-      nextStore.items.find((candidate) => ownerMatches(candidate.ownerUid, ownerUid) && candidate.collapseKey === collapseKey) ??
-      null;
+      nextStore.items.find(
+        (candidate) => ownerMatches(candidate.ownerUid, ownerUid) && candidate.collapseKey === collapseKey,
+      ) ?? null;
     const ok = writeMutationQueueStore(nextStore, options);
 
     return {
@@ -607,7 +601,9 @@ export function listStoredPendingMutations(
   options: ReadStoredMutationQueueOptions & ListPendingMutationsOptions = {},
 ): DataMutationItem[] {
   const normalizedOwnerUid =
-    ownerUid !== undefined ? normalizeOwnerUid(ownerUid) : normalizeOwnerUid(options.ownerUid) ?? readActiveAuthOwnerUid();
+    ownerUid !== undefined
+      ? normalizeOwnerUid(ownerUid)
+      : (normalizeOwnerUid(options.ownerUid) ?? readActiveAuthOwnerUid());
   const store = readMutationQueueStore(normalizedOwnerUid, options);
 
   return listPendingMutations(store, {
@@ -624,7 +620,10 @@ export function createMutationId(now: Date = new Date(), random: () => number = 
   return `dmq_${now.getTime()}_${suffix}`;
 }
 
-export function compactMutations(store: DataMutationQueueStore, options: MutationQueueOptions = {}): DataMutationQueueStore {
+export function compactMutations(
+  store: DataMutationQueueStore,
+  options: MutationQueueOptions = {},
+): DataMutationQueueStore {
   const updatedAt = toIso(options.now ?? store.updatedAt);
   const latestByCollapseKey = new Map<string, DataMutationItem>();
   const compactedItems: DataMutationItem[] = [];
@@ -645,11 +644,7 @@ export function compactMutations(store: DataMutationQueueStore, options: Mutatio
     const previousTime = compareIso(previous.updatedAt, item.updatedAt);
     const latest = previousTime <= 0 ? item : previous;
     const superseded = previousTime <= 0 ? previous : item;
-    const mergedSupersedes = [
-      ...(latest.supersedes ?? []),
-      superseded.id,
-      ...(superseded.supersedes ?? []),
-    ];
+    const mergedSupersedes = [...(latest.supersedes ?? []), superseded.id, ...(superseded.supersedes ?? [])];
 
     latestByCollapseKey.set(groupKey, {
       ...latest,

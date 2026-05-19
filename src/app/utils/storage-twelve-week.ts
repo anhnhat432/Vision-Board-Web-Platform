@@ -1,9 +1,4 @@
-import {
-  formatDateInputValue,
-  getCalendarDateKey,
-  getCalendarDayIndex,
-  parseCalendarDate,
-} from "./storage-date-utils";
+import { formatDateInputValue, getCalendarDateKey, getCalendarDayIndex, parseCalendarDate } from "./storage-date-utils";
 import type {
   Goal,
   LeadIndicator,
@@ -63,8 +58,7 @@ function inferSystemStartDate(system: TwelveWeekSystem): Date {
 
 function getUnclampedTwelveWeekNumber(system: TwelveWeekSystem, referenceDate = new Date()): number {
   const startDate = inferSystemStartDate(system);
-  const calculatedWeek =
-    Math.floor((getCalendarDayIndex(referenceDate) - getCalendarDayIndex(startDate)) / 7) + 1;
+  const calculatedWeek = Math.floor((getCalendarDayIndex(referenceDate) - getCalendarDayIndex(startDate)) / 7) + 1;
 
   return Math.max(system.currentWeek || 1, calculatedWeek, 1);
 }
@@ -74,7 +68,9 @@ export function getTwelveWeekCycleWeekNumber(system: TwelveWeekSystem, reference
 }
 
 export function isTwelveWeekCycleReviewPhase(system: TwelveWeekSystem, referenceDate = new Date()): boolean {
-  return system.status === "completed" || getUnclampedTwelveWeekNumber(system, referenceDate) > (system.totalWeeks || 12);
+  return (
+    system.status === "completed" || getUnclampedTwelveWeekNumber(system, referenceDate) > (system.totalWeeks || 12)
+  );
 }
 
 export function getCycleEndDate(startDate: Date, totalWeeks: number): Date {
@@ -91,7 +87,10 @@ function getLeadTargetCount(target: string): number {
 }
 
 function buildLeadIndicatorId(name: string, index: number): string {
-  const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const normalizedName = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
   return `tactic_${normalizedName || "item"}_${index + 1}`;
 }
 
@@ -141,23 +140,15 @@ function getTaskOffsetsForFrequency(frequency: number): number[] {
   }
 }
 
-function normalizeScheduleOffsets(
-  schedule: number[] | undefined,
-  target: string,
-  preferredDays?: number[],
-): number[] {
+function normalizeScheduleOffsets(schedule: number[] | undefined, target: string, preferredDays?: number[]): number[] {
   if (Array.isArray(schedule) && schedule.length > 0) {
-    return Array.from(new Set(schedule.map((offset) => clampNumber(offset, 0, 6)))).sort(
-      (left, right) => left - right,
-    );
+    return Array.from(new Set(schedule.map((offset) => clampNumber(offset, 0, 6)))).sort((left, right) => left - right);
   }
 
   const frequency = getLeadTargetCount(target);
 
   if (Array.isArray(preferredDays) && preferredDays.length > 0) {
-    const sorted = Array.from(new Set(preferredDays.map((d) => clampNumber(d, 0, 6)))).sort(
-      (a, b) => a - b,
-    );
+    const sorted = Array.from(new Set(preferredDays.map((d) => clampNumber(d, 0, 6)))).sort((a, b) => a - b);
     if (frequency <= sorted.length) {
       return sorted.slice(0, frequency);
     }
@@ -284,17 +275,12 @@ export function syncWeeklyPlans(
     return {
       ...fallbackPlan,
       ...existingPlan,
-      milestone:
-        existingPlan.milestone ||
-        (fallbackPlan.weekNumber === 12 ? week12Outcome : fallbackPlan.milestone),
+      milestone: existingPlan.milestone || (fallbackPlan.weekNumber === 12 ? week12Outcome : fallbackPlan.milestone),
     };
   });
 }
 
-function syncScoreboard(
-  existingScoreboard: UniversalScoreboardWeek[],
-  totalWeeks: number,
-): UniversalScoreboardWeek[] {
+function syncScoreboard(existingScoreboard: UniversalScoreboardWeek[], totalWeeks: number): UniversalScoreboardWeek[] {
   const fallbackScoreboard = getDefaultScoreboard(totalWeeks);
 
   return fallbackScoreboard.map((fallbackWeek) => {
@@ -305,7 +291,10 @@ function syncScoreboard(
 
 function normalizeTextArray(values: unknown): string[] {
   if (!Array.isArray(values)) return [];
-  return values.filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean);
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter(Boolean);
 }
 
 function firstNonEmptyText(...values: unknown[]): string | undefined {
@@ -392,10 +381,7 @@ export function isReviewDayForDate(reviewDay: string, referenceDate: Date): bool
   return getReviewDayIndex(reviewDay) === referenceDate.getDay();
 }
 
-export function isTwelveWeekReviewDueToday(
-  system: TwelveWeekSystem,
-  referenceDate = new Date(),
-): boolean {
+export function isTwelveWeekReviewDueToday(system: TwelveWeekSystem, referenceDate = new Date()): boolean {
   const currentWeek = getTwelveWeekCurrentWeek(system, referenceDate);
   const currentReview = system.weeklyReviews.find((review) => review.weekNumber === currentWeek);
 
@@ -487,11 +473,7 @@ function getWeekOnTimeCompletionPercent(system: TwelveWeekSystem, weekNumber: nu
   return Math.round((onTimeCompleted / tasks.length) * 100);
 }
 
-function getBehaviorWeeklyScore(
-  system: TwelveWeekSystem,
-  weekNumber: number,
-  reviewDone: boolean,
-): number {
+function getBehaviorWeeklyScore(system: TwelveWeekSystem, weekNumber: number, reviewDone: boolean): number {
   const breakdown = getWeekTaskBreakdown(system, weekNumber);
   const activeDayCount = getWeekActiveDayCount(system, weekNumber);
   const consistencyPercent = clampNumber(Math.round((activeDayCount / 5) * 100), 0, 100);
@@ -576,11 +558,7 @@ function buildTaskInstances(
       const frequency = getLeadTargetCount(indicator.target);
       const offsets = options.reviewAwareSchedule
         ? getReviewAwareScheduleOffsets(indicator, system)
-        : normalizeScheduleOffsets(
-            indicator.schedule,
-            indicator.target,
-            system.preferredDays,
-          );
+        : normalizeScheduleOffsets(indicator.schedule, indicator.target, system.preferredDays);
 
       offsets.forEach((offset, slotIndex) => {
         const tacticId = indicator.id || buildLeadIndicatorId(indicator.name, indicatorIndex);
@@ -591,12 +569,7 @@ function buildTaskInstances(
         const scheduledDate =
           options.preserveExistingSchedule !== false && existing?.scheduledDate
             ? existing.scheduledDate
-            : keepGeneratedTaskOutOfPast(
-                startDate,
-                system.totalWeeks,
-                weekNumber,
-                generatedDate,
-              );
+            : keepGeneratedTaskOutOfPast(startDate, system.totalWeeks, weekNumber, generatedDate);
 
         nextInstances.push({
           id,
@@ -623,7 +596,11 @@ export function regenerateUpcomingTaskInstances(
   system: TwelveWeekSystem,
   options: { currentWeek?: number } = {},
 ): TwelveWeekSystem {
-  const currentWeek = clampNumber(options.currentWeek ?? system.currentWeek ?? getTwelveWeekCurrentWeek(system), 1, system.totalWeeks);
+  const currentWeek = clampNumber(
+    options.currentWeek ?? system.currentWeek ?? getTwelveWeekCurrentWeek(system),
+    1,
+    system.totalWeeks,
+  );
   const protectedWeeks = new Set<number>();
 
   for (let weekNumber = 1; weekNumber < currentWeek; weekNumber += 1) {
@@ -672,10 +649,7 @@ export function getTwelveWeekCurrentWeek(system: TwelveWeekSystem, referenceDate
   return clampNumber(getUnclampedTwelveWeekNumber(system, referenceDate), 1, system.totalWeeks);
 }
 
-export function getTwelveWeekWeekRange(
-  system: TwelveWeekSystem,
-  weekNumber: number,
-): { start: string; end: string } {
+export function getTwelveWeekWeekRange(system: TwelveWeekSystem, weekNumber: number): { start: string; end: string } {
   const clampedWeek = clampNumber(weekNumber, 1, system.totalWeeks);
   const startDate = inferSystemStartDate(system);
   const weekStart = addCalendarDays(startDate, (clampedWeek - 1) * 7);
@@ -687,10 +661,7 @@ export function getTwelveWeekWeekRange(
   };
 }
 
-export function getTwelveWeekTasksForWeek(
-  system: TwelveWeekSystem,
-  weekNumber: number,
-): TwelveWeekTaskInstance[] {
+export function getTwelveWeekTasksForWeek(system: TwelveWeekSystem, weekNumber: number): TwelveWeekTaskInstance[] {
   return system.taskInstances.filter((task) => task.weekNumber === weekNumber);
 }
 
@@ -786,18 +757,11 @@ export interface OverdueTaskActionResult {
   updatedTask?: TwelveWeekTaskInstance;
 }
 
-function findTaskInstance(
-  system: TwelveWeekSystem,
-  taskId: string,
-): TwelveWeekTaskInstance | undefined {
+function findTaskInstance(system: TwelveWeekSystem, taskId: string): TwelveWeekTaskInstance | undefined {
   return system.taskInstances.find((task) => task.id === taskId);
 }
 
-function replaceTaskInstance(
-  system: TwelveWeekSystem,
-  taskId: string,
-  next: TwelveWeekTaskInstance,
-): TwelveWeekSystem {
+function replaceTaskInstance(system: TwelveWeekSystem, taskId: string, next: TwelveWeekTaskInstance): TwelveWeekSystem {
   return {
     ...system,
     taskInstances: system.taskInstances.map((task) => (task.id === taskId ? next : task)),
@@ -825,9 +789,7 @@ export function rescheduleTwelveWeekTaskWithinWeek(
   // Earliest valid new date: max(today, scheduledDate+1 day) — avoid picking a
   // past day, but at least move strictly forward from current schedule.
   const startDate = parseCalendarDate(task.scheduledDate);
-  const dayAfterScheduled = startDate
-    ? formatDateInputValue(addCalendarDays(startDate, 1))
-    : todayKey;
+  const dayAfterScheduled = startDate ? formatDateInputValue(addCalendarDays(startDate, 1)) : todayKey;
   const candidateKey = todayKey > dayAfterScheduled ? todayKey : dayAfterScheduled;
 
   if (candidateKey > range.end) {
@@ -852,10 +814,7 @@ export function rescheduleTwelveWeekTaskWithinWeek(
  * `weekNumber` and resets `scheduledDate` to the next week's start. Refuses
  * when current week is the final week of the cycle.
  */
-export function rescheduleTwelveWeekTaskToNextWeek(
-  system: TwelveWeekSystem,
-  taskId: string,
-): OverdueTaskActionResult {
+export function rescheduleTwelveWeekTaskToNextWeek(system: TwelveWeekSystem, taskId: string): OverdueTaskActionResult {
   const task = findTaskInstance(system, taskId);
   if (!task) return { system, applied: false, reason: "task_not_found" };
   if (task.completed) return { system, applied: false, reason: "task_already_completed" };
@@ -884,10 +843,7 @@ export function rescheduleTwelveWeekTaskToNextWeek(
  * caller is responsible for surfacing a confirmation flow elsewhere if a core
  * task should ever be skipped (out of scope for v1).
  */
-export function skipTwelveWeekNonCoreTask(
-  system: TwelveWeekSystem,
-  taskId: string,
-): OverdueTaskActionResult {
+export function skipTwelveWeekNonCoreTask(system: TwelveWeekSystem, taskId: string): OverdueTaskActionResult {
   const task = findTaskInstance(system, taskId);
   if (!task) return { system, applied: false, reason: "task_not_found" };
   if (task.completed) return { system, applied: false, reason: "task_already_completed" };
@@ -949,10 +905,7 @@ export function getGoalExecutionStats(goal: Goal, referenceDate = new Date()) {
   };
 }
 
-export function getActiveTwelveWeekGoal(
-  goals: Goal[],
-  preferredGoalId?: string | null,
-): Goal | null {
+export function getActiveTwelveWeekGoal(goals: Goal[], preferredGoalId?: string | null): Goal | null {
   const goalsWithSystem = sortTwelveWeekGoalsForSelection(goals);
   if (goalsWithSystem.length === 0) return null;
 
@@ -1005,10 +958,7 @@ export function migrateLegacyPlanToSystem(goal: Goal): Goal {
   const weeklyPlans: WeeklyPlanEntry[] = Array.from({ length: totalWeeks }, (_, index) => ({
     weekNumber: index + 1,
     phaseName: getLegacyPhaseName(index + 1),
-    focus:
-      legacyPlan.weeklyActions[index] ??
-      legacyPlan.weeklyActions[0] ??
-      "Duy trì nhịp hành động tuần này",
+    focus: legacyPlan.weeklyActions[index] ?? legacyPlan.weeklyActions[0] ?? "Duy trì nhịp hành động tuần này",
     milestone: index === 3 || index === 7 || index === 11 ? legacyPlan.week12Outcome : "",
     completed: false,
   }));
@@ -1054,10 +1004,7 @@ export function migrateLegacyPlanToSystem(goal: Goal): Goal {
   };
 }
 
-export function migrateLegacyUserData(
-  data: UserData,
-  currentStorageVersion: number,
-): UserData {
+export function migrateLegacyUserData(data: UserData, currentStorageVersion: number): UserData {
   const migratedGoals = data.goals.map((goal) => migrateGoalWeeklyReviews(migrateLegacyPlanToSystem(goal)));
   const hasChanges =
     migratedGoals.some((goal, index) => goal !== data.goals[index]) ||
@@ -1077,8 +1024,7 @@ export function normalizeGoal(goal: Goal): Goal {
 
   const baseSystem = goal.twelveWeekSystem;
   const totalWeeks = clampNumber(baseSystem.totalWeeks || 12, 1, 12);
-  const timezone =
-    baseSystem.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
+  const timezone = baseSystem.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
   const weekStartsOn = baseSystem.weekStartsOn ?? "Monday";
   const normalizedLeadIndicators = Array.isArray(baseSystem.leadIndicators)
     ? baseSystem.leadIndicators.map((indicator, index) => normalizeLeadIndicator(indicator, index))

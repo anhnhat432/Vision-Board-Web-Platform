@@ -41,10 +41,7 @@ describe("WizardStepPip", () => {
 
     expect(screen.getByText("Bước 2/3")).toBeInTheDocument();
     expect(screen.getAllByText("Measurable").length).toBeGreaterThan(0);
-    expect(screen.getByRole("progressbar", { name: "Tiến độ wizard" })).toHaveAttribute(
-      "aria-valuenow",
-      "2",
-    );
+    expect(screen.getByRole("progressbar", { name: "Tiến độ wizard" })).toHaveAttribute("aria-valuenow", "2");
   });
 
   it("matches the visual shell snapshot", () => {

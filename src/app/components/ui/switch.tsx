@@ -8,10 +8,7 @@ import { cn } from "./utils";
 const Switch = React.forwardRef<
   React.ComponentRef<typeof SwitchPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <SwitchPrimitive.Root
       ref={ref}

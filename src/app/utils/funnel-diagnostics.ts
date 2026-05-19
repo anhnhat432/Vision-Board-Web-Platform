@@ -17,15 +17,8 @@
  *    state for any production deploy is "hidden" even if flag leaks.
  */
 
-import {
-  evaluateSmartGoalQuality,
-  parseSmartGoal,
-  type QualityLevel,
-} from "@/lib/smart-goal";
-import {
-  evaluateTwelveWeekPlanQuality,
-  type PlanQualityLevel,
-} from "@/features/plan12week/logic";
+import { evaluateSmartGoalQuality, parseSmartGoal, type QualityLevel } from "@/lib/smart-goal";
+import { evaluateTwelveWeekPlanQuality, type PlanQualityLevel } from "@/features/plan12week/logic";
 
 import { hasRealLifeBalance } from "./core-flow-guard";
 import { APP_STORAGE_KEYS, getUserData } from "./storage";
@@ -35,11 +28,7 @@ import {
   getTwelveWeekWeekCompletion,
   isTwelveWeekReviewDueToday,
 } from "./storage-twelve-week";
-import type {
-  Goal,
-  TwelveWeekSystem,
-  UserData,
-} from "./storage-types";
+import type { Goal, TwelveWeekSystem, UserData } from "./storage-types";
 import { getUserIntentId, getUserIntentLabel, type UserIntentId } from "./user-intent";
 
 // ---- Visibility flag --------------------------------------------------------
@@ -51,7 +40,9 @@ import { getUserIntentId, getUserIntentLabel, type UserIntentId } from "./user-i
  */
 const RAW_DIAGNOSTICS_FLAG = import.meta.env.VITE_SHOW_FUNNEL_DIAGNOSTICS;
 const DIAGNOSTICS_ENABLED =
-  String(RAW_DIAGNOSTICS_FLAG ?? "").trim().toLowerCase() === "true";
+  String(RAW_DIAGNOSTICS_FLAG ?? "")
+    .trim()
+    .toLowerCase() === "true";
 
 export function shouldShowFunnelDiagnostics(): boolean {
   return DIAGNOSTICS_ENABLED;
@@ -62,10 +53,12 @@ export function shouldShowFunnelDiagnostics(): boolean {
  * `ImportMetaEnv`-shaped object so unit tests can probe the gate logic
  * without hitting `import.meta.env` directly.
  */
-export function evaluateDiagnosticsFlag(
-  env: { VITE_SHOW_FUNNEL_DIAGNOSTICS?: string } | undefined,
-): boolean {
-  return String(env?.VITE_SHOW_FUNNEL_DIAGNOSTICS ?? "").trim().toLowerCase() === "true";
+export function evaluateDiagnosticsFlag(env: { VITE_SHOW_FUNNEL_DIAGNOSTICS?: string } | undefined): boolean {
+  return (
+    String(env?.VITE_SHOW_FUNNEL_DIAGNOSTICS ?? "")
+      .trim()
+      .toLowerCase() === "true"
+  );
 }
 
 // ---- Public types -----------------------------------------------------------
@@ -207,9 +200,7 @@ function readPendingFeasibility(): {
       present: true,
       resultType: isResultType(parsed.resultType) ? parsed.resultType : null,
       adjustedScore:
-        typeof parsed.adjustedScore === "number" && Number.isFinite(parsed.adjustedScore)
-          ? parsed.adjustedScore
-          : null,
+        typeof parsed.adjustedScore === "number" && Number.isFinite(parsed.adjustedScore) ? parsed.adjustedScore : null,
       bottleneckAxis:
         parsed.bottleneck && typeof (parsed.bottleneck as Record<string, unknown>).axis === "string"
           ? ((parsed.bottleneck as Record<string, unknown>).axis as string)
@@ -312,9 +303,7 @@ function buildPlanSnapshot(activeGoal: Goal | null): FunnelDiagnosticsPlan {
   const coreCount = leadIndicators.filter((indicator) => (indicator.type ?? "core") === "core").length;
   const optionalCount = leadIndicators.length - coreCount;
   const milestoneCount = countMilestones(system);
-  const weekOneTasks = (system.taskInstances ?? []).filter(
-    (task) => task.weekNumber === 1 && !task.skipped,
-  );
+  const weekOneTasks = (system.taskInstances ?? []).filter((task) => task.weekNumber === 1 && !task.skipped);
   const firstTaskTitle = weekOneTasks[0]?.title;
 
   const planQuality = evaluateTwelveWeekPlanQuality(
@@ -352,8 +341,7 @@ function buildPlanSnapshot(activeGoal: Goal | null): FunnelDiagnosticsPlan {
   // Week 1 startability: ≥ 1 core indicator + at least 1 task + a non-empty
   // first-task title at least 6 characters long. This intentionally reuses
   // the same heuristic surface as the rubric without echoing the title.
-  const weekOneStartable =
-    coreCount >= 1 && weekOneTasks.length > 0 && (firstTaskTitle ?? "").trim().length >= 6;
+  const weekOneStartable = coreCount >= 1 && weekOneTasks.length > 0 && (firstTaskTitle ?? "").trim().length >= 6;
 
   return {
     present: true,
@@ -368,10 +356,7 @@ function buildPlanSnapshot(activeGoal: Goal | null): FunnelDiagnosticsPlan {
   };
 }
 
-function buildExecutionSnapshot(
-  activeGoal: Goal | null,
-  referenceDate: Date,
-): FunnelDiagnosticsExecution {
+function buildExecutionSnapshot(activeGoal: Goal | null, referenceDate: Date): FunnelDiagnosticsExecution {
   const system = activeGoal?.twelveWeekSystem;
   if (!system) {
     return {
@@ -419,9 +404,7 @@ export interface BuildSnapshotOptions {
   userData?: UserData;
 }
 
-export function buildFunnelDiagnosticsSnapshot(
-  options: BuildSnapshotOptions = {},
-): FunnelDiagnosticsSnapshot {
+export function buildFunnelDiagnosticsSnapshot(options: BuildSnapshotOptions = {}): FunnelDiagnosticsSnapshot {
   const now = options.now ?? new Date();
   const userData = options.userData ?? getUserData();
   const focusArea = readLocalString(APP_STORAGE_KEYS.selectedFocusArea) ?? "";
@@ -436,9 +419,7 @@ export function buildFunnelDiagnosticsSnapshot(
     hasPendingSmartGoal: readLocalString(APP_STORAGE_KEYS.pendingSmartGoal) !== null,
     hasPendingFeasibility: readLocalString(APP_STORAGE_KEYS.pendingFeasibilityResult) !== null,
     has12WeekPlan: Boolean(activeGoal?.twelveWeekSystem),
-    hasActiveTwelveWeekSystem: Boolean(
-      activeGoal?.twelveWeekSystem && activeGoal.twelveWeekSystem.status === "active",
-    ),
+    hasActiveTwelveWeekSystem: Boolean(activeGoal?.twelveWeekSystem && activeGoal.twelveWeekSystem.status === "active"),
   };
 
   const feasibilityRaw = readPendingFeasibility();

@@ -19,18 +19,14 @@ function makeInput(overrides: Partial<RescueModeInput> = {}): RescueModeInput {
     todayQueueCount: overrides.todayQueueCount,
     reviewDueToday: overrides.reviewDueToday ?? false,
     dailyCheckIns: overrides.dailyCheckIns ?? [{ date: TODAY }],
-    weeklyReviews:
-      overrides.weeklyReviews ??
-      [
-        { weekNumber: 1, reviewCompleted: true },
-        { weekNumber: 2, reviewCompleted: true },
-      ],
-    taskInstances:
-      overrides.taskInstances ??
-      [
-        { scheduledDate: "2026-05-08", completed: true, completedAt: TODAY },
-        { scheduledDate: "2026-05-09", completed: false },
-      ],
+    weeklyReviews: overrides.weeklyReviews ?? [
+      { weekNumber: 1, reviewCompleted: true },
+      { weekNumber: 2, reviewCompleted: true },
+    ],
+    taskInstances: overrides.taskInstances ?? [
+      { scheduledDate: "2026-05-08", completed: true, completedAt: TODAY },
+      { scheduledDate: "2026-05-09", completed: false },
+    ],
     startDate: overrides.startDate ?? "2026-04-26",
   };
 }
@@ -96,9 +92,7 @@ describe("getRescueModeStatus — no-completion streak", () => {
   it("triggers active after 5+ days without a completion", () => {
     const status = getRescueModeStatus(
       makeInput({
-        taskInstances: [
-          { scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" },
-        ],
+        taskInstances: [{ scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" }],
       }),
     );
     expect(status.triggers).toContain("no-completion-streak");
@@ -109,9 +103,7 @@ describe("getRescueModeStatus — no-completion streak", () => {
   it("does not trigger if last completion is within 2 days", () => {
     const status = getRescueModeStatus(
       makeInput({
-        taskInstances: [
-          { scheduledDate: "2026-05-09", completed: true, completedAt: "2026-05-09" },
-        ],
+        taskInstances: [{ scheduledDate: "2026-05-09", completed: true, completedAt: "2026-05-09" }],
       }),
     );
     expect(status.triggers).not.toContain("no-completion-streak");
@@ -269,9 +261,7 @@ describe("getRescueModeMessage", () => {
   it("returns active copy with day delta interpolated for no-completion-streak", () => {
     const status = getRescueModeStatus(
       makeInput({
-        taskInstances: [
-          { scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" },
-        ],
+        taskInstances: [{ scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" }],
       }),
     );
     const message = getRescueModeMessage(status);
@@ -299,9 +289,7 @@ describe("getRescueActionSuggestion", () => {
   });
 
   it("suggests 'quick-check-in' for missed-checkins trigger", () => {
-    const status = getRescueModeStatus(
-      makeInput({ dailyCheckIns: [{ date: "2026-05-06" }] }),
-    );
+    const status = getRescueModeStatus(makeInput({ dailyCheckIns: [{ date: "2026-05-06" }] }));
     const suggestions = getRescueActionSuggestion(status);
     expect(suggestions.map((s) => s.id)).toContain("quick-check-in");
   });
@@ -355,9 +343,7 @@ describe("Rescue mode — analytics safety", () => {
     const status = getRescueModeStatus(
       makeInput({
         overdueOpenCount: 4,
-        taskInstances: [
-          { scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" },
-        ],
+        taskInstances: [{ scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" }],
         dailyCheckIns: [{ date: "2026-05-06" }],
       }),
     );
@@ -371,9 +357,7 @@ describe("Rescue mode — analytics safety", () => {
     const status = getRescueModeStatus(
       makeInput({
         overdueOpenCount: 4,
-        taskInstances: [
-          { scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04", },
-        ],
+        taskInstances: [{ scheduledDate: "2026-05-04", completed: true, completedAt: "2026-05-04" }],
       }),
     );
     const message = getRescueModeMessage(status);

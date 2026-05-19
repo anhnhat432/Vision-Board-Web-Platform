@@ -23,16 +23,10 @@ export function updateWeek(weekId: string, payload: UpdateWeekPayload): Promise<
   return patch<Week, UpdateWeekPayload>(`/weeks/${weekId}`, payload);
 }
 
-export function updateWeekReview(
-  weekId: string,
-  payload: UpdateWeekReviewPayload,
-): Promise<Week> {
+export function updateWeekReview(weekId: string, payload: UpdateWeekReviewPayload): Promise<Week> {
   return post<Week, UpdateWeekReviewPayload>(`/weeks/${weekId}/review`, payload);
 }
 
-export function submitWeeklyReview(
-  weekId: string,
-  payload: UpdateWeekReviewPayload,
-): Promise<Week> {
+export function submitWeeklyReview(weekId: string, payload: UpdateWeekReviewPayload): Promise<Week> {
   return updateWeekReview(weekId, payload);
 }

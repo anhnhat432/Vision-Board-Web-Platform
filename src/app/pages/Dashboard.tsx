@@ -34,6 +34,7 @@ import { useBreakpoint } from "../hooks/useBreakpoint";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { isDemoMode } from "../utils/app-mode";
@@ -175,6 +176,11 @@ export function Dashboard() {
   const { userData, reloadUserData } = useSyncedUserData();
   const { isTourOpen, setIsTourOpen } = usePageTour("dashboard");
 
+  useSetAssistantPageContext({
+    pageType: "dashboard",
+    hint: "Đang xem tổng quan mục tiêu và hệ thống 12 tuần",
+  });
+
   if (!userData) {
     return (
       <div className="min-h-screen bg-app-bg text-app-ink">
@@ -291,9 +297,7 @@ function useDashboardDerivedData({
     effectiveSystem && activeSystemWeek
       ? (todayPreviewUsesToday ? activeSystemTodayOpenTasks : activeSystemWeekOpenTasks).slice(0, 3)
       : [];
-  const todayPreviewTotal = todayPreviewUsesToday
-    ? activeSystemTodayTasks.length
-    : activeSystemWeekTasks.length;
+  const todayPreviewTotal = todayPreviewUsesToday ? activeSystemTodayTasks.length : activeSystemWeekTasks.length;
   const todayPreviewCompleted = todayPreviewUsesToday
     ? activeSystemTodayCompletedCount
     : activeSystemWeekTasks.length - activeSystemWeekOpenTasks.length;

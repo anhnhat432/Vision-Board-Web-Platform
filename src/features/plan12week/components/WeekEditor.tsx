@@ -8,8 +8,7 @@ export type WeekEditorProps = ComponentProps<typeof TwelveWeekSettingsTab>;
 
 export function WeekEditor(props: WeekEditorProps) {
   const currentWeekScore =
-    props.system.scoreboard.find((week) => week.weekNumber === props.system.currentWeek)?.weeklyScore ??
-    0;
+    props.system.scoreboard.find((week) => week.weekNumber === props.system.currentWeek)?.weeklyScore ?? 0;
 
   return (
     <div className="space-y-6">

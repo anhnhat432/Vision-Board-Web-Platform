@@ -123,7 +123,10 @@ function getTotalWeeks(details: PlanDetails): number {
 }
 
 function slugify(value: string, fallback: string): string {
-  const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
   return slug || fallback;
 }
 
@@ -197,8 +200,7 @@ function getIndicatorSchedule(details: PlanDetails, indicatorName: string): numb
   const planStartDate = getPlanStartDate(details.plan);
   const matchingTasksByWeek = getMatchingTasksByWeek(details, indicatorName);
   const densestEntry = Array.from(matchingTasksByWeek.entries()).sort(
-    ([leftWeek, leftTasks], [rightWeek, rightTasks]) =>
-      rightTasks.length - leftTasks.length || leftWeek - rightWeek,
+    ([leftWeek, leftTasks], [rightWeek, rightTasks]) => rightTasks.length - leftTasks.length || leftWeek - rightWeek,
   )[0];
 
   if (!densestEntry) return undefined;
@@ -299,11 +301,7 @@ function getWeekOutput(weekByNumber: ReadonlyMap<number, WeekDetails>, weekNumbe
   return weekByNumber.get(weekNumber)?.expectedOutput?.trim() ?? "";
 }
 
-function buildWeeklyPlans(
-  details: PlanDetails,
-  totalWeeks: number,
-  week12Outcome: string,
-): WeeklyPlanEntry[] {
+function buildWeeklyPlans(details: PlanDetails, totalWeeks: number, week12Outcome: string): WeeklyPlanEntry[] {
   const weekByNumber = getWeekByNumber(details);
 
   return Array.from({ length: totalWeeks }, (_, index) => {
@@ -391,17 +389,16 @@ function findRemoteTaskForLocalTask(
 }
 
 function pickBestRemoteTask(tasks: ApiTask[]): ApiTask | null {
-  return [...tasks].sort((left, right) => {
-    const completionPriority = Number(right.status === "done") - Number(left.status === "done");
-    if (completionPriority !== 0) return completionPriority;
-    return left.createdAt.localeCompare(right.createdAt);
-  })[0] ?? null;
+  return (
+    [...tasks].sort((left, right) => {
+      const completionPriority = Number(right.status === "done") - Number(left.status === "done");
+      if (completionPriority !== 0) return completionPriority;
+      return left.createdAt.localeCompare(right.createdAt);
+    })[0] ?? null
+  );
 }
 
-function buildTaskLinkMap(
-  system: TwelveWeekSystem,
-  details: PlanDetails,
-): Record<string, string> {
+function buildTaskLinkMap(system: TwelveWeekSystem, details: PlanDetails): Record<string, string> {
   const weekByNumber = getWeekByNumber(details);
   const usedRemoteTaskIds = new Set<string>();
   const taskIdByRemoteTaskId: Record<string, string> = {};
@@ -449,7 +446,8 @@ export function buildHydratedGoalFromPlanDetails(
 
   const baseSystem: TwelveWeekSystem = {
     goalType: apiGoal?.focusArea || apiGoal?.category || "backend-plan",
-    vision12Week: details.plan.vision?.trim() || apiGoal?.description?.trim() || apiGoal?.title?.trim() || week12Outcome,
+    vision12Week:
+      details.plan.vision?.trim() || apiGoal?.description?.trim() || apiGoal?.title?.trim() || week12Outcome,
     lagMetric: {
       name: leadIndicators[0]?.name ?? "Tiến độ chính",
       unit: "",
@@ -499,12 +497,17 @@ export function buildHydratedGoalFromPlanDetails(
   const normalizedGoal = normalizeGoal(goal);
   const normalizedSystem = normalizedGoal.twelveWeekSystem ?? baseSystem;
   const taskIdByRemoteTaskId = buildTaskLinkMap(normalizedSystem, details);
-  const overlaidSystem = applyBackendProgressOverlay(normalizedSystem, details, invertTaskLinkMap(taskIdByRemoteTaskId));
+  const overlaidSystem = applyBackendProgressOverlay(
+    normalizedSystem,
+    details,
+    invertTaskLinkMap(taskIdByRemoteTaskId),
+  );
   const systemWithReviews: TwelveWeekSystem = {
     ...overlaidSystem,
-    weeklyReviews: overlaidSystem.weeklyReviews.length > 0
-      ? overlaidSystem.weeklyReviews
-      : buildWeeklyReviews(details, overlaidSystem),
+    weeklyReviews:
+      overlaidSystem.weeklyReviews.length > 0
+        ? overlaidSystem.weeklyReviews
+        : buildWeeklyReviews(details, overlaidSystem),
   };
   const currentWeek = getTwelveWeekCurrentWeek(systemWithReviews);
   const hydratedSystem: TwelveWeekSystem = {
@@ -620,7 +623,7 @@ function createHydrationResult(
           ? "Không thể khôi phục kế hoạch từ máy chủ."
           : result.conflictCount > 0
             ? `${result.conflictCount} khác biệt giữa thiết bị và máy chủ cần xem lại.`
-          : "Không có kế hoạch nào cần đồng bộ về thiết bị.";
+            : "Không có kế hoạch nào cần đồng bộ về thiết bị.";
 
   return {
     ...result,
@@ -654,10 +657,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     });
   }
 
-  const [apiGoals, plans] = await Promise.all([
-    getGoals().catch(() => [] as ApiGoal[]),
-    getPlans(),
-  ]);
+  const [apiGoals, plans] = await Promise.all([getGoals().catch(() => [] as ApiGoal[]), getPlans()]);
 
   if (plans.length === 0) {
     return createHydrationResult({
@@ -715,8 +715,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
 
     const apiGoal = findRelatedApiGoal(apiGoals, plan);
     const preferredGoalId =
-      existingGoal?.id ??
-      (knownGoalIds.has(plan.smartGoalId?.trim() ?? "") ? `backend_plan_${plan.id}` : undefined);
+      existingGoal?.id ?? (knownGoalIds.has(plan.smartGoalId?.trim() ?? "") ? `backend_plan_${plan.id}` : undefined);
     const buildResult = buildHydratedGoalFromPlanDetails(apiGoal, details, {
       goalId: preferredGoalId,
     });
@@ -832,9 +831,7 @@ export async function applyBackendPlanSnapshotToLocal(goalId: string): Promise<B
   }
 }
 
-export function useBackendPlanHydration(
-  options: UseBackendPlanHydrationOptions,
-): UseBackendPlanHydrationResult {
+export function useBackendPlanHydration(options: UseBackendPlanHydrationOptions): UseBackendPlanHydrationResult {
   const [result, setResult] = useState<BackendPlanHydrationResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");

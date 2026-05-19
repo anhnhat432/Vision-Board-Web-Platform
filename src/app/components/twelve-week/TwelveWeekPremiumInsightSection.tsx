@@ -144,9 +144,7 @@ export function TwelveWeekPremiumInsightSection({
               <div className="flex items-center gap-2">
                 <div
                   className={`h-2 w-2 rounded-full ${
-                    premiumInsight.status === "strong"
-                      ? "bg-app-accent"
-                      : "bg-app-warm"
+                    premiumInsight.status === "strong" ? "bg-app-accent" : "bg-app-warm"
                   }`}
                 />
                 <span className="text-sm font-semibold text-app-ink">Đã đọc được nhịp tuần này</span>

@@ -50,12 +50,13 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
     vision12Week: plan.vision,
     week12Outcome: week12?.expectedOutput ?? "",
     lagMetric: { name: "Kết quả chính", target: "", unit: "lần" },
-    leadIndicators: plan.weeks[0]?.leadMetrics.map((lm) => ({
-      name: lm.name,
-      target: lm.weeklyTarget.toString(),
-      schedule: [],
-      type: "core" as const,
-    })) ?? [],
+    leadIndicators:
+      plan.weeks[0]?.leadMetrics.map((lm) => ({
+        name: lm.name,
+        target: lm.weeklyTarget.toString(),
+        schedule: [],
+        type: "core" as const,
+      })) ?? [],
     milestones: {
       week4: week4?.expectedOutput ?? "",
       week8: week8?.expectedOutput ?? "",

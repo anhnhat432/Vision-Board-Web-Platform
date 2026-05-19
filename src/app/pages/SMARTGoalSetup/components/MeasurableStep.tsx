@@ -68,7 +68,9 @@ export function MeasurableStep({
           }
           className={inputClass}
           aria-invalid={metricNameMissing && currentStepHasDraftContent}
-          aria-describedby={intentMetricHint ? "smart-metric-name-hint smart-metric-intent-hint" : "smart-metric-name-hint"}
+          aria-describedby={
+            intentMetricHint ? "smart-metric-name-hint smart-metric-intent-hint" : "smart-metric-name-hint"
+          }
         />
         <p id="smart-metric-name-hint" className={helperTextClass}>
           Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.

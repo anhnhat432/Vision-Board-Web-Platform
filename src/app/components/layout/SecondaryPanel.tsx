@@ -55,28 +55,15 @@ export function SecondaryPanel({
         {icon && <span className="mt-0.5 h-4 w-4 shrink-0">{icon}</span>}
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-          {collapsible && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {isOpen ? "Thu gọn" : "Xem thêm"}
-            </p>
-          )}
+          {collapsible && <p className="text-xs text-muted-foreground mt-0.5">{isOpen ? "Thu gọn" : "Xem thêm"}</p>}
         </div>
       </div>
-      {collapsible && (
-        <span className="text-muted-foreground">
-          {isOpen ? "−" : "+"}
-        </span>
-      )}
+      {collapsible && <span className="text-muted-foreground">{isOpen ? "−" : "+"}</span>}
     </>
   );
 
   return (
-    <div
-      className={cn(
-        "rounded-[var(--r-tile)] border border-muted bg-muted/90 p-4",
-        className
-      )}
-    >
+    <div className={cn("rounded-[var(--r-tile)] border border-muted bg-muted/90 p-4", className)}>
       {collapsible ? (
         <button
           type="button"
@@ -87,15 +74,9 @@ export function SecondaryPanel({
           {headerContent}
         </button>
       ) : (
-        <div className="flex items-start justify-between gap-2">
-          {headerContent}
-        </div>
+        <div className="flex items-start justify-between gap-2">{headerContent}</div>
       )}
-      {(!collapsible || isOpen) && (
-        <div className="mt-3 text-sm text-muted-foreground">
-          {children}
-        </div>
-      )}
+      {(!collapsible || isOpen) && <div className="mt-3 text-sm text-muted-foreground">{children}</div>}
     </div>
   );
 }

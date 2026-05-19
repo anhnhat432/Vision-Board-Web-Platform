@@ -107,7 +107,8 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     hasCycle || (hasSmartGoal && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult)));
   const hasTouchedToday =
     hasCycle &&
-    (Boolean(activeSystem?.dailyCheckIns.length) || Boolean(activeSystem?.taskInstances.some((task) => task.completed)));
+    (Boolean(activeSystem?.dailyCheckIns.length) ||
+      Boolean(activeSystem?.taskInstances.some((task) => task.completed)));
 
   const steps: NewUserGuideStep[] = [
     {
@@ -145,7 +146,8 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     {
       id: "setup_cycle",
       title: "Chốt chu kỳ 12 tuần",
-      description: "Biến mục tiêu đó thành một chu kỳ có kết quả, việc lặp lại, chỉ số, tuần đầu và ngày review rõ ràng.",
+      description:
+        "Biến mục tiêu đó thành một chu kỳ có kết quả, việc lặp lại, chỉ số, tuần đầu và ngày review rõ ràng.",
       completed: hasCycle,
       href: hasFeasibility ? "/12-week-setup" : "/feasibility",
       ctaLabel: hasFeasibility ? "Tạo kế hoạch 12 tuần" : "Kiểm tra khả thi trước",

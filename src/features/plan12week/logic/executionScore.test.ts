@@ -17,13 +17,7 @@ describe("calculateLeadScore", () => {
   });
 
   it("returns completed tasks divided by committed tasks", () => {
-    const tasks = [
-      makeTask("done"),
-      makeTask("done"),
-      makeTask("done"),
-      makeTask("done"),
-      makeTask("todo"),
-    ];
+    const tasks = [makeTask("done"), makeTask("done"), makeTask("done"), makeTask("done"), makeTask("todo")];
 
     expect(calculateLeadScore(tasks)).toBe(80);
   });

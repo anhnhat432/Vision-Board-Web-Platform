@@ -8,9 +8,7 @@ function normalizeAppMode(value: string | undefined): AppMode {
   // Missing or malformed → default to "real" so production deployments
   // never silently downgrade to demo mode.
   if (trimmed !== undefined && trimmed !== "") {
-    console.error(
-      `[app-mode] Invalid VITE_APP_MODE="${value}". Expected "real" or "demo". Falling back to "real".`,
-    );
+    console.error(`[app-mode] Invalid VITE_APP_MODE="${value}". Expected "real" or "demo". Falling back to "real".`);
   }
   return "real";
 }

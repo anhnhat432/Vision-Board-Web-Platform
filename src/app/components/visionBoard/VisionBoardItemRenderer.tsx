@@ -32,7 +32,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
   if (item.type === "image") {
     const frameId = item.style?.imageFrame ?? "shadow";
     const frame = IMAGE_FRAME_STYLES.find((itemFrame) => itemFrame.id === frameId) ?? IMAGE_FRAME_STYLES[0];
-    const areaLabel = item.lifeAreaId ? LIFE_AREA_LABELS[item.lifeAreaId] ?? item.lifeAreaId : null;
+    const areaLabel = item.lifeAreaId ? (LIFE_AREA_LABELS[item.lifeAreaId] ?? item.lifeAreaId) : null;
 
     return (
       <div

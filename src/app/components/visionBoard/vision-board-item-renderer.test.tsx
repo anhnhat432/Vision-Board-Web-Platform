@@ -16,12 +16,7 @@ const BASE_ITEM: VisionBoardItem = {
 
 describe("VisionBoardItemRenderer", () => {
   it("renders handwriting quote font family", () => {
-    render(
-      <VisionBoardItemRenderer
-        item={{ ...BASE_ITEM, style: { quoteFont: "handwriting" } }}
-        goalsById={{}}
-      />,
-    );
+    render(<VisionBoardItemRenderer item={{ ...BASE_ITEM, style: { quoteFont: "handwriting" } }} goalsById={{}} />);
 
     expect(screen.getByText("Tôi là bình minh").style.fontFamily).toContain("Caveat");
   });

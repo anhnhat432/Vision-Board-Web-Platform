@@ -76,6 +76,11 @@ export interface AssistantContext {
       };
     };
   };
+  pageContextHint?: {
+    pageType: string;
+    currentStep?: string;
+    hint?: string;
+  };
   route: string;
 }
 
@@ -256,6 +261,7 @@ export function sanitizeContext(context: unknown): AssistantContext {
     streak: sanitizeStreak(raw.streak),
     upcomingDeadlines: sanitizeUpcomingDeadlines(raw.upcomingDeadlines),
     pageContext: sanitizePageContext(raw.pageContext, sanitizeText(raw.route || "/", MAX_ROUTE_LENGTH) || "/"),
+    pageContextHint: sanitizePageContextHint(raw.pageContextHint),
   };
 }
 
@@ -386,6 +392,19 @@ function sanitizePageFormDraft(value: unknown): AssistantContext["pageContext"][
         tacticLoadPreference: nullableText(draftSummary.tacticLoadPreference, 80),
         personalConstraint: nullableText(draftSummary.personalConstraint),
       },
+  };
+}
+
+function sanitizePageContextHint(value: unknown): AssistantContext["pageContextHint"] | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const raw = record(value);
+  const pageType = sanitizeText(raw.pageType, 40);
+  if (!pageType) return undefined;
+
+  return {
+    pageType,
+    currentStep: raw.currentStep ? sanitizeText(raw.currentStep, 40) : undefined,
+    hint: raw.hint ? sanitizeText(raw.hint, 200) : undefined,
   };
 }
 

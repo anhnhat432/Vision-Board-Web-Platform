@@ -77,10 +77,7 @@ import {
   createVisionBoard as backendCreateVisionBoard,
   updateVisionBoard as backendUpdateVisionBoard,
 } from "@/services/visionBoardService";
-import {
-  getBackendVisionBoardId,
-  saveVisionBoardLink,
-} from "@/lib/api/visionBoardLinkStore";
+import { getBackendVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 
 const ICON_COMPONENTS = {
   Star,
@@ -114,17 +111,26 @@ function getExportRatioDescription(ratio: ExportOptions["ratio"]): string {
 }
 
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
-  { label: "Không gian", url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80" },
+  {
+    label: "Không gian",
+    url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80",
+  },
   { label: "Bình minh", url: "https://images.unsplash.com/photo-1500672100127-fc5ed5f63ed3?w=480&h=360&fit=crop&q=80" },
   { label: "Du lịch", url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=480&h=360&fit=crop&q=80" },
   { label: "Nhà", url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=480&h=360&fit=crop&q=80" },
   { label: "Vận động", url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=360&fit=crop&q=80" },
-  { label: "Thiên nhiên", url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=480&h=360&fit=crop&q=80" },
+  {
+    label: "Thiên nhiên",
+    url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=480&h=360&fit=crop&q=80",
+  },
   { label: "Thành phố", url: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=480&h=360&fit=crop&q=80" },
   { label: "Biển", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=480&h=360&fit=crop&q=80" },
   { label: "Sách", url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=480&h=360&fit=crop&q=80" },
   { label: "Ẩm thực", url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=480&h=360&fit=crop&q=80" },
-  { label: "Nghệ thuật", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=480&h=360&fit=crop&q=80" },
+  {
+    label: "Nghệ thuật",
+    url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=480&h=360&fit=crop&q=80",
+  },
   { label: "Vườn", url: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=480&h=360&fit=crop&q=80" },
 ];
 
@@ -138,8 +144,8 @@ function createImageItem(
     id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     type: "image",
     content,
-    x: 10 + (items.length * 6) % 48,
-    y: 12 + (items.length * 5) % 42,
+    x: 10 + ((items.length * 6) % 48),
+    y: 12 + ((items.length * 5) % 42),
     width: SIZE_PRESETS.M.width,
     height: SIZE_PRESETS.M.width,
     lifeAreaId: lifeArea ?? undefined,
@@ -159,7 +165,7 @@ function formatShortDate(iso: string): string | null {
 
 // Upload hardening constants — module scope so they are not recreated on each render
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024; // 5 MB source file limit (compression handles reduction)
-const MAX_COMPRESSED_CHARS = 600_000;     // ~450 KB actual image data after base64 overhead
+const MAX_COMPRESSED_CHARS = 600_000; // ~450 KB actual image data after base64 overhead
 const CANVAS_MAX_WIDTH = 1200;
 const CANVAS_MAX_HEIGHT = 900;
 
@@ -395,10 +401,7 @@ export function VisionBoardEditor() {
     }
 
     const afterData = getUserData();
-    const unlockedAchievements = getUnlockedAchievements(
-      beforeData.achievements,
-      afterData.achievements,
-    );
+    const unlockedAchievements = getUnlockedAchievements(beforeData.achievements, afterData.achievements);
     const achievementCopy = getAchievementCelebrationCopy(unlockedAchievements);
 
     celebrateSpotlight({ x: 0.84, y: 0.14 });
@@ -409,12 +412,11 @@ export function VisionBoardEditor() {
     }
 
     toast.success(id ? "Bảng đã được làm mới." : "Vision board đã vào thư viện.", {
-      description:
-        achievementCopy?.title
-          ? `${achievementCopy.title}. ${achievementCopy.description}`
-          : id
-            ? "Phiên bản mới nhất của bảng này đã sẵn sàng để bạn tiếp tục nuôi cảm hứng."
-            : "Vision board mới của bạn đã được lưu và sẽ được nổi bật ngay trong thư viện.",
+      description: achievementCopy?.title
+        ? `${achievementCopy.title}. ${achievementCopy.description}`
+        : id
+          ? "Phiên bản mới nhất của bảng này đã sẵn sàng để bạn tiếp tục nuôi cảm hứng."
+          : "Vision board mới của bạn đã được lưu và sẽ được nổi bật ngay trong thư viện.",
     });
 
     setHasUnsavedChanges(false);
@@ -508,8 +510,8 @@ export function VisionBoardEditor() {
       id: `item_${Date.now()}`,
       type: "quote",
       content: quoteText.trim(),
-      x: 12 + (board.items.length * 5) % 50,
-      y: 14 + (board.items.length * 4) % 40,
+      x: 12 + ((board.items.length * 5) % 50),
+      y: 14 + ((board.items.length * 4) % 40),
       width: SIZE_PRESETS.L.width,
       height: 120,
       lifeAreaId: selectedLifeArea ?? undefined,
@@ -535,8 +537,8 @@ export function VisionBoardEditor() {
       id: `item_${Date.now()}`,
       type: "goal_card",
       content: selectedGoalId,
-      x: 10 + (board.items.length * 6) % 48,
-      y: 12 + (board.items.length * 5) % 42,
+      x: 10 + ((board.items.length * 6) % 48),
+      y: 12 + ((board.items.length * 5) % 42),
       width: SIZE_PRESETS.M.width,
       height: 140,
       lifeAreaId: goal.category,
@@ -558,8 +560,8 @@ export function VisionBoardEditor() {
       id: `item_${Date.now()}`,
       type: "icon",
       content: iconName,
-      x: 16 + (board.items.length * 5) % 50,
-      y: 16 + (board.items.length * 4) % 42,
+      x: 16 + ((board.items.length * 5) % 50),
+      y: 16 + ((board.items.length * 4) % 42),
       width: iconWidth,
       height: iconWidth,
       style: { sizePreset: selectedIconSize },
@@ -644,643 +646,640 @@ export function VisionBoardEditor() {
 
   return (
     <div className="stack-section pb-12">
-        <UpgradePaywallDialog
-          open={isVisionBoardLimitPaywallOpen}
-          onOpenChange={setIsVisionBoardLimitPaywallOpen}
-          context="plan"
-          currentPlan={getCurrentPlan(getUserData())}
-          title="Bạn đã có 1 bảng tầm nhìn"
-          description="Nâng cấp Plus để tạo thêm bảng tầm nhìn. Dữ liệu hiện có vẫn được giữ nguyên."
-          source="paywall_dialog"
-        />
-        <AlertDialog
-          open={blocker.state === "blocked"}
-          onOpenChange={(open) => {
-            if (!open && blocker.state === "blocked") {
-              blocker.reset();
-            }
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Rời khỏi bảng khi chưa lưu?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Bạn đang có thay đổi chưa được lưu. Nếu rời trang bây giờ, các thay đổi trên bảng sẽ bị mất.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                onClick={() => {
-                  if (blocker.state === "blocked") blocker.reset();
-                }}
+      <UpgradePaywallDialog
+        open={isVisionBoardLimitPaywallOpen}
+        onOpenChange={setIsVisionBoardLimitPaywallOpen}
+        context="plan"
+        currentPlan={getCurrentPlan(getUserData())}
+        title="Bạn đã có 1 bảng tầm nhìn"
+        description="Nâng cấp Plus để tạo thêm bảng tầm nhìn. Dữ liệu hiện có vẫn được giữ nguyên."
+        source="paywall_dialog"
+      />
+      <AlertDialog
+        open={blocker.state === "blocked"}
+        onOpenChange={(open) => {
+          if (!open && blocker.state === "blocked") {
+            blocker.reset();
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rời khỏi bảng khi chưa lưu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn đang có thay đổi chưa được lưu. Nếu rời trang bây giờ, các thay đổi trên bảng sẽ bị mất.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                if (blocker.state === "blocked") blocker.reset();
+              }}
+            >
+              Ở lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                if (blocker.state === "blocked") blocker.proceed();
+              }}
+            >
+              Rời khỏi trang
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <VisionBoardStoryWizard
+        open={isWizardOpen}
+        onOpenChange={setIsWizardOpen}
+        onComplete={handleWizardComplete}
+        availableGoals={getUserData().goals.map((goal) => ({
+          id: goal.id,
+          title: goal.title,
+          category: goal.category,
+        }))}
+        year={boardYear}
+      />
+
+      <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tải bảng về máy</DialogTitle>
+            <DialogDescription>
+              Chọn tỉ lệ phù hợp với mục đích sử dụng. Bảng sẽ được render thành ảnh PNG chất lượng cao.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {EXPORT_RATIOS.map((ratio) => (
+              <button
+                key={ratio}
+                type="button"
+                onClick={() => setSelectedRatio(ratio)}
+                className={`w-full rounded-[var(--r-tile)] border p-3 text-left transition ${
+                  selectedRatio === ratio
+                    ? "border-app-accent bg-app-accent-soft"
+                    : "border-app-line bg-app-surface hover:border-app-accent/50"
+                }`}
               >
-                Ở lại
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-red-600 hover:bg-red-700"
-                onClick={() => {
-                  if (blocker.state === "blocked") blocker.proceed();
-                }}
-              >
-                Rời khỏi trang
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <p className="text-sm font-semibold text-app-ink">{getRatioLabel(ratio)}</p>
+                <p className="text-xs text-app-ink-soft">{getExportRatioDescription(ratio)}</p>
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsExportDialogOpen(false)} disabled={isExporting}>
+              Hủy
+            </Button>
+            <Button onClick={handleExport} disabled={isExporting}>
+              {isExporting ? "Đang xuất..." : "Tải về"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        <VisionBoardStoryWizard
-          open={isWizardOpen}
-          onOpenChange={setIsWizardOpen}
-          onComplete={handleWizardComplete}
-          availableGoals={getUserData().goals.map((goal) => ({
-            id: goal.id,
-            title: goal.title,
-            category: goal.category,
-          }))}
-          year={boardYear}
-        />
+      <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
+        <Card className="overflow-hidden">
+          <CardContent className="relative p-5 sm:p-6 lg:p-8">
+            <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="stack-section">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-4 py-1.5 text-sm text-app-ink-muted uppercase tracking-wide">
+                  <Wand2 className="h-4 w-4" />
+                  Dear Our Future Studio
+                </div>
 
-        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Tải bảng về máy</DialogTitle>
-              <DialogDescription>
-                Chọn tỉ lệ phù hợp với mục đích sử dụng. Bảng sẽ được render thành ảnh PNG chất lượng cao.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 py-2">
-              {EXPORT_RATIOS.map((ratio) => (
-                <button
-                  key={ratio}
-                  type="button"
-                  onClick={() => setSelectedRatio(ratio)}
-                  className={`w-full rounded-[var(--r-tile)] border p-3 text-left transition ${
-                    selectedRatio === ratio
-                      ? "border-app-accent bg-app-accent-soft"
-                      : "border-app-line bg-app-surface hover:border-app-accent/50"
-                  }`}
-                >
-                  <p className="text-sm font-semibold text-app-ink">{getRatioLabel(ratio)}</p>
-                  <p className="text-xs text-app-ink-soft">{getExportRatioDescription(ratio)}</p>
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)} disabled={isExporting}>
-                Hủy
-              </Button>
-              <Button onClick={handleExport} disabled={isExporting}>
-                {isExporting ? "Đang xuất..." : "Tải về"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
-          <Card className="overflow-hidden">
-            <CardContent className="relative p-5 sm:p-6 lg:p-8">
-              <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
-                <div className="stack-section">
-                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-4 py-1.5 text-sm text-app-ink-muted uppercase tracking-wide">
-                    <Wand2 className="h-4 w-4" />
-                    Dear Our Future Studio
-                  </div>
-
-                  <div className="stack-stack">
-                    <h1 className="max-w-3xl text-2xl font-medium leading-[1.1] tracking-[-0.018em] text-app-ink mt-2 sm:text-3xl md:text-4xl">
-                      {boardName || "Bức tranh tương lai"}
-                    </h1>
-                    <p className="max-w-2xl text-base leading-7 text-app-ink-soft">
-                      Kéo thả hình ảnh, câu nói và biểu tượng để tạo một bảng giàu cảm xúc,
-                      rõ định hướng và đủ đẹp để bạn muốn quay lại thường xuyên.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
-                    <Input
-                      ref={boardNameInputRef}
-                      placeholder="Tên vision board của bạn"
-                      value={boardName}
-                      onChange={(event) => { setBoardName(event.target.value); setHasUnsavedChanges(true); }}
-                      className="text-lg font-semibold"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Năm"
-                      value={boardYear}
-                      onChange={(event) => { setBoardYear(event.target.value); setHasUnsavedChanges(true); }}
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <Button glow onClick={() => setIsAddingItem(true)}>
-                      <Plus className="h-4 w-4" />
-                      Thêm phần tử
-                    </Button>
-                    <Button variant="outline" onClick={() => setIsWizardOpen(true)}>
-                      <Wand2 className="h-4 w-4" />
-                      Story Mode
-                    </Button>
-                    <Button variant="outline" onClick={() => setIsExportDialogOpen(true)} disabled={board.items.length === 0}>
-                      <Download className="h-4 w-4" />
-                      Tải về wallpaper
-                    </Button>
-                    <Button variant="outline" onClick={handleSave}>
-                      <Save className="h-4 w-4" />
-                      Lưu bảng
-                    </Button>
-                  </div>
-                  {!boardName.trim() ? (
-                    <p className="text-xs text-app-ink-soft">
-                      Đặt tên bảng (ví dụ "Vision 2026") rồi bấm <span className="font-medium text-app-ink">Lưu bảng</span>.
-                    </p>
-                  ) : null}
-
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">Không gian</span>
-                    {VISION_BOARD_THEMES.map((theme) => (
-                      <button
-                        key={theme.id}
-                        type="button"
-                        onClick={() => {
-                          setThemeId(theme.id);
-                          setHasUnsavedChanges(true);
-                        }}
-                        className={`h-7 w-7 rounded-full border-2 transition-all ${
-                          themeId === theme.id ? "scale-110 ring-2 ring-app-accent ring-offset-2" : "border-app-line hover:border-app-accent"
-                        }`}
-                        style={{ background: theme.preview.gradient }}
-                        aria-label={theme.label}
-                        title={theme.label}
-                      />
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setShowZones((prev) => !prev)}
-                      className={`ml-2 rounded-full border px-3 py-1 text-xs font-medium ${
-                        showZones
-                          ? "border-app-accent bg-app-accent text-white"
-                          : "border-app-line bg-app-bg text-app-ink-soft hover:bg-app-surface"
-                      }`}
-                    >
-                      {showZones ? "Ẩn vùng life area" : "Hiện vùng life area"}
-                    </button>
-                  </div>
-
-                  <p className="text-sm text-app-ink-soft">
-                    Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên bảng.
+                <div className="stack-stack">
+                  <h1 className="max-w-3xl text-2xl font-medium leading-[1.1] tracking-[-0.018em] text-app-ink mt-2 sm:text-3xl md:text-4xl">
+                    {boardName || "Bức tranh tương lai"}
+                  </h1>
+                  <p className="max-w-2xl text-base leading-7 text-app-ink-soft">
+                    Kéo thả hình ảnh, câu nói và biểu tượng để tạo một bảng giàu cảm xúc, rõ định hướng và đủ đẹp để bạn
+                    muốn quay lại thường xuyên.
                   </p>
                 </div>
 
-
-                <div className="hidden xl:block rounded-xl border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-                    Tóm tắt bảng
-                  </p>
-
-                  <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                    {[
-                      { label: "Tổng phần tử", value: board.items.length, note: "đang có trên bảng" },
-                      { label: "Hình ảnh", value: boardStats.images, note: "nguồn cảm hứng trực quan" },
-                      { label: "Trích dẫn + biểu tượng", value: boardStats.quotes + boardStats.icons, note: "điểm nhấn cảm xúc" },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="rounded-xl border border-app-line bg-app-surface px-4 py-4"
-                      >
-                        <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
-                        <p className="mt-2 text-3xl font-bold text-app-ink">{item.value}</p>
-                        <p className="mt-1 text-sm text-app-ink-soft">{item.note}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <DialogContent className="max-w-3xl overflow-y-auto max-h-[85vh]">
-            <DialogHeader>
-              <DialogTitle>Thêm vào vision board</DialogTitle>
-              <DialogDescription>
-                Chọn loại phần tử phù hợp để làm bảng của bạn sống động và giàu ý nghĩa hơn.
-              </DialogDescription>
-            </DialogHeader>
-
-            <Tabs defaultValue="image" className="mt-4">
-              <TabsList className="mb-3 inline-flex rounded-full border border-app-line bg-app-bg p-1">
-                <TabsTrigger value="image">
-                  <Image className="h-4 w-4" />
-                  Hình ảnh
-                </TabsTrigger>
-                <TabsTrigger value="quote">
-                  <MessageSquareQuote className="h-4 w-4" />
-                  Câu nói
-                </TabsTrigger>
-                <TabsTrigger value="goal_card">
-                  <Target className="h-4 w-4" />
-                  Mục tiêu
-                </TabsTrigger>
-                <TabsTrigger value="icon">
-                  <Sparkles className="h-4 w-4" />
-                  Biểu tượng
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="image" className="stack-stack pt-4">
-                <div className="stack-tight">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <Upload className="h-4 w-4" />
-                    Tải ảnh từ thiết bị
-                  </div>
-                  <input
-                    ref={uploadInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileUpload}
+                <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
+                  <Input
+                    ref={boardNameInputRef}
+                    placeholder="Tên vision board của bạn"
+                    value={boardName}
+                    onChange={(event) => {
+                      setBoardName(event.target.value);
+                      setHasUnsavedChanges(true);
+                    }}
+                    className="text-lg font-semibold"
                   />
+                  <Input
+                    type="number"
+                    placeholder="Năm"
+                    value={boardYear}
+                    onChange={(event) => {
+                      setBoardYear(event.target.value);
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Button glow onClick={() => setIsAddingItem(true)}>
+                    <Plus className="h-4 w-4" />
+                    Thêm phần tử
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsWizardOpen(true)}>
+                    <Wand2 className="h-4 w-4" />
+                    Story Mode
+                  </Button>
                   <Button
                     variant="outline"
-                    className="w-full"
-                    onClick={() => uploadInputRef.current?.click()}
+                    onClick={() => setIsExportDialogOpen(true)}
+                    disabled={board.items.length === 0}
                   >
-                    <Upload className="h-4 w-4" />
-                    Chọn ảnh từ máy / điện thoại
+                    <Download className="h-4 w-4" />
+                    Tải về wallpaper
                   </Button>
-                  <p className="text-xs text-slate-400">Hỗ trợ JPG, PNG, WEBP, GIF — tối đa 5 MB (ảnh sẽ được nén tự động)</p>
-                </div>
-
-                <div className="stack-tight">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <Link2 className="h-4 w-4" />
-                    Dán URL hình ảnh
-                  </div>
-                  <Input
-                    placeholder="https://example.com/my-image.jpg"
-                    value={imageUrl}
-                    onChange={(event) => setImageUrl(event.target.value)}
-                    onKeyDown={(event) => event.key === "Enter" && handleAddImageFromUrl()}
-                  />
-                  <Button className="w-full" onClick={handleAddImageFromUrl} disabled={!imageUrl.trim()}>
-                    Thêm ảnh từ URL
+                  <Button variant="outline" onClick={handleSave}>
+                    <Save className="h-4 w-4" />
+                    Lưu bảng
                   </Button>
                 </div>
+                {!boardName.trim() ? (
+                  <p className="text-xs text-app-ink-soft">
+                    Đặt tên bảng (ví dụ "Vision 2026") rồi bấm{" "}
+                    <span className="font-medium text-app-ink">Lưu bảng</span>.
+                  </p>
+                ) : null}
 
-                <div className="stack-tight">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <Image className="h-4 w-4" />
-                    Chọn từ thư viện gợi ý
-                  </div>
-                  <div className="grid max-h-52 grid-cols-3 gap-2 overflow-y-auto rounded-[var(--r-tile)] sm:grid-cols-4">
-                    {CURATED_IMAGES.map((img) => (
-                      <button
-                        key={img.label}
-                        type="button"
-                        className="group relative overflow-hidden rounded-[var(--r-tile)] border border-app-line transition-colors transition-shadow duration-150 hover:border-app-accent hover:shadow-sm"
-                        onClick={() => handleAddCuratedImage(img.url)}
-                      >
-                        <ImageWithFallback
-                          src={img.url}
-                          alt={img.label}
-                          className="aspect-[4/3] w-full object-cover"
-                        />
-                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 py-1.5 text-xs font-medium text-white">
-                          {img.label}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">Không gian</span>
+                  {VISION_BOARD_THEMES.map((theme) => (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => {
+                        setThemeId(theme.id);
+                        setHasUnsavedChanges(true);
+                      }}
+                      className={`h-7 w-7 rounded-full border-2 transition-all ${
+                        themeId === theme.id
+                          ? "scale-110 ring-2 ring-app-accent ring-offset-2"
+                          : "border-app-line hover:border-app-accent"
+                      }`}
+                      style={{ background: theme.preview.gradient }}
+                      aria-label={theme.label}
+                      title={theme.label}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowZones((prev) => !prev)}
+                    className={`ml-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                      showZones
+                        ? "border-app-accent bg-app-accent text-white"
+                        : "border-app-line bg-app-bg text-app-ink-soft hover:bg-app-surface"
+                    }`}
+                  >
+                    {showZones ? "Ẩn vùng life area" : "Hiện vùng life area"}
+                  </button>
                 </div>
 
-                <div className="stack-tight">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                    <Globe className="h-4 w-4" />
-                    Tìm theo cảm giác
-                  </div>
-                  <Input
-                    placeholder="Tìm một cảm giác hình ảnh, ví dụ: văn phòng mơ ước, sống khỏe..."
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    onKeyDown={(event) => event.key === "Enter" && handleAddImage()}
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    {IMAGE_SUGGESTIONS.map((item) => (
-                      <Button
-                        key={item}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSearchQuery(item)}
-                      >
-                        {item}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="stack-tight border-t border-app-line pt-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                      <LayoutGrid className="h-4 w-4" />
-                      Gắn ảnh vào vùng nào? <span className="text-xs font-normal text-app-ink-soft">(tùy chọn)</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {LIFE_AREAS.map((area) => (
-                        <button
-                          key={area.name}
-                          type="button"
-                          onClick={() => setSelectedLifeArea((prev) => (prev === area.name ? null : area.name))}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                            selectedLifeArea === area.name
-                              ? "border-app-accent bg-app-accent-soft text-app-accent"
-                              : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
-                          }`}
-                        >
-                          {LIFE_AREA_LABELS[area.name]}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="stack-tight">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                      <Palette className="h-4 w-4" />
-                      Khung ảnh
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {IMAGE_FRAME_STYLES.map((frame) => (
-                        <button
-                          key={frame.id}
-                          type="button"
-                          onClick={() => setSelectedImageFrame(frame.id)}
-                          className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
-                            selectedImageFrame === frame.id
-                              ? "border-app-accent bg-app-accent-soft text-app-accent"
-                              : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
-                          }`}
-                        >
-                          {frame.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <Button variant="outline" className="w-full" onClick={handleAddImage} disabled={isSearching || !searchQuery.trim()}>
-                    {isSearching ? "Đang thêm hình..." : "Thêm hình theo cảm giác"}
-                  </Button>
-                </div>
-              </TabsContent>
+                <p className="text-sm text-app-ink-soft">
+                  Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên bảng.
+                </p>
+              </div>
 
-              <TabsContent value="quote" className="stack-stack pt-4">
-                <Textarea
-                  rows={4}
-                  placeholder="Viết một câu nhắc nhở bạn muốn nhìn thấy mỗi ngày..."
-                  value={quoteText}
-                  onChange={(event) => setQuoteText(event.target.value)}
+              <div className="hidden xl:block rounded-xl border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt bảng</p>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                  {[
+                    { label: "Tổng phần tử", value: board.items.length, note: "đang có trên bảng" },
+                    { label: "Hình ảnh", value: boardStats.images, note: "nguồn cảm hứng trực quan" },
+                    {
+                      label: "Trích dẫn + biểu tượng",
+                      value: boardStats.quotes + boardStats.icons,
+                      note: "điểm nhấn cảm xúc",
+                    },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-xl border border-app-line bg-app-surface px-4 py-4">
+                      <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
+                      <p className="mt-2 text-3xl font-bold text-app-ink">{item.value}</p>
+                      <p className="mt-1 text-sm text-app-ink-soft">{item.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <DialogContent className="max-w-3xl overflow-y-auto max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle>Thêm vào vision board</DialogTitle>
+            <DialogDescription>
+              Chọn loại phần tử phù hợp để làm bảng của bạn sống động và giàu ý nghĩa hơn.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="image" className="mt-4">
+            <TabsList className="mb-3 inline-flex rounded-full border border-app-line bg-app-bg p-1">
+              <TabsTrigger value="image">
+                <Image className="h-4 w-4" />
+                Hình ảnh
+              </TabsTrigger>
+              <TabsTrigger value="quote">
+                <MessageSquareQuote className="h-4 w-4" />
+                Câu nói
+              </TabsTrigger>
+              <TabsTrigger value="goal_card">
+                <Target className="h-4 w-4" />
+                Mục tiêu
+              </TabsTrigger>
+              <TabsTrigger value="icon">
+                <Sparkles className="h-4 w-4" />
+                Biểu tượng
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="image" className="stack-stack pt-4">
+              <div className="stack-tight">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Upload className="h-4 w-4" />
+                  Tải ảnh từ thiết bị
+                </div>
+                <input
+                  ref={uploadInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+                <Button variant="outline" className="w-full" onClick={() => uploadInputRef.current?.click()}>
+                  <Upload className="h-4 w-4" />
+                  Chọn ảnh từ máy / điện thoại
+                </Button>
+                <p className="text-xs text-slate-400">
+                  Hỗ trợ JPG, PNG, WEBP, GIF — tối đa 5 MB (ảnh sẽ được nén tự động)
+                </p>
+              </div>
+
+              <div className="stack-tight">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Link2 className="h-4 w-4" />
+                  Dán URL hình ảnh
+                </div>
+                <Input
+                  placeholder="https://example.com/my-image.jpg"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  onKeyDown={(event) => event.key === "Enter" && handleAddImageFromUrl()}
+                />
+                <Button className="w-full" onClick={handleAddImageFromUrl} disabled={!imageUrl.trim()}>
+                  Thêm ảnh từ URL
+                </Button>
+              </div>
+
+              <div className="stack-tight">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Image className="h-4 w-4" />
+                  Chọn từ thư viện gợi ý
+                </div>
+                <div className="grid max-h-52 grid-cols-3 gap-2 overflow-y-auto rounded-[var(--r-tile)] sm:grid-cols-4">
+                  {CURATED_IMAGES.map((img) => (
+                    <button
+                      key={img.label}
+                      type="button"
+                      className="group relative overflow-hidden rounded-[var(--r-tile)] border border-app-line transition-colors transition-shadow duration-150 hover:border-app-accent hover:shadow-sm"
+                      onClick={() => handleAddCuratedImage(img.url)}
+                    >
+                      <ImageWithFallback src={img.url} alt={img.label} className="aspect-[4/3] w-full object-cover" />
+                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 py-1.5 text-xs font-medium text-white">
+                        {img.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="stack-tight">
+                <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                  <Globe className="h-4 w-4" />
+                  Tìm theo cảm giác
+                </div>
+                <Input
+                  placeholder="Tìm một cảm giác hình ảnh, ví dụ: văn phòng mơ ước, sống khỏe..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onKeyDown={(event) => event.key === "Enter" && handleAddImage()}
                 />
                 <div className="flex flex-wrap gap-2">
-                  {QUOTE_SUGGESTIONS.map((item) => (
-                    <Button
-                      key={item}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setQuoteText(item)}
-                    >
+                  {IMAGE_SUGGESTIONS.map((item) => (
+                    <Button key={item} variant="outline" size="sm" onClick={() => setSearchQuery(item)}>
                       {item}
                     </Button>
                   ))}
                 </div>
-                <div className="stack-tight">
+                <div className="stack-tight border-t border-app-line pt-4">
                   <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                    <Type className="h-4 w-4" />
-                    Kiểu chữ
+                    <LayoutGrid className="h-4 w-4" />
+                    Gắn ảnh vào vùng nào? <span className="text-xs font-normal text-app-ink-soft">(tùy chọn)</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {QUOTE_FONT_STYLES.map((font) => (
+                  <div className="flex flex-wrap gap-2">
+                    {LIFE_AREAS.map((area) => (
                       <button
-                        key={font.id}
+                        key={area.name}
                         type="button"
-                        onClick={() => setSelectedQuoteFont(font.id)}
-                        className={`rounded-[var(--r-card)] border p-3 text-left transition ${
-                          selectedQuoteFont === font.id
-                            ? "border-app-accent bg-app-accent-soft"
-                            : "border-app-line bg-app-surface hover:border-app-accent/50"
+                        onClick={() => setSelectedLifeArea((prev) => (prev === area.name ? null : area.name))}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                          selectedLifeArea === area.name
+                            ? "border-app-accent bg-app-accent-soft text-app-accent"
+                            : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
                         }`}
                       >
-                        <p
-                          className={`text-base ${font.className}`}
-                          style={font.fontFamily ? { fontFamily: font.fontFamily } : undefined}
-                        >
-                          Aa
-                        </p>
-                        <p className="mt-1 text-xs text-app-ink-soft">{font.label}</p>
+                        {LIFE_AREA_LABELS[area.name]}
                       </button>
                     ))}
                   </div>
                 </div>
-                <Button className="w-full" onClick={handleAddQuote} disabled={!quoteText.trim()}>
-                  Thêm câu nói vào bảng
+                <div className="stack-tight">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                    <Palette className="h-4 w-4" />
+                    Khung ảnh
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {IMAGE_FRAME_STYLES.map((frame) => (
+                      <button
+                        key={frame.id}
+                        type="button"
+                        onClick={() => setSelectedImageFrame(frame.id)}
+                        className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
+                          selectedImageFrame === frame.id
+                            ? "border-app-accent bg-app-accent-soft text-app-accent"
+                            : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
+                        }`}
+                      >
+                        {frame.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleAddImage}
+                  disabled={isSearching || !searchQuery.trim()}
+                >
+                  {isSearching ? "Đang thêm hình..." : "Thêm hình theo cảm giác"}
                 </Button>
-              </TabsContent>
+              </div>
+            </TabsContent>
 
-              <TabsContent value="goal_card" className="stack-stack pt-4">
-                    {(() => {
-                      const userData = getUserData();
-                      const goals = userData.goals;
+            <TabsContent value="quote" className="stack-stack pt-4">
+              <Textarea
+                rows={4}
+                placeholder="Viết một câu nhắc nhở bạn muốn nhìn thấy mỗi ngày..."
+                value={quoteText}
+                onChange={(event) => setQuoteText(event.target.value)}
+              />
+              <div className="flex flex-wrap gap-2">
+                {QUOTE_SUGGESTIONS.map((item) => (
+                  <Button key={item} variant="outline" size="sm" onClick={() => setQuoteText(item)}>
+                    {item}
+                  </Button>
+                ))}
+              </div>
+              <div className="stack-tight">
+                <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                  <Type className="h-4 w-4" />
+                  Kiểu chữ
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {QUOTE_FONT_STYLES.map((font) => (
+                    <button
+                      key={font.id}
+                      type="button"
+                      onClick={() => setSelectedQuoteFont(font.id)}
+                      className={`rounded-[var(--r-card)] border p-3 text-left transition ${
+                        selectedQuoteFont === font.id
+                          ? "border-app-accent bg-app-accent-soft"
+                          : "border-app-line bg-app-surface hover:border-app-accent/50"
+                      }`}
+                    >
+                      <p
+                        className={`text-base ${font.className}`}
+                        style={font.fontFamily ? { fontFamily: font.fontFamily } : undefined}
+                      >
+                        Aa
+                      </p>
+                      <p className="mt-1 text-xs text-app-ink-soft">{font.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleAddQuote} disabled={!quoteText.trim()}>
+                Thêm câu nói vào bảng
+              </Button>
+            </TabsContent>
 
-                      if (goals.length === 0) {
-                        return (
-                          <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg p-6 text-center">
-                            <Target className="mx-auto h-10 w-10 text-app-ink-muted" />
-                            <p className="mt-3 text-base font-semibold text-app-ink">
-                              Bạn chưa có mục tiêu nào để ghim lên bảng
-                            </p>
-                            <p className="mt-1 text-sm text-app-ink-soft">
-                              Hãy tạo một SMART goal trước, rồi quay lại để ghim mục tiêu thành phần tử trên Vision Board.
-                            </p>
-                            <Button
-                              className="mt-4"
-                              onClick={() => {
-                                setIsAddingItem(false);
-                                navigate("/goals");
-                              }}
-                            >
-                              Đi tới Mục tiêu
-                            </Button>
-                          </div>
-                        );
-                      }
+            <TabsContent value="goal_card" className="stack-stack pt-4">
+              {(() => {
+                const userData = getUserData();
+                const goals = userData.goals;
 
-                  const pinnedGoalIds = new Set(
-                    board?.items.filter((item) => item.type === "goal_card").map((item) => item.content) ?? [],
+                if (goals.length === 0) {
+                  return (
+                    <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg p-6 text-center">
+                      <Target className="mx-auto h-10 w-10 text-app-ink-muted" />
+                      <p className="mt-3 text-base font-semibold text-app-ink">
+                        Bạn chưa có mục tiêu nào để ghim lên bảng
+                      </p>
+                      <p className="mt-1 text-sm text-app-ink-soft">
+                        Hãy tạo một SMART goal trước, rồi quay lại để ghim mục tiêu thành phần tử trên Vision Board.
+                      </p>
+                      <Button
+                        className="mt-4"
+                        onClick={() => {
+                          setIsAddingItem(false);
+                          navigate("/goals");
+                        }}
+                      >
+                        Đi tới Mục tiêu
+                      </Button>
+                    </div>
                   );
-                  const availableGoals = goals.filter((goal) => !pinnedGoalIds.has(goal.id));
+                }
 
-return (
-                      <>
-                        <p className="text-sm text-app-ink-soft">
-                          Chọn một mục tiêu để ghim lên bảng. Card sẽ tự cập nhật khi tiến độ thay đổi.
-                        </p>
-                        <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
-                          {availableGoals.map((goal) => {
-                            const area = LIFE_AREAS.find((item) => item.name === goal.category);
-                            const areaLabel = LIFE_AREA_LABELS[goal.category] ?? goal.category;
-                            const progress = calculateGoalProgress(goal);
-                            const isActive = selectedGoalId === goal.id;
+                const pinnedGoalIds = new Set(
+                  board?.items.filter((item) => item.type === "goal_card").map((item) => item.content) ?? [],
+                );
+                const availableGoals = goals.filter((goal) => !pinnedGoalIds.has(goal.id));
 
-                            return (
-                              <button
-                                key={goal.id}
-                                type="button"
-                                onClick={() => setSelectedGoalId(goal.id)}
-                                className={`rounded-[var(--r-card)] border p-3 text-left transition ${
-                                  isActive
-                                    ? "border-app-accent bg-app-accent-soft ring-1 ring-app-accent/30"
-                                    : "border-app-line bg-app-surface hover:bg-app-bg"
-                                }`}
-                              >
-                                {area && (
-                                  <span
-                                    className="inline-flex rounded-full px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wider"
-                                    style={{ backgroundColor: `${area.color}22`, color: area.color }}
-                                  >
-                                    {areaLabel}
-                                  </span>
-                                )}
-                                <p className="mt-2 line-clamp-2 text-sm font-semibold text-app-ink">{goal.title}</p>
-                                <div className="mt-2 flex items-center justify-between text-[12px] text-app-ink-soft">
-                                  <span>HSD: {formatShortDate(goal.deadline)}</span>
-                                  <span className="font-semibold">{progress}%</span>
-                                </div>
-                                <div className="mt-1 h-1 overflow-hidden rounded-full bg-app-bg">
-                                  <div
-                                    className="h-full bg-app-accent"
-                                    style={{ width: `${progress}%` }}
-                                  />
-                                </div>
-                              </button>
-                            );
-                          })}
-                          {availableGoals.length === 0 && (
-                            <p className="col-span-full rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
-                              Tất cả mục tiêu đã được ghim trên bảng này.
-                            </p>
-                          )}
-                        </div>
-                        <Button className="w-full" onClick={handleAddGoalCard} disabled={!selectedGoalId}>
-                          Ghim mục tiêu vào bảng
-                        </Button>
-                      </>
-                    );
-                })()}
-              </TabsContent>
-
-              <TabsContent value="icon" className="stack-stack pt-4">
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                      {ICON_OPTIONS.map((item) => {
-                        const Icon = ICON_COMPONENTS[item];
-                        const isActive = iconName === item;
+                return (
+                  <>
+                    <p className="text-sm text-app-ink-soft">
+                      Chọn một mục tiêu để ghim lên bảng. Card sẽ tự cập nhật khi tiến độ thay đổi.
+                    </p>
+                    <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                      {availableGoals.map((goal) => {
+                        const area = LIFE_AREAS.find((item) => item.name === goal.category);
+                        const areaLabel = LIFE_AREA_LABELS[goal.category] ?? goal.category;
+                        const progress = calculateGoalProgress(goal);
+                        const isActive = selectedGoalId === goal.id;
 
                         return (
                           <button
-                            key={item}
+                            key={goal.id}
                             type="button"
-                            onClick={() => setIconName(item)}
-                            className={`rounded-[var(--r-card)] border p-4 transition-colors transition-shadow duration-150 ${
+                            onClick={() => setSelectedGoalId(goal.id)}
+                            className={`rounded-[var(--r-card)] border p-3 text-left transition ${
                               isActive
-                                ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
-                                : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:text-app-accent"
+                                ? "border-app-accent bg-app-accent-soft ring-1 ring-app-accent/30"
+                                : "border-app-line bg-app-surface hover:bg-app-bg"
                             }`}
                           >
-                            <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft">
-                              <Icon className="h-6 w-6" />
+                            {area && (
+                              <span
+                                className="inline-flex rounded-full px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wider"
+                                style={{ backgroundColor: `${area.color}22`, color: area.color }}
+                              >
+                                {areaLabel}
+                              </span>
+                            )}
+                            <p className="mt-2 line-clamp-2 text-sm font-semibold text-app-ink">{goal.title}</p>
+                            <div className="mt-2 flex items-center justify-between text-[12px] text-app-ink-soft">
+                              <span>HSD: {formatShortDate(goal.deadline)}</span>
+                              <span className="font-semibold">{progress}%</span>
                             </div>
-                            <div className="mt-[var(--space-inline)] text-sm font-semibold text-app-ink">{item}</div>
+                            <div className="mt-1 h-1 overflow-hidden rounded-full bg-app-bg">
+                              <div className="h-full bg-app-accent" style={{ width: `${progress}%` }} />
+                            </div>
                           </button>
                         );
                       })}
-                    </div>
-                    <div className="stack-tight">
-                      <span className="text-sm font-semibold text-app-ink">Kích thước</span>
-                      <div className="flex gap-2">
-                        {(["S", "M", "L", "XL"] as const).map((size) => (
-                          <button
-                            key={size}
-                            type="button"
-                            onClick={() => setSelectedIconSize(size)}
-                            className={`flex-1 rounded-md border px-3 py-2 text-sm ${
-                              selectedIconSize === size
-                                ? "border-app-accent bg-app-accent-soft text-app-accent"
-                                : "border-app-line bg-app-surface text-app-ink-soft"
-                            }`}
-                          >
-                            {SIZE_PRESETS[size].label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                <Button className="w-full" onClick={handleAddIcon}>
-                  Thêm biểu tượng vào bảng
-                </Button>
-              </TabsContent>
-            </Tabs>
-          </DialogContent>
-        </Dialog>
-
-        <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
-          <Card className="min-w-0 overflow-hidden">
-            <CardContent className="p-0">
-              <VisionBoardCanvas
-                items={board.items}
-                themeId={themeId}
-                showZones={showZones}
-                focusAreaIds={board.storyAnswers?.focusAreas}
-                goalsById={goalsById}
-                selectedItemId={selectedItemId}
-                exportRef={canvasExportRef}
-                onItemPositionChange={handleUpdateItemPosition}
-                onItemDelete={handleDeleteItem}
-                onItemSelect={setSelectedItemId}
-                emptyStateSlot={
-                  board.items.length === 0 ? (
-                    <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                      <div className="w-full max-w-md rounded-xl border border-app-line bg-app-surface p-6 text-center shadow-sm sm:p-8">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                          <Sparkles className="h-7 w-7" />
-                        </div>
-                        <h2 className="mt-5 font-serif text-[24px] font-medium text-app-ink sm:mt-6 sm:text-3xl">
-                          Bảng của bạn đang chờ câu chuyện đầu tiên
-                        </h2>
-                        <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">
-                          Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
+                      {availableGoals.length === 0 && (
+                        <p className="col-span-full rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
+                          Tất cả mục tiêu đã được ghim trên bảng này.
                         </p>
-                        <Button className="mt-6 w-full sm:w-auto" onClick={() => setIsWizardOpen(true)}>
-                          <Wand2 className="h-4 w-4" />
-                          Bắt đầu Story Mode
-                        </Button>
-                        <button
-                          type="button"
-                          className="mt-3 block w-full text-sm text-app-ink-soft underline-offset-2 hover:underline hover:text-app-ink"
-                          onClick={() => setIsAddingItem(true)}
-                        >
-                          Hoặc tự thêm phần tử
-                        </button>
-                      </div>
+                      )}
                     </div>
-                  ) : null
-                }
-              />
-            </CardContent>
-          </Card>
+                    <Button className="w-full" onClick={handleAddGoalCard} disabled={!selectedGoalId}>
+                      Ghim mục tiêu vào bảng
+                    </Button>
+                  </>
+                );
+              })()}
+            </TabsContent>
 
-          <aside className="space-y-4 xl:sticky xl:top-28">
-            {selectedItem && (
-              <ItemControlsPopover
-                item={selectedItem}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-                onClose={() => setSelectedItemId(null)}
-              />
-            )}
-            <VisionBoardSidebar items={board.items} focusAreaIds={board.storyAnswers?.focusAreas} />
-          </aside>
-        </div>
+            <TabsContent value="icon" className="stack-stack pt-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {ICON_OPTIONS.map((item) => {
+                  const Icon = ICON_COMPONENTS[item];
+                  const isActive = iconName === item;
+
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setIconName(item)}
+                      className={`rounded-[var(--r-card)] border p-4 transition-colors transition-shadow duration-150 ${
+                        isActive
+                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:text-app-accent"
+                      }`}
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="mt-[var(--space-inline)] text-sm font-semibold text-app-ink">{item}</div>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="stack-tight">
+                <span className="text-sm font-semibold text-app-ink">Kích thước</span>
+                <div className="flex gap-2">
+                  {(["S", "M", "L", "XL"] as const).map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setSelectedIconSize(size)}
+                      className={`flex-1 rounded-md border px-3 py-2 text-sm ${
+                        selectedIconSize === size
+                          ? "border-app-accent bg-app-accent-soft text-app-accent"
+                          : "border-app-line bg-app-surface text-app-ink-soft"
+                      }`}
+                    >
+                      {SIZE_PRESETS[size].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleAddIcon}>
+                Thêm biểu tượng vào bảng
+              </Button>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
+        <Card className="min-w-0 overflow-hidden">
+          <CardContent className="p-0">
+            <VisionBoardCanvas
+              items={board.items}
+              themeId={themeId}
+              showZones={showZones}
+              focusAreaIds={board.storyAnswers?.focusAreas}
+              goalsById={goalsById}
+              selectedItemId={selectedItemId}
+              exportRef={canvasExportRef}
+              onItemPositionChange={handleUpdateItemPosition}
+              onItemDelete={handleDeleteItem}
+              onItemSelect={setSelectedItemId}
+              emptyStateSlot={
+                board.items.length === 0 ? (
+                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
+                    <div className="w-full max-w-md rounded-xl border border-app-line bg-app-surface p-6 text-center shadow-sm sm:p-8">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                        <Sparkles className="h-7 w-7" />
+                      </div>
+                      <h2 className="mt-5 font-serif text-[24px] font-medium text-app-ink sm:mt-6 sm:text-3xl">
+                        Bảng của bạn đang chờ câu chuyện đầu tiên
+                      </h2>
+                      <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">
+                        Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để
+                        neo cảm xúc cho mục tiêu của mình.
+                      </p>
+                      <Button className="mt-6 w-full sm:w-auto" onClick={() => setIsWizardOpen(true)}>
+                        <Wand2 className="h-4 w-4" />
+                        Bắt đầu Story Mode
+                      </Button>
+                      <button
+                        type="button"
+                        className="mt-3 block w-full text-sm text-app-ink-soft underline-offset-2 hover:underline hover:text-app-ink"
+                        onClick={() => setIsAddingItem(true)}
+                      >
+                        Hoặc tự thêm phần tử
+                      </button>
+                    </div>
+                  </div>
+                ) : null
+              }
+            />
+          </CardContent>
+        </Card>
+
+        <aside className="space-y-4 xl:sticky xl:top-28">
+          {selectedItem && (
+            <ItemControlsPopover
+              item={selectedItem}
+              onUpdate={handleUpdateItem}
+              onDelete={handleDeleteItem}
+              onClose={() => setSelectedItemId(null)}
+            />
+          )}
+          <VisionBoardSidebar items={board.items} focusAreaIds={board.storyAnswers?.focusAreas} />
+        </aside>
       </div>
+    </div>
   );
 }

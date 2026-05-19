@@ -912,8 +912,15 @@ export function TwelveWeekSystem() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">Quay lại</AlertDialogCancel>
-            <AlertDialogAction className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90" onClick={handleResetCycle}>Làm mới từ tuần này</AlertDialogAction>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
+              Quay lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              onClick={handleResetCycle}
+            >
+              Làm mới từ tuần này
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -928,8 +935,15 @@ export function TwelveWeekSystem() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">Giữ lại</AlertDialogCancel>
-            <AlertDialogAction className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90" onClick={handleClearLocalSignals}>Xóa dấu vết trên thiết bị</AlertDialogAction>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
+              Giữ lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              onClick={handleClearLocalSignals}
+            >
+              Xóa dấu vết trên thiết bị
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -945,8 +959,15 @@ export function TwelveWeekSystem() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">Quay lại</AlertDialogCancel>
-            <AlertDialogAction className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90" onClick={handleConfirmDeleteCloudWorkspace}>Xóa dữ liệu đã đồng bộ</AlertDialogAction>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
+              Quay lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              onClick={handleConfirmDeleteCloudWorkspace}
+            >
+              Xóa dữ liệu đã đồng bộ
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1091,7 +1112,10 @@ export function TwelveWeekSystem() {
 
       <nav className="mt-5" aria-label="Điều hướng hệ 12 tuần">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto">
-          <TabsList aria-label="Điều hướng hệ 12 tuần" className="inline-flex min-h-0 rounded-full border border-app-line bg-app-bg p-1">
+          <TabsList
+            aria-label="Điều hướng hệ 12 tuần"
+            className="inline-flex min-h-0 rounded-full border border-app-line bg-app-bg p-1"
+          >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
                 key={value}

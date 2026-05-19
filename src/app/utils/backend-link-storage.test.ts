@@ -1,16 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import {
-  getRemoteTaskIdForGoal,
-  setRemoteTaskIdForGoal,
-} from "@/features/plan12week/persistence/planLinkStore";
+import { getRemoteTaskIdForGoal, setRemoteTaskIdForGoal } from "@/features/plan12week/persistence/planLinkStore";
 import { getBackendGoalId, saveGoalLink } from "@/lib/api/goalLinkStore";
 import { getBackendOrderId, saveOrderLink } from "@/lib/api/orderLinkStore";
-import {
-  getBackendVisionBoardId,
-  getLocalVisionBoardId,
-  saveVisionBoardLink,
-} from "@/lib/api/visionBoardLinkStore";
+import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { getScopedBackendLinkStorageKey } from "./backend-link-storage";
 import { activateAuthenticatedUserData, deleteAllUserData } from "./storage";
 
@@ -31,9 +24,7 @@ describe("backend link storage auth scoping", () => {
     expect(getLocalVisionBoardId("backend_board")).toBe("local_board");
     expect(getRemoteTaskIdForGoal("local_goal", "local_task")).toBe("backend_task");
     expect(localStorage.getItem("backend_goal_links")).toContain("backend_goal");
-    expect(
-      localStorage.getItem(getScopedBackendLinkStorageKey("backend_goal_links", "firebase_uid_one")),
-    ).toBeNull();
+    expect(localStorage.getItem(getScopedBackendLinkStorageKey("backend_goal_links", "firebase_uid_one"))).toBeNull();
   });
 
   it("isolates backend links between authenticated users", () => {

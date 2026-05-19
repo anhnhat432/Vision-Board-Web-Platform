@@ -123,7 +123,15 @@ export function useBackendSyncIssueState(input: UseBackendSyncIssueStateInput): 
       isTransient: !visible,
       isConflict: false,
     };
-  }, [hasIssue, isConflict, backendConnectionStatus, lastBackendHydrationResult, failedOrRetryableCount, firstFailedAt, now]);
+  }, [
+    hasIssue,
+    isConflict,
+    backendConnectionStatus,
+    lastBackendHydrationResult,
+    failedOrRetryableCount,
+    firstFailedAt,
+    now,
+  ]);
 
   return state;
 }

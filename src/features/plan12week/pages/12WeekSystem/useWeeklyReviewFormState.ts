@@ -87,7 +87,8 @@ export function useWeeklyReviewFormState({
       nextWeekPriority: legacyNextPriority,
       commitmentStatuses: buildCommitmentStatuses(previousCommitments, currentReview),
       insights,
-      nextWeekCommitments: nextWeekCommitments.length > 0 ? nextWeekCommitments : legacyNextPriority ? [legacyNextPriority] : [],
+      nextWeekCommitments:
+        nextWeekCommitments.length > 0 ? nextWeekCommitments : legacyNextPriority ? [legacyNextPriority] : [],
       workloadDecision: currentReview?.workloadDecision ?? "keep same",
     });
     setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");

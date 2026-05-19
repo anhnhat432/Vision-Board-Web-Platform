@@ -44,12 +44,24 @@ export function EmptyTaskIllustration({ className, ...rest }: AmbientIllustratio
           />
         )),
       )}
-      <path d="M192 83L202 93L222 70" stroke={`url(#${gradientId})`} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M72 188C110 202 176 207 248 182" stroke={`url(#${gradientId})`} strokeWidth="2" strokeLinecap="round" strokeDasharray="4 8" opacity="0.5" />
+      <path
+        d="M192 83L202 93L222 70"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M72 188C110 202 176 207 248 182"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray="4 8"
+        opacity="0.5"
+      />
       <path d="M68 70L76 84L92 87L81 99L83 115L68 108L53 115L56 99L44 87L60 84L68 70Z" fill="#4E8C7A" opacity="0.54" />
       <circle cx="262" cy="80" r="6" fill="#2F5D50" opacity="0.45" />
       <circle cx="246" cy="166" r="5" fill="#3B7565" opacity="0.52" />
     </svg>
   );
 }
-

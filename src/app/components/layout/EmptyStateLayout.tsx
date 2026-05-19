@@ -38,12 +38,10 @@ export function EmptyStateLayout({
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-6 rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-12 text-center",
-        className
+        className,
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-muted">
-        {icon}
-      </div>
+      <div className="flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-muted">{icon}</div>
       <div className="space-y-2 max-w-md">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>

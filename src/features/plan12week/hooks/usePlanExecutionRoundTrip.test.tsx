@@ -140,45 +140,47 @@ const fakeBackend = vi.hoisted(() => {
 
   const getGoals = vi.fn(async () => clone(state.apiGoals));
 
-  const createPlan = vi.fn(async (payload: {
-    vision?: string;
-    smartGoalId?: string;
-    startDate?: string;
-    initializeWeeks?: boolean;
-    totalWeeks?: number;
-  }) => {
-    const plan: FakePlan = {
-      id: `plan_${state.nextPlanId}`,
-      userId: "user_1",
-      vision: payload.vision ?? "",
-      smartGoalId: payload.smartGoalId,
-      startDate: payload.startDate ?? now,
-      createdAt: now,
-      updatedAt: now,
-    };
-    state.nextPlanId += 1;
-    state.plans.push(plan);
+  const createPlan = vi.fn(
+    async (payload: {
+      vision?: string;
+      smartGoalId?: string;
+      startDate?: string;
+      initializeWeeks?: boolean;
+      totalWeeks?: number;
+    }) => {
+      const plan: FakePlan = {
+        id: `plan_${state.nextPlanId}`,
+        userId: "user_1",
+        vision: payload.vision ?? "",
+        smartGoalId: payload.smartGoalId,
+        startDate: payload.startDate ?? now,
+        createdAt: now,
+        updatedAt: now,
+      };
+      state.nextPlanId += 1;
+      state.plans.push(plan);
 
-    if (payload.initializeWeeks) {
-      const totalWeeks = Math.max(payload.totalWeeks ?? 12, 1);
-      state.weeksByPlanId.set(
-        plan.id,
-        Array.from({ length: totalWeeks }, (_, index) => ({
-          id: `week_${index + 1}`,
-          planId: plan.id,
-          weekNumber: index + 1,
-          focus: "",
-          expectedOutput: "",
-          tasks: [],
-          metrics: [],
-          createdAt: now,
-          updatedAt: now,
-        })),
-      );
-    }
+      if (payload.initializeWeeks) {
+        const totalWeeks = Math.max(payload.totalWeeks ?? 12, 1);
+        state.weeksByPlanId.set(
+          plan.id,
+          Array.from({ length: totalWeeks }, (_, index) => ({
+            id: `week_${index + 1}`,
+            planId: plan.id,
+            weekNumber: index + 1,
+            focus: "",
+            expectedOutput: "",
+            tasks: [],
+            metrics: [],
+            createdAt: now,
+            updatedAt: now,
+          })),
+        );
+      }
 
-    return clone(plan);
-  });
+      return clone(plan);
+    },
+  );
 
   const getPlans = vi.fn(async () => clone(state.plans));
 
@@ -199,56 +201,56 @@ const fakeBackend = vi.hoisted(() => {
     return clone(week);
   });
 
-  const updateWeekReview = vi.fn(async (
-    weekId: string,
-    payload: {
-      weekNumber: number;
-      executionScore: number;
-      reflection?: string;
-      adjustments?: string;
+  const updateWeekReview = vi.fn(
+    async (
+      weekId: string,
+      payload: {
+        weekNumber: number;
+        executionScore: number;
+        reflection?: string;
+        adjustments?: string;
+      },
+    ) => {
+      const week = findWeek(weekId);
+      week.review = {
+        weekNumber: payload.weekNumber,
+        executionScore: payload.executionScore,
+        reflection: payload.reflection,
+        adjustments: payload.adjustments,
+      };
+      week.updatedAt = now;
+      return clone(week);
     },
-  ) => {
-    const week = findWeek(weekId);
-    week.review = {
-      weekNumber: payload.weekNumber,
-      executionScore: payload.executionScore,
-      reflection: payload.reflection,
-      adjustments: payload.adjustments,
-    };
-    week.updatedAt = now;
-    return clone(week);
-  });
+  );
 
-  const addTask = vi.fn(async (
-    weekId: string,
-    payload: { title: string; status?: TaskStatus; scheduledDate?: string },
-  ) => {
-    const week = findWeek(weekId);
-    const task: FakeTask = {
-      id: `task_${state.nextTaskId}`,
-      weekId,
-      title: payload.title,
-      status: payload.status ?? "todo",
-      scheduledDate: payload.scheduledDate,
-      createdAt: now,
-      updatedAt: now,
-    };
-    state.nextTaskId += 1;
-    week.tasks.push(task);
-    return clone(task);
-  });
+  const addTask = vi.fn(
+    async (weekId: string, payload: { title: string; status?: TaskStatus; scheduledDate?: string }) => {
+      const week = findWeek(weekId);
+      const task: FakeTask = {
+        id: `task_${state.nextTaskId}`,
+        weekId,
+        title: payload.title,
+        status: payload.status ?? "todo",
+        scheduledDate: payload.scheduledDate,
+        createdAt: now,
+        updatedAt: now,
+      };
+      state.nextTaskId += 1;
+      week.tasks.push(task);
+      return clone(task);
+    },
+  );
 
-  const updateTask = vi.fn(async (
-    taskId: string,
-    payload: { title?: string; status?: TaskStatus; scheduledDate?: string },
-  ) => {
-    const task = findTask(taskId);
-    task.title = payload.title ?? task.title;
-    task.status = payload.status ?? task.status;
-    task.scheduledDate = payload.scheduledDate ?? task.scheduledDate;
-    task.updatedAt = now;
-    return clone(task);
-  });
+  const updateTask = vi.fn(
+    async (taskId: string, payload: { title?: string; status?: TaskStatus; scheduledDate?: string }) => {
+      const task = findTask(taskId);
+      task.title = payload.title ?? task.title;
+      task.status = payload.status ?? task.status;
+      task.scheduledDate = payload.scheduledDate ?? task.scheduledDate;
+      task.updatedAt = now;
+      return clone(task);
+    },
+  );
 
   const getMetrics = vi.fn(async (weekId: string) => clone(findWeek(weekId).metrics));
 
@@ -268,10 +270,7 @@ const fakeBackend = vi.hoisted(() => {
     return clone(metric);
   });
 
-  const logMetric = vi.fn(async (
-    metricId: string,
-    payload: { date: string; value: number; completed: boolean },
-  ) => {
+  const logMetric = vi.fn(async (metricId: string, payload: { date: string; value: number; completed: boolean }) => {
     const metric = findMetric(metricId);
     metric.logs.push({
       id: `metric_log_${state.nextMetricLogId}`,
@@ -284,20 +283,18 @@ const fakeBackend = vi.hoisted(() => {
     return clone(metric);
   });
 
-  const updateMetricLog = vi.fn(async (
-    metricId: string,
-    logId: string,
-    payload: { date?: string; value?: number; completed?: boolean },
-  ) => {
-    const metric = findMetric(metricId);
-    const log = metric.logs.find((item) => item.id === logId);
-    if (!log) throw new Error(`Metric log ${logId} was not found.`);
-    log.date = payload.date ?? log.date;
-    log.value = payload.value ?? log.value;
-    log.completed = payload.completed ?? log.completed;
-    metric.updatedAt = now;
-    return clone(metric);
-  });
+  const updateMetricLog = vi.fn(
+    async (metricId: string, logId: string, payload: { date?: string; value?: number; completed?: boolean }) => {
+      const metric = findMetric(metricId);
+      const log = metric.logs.find((item) => item.id === logId);
+      if (!log) throw new Error(`Metric log ${logId} was not found.`);
+      log.date = payload.date ?? log.date;
+      log.value = payload.value ?? log.value;
+      log.completed = payload.completed ?? log.completed;
+      metric.updatedAt = now;
+      return clone(metric);
+    },
+  );
 
   return {
     state,

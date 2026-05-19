@@ -276,19 +276,22 @@ describe("pulled workspace merge report", () => {
   });
 
   it("reports pending local mutation conflict when the cloud entity is newer", () => {
-    const localGoal = createGoal({}, {
-      taskInstances: [
-        {
-          id: "task_1",
-          weekNumber: 1,
-          scheduledDate: "2026-04-30",
-          title: "Run one test",
-          leadIndicatorName: "",
-          isCore: true,
-          completed: false,
-        },
-      ],
-    });
+    const localGoal = createGoal(
+      {},
+      {
+        taskInstances: [
+          {
+            id: "task_1",
+            weekNumber: 1,
+            scheduledDate: "2026-04-30",
+            title: "Run one test",
+            leadIndicatorName: "",
+            isCore: true,
+            completed: false,
+          },
+        ],
+      },
+    );
     const report = createPulledWorkspaceMergeReport(localGoal, createCloudWorkspace(), {
       pendingMutations: [createPendingTaskMutation()],
     });
@@ -351,19 +354,22 @@ describe("pulled workspace merge report", () => {
   });
 
   it("reports local-only tasks", () => {
-    const localGoal = createGoal({}, {
-      taskInstances: [
-        {
-          id: "task_local_only",
-          weekNumber: 1,
-          scheduledDate: "2026-04-30",
-          title: "Local draft task",
-          leadIndicatorName: "",
-          isCore: true,
-          completed: false,
-        },
-      ],
-    });
+    const localGoal = createGoal(
+      {},
+      {
+        taskInstances: [
+          {
+            id: "task_local_only",
+            weekNumber: 1,
+            scheduledDate: "2026-04-30",
+            title: "Local draft task",
+            leadIndicatorName: "",
+            isCore: true,
+            completed: false,
+          },
+        ],
+      },
+    );
 
     const report = createPulledWorkspaceMergeReport(
       localGoal,
@@ -384,28 +390,31 @@ describe("pulled workspace merge report", () => {
   });
 
   it("does not treat omitted local records as local-only during delta pull", () => {
-    const localGoal = createGoal({}, {
-      taskInstances: [
-        {
-          id: "task_1",
-          weekNumber: 1,
-          scheduledDate: "2026-04-30",
-          title: "Run one test",
-          leadIndicatorName: "",
-          isCore: true,
-          completed: false,
-        },
-        {
-          id: "task_local_unchanged",
-          weekNumber: 1,
-          scheduledDate: "2026-04-30",
-          title: "Unchanged local task",
-          leadIndicatorName: "",
-          isCore: true,
-          completed: false,
-        },
-      ],
-    });
+    const localGoal = createGoal(
+      {},
+      {
+        taskInstances: [
+          {
+            id: "task_1",
+            weekNumber: 1,
+            scheduledDate: "2026-04-30",
+            title: "Run one test",
+            leadIndicatorName: "",
+            isCore: true,
+            completed: false,
+          },
+          {
+            id: "task_local_unchanged",
+            weekNumber: 1,
+            scheduledDate: "2026-04-30",
+            title: "Unchanged local task",
+            leadIndicatorName: "",
+            isCore: true,
+            completed: false,
+          },
+        ],
+      },
+    );
     const delta = createDeltaPullResponse({
       tasks: createCloudWorkspace().tasks,
     });
@@ -453,25 +462,32 @@ describe("pulled workspace merge report", () => {
 
     const report = createPulledWorkspaceMergeReport(createUserData([]), response);
 
-    expect(report.cloudOnlyChanges.some((change) => change.kind === "goal" && change.clientId === "goal_1")).toBe(false);
-    expect(report.cloudOnlyChanges.some((change) => change.kind === "plan" && change.clientId === "goal_1:12-week-system")).toBe(false);
+    expect(report.cloudOnlyChanges.some((change) => change.kind === "goal" && change.clientId === "goal_1")).toBe(
+      false,
+    );
+    expect(
+      report.cloudOnlyChanges.some((change) => change.kind === "plan" && change.clientId === "goal_1:12-week-system"),
+    ).toBe(false);
   });
 
   it("does not mutate UserData input", () => {
     const userData = createUserData([
-      createGoal({}, {
-        taskInstances: [
-          {
-            id: "task_1",
-            weekNumber: 1,
-            scheduledDate: "2026-04-30",
-            title: "Run one test",
-            leadIndicatorName: "",
-            isCore: true,
-            completed: false,
-          },
-        ],
-      }),
+      createGoal(
+        {},
+        {
+          taskInstances: [
+            {
+              id: "task_1",
+              weekNumber: 1,
+              scheduledDate: "2026-04-30",
+              title: "Run one test",
+              leadIndicatorName: "",
+              isCore: true,
+              completed: false,
+            },
+          ],
+        },
+      ),
     ]);
     const before = JSON.parse(JSON.stringify(userData)) as UserData;
 

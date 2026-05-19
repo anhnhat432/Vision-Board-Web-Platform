@@ -50,7 +50,8 @@ function getCurrentValueForMetric(
   leadIndicatorId: string,
 ): number {
   return system.taskInstances.filter(
-    (task) => task.weekNumber === weekNumber && task.completed && taskMatchesIndicator(task, indicator, leadIndicatorId),
+    (task) =>
+      task.weekNumber === weekNumber && task.completed && taskMatchesIndicator(task, indicator, leadIndicatorId),
   ).length;
 }
 

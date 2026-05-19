@@ -227,9 +227,7 @@ export function useTwelveWeekExecutionActions({
       const now = Date.now();
       const completedAt = completed ? new Date(now).toISOString() : undefined;
       const nextTaskInstances = system.taskInstances.map((task) =>
-        task.id === taskId
-          ? { ...task, completed, completedAt, lastModifiedAt: now }
-          : task,
+        task.id === taskId ? { ...task, completed, completedAt, lastModifiedAt: now } : task,
       );
       const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
 

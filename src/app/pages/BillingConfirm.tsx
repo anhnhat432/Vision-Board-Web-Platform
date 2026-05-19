@@ -7,7 +7,11 @@ import { Link, useNavigate } from "react-router";
 import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { BillingPlusIllustration } from "../components/illustrations";
 import { formatVndAmount, PLUS_MONTHLY_PRICE_VND, PLUS_PRICE_CYCLE_LABEL } from "../utils/billing-pricing";
-import { canUpgradeToPlus, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
+import {
+  canUpgradeToPlus,
+  getEmailVerificationRequiredMessage,
+  rememberEmailVerificationReturnPath,
+} from "../utils/email-verification-guard";
 import { getUserData } from "../utils/storage";
 
 interface CheckoutInfoResponse {
@@ -155,7 +159,9 @@ export function BillingConfirm() {
               <ReceiptText className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Xác nhận trước khi thanh toán</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">
+                Xác nhận trước khi thanh toán
+              </p>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight text-app-ink">Bạn đang mua gì?</h1>
               <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                 Vui lòng kiểm tra gói, số tiền và email nhận biên nhận trước khi tạo mã QR chuyển khoản.
@@ -194,7 +200,9 @@ export function BillingConfirm() {
                 ? "Email tài khoản đã xác minh nên biên nhận sẽ gửi về địa chỉ này."
                 : "Nếu email tài khoản chưa xác minh hoặc bạn chưa đăng nhập, bạn có thể sửa email nhận biên nhận."}
             </p>
-            {emailInvalid && <p className="mt-2 text-xs font-medium text-red-600">Email nhận biên nhận chưa đúng định dạng.</p>}
+            {emailInvalid && (
+              <p className="mt-2 text-xs font-medium text-red-600">Email nhận biên nhận chưa đúng định dạng.</p>
+            )}
           </div>
 
           <label className="mt-6 flex items-start gap-3 rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft">
@@ -206,11 +214,17 @@ export function BillingConfirm() {
             />
             <span>
               Tôi đồng ý với{" "}
-              <Link to="/terms" className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline">
+              <Link
+                to="/terms"
+                className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline"
+              >
                 Điều khoản
               </Link>{" "}
               và{" "}
-              <Link to="/refund-policy" className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline">
+              <Link
+                to="/refund-policy"
+                className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline"
+              >
                 Chính sách hoàn tiền
               </Link>
               .
@@ -221,7 +235,8 @@ export function BillingConfirm() {
             <div className="mt-4 rounded-[var(--r-card)] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               <p className="font-semibold">Vui lòng xác thực email trước khi thanh toán.</p>
               <p className="mt-1 leading-6">
-                Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực: {userEmail || "chưa có email"}.
+                Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực:{" "}
+                {userEmail || "chưa có email"}.
               </p>
               <button
                 type="button"

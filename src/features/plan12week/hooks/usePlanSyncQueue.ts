@@ -59,12 +59,7 @@ function getBackoffDelayMs(attemptCount: number): number {
 }
 
 export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
-  const {
-    goalId: propGoalId,
-    enabled = true,
-    now: propNow,
-    executeSync = async () => undefined,
-  } = options;
+  const { goalId: propGoalId, enabled = true, now: propNow, executeSync = async () => undefined } = options;
 
   const [syncQueueStore, setSyncQueueStore] = useState<SyncQueueStore | null>(null);
   const [loading, setLoading] = useState(false);
@@ -96,7 +91,13 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
       return {
         loading: false,
         goalId: null,
-        queueSummary: { totalCount: 0, pendingCount: 0, inFlightCount: 0, failedOrRetryableCount: 0, succeededCount: 0 },
+        queueSummary: {
+          totalCount: 0,
+          pendingCount: 0,
+          inFlightCount: 0,
+          failedOrRetryableCount: 0,
+          succeededCount: 0,
+        },
         lastError: null,
         retryInSeconds: null,
       };
@@ -206,7 +207,9 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
           const exponentialBackoffMs = getBackoffDelayMs(item.attemptCount);
           const retryAfterMs = rateLimited && typeof err.retryAfterMs === "number" ? err.retryAfterMs : 0;
           const nextRetryAt = retryable
-            ? new Date(now.getTime() + (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs))
+            ? new Date(
+                now.getTime() + (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs),
+              )
             : undefined;
           store = markSyncFailed(store, item.id, failure, {
             now: now.toISOString(),
@@ -259,12 +262,12 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
 
   // Enqueue a sync action
   const enqueueSyncAction = useCallback(
-    <T,>(
+    <T>(
       syncType: SyncType,
       payload: unknown,
       entityId?: string,
       entityType?: "task" | "checkin" | "review" | "plan",
-      maxAttempts?: number
+      maxAttempts?: number,
     ): Promise<T | null> => {
       if (!goalId || !enabled || isDemoMode()) {
         return Promise.resolve(null);
@@ -293,7 +296,7 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
 
       return Promise.resolve(null as T);
     },
-    [goalId, enabled, processQueue]
+    [goalId, enabled, processQueue],
   );
 
   // Manual sync trigger
@@ -303,16 +306,18 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
 
   // Auto-process on reconnect
   const { isOnline } = useNetworkStatus({
-    onReconnect: enabled ? () => {
-      if (scheduledRef.current) {
-        clearTimeout(scheduledRef.current);
-      }
-      scheduledRef.current = setTimeout(() => {
-        if (enabled) {
-          void processQueue();
+    onReconnect: enabled
+      ? () => {
+          if (scheduledRef.current) {
+            clearTimeout(scheduledRef.current);
+          }
+          scheduledRef.current = setTimeout(() => {
+            if (enabled) {
+              void processQueue();
+            }
+          }, AUTO_RETRY_DEBOUNCE_MS);
         }
-      }, AUTO_RETRY_DEBOUNCE_MS);
-    } : undefined,
+      : undefined,
     reconnectDebounceMs: AUTO_RETRY_DEBOUNCE_MS,
   });
 

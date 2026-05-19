@@ -1,9 +1,6 @@
 ﻿import { Lightbulb, RotateCcw, type LucideIcon } from "lucide-react";
 
-import {
-  type GoalArchetype,
-  getGoalArchetypeLabel,
-} from "@/lib/smart-goal/goalArchetypes";
+import { type GoalArchetype, getGoalArchetypeLabel } from "@/lib/smart-goal/goalArchetypes";
 
 const ARCHETYPE_ORDER: Array<{ value: GoalArchetype; icon: LucideIcon; sub: string }> = [
   { value: "skill_learning", icon: Lightbulb, sub: "Học kỹ năng" },

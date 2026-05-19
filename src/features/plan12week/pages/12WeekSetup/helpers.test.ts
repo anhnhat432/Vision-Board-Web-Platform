@@ -209,15 +209,14 @@ describe("12-week setup plan load guards", () => {
     for (const template of [freeTemplate, premiumTemplate]) {
       if (!template) continue;
 
-      const indicators: LeadIndicatorDraft[] =
-        template.tactics.map((tactic, index) => ({
-          id: `${template.id}_${index}`,
-          name: tactic.name,
-          target: tactic.target,
-          unit: tactic.unit,
-          type: tactic.type,
-          cadence: tactic.cadence,
-        }));
+      const indicators: LeadIndicatorDraft[] = template.tactics.map((tactic, index) => ({
+        id: `${template.id}_${index}`,
+        name: tactic.name,
+        target: tactic.target,
+        unit: tactic.unit,
+        type: tactic.type,
+        cadence: tactic.cadence,
+      }));
 
       const scheduled = buildLeadIndicatorSchedules(indicators, buildOptions("balanced", "1h"));
 
@@ -323,9 +322,7 @@ describe("buildPlanRationaleReasons", () => {
   });
 
   it("first reason mentions plan load and readiness score", () => {
-    const reasons = buildPlanRationaleReasons(
-      makeFeasibility({ planLoad: "lighter", adjustedScore: 9 }),
-    );
+    const reasons = buildPlanRationaleReasons(makeFeasibility({ planLoad: "lighter", adjustedScore: 9 }));
     expect(reasons[0].title).toContain("Nhẹ hơn");
     expect(reasons[0].detail).toContain("9/20");
   });
@@ -392,9 +389,7 @@ describe("buildPlanRationaleReasons", () => {
   });
 
   it("strong SMART goal quality does not add smart-quality reason", () => {
-    const reasons = buildPlanRationaleReasons(
-      makeFeasibility({ smartGoalQualityLevel: "strong" }),
-    );
+    const reasons = buildPlanRationaleReasons(makeFeasibility({ smartGoalQualityLevel: "strong" }));
 
     expect(reasons.find((reason) => reason.id === "smart-quality-weak")).toBeUndefined();
   });

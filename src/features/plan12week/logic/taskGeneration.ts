@@ -11,10 +11,7 @@ import type { GeneratedTactic, WeekOneTask } from "./tacticGeneration";
  * 3. Total tasks must be 3-7
  * 4. Core tasks must be present (at least 1)
  */
-export function generateWeekOneTasks(
-  tactics: GeneratedTactic[],
-  weekStartDate: Date
-): WeekOneTask[] {
+export function generateWeekOneTasks(tactics: GeneratedTactic[], weekStartDate: Date): WeekOneTask[] {
   const tasks: WeekOneTask[] = [];
   const weekStart = new Date(weekStartDate);
   weekStart.setHours(0, 0, 0, 0);
@@ -26,9 +23,7 @@ export function generateWeekOneTasks(
       const taskDate = new Date(weekStart);
       taskDate.setDate(weekStart.getDate() + dayOffset);
 
-      const title = tactic.type === "core"
-        ? `[CỐT LỖI] ${tactic.name}`
-        : tactic.name;
+      const title = tactic.type === "core" ? `[CỐT LỖI] ${tactic.name}` : tactic.name;
 
       tasks.push({
         id: generateTaskId(tacticIndex, slotIndex),

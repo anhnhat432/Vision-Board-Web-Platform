@@ -1,4 +1,8 @@
-import { canUpgradeToPlus, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../email-verification-guard";
+import {
+  canUpgradeToPlus,
+  getEmailVerificationRequiredMessage,
+  rememberEmailVerificationReturnPath,
+} from "../email-verification-guard";
 import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
 import type {
   BillingProvider,

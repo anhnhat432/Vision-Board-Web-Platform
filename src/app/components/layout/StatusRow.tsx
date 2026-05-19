@@ -24,12 +24,7 @@ interface StatusRowProps {
  *   badge={{ label: "Cần xem lại", variant: "warning" }}
  * />
  */
-export function StatusRow({
-  icon,
-  text,
-  badge,
-  className,
-}: StatusRowProps) {
+export function StatusRow({ icon, text, badge, className }: StatusRowProps) {
   return (
     <div className={cn("flex items-center gap-2 text-sm text-muted-foreground", className)}>
       {icon && <span className="h-4 w-4 shrink-0">{icon}</span>}

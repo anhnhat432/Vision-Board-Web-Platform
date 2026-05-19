@@ -21,9 +21,7 @@ const MAX_STREAK_DAYS = 365;
 const MAX_DAYS_UNTIL = 365;
 const MAX_MISSING_FIELDS = 8;
 
-export function sanitizeAssistantContext(
-  ctx: AssistantContext & { route: string },
-): SanitizedAssistantContext {
+export function sanitizeAssistantContext(ctx: AssistantContext & { route: string }): SanitizedAssistantContext {
   return {
     currentWeek: ctx.currentWeek,
     weeksTotal: ctx.weeksTotal,
@@ -45,12 +43,15 @@ export function sanitizeAssistantContext(
     streak: sanitizeStreak(ctx.streak),
     upcomingDeadlines: sanitizeUpcomingDeadlines(ctx.upcomingDeadlines),
     pageContext: sanitizePageContext(ctx.pageContext),
+    pageContextHint: sanitizePageContextHint(ctx.pageContextHint),
     route: text(ctx.route || "", 50),
   };
 }
 
 function text(value: unknown, maxLength: number): string {
-  return String(value ?? "").trim().slice(0, maxLength);
+  return String(value ?? "")
+    .trim()
+    .slice(0, maxLength);
 }
 
 function nullableText(value: unknown, maxLength = MAX_TEXT): string | null {
@@ -112,13 +113,10 @@ function sanitizeTrend(trend: AssistantContext["trend"]): AssistantContext["tren
     return { completionLast4Weeks: [], direction: "unknown" };
   }
 
-  const completions = (trend.completionLast4Weeks || [])
-    .slice(0, 4)
-    .map((val) => clamp(val, 0, 100, 0));
+  const completions = (trend.completionLast4Weeks || []).slice(0, 4).map((val) => clamp(val, 0, 100, 0));
 
-  const direction = trend.direction === "up" || trend.direction === "down" || trend.direction === "flat"
-    ? trend.direction
-    : "unknown";
+  const direction =
+    trend.direction === "up" || trend.direction === "down" || trend.direction === "flat" ? trend.direction : "unknown";
 
   return { completionLast4Weeks: completions, direction };
 }
@@ -157,7 +155,9 @@ function sanitizePageContext(pageContext: AssistantContext["pageContext"]): Assi
   };
 }
 
-function sanitizePageFormDraft(formDraft: AssistantContext["pageContext"]["formDraft"] | undefined): AssistantContext["pageContext"]["formDraft"] {
+function sanitizePageFormDraft(
+  formDraft: AssistantContext["pageContext"]["formDraft"] | undefined,
+): AssistantContext["pageContext"]["formDraft"] {
   return {
     focusArea: nullableText(formDraft?.focusArea),
     smartGoalTitle: nullableText(formDraft?.smartGoalTitle),
@@ -173,13 +173,24 @@ function sanitizePageFormDraft(formDraft: AssistantContext["pageContext"]["formD
     activeGoalTitle: nullableText(formDraft?.activeGoalTitle),
     twelveWeekDraftSummary: formDraft?.twelveWeekDraftSummary
       ? {
-        leadIndicatorCount: clamp(formDraft.twelveWeekDraftSummary.leadIndicatorCount, 0, 20, 0),
-        hasReviewDay: !!formDraft.twelveWeekDraftSummary.hasReviewDay,
-        hasWeek12Outcome: !!formDraft.twelveWeekDraftSummary.hasWeek12Outcome,
-        hasLagMetric: !!formDraft.twelveWeekDraftSummary.hasLagMetric,
-        tacticLoadPreference: nullableText(formDraft.twelveWeekDraftSummary.tacticLoadPreference, 80),
-        personalConstraint: nullableText(formDraft.twelveWeekDraftSummary.personalConstraint),
-      }
+          leadIndicatorCount: clamp(formDraft.twelveWeekDraftSummary.leadIndicatorCount, 0, 20, 0),
+          hasReviewDay: !!formDraft.twelveWeekDraftSummary.hasReviewDay,
+          hasWeek12Outcome: !!formDraft.twelveWeekDraftSummary.hasWeek12Outcome,
+          hasLagMetric: !!formDraft.twelveWeekDraftSummary.hasLagMetric,
+          tacticLoadPreference: nullableText(formDraft.twelveWeekDraftSummary.tacticLoadPreference, 80),
+          personalConstraint: nullableText(formDraft.twelveWeekDraftSummary.personalConstraint),
+        }
       : undefined,
+  };
+}
+
+export function sanitizePageContextHint(
+  pageContextHint: AssistantContext["pageContextHint"],
+): AssistantContext["pageContextHint"] | undefined {
+  if (!pageContextHint) return undefined;
+  return {
+    pageType: text(pageContextHint.pageType, 40),
+    currentStep: pageContextHint.currentStep ? text(pageContextHint.currentStep, 40) : undefined,
+    hint: pageContextHint.hint ? text(pageContextHint.hint, 200) : undefined,
   };
 }

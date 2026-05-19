@@ -53,7 +53,10 @@ export function FeasibilityStepShell({
           >
             {currentQuestion.question}
           </h2>
-          <p id={`feasibility-question-${currentQuestion.id}-helper`} className="mt-2 text-[15px] leading-6 text-app-ink-soft">
+          <p
+            id={`feasibility-question-${currentQuestion.id}-helper`}
+            className="mt-2 text-[15px] leading-6 text-app-ink-soft"
+          >
             {currentQuestion.helper}
           </p>
         </div>

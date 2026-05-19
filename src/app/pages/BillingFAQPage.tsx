@@ -40,7 +40,9 @@ export function BillingFAQPage() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Thanh toán Plus</p>
-              <CardTitle className="mt-2 text-3xl font-semibold tracking-tight text-app-ink">Câu hỏi thường gặp</CardTitle>
+              <CardTitle className="mt-2 text-3xl font-semibold tracking-tight text-app-ink">
+                Câu hỏi thường gặp
+              </CardTitle>
               <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-app-ink-soft">
                 Các câu hỏi hay gặp khi chuyển khoản ngân hàng để nâng cấp Plus.
               </CardDescription>
@@ -56,7 +58,10 @@ export function BillingFAQPage() {
                 {item.link ? (
                   <>
                     {" "}
-                    <Link to={item.link} className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline">
+                    <Link
+                      to={item.link}
+                      className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline"
+                    >
                       {item.linkLabel}
                     </Link>
                     .

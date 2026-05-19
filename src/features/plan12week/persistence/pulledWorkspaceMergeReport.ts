@@ -1,14 +1,8 @@
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
 import type { DataMutationItem, DataMutationStatus } from "./mutationQueue";
-import {
-  getTwelveWeekClientPlanId,
-  getTwelveWeekClientWeekId,
-} from "./twelveWeekImportPayload";
-import type {
-  TwelveWeekPulledWorkspace,
-  TwelveWeekPullResponse,
-} from "@/services/syncService";
+import { getTwelveWeekClientPlanId, getTwelveWeekClientWeekId } from "./twelveWeekImportPayload";
+import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 
 export type PulledWorkspaceMergeEntityKind =
   | "goal"
@@ -35,11 +29,7 @@ export interface PulledWorkspaceMergeIssue {
 
 export type PulledWorkspaceConflictWinner = "local" | "cloud";
 
-export type PulledWorkspaceConflictWinnerSource =
-  | "timestamp"
-  | "tombstone"
-  | "no_local_mutation"
-  | "missing_timestamp";
+export type PulledWorkspaceConflictWinnerSource = "timestamp" | "tombstone" | "no_local_mutation" | "missing_timestamp";
 
 export interface PulledWorkspaceConflict extends PulledWorkspaceMergeIssue {
   mutationId?: string;
@@ -278,12 +268,21 @@ function createLocalIndex(goals: Goal[]): Map<string, ComparableEntity> {
   return index;
 }
 
-function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds: PulledWorkspaceMergeIssue[]): Map<string, ComparableEntity> {
+function createCloudIndex(
+  workspace: TwelveWeekPulledWorkspace,
+  missingClientIds: PulledWorkspaceMergeIssue[],
+): Map<string, ComparableEntity> {
   const index = new Map<string, ComparableEntity>();
 
   workspace.goals.forEach((goal) => {
     if (!goal.clientGoalId) {
-      addMissingClientId(missingClientIds, "goal", goal.id, `cloud.goals.${goal.id}`, "Pulled goal is missing clientGoalId.");
+      addMissingClientId(
+        missingClientIds,
+        "goal",
+        goal.id,
+        `cloud.goals.${goal.id}`,
+        "Pulled goal is missing clientGoalId.",
+      );
       return;
     }
     addEntity(index, {
@@ -304,7 +303,13 @@ function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds
 
   workspace.plans.forEach((plan) => {
     if (!plan.clientPlanId) {
-      addMissingClientId(missingClientIds, "plan", plan.id, `cloud.plans.${plan.id}`, "Pulled plan is missing clientPlanId.");
+      addMissingClientId(
+        missingClientIds,
+        "plan",
+        plan.id,
+        `cloud.plans.${plan.id}`,
+        "Pulled plan is missing clientPlanId.",
+      );
       return;
     }
     addEntity(index, {
@@ -322,7 +327,13 @@ function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds
 
   workspace.weeks.forEach((week) => {
     if (!week.clientWeekId) {
-      addMissingClientId(missingClientIds, "week", week.id, `cloud.weeks.${week.id}`, "Pulled week is missing clientWeekId.");
+      addMissingClientId(
+        missingClientIds,
+        "week",
+        week.id,
+        `cloud.weeks.${week.id}`,
+        "Pulled week is missing clientWeekId.",
+      );
       return;
     }
     addEntity(index, {
@@ -342,7 +353,13 @@ function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds
 
   workspace.tasks.forEach((task) => {
     if (!task.clientTaskId) {
-      addMissingClientId(missingClientIds, "task", task.id, `cloud.tasks.${task.id}`, "Pulled task is missing clientTaskId.");
+      addMissingClientId(
+        missingClientIds,
+        "task",
+        task.id,
+        `cloud.tasks.${task.id}`,
+        "Pulled task is missing clientTaskId.",
+      );
       return;
     }
     addEntity(index, {
@@ -365,7 +382,13 @@ function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds
 
   workspace.leadMetrics.forEach((metric) => {
     if (!metric.clientMetricId) {
-      addMissingClientId(missingClientIds, "leadMetric", metric.id, `cloud.leadMetrics.${metric.id}`, "Pulled lead metric is missing clientMetricId.");
+      addMissingClientId(
+        missingClientIds,
+        "leadMetric",
+        metric.id,
+        `cloud.leadMetrics.${metric.id}`,
+        "Pulled lead metric is missing clientMetricId.",
+      );
       return;
     }
     addEntity(index, {
@@ -387,7 +410,13 @@ function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds
 
   workspace.dailyCheckIns.forEach((checkIn) => {
     if (!checkIn.clientCheckInId) {
-      addMissingClientId(missingClientIds, "dailyCheckIn", checkIn.id, `cloud.dailyCheckIns.${checkIn.id}`, "Pulled daily check-in is missing clientCheckInId.");
+      addMissingClientId(
+        missingClientIds,
+        "dailyCheckIn",
+        checkIn.id,
+        `cloud.dailyCheckIns.${checkIn.id}`,
+        "Pulled daily check-in is missing clientCheckInId.",
+      );
       return;
     }
     addEntity(index, {
@@ -410,7 +439,13 @@ function createCloudIndex(workspace: TwelveWeekPulledWorkspace, missingClientIds
 
   workspace.weeklyReviews.forEach((review) => {
     if (!review.clientReviewId) {
-      addMissingClientId(missingClientIds, "weeklyReview", review.id, `cloud.weeklyReviews.${review.id}`, "Pulled weekly review is missing clientReviewId.");
+      addMissingClientId(
+        missingClientIds,
+        "weeklyReview",
+        review.id,
+        `cloud.weeklyReviews.${review.id}`,
+        "Pulled weekly review is missing clientReviewId.",
+      );
       return;
     }
     addEntity(index, {
@@ -752,7 +787,10 @@ function addUnsupportedField(
   fields.push({ goalId, clientPlanId, field, reason });
 }
 
-function collectUnsupportedFields(goals: Goal[], cloudIndex: ReadonlyMap<string, ComparableEntity>): PulledWorkspaceUnsupportedField[] {
+function collectUnsupportedFields(
+  goals: Goal[],
+  cloudIndex: ReadonlyMap<string, ComparableEntity>,
+): PulledWorkspaceUnsupportedField[] {
   const fields: PulledWorkspaceUnsupportedField[] = [];
 
   goals.forEach((goal) => {
@@ -809,7 +847,9 @@ export function createPulledWorkspaceMergeReport(
     ...buildCloudOnlyChanges(localIndex, cloudIndex, tombstoneKeys),
     ...buildMatchedCloudChanges(localIndex, cloudIndex),
   ];
-  const localOnlyChanges = isDelta ? [] : buildLocalOnlyChanges(localIndex, cloudIndex, pendingDeleteKeys, tombstoneKeys);
+  const localOnlyChanges = isDelta
+    ? []
+    : buildLocalOnlyChanges(localIndex, cloudIndex, pendingDeleteKeys, tombstoneKeys);
   const unsupportedFields = isDelta ? [] : collectUnsupportedFields(localGoals, cloudIndex);
 
   // Determine auto-resolvability:

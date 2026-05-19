@@ -132,10 +132,7 @@ export function useBackendTaskOverlay(goalId: string | null): BackendTaskOverlay
  * For any task with a backend override, the `completed` field is replaced.
  * Tasks without backend data keep their local value.
  */
-export function applyTaskOverlay(
-  tasks: TwelveWeekTaskInstance[],
-  overlay: TaskOverlayMap,
-): TwelveWeekTaskInstance[] {
+export function applyTaskOverlay(tasks: TwelveWeekTaskInstance[], overlay: TaskOverlayMap): TwelveWeekTaskInstance[] {
   if (overlay.size === 0) return tasks;
 
   return tasks.map((task) => {

@@ -154,13 +154,15 @@ function createConflictLastResult(): TwelveWeekManualCloudSyncResult {
   };
 }
 
-function renderConflictSection(overrides: {
-  onExportLocalData?: () => void;
-  onRunMutationQueueSync?: () => void;
-  onUseCloudVersion?: () => void;
-  unresolvedLocalMutationCount?: number;
-  pullResponse?: TwelveWeekManualCloudSyncResult["pullResponse"];
-} = {}) {
+function renderConflictSection(
+  overrides: {
+    onExportLocalData?: () => void;
+    onRunMutationQueueSync?: () => void;
+    onUseCloudVersion?: () => void;
+    unresolvedLocalMutationCount?: number;
+    pullResponse?: TwelveWeekManualCloudSyncResult["pullResponse"];
+  } = {},
+) {
   const onExportLocalData = overrides.onExportLocalData ?? vi.fn();
   const onRunMutationQueueSync = overrides.onRunMutationQueueSync ?? vi.fn();
   const onUseCloudVersion = overrides.onUseCloudVersion ?? vi.fn();
@@ -256,8 +258,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={vi.fn()}
@@ -306,8 +308,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={onRunMutationQueueSync}
@@ -348,8 +350,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={onRunMutationQueueSync}
@@ -387,8 +389,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={onRunMutationQueueSync}
@@ -426,8 +428,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={onRunMutationQueueSync}
@@ -573,8 +575,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={onRunMutationQueueSync}
@@ -612,8 +614,8 @@ describe("TwelveWeekLocalStatusSection", () => {
           loading: false,
           lastResult: null,
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={onRunMutationQueueSync}
@@ -710,8 +712,8 @@ describe("TwelveWeekLocalStatusSection", () => {
             message: "Manual cloud sync gặp lỗi. Dữ liệu local không bị xóa.",
           },
           queueSummary: emptyQueueSummary,
-        networkStatus: "online" as const,
-        retryOnReconnectEnabled: false,
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
         }}
         onHydrateBackendPlans={vi.fn()}
         onRunMutationQueueSync={vi.fn()}

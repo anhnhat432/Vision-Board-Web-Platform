@@ -87,10 +87,7 @@ function getMetricProgressSummary(week: ApiWeekDetails | undefined): string {
   const candidates = week.metrics
     .filter((metric) => !isDailyCheckInMetric(metric.name))
     .map((metric) => {
-      const total = metric.logs.reduce(
-        (sum, log) => sum + (Number.isFinite(log.value) ? log.value : 0),
-        0,
-      );
+      const total = metric.logs.reduce((sum, log) => sum + (Number.isFinite(log.value) ? log.value : 0), 0);
 
       return {
         name: metric.name.trim(),
@@ -138,13 +135,11 @@ function mergeWeeklyReviews(
         weekNumber,
         leadCompletionPercent: completion.percent,
         lagProgressValue: existingReview?.lagProgressValue?.trim() || metricSummary,
-        biggestOutputThisWeek:
-          backendReview?.reflection?.trim() || existingReview?.biggestOutputThisWeek || "",
+        biggestOutputThisWeek: backendReview?.reflection?.trim() || existingReview?.biggestOutputThisWeek || "",
         mainObstacle: existingReview?.mainObstacle || "",
-        nextWeekPriority:
-          backendReview?.adjustments?.trim() || existingReview?.nextWeekPriority || "",
+        nextWeekPriority: backendReview?.adjustments?.trim() || existingReview?.nextWeekPriority || "",
         workloadDecision: (existingReview?.workloadDecision || "") as UniversalWeeklyReview["workloadDecision"],
-        reviewCompleted: backendReview ? true : existingReview?.reviewCompleted ?? false,
+        reviewCompleted: backendReview ? true : (existingReview?.reviewCompleted ?? false),
         progressScore: existingReview?.progressScore || backendReviewScore,
         disciplineScore: existingReview?.disciplineScore || backendReviewScore,
         focusScore: existingReview?.focusScore || backendReviewScore,
@@ -223,16 +218,12 @@ export function applyBackendProgressOverlay(
   const taskOverlay = buildTaskOverlayFromPlanDetails(details, system.taskInstances, taskIdByLocalTaskId);
   const overlaidTaskInstances = applyTaskOverlay(system.taskInstances, taskOverlay);
   const taskOverlaidSystem =
-    overlaidTaskInstances === system.taskInstances
-      ? system
-      : { ...system, taskInstances: overlaidTaskInstances };
+    overlaidTaskInstances === system.taskInstances ? system : { ...system, taskInstances: overlaidTaskInstances };
 
   const backendWeekByNumber = new Map(details.weeks.map((week) => [week.weekNumber, week] as const));
   const dailyCheckIns = mergeDailyCheckIns(taskOverlaidSystem, backendWeekByNumber);
   const checkInOverlaidSystem =
-    dailyCheckIns === taskOverlaidSystem.dailyCheckIns
-      ? taskOverlaidSystem
-      : { ...taskOverlaidSystem, dailyCheckIns };
+    dailyCheckIns === taskOverlaidSystem.dailyCheckIns ? taskOverlaidSystem : { ...taskOverlaidSystem, dailyCheckIns };
   const weeklyReviews = mergeWeeklyReviews(checkInOverlaidSystem, backendWeekByNumber);
   const currentWeek = getTwelveWeekCurrentWeek(checkInOverlaidSystem);
   const currentWeekMetricSummary = getMetricProgressSummary(backendWeekByNumber.get(currentWeek));
@@ -402,10 +393,7 @@ export function useBackendProgressOverlayMap(
   const { user } = useAuthContext();
   const [detailsByGoalId, setDetailsByGoalId] = useState<Record<string, PlanDetails>>({});
 
-  const normalizedEntries = useMemo(
-    () => entries.filter((entry) => entry.goalId && entry.system),
-    [entries],
-  );
+  const normalizedEntries = useMemo(() => entries.filter((entry) => entry.goalId && entry.system), [entries]);
 
   useEffect(() => {
     if (!user || normalizedEntries.length === 0) {
@@ -465,10 +453,7 @@ export function useBackendProgressOverlayMap(
       if (!details) return;
 
       const link = getPlanLink(entry.goalId);
-      overlayMap.set(
-        entry.goalId,
-        applyBackendProgressOverlay(entry.system, details, link?.taskIdByLocalTaskId ?? {}),
-      );
+      overlayMap.set(entry.goalId, applyBackendProgressOverlay(entry.system, details, link?.taskIdByLocalTaskId ?? {}));
     });
 
     return overlayMap;

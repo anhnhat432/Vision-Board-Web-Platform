@@ -20,11 +20,7 @@ describe("EmptyState", () => {
 
   it("shows eyebrow, description and children slot content", () => {
     render(
-      <EmptyState
-        eyebrow="Workspace mới"
-        title="Chưa có dữ liệu"
-        description="Bắt đầu bằng Life Balance."
-      >
+      <EmptyState eyebrow="Workspace mới" title="Chưa có dữ liệu" description="Bắt đầu bằng Life Balance.">
         <p>Gợi ý 1</p>
       </EmptyState>,
     );
@@ -35,12 +31,7 @@ describe("EmptyState", () => {
 
   it("renders actions and lets them fire", async () => {
     const onStart = vi.fn();
-    render(
-      <EmptyState
-        title="Chưa có dữ liệu"
-        actions={<Button onClick={onStart}>Bắt đầu</Button>}
-      />,
-    );
+    render(<EmptyState title="Chưa có dữ liệu" actions={<Button onClick={onStart}>Bắt đầu</Button>} />);
     await userEvent.click(screen.getByRole("button", { name: "Bắt đầu" }));
     expect(onStart).toHaveBeenCalledTimes(1);
   });
@@ -51,18 +42,14 @@ describe("EmptyState", () => {
   });
 
   it("marks the decorative icon as aria-hidden", () => {
-    const { container } = render(
-      <EmptyState title="Chưa có dữ liệu" icon={<Sparkles data-testid="icon" />} />,
-    );
+    const { container } = render(<EmptyState title="Chưa có dữ liệu" icon={<Sparkles data-testid="icon" />} />);
     expect(screen.getByTestId("icon")).toBeInTheDocument();
     const iconWrapper = container.querySelector('[aria-hidden="true"]');
     expect(iconWrapper).not.toBeNull();
   });
 
   it("switches container style when variant=dashed", () => {
-    const { container } = render(
-      <EmptyState variant="dashed" title="Chưa có việc" testId="dashed" />,
-    );
+    const { container } = render(<EmptyState variant="dashed" title="Chưa có việc" testId="dashed" />);
     const root = screen.getByTestId("dashed");
     expect(root.className).toContain("border-dashed");
     expect(container.querySelector(".rounded-\\[26px\\]")).toBeNull();

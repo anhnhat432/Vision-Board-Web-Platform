@@ -396,8 +396,8 @@ export function TwelveWeekDeviceDetailsSection({
           <div className="rounded-lg border border-app-line bg-app-surface p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Quyền riêng tư</p>
             <p className="mt-2 text-sm leading-6 text-app-ink">
-              Tải bản sao gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa dữ liệu, chỉ dữ liệu
-              đang lưu trên thiết bị này bị xóa.
+              Tải bản sao gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa dữ liệu, chỉ dữ liệu đang
+              lưu trên thiết bị này bị xóa.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <Button variant="outline" className="bg-app-surface" onClick={onExportLocalData}>
@@ -433,10 +433,12 @@ export function TwelveWeekDeviceDetailsSection({
             </p>
           </div>
           <div className="rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-danger-fg)]">Xóa toàn bộ dữ liệu</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-danger-fg)]">
+              Xóa toàn bộ dữ liệu
+            </p>
             <p className="mt-2 text-sm text-[color:var(--color-danger-fg)]">
-              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu đang lưu trên thiết bị này: mục tiêu, nhật ký, check-in,
-              cài đặt và trạng thái gói Plus. Không thể hoàn tác.
+              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu đang lưu trên thiết bị này: mục tiêu, nhật ký, check-in, cài
+              đặt và trạng thái gói Plus. Không thể hoàn tác.
             </p>
             <Button variant="destructive" className="mt-3 w-full" onClick={onOpenDeleteDataDialog}>
               {deleteActionLabel}
@@ -585,8 +587,8 @@ export function TwelveWeekDeviceDetailsSection({
       <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-warm">Làm mới chu kỳ</p>
         <p className="mt-2 text-sm text-app-accent">
-          Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên kết quả và việc lặp lại, nhưng làm mới việc hàng ngày, check-in và review của
-          chu kỳ này.
+          Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên kết quả và việc lặp lại, nhưng làm mới việc hàng ngày,
+          check-in và review của chu kỳ này.
         </p>
         <Button className="mt-3 w-full bg-app-surface" variant="outline" onClick={onOpenResetDialog}>
           <RotateCcw className="h-4 w-4" />

@@ -130,11 +130,23 @@ describe("useAuth logout", () => {
     const userBQueueKey = getMutationQueueStorageKey(USER_B_UID);
     localStorage.setItem(
       userAQueueKey,
-      JSON.stringify({ version: 1, ownerUid: USER_A_UID, deviceId: "device_a", updatedAt: NOW, items: [{ id: "mutation_a" }] }),
+      JSON.stringify({
+        version: 1,
+        ownerUid: USER_A_UID,
+        deviceId: "device_a",
+        updatedAt: NOW,
+        items: [{ id: "mutation_a" }],
+      }),
     );
     localStorage.setItem(
       userBQueueKey,
-      JSON.stringify({ version: 1, ownerUid: USER_B_UID, deviceId: "device_b", updatedAt: NOW, items: [{ id: "mutation_b" }] }),
+      JSON.stringify({
+        version: 1,
+        ownerUid: USER_B_UID,
+        deviceId: "device_b",
+        updatedAt: NOW,
+        items: [{ id: "mutation_b" }],
+      }),
     );
 
     expect(getCurrentPlan()).toBe("PLUS");

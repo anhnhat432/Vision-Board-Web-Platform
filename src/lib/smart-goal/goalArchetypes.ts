@@ -277,12 +277,9 @@ function lower(value: string | undefined): string {
 }
 
 function joinHaystack(input: GoalArchetypeInput): string {
-  return [
-    lower(input.focusArea),
-    lower(input.goalStatement),
-    lower(input.metricName),
-    lower(input.metricUnit),
-  ].join(" \n ");
+  return [lower(input.focusArea), lower(input.goalStatement), lower(input.metricName), lower(input.metricUnit)].join(
+    " \n ",
+  );
 }
 
 function countKeywordHits(haystack: string, keywords: readonly string[]): number {
@@ -312,9 +309,7 @@ export function inferGoalArchetype(input: GoalArchetypeInput | SmartGoal): GoalA
       }
     : input;
 
-  const explicitFromGoalType = normalized.goalType
-    ? GOAL_TYPE_TO_ARCHETYPE[normalized.goalType]
-    : undefined;
+  const explicitFromGoalType = normalized.goalType ? GOAL_TYPE_TO_ARCHETYPE[normalized.goalType] : undefined;
   if (explicitFromGoalType && explicitFromGoalType !== "other") {
     return explicitFromGoalType;
   }
@@ -389,9 +384,7 @@ function refineByDomain(
   }
 }
 
-function pickTopArchetype(
-  hits: Record<Exclude<GoalArchetype, "other">, number>,
-): GoalArchetype | null {
+function pickTopArchetype(hits: Record<Exclude<GoalArchetype, "other">, number>): GoalArchetype | null {
   // Order matters for tie-break: prefer more specific archetypes.
   const order: Array<Exclude<GoalArchetype, "other">> = [
     "exam_study",
@@ -442,21 +435,13 @@ export interface ArchetypePlanDefaults {
 
 export interface ArchetypeFeasibilityFocus {
   /** Most common bottleneck axis from FeasibilityCheck/types.ts. */
-  typicalBottleneck:
-    | "time"
-    | "energy"
-    | "resources"
-    | "clarity"
-    | "obstacle"
-    | "routine"
-    | "confidence";
+  typicalBottleneck: "time" | "energy" | "resources" | "clarity" | "obstacle" | "routine" | "confidence";
   reason: string;
 }
 
 const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
   skill_learning: {
-    recommendedMetric:
-      "Số sản phẩm thực hành làm được (dự án nhỏ, bài tập đã chấm), không phải số giờ học.",
+    recommendedMetric: "Số sản phẩm thực hành làm được (dự án nhỏ, bài tập đã chấm), không phải số giờ học.",
     antiPatterns: [
       "Đặt mục tiêu là 'thành thạo' mà không có sản phẩm cụ thể.",
       "Dùng số giờ học làm chỉ số — học mà không tạo kết quả dễ ảo tưởng tiến bộ.",
@@ -464,8 +449,7 @@ const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
     ],
   },
   health_fitness: {
-    recommendedMetric:
-      "Chỉ số đo được hằng tuần (km chạy, số buổi tập, cân nặng), không phải cảm giác chung.",
+    recommendedMetric: "Chỉ số đo được hằng tuần (km chạy, số buổi tập, cân nặng), không phải cảm giác chung.",
     antiPatterns: [
       "Đặt giảm cân/lên cơ rất nhanh trong 12 tuần, dễ kiệt sức tuần 3.",
       "Lịch tập nặng tuần 1 trước khi cơ thể quen — nguy cơ chấn thương.",
@@ -509,8 +493,7 @@ const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
     ],
   },
   habit_building: {
-    recommendedMetric:
-      "Số buổi/tuần thực hiện, đo bằng tần suất (3 lần/tuần), không phải cảm giác 'đều đặn'.",
+    recommendedMetric: "Số buổi/tuần thực hiện, đo bằng tần suất (3 lần/tuần), không phải cảm giác 'đều đặn'.",
     antiPatterns: [
       "Đặt thói quen quá khó tuần 1 — không xây được chuỗi ngày ban đầu.",
       "Nhiều thói quen cùng lúc — chọn 1 thói quen chính.",
@@ -518,8 +501,7 @@ const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
     ],
   },
   creative_output: {
-    recommendedMetric:
-      "Số tác phẩm/bài viết/bài đăng đã xuất bản, không phải 'cảm hứng' hay số giờ ngồi.",
+    recommendedMetric: "Số tác phẩm/bài viết/bài đăng đã xuất bản, không phải 'cảm hứng' hay số giờ ngồi.",
     antiPatterns: [
       "Chỉ có chỉ số 'viết tốt hơn' — không đếm được.",
       "Không có lịch xuất bản đều — đăng dồn cuối kỳ.",
@@ -536,8 +518,7 @@ const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
     ],
   },
   other: {
-    recommendedMetric:
-      "Chọn một con số đo được hằng tuần. Nếu không nghĩ ra chỉ số, mục tiêu có thể đang quá mơ hồ.",
+    recommendedMetric: "Chọn một con số đo được hằng tuần. Nếu không nghĩ ra chỉ số, mục tiêu có thể đang quá mơ hồ.",
     antiPatterns: [
       "Câu mục tiêu không có động từ kết quả rõ.",
       "Không có cách đo tiến độ hằng tuần.",
@@ -553,26 +534,15 @@ const PLAN_DEFAULTS: Record<GoalArchetype, ArchetypePlanDefaults> = {
       "Đọc tài liệu chính 30 phút",
       "Review cùng người khác hoặc bản thử nhỏ",
     ],
-    weekOneStart:
-      "Tuần 1 chọn một dự án nhỏ làm kết quả đầu tiên. Đừng học lý thuyết tuần 1.",
+    weekOneStart: "Tuần 1 chọn một dự án nhỏ làm kết quả đầu tiên. Đừng học lý thuyết tuần 1.",
   },
   health_fitness: {
-    recommendedLeadIndicators: [
-      "Buổi cardio chính",
-      "Buổi tập sức mạnh",
-      "Giãn cơ/phục hồi ngắn",
-    ],
-    weekOneStart:
-      "Tuần 1 nhẹ — kiểm tra form và nhịp tim. Tăng tải từ tuần 2 trở đi.",
+    recommendedLeadIndicators: ["Buổi cardio chính", "Buổi tập sức mạnh", "Giãn cơ/phục hồi ngắn"],
+    weekOneStart: "Tuần 1 nhẹ — kiểm tra form và nhịp tim. Tăng tải từ tuần 2 trở đi.",
   },
   career_growth: {
-    recommendedLeadIndicators: [
-      "Khung làm sâu",
-      "1:1 với người liên quan",
-      "Chuẩn bị demo / buổi góp ý",
-    ],
-    weekOneStart:
-      "Tuần 1 chốt lịch làm sâu cố định và một buổi 1:1 với mentor/quản lý.",
+    recommendedLeadIndicators: ["Khung làm sâu", "1:1 với người liên quan", "Chuẩn bị demo / buổi góp ý"],
+    weekOneStart: "Tuần 1 chốt lịch làm sâu cố định và một buổi 1:1 với mentor/quản lý.",
   },
   financial_goal: {
     recommendedLeadIndicators: [
@@ -580,17 +550,11 @@ const PLAN_DEFAULTS: Record<GoalArchetype, ArchetypePlanDefaults> = {
       "Chuyển khoản tiết kiệm cố định",
       "Review tiền bạc hằng tuần",
     ],
-    weekOneStart:
-      "Tuần 1 thiết lập theo dõi + chuyển khoản tự động. Đừng đặt số tiết kiệm lớn tuần đầu.",
+    weekOneStart: "Tuần 1 thiết lập theo dõi + chuyển khoản tự động. Đừng đặt số tiết kiệm lớn tuần đầu.",
   },
   exam_study: {
-    recommendedLeadIndicators: [
-      "Buổi luyện kỹ năng yếu nhất",
-      "Đề thi thử mỗi tuần",
-      "Review lỗi sau đề thi",
-    ],
-    weekOneStart:
-      "Tuần 1 làm 1 đề thi thử để biết mốc hiện tại thật, không phải dự đoán.",
+    recommendedLeadIndicators: ["Buổi luyện kỹ năng yếu nhất", "Đề thi thử mỗi tuần", "Review lỗi sau đề thi"],
+    weekOneStart: "Tuần 1 làm 1 đề thi thử để biết mốc hiện tại thật, không phải dự đoán.",
   },
   project_completion: {
     recommendedLeadIndicators: [
@@ -598,39 +562,22 @@ const PLAN_DEFAULTS: Record<GoalArchetype, ArchetypePlanDefaults> = {
       "Phỏng vấn người dùng / góp ý",
       "Hoàn tất review hoặc bản thử nội bộ",
     ],
-    weekOneStart:
-      "Tuần 1 xác định phạm vi tối thiểu khả thi (MVP). Mốc tuần 4 và 8 phải rõ.",
+    weekOneStart: "Tuần 1 xác định phạm vi tối thiểu khả thi (MVP). Mốc tuần 4 và 8 phải rõ.",
   },
   habit_building: {
-    recommendedLeadIndicators: [
-      "Thói quen chính (ví dụ: đọc 30p)",
-      "Ghi chú review cuối ngày",
-    ],
-    weekOneStart:
-      "Tuần 1 chỉ làm thói quen dễ nhất phiên bản nhỏ nhất để xây chuỗi ngày. Tăng tải từ tuần 3.",
+    recommendedLeadIndicators: ["Thói quen chính (ví dụ: đọc 30p)", "Ghi chú review cuối ngày"],
+    weekOneStart: "Tuần 1 chỉ làm thói quen dễ nhất phiên bản nhỏ nhất để xây chuỗi ngày. Tăng tải từ tuần 3.",
   },
   creative_output: {
-    recommendedLeadIndicators: [
-      "Buổi sáng tác / bản nháp",
-      "Buổi chỉnh sửa",
-      "Lịch xuất bản (đăng bài/tải lên)",
-    ],
-    weekOneStart:
-      "Tuần 1 hoàn tất một bản thô — không sửa mãi. Mục đích là tạo nhịp xuất bản.",
+    recommendedLeadIndicators: ["Buổi sáng tác / bản nháp", "Buổi chỉnh sửa", "Lịch xuất bản (đăng bài/tải lên)"],
+    weekOneStart: "Tuần 1 hoàn tất một bản thô — không sửa mãi. Mục đích là tạo nhịp xuất bản.",
   },
   relationship_life: {
-    recommendedLeadIndicators: [
-      "Thời gian chất lượng cố định trong tuần",
-      "Một hành động nhỏ thể hiện quan tâm",
-    ],
-    weekOneStart:
-      "Tuần 1 chốt một ngày/giờ cố định trong tuần. Không phụ thuộc 'có thời gian thì gặp'.",
+    recommendedLeadIndicators: ["Thời gian chất lượng cố định trong tuần", "Một hành động nhỏ thể hiện quan tâm"],
+    weekOneStart: "Tuần 1 chốt một ngày/giờ cố định trong tuần. Không phụ thuộc 'có thời gian thì gặp'.",
   },
   other: {
-    recommendedLeadIndicators: [
-      "1-2 việc cốt lõi đo được",
-      "Một buổi nhìn lại ngắn hằng tuần",
-    ],
+    recommendedLeadIndicators: ["1-2 việc cốt lõi đo được", "Một buổi nhìn lại ngắn hằng tuần"],
     weekOneStart: "Tuần 1 giữ nhẹ. Khi chỉ số rõ hơn, tăng tải từ tuần 2-3.",
   },
 };
@@ -686,9 +633,7 @@ export function getArchetypePlanDefaults(archetype: GoalArchetype): ArchetypePla
   return PLAN_DEFAULTS[archetype] ?? PLAN_DEFAULTS.other;
 }
 
-export function getArchetypeFeasibilityFocus(
-  archetype: GoalArchetype,
-): ArchetypeFeasibilityFocus {
+export function getArchetypeFeasibilityFocus(archetype: GoalArchetype): ArchetypeFeasibilityFocus {
   return FEASIBILITY_FOCUS[archetype] ?? FEASIBILITY_FOCUS.other;
 }
 

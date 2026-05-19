@@ -178,40 +178,29 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
   const currentWeekEntry = scoreboard.find((entry) => entry.weekNumber === weekNumber);
   const previousWeekEntry = scoreboard.find((entry) => entry.weekNumber === weekNumber - 1);
 
-  const currentWeekScore =
-    currentWeekEntry && currentWeekEntry.weeklyScore > 0 ? currentWeekEntry.weeklyScore : null;
+  const currentWeekScore = currentWeekEntry && currentWeekEntry.weeklyScore > 0 ? currentWeekEntry.weeklyScore : null;
   const previousWeekScore =
     previousWeekEntry && previousWeekEntry.weeklyScore > 0 ? previousWeekEntry.weeklyScore : null;
 
   const scoredWeeks = scoreboardThroughCurrent.filter((entry) => entry.weeklyScore > 0);
   const averageScore =
     scoredWeeks.length > 0
-      ? Math.round(
-          scoredWeeks.reduce((sum, entry) => sum + entry.weeklyScore, 0) / scoredWeeks.length,
-        )
+      ? Math.round(scoredWeeks.reduce((sum, entry) => sum + entry.weeklyScore, 0) / scoredWeeks.length)
       : null;
 
   const recentScored = scoredWeeks.slice(-3);
   const recentAverageScore =
     recentScored.length > 0
-      ? Math.round(
-          recentScored.reduce((sum, entry) => sum + entry.weeklyScore, 0) / recentScored.length,
-        )
+      ? Math.round(recentScored.reduce((sum, entry) => sum + entry.weeklyScore, 0) / recentScored.length)
       : null;
 
-  const currentWeekTasks = taskInstances.filter(
-    (task) => task.weekNumber === weekNumber && !task.skipped,
-  );
+  const currentWeekTasks = taskInstances.filter((task) => task.weekNumber === weekNumber && !task.skipped);
   const currentWeekTaskCount = currentWeekTasks.length;
   const currentWeekCompletedCount = currentWeekTasks.filter((task) => task.completed).length;
   const currentWeekCompletionPercent =
-    currentWeekTaskCount > 0
-      ? Math.round((currentWeekCompletedCount / currentWeekTaskCount) * 100)
-      : null;
+    currentWeekTaskCount > 0 ? Math.round((currentWeekCompletedCount / currentWeekTaskCount) * 100) : null;
 
-  const currentWeekLeadCompletionPercent = clampPercent(
-    currentWeekEntry?.leadCompletionPercent ?? null,
-  );
+  const currentWeekLeadCompletionPercent = clampPercent(currentWeekEntry?.leadCompletionPercent ?? null);
   const recentLeadCompletionPercent =
     scoredWeeks.length > 0
       ? clampPercent(
@@ -221,8 +210,7 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
       : null;
 
   const previousReview = reviews.find((entry) => entry.weekNumber === weekNumber - 1);
-  const previousWeekReviewCompleted =
-    weekNumber <= 1 ? null : Boolean(previousReview?.reviewCompleted);
+  const previousWeekReviewCompleted = weekNumber <= 1 ? null : Boolean(previousReview?.reviewCompleted);
 
   const checkInsLast7d = dailyCheckIns.filter((entry) => {
     const date = entry.date?.slice(0, 10) ?? "";
@@ -230,13 +218,11 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
     const delta = differenceInDays(todayKey, date);
     return delta >= 0 && delta < 7 && entry.didWorkToday;
   }).length;
-  const checkInRate7d = dailyCheckIns.length === 0 && taskInstances.length === 0
-    ? null
-    : Math.round((checkInsLast7d / 7) * 100);
+  const checkInRate7d =
+    dailyCheckIns.length === 0 && taskInstances.length === 0 ? null : Math.round((checkInsLast7d / 7) * 100);
 
   const lagMetricMoving =
-    nonEmpty(system.lagMetric?.currentValue) ||
-    reviewsThroughCurrent.some((entry) => nonEmpty(entry.lagProgressValue));
+    nonEmpty(system.lagMetric?.currentValue) || reviewsThroughCurrent.some((entry) => nonEmpty(entry.lagProgressValue));
 
   const hasAnyExecutionData =
     scoredWeeks.length > 0 ||
@@ -335,10 +321,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
   }
 
   // 3. task_completion_without_progress — high task completion but lag metric is not moving.
-  if (
-    (metrics.currentWeekCompletionPercent ?? 0) >= HIGH_COMPLETION_PERCENT &&
-    !metrics.lagMetricMoving
-  ) {
+  if ((metrics.currentWeekCompletionPercent ?? 0) >= HIGH_COMPLETION_PERCENT && !metrics.lagMetricMoving) {
     insights.push(
       makeInsight(
         "task_completion_without_progress",
@@ -485,9 +468,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
 function sortAndCap(insights: ExecutionInsight[], cap = MAX_INSIGHTS): ExecutionInsight[] {
   const indexById = new Map(PRIORITY_ORDER.map((id, index) => [id, index] as const));
-  return [...insights]
-    .sort((a, b) => (indexById.get(a.id) ?? 99) - (indexById.get(b.id) ?? 99))
-    .slice(0, cap);
+  return [...insights].sort((a, b) => (indexById.get(a.id) ?? 99) - (indexById.get(b.id) ?? 99)).slice(0, cap);
 }
 
 // ---- Public API -------------------------------------------------------------
@@ -582,9 +563,7 @@ const NEXT_ACTION_LIBRARY: Record<ExecutionInsightNextActionId, Omit<ExecutionIn
  * the action mapped to the highest-priority insight, or a no-action fallback
  * when the list is empty.
  */
-export function getNextActionFromInsights(
-  insights: ReadonlyArray<ExecutionInsight>,
-): ExecutionInsightNextAction {
+export function getNextActionFromInsights(insights: ReadonlyArray<ExecutionInsight>): ExecutionInsightNextAction {
   if (insights.length === 0) {
     return { id: "no_action", ...NEXT_ACTION_LIBRARY.no_action };
   }

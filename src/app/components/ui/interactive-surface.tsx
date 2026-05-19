@@ -25,11 +25,7 @@ export function InteractiveSurface({
   return (
     <div
       ref={surfaceRef}
-      className={cn(
-        "interactive-surface",
-        shine && "interactive-surface--shine",
-        className,
-      )}
+      className={cn("interactive-surface", shine && "interactive-surface--shine", className)}
       {...props}
     >
       {children}
@@ -37,15 +33,6 @@ export function InteractiveSurface({
   );
 }
 
-export function InteractiveLayer({
-  className,
-  depth = "medium",
-  ...props
-}: InteractiveLayerProps) {
-  return (
-    <div
-      className={cn("interactive-layer", `interactive-layer--${depth}`, className)}
-      {...props}
-    />
-  );
+export function InteractiveLayer({ className, depth = "medium", ...props }: InteractiveLayerProps) {
+  return <div className={cn("interactive-layer", `interactive-layer--${depth}`, className)} {...props} />;
 }

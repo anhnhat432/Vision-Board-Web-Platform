@@ -96,9 +96,7 @@ export function EmptyState({
   const alignClass = align === "center" ? "text-center" : "text-left";
   const blockAlignClass = align === "center" ? "mx-auto" : "";
   const actionsLayoutClass =
-    align === "center"
-      ? "flex flex-col gap-2 sm:flex-row sm:justify-center"
-      : "flex flex-col gap-2 sm:flex-row";
+    align === "center" ? "flex flex-col gap-2 sm:flex-row sm:justify-center" : "flex flex-col gap-2 sm:flex-row";
   const titleSizeClass =
     variant === "card"
       ? "text-xl font-bold tracking-[-0.014em] text-foreground sm:text-2xl"
@@ -108,10 +106,7 @@ export function EmptyState({
   const HeadingTag = `h${headingLevel}` as "h2" | "h3" | "h4";
 
   return (
-    <Wrapper
-      data-testid={testId}
-      className={cn("space-y-4", variantClass, alignClass, className)}
-    >
+    <Wrapper data-testid={testId} className={cn("space-y-4", variantClass, alignClass, className)}>
       {illustration ? (
         <div className={cn("w-32 max-w-full sm:w-40", blockAlignClass)} aria-hidden="true">
           {illustration}
@@ -133,9 +128,7 @@ export function EmptyState({
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</p>
         ) : null}
         <HeadingTag className={titleSizeClass}>{title}</HeadingTag>
-        {description ? (
-          <p className="text-[15px] leading-relaxed text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="text-[15px] leading-relaxed text-muted-foreground">{description}</p> : null}
       </div>
       {children ? <div className={blockAlignClass}>{children}</div> : null}
       {actions ? <div className={actionsLayoutClass}>{actions}</div> : null}

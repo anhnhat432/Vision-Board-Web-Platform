@@ -1,12 +1,27 @@
 ﻿import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { AlertTriangle, Check, CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  CreditCard,
+  Crown,
+  LifeBuoy,
+  Loader2,
+  ReceiptText,
+  RefreshCw,
+  Shield,
+  Sparkles,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { canRequestRefund, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
+import {
+  canRequestRefund,
+  getEmailVerificationRequiredMessage,
+  rememberEmailVerificationReturnPath,
+} from "../utils/email-verification-guard";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { PageHero } from "../components/layout/PageHero";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
@@ -442,13 +457,13 @@ export function BillingPlan() {
   const isInRenewalPriority = graceState.inGracePeriod;
   const isExpired = expiryInfo.isExpired && !graceState.active;
   const shouldShowExpiryNotice =
-    realMode &&
-    subscription?.planCode === "PLUS" &&
-    (isInRenewalPriority || expiryInfo.isExpiringSoon || isExpired);
+    realMode && subscription?.planCode === "PLUS" && (isInRenewalPriority || expiryInfo.isExpiringSoon || isExpired);
 
   const handleConfirmStopUsing = () => {
     setShowStopUsingConfirm(false);
-    toast.info("Plus hiện không tự động gia hạn. Bạn có thể tiếp tục dùng đến hết chu kỳ hoặc gửi yêu cầu hoàn tiền nếu còn đủ điều kiện.");
+    toast.info(
+      "Plus hiện không tự động gia hạn. Bạn có thể tiếp tục dùng đến hết chu kỳ hoặc gửi yêu cầu hoàn tiền nếu còn đủ điều kiện.",
+    );
   };
 
   const openRefundDialog = (order: PaymentHistoryOrder, reason = "") => {
@@ -525,13 +540,15 @@ export function BillingPlan() {
       toast.success("Đã gửi yêu cầu hoàn tiền — sẽ xử lý trong 3-7 ngày làm việc.");
       setRefundDialogOrder(null);
     } catch (error: unknown) {
-      if (toastBillingNetworkError(error, {
-        surface: "BillingPlan",
-        action: "submit_refund_request",
-        orderId: refundDialogOrder.orderId,
-        amount: refundDialogOrder.amount,
-        status: refundDialogOrder.status,
-      })) {
+      if (
+        toastBillingNetworkError(error, {
+          surface: "BillingPlan",
+          action: "submit_refund_request",
+          orderId: refundDialogOrder.orderId,
+          amount: refundDialogOrder.amount,
+          status: refundDialogOrder.status,
+        })
+      ) {
         setRefundFormError("Mạng có vấn đề, vui lòng thử lại");
       } else {
         logBillingUiError(error, {
@@ -588,19 +605,23 @@ export function BillingPlan() {
       );
       setPaymentHistory((orders) =>
         orders.map((order) =>
-          order.orderId === orderId ? { ...order, receiptSentAt: response.receiptSentAt ?? new Date().toISOString() } : order,
+          order.orderId === orderId
+            ? { ...order, receiptSentAt: response.receiptSentAt ?? new Date().toISOString() }
+            : order,
         ),
       );
       toast.success("Đã gửi lại biên nhận thanh toán.");
     } catch (error: unknown) {
       const order = paymentHistory.find((item) => item.orderId === orderId);
-      if (!toastBillingNetworkError(error, {
-        surface: "BillingPlan",
-        action: "resend_receipt",
-        orderId,
-        amount: order?.amount,
-        status: order?.status,
-      })) {
+      if (
+        !toastBillingNetworkError(error, {
+          surface: "BillingPlan",
+          action: "resend_receipt",
+          orderId,
+          amount: order?.amount,
+          status: order?.status,
+        })
+      ) {
         logBillingUiError(error, {
           surface: "BillingPlan",
           action: "resend_receipt",
@@ -681,10 +702,19 @@ export function BillingPlan() {
             ) : null}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setRefundDialogOrder(null)} disabled={isSubmittingRefund}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRefundDialogOrder(null)}
+              disabled={isSubmittingRefund}
+            >
               Huỷ
             </Button>
-            <Button type="button" onClick={handleSubmitRefundRequest} disabled={!canSubmitRefundRequest || emailNeedsVerification}>
+            <Button
+              type="button"
+              onClick={handleSubmitRefundRequest}
+              disabled={!canSubmitRefundRequest || emailNeedsVerification}
+            >
               {isSubmittingRefund ? "Đang gửi…" : "Gửi yêu cầu hoàn tiền"}
             </Button>
           </DialogFooter>
@@ -753,9 +783,13 @@ export function BillingPlan() {
       )}
 
       {shouldShowExpiryNotice && (
-        <div className={`rounded-card p-4 ${isExpired ? "border-app-line bg-[color:var(--color-danger-bg)]" : "border-app-line bg-app-warm-soft"}`}>
+        <div
+          className={`rounded-card p-4 ${isExpired ? "border-app-line bg-[color:var(--color-danger-bg)]" : "border-app-line bg-app-warm-soft"}`}
+        >
           <div className="flex items-start gap-3">
-            <AlertTriangle className={`mt-0.5 h-5 w-5 ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-warm"}`} />
+            <AlertTriangle
+              className={`mt-0.5 h-5 w-5 ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-warm"}`}
+            />
             <div className="flex-1">
               <p className={`font-medium ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-ink"}`}>
                 {isInRenewalPriority
@@ -764,7 +798,9 @@ export function BillingPlan() {
                     ? "Gói Plus đã hết hạn"
                     : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
               </p>
-              <p className={`mt-1 text-sm leading-6 ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-ink-soft"}`}>
+              <p
+                className={`mt-1 text-sm leading-6 ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-ink-soft"}`}
+              >
                 {isInRenewalPriority
                   ? "Quyền Plus vẫn được giữ trong thời gian này. Gia hạn ngay để không bị tạm dừng."
                   : isExpired
@@ -780,7 +816,7 @@ export function BillingPlan() {
         </div>
       )}
 
-        <BillingTrustSignals supportEmail={BILLING_SUPPORT_EMAIL} />
+      <BillingTrustSignals supportEmail={BILLING_SUPPORT_EMAIL} />
 
       {/* Current plan */}
       <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
@@ -802,7 +838,10 @@ export function BillingPlan() {
                 Gia hạn ngay
               </Button>
             ) : currentPlanCode === "FREE" ? (
-              <Button className="w-full bg-app-accent text-white hover:bg-[#284f45] sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
+              <Button
+                className="w-full bg-app-accent text-white hover:bg-[#284f45] sm:w-auto"
+                onClick={() => handleOpenUpgrade("plan")}
+              >
                 <Sparkles className="mr-2 h-4 w-4" />
                 Nâng cấp Plus
               </Button>
@@ -813,41 +852,40 @@ export function BillingPlan() {
                 disabled={isOpeningPortal || !billingStatus.manageBillingReady}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
-                {billingStatus.manageBillingReady
-                  ? isOpeningPortal
-                    ? "Đang mở…"
-                    : "Quản lý gói"
-                  : "Đang chuẩn bị"}
+                {billingStatus.manageBillingReady ? (isOpeningPortal ? "Đang mở…" : "Quản lý gói") : "Đang chuẩn bị"}
               </Button>
             ) : null
           }
           actionClassName="pt-1"
           contentClassName="stack-stack"
         >
-<div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge
+              variant="outline"
+              className={
+                currentPlanCode !== "FREE"
+                  ? "border-app-accent-soft bg-app-accent-soft text-app-accent"
+                  : "border-app-line bg-app-bg text-app-ink-muted"
+              }
+            >
+              {currentPlanName}
+            </Badge>
+            {currentPlanDefinition && (
+              <span className="text-sm text-app-ink-muted">{currentPlanDefinition.priceLabel}</span>
+            )}
+            {isInRenewalPriority ? (
+              <Badge variant="outline" className="border-app-line bg-app-warm-soft text-app-warm">
+                Còn {graceState.daysRemaining} ngày để gia hạn ưu tiên
+              </Badge>
+            ) : isExpired ? (
               <Badge
                 variant="outline"
-                className={
-                  currentPlanCode !== "FREE"
-                    ? "border-app-accent-soft bg-app-accent-soft text-app-accent"
-                    : "border-app-line bg-app-bg text-app-ink-muted"
-                }
+                className="border-app-line bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]"
               >
-                {currentPlanName}
+                Đã hết hạn
               </Badge>
-              {currentPlanDefinition && (
-                <span className="text-sm text-app-ink-muted">{currentPlanDefinition.priceLabel}</span>
-              )}
-              {isInRenewalPriority ? (
-                <Badge variant="outline" className="border-app-line bg-app-warm-soft text-app-warm">
-                  Còn {graceState.daysRemaining} ngày để gia hạn ưu tiên
-                </Badge>
-              ) : isExpired ? (
-                <Badge variant="outline" className="border-app-line bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]">
-                  Đã hết hạn
-                </Badge>
-              ) : null}
-            </div>
+            ) : null}
+          </div>
 
           {isPaidPlan && (
             <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -902,12 +940,20 @@ export function BillingPlan() {
                 </Button>
               )}
               {realMode && (
-                <Button variant="outline" className="border-app-line text-app-ink hover:bg-app-bg" onClick={() => setShowStopUsingConfirm(true)}>
+                <Button
+                  variant="outline"
+                  className="border-app-line text-app-ink hover:bg-app-bg"
+                  onClick={() => setShowStopUsingConfirm(true)}
+                >
                   Tôi không muốn dùng nữa
                 </Button>
               )}
               {realMode && (
-                <Button variant="outline" className="border-app-line text-app-warm hover:bg-app-warm-soft" onClick={handleRequestUnusedCycleRefund}>
+                <Button
+                  variant="outline"
+                  className="border-app-line text-app-warm hover:bg-app-warm-soft"
+                  onClick={handleRequestUnusedCycleRefund}
+                >
                   Yêu cầu hoàn tiền cho chu kỳ chưa dùng
                 </Button>
               )}
@@ -919,8 +965,9 @@ export function BillingPlan() {
             <AlertDialogHeader>
               <AlertDialogTitle>Ghi nhận bạn không muốn dùng nữa?</AlertDialogTitle>
               <AlertDialogDescription>
-                Plus hiện không tự động gia hạn, nên không có auto-renewal cần hủy. Quyền Plus vẫn hoạt động đến {cancelEffectiveDate}.
-                Nếu muốn hoàn tiền cho phần chu kỳ chưa dùng và đơn còn đủ điều kiện, hãy gửi yêu cầu hoàn tiền riêng.
+                Plus hiện không tự động gia hạn, nên không có auto-renewal cần hủy. Quyền Plus vẫn hoạt động đến{" "}
+                {cancelEffectiveDate}. Nếu muốn hoàn tiền cho phần chu kỳ chưa dùng và đơn còn đủ điều kiện, hãy gửi yêu
+                cầu hoàn tiền riêng.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -935,129 +982,128 @@ export function BillingPlan() {
       {realMode && (
         <SectionBlock title="Khu vực lịch sử thanh toán" headerVisuallyHidden>
           <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ReceiptText className="h-5 w-5 text-sky-600" />
-              Lịch sử thanh toán
-            </CardTitle>
-            <CardDescription>
-              Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="stack-stack">
-            {isLoadingPaymentHistory && (
-              <div className="flex items-center gap-3 rounded-lg border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang tải lịch sử thanh toán...
-              </div>
-            )}
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ReceiptText className="h-5 w-5 text-sky-600" />
+                Lịch sử thanh toán
+              </CardTitle>
+              <CardDescription>
+                Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="stack-stack">
+              {isLoadingPaymentHistory && (
+                <div className="flex items-center gap-3 rounded-lg border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang tải lịch sử thanh toán...
+                </div>
+              )}
 
-            {!isLoadingPaymentHistory && paymentHistoryError && (
-              <div className="flex flex-col gap-3 rounded-lg border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-[color:var(--color-danger-fg)]">{paymentHistoryError}</p>
-                <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
-                  Thử lại
-                </Button>
-              </div>
-            )}
+              {!isLoadingPaymentHistory && paymentHistoryError && (
+                <div className="flex flex-col gap-3 rounded-lg border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-[color:var(--color-danger-fg)]">{paymentHistoryError}</p>
+                  <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
+                    Thử lại
+                  </Button>
+                </div>
+              )}
 
-            {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
-              <div className="rounded-lg border border-app-line bg-app-bg p-4">
-                <p className="text-sm font-medium text-app-ink">Chưa có giao dịch nào.</p>
-                <p className="mt-1 text-sm text-app-ink-muted">
-                  Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
-                </p>
-              </div>
-            )}
+              {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
+                <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                  <p className="text-sm font-medium text-app-ink">Chưa có giao dịch nào.</p>
+                  <p className="mt-1 text-sm text-app-ink-muted">
+                    Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
+                  </p>
+                </div>
+              )}
 
-            {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
-              <div className="divide-y divide-app-line overflow-hidden rounded-lg border border-app-line bg-app-surface">
-                {paymentHistory.map((order) => (
-                  <div
-                    key={order.orderId}
-                    className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-app-ink">{order.orderId}</p>
-                        <Badge variant="outline" className={getPaymentStatusClassName(order.status)}>
-                          {getPaymentStatusLabel(order.status)}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 text-sm text-app-ink-muted">
-                        {getBillingCycleLabel(order.billingCycle)} · {formatPaymentDate(order.createdAt)}
-                      </p>
-                      {order.status === "completed" && (
-                        <div className="mt-1 space-y-1 text-xs">
-                          <p className="text-app-accent">Xác nhận lúc {formatPaymentDate(order.completedAt)}</p>
-                          {order.receiptSentAt ? (
-                            <p className="text-app-accent">
-                              ✓ Biên nhận đã gửi ngày {formatPaymentDate(order.receiptSentAt)}
-                            </p>
-                          ) : (
-                            <p className="text-app-warm">Biên nhận chưa ghi nhận đã gửi.</p>
-                          )}
-                          {order.refundRequest ? (
-                            <p className="text-app-warm">
-                              Hoàn tiền: {getRefundStatusLabel(order.refundRequest.status)}
-                              {order.refundRequest.createdAt
-                                ? ` — gửi lúc ${formatPaymentDate(order.refundRequest.createdAt)}`
-                                : ""}
-                            </p>
-                          ) : null}
+              {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
+                <div className="divide-y divide-app-line overflow-hidden rounded-lg border border-app-line bg-app-surface">
+                  {paymentHistory.map((order) => (
+                    <div key={order.orderId} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-semibold text-app-ink">{order.orderId}</p>
+                          <Badge variant="outline" className={getPaymentStatusClassName(order.status)}>
+                            {getPaymentStatusLabel(order.status)}
+                          </Badge>
                         </div>
-                      )}
+                        <p className="mt-1 text-sm text-app-ink-muted">
+                          {getBillingCycleLabel(order.billingCycle)} · {formatPaymentDate(order.createdAt)}
+                        </p>
+                        {order.status === "completed" && (
+                          <div className="mt-1 space-y-1 text-xs">
+                            <p className="text-app-accent">Xác nhận lúc {formatPaymentDate(order.completedAt)}</p>
+                            {order.receiptSentAt ? (
+                              <p className="text-app-accent">
+                                ✓ Biên nhận đã gửi ngày {formatPaymentDate(order.receiptSentAt)}
+                              </p>
+                            ) : (
+                              <p className="text-app-warm">Biên nhận chưa ghi nhận đã gửi.</p>
+                            )}
+                            {order.refundRequest ? (
+                              <p className="text-app-warm">
+                                Hoàn tiền: {getRefundStatusLabel(order.refundRequest.status)}
+                                {order.refundRequest.createdAt
+                                  ? ` — gửi lúc ${formatPaymentDate(order.refundRequest.createdAt)}`
+                                  : ""}
+                              </p>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+                        <p className="font-semibold text-app-ink">
+                          {formatPaymentAmount(order.amount, order.currency)}
+                        </p>
+                        {order.status === "pending" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`)}
+                            className="border-app-line hover:bg-app-bg"
+                          >
+                            Tiếp tục thanh toán
+                          </Button>
+                        )}
+                        {order.status === "completed" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleResendReceipt(order.orderId)}
+                            disabled={resendingReceiptOrderId === order.orderId}
+                            className="border-app-line hover:bg-app-bg"
+                          >
+                            {resendingReceiptOrderId === order.orderId ? "Đang gửi..." : "Gửi lại biên nhận"}
+                          </Button>
+                        )}
+                        {order.status === "completed" && !order.refundRequest && isOrderRefundEligible(order) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-app-line text-app-warm hover:bg-app-warm-soft"
+                            onClick={() => openRefundDialog(order)}
+                            disabled={emailNeedsVerification}
+                            title={
+                              emailNeedsVerification ? "Bạn cần xác minh email trước khi yêu cầu hoàn tiền." : undefined
+                            }
+                          >
+                            Yêu cầu hoàn tiền
+                          </Button>
+                        )}
+                        {order.invoiceUrl ? (
+                          <Button variant="outline" size="sm" asChild className="border-app-line hover:bg-app-bg">
+                            <a href={order.invoiceUrl} target="_blank" rel="noreferrer">
+                              Xem hóa đơn
+                            </a>
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-                      <p className="font-semibold text-app-ink">
-                        {formatPaymentAmount(order.amount, order.currency)}
-                      </p>
-                      {order.status === "pending" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`)}
-                          className="border-app-line hover:bg-app-bg"
-                        >
-                          Tiếp tục thanh toán
-                        </Button>
-                      )}
-                      {order.status === "completed" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleResendReceipt(order.orderId)}
-                          disabled={resendingReceiptOrderId === order.orderId}
-                          className="border-app-line hover:bg-app-bg"
-                        >
-                          {resendingReceiptOrderId === order.orderId ? "Đang gửi..." : "Gửi lại biên nhận"}
-                        </Button>
-                      )}
-                      {order.status === "completed" && !order.refundRequest && isOrderRefundEligible(order) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-app-line text-app-warm hover:bg-app-warm-soft"
-                          onClick={() => openRefundDialog(order)}
-                          disabled={emailNeedsVerification}
-                          title={emailNeedsVerification ? "Bạn cần xác minh email trước khi yêu cầu hoàn tiền." : undefined}
-                        >
-                          Yêu cầu hoàn tiền
-                        </Button>
-                      )}
-                      {order.invoiceUrl ? (
-                        <Button variant="outline" size="sm" asChild className="border-app-line hover:bg-app-bg">
-                          <a href={order.invoiceUrl} target="_blank" rel="noreferrer">
-                            Xem hóa đơn
-                          </a>
-                        </Button>
-                      ) : null}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                  ))}
+                </div>
+              )}
+            </CardContent>
           </Card>
         </SectionBlock>
       )}
@@ -1076,12 +1122,14 @@ export function BillingPlan() {
             <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="rounded-lg border border-app-line bg-app-bg p-4">
                 <p className="text-sm text-app-ink-muted">Email hỗ trợ</p>
-                <p className="mt-1 font-medium text-app-ink">
-                  {BILLING_SUPPORT_EMAIL || "Chưa cấu hình email hỗ trợ"}
-                </p>
+                <p className="mt-1 font-medium text-app-ink">{BILLING_SUPPORT_EMAIL || "Chưa cấu hình email hỗ trợ"}</p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <Button variant="outline" className="border-app-line text-app-ink hover:bg-app-bg" onClick={handleCopySupportMessage}>
+                <Button
+                  variant="outline"
+                  className="border-app-line text-app-ink hover:bg-app-bg"
+                  onClick={handleCopySupportMessage}
+                >
                   Sao chép nội dung hỗ trợ
                 </Button>
                 {BILLING_SUPPORT_EMAIL ? (
@@ -1170,13 +1218,7 @@ export function BillingPlan() {
                       {getEntitlementLabel(key)}
                     </p>
                     <p className="text-xs text-app-ink-muted">
-                      {isActive
-                        ? realMode
-                          ? "Đang hoạt động"
-                          : "Đang mở"
-                        : realMode
-                          ? "Chưa kích hoạt"
-                          : "Chưa mở"}
+                      {isActive ? (realMode ? "Đang hoạt động" : "Đang mở") : realMode ? "Chưa kích hoạt" : "Chưa mở"}
                     </p>
                   </div>
                 </div>
@@ -1194,14 +1236,28 @@ export function BillingPlan() {
             Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing} className="border-app-line text-app-ink hover:bg-app-bg">
+            <Button
+              variant="outline"
+              onClick={handleSyncEntitlements}
+              disabled={isSyncing}
+              className="border-app-line text-app-ink hover:bg-app-bg"
+            >
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
               {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền nâng cao"}
             </Button>
-            <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring} className="border-app-line text-app-ink hover:bg-app-bg">
+            <Button
+              variant="outline"
+              onClick={handleRestoreAccess}
+              disabled={isRestoring}
+              className="border-app-line text-app-ink hover:bg-app-bg"
+            >
               {isRestoring ? "Đang khôi phục…" : "Khôi phục quyền đã mua"}
             </Button>
-            <Button variant="outline" onClick={() => navigate("/")} className="border-app-line text-app-ink hover:bg-app-bg">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/")}
+              className="border-app-line text-app-ink hover:bg-app-bg"
+            >
               Quay lại Trang chính
             </Button>
           </div>
@@ -1295,12 +1351,18 @@ export function BillingPlan() {
                     </Button>
                   )}
                   {isCurrent && !isPlus && (
-                    <Button className="mt-6 w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg" variant="outline">
+                    <Button
+                      className="mt-6 w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                      variant="outline"
+                    >
                       Gói hiện tại
                     </Button>
                   )}
                   {isCurrent && isPlus && (
-                    <Button className="mt-6 w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg" variant="outline">
+                    <Button
+                      className="mt-6 w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                      variant="outline"
+                    >
                       Đang dùng
                     </Button>
                   )}

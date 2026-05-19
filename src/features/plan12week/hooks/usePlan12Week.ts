@@ -16,10 +16,7 @@ import type {
 
 import { generateAdaptiveSuggestion } from "../logic/adaptivePlanning";
 import { analyzeExecutionPatterns } from "../logic/behaviorInsights";
-import {
-  generateExecutionSuggestion,
-  interpretExecutionScore,
-} from "../logic/executionFeedback";
+import { generateExecutionSuggestion, interpretExecutionScore } from "../logic/executionFeedback";
 import { savePlanDetailsLink } from "../persistence/planLinkStore";
 import { calculateExecutionScore } from "../logic/executionScore";
 import { calculateGoalProgress } from "../logic/goalProgress";
@@ -168,11 +165,7 @@ function extractInitialMetricIdMap(plan: Plan12Week | null): Record<string, stri
   }, {});
 }
 
-function updateWeekByNumber(
-  currentPlan: Plan12Week,
-  weekNumber: number,
-  updater: (week: Week) => Week,
-): Plan12Week {
+function updateWeekByNumber(currentPlan: Plan12Week, weekNumber: number, updater: (week: Week) => Week): Plan12Week {
   return {
     ...currentPlan,
     weeks: currentPlan.weeks.map((week) => (week.weekNumber === weekNumber ? updater(week) : week)),
@@ -216,14 +209,12 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
   const [error, setError] = useState<AppError | null>(null);
   const [pendingApiRequests, setPendingApiRequests] = useState(0);
   const hydrationRequestIdRef = useRef(0);
-  const [apiPlanId, setApiPlanId] = useState<string | null>(
-    isLikelyMongoId(initialPlan?.id) ? initialPlan.id : null,
+  const [apiPlanId, setApiPlanId] = useState<string | null>(isLikelyMongoId(initialPlan?.id) ? initialPlan.id : null);
+  const [weekIdByNumber, setWeekIdByNumber] = useState<Record<number, string>>(() =>
+    extractInitialWeekIdMap(initialPlan),
   );
-  const [weekIdByNumber, setWeekIdByNumber] = useState<Record<number, string>>(
-    () => extractInitialWeekIdMap(initialPlan),
-  );
-  const [metricIdByKey, setMetricIdByKey] = useState<Record<string, string>>(
-    () => extractInitialMetricIdMap(initialPlan),
+  const [metricIdByKey, setMetricIdByKey] = useState<Record<string, string>>(() =>
+    extractInitialMetricIdMap(initialPlan),
   );
 
   useEffect(() => {
@@ -246,7 +237,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
 
   const loading = pendingApiRequests > 0;
 
-  const runWithApi = useCallback(async <T,>(operation: () => Promise<T>): Promise<T | null> => {
+  const runWithApi = useCallback(async <T>(operation: () => Promise<T>): Promise<T | null> => {
     setError(null);
     setPendingApiRequests((count) => count + 1);
 
@@ -285,43 +276,49 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
     );
   }, []);
 
-  const loadPlan = useCallback(async (planId: string): Promise<Plan12Week | null> => {
-    const requestId = ++hydrationRequestIdRef.current;
-    const details = await runWithApi(() => getPlanById(planId));
-    if (!details) return null;
-    if (requestId !== hydrationRequestIdRef.current) return null;
+  const loadPlan = useCallback(
+    async (planId: string): Promise<Plan12Week | null> => {
+      const requestId = ++hydrationRequestIdRef.current;
+      const details = await runWithApi(() => getPlanById(planId));
+      if (!details) return null;
+      if (requestId !== hydrationRequestIdRef.current) return null;
 
-    applyPlanDetails(details);
-    return mapApiPlan(details);
-  }, [applyPlanDetails, runWithApi]);
+      applyPlanDetails(details);
+      return mapApiPlan(details);
+    },
+    [applyPlanDetails, runWithApi],
+  );
 
-  const createPlan = useCallback(async (payload: CreatePlanPayload): Promise<Plan12Week | null> => {
-    const requestId = ++hydrationRequestIdRef.current;
-    const created = await runWithApi(() => createRemotePlan(payload));
-    if (!created) return null;
-    if (requestId !== hydrationRequestIdRef.current) return null;
+  const createPlan = useCallback(
+    async (payload: CreatePlanPayload): Promise<Plan12Week | null> => {
+      const requestId = ++hydrationRequestIdRef.current;
+      const created = await runWithApi(() => createRemotePlan(payload));
+      if (!created) return null;
+      if (requestId !== hydrationRequestIdRef.current) return null;
 
-    const details = await runWithApi(() => getPlanById(created.id));
-    if (requestId !== hydrationRequestIdRef.current) return null;
-    if (!details) {
-      const nextPlan: Plan12Week = {
-        id: created.id,
-        userId: created.userId,
-        vision: created.vision,
-        smartGoalId: created.smartGoalId ?? "",
-        startDate: normalizeDateValue(created.startDate) ?? created.startDate,
-        createdAt: normalizeDateValue(created.createdAt),
-        updatedAt: normalizeDateValue(created.updatedAt),
-        weeks: [],
-      };
-      setApiPlanId(created.id);
-      setPlan(nextPlan);
-      return nextPlan;
-    }
+      const details = await runWithApi(() => getPlanById(created.id));
+      if (requestId !== hydrationRequestIdRef.current) return null;
+      if (!details) {
+        const nextPlan: Plan12Week = {
+          id: created.id,
+          userId: created.userId,
+          vision: created.vision,
+          smartGoalId: created.smartGoalId ?? "",
+          startDate: normalizeDateValue(created.startDate) ?? created.startDate,
+          createdAt: normalizeDateValue(created.createdAt),
+          updatedAt: normalizeDateValue(created.updatedAt),
+          weeks: [],
+        };
+        setApiPlanId(created.id);
+        setPlan(nextPlan);
+        return nextPlan;
+      }
 
-    applyPlanDetails(details);
-    return mapApiPlan(details);
-  }, [applyPlanDetails, runWithApi]);
+      applyPlanDetails(details);
+      return mapApiPlan(details);
+    },
+    [applyPlanDetails, runWithApi],
+  );
 
   useEffect(() => {
     if (!apiPlanId || !isLikelyMongoId(apiPlanId)) return;
@@ -336,13 +333,16 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
   const cycleCompletionRate = useMemo(() => (plan ? calculateCycleCompletionRate(plan) : 0), [plan]);
   const goalProgressPercent = useMemo(() => calculateGoalProgress(goalProgress), [goalProgress]);
 
-  const getWeekId = useCallback((weekNumber: number): string | null => {
-    const knownWeekId = weekIdByNumber[weekNumber];
-    if (knownWeekId) return knownWeekId;
+  const getWeekId = useCallback(
+    (weekNumber: number): string | null => {
+      const knownWeekId = weekIdByNumber[weekNumber];
+      if (knownWeekId) return knownWeekId;
 
-    const planWeekId = plan?.weeks.find((week) => week.weekNumber === weekNumber)?.id;
-    return typeof planWeekId === "string" && planWeekId.length > 0 ? planWeekId : null;
-  }, [plan, weekIdByNumber]);
+      const planWeekId = plan?.weeks.find((week) => week.weekNumber === weekNumber)?.id;
+      return typeof planWeekId === "string" && planWeekId.length > 0 ? planWeekId : null;
+    },
+    [plan, weekIdByNumber],
+  );
 
   const updateWeek = (weekNumber: number, updates: UpdateWeekInput) => {
     const previousWeek = plan?.weeks.find((week) => week.weekNumber === weekNumber);
@@ -406,9 +406,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
   const addTask = (weekNumber: number, input: AddTaskInput): string | null => {
     let warning: string | null = null;
     const temporaryTaskId = createId("task");
-    const previousTasks = cloneTasks(
-      plan?.weeks.find((week) => week.weekNumber === weekNumber)?.tasks ?? [],
-    );
+    const previousTasks = cloneTasks(plan?.weeks.find((week) => week.weekNumber === weekNumber)?.tasks ?? []);
 
     setPlan((previousPlan) => {
       if (!previousPlan) return previousPlan;
@@ -460,9 +458,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
 
         return updateWeekByNumber(previousPlan, weekNumber, (week) => ({
           ...week,
-          tasks: week.tasks.map((task) =>
-            task.id === temporaryTaskId ? mapApiTask(createdTask) : task,
-          ),
+          tasks: week.tasks.map((task) => (task.id === temporaryTaskId ? mapApiTask(createdTask) : task)),
         }));
       });
     })();
@@ -470,11 +466,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
     return warning;
   };
 
-  const updateTaskStatus = (
-    weekNumber: number,
-    taskId: string,
-    status: TaskStatus,
-  ) => {
+  const updateTaskStatus = (weekNumber: number, taskId: string, status: TaskStatus) => {
     const previousStatus = plan?.weeks
       .find((week) => week.weekNumber === weekNumber)
       ?.tasks.find((task) => task.id === taskId)?.status;
@@ -503,9 +495,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
 
           return updateWeekByNumber(previousPlan, weekNumber, (week) => ({
             ...week,
-            tasks: week.tasks.map((task) =>
-              task.id === taskId ? { ...task, status: previousStatus } : task,
-            ),
+            tasks: week.tasks.map((task) => (task.id === taskId ? { ...task, status: previousStatus } : task)),
           }));
         });
         return;
@@ -516,61 +506,54 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
 
         return updateWeekByNumber(previousPlan, weekNumber, (week) => ({
           ...week,
-          tasks: week.tasks.map((task) =>
-            task.id === updatedTask.id ? mapApiTask(updatedTask) : task,
-          ),
+          tasks: week.tasks.map((task) => (task.id === updatedTask.id ? mapApiTask(updatedTask) : task)),
         }));
       });
     })();
   };
 
-  const ensureMetricId = useCallback(async (
-    weekNumber: number,
-    metricName: string,
-  ): Promise<string | null> => {
-    const weekId = getWeekId(weekNumber);
-    if (!weekId) return null;
+  const ensureMetricId = useCallback(
+    async (weekNumber: number, metricName: string): Promise<string | null> => {
+      const weekId = getWeekId(weekNumber);
+      if (!weekId) return null;
 
-    const lookupKey = createMetricLookupKey(weekNumber, metricName);
-    const knownMetricId = metricIdByKey[lookupKey];
-    if (knownMetricId) return knownMetricId;
+      const lookupKey = createMetricLookupKey(weekNumber, metricName);
+      const knownMetricId = metricIdByKey[lookupKey];
+      if (knownMetricId) return knownMetricId;
 
-    const weekMetrics = await runWithApi(() => getMetrics(weekId));
-    const existingMetric = weekMetrics?.find(
-      (metric) => metric.name.trim().toLowerCase() === metricName.trim().toLowerCase(),
-    );
+      const weekMetrics = await runWithApi(() => getMetrics(weekId));
+      const existingMetric = weekMetrics?.find(
+        (metric) => metric.name.trim().toLowerCase() === metricName.trim().toLowerCase(),
+      );
 
-    if (existingMetric) {
+      if (existingMetric) {
+        setMetricIdByKey((previousMap) => ({
+          ...previousMap,
+          [lookupKey]: existingMetric.id,
+        }));
+        return existingMetric.id;
+      }
+
+      const createdMetric = await runWithApi(() =>
+        createRemoteMetric(weekId, {
+          name: metricName,
+          weeklyTarget: 0,
+        }),
+      );
+
+      if (!createdMetric) return null;
+
       setMetricIdByKey((previousMap) => ({
         ...previousMap,
-        [lookupKey]: existingMetric.id,
+        [lookupKey]: createdMetric.id,
       }));
-      return existingMetric.id;
-    }
 
-    const createdMetric = await runWithApi(() =>
-      createRemoteMetric(weekId, {
-        name: metricName,
-        weeklyTarget: 0,
-      }),
-    );
+      return createdMetric.id;
+    },
+    [getWeekId, metricIdByKey, runWithApi],
+  );
 
-    if (!createdMetric) return null;
-
-    setMetricIdByKey((previousMap) => ({
-      ...previousMap,
-      [lookupKey]: createdMetric.id,
-    }));
-
-    return createdMetric.id;
-  }, [getWeekId, metricIdByKey, runWithApi]);
-
-  const logLeadMetric = (
-    weekNumber: number,
-    metricName: string,
-    value: number,
-    date = new Date().toISOString(),
-  ) => {
+  const logLeadMetric = (weekNumber: number, metricName: string, value: number, date = new Date().toISOString()) => {
     const normalizedMetricName = metricName.trim();
     if (!normalizedMetricName) return;
     const previousLeadMetrics = cloneLeadMetrics(
@@ -593,9 +576,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
       if (!previousPlan) return previousPlan;
 
       return updateWeekByNumber(previousPlan, weekNumber, (week) => {
-        const existingMetricIndex = week.leadMetrics.findIndex(
-          (metric) => metric.name === normalizedMetricName,
-        );
+        const existingMetricIndex = week.leadMetrics.findIndex((metric) => metric.name === normalizedMetricName);
 
         if (existingMetricIndex < 0) {
           return {
@@ -679,11 +660,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
     })();
   };
 
-  const submitWeeklyReview = (
-    weekNumber: number,
-    reflection?: string,
-    adjustments?: string,
-  ): WeekReview | null => {
+  const submitWeeklyReview = (weekNumber: number, reflection?: string, adjustments?: string): WeekReview | null => {
     let createdReview: WeekReview | null = null;
     const previousReview = plan?.weeks.find((week) => week.weekNumber === weekNumber)?.review;
 
@@ -756,7 +733,9 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
     return createdReview;
   };
 
-  const getExecutionFeedback = (weekNumber: number): {
+  const getExecutionFeedback = (
+    weekNumber: number,
+  ): {
     status: ReturnType<typeof interpretExecutionScore>;
     suggestion: string;
     score: number;

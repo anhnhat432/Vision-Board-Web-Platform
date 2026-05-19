@@ -44,10 +44,7 @@ function buildFirebaseConfig(): FirebaseConfig {
 
 function isFirebaseConfigured(config: FirebaseConfig): boolean {
   return (
-    config.apiKey.length > 0 &&
-    config.authDomain.length > 0 &&
-    config.projectId.length > 0 &&
-    config.appId.length > 0
+    config.apiKey.length > 0 && config.authDomain.length > 0 && config.projectId.length > 0 && config.appId.length > 0
   );
 }
 
@@ -138,10 +135,7 @@ export async function loginWithGoogle(): Promise<UserCredential | null> {
   return credential;
 }
 
-export async function loginWithEmail(
-  email: string,
-  password: string,
-): Promise<UserCredential | null> {
+export async function loginWithEmail(email: string, password: string): Promise<UserCredential | null> {
   const auth = getFirebaseAuth();
   if (!auth) return null;
 
@@ -150,10 +144,7 @@ export async function loginWithEmail(
   return credential;
 }
 
-export async function registerWithEmail(
-  email: string,
-  password: string,
-): Promise<UserCredential | null> {
+export async function registerWithEmail(email: string, password: string): Promise<UserCredential | null> {
   const auth = getFirebaseAuth();
   if (!auth) return null;
 
@@ -207,9 +198,7 @@ export async function reloadCurrentUser(): Promise<User | null> {
   return user;
 }
 
-export function subscribeAuthState(
-  callback: (user: User | null) => void,
-): () => void {
+export function subscribeAuthState(callback: (user: User | null) => void): () => void {
   const auth = getFirebaseAuth();
   if (!auth) {
     callback(null);
@@ -229,9 +218,7 @@ export function subscribeAuthState(
   });
 }
 
-export function subscribeIdToken(
-  callback: (user: User | null) => void,
-): () => void {
+export function subscribeIdToken(callback: (user: User | null) => void): () => void {
   const auth = getFirebaseAuth();
   if (!auth) {
     callback(null);

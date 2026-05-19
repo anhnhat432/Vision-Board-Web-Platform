@@ -7,4 +7,3 @@ export { VisionMapIllustration } from "./VisionMapIllustration";
 export { WeeklyReviewIllustration } from "./WeeklyReviewIllustration";
 export * from "./mini";
 export type { AmbientIllustrationProps } from "./utils";
-

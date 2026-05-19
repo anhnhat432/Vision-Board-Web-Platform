@@ -1,11 +1,7 @@
 ﻿import { CalendarClock, Clock3, Pencil, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import {
-  getDefaultTimeBlocks,
-  TIME_BLOCK_DAYS,
-  validateTimeBlocks,
-} from "@/features/plan12week/logic/timeBlocks";
+import { getDefaultTimeBlocks, TIME_BLOCK_DAYS, validateTimeBlocks } from "@/features/plan12week/logic/timeBlocks";
 import type { TimeBlock, TimeBlockDayOfWeek, TimeBlockType } from "@/app/utils/storage-types";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -137,7 +133,8 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               Performance Time Blocking
             </CardTitle>
             <CardDescription className="mt-2 text-app-ink-soft">
-              Gợi ý nhịp tuần theo 12 Week Year: Khung chiến lược, Khung dự phòng và Khung đột phá. Lịch này chỉ lưu trên thiết bị, không đồng bộ lịch.
+              Gợi ý nhịp tuần theo 12 Week Year: Khung chiến lược, Khung dự phòng và Khung đột phá. Lịch này chỉ lưu
+              trên thiết bị, không đồng bộ lịch.
             </CardDescription>
           </div>
           {sortedBlocks.length === 0 && (
@@ -206,7 +203,9 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Sửa khung</DialogTitle>
-            <DialogDescription>Chỉnh ngày, giờ bắt đầu và thời lượng. App sẽ chặn khung trùng giờ trong cùng ngày.</DialogDescription>
+            <DialogDescription>
+              Chỉnh ngày, giờ bắt đầu và thời lượng. App sẽ chặn khung trùng giờ trong cùng ngày.
+            </DialogDescription>
           </DialogHeader>
           {editingDraft ? (
             <div className="stack-stack">
@@ -215,9 +214,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                 <Select
                   value={editingDraft.dayOfWeek}
                   onValueChange={(day) =>
-                    setEditingDraft((draft) =>
-                      draft ? { ...draft, dayOfWeek: day as TimeBlockDayOfWeek } : draft,
-                    )
+                    setEditingDraft((draft) => (draft ? { ...draft, dayOfWeek: day as TimeBlockDayOfWeek } : draft))
                   }
                 >
                   <SelectTrigger id="time-block-day">
@@ -255,9 +252,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                     step={15}
                     value={editingDraft.durationMinutes}
                     onChange={(event) =>
-                      setEditingDraft((draft) =>
-                        draft ? { ...draft, durationMinutes: event.target.value } : draft,
-                      )
+                      setEditingDraft((draft) => (draft ? { ...draft, durationMinutes: event.target.value } : draft))
                     }
                   />
                 </div>

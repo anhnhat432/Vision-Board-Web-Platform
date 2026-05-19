@@ -149,9 +149,7 @@ describe("getExecutionInsights — review_missing", () => {
 
 describe("getExecutionInsights — overloaded_week", () => {
   it("flags overloaded when many tasks AND completion is low", () => {
-    const tasks = Array.from({ length: 12 }, (_, i) =>
-      makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 3 }),
-    );
+    const tasks = Array.from({ length: 12 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 3 }));
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,
@@ -179,9 +177,7 @@ describe("getExecutionInsights — overloaded_week", () => {
 
 describe("getExecutionInsights — task_completion_without_progress", () => {
   it("flags when completion is high but lag metric is empty", () => {
-    const tasks = Array.from({ length: 5 }, (_, i) =>
-      makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 4 }),
-    );
+    const tasks = Array.from({ length: 5 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 4 }));
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,
@@ -196,9 +192,7 @@ describe("getExecutionInsights — task_completion_without_progress", () => {
   });
 
   it("does not flag when lag metric has been updated", () => {
-    const tasks = Array.from({ length: 5 }, (_, i) =>
-      makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 4 }),
-    );
+    const tasks = Array.from({ length: 5 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 4 }));
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,
@@ -276,15 +270,11 @@ describe("getExecutionInsights — strong_lead_metric", () => {
 
 describe("getExecutionInsights — needs_scope_reduction", () => {
   it("flags when completion is high but lead completion is low", () => {
-    const tasks = Array.from({ length: 6 }, (_, i) =>
-      makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 5 }),
-    );
+    const tasks = Array.from({ length: 6 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 5 }));
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,
-        scoreboard: [
-          makeScoreboard({ weekNumber: 3, weeklyScore: 70, leadCompletionPercent: 25 }),
-        ],
+        scoreboard: [makeScoreboard({ weekNumber: 3, weeklyScore: 70, leadCompletionPercent: 25 })],
         taskInstances: tasks,
         weeklyReviews: [makeReview({ weekNumber: 2, reviewCompleted: true })],
       }),
@@ -296,9 +286,7 @@ describe("getExecutionInsights — needs_scope_reduction", () => {
 
 describe("getExecutionInsights — progress_without_consistency", () => {
   it("flags when lag metric moved but completion is low", () => {
-    const tasks = Array.from({ length: 6 }, (_, i) =>
-      makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 2 }),
-    );
+    const tasks = Array.from({ length: 6 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 2 }));
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,
@@ -315,8 +303,8 @@ describe("getExecutionInsights — progress_without_consistency", () => {
 
 describe("getExecutionInsights — ready_to_push", () => {
   it("flags when recent avg score is strong AND check-in rate is strong", () => {
-    const checkIns = ["2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29"].map(
-      (date) => makeCheckIn({ date, didWorkToday: true }),
+    const checkIns = ["2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29"].map((date) =>
+      makeCheckIn({ date, didWorkToday: true }),
     );
     const insights = getExecutionInsights(
       makeSystem({
@@ -340,9 +328,7 @@ describe("getExecutionInsights — ready_to_push", () => {
 
 describe("getExecutionInsights — priority and capping", () => {
   it("returns at most 3 insights, sorted by priority", () => {
-    const tasks = Array.from({ length: 12 }, (_, i) =>
-      makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 3 }),
-    );
+    const tasks = Array.from({ length: 12 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 3 }));
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,

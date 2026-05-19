@@ -1,5 +1,9 @@
 import { get, post, delete as deleteRequest } from "@/lib/api/apiClient";
-import type { DataMutationItem, DataMutationKind, DataMutationPayload } from "@/features/plan12week/persistence/mutationQueue";
+import type {
+  DataMutationItem,
+  DataMutationKind,
+  DataMutationPayload,
+} from "@/features/plan12week/persistence/mutationQueue";
 import type { TwelveWeekImportPayload } from "@/features/plan12week/persistence/twelveWeekImportPayload";
 
 export type TwelveWeekMutationResultStatus =
@@ -317,9 +321,7 @@ export function toTwelveWeekMutationRequestItem(item: DataMutationItem): TwelveW
   };
 }
 
-export function post12WeekMutations(
-  payload: TwelveWeekMutationBatchRequest,
-): Promise<TwelveWeekMutationBatchResponse> {
+export function post12WeekMutations(payload: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> {
   return post<TwelveWeekMutationBatchResponse, TwelveWeekMutationBatchRequest>("/sync/12-week/mutations", payload);
 }
 
@@ -360,9 +362,7 @@ export interface TwelveWeekImportResponse {
   links?: TwelveWeekImportEntityLinks[];
 }
 
-export function post12WeekImport(
-  payload: TwelveWeekImportRequest,
-): Promise<TwelveWeekImportResponse> {
+export function post12WeekImport(payload: TwelveWeekImportRequest): Promise<TwelveWeekImportResponse> {
   return post<TwelveWeekImportResponse, TwelveWeekImportRequest>("/sync/12-week/import", payload);
 }
 

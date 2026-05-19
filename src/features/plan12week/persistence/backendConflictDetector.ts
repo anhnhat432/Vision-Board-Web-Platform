@@ -87,9 +87,7 @@ function findBackendTaskForLocalTask(
 
   const localTitleKey = normalizeComparableText(localTask.title);
   const localDateKey = normalizeDateKey(localTask.scheduledDate);
-  const sameTitleTasks = backendWeek.tasks.filter(
-    (task) => normalizeComparableText(task.title) === localTitleKey,
-  );
+  const sameTitleTasks = backendWeek.tasks.filter((task) => normalizeComparableText(task.title) === localTitleKey);
   const sameTitleAndDateTask = sameTitleTasks.find((task) => normalizeDateKey(task.scheduledDate) === localDateKey);
 
   return sameTitleAndDateTask ?? (sameTitleTasks.length === 1 ? sameTitleTasks[0] : null);
@@ -257,7 +255,11 @@ function detectWeeklyReviewConflicts(
 
     const localOutput = normalizeText(localReview.biggestOutputThisWeek);
     const backendOutput = normalizeText(backendReview.reflection);
-    if (localOutput && backendOutput && normalizeComparableText(localOutput) !== normalizeComparableText(backendOutput)) {
+    if (
+      localOutput &&
+      backendOutput &&
+      normalizeComparableText(localOutput) !== normalizeComparableText(backendOutput)
+    ) {
       addConflict(conflicts, {
         kind: "weekly_review_output",
         weekNumber,

@@ -79,11 +79,7 @@ export function validateTimeBlocks(blocks: readonly TimeBlock[]): TimeBlockValid
     if (parseTimeToMinutes(block.startTime) === null) {
       errors.push(`Giờ bắt đầu của khung ${block.id || block.dayOfWeek} không hợp lệ.`);
     }
-    if (
-      !Number.isFinite(block.durationMinutes) ||
-      block.durationMinutes < 15 ||
-      block.durationMinutes > 300
-    ) {
+    if (!Number.isFinite(block.durationMinutes) || block.durationMinutes < 15 || block.durationMinutes > 300) {
       errors.push("Thời lượng khung cần nằm trong khoảng 15-300 phút.");
     }
   }

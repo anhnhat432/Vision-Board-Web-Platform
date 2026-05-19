@@ -42,14 +42,7 @@ const INLINE_CLASS =
  * FeasibilityCheck, 12WeekSetup, etc. Keeps a stable contract so global
  * focus/scroll behavior stays consistent.
  */
-export function WizardActionBar({
-  back,
-  next,
-  secondary,
-  mode = "inline",
-  className,
-  testId,
-}: WizardActionBarProps) {
+export function WizardActionBar({ back, next, secondary, mode = "inline", className, testId }: WizardActionBarProps) {
   const containerClass = mode === "sticky" ? STICKY_CLASS : INLINE_CLASS;
 
   return (

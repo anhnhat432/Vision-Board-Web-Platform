@@ -143,11 +143,7 @@ function getRequestFailureInput(error: unknown): MutationFailureInput {
   const appError = toAppError(error) as ReturnType<typeof toAppError> & { isNetworkError?: boolean };
   const status = appError.status;
   const retryable =
-    Boolean(appError.isNetworkError) ||
-    status === undefined ||
-    status === 408 ||
-    status === 429 ||
-    status >= 500;
+    Boolean(appError.isNetworkError) || status === undefined || status === 408 || status === 429 || status >= 500;
 
   return {
     code: retryable ? "sync_request_retryable" : "sync_request_failed",
@@ -176,7 +172,9 @@ function countRemainingPending(store: DataMutationQueueStore, ownerUid: string, 
   return listPendingMutations(store, { ownerUid, now }).length;
 }
 
-function isDeleteMutation(item: DataMutationItem): item is Extract<DataMutationItem, { kind: "goal_deleted" | "plan_deleted" }> {
+function isDeleteMutation(
+  item: DataMutationItem,
+): item is Extract<DataMutationItem, { kind: "goal_deleted" | "plan_deleted" }> {
   return item.kind === "goal_deleted" || item.kind === "plan_deleted";
 }
 
@@ -212,7 +210,14 @@ function createDrainResult(input: {
   error?: unknown;
 }): MutationQueueSyncResult {
   return {
-    status: input.failedCount > 0 ? (input.hadRequestError && input.succeededCount === 0 ? "error" : "partial") : input.hadRequestError ? "error" : "success",
+    status:
+      input.failedCount > 0
+        ? input.hadRequestError && input.succeededCount === 0
+          ? "error"
+          : "partial"
+        : input.hadRequestError
+          ? "error"
+          : "success",
     attemptedCount: input.pendingMutationsLength,
     succeededCount: input.succeededCount,
     duplicateCount: input.duplicateCount,
@@ -244,7 +249,10 @@ export async function sendPending12WeekMutations(
   if (store.items.length !== rawStore.items.length) {
     writeMutationQueueStore(store, { storage: options.storage, now });
   }
-  const pendingMutations = listPendingMutations(store, { ownerUid, now }).slice(0, options.batchSize ?? DEFAULT_BATCH_SIZE);
+  const pendingMutations = listPendingMutations(store, { ownerUid, now }).slice(
+    0,
+    options.batchSize ?? DEFAULT_BATCH_SIZE,
+  );
   if (pendingMutations.length === 0) return createSkippedResult("empty");
 
   const mutationIds = pendingMutations.map((item) => item.id);
@@ -282,7 +290,9 @@ export async function sendPending12WeekMutations(
       const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
       latestStore = markMutationFailed(latestStore, item.id, failure, {
         now,
-        nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
+        nextRetryAt: failure.retryable
+          ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1)
+          : undefined,
       });
       if (failure.httpStatus !== 429) failedCount += 1;
       hadRequestError = true;
@@ -307,7 +317,9 @@ export async function sendPending12WeekMutations(
       latestStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
 
       for (const item of deleteMutations) {
-        const appliedDelete = latestStore.items.find((candidate) => candidate.id === item.id && candidate.status === "applied");
+        const appliedDelete = latestStore.items.find(
+          (candidate) => candidate.id === item.id && candidate.status === "applied",
+        );
         if (!appliedDelete) continue;
         latestStore = markMutationSucceeded(latestStore, item.id, { now });
       }
@@ -331,7 +343,9 @@ export async function sendPending12WeekMutations(
         const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
         latestStore = markMutationFailed(latestStore, item.id, failure, {
           now,
-          nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
+          nextRetryAt: failure.retryable
+            ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1)
+            : undefined,
         });
         failedCount += 1;
       }
@@ -343,7 +357,9 @@ export async function sendPending12WeekMutations(
         const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
         latestStore = markMutationFailed(latestStore, item.id, failure, {
           now,
-          nextRetryAt: failure.retryable ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1) : undefined,
+          nextRetryAt: failure.retryable
+            ? getNextRetryAt(now, inFlightItem?.attemptCount ?? item.attemptCount + 1)
+            : undefined,
         });
       }
 

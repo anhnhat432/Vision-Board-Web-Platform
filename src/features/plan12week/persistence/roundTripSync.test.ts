@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type {
-  Goal,
-  TwelveWeekSystem,
-  UserData,
-} from "@/app/utils/storage-types";
+import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
 import type {
   TwelveWeekPulledDailyCheckIn,
   TwelveWeekPulledGoal,
@@ -15,9 +11,7 @@ import type {
   TwelveWeekPulledWeeklyReview,
   TwelveWeekPulledWorkspace,
 } from "@/services/syncService";
-import type {
-  TwelveWeekImportPayload,
-} from "./twelveWeekImportPayload";
+import type { TwelveWeekImportPayload } from "./twelveWeekImportPayload";
 import { createTwelveWeekImportPayload } from "./twelveWeekImportPayload";
 import { applyPulledWorkspaceToUserData } from "./pulledWorkspaceApply";
 import { createPulledWorkspaceMergeReport } from "./pulledWorkspaceMergeReport";
@@ -85,8 +79,20 @@ function buildSystem(): TwelveWeekSystem {
     currentWeek: 2,
     totalWeeks: 2,
     weeklyPlans: [
-      { weekNumber: 1, phaseName: "Foundation", focus: "Build import payload", milestone: "Serializer tested", completed: true },
-      { weekNumber: 2, phaseName: "Validation", focus: "Use payload in import design", milestone: "Backend-ready contract", completed: false },
+      {
+        weekNumber: 1,
+        phaseName: "Foundation",
+        focus: "Build import payload",
+        milestone: "Serializer tested",
+        completed: true,
+      },
+      {
+        weekNumber: 2,
+        phaseName: "Validation",
+        focus: "Use payload in import design",
+        milestone: "Backend-ready contract",
+        completed: false,
+      },
     ],
     taskInstances: [
       {
@@ -144,7 +150,14 @@ function buildSystem(): TwelveWeekSystem {
       },
     ],
     scoreboard: [
-      { weekNumber: 1, leadCompletionPercent: 100, mainMetricProgress: "50%", outputDone: "Serializer draft", reviewDone: true, weeklyScore: 92 },
+      {
+        weekNumber: 1,
+        leadCompletionPercent: 100,
+        mainMetricProgress: "50%",
+        outputDone: "Serializer draft",
+        reviewDone: true,
+        weeklyScore: 92,
+      },
     ],
   };
 }
@@ -229,7 +242,9 @@ function simulateBackendEcho(importPayload: TwelveWeekImportPayload): TwelveWeek
     weekNumber: week.weekNumber,
     focus: week.focus,
     expectedOutput: week.expectedOutput,
-    review: week.completed ? { weekNumber: week.weekNumber, executionScore: 0, reflection: "", adjustments: "" } : undefined,
+    review: week.completed
+      ? { weekNumber: week.weekNumber, executionScore: 0, reflection: "", adjustments: "" }
+      : undefined,
   }));
 
   const pulledTasks: TwelveWeekPulledTask[] = plan.tasks.map((task, i) => ({
@@ -368,27 +383,133 @@ interface FieldGap {
 
 const KNOWN_FIELD_GAPS: FieldGap[] = [
   // Plan-level metadata: pull v1 does not return these from the plan model
-  { field: "templateId", category: "plan_metadata", severity: "low", reason: "Pull v1 does not return template identity." },
-  { field: "templateName", category: "plan_metadata", severity: "low", reason: "Pull v1 does not return template identity." },
-  { field: "lagMetric", category: "plan_metadata", severity: "medium", reason: "Pull v1 does not return plan-level lag metric metadata. Defaults to lead indicator name." },
-  { field: "leadIndicators", category: "plan_metadata", severity: "medium", reason: "Pull v1 returns week-level metrics, not the original lead indicator setup. Reconstructed from metrics or tasks." },
-  { field: "milestones", category: "plan_metadata", severity: "medium", reason: "Pull v1 returns weekly expectedOutput, not the original milestones object." },
-  { field: "successEvidence", category: "setup", severity: "low", reason: "Pull v1 does not return setup evidence text." },
-  { field: "reviewDay", category: "setup", severity: "low", reason: "Pull v1 does not return review day preference. Defaults to Sunday." },
-  { field: "week12Outcome", category: "setup", severity: "low", reason: "Pull v1 derives from last week milestone or goal title." },
-  { field: "weeklyActions", category: "setup", severity: "low", reason: "Pull v1 does not return legacy setup action list." },
-  { field: "successMetric", category: "setup", severity: "low", reason: "Pull v1 does not return setup success metric." },
-  { field: "endDate", category: "plan_metadata", severity: "medium", reason: "Pull v1 does not return endDate. Defaults to empty." },
-  { field: "timezone", category: "setup", severity: "low", reason: "Pull v1 does not return timezone. Defaults to Asia/Ho_Chi_Minh." },
-  { field: "weekStartsOn", category: "setup", severity: "low", reason: "Pull v1 does not return weekStartsOn. Defaults to Monday." },
-  { field: "dailyReminderTime", category: "setup", severity: "low", reason: "Pull v1 does not return local reminder preference." },
-  { field: "tacticLoadPreference", category: "setup", severity: "low", reason: "Pull v1 does not return tactic load preference." },
-  { field: "preferredDays", category: "setup", severity: "low", reason: "Pull v1 does not return preferred execution days." },
-  { field: "personalConstraint", category: "setup", severity: "low", reason: "Pull v1 does not return personal constraint." },
-  { field: "reentryCount", category: "setup", severity: "low", reason: "Pull v1 does not return reentry metadata. Defaults to 0." },
-  { field: "scoreboard", category: "derived", severity: "low", reason: "Scoreboard is derived from tasks/reviews, not stored directly." },
-  { field: "weeklyPlans[].phaseName", category: "plan_metadata", severity: "low", reason: "Pull v1 re-derives phase names from week number." },
-  { field: "goalType", category: "plan_metadata", severity: "low", reason: "Pull v1 infers from goal focusArea/category, not original setup." },
+  {
+    field: "templateId",
+    category: "plan_metadata",
+    severity: "low",
+    reason: "Pull v1 does not return template identity.",
+  },
+  {
+    field: "templateName",
+    category: "plan_metadata",
+    severity: "low",
+    reason: "Pull v1 does not return template identity.",
+  },
+  {
+    field: "lagMetric",
+    category: "plan_metadata",
+    severity: "medium",
+    reason: "Pull v1 does not return plan-level lag metric metadata. Defaults to lead indicator name.",
+  },
+  {
+    field: "leadIndicators",
+    category: "plan_metadata",
+    severity: "medium",
+    reason:
+      "Pull v1 returns week-level metrics, not the original lead indicator setup. Reconstructed from metrics or tasks.",
+  },
+  {
+    field: "milestones",
+    category: "plan_metadata",
+    severity: "medium",
+    reason: "Pull v1 returns weekly expectedOutput, not the original milestones object.",
+  },
+  {
+    field: "successEvidence",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return setup evidence text.",
+  },
+  {
+    field: "reviewDay",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return review day preference. Defaults to Sunday.",
+  },
+  {
+    field: "week12Outcome",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 derives from last week milestone or goal title.",
+  },
+  {
+    field: "weeklyActions",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return legacy setup action list.",
+  },
+  {
+    field: "successMetric",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return setup success metric.",
+  },
+  {
+    field: "endDate",
+    category: "plan_metadata",
+    severity: "medium",
+    reason: "Pull v1 does not return endDate. Defaults to empty.",
+  },
+  {
+    field: "timezone",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return timezone. Defaults to Asia/Ho_Chi_Minh.",
+  },
+  {
+    field: "weekStartsOn",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return weekStartsOn. Defaults to Monday.",
+  },
+  {
+    field: "dailyReminderTime",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return local reminder preference.",
+  },
+  {
+    field: "tacticLoadPreference",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return tactic load preference.",
+  },
+  {
+    field: "preferredDays",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return preferred execution days.",
+  },
+  {
+    field: "personalConstraint",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return personal constraint.",
+  },
+  {
+    field: "reentryCount",
+    category: "setup",
+    severity: "low",
+    reason: "Pull v1 does not return reentry metadata. Defaults to 0.",
+  },
+  {
+    field: "scoreboard",
+    category: "derived",
+    severity: "low",
+    reason: "Scoreboard is derived from tasks/reviews, not stored directly.",
+  },
+  {
+    field: "weeklyPlans[].phaseName",
+    category: "plan_metadata",
+    severity: "low",
+    reason: "Pull v1 re-derives phase names from week number.",
+  },
+  {
+    field: "goalType",
+    category: "plan_metadata",
+    severity: "low",
+    reason: "Pull v1 infers from goal focusArea/category, not original setup.",
+  },
 ];
 
 // ── Tests ─────────────────────────────────────────────────────────
@@ -704,7 +825,14 @@ describe("round-trip sync: import → backend echo → pull → apply", () => {
     it("billing, analytics, and browser-local state are not in the round-trip", () => {
       const userData: UserData = {
         ...emptyUserData(),
-        subscription: { planCode: "PLUS" as const, status: "active", billingCycle: "season-pass" as const, startedAt: NOW, providerMode: "mock_provider" as const, isLocalTestMode: true },
+        subscription: {
+          planCode: "PLUS" as const,
+          status: "active",
+          billingCycle: "season-pass" as const,
+          startedAt: NOW,
+          providerMode: "mock_provider" as const,
+          isLocalTestMode: true,
+        },
         entitlements: [{ key: "premium_templates", sourcePlan: "PLUS", grantedAt: NOW }],
         eventLog: [{ id: "e1", type: "do_not_sync", createdAt: NOW }],
       };

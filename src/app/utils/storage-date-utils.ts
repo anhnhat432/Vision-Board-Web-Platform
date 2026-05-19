@@ -29,11 +29,7 @@ export function parseCalendarDate(value: string): Date | null {
     const day = Number(dateOnlyMatch[3]);
     const parsed = new Date(year, month - 1, day);
 
-    if (
-      parsed.getFullYear() === year &&
-      parsed.getMonth() === month - 1 &&
-      parsed.getDate() === day
-    ) {
+    if (parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day) {
       return parsed;
     }
 
@@ -76,11 +72,7 @@ export function isCalendarDateKeyOnOrAfter(left: string, right: string): boolean
   return comparison !== null && comparison >= 0;
 }
 
-export function formatCalendarDate(
-  value: string,
-  locale = "vi-VN",
-  options?: Intl.DateTimeFormatOptions,
-): string {
+export function formatCalendarDate(value: string, locale = "vi-VN", options?: Intl.DateTimeFormatOptions): string {
   const date = parseCalendarDate(value);
   if (!date) return "--";
   return date.toLocaleDateString(locale, options);

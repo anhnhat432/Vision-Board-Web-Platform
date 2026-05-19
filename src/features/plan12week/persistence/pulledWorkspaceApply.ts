@@ -104,7 +104,10 @@ function buildWeeklyPlans(weeks: TwelveWeekPulledWeek[], totalWeeks: number): We
 }
 
 function getIndicatorIdFromTask(task: TwelveWeekPulledTask, index: number): string {
-  return task.tacticId?.trim() || `tactic_cloud_${slugify(task.leadIndicatorName || task.title || "", String(index + 1))}_${index + 1}`;
+  return (
+    task.tacticId?.trim() ||
+    `tactic_cloud_${slugify(task.leadIndicatorName || task.title || "", String(index + 1))}_${index + 1}`
+  );
 }
 
 function buildLeadIndicators(input: {
@@ -131,7 +134,10 @@ function buildLeadIndicators(input: {
 
   if (indicatorsById.size > 0) return [...indicatorsById.values()];
 
-  const groupedTasks = new Map<string, { name: string; id: string; isCore: boolean; countByWeek: Map<number, number> }>();
+  const groupedTasks = new Map<
+    string,
+    { name: string; id: string; isCore: boolean; countByWeek: Map<number, number> }
+  >();
   input.tasks.forEach((task, index) => {
     const name = task.leadIndicatorName?.trim() || task.title?.trim() || "Việc lặp lại trên máy chủ";
     const id = getIndicatorIdFromTask(task, index);
@@ -200,7 +206,7 @@ function mergeTaskInstances(
     const dateSort = left.scheduledDate.localeCompare(right.scheduledDate);
     if (dateSort !== 0) return dateSort;
     return left.title.localeCompare(right.title);
-    });
+  });
 }
 
 function withDerivedExecutionState(system: TwelveWeekSystem): TwelveWeekSystem {
@@ -447,7 +453,11 @@ function buildPulledGoal(input: {
   });
   const weeklyPlans = buildWeeklyPlans(input.pulledWeeks, totalWeeks);
   const baseSystem: TwelveWeekSystem = {
-    goalType: input.pulledGoal?.focusArea || input.pulledGoal?.category || input.existingGoal?.twelveWeekSystem?.goalType || "cloud-plan",
+    goalType:
+      input.pulledGoal?.focusArea ||
+      input.pulledGoal?.category ||
+      input.existingGoal?.twelveWeekSystem?.goalType ||
+      "cloud-plan",
     vision12Week:
       input.pulledPlan.vision?.trim() ||
       input.pulledGoal?.description?.trim() ||
@@ -477,7 +487,10 @@ function buildPulledGoal(input: {
     endDate: input.existingGoal?.twelveWeekSystem?.endDate ?? "",
     timezone: input.existingGoal?.twelveWeekSystem?.timezone ?? "Asia/Ho_Chi_Minh",
     weekStartsOn: input.existingGoal?.twelveWeekSystem?.weekStartsOn ?? "Monday",
-    status: input.pulledGoal?.status === "completed" ? "completed" : (input.existingGoal?.twelveWeekSystem?.status ?? "active"),
+    status:
+      input.pulledGoal?.status === "completed"
+        ? "completed"
+        : (input.existingGoal?.twelveWeekSystem?.status ?? "active"),
     dailyReminderTime: input.existingGoal?.twelveWeekSystem?.dailyReminderTime,
     tacticLoadPreference: input.existingGoal?.twelveWeekSystem?.tacticLoadPreference,
     preferredDays: input.existingGoal?.twelveWeekSystem?.preferredDays,
@@ -519,12 +532,15 @@ function buildPulledGoal(input: {
   const systemWithDerivedState: TwelveWeekSystem = {
     ...systemWithPulledRecords,
     currentWeek: getTwelveWeekCurrentWeek(systemWithPulledRecords),
-    scoreboard: buildDerivedScoreboard(systemWithPulledRecords, getDefaultScoreboard(systemWithPulledRecords.totalWeeks)),
+    scoreboard: buildDerivedScoreboard(
+      systemWithPulledRecords,
+      getDefaultScoreboard(systemWithPulledRecords.totalWeeks),
+    ),
   };
 
   return {
     ...normalizedGoal,
-    tasks: normalizedGoal.tasks.length > 0 ? normalizedGoal.tasks : input.existingGoal?.tasks ?? [],
+    tasks: normalizedGoal.tasks.length > 0 ? normalizedGoal.tasks : (input.existingGoal?.tasks ?? []),
     twelveWeekSystem: systemWithDerivedState,
   };
 }
@@ -549,9 +565,7 @@ export function applyPulledWorkspaceToUserData(
   const goalsById = new Map(userData.goals.map((goal) => [goal.id, goal]));
   const nextGoalsById = new Map(goalsById);
   const pulledGoalByClientId = new Map(
-    workspace.goals
-      .filter((goal) => goal.clientGoalId?.trim())
-      .map((goal) => [goal.clientGoalId?.trim() ?? "", goal]),
+    workspace.goals.filter((goal) => goal.clientGoalId?.trim()).map((goal) => [goal.clientGoalId?.trim() ?? "", goal]),
   );
 
   workspace.plans.forEach((plan) => {
@@ -581,10 +595,10 @@ export function applyPulledWorkspaceToUserData(
   workspace.goals.forEach((goal) => {
     const clientGoalId = goal.clientGoalId?.trim();
     if (!clientGoalId || nextGoalsById.has(clientGoalId)) return;
-    
+
     // Skip this goal if its clientGoalId is in skipEntities
     if (skipEntities.has(`goal:${clientGoalId}`)) return;
-    
+
     const clientPlanId = getTwelveWeekClientPlanId(clientGoalId);
     const fallbackPlan: TwelveWeekPulledPlan = {
       id: goal.planId ?? clientPlanId,

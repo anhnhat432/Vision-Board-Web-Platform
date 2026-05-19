@@ -68,11 +68,7 @@ export interface ArchetypePlanFullDefaults {
 
 const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   skill_learning: {
-    leadIndicatorSuggestions: [
-      "Luyện tập / làm bài thực hành",
-      "Đọc tài liệu chính",
-      "Pair review hoặc demo nhỏ",
-    ],
+    leadIndicatorSuggestions: ["Luyện tập / làm bài thực hành", "Đọc tài liệu chính", "Pair review hoặc demo nhỏ"],
     milestoneTemplates: {
       week4: "Hoàn thành 1 dự án nhỏ làm kết quả đầu tiên.",
       week8: "Phát hành phiên bản thứ 2 sau khi nhận góp ý.",
@@ -92,16 +88,26 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Chọn quá nhiều khóa học song song, không hoàn thành khóa nào.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["luyện", "luyen", "làm", "lam ", "thực hành", "thuc hanh", "code", "demo", "practice", "output", "project", "dự án", "du an"],
+      leadIndicatorKeywords: [
+        "luyện",
+        "luyen",
+        "làm",
+        "lam ",
+        "thực hành",
+        "thuc hanh",
+        "code",
+        "demo",
+        "practice",
+        "output",
+        "project",
+        "dự án",
+        "du an",
+      ],
       milestoneKeywords: ["output", "project", "dự án", "du an", "ship", "sản phẩm", "san pham", "demo", "portfolio"],
     },
   },
   health_fitness: {
-    leadIndicatorSuggestions: [
-      "Buổi cardio chính",
-      "Buổi tập sức mạnh",
-      "Vận động linh hoạt / phục hồi ngắn",
-    ],
+    leadIndicatorSuggestions: ["Buổi cardio chính", "Buổi tập sức mạnh", "Vận động linh hoạt / phục hồi ngắn"],
     milestoneTemplates: {
       week4: "Giữ được nhịp 3 buổi/tuần và đo được mốc hiện tại (nhịp tim, tạ, km).",
       week8: "Tăng tải ~15% so với tuần 4 nhưng vẫn giữ ngày nghỉ.",
@@ -121,16 +127,39 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Đặt mục tiêu giảm cân/lên cơ nhanh hơn mức an toàn (> 1kg/tuần).",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["tập", "tap ", "workout", "cardio", "strength", "buổi", "buoi", "chạy", "chay", "run", "yoga", "mobility", "recovery"],
-      milestoneKeywords: ["buổi", "buoi", "tuần", "tuan", "km", "kg", "frequency", "nhịp", "nhip", "form", "baseline", "recovery"],
+      leadIndicatorKeywords: [
+        "tập",
+        "tap ",
+        "workout",
+        "cardio",
+        "strength",
+        "buổi",
+        "buoi",
+        "chạy",
+        "chay",
+        "run",
+        "yoga",
+        "mobility",
+        "recovery",
+      ],
+      milestoneKeywords: [
+        "buổi",
+        "buoi",
+        "tuần",
+        "tuan",
+        "km",
+        "kg",
+        "frequency",
+        "nhịp",
+        "nhip",
+        "form",
+        "baseline",
+        "recovery",
+      ],
     },
   },
   career_growth: {
-    leadIndicatorSuggestions: [
-      "Khung làm sâu",
-      "1:1 với stakeholder / mentor",
-      "Chuẩn bị demo / buổi góp ý",
-    ],
+    leadIndicatorSuggestions: ["Khung làm sâu", "1:1 với stakeholder / mentor", "Chuẩn bị demo / buổi góp ý"],
     milestoneTemplates: {
       week4: "Hoàn thành 3-4 phần việc IDP và có 2 buổi 1:1.",
       week8: "Hoàn tất phần việc lớn và lấy góp ý từ stakeholder.",
@@ -150,7 +179,18 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Tự làm hết một mình, không có mentor/stakeholder.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["deep work", "1:1", "mentor", "stakeholder", "demo", "deliverable", "feedback", "review", "họp", "hop "],
+      leadIndicatorKeywords: [
+        "deep work",
+        "1:1",
+        "mentor",
+        "stakeholder",
+        "demo",
+        "deliverable",
+        "feedback",
+        "review",
+        "họp",
+        "hop ",
+      ],
       milestoneKeywords: ["deliverable", "1:1", "review", "mentor", "stakeholder", "feedback", "self-review", "idp"],
     },
   },
@@ -179,8 +219,33 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Chỉ có kết quả cuối (số tiền) mà không có việc lặp lại (theo dõi/chuyển khoản/review).",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["track", "chi tiêu", "chi tieu", "tiết kiệm", "tiet kiem", "chuyển khoản", "chuyen khoan", "tự động", "tu dong", "review", "ngân sách", "ngan sach", "saving"],
-      milestoneKeywords: ["saving", "tiết kiệm", "tiet kiem", "runway", "tracking", "báo cáo", "bao cao", "milestone", "chuyển khoản", "chuyen khoan"],
+      leadIndicatorKeywords: [
+        "track",
+        "chi tiêu",
+        "chi tieu",
+        "tiết kiệm",
+        "tiet kiem",
+        "chuyển khoản",
+        "chuyen khoan",
+        "tự động",
+        "tu dong",
+        "review",
+        "ngân sách",
+        "ngan sach",
+        "saving",
+      ],
+      milestoneKeywords: [
+        "saving",
+        "tiết kiệm",
+        "tiet kiem",
+        "runway",
+        "tracking",
+        "báo cáo",
+        "bao cao",
+        "milestone",
+        "chuyển khoản",
+        "chuyen khoan",
+      ],
     },
   },
   exam_study: {
@@ -208,16 +273,26 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Không làm đề thi thử, chỉ học lý thuyết.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["đề thi", "de thi", "đề thi thử", "de thi thu", "practice test", "mock test", "luyện", "luyen", "spaced repetition", "review lỗi", "review loi", "ôn", "on "],
+      leadIndicatorKeywords: [
+        "đề thi",
+        "de thi",
+        "đề thi thử",
+        "de thi thu",
+        "practice test",
+        "mock test",
+        "luyện",
+        "luyen",
+        "spaced repetition",
+        "review lỗi",
+        "review loi",
+        "ôn",
+        "on ",
+      ],
       milestoneKeywords: ["đề thi", "de thi", "điểm", "diem ", "band", "practice test", "baseline", "mock"],
     },
   },
   project_completion: {
-    leadIndicatorSuggestions: [
-      "Build session",
-      "Phỏng vấn / góp ý người dùng",
-      "Hoàn tất review hoặc bản thử nội bộ",
-    ],
+    leadIndicatorSuggestions: ["Build session", "Phỏng vấn / góp ý người dùng", "Hoàn tất review hoặc bản thử nội bộ"],
     milestoneTemplates: {
       week4: "Phát hành được 50% phạm vi MVP và có phản hồi từ người dùng đầu tiên.",
       week8: "Đạt 80% phạm vi MVP, đã gỡ phần phụ thuộc đang chặn, có 2 buổi góp ý.",
@@ -237,15 +312,24 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Phạm vi phình to giữa chu kỳ, mất tập trung.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["build", "ship", "deliver", "demo", "feature", "user interview", "feedback", "deploy", "release", "pr ", "review"],
+      leadIndicatorKeywords: [
+        "build",
+        "ship",
+        "deliver",
+        "demo",
+        "feature",
+        "user interview",
+        "feedback",
+        "deploy",
+        "release",
+        "pr ",
+        "review",
+      ],
       milestoneKeywords: ["ship", "deliver", "mvp", "launch", "deploy", "scope", "release", "feature", "demo"],
     },
   },
   habit_building: {
-    leadIndicatorSuggestions: [
-      "Thói quen chính phiên bản 2 phút",
-      "Ghi chú ngắn cuối ngày",
-    ],
+    leadIndicatorSuggestions: ["Thói quen chính phiên bản 2 phút", "Ghi chú ngắn cuối ngày"],
     milestoneTemplates: {
       week4: "Giữ chuỗi ngày thói quen chính ≥ 21 ngày phiên bản dễ.",
       week8: "Tăng cường độ thói quen lên mức mục tiêu, môi trường đã ổn định.",
@@ -255,7 +339,8 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     weekOneExpectedOutput: "Chuỗi ngày 5-7 ngày phiên bản dễ + tín hiệu đã được thử.",
     firstAction: {
       standard: "Đặt tín hiệu cụ thể (sau cà phê / trước đánh răng) và làm thói quen phiên bản 2 phút ngay hôm nay.",
-      lowFeasibility: "Hôm nay làm thói quen phiên bản 1 phút sau 1 nhịp quen thuộc có sẵn. Quan trọng là bấm khởi động.",
+      lowFeasibility:
+        "Hôm nay làm thói quen phiên bản 1 phút sau 1 nhịp quen thuộc có sẵn. Quan trọng là bấm khởi động.",
     },
     weekOneTacticLoadHint: "lighter",
     reviewPrompt: "Chuỗi ngày còn giữ được không? Tín hiệu nào đang hoạt động tốt nhất?",
@@ -265,16 +350,38 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Không có tín hiệu kích hoạt gắn với nhịp quen thuộc có sẵn.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["habit", "cue", "2 phút", "2 phut", "routine", "streak", "môi trường", "moi truong", "ghi chú", "ghi chu", "daily", "hằng ngày", "hang ngay", "trigger"],
-      milestoneKeywords: ["streak", "habit", "cue", "môi trường", "moi truong", "routine", "tự chạy", "tu chay", "21 ngày", "21 ngay"],
+      leadIndicatorKeywords: [
+        "habit",
+        "cue",
+        "2 phút",
+        "2 phut",
+        "routine",
+        "streak",
+        "môi trường",
+        "moi truong",
+        "ghi chú",
+        "ghi chu",
+        "daily",
+        "hằng ngày",
+        "hang ngay",
+        "trigger",
+      ],
+      milestoneKeywords: [
+        "streak",
+        "habit",
+        "cue",
+        "môi trường",
+        "moi truong",
+        "routine",
+        "tự chạy",
+        "tu chay",
+        "21 ngày",
+        "21 ngay",
+      ],
     },
   },
   creative_output: {
-    leadIndicatorSuggestions: [
-      "Buổi sáng tác / bản nháp",
-      "Buổi chỉnh sửa",
-      "Lịch xuất bản (post / upload)",
-    ],
+    leadIndicatorSuggestions: ["Buổi sáng tác / bản nháp", "Buổi chỉnh sửa", "Lịch xuất bản (post / upload)"],
     milestoneTemplates: {
       week4: "Phát hành 4 tác phẩm bản nháp, nhịp xuất bản đã hình thành.",
       week8: "Đã có 8 tác phẩm + 1 vòng góp ý công khai.",
@@ -294,15 +401,36 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Sửa mãi, không đưa ra bản hoàn tất.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["viết", "viet ", "draft", "edit", "publish", "post", "upload", "bài", "bai ", "tác phẩm", "tac pham", "xuất bản", "xuat ban"],
-      milestoneKeywords: ["bài", "bai ", "tác phẩm", "tac pham", "publish", "xuất bản", "xuat ban", "cadence", "body of work"],
+      leadIndicatorKeywords: [
+        "viết",
+        "viet ",
+        "draft",
+        "edit",
+        "publish",
+        "post",
+        "upload",
+        "bài",
+        "bai ",
+        "tác phẩm",
+        "tac pham",
+        "xuất bản",
+        "xuat ban",
+      ],
+      milestoneKeywords: [
+        "bài",
+        "bai ",
+        "tác phẩm",
+        "tac pham",
+        "publish",
+        "xuất bản",
+        "xuat ban",
+        "cadence",
+        "body of work",
+      ],
     },
   },
   relationship_life: {
-    leadIndicatorSuggestions: [
-      "Thời gian chất lượng cố định trong tuần",
-      "Một hành động nhỏ thể hiện quan tâm",
-    ],
+    leadIndicatorSuggestions: ["Thời gian chất lượng cố định trong tuần", "Một hành động nhỏ thể hiện quan tâm"],
     milestoneTemplates: {
       week4: "Giữ được buổi cố định 4 tuần liên tiếp.",
       week8: "Cuộc trò chuyện / hành động sâu hơn đã diễn ra.",
@@ -322,15 +450,36 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Đo bằng cảm xúc thay vì hành động.",
     ],
     requiredSignals: {
-      leadIndicatorKeywords: ["buổi", "buoi", "gặp", "gap ", "gọi", "goi ", "chất lượng", "chat luong", "hành động", "hanh dong", "thời gian", "thoi gian"],
-      milestoneKeywords: ["buổi", "buoi", "nhịp", "nhip", "tuần", "tuan", "cố định", "co dinh", "liên tiếp", "lien tiep"],
+      leadIndicatorKeywords: [
+        "buổi",
+        "buoi",
+        "gặp",
+        "gap ",
+        "gọi",
+        "goi ",
+        "chất lượng",
+        "chat luong",
+        "hành động",
+        "hanh dong",
+        "thời gian",
+        "thoi gian",
+      ],
+      milestoneKeywords: [
+        "buổi",
+        "buoi",
+        "nhịp",
+        "nhip",
+        "tuần",
+        "tuan",
+        "cố định",
+        "co dinh",
+        "liên tiếp",
+        "lien tiep",
+      ],
     },
   },
   other: {
-    leadIndicatorSuggestions: [
-      "1-2 việc cốt lõi đo được",
-      "Một buổi nhìn lại ngắn hằng tuần",
-    ],
+    leadIndicatorSuggestions: ["1-2 việc cốt lõi đo được", "Một buổi nhìn lại ngắn hằng tuần"],
     milestoneTemplates: {
       week4: "Giữ nhịp 4 tuần đầu và có kết quả nhỏ đo được.",
       week8: "Đạt nửa mục tiêu và có 2 bản review.",
@@ -344,10 +493,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     },
     weekOneTacticLoadHint: "balanced",
     reviewPrompt: "Tuần này làm được gì? Có cần điều chỉnh gì cho tuần sau không?",
-    antiPatterns: [
-      "Câu mục tiêu không có động từ kết quả rõ.",
-      "Không có cách đo tiến độ hằng tuần.",
-    ],
+    antiPatterns: ["Câu mục tiêu không có động từ kết quả rõ.", "Không có cách đo tiến độ hằng tuần."],
     requiredSignals: {
       leadIndicatorKeywords: [],
       milestoneKeywords: [],
@@ -364,10 +510,7 @@ export function getArchetypePlanFullDefaults(archetype: GoalArchetype): Archetyp
  * When `lowFeasibility` is true, returns the smaller "setup / start small"
  * variant that is doable in <30 minutes today or tomorrow.
  */
-export function getArchetypeFirstAction(
-  archetype: GoalArchetype,
-  options: { lowFeasibility?: boolean } = {},
-): string {
+export function getArchetypeFirstAction(archetype: GoalArchetype, options: { lowFeasibility?: boolean } = {}): string {
   const defaults = getArchetypePlanFullDefaults(archetype);
   return options.lowFeasibility ? defaults.firstAction.lowFeasibility : defaults.firstAction.standard;
 }
@@ -377,20 +520,14 @@ export function getArchetypeFirstAction(
  * Empty keyword list (archetype `other`) is always considered a match so the
  * signal does not penalise generic plans.
  */
-export function indicatorsMatchArchetype(
-  indicatorNames: readonly string[],
-  archetype: GoalArchetype,
-): boolean {
+export function indicatorsMatchArchetype(indicatorNames: readonly string[], archetype: GoalArchetype): boolean {
   const { requiredSignals } = getArchetypePlanFullDefaults(archetype);
   if (requiredSignals.leadIndicatorKeywords.length === 0) return true;
   const haystack = indicatorNames.map((name) => name.toLowerCase()).join(" \n ");
   return requiredSignals.leadIndicatorKeywords.some((keyword) => haystack.includes(keyword));
 }
 
-export function milestonesMatchArchetype(
-  milestones: readonly string[],
-  archetype: GoalArchetype,
-): boolean {
+export function milestonesMatchArchetype(milestones: readonly string[], archetype: GoalArchetype): boolean {
   const { requiredSignals } = getArchetypePlanFullDefaults(archetype);
   if (requiredSignals.milestoneKeywords.length === 0) return true;
   const haystack = milestones.map((milestone) => milestone.toLowerCase()).join(" \n ");

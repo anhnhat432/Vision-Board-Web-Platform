@@ -30,9 +30,9 @@
     "smoke:core-quality": "node scripts/smoke-core-quality.mjs",
     "smoke:prod:quick": "node scripts/smoke-production-quick.mjs",
     "smoke:prod": "node scripts/smoke-production-e2e.mjs",
-"smoke:mvp2-sync": "node scripts/smoke-mvp2-sync-staging.mjs",
-"smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs",
-"test:e2e:lww": "playwright test e2e/sync-lww.spec.ts"
+    "smoke:mvp2-sync": "node scripts/smoke-mvp2-sync-staging.mjs",
+    "smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs",
+    "test:e2e:lww": "playwright test e2e/sync-lww.spec.ts"
   },
   "dependencies": {
     "@fontsource-variable/source-serif-4": "^5.2.9",
@@ -81,9 +81,11 @@
     "react-day-picker": "8.10.1",
     "react-dom": "18.3.1",
     "react-hook-form": "7.55.0",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "2.1.7",
     "react-router": "7.13.0",
     "recharts": "2.15.2",
+    "remark-gfm": "^4.0.1",
     "sonner": "2.0.3",
     "tailwind-merge": "3.2.0",
     "tw-animate-css": "1.3.8",

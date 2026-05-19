@@ -9,20 +9,14 @@ interface DataStorageInfoProps {
   className?: string;
 }
 
-export function DataStorageInfo({
-  variant = "card",
-  showSyncHint = false,
-  className = "",
-}: DataStorageInfoProps) {
+export function DataStorageInfo({ variant = "card", showSyncHint = false, className = "" }: DataStorageInfoProps) {
   const demoMode = isDemoMode();
 
   if (variant === "inline") {
     return (
       <p className={`flex items-center gap-1.5 text-xs text-slate-500 ${className}`}>
         <Monitor className="h-3 w-3 shrink-0" />
-        {demoMode
-          ? "Kế hoạch 12 tuần được lưu trên thiết bị này."
-          : "Kế hoạch 12 tuần đang gắn với tài khoản của bạn."}
+        {demoMode ? "Kế hoạch 12 tuần được lưu trên thiết bị này." : "Kế hoạch 12 tuần đang gắn với tài khoản của bạn."}
       </p>
     );
   }
@@ -48,9 +42,7 @@ export function DataStorageInfo({
   }
 
   return (
-    <div
-      className={`rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-5 shadow-sm ${className}`}
-    >
+    <div className={`rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-5 shadow-sm ${className}`}>
       <div className="flex items-center gap-2.5">
         <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] bg-slate-100">
           <HardDrive className="h-4 w-4 text-slate-600" />

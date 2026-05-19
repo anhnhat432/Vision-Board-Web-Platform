@@ -5,11 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
-const {
-  syncTaskToggleMock,
-  syncWeeklyReviewMock,
-  syncDailyCheckInMock,
-} = vi.hoisted(() => ({
+const { syncTaskToggleMock, syncWeeklyReviewMock, syncDailyCheckInMock } = vi.hoisted(() => ({
   syncTaskToggleMock: vi.fn(),
   syncWeeklyReviewMock: vi.fn(),
   syncDailyCheckInMock: vi.fn(),
@@ -26,9 +22,7 @@ vi.mock("@/lib/auth/AuthContext", () => ({
 }));
 
 vi.mock("@/features/plan12week/hooks", async () => {
-  const actual = await vi.importActual<typeof import("@/features/plan12week/hooks")>(
-    "@/features/plan12week/hooks",
-  );
+  const actual = await vi.importActual<typeof import("@/features/plan12week/hooks")>("@/features/plan12week/hooks");
 
   return {
     ...actual,
@@ -46,8 +40,8 @@ vi.mock("@/features/plan12week/hooks", async () => {
   };
 });
 
-import { getTwelveWeekCurrentWeek } from '@/app/utils/storage-twelve-week';
-import { getUserData } from '@/app/utils/storage';
+import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
+import { getUserData } from "@/app/utils/storage";
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import {
@@ -56,7 +50,7 @@ import {
   resetTestStorage,
   seedTwelveWeekGoal,
   updateUserData,
-} from '@/test/app-flow-helpers';
+} from "@/test/app-flow-helpers";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 30_000;
 
@@ -197,9 +191,7 @@ describe("12-week write-path safety", () => {
       await user.click(getPrimaryButton(/check-in/i));
 
       await waitFor(() => {
-        expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe(
-          "Check-in still saves locally.",
-        );
+        expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("Check-in still saves locally.");
       });
 
       expect(syncDailyCheckInMock).toHaveBeenCalledTimes(1);
@@ -209,30 +201,74 @@ describe("12-week write-path safety", () => {
     }
   });
 
-  it("keeps local weekly review and reflection saved when queue persistence fails", async () => {
-    const { goalId } = seedTwelveWeekGoal();
+  it(
+    "keeps local weekly review and reflection saved when queue persistence fails",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
 
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
-    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
-    await typeWamReview(user, {
-      insights: "Weekly review still saves locally.",
-      nextWeekCommitments: "Keep the local review.",
-    });
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
+      await typeWamReview(user, {
+        insights: "Weekly review still saves locally.",
+        nextWeekCommitments: "Keep the local review.",
+      });
 
-    const originalSetItem = Storage.prototype.setItem;
-    const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
-      this: Storage,
-      key: string,
-      value: string,
-    ) {
-      if (key.startsWith("visionboard_data_mutation_queue")) {
-        throw new Error("queue write failed");
+      const originalSetItem = Storage.prototype.setItem;
+      const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
+        this: Storage,
+        key: string,
+        value: string,
+      ) {
+        if (key.startsWith("visionboard_data_mutation_queue")) {
+          throw new Error("queue write failed");
+        }
+        return originalSetItem.call(this, key, value);
+      });
+
+      try {
+        await user.click(getPrimaryButton("Chốt review tuần này"));
+        await confirmEarlyReviewIfPrompted(user);
+
+        await waitFor(() => {
+          expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
+        });
+
+        const system = readGoal(goalId).twelveWeekSystem;
+        const data = getUserData();
+        const reflection = data.reflections.find(
+          (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
+        );
+
+        expect(system?.weeklyReviews[0]?.insights).toBe("Weekly review still saves locally.");
+        expect(reflection?.content).toContain("Weekly review still saves locally.");
+        expect(listStoredPendingMutations(null)).toEqual([]);
+      } finally {
+        setItemSpy.mockRestore();
       }
-      return originalSetItem.call(this, key, value);
-    });
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-    try {
+  it(
+    "keeps lag metric, weekly review, and scoreboard metric aligned before weekly-review sync",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+
+      updateUserData((data) => {
+        const goal = data.goals.find((item) => item.id === goalId);
+        if (!goal?.twelveWeekSystem) return;
+        goal.twelveWeekSystem.lagMetric.currentValue = "13 ngày giữ nhịp";
+      });
+
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
+
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
+      await typeWamReview(user, {
+        insights: "Bị phân tán vì đổi context.",
+        nextWeekCommitments: "Chốt xong command center trước.",
+      });
       await user.click(getPrimaryButton("Chốt review tuần này"));
       await confirmEarlyReviewIfPrompted(user);
 
@@ -241,101 +277,67 @@ describe("12-week write-path safety", () => {
       });
 
       const system = readGoal(goalId).twelveWeekSystem;
+      expect(system).toBeDefined();
+
+      if (!system) {
+        throw new Error("Expected seeded 12-week system to exist.");
+      }
+
+      const currentWeek = getTwelveWeekCurrentWeek(system);
+      const review = system?.weeklyReviews.find((item) => item.weekNumber === currentWeek);
+      const scoreWeek = system?.scoreboard.find((item) => item.weekNumber === currentWeek);
+      const lastSyncCall = syncWeeklyReviewMock.mock.calls[syncWeeklyReviewMock.mock.calls.length - 1];
+      const syncPayload = lastSyncCall?.[0] as { weekNumber: number; executionScore: number } | undefined;
+
+      expect(review?.lagProgressValue).toBe("13 ngày giữ nhịp");
+      expect(system?.lagMetric.currentValue).toBe("13 ngày giữ nhịp");
+      expect(scoreWeek?.mainMetricProgress).toBe("13 ngày giữ nhịp");
+      expect(syncPayload).toEqual(
+        expect.objectContaining({
+          weekNumber: currentWeek,
+          executionScore: review ? getUniversalWeeklyReviewExecutionScore(review) : undefined,
+        }),
+      );
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "keeps weekly review, linked reflection, and outbox event when backend review sync fails",
+    async () => {
+      syncWeeklyReviewMock.mockResolvedValueOnce(false);
+      const { goalId } = seedTwelveWeekGoal();
+
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
+
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
+      await openWeeklyReviewDetails(user);
+      expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
+      await typeWamReview(user, {
+        insights: "Hoàn thành review local trước khi backend kịp trả lời.",
+        nextWeekCommitments: "Giữ review hiển thị trong journal.",
+      });
+      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
+
+      await waitFor(() => {
+        expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
+      });
+
+      const system = readGoal(goalId).twelveWeekSystem;
+      const currentWeek = system ? getTwelveWeekCurrentWeek(system) : 1;
       const data = getUserData();
       const reflection = data.reflections.find(
         (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
       );
 
-      expect(system?.weeklyReviews[0]?.insights).toBe("Weekly review still saves locally.");
-      expect(reflection?.content).toContain("Weekly review still saves locally.");
-      expect(listStoredPendingMutations(null)).toEqual([]);
-    } finally {
-      setItemSpy.mockRestore();
-    }
-  }, INTEGRATION_TEST_TIMEOUT_MS);
-
-  it("keeps lag metric, weekly review, and scoreboard metric aligned before weekly-review sync", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-
-    updateUserData((data) => {
-      const goal = data.goals.find((item) => item.id === goalId);
-      if (!goal?.twelveWeekSystem) return;
-      goal.twelveWeekSystem.lagMetric.currentValue = "13 ngày giữ nhịp";
-    });
-
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
-
-    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
-    await typeWamReview(user, {
-      insights: "Bị phân tán vì đổi context.",
-      nextWeekCommitments: "Chốt xong command center trước.",
-    });
-    await user.click(getPrimaryButton("Chốt review tuần này"));
-    await confirmEarlyReviewIfPrompted(user);
-
-    await waitFor(() => {
-      expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
-    });
-
-    const system = readGoal(goalId).twelveWeekSystem;
-    expect(system).toBeDefined();
-
-    if (!system) {
-      throw new Error("Expected seeded 12-week system to exist.");
-    }
-
-    const currentWeek = getTwelveWeekCurrentWeek(system);
-    const review = system?.weeklyReviews.find((item) => item.weekNumber === currentWeek);
-    const scoreWeek = system?.scoreboard.find((item) => item.weekNumber === currentWeek);
-    const lastSyncCall = syncWeeklyReviewMock.mock.calls[syncWeeklyReviewMock.mock.calls.length - 1];
-    const syncPayload = lastSyncCall?.[0] as
-      | { weekNumber: number; executionScore: number }
-      | undefined;
-
-    expect(review?.lagProgressValue).toBe("13 ngày giữ nhịp");
-    expect(system?.lagMetric.currentValue).toBe("13 ngày giữ nhịp");
-    expect(scoreWeek?.mainMetricProgress).toBe("13 ngày giữ nhịp");
-    expect(syncPayload).toEqual(
-      expect.objectContaining({
-        weekNumber: currentWeek,
-        executionScore: review ? getUniversalWeeklyReviewExecutionScore(review) : undefined,
-      }),
-    );
-  }, INTEGRATION_TEST_TIMEOUT_MS);
-
-  it("keeps weekly review, linked reflection, and outbox event when backend review sync fails", async () => {
-    syncWeeklyReviewMock.mockResolvedValueOnce(false);
-    const { goalId } = seedTwelveWeekGoal();
-
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
-
-    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
-    await openWeeklyReviewDetails(user);
-    expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
-    await typeWamReview(user, {
-      insights: "Hoàn thành review local trước khi backend kịp trả lời.",
-      nextWeekCommitments: "Giữ review hiển thị trong journal.",
-    });
-    await user.click(getPrimaryButton("Chốt review tuần này"));
-    await confirmEarlyReviewIfPrompted(user);
-
-    await waitFor(() => {
-      expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
-    });
-
-    const system = readGoal(goalId).twelveWeekSystem;
-    const currentWeek = system ? getTwelveWeekCurrentWeek(system) : 1;
-    const data = getUserData();
-    const reflection = data.reflections.find(
-      (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
-    );
-
-    expect(system?.weeklyReviews.find((review) => review.weekNumber === currentWeek)?.reviewCompleted).toBe(true);
-    expect(reflection?.content).toContain("Hoàn thành review local trước khi backend kịp trả lời.");
-    expect(data.eventLog.some((event) => event.type === "12_week_weekly_review_submitted")).toBe(true);
-    expect(data.syncOutbox.some((item) => item.type === "12_week_weekly_review_submitted")).toBe(true);
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      expect(system?.weeklyReviews.find((review) => review.weekNumber === currentWeek)?.reviewCompleted).toBe(true);
+      expect(reflection?.content).toContain("Hoàn thành review local trước khi backend kịp trả lời.");
+      expect(data.eventLog.some((event) => event.type === "12_week_weekly_review_submitted")).toBe(true);
+      expect(data.syncOutbox.some((item) => item.type === "12_week_weekly_review_submitted")).toBe(true);
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 });

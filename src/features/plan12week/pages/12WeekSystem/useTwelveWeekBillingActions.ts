@@ -2,14 +2,8 @@ import type { RefObject } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import {
-  trackPaywallCtaClicked,
-} from "@/app/utils/monetization-analytics";
-import {
-  openBillingCustomerPortal,
-  restorePlanAccess,
-  syncEntitlementsWithProvider,
-} from "@/app/utils/production";
+import { trackPaywallCtaClicked } from "@/app/utils/monetization-analytics";
+import { openBillingCustomerPortal, restorePlanAccess, syncEntitlementsWithProvider } from "@/app/utils/production";
 import { trackAppEvent } from "@/app/utils/storage";
 import type { PricingPlanCode } from "@/app/utils/storage-types";
 import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium";

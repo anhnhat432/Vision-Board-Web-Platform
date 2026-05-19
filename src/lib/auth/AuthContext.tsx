@@ -212,7 +212,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     previousEmailVerified.current = user.emailVerified === true;
     if (wasVerified === false && user.emailVerified === true) {
       toast.success("Email đã xác thực, bạn có thể tiếp tục");
-      const redirectPath = typeof window !== "undefined" ? window.sessionStorage.getItem("emailVerification:returnTo") : null;
+      const redirectPath =
+        typeof window !== "undefined" ? window.sessionStorage.getItem("emailVerification:returnTo") : null;
       if (redirectPath && typeof window !== "undefined") {
         window.sessionStorage.removeItem("emailVerification:returnTo");
         window.location.assign(redirectPath);

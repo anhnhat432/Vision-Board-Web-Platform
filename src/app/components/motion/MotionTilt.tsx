@@ -6,7 +6,14 @@ interface MotionTiltProps extends HTMLMotionProps<"div"> {
   intensity?: number;
 }
 
-export function MotionTilt({ children, intensity = 8, onPointerLeave, onPointerMove, style, ...props }: MotionTiltProps) {
+export function MotionTilt({
+  children,
+  intensity = 8,
+  onPointerLeave,
+  onPointerMove,
+  style,
+  ...props
+}: MotionTiltProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
   const [canTilt, setCanTilt] = useState(false);

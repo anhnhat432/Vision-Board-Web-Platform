@@ -89,16 +89,17 @@ describe("useDraggableMascot", () => {
     const initialY = result.current.position.y;
 
     const button = {
-      getBoundingClientRect: () => ({
-        left: initialX,
-        top: initialY,
-        width: mascotSize,
-        height: mascotSize,
-        x: initialX,
-        y: initialY,
-        right: initialX + mascotSize,
-        bottom: initialY + mascotSize,
-      } as DOMRect),
+      getBoundingClientRect: () =>
+        ({
+          left: initialX,
+          top: initialY,
+          width: mascotSize,
+          height: mascotSize,
+          x: initialX,
+          y: initialY,
+          right: initialX + mascotSize,
+          bottom: initialY + mascotSize,
+        }) as DOMRect,
       setPointerCapture: vi.fn(),
     } as unknown as HTMLButtonElement;
 
@@ -131,16 +132,17 @@ describe("useDraggableMascot", () => {
     const initialY = result.current.position.y;
 
     const button = {
-      getBoundingClientRect: () => ({
-        left: initialX,
-        top: initialY,
-        width: mascotSize,
-        height: mascotSize,
-        x: initialX,
-        y: initialY,
-        right: initialX + mascotSize,
-        bottom: initialY + mascotSize,
-      } as DOMRect),
+      getBoundingClientRect: () =>
+        ({
+          left: initialX,
+          top: initialY,
+          width: mascotSize,
+          height: mascotSize,
+          x: initialX,
+          y: initialY,
+          right: initialX + mascotSize,
+          bottom: initialY + mascotSize,
+        }) as DOMRect,
       setPointerCapture: vi.fn(),
     } as unknown as HTMLButtonElement;
 
@@ -190,11 +192,14 @@ describe("useDraggableMascot", () => {
     expect(result.current.position.x).toBe(initialX + 50);
     expect(result.current.position.y).toBe(initialY + 50);
 
-    await waitFor(() => {
-      const saved = JSON.parse(localStorage.getItem("assistant.mascot.position") || "{}");
-      expect(saved.x).toBe(initialX + 50);
-      expect(saved.y).toBe(initialY + 50);
-    }, { timeout: 500 });
+    await waitFor(
+      () => {
+        const saved = JSON.parse(localStorage.getItem("assistant.mascot.position") || "{}");
+        expect(saved.x).toBe(initialX + 50);
+        expect(saved.y).toBe(initialY + 50);
+      },
+      { timeout: 500 },
+    );
   });
 
   it("constrains position when dragged beyond viewport", () => {
@@ -206,16 +211,17 @@ describe("useDraggableMascot", () => {
     const initialY = result.current.position.y;
 
     const button = {
-      getBoundingClientRect: () => ({
-        left: initialX,
-        top: initialY,
-        width: mascotSize,
-        height: mascotSize,
-        x: initialX,
-        y: initialY,
-        right: initialX + mascotSize,
-        bottom: initialY + mascotSize,
-      } as DOMRect),
+      getBoundingClientRect: () =>
+        ({
+          left: initialX,
+          top: initialY,
+          width: mascotSize,
+          height: mascotSize,
+          x: initialX,
+          y: initialY,
+          right: initialX + mascotSize,
+          bottom: initialY + mascotSize,
+        }) as DOMRect,
       setPointerCapture: vi.fn(),
     } as unknown as HTMLButtonElement;
 
@@ -285,16 +291,17 @@ describe("useDraggableMascot", () => {
     const initialY = result.current.position.y;
 
     const button = {
-      getBoundingClientRect: () => ({
-        left: initialX,
-        top: initialY,
-        width: mascotSize,
-        height: mascotSize,
-        x: initialX,
-        y: initialY,
-        right: initialX + mascotSize,
-        bottom: initialY + mascotSize,
-      } as DOMRect),
+      getBoundingClientRect: () =>
+        ({
+          left: initialX,
+          top: initialY,
+          width: mascotSize,
+          height: mascotSize,
+          x: initialX,
+          y: initialY,
+          right: initialX + mascotSize,
+          bottom: initialY + mascotSize,
+        }) as DOMRect,
       setPointerCapture: vi.fn(),
     } as unknown as HTMLButtonElement;
 
@@ -349,16 +356,17 @@ describe("useDraggableMascot", () => {
     const initialY = result.current.position.y;
 
     const button = {
-      getBoundingClientRect: () => ({
-        left: initialX,
-        top: initialY,
-        width: mascotSize,
-        height: mascotSize,
-        x: initialX,
-        y: initialY,
-        right: initialX + mascotSize,
-        bottom: initialY + mascotSize,
-      } as DOMRect),
+      getBoundingClientRect: () =>
+        ({
+          left: initialX,
+          top: initialY,
+          width: mascotSize,
+          height: mascotSize,
+          x: initialX,
+          y: initialY,
+          right: initialX + mascotSize,
+          bottom: initialY + mascotSize,
+        }) as DOMRect,
       setPointerCapture: vi.fn(),
     } as unknown as HTMLButtonElement;
 

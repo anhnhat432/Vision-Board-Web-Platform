@@ -21,11 +21,7 @@ export function upgradeLegacyGoalToSystemInData(data: UserData, goalId: string):
   return true;
 }
 
-export function updateWheelOfLifeInData(
-  data: UserData,
-  areas: LifeArea[],
-  createdAt = new Date().toISOString(),
-): void {
+export function updateWheelOfLifeInData(data: UserData, areas: LifeArea[], createdAt = new Date().toISOString()): void {
   data.currentWheelOfLife = areas;
   data.wheelOfLifeHistory.push({
     date: createdAt,
@@ -107,11 +103,7 @@ export function recomputeGoalProgressFromWeeksInData(data: UserData, goalId: str
   return Math.round((completed / taskInstances.length) * 100);
 }
 
-export function resetTwelveWeekGoalCycleInData(
-  data: UserData,
-  goalId: string,
-  referenceDate = new Date(),
-): boolean {
+export function resetTwelveWeekGoalCycleInData(data: UserData, goalId: string, referenceDate = new Date()): boolean {
   const goalIndex = data.goals.findIndex((goal) => goal.id === goalId);
   if (goalIndex === -1) return false;
 
@@ -139,11 +131,7 @@ export function resetTwelveWeekGoalCycleInData(
       dailyCheckIns: [],
       weeklyReviews: [],
       scoreboard: getDefaultScoreboard(system.totalWeeks || 12),
-      weeklyPlans: syncWeeklyPlans(
-        system.weeklyPlans,
-        system.totalWeeks || 12,
-        system.week12Outcome,
-      ).map((plan) => ({
+      weeklyPlans: syncWeeklyPlans(system.weeklyPlans, system.totalWeeks || 12, system.week12Outcome).map((plan) => ({
         ...plan,
         completed: false,
       })),

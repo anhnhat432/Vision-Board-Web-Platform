@@ -53,10 +53,7 @@ export function getVisionBoard(boardId: string): Promise<ApiVisionBoard> {
   return get<ApiVisionBoard>(`/vision-boards/${boardId}`);
 }
 
-export function updateVisionBoard(
-  boardId: string,
-  payload: UpdateVisionBoardPayload,
-): Promise<ApiVisionBoard> {
+export function updateVisionBoard(boardId: string, payload: UpdateVisionBoardPayload): Promise<ApiVisionBoard> {
   return put<ApiVisionBoard, UpdateVisionBoardPayload>(`/vision-boards/${boardId}`, payload);
 }
 

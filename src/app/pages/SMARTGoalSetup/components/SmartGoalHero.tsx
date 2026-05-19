@@ -54,9 +54,7 @@ export function SmartGoalHero({
       >
         Viết mục tiêu SMART đầu tiên cho {focusAreaLabel}.
       </h1>
-      <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
-        {smartGoalStarter.specificGoalStatement}
-      </p>
+      <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">{smartGoalStarter.specificGoalStatement}</p>
 
       <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tiến độ SMART">
         {SMART_STEPS.map((step, index) => {

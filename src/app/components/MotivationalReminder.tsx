@@ -59,7 +59,8 @@ export function MotivationalReminder() {
 
     const isOnReminderTarget =
       reminder &&
-      (location.pathname === reminder.href || (reminder.href !== "/" && location.pathname.startsWith(`${reminder.href}/`)));
+      (location.pathname === reminder.href ||
+        (reminder.href !== "/" && location.pathname.startsWith(`${reminder.href}/`)));
 
     if (isOnReminderTarget) {
       // The destination page already shows the same task/review prompt; a fixed card blocks the first mobile viewport.
@@ -88,62 +89,63 @@ export function MotivationalReminder() {
   if (!showReminder) return null;
 
   const content = (
-      <Card className="max-w-full overflow-hidden rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card shadow-[var(--shadow-2)]">
-        <CardContent className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
-          {reminder ? (
-            <div className="flex items-start gap-2.5">
-              <BellRing className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
-              <div className="min-w-0 flex-1">
-                <p className="break-words font-semibold text-foreground">{reminder.title}</p>
-                <p className="mt-1 hidden line-clamp-2 break-words text-sm text-muted-foreground sm:block">{reminder.description}</p>
-                <Button
-                  size="sm"
-                  glow
-                  className="mt-2 h-10 px-3 text-xs"
-                  onClick={() => {
-                    setShowReminder(false);
-                    if (reminder.goalId) {
-                      localStorage.setItem("latest_12_week_goal_id", reminder.goalId);
-                      localStorage.setItem("latest_12_week_system_goal_id", reminder.goalId);
-                    }
-                    navigate(reminder.href);
-                  }}
-                >
-                  {getReminderActionLabel(reminder.kind)}
-                </Button>
-              </div>
-              <button
-                onClick={() => setShowReminder(false)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition hover:bg-[color:var(--muted)] hover:text-foreground"
-                aria-label="Đóng nhắc việc"
-                type="button"
+    <Card className="max-w-full overflow-hidden rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card shadow-[var(--shadow-2)]">
+      <CardContent className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
+        {reminder ? (
+          <div className="flex items-start gap-2.5">
+            <BellRing className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
+            <div className="min-w-0 flex-1">
+              <p className="break-words font-semibold text-foreground">{reminder.title}</p>
+              <p className="mt-1 hidden line-clamp-2 break-words text-sm text-muted-foreground sm:block">
+                {reminder.description}
+              </p>
+              <Button
+                size="sm"
+                glow
+                className="mt-2 h-10 px-3 text-xs"
+                onClick={() => {
+                  setShowReminder(false);
+                  if (reminder.goalId) {
+                    localStorage.setItem("latest_12_week_goal_id", reminder.goalId);
+                    localStorage.setItem("latest_12_week_system_goal_id", reminder.goalId);
+                  }
+                  navigate(reminder.href);
+                }}
               >
-                <X className="h-4 w-4" />
-              </button>
+                {getReminderActionLabel(reminder.kind)}
+              </Button>
             </div>
-          ) : (
-            <div className="flex items-start gap-2.5">
-              <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-foreground">Cảm hứng hôm nay</p>
-                <p className="line-clamp-2 text-sm italic text-muted-foreground">"{quote}"</p>
-              </div>
-              <button
-                onClick={() => setShowReminder(false)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition hover:bg-[color:var(--muted)] hover:text-foreground"
-                aria-label="Đóng thông điệp"
-                type="button"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            <button
+              onClick={() => setShowReminder(false)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition hover:bg-[color:var(--muted)] hover:text-foreground"
+              aria-label="Đóng nhắc việc"
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-start gap-2.5">
+            <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-foreground">Cảm hứng hôm nay</p>
+              <p className="line-clamp-2 text-sm italic text-muted-foreground">"{quote}"</p>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <button
+              onClick={() => setShowReminder(false)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition hover:bg-[color:var(--muted)] hover:text-foreground"
+              aria-label="Đóng thông điệp"
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 
-  const className =
-    "fixed bottom-4 left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm";
+  const className = "fixed bottom-4 left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm";
 
   if (prefersReducedMotion) {
     return (

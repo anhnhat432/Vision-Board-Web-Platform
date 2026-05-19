@@ -107,9 +107,7 @@ function getPrePlanAction(bottleneck: FeasibilityBottleneck): string {
   }
 }
 
-function getSmartGoalQualityNote(
-  qualityLevel: SmartGoalQualityBridge | undefined,
-): string | undefined {
+function getSmartGoalQualityNote(qualityLevel: SmartGoalQualityBridge | undefined): string | undefined {
   if (qualityLevel === "weak") {
     return "Mục tiêu viết chưa đủ rõ ràng. Nên quay lại làm rõ kết quả, con số đo và lý do trước khi tạo kế hoạch 12 tuần.";
   }
@@ -130,34 +128,28 @@ function buildPlanGuidance(input: {
 
   if (input.resultType === "too_ambitious") {
     return {
-      firstWeekGuidance:
-        "Tuần 1 chỉ nên có 1-2 việc bắt buộc, ưu tiên thắng nhỏ thay vì chứng minh năng lực.",
-      scopeRecommendation:
-        `Thu nhỏ mục tiêu 12 tuần hoặc kéo dài thời hạn trước khi tăng độ khó.${qualitySuffix}`,
+      firstWeekGuidance: "Tuần 1 chỉ nên có 1-2 việc bắt buộc, ưu tiên thắng nhỏ thay vì chứng minh năng lực.",
+      scopeRecommendation: `Thu nhỏ mục tiêu 12 tuần hoặc kéo dài thời hạn trước khi tăng độ khó.${qualitySuffix}`,
     };
   }
 
   if (input.planLoad === "lighter") {
     return {
       firstWeekGuidance: `Tuần 1 nên nhẹ hơn vì phần cần chú ý nhất là ${input.bottleneck.label.toLowerCase()}.`,
-      scopeRecommendation:
-        `Giữ 2 việc chính, bỏ bớt phần mở rộng cho đến khi duy trì ổn.${qualitySuffix}`,
+      scopeRecommendation: `Giữ 2 việc chính, bỏ bớt phần mở rộng cho đến khi duy trì ổn.${qualitySuffix}`,
     };
   }
 
   if (input.planLoad === "push") {
     return {
-      firstWeekGuidance:
-        "Tuần 1 có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm để tránh ôm quá nhiều.",
-      scopeRecommendation:
-        `Có thể dùng 3-4 việc lặp lại nếu mỗi việc có lịch rõ và đo được.${qualitySuffix}`,
+      firstWeekGuidance: "Tuần 1 có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm để tránh ôm quá nhiều.",
+      scopeRecommendation: `Có thể dùng 3-4 việc lặp lại nếu mỗi việc có lịch rõ và đo được.${qualitySuffix}`,
     };
   }
 
   return {
     firstWeekGuidance: "Tuần 1 nên cân bằng: đủ rõ để tiến lên, đủ nhẹ để duy trì đều.",
-    scopeRecommendation:
-      `Giữ một kết quả chính, 2-3 việc lặp lại và một buổi nhìn lại cố định.${qualitySuffix}`,
+    scopeRecommendation: `Giữ một kết quả chính, 2-3 việc lặp lại và một buổi nhìn lại cố định.${qualitySuffix}`,
   };
 }
 
@@ -221,22 +213,16 @@ export function buildResult(
     challenging: {
       title: "Mục tiêu này làm được, nhưng phải xử lý đúng phần yếu nhất.",
       summary: `Kết quả không chỉ dựa vào cảm giác chung. Phần yếu nhất là ${bottleneck.label.toLowerCase()} — bỏ qua phần này thì kế hoạch 12 tuần dễ phình nhưng khó duy trì.`,
-      recommendation:
-        `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Thu hẹp mục tiêu, chọn ít việc chính hơn và biến ${bottleneck.label.toLowerCase()} thành nguyên tắc cho tuần đầu.`,
+      recommendation: `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Thu hẹp mục tiêu, chọn ít việc chính hơn và biến ${bottleneck.label.toLowerCase()} thành nguyên tắc cho tuần đầu.`,
     },
     too_ambitious: {
       title: "Mục tiêu này cần thu nhỏ trước khi tạo kế hoạch 12 tuần.",
       summary: `Một vài nền tảng chưa đủ chắc, đặc biệt là ${bottleneck.label.toLowerCase()}. Giữ nguyên quy mô thì rủi ro lớn nhất là bắt đầu mạnh nhưng sớm đuối.`,
-      recommendation:
-        `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Chọn phiên bản nhỏ hơn, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi đã duy trì ổn.`,
+      recommendation: `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Chọn phiên bản nhỏ hơn, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi đã duy trì ổn.`,
     },
   };
 
-  const archetypeOverride = getArchetypeFeasibilityOverride(
-    goalArchetype,
-    resultType,
-    bottleneck.axis,
-  );
+  const archetypeOverride = getArchetypeFeasibilityOverride(goalArchetype, resultType, bottleneck.axis);
 
   const finalBottleneck: FeasibilityBottleneck = archetypeOverride.bottleneckOverlayNote
     ? { ...bottleneck, action: `${bottleneck.action} ${archetypeOverride.bottleneckOverlayNote}` }

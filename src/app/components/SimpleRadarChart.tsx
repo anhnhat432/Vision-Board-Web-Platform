@@ -37,10 +37,7 @@ function getLabelPoint(angle: number) {
 
   return {
     x: basePoint.x + (Math.abs(horizontalBias) > 0.45 ? horizontalBias * 6 : 0),
-    y:
-      basePoint.y +
-      (verticalBias < -0.55 ? -8 : 0) +
-      (verticalBias > 0.55 ? 10 : 0),
+    y: basePoint.y + (verticalBias < -0.55 ? -8 : 0) + (verticalBias > 0.55 ? 10 : 0),
   };
 }
 
@@ -170,11 +167,7 @@ export function SimpleRadarChart({
                 y={label.y}
               >
                 {lines.map((line, lineIndex) => (
-                  <tspan
-                    dy={lineIndex === 0 ? 0 : 19}
-                    key={`${item.subject}-${line}`}
-                    x={label.x}
-                  >
+                  <tspan dy={lineIndex === 0 ? 0 : 19} key={`${item.subject}-${line}`} x={label.x}>
                     {line}
                   </tspan>
                 ))}

@@ -11,13 +11,17 @@ describe("useNetworkStatus", () => {
     Object.defineProperty(navigator, "onLine", { value: true, writable: true, configurable: true });
 
     listeners.clear();
-    vi.spyOn(window, "addEventListener").mockImplementation((type: string, listener: EventListenerOrEventListenerObject) => {
-      if (!listeners.has(type)) listeners.set(type, new Set());
-      listeners.get(type)?.add(listener as EventListener);
-    });
-    vi.spyOn(window, "removeEventListener").mockImplementation((type: string, listener: EventListenerOrEventListenerObject) => {
-      listeners.get(type)?.delete(listener as EventListener);
-    });
+    vi.spyOn(window, "addEventListener").mockImplementation(
+      (type: string, listener: EventListenerOrEventListenerObject) => {
+        if (!listeners.has(type)) listeners.set(type, new Set());
+        listeners.get(type)?.add(listener as EventListener);
+      },
+    );
+    vi.spyOn(window, "removeEventListener").mockImplementation(
+      (type: string, listener: EventListenerOrEventListenerObject) => {
+        listeners.get(type)?.delete(listener as EventListener);
+      },
+    );
 
     vi.useFakeTimers();
   });
@@ -81,7 +85,9 @@ describe("useNetworkStatus", () => {
     expect(onReconnect).not.toHaveBeenCalled();
 
     // Advance past debounce
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     expect(onReconnect).toHaveBeenCalledTimes(1);
   });
 
@@ -91,11 +97,15 @@ describe("useNetworkStatus", () => {
     renderHook(() => useNetworkStatus({ onReconnect, reconnectDebounceMs: 3000 }));
 
     act(() => fireEvent("online"));
-    act(() => { vi.advanceTimersByTime(1000); });
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     act(() => fireEvent("offline"));
 
     // Advance way past debounce
-    act(() => { vi.advanceTimersByTime(5000); });
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
     expect(onReconnect).not.toHaveBeenCalled();
   });
 
@@ -107,7 +117,9 @@ describe("useNetworkStatus", () => {
     act(() => fireEvent("online"));
     unmount();
 
-    act(() => { vi.advanceTimersByTime(5000); });
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
     expect(onReconnect).not.toHaveBeenCalled();
   });
 

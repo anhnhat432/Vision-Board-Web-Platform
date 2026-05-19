@@ -73,7 +73,8 @@ const RESULT_COPY: Record<ResultType, ResultCopy> = {
     statusLabel: "Khó nhưng vẫn làm được",
     statusHint: "Có thể đạt nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần nghiêm túc.",
     guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa hơn.",
-    guideBody: "Mục tiêu có sức bật nhưng không phù hợp nếu triển khai quá rộng. Giữ một hướng chính rõ và bỏ bớt phần gây nhiễu.",
+    guideBody:
+      "Mục tiêu có sức bật nhưng không phù hợp nếu triển khai quá rộng. Giữ một hướng chính rõ và bỏ bớt phần gây nhiễu.",
     highlights: [
       {
         title: "Thu hẹp mục tiêu 12 tuần đầu",
@@ -99,14 +100,19 @@ const RESULT_COPY: Record<ResultType, ResultCopy> = {
     weeklyRhythm: [
       { label: "Ngay sau kết quả", detail: "Chốt một kết quả đủ rõ, bỏ bớt mục tiêu phụ không cần cho chu kỳ này." },
       { label: "Tuần 1-2", detail: "Kiểm tra xem lịch hành động có thực sự vừa với cuộc sống hằng ngày không." },
-      { label: "Sau mỗi lần nhìn lại", detail: "Đang đuối thì giảm tải trước khi tăng tốc. Bền quan trọng hơn hưng phấn đầu kỳ." },
+      {
+        label: "Sau mỗi lần nhìn lại",
+        detail: "Đang đuối thì giảm tải trước khi tăng tốc. Bền quan trọng hơn hưng phấn đầu kỳ.",
+      },
     ],
   },
   too_ambitious: {
     statusLabel: "Cần thu nhỏ trước khi tăng tốc",
-    statusHint: "Mục tiêu đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách giúp giữ động lực và xác suất hoàn thành cao hơn.",
+    statusHint:
+      "Mục tiêu đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách giúp giữ động lực và xác suất hoàn thành cao hơn.",
     guideTitle: "Không cần hạ tham vọng — chỉ cần hạ mức tải bước đầu.",
-    guideBody: "Chưa cần từ bỏ mục tiêu lớn. Biến nó thành bước đệm vừa tầm để 12 tuần tới là chu kỳ thắng được, không phải lời hứa áp lực.",
+    guideBody:
+      "Chưa cần từ bỏ mục tiêu lớn. Biến nó thành bước đệm vừa tầm để 12 tuần tới là chu kỳ thắng được, không phải lời hứa áp lực.",
     highlights: [
       {
         title: "Thu nhỏ kết quả đầu tiên",
@@ -200,7 +206,10 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   ];
 
   return (
-    <section className="mt-6 rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-labelledby="feasibility-result-title">
+    <section
+      className="mt-6 rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      aria-labelledby="feasibility-result-title"
+    >
       <div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Kết quả kiểm tra</p>
@@ -290,7 +299,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <div className="rounded-card border border-app-line bg-app-bg p-4 md:p-5">
             <div className="flex items-center gap-2">
               <Compass className="h-4 w-4 text-app-accent" aria-hidden="true" />
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Hướng đi tiếp theo</p>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                Hướng đi tiếp theo
+              </p>
             </div>
             <h3 className="mt-3 font-serif text-[20px] font-medium text-app-ink">{copy.guideTitle}</h3>
             <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{copy.guideBody}</p>
@@ -333,7 +344,10 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                     </span>
                   </div>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
-                    <div className={`h-full rounded-full ${getAxisBarClass(axis.percent)}`} style={{ width: `${axis.percent}%` }} />
+                    <div
+                      className={`h-full rounded-full ${getAxisBarClass(axis.percent)}`}
+                      style={{ width: `${axis.percent}%` }}
+                    />
                   </div>
                   <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">{axis.diagnostic}</p>
                 </div>
@@ -342,7 +356,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem mục tiêu đã viết</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">
+              Xem mục tiêu đã viết
+            </summary>
             <div className="mt-4 space-y-3">
               <p className="text-[15px] font-medium leading-6 text-app-ink">{pendingGoal.specific}</p>
               <div className="grid gap-3 text-[14px] leading-6 text-app-ink-soft">
@@ -351,11 +367,15 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <p className="mt-1">{pendingGoal.timeBound}</p>
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Dấu hiệu hoàn thành</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    Dấu hiệu hoàn thành
+                  </p>
                   <p className="mt-1">{pendingGoal.measurable}</p>
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lý do theo đuổi</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    Lý do theo đuổi
+                  </p>
                   <p className="mt-1">{pendingGoal.relevant}</p>
                 </div>
               </div>
@@ -363,7 +383,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem nhịp triển khai gợi ý</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">
+              Xem nhịp triển khai gợi ý
+            </summary>
             <div className="mt-4 grid gap-3">
               {copy.weeklyRhythm.map((item, index) => (
                 <div key={item.label} className="flex gap-3">
@@ -380,7 +402,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem lý do đằng sau kết quả</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">
+              Xem lý do đằng sau kết quả
+            </summary>
             <div className="mt-4 space-y-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-app-accent" aria-hidden="true" />
@@ -397,7 +421,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 ))}
               </ol>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nguyên tắc lập kế hoạch</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  Nguyên tắc lập kế hoạch
+                </p>
                 <p className="mt-2 text-[14px] font-medium leading-6 text-app-ink">{result.scopeRecommendation}</p>
                 <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">{result.bottleneck.action}</p>
               </div>

@@ -228,15 +228,7 @@ describe("archetype property accessors", () => {
   });
 
   it("returns a feasibility focus with valid bottleneck for every archetype", () => {
-    const validBottlenecks = new Set([
-      "time",
-      "energy",
-      "resources",
-      "clarity",
-      "obstacle",
-      "routine",
-      "confidence",
-    ]);
+    const validBottlenecks = new Set(["time", "energy", "resources", "clarity", "obstacle", "routine", "confidence"]);
     for (const archetype of ALL_ARCHETYPES) {
       const focus = getArchetypeFeasibilityFocus(archetype);
       expect(validBottlenecks.has(focus.typicalBottleneck)).toBe(true);

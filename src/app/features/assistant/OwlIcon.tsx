@@ -33,18 +33,8 @@ export function OwlIcon({ size = 24, className, ...props }: OwlIconProps) {
       <circle cx={cx - 3} cy={cy - 2} r={pupilR} fill="#1e293b" />
       <circle cx={cx + 3} cy={cy - 2} r={eyeR} fill="white" />
       <circle cx={cx + 3} cy={cy - 2} r={pupilR} fill="#1e293b" />
-      <polygon
-        points={`${cx},${cy + 1} ${cx - 2},${cy + 4} ${cx + 2},${cy + 4}`}
-        fill="#fbbf24"
-      />
-      <ellipse
-        cx={earCx}
-        cy={earCy}
-        rx={earRx}
-        ry={earRy}
-        fill="white"
-        transform={`rotate(-20 ${earCx} ${earCy})`}
-      />
+      <polygon points={`${cx},${cy + 1} ${cx - 2},${cy + 4} ${cx + 2},${cy + 4}`} fill="#fbbf24" />
+      <ellipse cx={earCx} cy={earCy} rx={earRx} ry={earRy} fill="white" transform={`rotate(-20 ${earCx} ${earCy})`} />
       <ellipse
         cx={size - earCx}
         cy={earCy}

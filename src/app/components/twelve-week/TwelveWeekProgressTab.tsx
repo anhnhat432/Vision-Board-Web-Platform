@@ -278,7 +278,11 @@ export function TwelveWeekProgressTab({
                 Tiếp theo nên làm
               </p>
               <p className="mt-1 text-[14px] leading-6 text-app-ink">{nextActionSuggestion.label}</p>
-              <Button size="lg" className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto" onClick={nextActionHandler}>
+              <Button
+                size="lg"
+                className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto"
+                onClick={nextActionHandler}
+              >
                 {nextActionSuggestion.buttonLabel}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -324,77 +328,72 @@ export function TwelveWeekProgressTab({
         />
       )}
 
-      <SectionBlock
-        title="Tổng quan hiệu suất"
-        eyebrow="Performance"
-        collapsible
-        defaultOpen={true}
-      >
+      <SectionBlock title="Tổng quan hiệu suất" eyebrow="Performance" collapsible defaultOpen={true}>
         <div className="grid gap-5 md:grid-cols-3">
-        <Card className="border border-app-line bg-app-surface">
-          <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              <CalendarDays className="h-3.5 w-3.5" />
-              Tuần đang chạy
-            </p>
-            <div className="mt-3">
-              <p className="font-serif text-2xl font-medium text-app-ink">Tuần {currentWeek}</p>
-              <p className="mt-1 text-[14px] text-app-ink-muted">
-                {currentWeekRange
-                  ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-                  : "Đang cập nhật phạm vi tuần"}
+          <Card className="border border-app-line bg-app-surface">
+            <CardContent className="p-5">
+              <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Tuần đang chạy
               </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-3">
+                <p className="font-serif text-2xl font-medium text-app-ink">Tuần {currentWeek}</p>
+                <p className="mt-1 text-[14px] text-app-ink-muted">
+                  {currentWeekRange
+                    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                    : "Đang cập nhật phạm vi tuần"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="border border-app-line bg-app-surface">
-          <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
-              Tiến độ việc lặp lại
-            </p>
-            <div className="mt-3 flex items-start justify-between gap-3">
-              <p className="font-serif text-2xl font-medium text-app-ink">Việc lặp lại trung bình {averageLeadScore}%</p>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent"
-                    aria-label="Tại sao 85%?"
-                  >
-                    <CircleHelp className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent sideOffset={8}>{WEEKLY_EXECUTION_TARGET_TOOLTIP}</TooltipContent>
-              </Tooltip>
-            </div>
-            <p className="mt-1 text-[14px] text-app-ink-muted">
-              Tuần hiện tại: {currentWeekScoreValue}% việc lặp lại. Điểm hệ cũ: {averageScore}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-app-line bg-app-surface">
+            <CardContent className="p-5">
+              <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
+                Tiến độ việc lặp lại
+              </p>
+              <div className="mt-3 flex items-start justify-between gap-3">
+                <p className="font-serif text-2xl font-medium text-app-ink">
+                  Việc lặp lại trung bình {averageLeadScore}%
+                </p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent"
+                      aria-label="Tại sao 85%?"
+                    >
+                      <CircleHelp className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent sideOffset={8}>{WEEKLY_EXECUTION_TARGET_TOOLTIP}</TooltipContent>
+                </Tooltip>
+              </div>
+              <p className="mt-1 text-[14px] text-app-ink-muted">
+                Tuần hiện tại: {currentWeekScoreValue}% việc lặp lại. Điểm hệ cũ: {averageScore}
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card className="border border-app-line bg-app-surface">
-          <CardContent className="p-5">
-            {reviewDoneCount === 0 && (
-              <WeeklyReviewIllustration className="mb-3 w-24 text-app-accent opacity-65" />
-            )}
-            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              <Flag className="h-3.5 w-3.5 text-app-accent" />
-              Tuần đã hoàn thành
-            </p>
-            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">
-              Đã hoàn thành {reviewDoneCount}/{system.totalWeeks} tuần
-            </p>
-            <p className="mt-1 text-[14px] text-app-ink-muted">
-              {isEarlyState
-                ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
-                : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="border border-app-line bg-app-surface">
+            <CardContent className="p-5">
+              {reviewDoneCount === 0 && <WeeklyReviewIllustration className="mb-3 w-24 text-app-accent opacity-65" />}
+              <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <Flag className="h-3.5 w-3.5 text-app-accent" />
+                Tuần đã hoàn thành
+              </p>
+              <p className="mt-3 font-serif text-2xl font-medium text-app-ink">
+                Đã hoàn thành {reviewDoneCount}/{system.totalWeeks} tuần
+              </p>
+              <p className="mt-1 text-[14px] text-app-ink-muted">
+                {isEarlyState
+                  ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
+                  : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </SectionBlock>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -430,11 +429,7 @@ export function TwelveWeekProgressTab({
                   <div
                     key={week.weekNumber}
                     className={`rounded-card border bg-app-surface p-4 ${
-                      isCurrentWeek
-                        ? "border-app-ink"
-                        : isReviewed
-                          ? "border-app-accent/30"
-                          : "border-app-line"
+                      isCurrentWeek ? "border-app-ink" : isReviewed ? "border-app-accent/30" : "border-app-line"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -446,9 +441,7 @@ export function TwelveWeekProgressTab({
                         >
                           Tuần {week.weekNumber}
                         </p>
-                        <p className="mt-2 font-serif text-2xl font-medium text-app-ink">
-                          {week.weeklyScore}
-                        </p>
+                        <p className="mt-2 font-serif text-2xl font-medium text-app-ink">{week.weeklyScore}</p>
                       </div>
                       <Badge
                         variant={isReviewed ? "default" : "outline"}
@@ -468,14 +461,9 @@ export function TwelveWeekProgressTab({
                       <div>
                         <div className="flex items-center justify-between text-[14px] text-app-ink-soft">
                           <span>Hoàn thành cốt lõi</span>
-                          <span className="font-semibold text-app-ink">
-                            {week.leadCompletionPercent}%
-                          </span>
+                          <span className="font-semibold text-app-ink">{week.leadCompletionPercent}%</span>
                         </div>
-                        <Progress
-                          value={week.leadCompletionPercent}
-                          className="mt-2 h-2.5"
-                        />
+                        <Progress value={week.leadCompletionPercent} className="mt-2 h-2.5" />
                       </div>
 
                       <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
@@ -555,7 +543,9 @@ export function TwelveWeekProgressTab({
 
                       return (
                         <div key={weekNumber} className="flex items-center gap-1">
-                          <span className="w-8 text-right text-[12px] font-medium text-app-ink-muted">T{weekNumber}</span>
+                          <span className="w-8 text-right text-[12px] font-medium text-app-ink-muted">
+                            T{weekNumber}
+                          </span>
                           {cells.map((cell) => {
                             const cellClass =
                               cell.total === 0
@@ -621,18 +611,20 @@ export function TwelveWeekProgressTab({
                       <div
                         key={point.weekNumber}
                         className={`rounded-lg border p-4 ${
-                          isCurrent
-                            ? "border-app-ink bg-app-surface"
-                            : "border-app-line bg-app-bg"
+                          isCurrent ? "border-app-ink bg-app-surface" : "border-app-line bg-app-bg"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <span className={`text-[14px] font-semibold ${isCurrent ? "text-app-ink" : "text-app-ink-soft"}`}>
+                            <span
+                              className={`text-[14px] font-semibold ${isCurrent ? "text-app-ink" : "text-app-ink-soft"}`}
+                            >
                               Tuần {point.weekNumber}
                             </span>
                             {isCurrent && (
-                              <Badge className="border-app-accent/20 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft">Đang chạy</Badge>
+                              <Badge className="border-app-accent/20 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft">
+                                Đang chạy
+                              </Badge>
                             )}
                           </div>
                           <span className="text-[14px] font-semibold text-app-ink">{point.score} điểm</span>

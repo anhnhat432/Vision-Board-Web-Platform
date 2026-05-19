@@ -1,4 +1,12 @@
-import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform, type HTMLMotionProps } from "motion/react";
+import {
+  animate,
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type HTMLMotionProps,
+} from "motion/react";
 import { useEffect, useRef } from "react";
 
 interface MotionCountUpProps extends Omit<HTMLMotionProps<"span">, "children"> {
@@ -40,5 +48,9 @@ export function MotionCountUp({
     return controls.stop;
   }, [duration, isInView, motionValue, reduceMotion, value]);
 
-  return <motion.span ref={ref} {...props}>{rounded}</motion.span>;
+  return (
+    <motion.span ref={ref} {...props}>
+      {rounded}
+    </motion.span>
+  );
 }

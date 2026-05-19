@@ -1,5 +1,18 @@
 ﻿import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, CheckCircle2, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarClock,
+  CalendarPlus,
+  Check,
+  CheckCircle2,
+  Crown,
+  Gauge,
+  Inbox,
+  Loader2,
+  Sparkles,
+  X,
+} from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
@@ -321,7 +334,9 @@ export function TwelveWeekTodayTab({
           <p className="mt-0.5 text-lg font-bold text-app-ink">{weekCompletion.percent}%</p>
         </div>
         <div className={`min-w-0 rounded-lg px-2 py-2 ${reviewDueToday ? "bg-app-warm-soft" : "bg-app-accent-soft"}`}>
-          <p className={`text-[12px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}>
+          <p
+            className={`text-[12px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}
+          >
             {reviewDueToday ? "Review" : "Xong"}
           </p>
           <p className="mt-0.5 truncate text-lg font-bold text-app-ink">
@@ -445,10 +460,7 @@ export function TwelveWeekTodayTab({
               </div>
               <div className="grid gap-3">
                 {rescueModes.map((mode) => (
-                  <div
-                    key={mode}
-                    className="rounded-lg border border-app-line bg-app-surface p-4"
-                  >
+                  <div key={mode} className="rounded-lg border border-app-line bg-app-surface p-4">
                     <p className="text-sm font-semibold text-app-ink">{getReentryModeLabel(mode)}</p>
                     <p className="mt-2 text-sm leading-7 text-app-ink-soft">
                       {getReentryModeDescription(mode, {
@@ -531,10 +543,7 @@ export function TwelveWeekTodayTab({
             Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
           </p>
           {isFirstWeek && (
-            <p
-              data-testid="today-first-week-encouragement"
-              className="text-sm leading-6 text-app-ink-soft"
-            >
+            <p data-testid="today-first-week-encouragement" className="text-sm leading-6 text-app-ink-soft">
               Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
             </p>
           )}
@@ -542,432 +551,440 @@ export function TwelveWeekTodayTab({
       )}
 
       <SectionBlock title="Hàng việc và check-in hôm nay" headerVisuallyHidden className="order-3">
-        <div data-testid="today-main-work-grid" className="grid min-w-0 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.12fr)_380px]">
-        <div className={fadeInClassName}>
-          <Card
-            data-tour-id="system-today-queue"
-            className="h-full min-w-0 overflow-hidden rounded-card border border-app-line bg-app-surface"
-          >
-            <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
-              <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle as="h2" className="break-words text-app-ink">Hàng việc hôm nay</CardTitle>
-                  <CardDescription className="mt-1 break-words text-app-ink-soft">
-                    Làm việc đầu tiên trước, phần còn lại để sau.
-                  </CardDescription>
+        <div
+          data-testid="today-main-work-grid"
+          className="grid min-w-0 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.12fr)_380px]"
+        >
+          <div className={fadeInClassName}>
+            <Card
+              data-tour-id="system-today-queue"
+              className="h-full min-w-0 overflow-hidden rounded-card border border-app-line bg-app-surface"
+            >
+              <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
+                <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle as="h2" className="break-words text-app-ink">
+                      Hàng việc hôm nay
+                    </CardTitle>
+                    <CardDescription className="mt-1 break-words text-app-ink-soft">
+                      Làm việc đầu tiên trước, phần còn lại để sau.
+                    </CardDescription>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 border-app-line bg-app-bg text-app-ink-muted">
+                    {todayCompletedCount}/{checkInTotal} xong
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="shrink-0 border-app-line bg-app-bg text-app-ink-muted">
-                  {todayCompletedCount}/{checkInTotal} xong
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="min-w-0 stack-tight px-4 pt-0 pb-4 sm:px-7 sm:pb-7">
-              {todayQueue.length === 0 ? (
-                hasPlanTasks ? (
-                  <EmptyState
-                    variant="dashed"
-                    testId="today-empty-state"
-                    illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
-                    icon={<Check className="h-5 w-5" />}
-                    title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
-                    description={
-                      reviewDueToday
-                        ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
-                        : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
-                    }
-                    actions={
-                      onOpenWeekTab && !reviewDueToday ? (
-                        <Button variant="outline" onClick={onOpenWeekTab} className="bg-app-surface">
-                          Mở tab Tuần
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
-                      ) : undefined
-                    }
-                  />
+              </CardHeader>
+              <CardContent className="min-w-0 stack-tight px-4 pt-0 pb-4 sm:px-7 sm:pb-7">
+                {todayQueue.length === 0 ? (
+                  hasPlanTasks ? (
+                    <EmptyState
+                      variant="dashed"
+                      testId="today-empty-state"
+                      illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
+                      icon={<Check className="h-5 w-5" />}
+                      title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
+                      description={
+                        reviewDueToday
+                          ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
+                          : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
+                      }
+                      actions={
+                        onOpenWeekTab && !reviewDueToday ? (
+                          <Button variant="outline" onClick={onOpenWeekTab} className="bg-app-surface">
+                            Mở tab Tuần
+                            <ArrowRight className="ml-1 h-4 w-4" />
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                  ) : (
+                    <EmptyState
+                      variant="dashed"
+                      testId="today-empty-state"
+                      illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
+                      icon={<Inbox className="h-5 w-5" />}
+                      title="Chưa có việc nào trong chu kỳ này"
+                      description={
+                        hasLeadMetrics
+                          ? "Chu kỳ đã có việc lặp lại, nhưng chưa có việc nào cho tuần này. Vào Setup để tạo lại chu kỳ."
+                          : "Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước."
+                      }
+                      actions={
+                        onNavigateToSetup ? (
+                          <Button variant="secondary" onClick={onNavigateToSetup}>
+                            {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
+                            <ArrowRight className="ml-1 h-4 w-4" />
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                  )
                 ) : (
-                  <EmptyState
-                    variant="dashed"
-                    testId="today-empty-state"
-                    illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
-                    icon={<Inbox className="h-5 w-5" />}
-                    title="Chưa có việc nào trong chu kỳ này"
-                    description={
-                      hasLeadMetrics
-                        ? "Chu kỳ đã có việc lặp lại, nhưng chưa có việc nào cho tuần này. Vào Setup để tạo lại chu kỳ."
-                        : "Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước."
-                    }
-                    actions={
-                      onNavigateToSetup ? (
-                        <Button variant="secondary" onClick={onNavigateToSetup}>
-                          {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
-                      ) : undefined
-                    }
-                  />
-                )
-              ) : (
-                <MotionStaggerList className="stack-tight">
-                  {todayQueue.map((task) => {
-                  const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
-                  const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
-                  const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
-                  const TaskStateIcon = taskCompleted ? TaskDoneIcon : isPrimaryTask ? TaskInProgressIcon : TaskTodoIcon;
-                  const statusLabel = taskCompleted
-                    ? "Đã chốt"
-                    : isOverdue
-                      ? "Đang trễ"
-                      : task.scheduledDate === todayDateKey
-                        ? "Hôm nay"
-                        : formatCalendarDate(task.scheduledDate);
-                  const taskCommitmentQuote = getTaskCommitmentQuote(system, task);
-                  const showTaskCommitmentQuote = Boolean(
-                    taskCommitmentQuote && !(isPrimaryTask && primaryTaskCommitmentQuote),
-                  );
+                  <MotionStaggerList className="stack-tight">
+                    {todayQueue.map((task) => {
+                      const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
+                      const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
+                      const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
+                      const TaskStateIcon = taskCompleted
+                        ? TaskDoneIcon
+                        : isPrimaryTask
+                          ? TaskInProgressIcon
+                          : TaskTodoIcon;
+                      const statusLabel = taskCompleted
+                        ? "Đã chốt"
+                        : isOverdue
+                          ? "Đang trễ"
+                          : task.scheduledDate === todayDateKey
+                            ? "Hôm nay"
+                            : formatCalendarDate(task.scheduledDate);
+                      const taskCommitmentQuote = getTaskCommitmentQuote(system, task);
+                      const showTaskCommitmentQuote = Boolean(
+                        taskCommitmentQuote && !(isPrimaryTask && primaryTaskCommitmentQuote),
+                      );
 
-                  return (
-                    <MotionStaggerItem
-                      key={task.id}
-                      className={`flex min-w-0 items-start gap-3 rounded-card border p-4 ${
-                        isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface"
-                      }`}
-                    >
-                      <Checkbox
-                        aria-label={`Hoàn thành việc: ${task.title}`}
-                        checked={taskCompleted}
-                        className={`-m-2 mt-0 h-11 w-11 rounded-full ${
-                          isPrimaryTask
-                            ? "border-white/30 bg-white/10 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-app-ink"
-                            : "border-app-line bg-app-surface"
-                        }`}
-                        onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
-                      />
-                      <div className="min-w-0 flex-1">
-                        {isPrimaryTask && (
-                          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
-                            Việc ưu tiên số 1
-                          </p>
-                        )}
-                        <div
-                          className={`flex min-w-0 flex-wrap items-start justify-between gap-3 ${
-                            isPrimaryTask && !taskCompleted ? "text-white" : ""
+                      return (
+                        <MotionStaggerItem
+                          key={task.id}
+                          className={`flex min-w-0 items-start gap-3 rounded-card border p-4 ${
+                            isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface"
                           }`}
                         >
+                          <Checkbox
+                            aria-label={`Hoàn thành việc: ${task.title}`}
+                            checked={taskCompleted}
+                            className={`-m-2 mt-0 h-11 w-11 rounded-full ${
+                              isPrimaryTask
+                                ? "border-white/30 bg-white/10 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-app-ink"
+                                : "border-app-line bg-app-surface"
+                            }`}
+                            onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
+                          />
                           <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <TaskStateIcon
-                                className={`h-4 w-4 shrink-0 ${
-                                  isPrimaryTask && !taskCompleted
-                                    ? "text-white"
-                                    : taskCompleted
-                                      ? "text-app-accent"
-                                      : "text-app-accent"
-                                }`}
-                              />
-                              <p
-                                className={`min-w-0 max-w-full break-words font-medium ${
-                                  taskCompleted
-                                    ? "text-app-ink-muted line-through"
-                                    : isPrimaryTask
-                                      ? "text-white"
-                                      : "text-app-ink"
-                                }`}
-                              >
-                                {task.title}
+                            {isPrimaryTask && (
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
+                                Việc ưu tiên số 1
                               </p>
-                              <Badge
-                                variant={task.isCore ? "success" : "warning"}
-                                className={
-                                  isPrimaryTask && !taskCompleted
-                                    ? "border-white/20 bg-white/10 text-white hover:bg-white/10"
-                                    : ""
-                                }
-                              >
-                                {task.isCore ? "Cốt lõi" : "Tùy chọn"}
-                              </Badge>
-                            </div>
-                            <p
-                              className={`mt-1 text-sm ${
-                                isPrimaryTask && !taskCompleted
-                                  ? "text-white/80"
-                                  : taskCompleted
-                                    ? "text-app-ink-muted"
-                                    : "text-app-ink-muted"
+                            )}
+                            <div
+                              className={`flex min-w-0 flex-wrap items-start justify-between gap-3 ${
+                                isPrimaryTask && !taskCompleted ? "text-white" : ""
                               }`}
                             >
-                              {task.leadIndicatorName}
-                            </p>
-                            {showTaskCommitmentQuote ? (
-                              <p
-                                className={`mt-1 text-xs italic leading-5 ${
-                                  isPrimaryTask && !taskCompleted ? "text-white/60" : "text-app-ink-muted"
-                                }`}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <TaskStateIcon
+                                    className={`h-4 w-4 shrink-0 ${
+                                      isPrimaryTask && !taskCompleted
+                                        ? "text-white"
+                                        : taskCompleted
+                                          ? "text-app-accent"
+                                          : "text-app-accent"
+                                    }`}
+                                  />
+                                  <p
+                                    className={`min-w-0 max-w-full break-words font-medium ${
+                                      taskCompleted
+                                        ? "text-app-ink-muted line-through"
+                                        : isPrimaryTask
+                                          ? "text-white"
+                                          : "text-app-ink"
+                                    }`}
+                                  >
+                                    {task.title}
+                                  </p>
+                                  <Badge
+                                    variant={task.isCore ? "success" : "warning"}
+                                    className={
+                                      isPrimaryTask && !taskCompleted
+                                        ? "border-white/20 bg-white/10 text-white hover:bg-white/10"
+                                        : ""
+                                    }
+                                  >
+                                    {task.isCore ? "Cốt lõi" : "Tùy chọn"}
+                                  </Badge>
+                                </div>
+                                <p
+                                  className={`mt-1 text-sm ${
+                                    isPrimaryTask && !taskCompleted
+                                      ? "text-white/80"
+                                      : taskCompleted
+                                        ? "text-app-ink-muted"
+                                        : "text-app-ink-muted"
+                                  }`}
+                                >
+                                  {task.leadIndicatorName}
+                                </p>
+                                {showTaskCommitmentQuote ? (
+                                  <p
+                                    className={`mt-1 text-xs italic leading-5 ${
+                                      isPrimaryTask && !taskCompleted ? "text-white/60" : "text-app-ink-muted"
+                                    }`}
+                                  >
+                                    {taskCommitmentQuote}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className={
+                                  isOverdue
+                                    ? "border-app-warm-border bg-app-warm-soft text-app-warm"
+                                    : taskCompleted
+                                      ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                                      : isPrimaryTask
+                                        ? "border-white/30 bg-white/10 text-white/90"
+                                        : "border-app-line bg-app-bg text-app-ink-muted"
+                                }
                               >
-                                {taskCommitmentQuote}
-                              </p>
-                            ) : null}
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={
-                              isOverdue
-                                ? "border-app-warm-border bg-app-warm-soft text-app-warm"
-                                : taskCompleted
-                                  ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
-                                  : isPrimaryTask
-                                    ? "border-white/30 bg-white/10 text-white/90"
-                                    : "border-app-line bg-app-bg text-app-ink-muted"
-                            }
-                          >
-                            {statusLabel}
-                          </Badge>
-                        </div>
-                        {isOverdue &&
-                          (onRescheduleTaskWithinWeek ||
-                            onRescheduleTaskToNextWeek ||
-                            (onSkipNonCoreTask && !task.isCore)) && (
-                            <div
-                              data-testid={`overdue-actions-${task.id}`}
-                              className="mt-3 flex flex-wrap items-center gap-2"
-                            >
-                              {onRescheduleTaskWithinWeek && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className={
-                                    isPrimaryTask
-                                      ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                                      : "bg-app-surface"
-                                  }
-                                  onClick={() => onRescheduleTaskWithinWeek(task.id)}
-                                  data-action="reschedule-within-week"
-                                  aria-label={`Dời ${task.title} sang ngày khác trong tuần`}
-                                >
-                                  <CalendarClock className="mr-1 h-3.5 w-3.5" />
-                                  Dời trong tuần
-                                </Button>
-                              )}
-                              {onRescheduleTaskToNextWeek && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className={
-                                    isPrimaryTask
-                                      ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                                      : "bg-app-surface"
-                                  }
-                                  onClick={() => onRescheduleTaskToNextWeek(task.id)}
-                                  data-action="reschedule-next-week"
-                                  aria-label={`Dời ${task.title} sang tuần sau`}
-                                >
-                                  <CalendarPlus className="mr-1 h-3.5 w-3.5" />
-                                  Sang tuần sau
-                                </Button>
-                              )}
-                              {onSkipNonCoreTask && !task.isCore && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className={
-                                    isPrimaryTask ? "text-white/80 hover:bg-white/10" : "text-app-ink-muted"
-                                  }
-                                  onClick={() => onSkipNonCoreTask(task.id)}
-                                  data-action="skip-non-core"
-                                  aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
-                                >
-                                  <X className="mr-1 h-3.5 w-3.5" />
-                                  Bỏ qua
-                                </Button>
-                              )}
-                              {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) && (
-                                <span
-                                  data-testid={`overdue-core-note-${task.id}`}
-                                  className={`text-xs ${isPrimaryTask ? "text-white/60" : "text-app-ink-muted"}`}
-                                >
-                                  Việc cốt lõi không thể bỏ — chỉ dời lịch.
-                                </span>
-                              )}
+                                {statusLabel}
+                              </Badge>
                             </div>
-                          )}
-                      </div>
-                    </MotionStaggerItem>
-                  );
-                })}
-                </MotionStaggerList>
-              )}
-              {secondaryTodayTasks.length > 0 && (
-                <details className="group min-w-0 rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-app-ink">
-                    <span>Sau việc đầu tiên</span>
-                    <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs font-medium text-app-ink-muted">
-                      {secondaryTodayTasks.length} việc
-                    </span>
-                  </summary>
-                  <p className="mt-2 text-sm text-app-ink-muted">Xong việc số 1 rồi mới mở danh sách này.</p>
-                  <div className="mt-3 stack-tight">
-                    {secondaryPreviewTasks.map((task, index) => (
-                      <div
-                        key={task.id}
-                        className="flex min-w-0 items-center gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-3"
+                            {isOverdue &&
+                              (onRescheduleTaskWithinWeek ||
+                                onRescheduleTaskToNextWeek ||
+                                (onSkipNonCoreTask && !task.isCore)) && (
+                                <div
+                                  data-testid={`overdue-actions-${task.id}`}
+                                  className="mt-3 flex flex-wrap items-center gap-2"
+                                >
+                                  {onRescheduleTaskWithinWeek && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className={
+                                        isPrimaryTask
+                                          ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                                          : "bg-app-surface"
+                                      }
+                                      onClick={() => onRescheduleTaskWithinWeek(task.id)}
+                                      data-action="reschedule-within-week"
+                                      aria-label={`Dời ${task.title} sang ngày khác trong tuần`}
+                                    >
+                                      <CalendarClock className="mr-1 h-3.5 w-3.5" />
+                                      Dời trong tuần
+                                    </Button>
+                                  )}
+                                  {onRescheduleTaskToNextWeek && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className={
+                                        isPrimaryTask
+                                          ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                                          : "bg-app-surface"
+                                      }
+                                      onClick={() => onRescheduleTaskToNextWeek(task.id)}
+                                      data-action="reschedule-next-week"
+                                      aria-label={`Dời ${task.title} sang tuần sau`}
+                                    >
+                                      <CalendarPlus className="mr-1 h-3.5 w-3.5" />
+                                      Sang tuần sau
+                                    </Button>
+                                  )}
+                                  {onSkipNonCoreTask && !task.isCore && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className={
+                                        isPrimaryTask ? "text-white/80 hover:bg-white/10" : "text-app-ink-muted"
+                                      }
+                                      onClick={() => onSkipNonCoreTask(task.id)}
+                                      data-action="skip-non-core"
+                                      aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
+                                    >
+                                      <X className="mr-1 h-3.5 w-3.5" />
+                                      Bỏ qua
+                                    </Button>
+                                  )}
+                                  {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) && (
+                                    <span
+                                      data-testid={`overdue-core-note-${task.id}`}
+                                      className={`text-xs ${isPrimaryTask ? "text-white/60" : "text-app-ink-muted"}`}
+                                    >
+                                      Việc cốt lõi không thể bỏ — chỉ dời lịch.
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                          </div>
+                        </MotionStaggerItem>
+                      );
+                    })}
+                  </MotionStaggerList>
+                )}
+                {secondaryTodayTasks.length > 0 && (
+                  <details className="group min-w-0 rounded-lg border border-app-line bg-app-bg px-4 py-3">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-app-ink">
+                      <span>Sau việc đầu tiên</span>
+                      <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs font-medium text-app-ink-muted">
+                        {secondaryTodayTasks.length} việc
+                      </span>
+                    </summary>
+                    <p className="mt-2 text-sm text-app-ink-muted">Xong việc số 1 rồi mới mở danh sách này.</p>
+                    <div className="mt-3 stack-tight">
+                      {secondaryPreviewTasks.map((task, index) => (
+                        <div
+                          key={task.id}
+                          className="flex min-w-0 items-center gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-3"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent text-xs font-semibold text-white">
+                            {index + 2}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-app-ink">{task.title}</p>
+                            <p className="mt-0.5 text-xs text-app-ink-muted">{task.leadIndicatorName}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {remainingSecondaryTasks > 0 && (
+                      <p className="mt-3 text-sm text-app-ink-muted">
+                        Còn {remainingSecondaryTasks} việc mở phía sau, chưa cần nghĩ tới ngay.
+                      </p>
+                    )}
+                  </details>
+                )}
+                <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                  <div className="flex items-center justify-between text-sm text-app-ink-muted">
+                    <span>Tiến độ tuần {currentWeek}</span>
+                    <span className="font-semibold text-app-ink-muted">{weekCompletion.percent}%</span>
+                  </div>
+                  <Progress value={weekCompletion.percent} className="mt-3 h-2.5" />
+                </div>
+                {primaryTaskCompletedToday && (
+                  <p
+                    data-testid="today-primary-done-nudge"
+                    className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm leading-6 text-app-accent"
+                  >
+                    Việc chính đã xong — lưu check-in để chốt hôm nay.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
+            <Card className="h-full min-w-0 overflow-hidden rounded-card border border-app-line bg-app-surface">
+              <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle as="h2" className="flex items-center gap-2 break-words text-app-ink">
+                      <Gauge className="h-5 w-5 text-app-accent" />
+                      Check-in 30 giây
+                    </CardTitle>
+                    <CardDescription className="mt-1 break-words text-app-ink-soft">
+                      Chọn năng lượng và ghi 1 ý ngắn nếu cần.
+                    </CardDescription>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 border-app-accent/20 bg-app-accent-soft text-app-accent">
+                    {todayCompletedCount}/{checkInTotal}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="min-w-0 stack-tight px-4 pt-0 pb-4 sm:stack-stack sm:px-7 sm:pb-7">
+                {todayCheckIn && (
+                  <div
+                    data-testid="today-check-in-saved"
+                    className="flex items-start gap-3 rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm text-app-accent"
+                  >
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
+                    <div>
+                      <p className="font-semibold">Check-in hôm nay đã lưu</p>
+                      <p className="mt-1 leading-6">
+                        {formatCalendarDate(todayCheckIn.date)} - năng lượng{" "}
+                        {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="stack-tight">
+                  <Label id="daily-mood-label">Năng lượng hôm nay</Label>
+                  <div
+                    role="radiogroup"
+                    aria-labelledby="daily-mood-label"
+                    className="grid grid-cols-3 gap-2 lg:grid-cols-1 2xl:grid-cols-3"
+                  >
+                    {MOOD_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={dailyMood === option.value}
+                        aria-label={`${option.label}: ${option.hint}`}
+                        variant="outline"
+                        className={
+                          dailyMood === option.value
+                            ? "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-app-accent bg-app-accent px-2 py-2 text-center text-white hover:bg-app-accent sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
+                            : "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-app-line bg-app-surface px-2 py-2 text-center text-app-ink-soft hover:bg-app-bg sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
+                        }
+                        onClick={() => onDailyMoodChange(option.value)}
                       >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent text-xs font-semibold text-white">
-                          {index + 2}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-app-ink">{task.title}</p>
-                          <p className="mt-0.5 text-xs text-app-ink-muted">{task.leadIndicatorName}</p>
-                        </div>
-                      </div>
+                        <span className="min-w-0 text-left">
+                          <span className="block text-center text-sm font-semibold sm:text-left">{option.label}</span>
+                          <span
+                            className={`hidden break-words text-xs leading-5 sm:block ${dailyMood === option.value ? "text-white/72" : "text-app-ink-muted"}`}
+                          >
+                            {option.hint}
+                          </span>
+                        </span>
+                      </Button>
                     ))}
                   </div>
-                  {remainingSecondaryTasks > 0 && (
-                    <p className="mt-3 text-sm text-app-ink-muted">
-                      Còn {remainingSecondaryTasks} việc mở phía sau, chưa cần nghĩ tới ngay.
-                    </p>
-                  )}
-                </details>
-              )}
-              <div className="rounded-lg border border-app-line bg-app-bg p-4">
-                <div className="flex items-center justify-between text-sm text-app-ink-muted">
-                  <span>Tiến độ tuần {currentWeek}</span>
-                  <span className="font-semibold text-app-ink-muted">{weekCompletion.percent}%</span>
                 </div>
-                <Progress value={weekCompletion.percent} className="mt-3 h-2.5" />
-              </div>
-              {primaryTaskCompletedToday && (
-                <p
-                  data-testid="today-primary-done-nudge"
-                  className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm leading-6 text-app-accent"
-                >
-                  Việc chính đã xong — lưu check-in để chốt hôm nay.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        <div
-          className={fadeInClassName}
-          style={{ animationDelay: '0.06s' }}
-        >
-          <Card className="h-full min-w-0 overflow-hidden rounded-card border border-app-line bg-app-surface">
-            <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
-              <div className="flex min-w-0 items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle as="h2" className="flex items-center gap-2 break-words text-app-ink">
-                    <Gauge className="h-5 w-5 text-app-accent" />
-                    Check-in 30 giây
-                  </CardTitle>
-                  <CardDescription className="mt-1 break-words text-app-ink-soft">
-                    Chọn năng lượng và ghi 1 ý ngắn nếu cần.
-                  </CardDescription>
+                <div className="stack-tight">
+                  <Label htmlFor="daily-note">Note tùy chọn</Label>
+                  <Textarea
+                    id="daily-note"
+                    rows={2}
+                    value={dailyNote}
+                    onChange={(event) => onDailyNoteChange(event.target.value)}
+                    placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
+                  />
                 </div>
-                <Badge variant="outline" className="shrink-0 border-app-accent/20 bg-app-accent-soft text-app-accent">
-                  {todayCompletedCount}/{checkInTotal}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="min-w-0 stack-tight px-4 pt-0 pb-4 sm:stack-stack sm:px-7 sm:pb-7">
-              {todayCheckIn && (
-                <div
-                  data-testid="today-check-in-saved"
-                  className="flex items-start gap-3 rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm text-app-accent"
-                >
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
-                  <div>
-                    <p className="font-semibold">Check-in hôm nay đã lưu</p>
-                    <p className="mt-1 leading-6">
-                      {formatCalendarDate(todayCheckIn.date)} - năng lượng{" "}
-                      {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className="stack-tight">
-                <Label id="daily-mood-label">Năng lượng hôm nay</Label>
-                <div
-                  role="radiogroup"
-                  aria-labelledby="daily-mood-label"
-                  className="grid grid-cols-3 gap-2 lg:grid-cols-1 2xl:grid-cols-3"
-                >
-                  {MOOD_OPTIONS.map((option) => (
-                    <Button
-                      key={option.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={dailyMood === option.value}
-                      aria-label={`${option.label}: ${option.hint}`}
-                      variant="outline"
-                      className={
-                        dailyMood === option.value
-                          ? "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-app-accent bg-app-accent px-2 py-2 text-center text-white hover:bg-app-accent sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
-                          : "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-app-line bg-app-surface px-2 py-2 text-center text-app-ink-soft hover:bg-app-bg sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
-                      }
-                      onClick={() => onDailyMoodChange(option.value)}
-                    >
-                      <span className="min-w-0 text-left">
-                        <span className="block text-center text-sm font-semibold sm:text-left">{option.label}</span>
-                        <span
-                          className={`hidden break-words text-xs leading-5 sm:block ${dailyMood === option.value ? "text-white/72" : "text-app-ink-muted"}`}
-                        >
-                          {option.hint}
-                        </span>
-                      </span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className="stack-tight">
-                <Label htmlFor="daily-note">Note tùy chọn</Label>
-                <Textarea
-                  id="daily-note"
-                  rows={2}
-                  value={dailyNote}
-                  onChange={(event) => onDailyNoteChange(event.target.value)}
-                  placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
-                />
-              </div>
-              <Button
-                size="lg"
-                variant="secondary"
-                className="w-full py-3 text-base sm:w-auto sm:py-4 sm:text-lg"
-                onClick={handleSaveCheckInClick}
-                disabled={isSavingCheckIn}
-                aria-busy={isSavingCheckIn}
-              >
-                {isSavingCheckIn ? (
-                  <>
-                    <Loader2 className={loadingIconClassName} aria-hidden="true" />
-                    Đang lưu check-in...
-                  </>
-                ) : (
-                  hasSavedTodayCheckIn ? "Cập nhật check-in hôm nay" : "Lưu check-in hôm nay"
-                )}
-              </Button>
-              {reviewDueToday && onOpenWeekTab && (
                 <Button
-                  data-testid="today-check-in-open-week"
-                  variant="outline"
-                  className="w-full bg-app-surface sm:w-auto"
-                  onClick={onOpenWeekTab}
+                  size="lg"
+                  variant="secondary"
+                  className="w-full py-3 text-base sm:w-auto sm:py-4 sm:text-lg"
+                  onClick={handleSaveCheckInClick}
+                  disabled={isSavingCheckIn}
+                  aria-busy={isSavingCheckIn}
                 >
-                  Mở tab Tuần để review
-                  <ArrowRight className="ml-1 h-4 w-4" />
+                  {isSavingCheckIn ? (
+                    <>
+                      <Loader2 className={loadingIconClassName} aria-hidden="true" />
+                      Đang lưu check-in...
+                    </>
+                  ) : hasSavedTodayCheckIn ? (
+                    "Cập nhật check-in hôm nay"
+                  ) : (
+                    "Lưu check-in hôm nay"
+                  )}
                 </Button>
-              )}
-              <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false}>
-                {latestCheckIn && (
-                  <div
-                    aria-live="polite"
-                    className="rounded-lg border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted"
+                {reviewDueToday && onOpenWeekTab && (
+                  <Button
+                    data-testid="today-check-in-open-week"
+                    variant="outline"
+                    className="w-full bg-app-surface sm:w-auto"
+                    onClick={onOpenWeekTab}
                   >
-                    Check-in gần nhất: {formatCalendarDate(latestCheckIn.date)} • năng lượng{" "}
-                    {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
-                  </div>
+                    Mở tab Tuần để review
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
                 )}
-              </SecondaryPanel>
-            </CardContent>
-          </Card>
-        </div>
+                <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false}>
+                  {latestCheckIn && (
+                    <div
+                      aria-live="polite"
+                      className="rounded-lg border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted"
+                    >
+                      Check-in gần nhất: {formatCalendarDate(latestCheckIn.date)} • năng lượng{" "}
+                      {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                    </div>
+                  )}
+                </SecondaryPanel>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </SectionBlock>
 

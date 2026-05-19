@@ -60,30 +60,21 @@ describe("ReflectionJournal streak", () => {
 
   it.skip("resets streak after a skipped day", () => {
     vi.setSystemTime(new Date("2026-05-15T10:00:00+07:00"));
-    seedReflections([
-      { timestamp: "2026-05-15T08:00:00+07:00" },
-      { timestamp: "2026-05-13T22:30:00+07:00" },
-    ]);
+    seedReflections([{ timestamp: "2026-05-15T08:00:00+07:00" }, { timestamp: "2026-05-13T22:30:00+07:00" }]);
     renderJournal();
     expect(screen.getByText("1 ngày")).toBeInTheDocument();
   });
 
   it.skip("does not double-count entries at 23:59 and 00:01 of same calendar day", () => {
     vi.setSystemTime(new Date("2026-05-15T10:00:00+07:00"));
-    seedReflections([
-      { timestamp: "2026-05-14T23:59:00+07:00" },
-      { timestamp: "2026-05-14T00:01:00+07:00" },
-    ]);
+    seedReflections([{ timestamp: "2026-05-14T23:59:00+07:00" }, { timestamp: "2026-05-14T00:01:00+07:00" }]);
     renderJournal();
     expect(screen.getByText("1 ngày")).toBeInTheDocument();
   });
 
   it.skip("counts entries at 23:59 day N and 00:01 day N+1 as 2 separate days", () => {
     vi.setSystemTime(new Date("2026-05-15T10:00:00+07:00"));
-    seedReflections([
-      { timestamp: "2026-05-15T00:01:00+07:00" },
-      { timestamp: "2026-05-14T23:59:00+07:00" },
-    ]);
+    seedReflections([{ timestamp: "2026-05-15T00:01:00+07:00" }, { timestamp: "2026-05-14T23:59:00+07:00" }]);
     renderJournal();
     expect(screen.getByText("2 ngày")).toBeInTheDocument();
   });
@@ -97,10 +88,7 @@ describe("ReflectionJournal streak", () => {
 
   it.skip("includes today even if today has no entry yet (allows yesterday-start)", () => {
     vi.setSystemTime(new Date("2026-05-15T10:00:00+07:00"));
-    seedReflections([
-      { timestamp: "2026-05-14T20:00:00+07:00" },
-      { timestamp: "2026-05-13T20:00:00+07:00" },
-    ]);
+    seedReflections([{ timestamp: "2026-05-14T20:00:00+07:00" }, { timestamp: "2026-05-13T20:00:00+07:00" }]);
     renderJournal();
     expect(screen.getByText("2 ngày")).toBeInTheDocument();
   });

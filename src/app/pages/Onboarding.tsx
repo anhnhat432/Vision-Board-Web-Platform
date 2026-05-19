@@ -148,7 +148,11 @@ function clearOnboardingDraft() {
   window.localStorage.removeItem(ONBOARDING_DRAFT_STORAGE_KEY);
 }
 
-function createOnboardingDraft(step: OnboardingStep, lifeAreas: LifeArea[], reviewedAreaIndices: Set<number>): OnboardingDraft {
+function createOnboardingDraft(
+  step: OnboardingStep,
+  lifeAreas: LifeArea[],
+  reviewedAreaIndices: Set<number>,
+): OnboardingDraft {
   return {
     version: ONBOARDING_DRAFT_VERSION,
     completed: false,
@@ -376,7 +380,10 @@ export function Onboarding() {
 
           {draftBanner}
 
-          <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8" aria-labelledby="onboarding-welcome-title">
+          <section
+            className="rounded-card border border-app-line bg-app-surface p-5 md:p-8"
+            aria-labelledby="onboarding-welcome-title"
+          >
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
@@ -453,7 +460,10 @@ export function Onboarding() {
         {progressHeader}
         {draftBanner}
 
-        <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8" aria-labelledby="onboarding-assessment-title">
+        <section
+          className="rounded-card border border-app-line bg-app-surface p-5 md:p-8"
+          aria-labelledby="onboarding-assessment-title"
+        >
           <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             BƯỚC 1 / 6 · CÂN BẰNG CUỘC SỐNG
           </p>
@@ -473,7 +483,9 @@ export function Onboarding() {
           >
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-[13px] text-app-ink-muted">Điểm trung bình</p>
-              <p className="mt-1 font-serif text-[26px] font-medium text-app-ink tabular-nums">{averageScore.toFixed(1)}/10</p>
+              <p className="mt-1 font-serif text-[26px] font-medium text-app-ink tabular-nums">
+                {averageScore.toFixed(1)}/10
+              </p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-[13px] text-app-ink-muted">Đã rà soát</p>
@@ -539,7 +551,9 @@ export function Onboarding() {
         </section>
 
         {!canCompleteAssessment ? (
-          <InlineStatusMessage tone="warning">Còn {remainingAreaCount} lĩnh vực cần rà trước khi đi tiếp.</InlineStatusMessage>
+          <InlineStatusMessage tone="warning">
+            Còn {remainingAreaCount} lĩnh vực cần rà trước khi đi tiếp.
+          </InlineStatusMessage>
         ) : null}
 
         <footer className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">

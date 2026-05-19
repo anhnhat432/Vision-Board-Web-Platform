@@ -69,20 +69,18 @@ export function SectionBlock({
   };
 
   return (
-    <section {...sectionProps} aria-labelledby={headingId} className={cn(headerVisuallyHidden ? null : densityClass, className)}>
+    <section
+      {...sectionProps}
+      aria-labelledby={headingId}
+      className={cn(headerVisuallyHidden ? null : densityClass, className)}
+    >
       <div className={cn("flex items-start justify-between gap-2", headerVisuallyHidden && "sr-only")}>
         <div className={cn("flex-1", headerDensityClass)}>
-          {eyebrow && (
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
-              {eyebrow}
-            </p>
-          )}
+          {eyebrow && <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">{eyebrow}</p>}
           <h2 id={headingId} className="text-xl font-bold leading-tight tracking-[-0.014em] text-app-ink">
             {title}
           </h2>
-          {description && (
-            <p className="text-[15px] leading-6 tracking-tight text-app-ink-muted">{description}</p>
-          )}
+          {description && <p className="text-[15px] leading-6 tracking-tight text-app-ink-muted">{description}</p>}
         </div>
         {collapsible && (
           <Button
@@ -95,10 +93,7 @@ export function SectionBlock({
             aria-controls={contentId}
           >
             <ChevronDown
-              className={cn(
-                "h-4 w-4 transition-transform duration-300 ease-out",
-                isOpen ? "rotate-0" : "-rotate-90",
-              )}
+              className={cn("h-4 w-4 transition-transform duration-300 ease-out", isOpen ? "rotate-0" : "-rotate-90")}
             />
           </Button>
         )}

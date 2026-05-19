@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  getNextWeekAdjustmentRecommendation,
-  type NextWeekRecommendationContext,
-} from "./nextWeekRecommendation";
+import { getNextWeekAdjustmentRecommendation, type NextWeekRecommendationContext } from "./nextWeekRecommendation";
 
 function makeContext(overrides: Partial<NextWeekRecommendationContext> = {}): NextWeekRecommendationContext {
   return {
@@ -100,25 +97,19 @@ describe("getNextWeekAdjustmentRecommendation — rescue overrides", () => {
 
 describe("getNextWeekAdjustmentRecommendation — completion-driven rules", () => {
   it("recommends 'reset' for very low completion", () => {
-    const result = getNextWeekAdjustmentRecommendation(
-      makeContext({ weekCompletionPercent: 25 }),
-    );
+    const result = getNextWeekAdjustmentRecommendation(makeContext({ weekCompletionPercent: 25 }));
     expect(result.recommendation).toBe("reset");
     expect(result.reasonCodes).toContain("very_low_week_completion");
   });
 
   it("recommends 'lighter' for low completion (<50%)", () => {
-    const result = getNextWeekAdjustmentRecommendation(
-      makeContext({ weekCompletionPercent: 40 }),
-    );
+    const result = getNextWeekAdjustmentRecommendation(makeContext({ weekCompletionPercent: 40 }));
     expect(result.recommendation).toBe("lighter");
     expect(result.reasonCodes).toContain("low_week_completion");
   });
 
   it("recommends 'same' for mid completion (50-79%)", () => {
-    const result = getNextWeekAdjustmentRecommendation(
-      makeContext({ weekCompletionPercent: 65 }),
-    );
+    const result = getNextWeekAdjustmentRecommendation(makeContext({ weekCompletionPercent: 65 }));
     expect(result.recommendation).toBe("same");
   });
 
@@ -199,9 +190,7 @@ describe("getNextWeekAdjustmentRecommendation — combined low completion + resc
 
 describe("getNextWeekAdjustmentRecommendation — confidence", () => {
   it("returns 'low' confidence when only weekCompletionPercent is provided in mid-band", () => {
-    const result = getNextWeekAdjustmentRecommendation(
-      makeContext({ weekCompletionPercent: 60 }),
-    );
+    const result = getNextWeekAdjustmentRecommendation(makeContext({ weekCompletionPercent: 60 }));
     expect(result.recommendation).toBe("same");
     // Mid-band has 1 implicit signal → medium.
     expect(["low", "medium"]).toContain(result.confidence);
@@ -248,9 +237,7 @@ describe("getNextWeekAdjustmentRecommendation — copy", () => {
   });
 
   it("does not interpolate user content (raw text) into output", () => {
-    const result = getNextWeekAdjustmentRecommendation(
-      makeContext({ weekCompletionPercent: 40 }),
-    );
+    const result = getNextWeekAdjustmentRecommendation(makeContext({ weekCompletionPercent: 40 }));
     const combined = `${result.headline} ${result.body} ${result.suggestedNextWeekPriority}`;
     // Sanity: outputs contain no placeholders or numeric percentages beyond canned copy.
     expect(combined).not.toMatch(/\{[^}]+\}/);
@@ -298,9 +285,7 @@ describe("getNextWeekAdjustmentRecommendation — backwards compat", () => {
   });
 
   it("ignores unknown rescueSeverity gracefully (treats as null)", () => {
-    const result = getNextWeekAdjustmentRecommendation(
-      makeContext({ weekCompletionPercent: 65 }),
-    );
+    const result = getNextWeekAdjustmentRecommendation(makeContext({ weekCompletionPercent: 65 }));
     expect(result.recommendation).toBe("same");
   });
 });

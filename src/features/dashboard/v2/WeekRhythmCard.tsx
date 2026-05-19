@@ -99,13 +99,18 @@ function getBarOpacity(percent: number): number {
 function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const barContent = (() => {
     if (day.isFuture) {
-      return <div className="h-12 w-5 rounded-md border border-dashed border-app-line bg-transparent" aria-hidden="true" />;
+      return (
+        <div className="h-12 w-5 rounded-md border border-dashed border-app-line bg-transparent" aria-hidden="true" />
+      );
     }
 
     if (day.isToday) {
       const fillHeight = day.total === 0 ? 18 : clamp(day.percent, 18, 100);
       return (
-        <div className="flex h-12 w-5 items-end rounded-md bg-app-accent-soft ring-2 ring-app-accent" aria-hidden="true">
+        <div
+          className="flex h-12 w-5 items-end rounded-md bg-app-accent-soft ring-2 ring-app-accent"
+          aria-hidden="true"
+        >
           <div className="w-full rounded-md bg-app-accent" style={{ height: `${fillHeight}%` }} />
         </div>
       );
@@ -172,7 +177,11 @@ export function WeekRhythmCard({
   ];
 
   return (
-    <section data-testid="dashboard-kpi-row" className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-week-rhythm-title">
+    <section
+      data-testid="dashboard-kpi-row"
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      aria-labelledby="dashboard-week-rhythm-title"
+    >
       <div>
         <h2 id="dashboard-week-rhythm-title" className="text-[16px] font-semibold text-app-ink">
           Nhịp tuần {safeWeek}
@@ -189,8 +198,12 @@ export function WeekRhythmCard({
           return (
             <div key={item.caption} className="rounded-xl border border-app-line bg-app-bg p-3">
               <Icon className="h-4 w-4 text-app-accent" />
-              <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{item.caption}</p>
-              <p className="mt-1 font-serif text-[28px] font-medium leading-none text-app-ink sm:text-[30px]">{item.value}</p>
+              <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                {item.caption}
+              </p>
+              <p className="mt-1 font-serif text-[28px] font-medium leading-none text-app-ink sm:text-[30px]">
+                {item.value}
+              </p>
               <p className="mt-2 text-[12px] text-app-ink-muted">{item.subLine}</p>
             </div>
           );

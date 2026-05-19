@@ -1,7 +1,4 @@
-import {
-  generateExecutionSuggestion,
-  interpretExecutionScore,
-} from "../logic/executionFeedback";
+import { generateExecutionSuggestion, interpretExecutionScore } from "../logic/executionFeedback";
 
 interface ExecutionFeedbackProps {
   score: number;
@@ -40,9 +37,7 @@ export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
     <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-            Phản hồi thực hiện
-          </p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Phản hồi thực hiện</p>
           <p className="mt-1 text-[16px] font-semibold text-app-ink">{getStatusLabel(status)}</p>
         </div>
         <div className="flex items-center gap-3">

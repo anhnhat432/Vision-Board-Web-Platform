@@ -46,7 +46,10 @@ function getLimitUsage(userData: UserData, limitName: FreeTierLimitName): number
   }
 }
 
-export function getFreeTierUsage(userData: UserData, limitName: FreeTierLimitName): { current: number; limit: number; reached: boolean } {
+export function getFreeTierUsage(
+  userData: UserData,
+  limitName: FreeTierLimitName,
+): { current: number; limit: number; reached: boolean } {
   const limit = FREE_TIER_LIMITS[limitName];
   const current = getLimitUsage(userData, limitName);
   return {

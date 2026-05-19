@@ -121,10 +121,7 @@ export function startTrialLocallyInData(
   return planCode;
 }
 
-export function restorePlanAccessLocallyInData(
-  userData: UserData,
-  persistOnExpiry?: PersistCallback,
-): PricingPlanCode {
+export function restorePlanAccessLocallyInData(userData: UserData, persistOnExpiry?: PersistCallback): PricingPlanCode {
   const currentPlan = getCurrentPlanFromData(userData, persistOnExpiry);
 
   if (currentPlan === "FREE") {

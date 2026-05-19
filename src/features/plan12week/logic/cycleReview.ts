@@ -32,12 +32,7 @@ function parseMetricValue(value: string | number | undefined): number {
 }
 
 function getLeadScore(review: CycleReviewInput): number {
-  return clampPercent(
-    review.leadScore ??
-      review.executionScore ??
-      review.leadCompletionPercent ??
-      0,
-  );
+  return clampPercent(review.leadScore ?? review.executionScore ?? review.leadCompletionPercent ?? 0);
 }
 
 function normalizeText(value: unknown): string {
@@ -93,9 +88,7 @@ export function calculateCycleSummary(
 
   const leadScores = cycleReviews.map(getLeadScore);
   const averageLeadScore =
-    leadScores.length === 0
-      ? 0
-      : clampPercent(leadScores.reduce((sum, score) => sum + score, 0) / leadScores.length);
+    leadScores.length === 0 ? 0 : clampPercent(leadScores.reduce((sum, score) => sum + score, 0) / leadScores.length);
   const weeksWith85Plus = leadScores.filter((score) => score >= 85).length;
 
   const keptCount = cycleReviews.reduce((sum, review) => sum + (review.commitmentsKept?.length ?? 0), 0);
@@ -113,7 +106,10 @@ export function calculateCycleSummary(
     averageLeadScore,
     commitmentsKeptRate,
     weeksWith85Plus,
-    biggestWins: uniqueNonEmptyTexts(cycleReviews.map((review) => review.insights), 5),
+    biggestWins: uniqueNonEmptyTexts(
+      cycleReviews.map((review) => review.insights),
+      5,
+    ),
     topAdjustments: summarizeRepeatedTexts(missedCommitments, 5),
   };
 }

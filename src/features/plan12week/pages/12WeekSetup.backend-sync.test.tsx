@@ -50,7 +50,7 @@ vi.mock("@/services/planService", () => ({
 
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
-import { APP_STORAGE_KEYS, formatDateInputValue, getUserData, saveUserData } from '@/app/utils/storage';
+import { APP_STORAGE_KEYS, formatDateInputValue, getUserData, saveUserData } from "@/app/utils/storage";
 import { TwelveWeekSetup } from "./12WeekSetup";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 20_000;
@@ -272,9 +272,7 @@ async function submitSetupFlow() {
     expect(router.state.location.pathname).toBe("/12-week-system");
   });
 
-  const localGoal = getUserData().goals.find((goal) =>
-    goal.title.includes("Ra mắt hệ thống review cá nhân"),
-  );
+  const localGoal = getUserData().goals.find((goal) => goal.title.includes("Ra mắt hệ thống review cá nhân"));
   if (!localGoal) {
     throw new Error("Expected local 12-week goal to be saved.");
   }
@@ -303,18 +301,22 @@ describe("12-week setup backend sync", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
 
-  it("completes locally without backend calls in demo mode or when Firebase is not configured", async () => {
-    appMode.value = "demo";
-    setAuthNotConfigured();
-    seedReadyTwelveWeekSetup();
+  it(
+    "completes locally without backend calls in demo mode or when Firebase is not configured",
+    async () => {
+      appMode.value = "demo";
+      setAuthNotConfigured();
+      seedReadyTwelveWeekSetup();
 
-    const { localGoal } = await submitSetupFlow();
+      const { localGoal } = await submitSetupFlow();
 
-    expect(localGoal.twelveWeekSystem).toBeDefined();
-    expect(createGoal).not.toHaveBeenCalled();
-    expect(createPlan).not.toHaveBeenCalled();
-    expect(updateGoal).not.toHaveBeenCalled();
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      expect(localGoal.twelveWeekSystem).toBeDefined();
+      expect(createGoal).not.toHaveBeenCalled();
+      expect(createPlan).not.toHaveBeenCalled();
+      expect(updateGoal).not.toHaveBeenCalled();
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
   it("lets signed-out users preview setup steps but gates the final preview in real mode", async () => {
     appMode.value = "real";
@@ -352,63 +354,75 @@ describe("12-week setup backend sync", () => {
     expect(screen.getByRole("link", { name: "Quay về trang chính" })).toHaveAttribute("href", "/");
   });
 
-  it("creates backend goal, syncs plan with backend goal id, stores links, then updates goal with plan id", async () => {
-    seedReadyTwelveWeekSetup();
+  it(
+    "creates backend goal, syncs plan with backend goal id, stores links, then updates goal with plan id",
+    async () => {
+      seedReadyTwelveWeekSetup();
 
-    const { localGoal } = await submitSetupFlow();
+      const { localGoal } = await submitSetupFlow();
 
-    await waitFor(() => {
-      expect(updateGoal).toHaveBeenCalledWith("backend_goal_1", { planId: "backend_plan_1" });
-    });
-    expect(createGoal).toHaveBeenCalledTimes(1);
-    expect(createPlan).toHaveBeenCalledWith(
-      expect.objectContaining({
-        smartGoalId: "backend_goal_1",
-        vision: "Giữ nhịp review trong 12 tuần.",
-        initializeWeeks: true,
-        totalWeeks: 12,
-      }),
-    );
-    expect(getBackendGoalId(localGoal.id)).toBe("backend_goal_1");
-    expect(getPlanLink(localGoal.id)?.planId).toBe("backend_plan_1");
-  }, INTEGRATION_TEST_TIMEOUT_MS);
-
-  it("keeps local flow when backend goal creation fails and falls back to local goal id for plan sync", async () => {
-    createGoal.mockRejectedValueOnce(new Error("goal sync failed"));
-    seedReadyTwelveWeekSetup();
-
-    const { localGoal } = await submitSetupFlow();
-
-    await waitFor(() => {
+      await waitFor(() => {
+        expect(updateGoal).toHaveBeenCalledWith("backend_goal_1", { planId: "backend_plan_1" });
+      });
+      expect(createGoal).toHaveBeenCalledTimes(1);
       expect(createPlan).toHaveBeenCalledWith(
         expect.objectContaining({
-          smartGoalId: localGoal.id,
+          smartGoalId: "backend_goal_1",
+          vision: "Giữ nhịp review trong 12 tuần.",
+          initializeWeeks: true,
+          totalWeeks: 12,
         }),
       );
-    });
-    expect(localGoal.twelveWeekSystem).toBeDefined();
-    expect(getBackendGoalId(localGoal.id)).toBeNull();
-    expect(getPlanLink(localGoal.id)?.planId).toBe("backend_plan_1");
-    expect(updateGoal).not.toHaveBeenCalled();
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      expect(getBackendGoalId(localGoal.id)).toBe("backend_goal_1");
+      expect(getPlanLink(localGoal.id)?.planId).toBe("backend_plan_1");
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-  it("keeps local flow when backend plan sync fails and does not link an empty plan id", async () => {
-    createPlan.mockRejectedValueOnce(new Error("plan sync failed"));
-    seedReadyTwelveWeekSetup();
+  it(
+    "keeps local flow when backend goal creation fails and falls back to local goal id for plan sync",
+    async () => {
+      createGoal.mockRejectedValueOnce(new Error("goal sync failed"));
+      seedReadyTwelveWeekSetup();
 
-    const { localGoal } = await submitSetupFlow();
+      const { localGoal } = await submitSetupFlow();
 
-    await waitFor(() => {
-      expect(createPlan).toHaveBeenCalledTimes(1);
-    });
-    await act(async () => {
-      await Promise.resolve();
-      await Promise.resolve();
-    });
+      await waitFor(() => {
+        expect(createPlan).toHaveBeenCalledWith(
+          expect.objectContaining({
+            smartGoalId: localGoal.id,
+          }),
+        );
+      });
+      expect(localGoal.twelveWeekSystem).toBeDefined();
+      expect(getBackendGoalId(localGoal.id)).toBeNull();
+      expect(getPlanLink(localGoal.id)?.planId).toBe("backend_plan_1");
+      expect(updateGoal).not.toHaveBeenCalled();
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-    expect(localGoal.twelveWeekSystem).toBeDefined();
-    expect(getBackendGoalId(localGoal.id)).toBe("backend_goal_1");
-    expect(getPlanLink(localGoal.id)).toBeNull();
-    expect(updateGoal).not.toHaveBeenCalled();
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+  it(
+    "keeps local flow when backend plan sync fails and does not link an empty plan id",
+    async () => {
+      createPlan.mockRejectedValueOnce(new Error("plan sync failed"));
+      seedReadyTwelveWeekSetup();
+
+      const { localGoal } = await submitSetupFlow();
+
+      await waitFor(() => {
+        expect(createPlan).toHaveBeenCalledTimes(1);
+      });
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(localGoal.twelveWeekSystem).toBeDefined();
+      expect(getBackendGoalId(localGoal.id)).toBe("backend_goal_1");
+      expect(getPlanLink(localGoal.id)).toBeNull();
+      expect(updateGoal).not.toHaveBeenCalled();
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 });

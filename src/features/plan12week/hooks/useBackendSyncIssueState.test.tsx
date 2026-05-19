@@ -3,10 +3,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import type { BackendConnectionStatus } from "@/app/components/twelve-week/TwelveWeekSettingsShared";
 import type { BackendPlanHydrationResult } from "@/app/hooks/useBackendPlanHydration";
-import {
-  useBackendSyncIssueState,
-  type UseBackendSyncIssueStateInput,
-} from "./useBackendSyncIssueState";
+import { useBackendSyncIssueState, type UseBackendSyncIssueStateInput } from "./useBackendSyncIssueState";
 
 function makeOkStatus(overrides?: Partial<BackendConnectionStatus>): BackendConnectionStatus {
   return {
@@ -94,15 +91,12 @@ describe("useBackendSyncIssueState", () => {
   });
 
   it("promotes to visible after time threshold", () => {
-    const { result, rerender } = renderHook(
-      (props: UseBackendSyncIssueStateInput) => useBackendSyncIssueState(props),
-      {
-        initialProps: makeInput({
-          backendConnectionStatus: makeErrorStatus(),
-          failedOrRetryableCount: 1,
-        }),
-      },
-    );
+    const { result, rerender } = renderHook((props: UseBackendSyncIssueStateInput) => useBackendSyncIssueState(props), {
+      initialProps: makeInput({
+        backendConnectionStatus: makeErrorStatus(),
+        failedOrRetryableCount: 1,
+      }),
+    });
 
     // Initially transient
     expect(result.current.isTransient).toBe(true);
@@ -163,15 +157,12 @@ describe("useBackendSyncIssueState", () => {
   });
 
   it("clears issue state when status returns to success", () => {
-    const { result, rerender } = renderHook(
-      (props: UseBackendSyncIssueStateInput) => useBackendSyncIssueState(props),
-      {
-        initialProps: makeInput({
-          backendConnectionStatus: makeErrorStatus(),
-          failedOrRetryableCount: 5,
-        }),
-      },
-    );
+    const { result, rerender } = renderHook((props: UseBackendSyncIssueStateInput) => useBackendSyncIssueState(props), {
+      initialProps: makeInput({
+        backendConnectionStatus: makeErrorStatus(),
+        failedOrRetryableCount: 5,
+      }),
+    });
 
     expect(result.current.visible).toBe(true);
 

@@ -1,10 +1,6 @@
 ﻿import { Heart, RefreshCcw } from "lucide-react";
 
-import type {
-  RescueModeStatus,
-  RescueSuggestion,
-  RescueSuggestionId,
-} from "@/features/plan12week/logic";
+import type { RescueModeStatus, RescueSuggestion, RescueSuggestionId } from "@/features/plan12week/logic";
 import { getRescueActionSuggestion, getRescueModeMessage } from "@/features/plan12week/logic";
 
 import { Button } from "../ui/button";
@@ -34,10 +30,7 @@ const SEVERITY_BORDER = {
   },
 } as const;
 
-function getCallbackForSuggestion(
-  id: RescueSuggestionId,
-  props: TwelveWeekRescueNudgeProps,
-): (() => void) | undefined {
+function getCallbackForSuggestion(id: RescueSuggestionId, props: TwelveWeekRescueNudgeProps): (() => void) | undefined {
   switch (id) {
     case "pick-one-tiny-task":
       return props.onPickTinyTask;
@@ -90,18 +83,12 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
           >
             Cứu nhịp nhẹ
           </p>
-          <p className="mt-1 text-base font-semibold leading-7 text-app-ink">
-            {message.headline}
-          </p>
-          {message.subtext && (
-            <p className="mt-1 text-sm leading-6 text-app-ink-soft">{message.subtext}</p>
-          )}
+          <p className="mt-1 text-base font-semibold leading-7 text-app-ink">{message.headline}</p>
+          {message.subtext && <p className="mt-1 text-sm leading-6 text-app-ink-soft">{message.subtext}</p>}
 
           {suggestions.length > 0 && (
             <ul
-              data-testid={
-                variant === "today" ? "today-rescue-suggestions" : "week-rescue-suggestions"
-              }
+              data-testid={variant === "today" ? "today-rescue-suggestions" : "week-rescue-suggestions"}
               className="mt-3 grid gap-2"
             >
               {suggestions.map((suggestion: RescueSuggestion) => {

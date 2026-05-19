@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { GoalArchetype } from "./goalArchetypes";
-import {
-  getAllGoalArchetypeExamples,
-  getGoalArchetypeExample,
-  type ArchetypeExample,
-} from "./goalExamples";
+import { getAllGoalArchetypeExamples, getGoalArchetypeExample, type ArchetypeExample } from "./goalExamples";
 
 const ARCHETYPES: readonly GoalArchetype[] = [
   "skill_learning",
@@ -111,9 +107,7 @@ describe("goalExamples — fallback", () => {
   it("returns the 'other' bundle for unknown archetypes (defensive lookup)", () => {
     const fallback = getGoalArchetypeExample("other");
     // Type-cast to access via key; the function intentionally never throws.
-    const lookup = (getGoalArchetypeExample as (a: GoalArchetype) => ArchetypeExample)(
-      "skill_learning",
-    );
+    const lookup = (getGoalArchetypeExample as (a: GoalArchetype) => ArchetypeExample)("skill_learning");
     expect(fallback.archetype).toBe("other");
     expect(lookup.archetype).toBe("skill_learning");
   });

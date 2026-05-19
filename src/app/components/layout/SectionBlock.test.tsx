@@ -34,8 +34,6 @@ describe("SectionBlock", () => {
       </SectionBlock>,
     );
 
-    expect(screen.getByRole("heading", { level: 2, name: "Thoáng" }).closest("section")).toHaveClass(
-      "stack-section",
-    );
+    expect(screen.getByRole("heading", { level: 2, name: "Thoáng" }).closest("section")).toHaveClass("stack-section");
   });
 });

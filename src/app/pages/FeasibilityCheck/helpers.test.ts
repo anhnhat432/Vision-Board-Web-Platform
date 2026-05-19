@@ -16,97 +16,97 @@ type AnswerMap = Record<number, string>;
 
 function highCapacityClearGoal(): AnswerMap {
   return {
-    1: "gt5",       // time: 4
-    2: "energy_high",  // energy: 4
+    1: "gt5", // time: 4
+    2: "energy_high", // energy: 4
     3: "resources_ready", // resources: 4
     4: "very_realistic", // clarity: 4
-    5: "none",       // obstacle: 4
-    6: "always",     // routine: 4
-    7: "committed",  // confidence: 4
+    5: "none", // obstacle: 4
+    6: "always", // routine: 4
+    7: "committed", // confidence: 4
   };
 }
 
 function lowTimeHighAmbition(): AnswerMap {
   return {
-    1: "lt1",          // time: 1
+    1: "lt1", // time: 1
     2: "energy_drained", // energy: 1
     3: "resources_ready", // resources: 4
-    4: "realistic",    // clarity: 3
-    5: "none",         // obstacle: 4
-    6: "mostly",       // routine: 3
-    7: "committed",    // confidence: 4
+    4: "realistic", // clarity: 3
+    5: "none", // obstacle: 4
+    6: "mostly", // routine: 3
+    7: "committed", // confidence: 4
   };
 }
 
 function lowClarity(): AnswerMap {
   return {
-    1: "3to5",         // time: 3
+    1: "3to5", // time: 3
     2: "energy_stable", // energy: 3
     3: "resources_mostly_ready", // resources: 3
     4: "overwhelming", // clarity: 1
-    5: "complexity",   // obstacle: 2
-    6: "sometimes",    // routine: 2
-    7: "interested",   // confidence: 2
+    5: "complexity", // obstacle: 2
+    6: "sometimes", // routine: 2
+    7: "interested", // confidence: 2
   };
 }
 
 function lowResources(): AnswerMap {
   return {
-    1: "3to5",           // time: 3
-    2: "energy_stable",  // energy: 3
+    1: "3to5", // time: 3
+    2: "energy_stable", // energy: 3
     3: "resources_missing", // resources: 1
-    4: "challenging",    // clarity: 2
-    5: "resources",      // obstacle: 2
-    6: "mostly",         // routine: 3
-    7: "ready",          // confidence: 3
+    4: "challenging", // clarity: 2
+    5: "resources", // obstacle: 2
+    6: "mostly", // routine: 3
+    7: "ready", // confidence: 3
   };
 }
 
 function lowConfidence(): AnswerMap {
   return {
-    1: "1to3",          // time: 2
-    2: "energy_low",    // energy: 2
+    1: "1to3", // time: 2
+    2: "energy_low", // energy: 2
     3: "resources_basic", // resources: 2
-    4: "challenging",   // clarity: 2
-    5: "motivation",    // obstacle: 2
-    6: "sometimes",     // routine: 2
-    7: "exploring",     // confidence: 1
+    4: "challenging", // clarity: 2
+    5: "motivation", // obstacle: 2
+    6: "sometimes", // routine: 2
+    7: "exploring", // confidence: 1
   };
 }
 
 function lowContextBalance(): AnswerMap {
   return {
-    1: "1to3",          // time: 2
-    2: "energy_low",    // energy: 2
+    1: "1to3", // time: 2
+    2: "energy_low", // energy: 2
     3: "resources_basic", // resources: 2
-    4: "challenging",   // clarity: 2
-    5: "time",          // obstacle: 2
-    6: "rarely",        // routine: 1
-    7: "interested",    // confidence: 2
+    4: "challenging", // clarity: 2
+    5: "time", // obstacle: 2
+    6: "rarely", // routine: 1
+    7: "interested", // confidence: 2
   };
 }
 
 function strongGoalLowCapacity(): AnswerMap {
   return {
-    1: "lt1",             // time: 1
-    2: "energy_drained",  // energy: 1
+    1: "lt1", // time: 1
+    2: "energy_drained", // energy: 1
     3: "resources_basic", // resources: 2
-    4: "realistic",       // clarity: 3
-    5: "motivation",      // obstacle: 2
-    6: "sometimes",       // routine: 2
-    7: "interested",      // confidence: 2
+    4: "realistic", // clarity: 3
+    5: "motivation", // obstacle: 2
+    6: "sometimes", // routine: 2
+    7: "interested", // confidence: 2
   };
 }
 
 function weakGoalHighEnergy(): AnswerMap {
   return {
-    1: "gt5",            // time: 4
-    2: "energy_high",    // energy: 4
+    1: "gt5", // time: 4
+    2: "energy_high", // energy: 4
     3: "resources_ready", // resources: 4
     4: "very_realistic", // clarity: 4
-    5: "none",           // obstacle: 4
-    6: "always",         // routine: 4
-    7: "committed",      // confidence: 4
+    5: "none", // obstacle: 4
+    6: "always", // routine: 4
+    7: "committed", // confidence: 4
   };
 }
 

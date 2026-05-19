@@ -22,13 +22,7 @@ interface PageHeaderProps {
  *   level={2}
  * />
  */
-export function PageHeader({
-  eyebrow,
-  title,
-  description,
-  level = 2,
-  className,
-}: PageHeaderProps) {
+export function PageHeader({ eyebrow, title, description, level = 2, className }: PageHeaderProps) {
   const HeadingTag = level === 2 ? "h2" : "h3";
 
   return (
@@ -43,9 +37,7 @@ export function PageHeader({
         {title}
       </HeadingTag>
       {description && (
-        <p className="text-[16px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
-          {description}
-        </p>
+        <p className="text-[16px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">{description}</p>
       )}
     </div>
   );

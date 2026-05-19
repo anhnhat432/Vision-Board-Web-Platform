@@ -122,9 +122,7 @@ export function interpretProgressTrend(input: ProgressTrendInput): ProgressTrend
     advice: improving
       ? "Giữ chính xác cách làm tuần này, đó là phần đang chạy đúng."
       : "Cấu hình hiện tại đang hợp với bạn, giữ nguyên là đủ.",
-    nextAction: input.reviewDueToday
-      ? "Chốt review để khóa nhịp cho tuần sau."
-      : "Mở tab Hôm nay tiếp tục giữ nhịp.",
+    nextAction: input.reviewDueToday ? "Chốt review để khóa nhịp cho tuần sau." : "Mở tab Hôm nay tiếp tục giữ nhịp.",
     trendDirection: direction,
     weekOverWeekDelta: delta,
   };

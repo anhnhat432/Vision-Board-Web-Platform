@@ -8,7 +8,10 @@ import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
   return (
     <div className="stack-section pt-4">
-      <SectionBlock title="Cài đặt mục tiêu" description="Tên mục tiêu, chu kỳ 12 tuần, ngày review, thời gian nhắc nhở">
+      <SectionBlock
+        title="Cài đặt mục tiêu"
+        description="Tên mục tiêu, chu kỳ 12 tuần, ngày review, thời gian nhắc nhở"
+      >
         <TwelveWeekCycleSettingsPanel
           system={props.system}
           onReviewDayChange={props.onReviewDayChange}

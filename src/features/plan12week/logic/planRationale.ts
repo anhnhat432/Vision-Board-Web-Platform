@@ -136,24 +136,15 @@ const REASON_PRIORITY: PlanRationaleReasonId[] = [
 ];
 
 const ARCHETYPE_REASON_TEXT: Record<GoalArchetype, string | null> = {
-  skill_learning:
-    "Có ít nhất một việc lặp lại tạo kết quả để bạn đo tiến bộ thật, không chỉ đo giờ học.",
-  health_fitness:
-    "Nhịp tuần được giữ vừa sức để tránh kiệt sức hoặc chấn thương khi mới bắt đầu.",
-  career_growth:
-    "Tập trung vào kết quả công việc bạn kiểm soát được, không phụ thuộc người khác công nhận.",
-  financial_goal:
-    "Có hành động lặp lại bạn kiểm soát được, không phụ thuộc thu nhập bất thường.",
-  exam_study:
-    "Có chỗ cho việc làm đề thi thử để biết band/điểm thực tế, không học chay.",
-  project_completion:
-    "Có cột mốc tuần 4 và tuần 8 để biết dự án đang đúng hướng giữa chu kỳ.",
-  habit_building:
-    "Tuần 1 đủ nhỏ để xây chuỗi ngày, đặt nền cho thói quen lâu dài.",
-  creative_output:
-    "Ưu tiên nhịp xuất bản đều đặn hơn là cố làm hoàn hảo từng tác phẩm.",
-  relationship_life:
-    "Có lịch cố định và việc bạn kiểm soát được, không phụ thuộc 'lúc rảnh thì gặp'.",
+  skill_learning: "Có ít nhất một việc lặp lại tạo kết quả để bạn đo tiến bộ thật, không chỉ đo giờ học.",
+  health_fitness: "Nhịp tuần được giữ vừa sức để tránh kiệt sức hoặc chấn thương khi mới bắt đầu.",
+  career_growth: "Tập trung vào kết quả công việc bạn kiểm soát được, không phụ thuộc người khác công nhận.",
+  financial_goal: "Có hành động lặp lại bạn kiểm soát được, không phụ thuộc thu nhập bất thường.",
+  exam_study: "Có chỗ cho việc làm đề thi thử để biết band/điểm thực tế, không học chay.",
+  project_completion: "Có cột mốc tuần 4 và tuần 8 để biết dự án đang đúng hướng giữa chu kỳ.",
+  habit_building: "Tuần 1 đủ nhỏ để xây chuỗi ngày, đặt nền cho thói quen lâu dài.",
+  creative_output: "Ưu tiên nhịp xuất bản đều đặn hơn là cố làm hoàn hảo từng tác phẩm.",
+  relationship_life: "Có lịch cố định và việc bạn kiểm soát được, không phụ thuộc 'lúc rảnh thì gặp'.",
   other: null,
 };
 
@@ -204,20 +195,17 @@ function buildReasons(
   if (planLoad === "lighter" || weeklyCapacity === "low") {
     reasons.push({
       id: "lighter_for_low_capacity",
-      text:
-        "Bạn chọn nhịp nhẹ vì tuần này thời gian/năng lượng còn hạn — mục tiêu là giữ nhịp, không phải dồn việc.",
+      text: "Bạn chọn nhịp nhẹ vì tuần này thời gian/năng lượng còn hạn — mục tiêu là giữ nhịp, không phải dồn việc.",
     });
   } else if (planLoad === "push" && weeklyCapacity === "high") {
     reasons.push({
       id: "push_for_high_capacity",
-      text:
-        "Bạn có quỹ thời gian tốt và sẵn sàng cao nên kế hoạch đẩy nhanh thêm một bậc, vẫn có chỗ nhìn lại hằng tuần.",
+      text: "Bạn có quỹ thời gian tốt và sẵn sàng cao nên kế hoạch đẩy nhanh thêm một bậc, vẫn có chỗ nhìn lại hằng tuần.",
     });
   } else if (planLoad === "balanced") {
     reasons.push({
       id: "balanced_for_medium_capacity",
-      text:
-        "Nhịp cân bằng phù hợp với quỹ thời gian thực — đủ tiến độ mà không kiệt sức cuối tuần.",
+      text: "Nhịp cân bằng phù hợp với quỹ thời gian thực — đủ tiến độ mà không kiệt sức cuối tuần.",
     });
   }
 
@@ -242,8 +230,7 @@ function buildReasons(
   if (milestoneCount >= 2) {
     reasons.push({
       id: "milestones_break_into_steps",
-      text:
-        "Có cột mốc tuần 4/8/12 để chia chu kỳ thành các đoạn ngắn — dễ nhìn lại và điều chỉnh giữa chu kỳ.",
+      text: "Có cột mốc tuần 4/8/12 để chia chu kỳ thành các đoạn ngắn — dễ nhìn lại và điều chỉnh giữa chu kỳ.",
     });
   }
 
@@ -279,9 +266,7 @@ function buildReasons(
 
 function sortAndCap(reasons: PlanRationaleReason[]): PlanRationaleReason[] {
   const indexById = new Map(REASON_PRIORITY.map((id, index) => [id, index] as const));
-  return [...reasons]
-    .sort((a, b) => (indexById.get(a.id) ?? 99) - (indexById.get(b.id) ?? 99))
-    .slice(0, MAX_REASONS);
+  return [...reasons].sort((a, b) => (indexById.get(a.id) ?? 99) - (indexById.get(b.id) ?? 99)).slice(0, MAX_REASONS);
 }
 
 // ---- Warning builders ------------------------------------------------------
@@ -340,18 +325,12 @@ function buildWarnings(
 // ---- Adjustment builders ---------------------------------------------------
 
 const ADJUSTMENT_TEXT: Record<PlanRationaleAdjustmentId, string> = {
-  switch_to_lighter:
-    "Đổi sang nhịp nhẹ hơn ở phần Cài đặt nếu tuần đầu đang quá tải.",
-  switch_to_push:
-    "Đổi sang nhịp đẩy nhanh ở phần Cài đặt nếu bạn còn dư thời gian/năng lượng.",
-  add_milestone:
-    "Thêm 1 cột mốc cho tuần 4 hoặc tuần 8 để biết kế hoạch đang đi đúng hướng.",
-  trim_week_one:
-    "Bỏ bớt 1-2 việc trong tuần 1 — giữ 2-3 việc cốt lõi quan trọng nhất.",
-  add_indicator:
-    "Thêm 1 việc lặp lại cốt lõi (kiểu hành động bạn kiểm soát được, lặp lại được hằng tuần).",
-  fix_smart_goal:
-    "Quay lại bước SMART để làm rõ kết quả cần đạt và con số đo được.",
+  switch_to_lighter: "Đổi sang nhịp nhẹ hơn ở phần Cài đặt nếu tuần đầu đang quá tải.",
+  switch_to_push: "Đổi sang nhịp đẩy nhanh ở phần Cài đặt nếu bạn còn dư thời gian/năng lượng.",
+  add_milestone: "Thêm 1 cột mốc cho tuần 4 hoặc tuần 8 để biết kế hoạch đang đi đúng hướng.",
+  trim_week_one: "Bỏ bớt 1-2 việc trong tuần 1 — giữ 2-3 việc cốt lõi quan trọng nhất.",
+  add_indicator: "Thêm 1 việc lặp lại cốt lõi (kiểu hành động bạn kiểm soát được, lặp lại được hằng tuần).",
+  fix_smart_goal: "Quay lại bước SMART để làm rõ kết quả cần đạt và con số đo được.",
 };
 
 function buildAdjustments(
@@ -415,10 +394,7 @@ function buildAdjustments(
  * be empty when the plan is healthy. The `metrics` slice is safe to log
  * to analytics — it contains no user free text.
  */
-export function getPlanRationale(
-  input: PlanRationaleInput,
-  context: PlanRationaleContext = {},
-): PlanRationaleResult {
+export function getPlanRationale(input: PlanRationaleInput, context: PlanRationaleContext = {}): PlanRationaleResult {
   const feasibility = context.feasibility ?? null;
   const archetype = context.goalArchetype ?? input.goalArchetype ?? null;
 
@@ -439,8 +415,7 @@ export function getPlanRationale(
     if (reasons.length < MIN_REASONS) {
       reasons.push({
         id: "balanced_for_medium_capacity",
-        text:
-          "Kế hoạch giữ nhịp cân bằng — đủ rõ để hành động, đủ nhẹ để bạn không bỏ cuộc tuần đầu.",
+        text: "Kế hoạch giữ nhịp cân bằng — đủ rõ để hành động, đủ nhẹ để bạn không bỏ cuộc tuần đầu.",
       });
     }
   }

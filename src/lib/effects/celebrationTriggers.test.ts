@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  claimCelebrationOnce,
-  getCycleCelebrationStorageKey,
-  hasNewCelebrationIds,
-} from "./celebrationTriggers";
+import { claimCelebrationOnce, getCycleCelebrationStorageKey, hasNewCelebrationIds } from "./celebrationTriggers";
 
 describe("celebrationTriggers", () => {
   it("does not treat the first seen achievement set as newly unlocked", () => {

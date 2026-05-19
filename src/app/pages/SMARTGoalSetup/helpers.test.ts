@@ -39,8 +39,7 @@ function makeWeakFormData(): SMARTData {
 function makeStrongFormData(): SMARTData {
   return makeFormData({
     specific: {
-      goal_statement:
-        "Hoàn thành chứng chỉ AWS Solutions Architect và áp dụng vào dự án nội bộ trước cuối quý 3.",
+      goal_statement: "Hoàn thành chứng chỉ AWS Solutions Architect và áp dụng vào dự án nội bộ trước cuối quý 3.",
     },
     measurable: {
       metric_name: "Số module hoàn thành",
@@ -53,8 +52,7 @@ function makeStrongFormData(): SMARTData {
       support_resources: "Khóa Udemy, Mentor nội bộ",
     },
     relevant: {
-      motivation_reason:
-        "Vì chứng chỉ này gắn trực tiếp với lộ trình thăng chức và tăng thu nhập 20% trong 2 năm tới.",
+      motivation_reason: "Vì chứng chỉ này gắn trực tiếp với lộ trình thăng chức và tăng thu nhập 20% trong 2 năm tới.",
       life_dimension_alignment: "sự nghiệp",
     },
     timeBound: { mode: "weeks", target_date: "", target_weeks: "12" },
@@ -218,9 +216,7 @@ describe("analytics payload does not contain raw goal text", () => {
     expect(payloadString).not.toContain("chứng chỉ");
 
     expect(["weak", "okay", "strong"]).toContain(payload.quality_level);
-    expect(["0-19", "20-39", "40-59", "60-79", "80-100"]).toContain(
-      payload.score_bucket,
-    );
+    expect(["0-19", "20-39", "40-59", "60-79", "80-100"]).toContain(payload.score_bucket);
   });
 });
 

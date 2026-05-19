@@ -14,7 +14,16 @@ function TaskDefs({ id }: { id: string }) {
 export function TaskTodoIcon({ className, ...rest }: AmbientIllustrationProps) {
   const id = useIllustrationId("task-todo");
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" role="presentation" className={className} {...rest}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+      role="presentation"
+      className={className}
+      {...rest}
+    >
       <TaskDefs id={id} />
       <circle cx="12" cy="12" r="8.5" stroke={`url(#${id})`} strokeWidth="2" />
       <circle cx="12" cy="12" r="2.4" fill="currentColor" opacity="0.16" />
@@ -25,7 +34,16 @@ export function TaskTodoIcon({ className, ...rest }: AmbientIllustrationProps) {
 export function TaskInProgressIcon({ className, ...rest }: AmbientIllustrationProps) {
   const id = useIllustrationId("task-progress");
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" role="presentation" className={className} {...rest}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+      role="presentation"
+      className={className}
+      {...rest}
+    >
       <TaskDefs id={id} />
       <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeOpacity="0.18" strokeWidth="2" />
       <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill={`url(#${id})`} />
@@ -37,7 +55,16 @@ export function TaskInProgressIcon({ className, ...rest }: AmbientIllustrationPr
 export function TaskDoneIcon({ className, ...rest }: AmbientIllustrationProps) {
   const id = useIllustrationId("task-done");
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" role="presentation" className={className} {...rest}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+      role="presentation"
+      className={className}
+      {...rest}
+    >
       <TaskDefs id={id} />
       <circle cx="12" cy="12" r="9" fill={`url(#${id})`} />
       <path d="M7.6 12.2l3 3L16.8 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

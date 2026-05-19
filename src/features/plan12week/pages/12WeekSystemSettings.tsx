@@ -3,7 +3,16 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
 import { DataStorageInfo } from "@/app/components/DataStorageInfo";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/app/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { TwelveWeekTabFallback } from "./12WeekSystem/components";
@@ -19,23 +28,13 @@ import {
   isRealMode,
   shouldEnable12WeekMutationSync,
   shouldEnable12WeekPullSync,
-} from '@/app/utils/app-mode';
-import {
-  buildDerivedScoreboard,
-  getDefaultScoreboard,
-} from '@/app/utils/storage-twelve-week';
-import {
-  clearArchivedOutbox,
-  clearEventLog,
-  updateGoal,
-} from '@/app/utils/storage';
-import {
-  readMutationQueueStore,
-  summarizeMutationQueueStore,
-} from "@/features/plan12week/persistence/mutationQueue";
+} from "@/app/utils/app-mode";
+import { buildDerivedScoreboard, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
+import { clearArchivedOutbox, clearEventLog, updateGoal } from "@/app/utils/storage";
+import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
-import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
-import type { TwelveWeekSystem as TwelveWeekSystemModel } from '@/app/utils/storage-types';
+import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
+import type { TwelveWeekSystem as TwelveWeekSystemModel } from "@/app/utils/storage-types";
 
 const emptyMutationQueueSummary = {
   totalCount: 0,
@@ -290,8 +289,8 @@ export function TwelveWeekSystemSettings() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xóa dữ liệu cục bộ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này sẽ xóa log, hàng chờ đồng bộ và trạng thái nhắc việc trên thiết bị này.
-              Dữ liệu chính của bạn (mục tiêu, kế hoạch, việc, check-in, review) sẽ không bị ảnh hưởng.
+              Hành động này sẽ xóa log, hàng chờ đồng bộ và trạng thái nhắc việc trên thiết bị này. Dữ liệu chính của
+              bạn (mục tiêu, kế hoạch, việc, check-in, review) sẽ không bị ảnh hưởng.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -313,7 +312,14 @@ export function TwelveWeekSystemSettings() {
       <DataStorageInfo showSyncHint className="mb-6" />
 
       <TabErrorBoundary fallbackTitle="Cài đặt gặp lỗi">
-        <Suspense fallback={<TwelveWeekTabFallback title="Đang mở tab Cài đặt" description="Phần chỉnh nhịp chu kỳ, dữ liệu trên thiết bị và quyền gói đang được tải." />}>
+        <Suspense
+          fallback={
+            <TwelveWeekTabFallback
+              title="Đang mở tab Cài đặt"
+              description="Phần chỉnh nhịp chu kỳ, dữ liệu trên thiết bị và quyền gói đang được tải."
+            />
+          }
+        >
           <WeekEditor
             system={system}
             activeGoalId={activeGoal.id}

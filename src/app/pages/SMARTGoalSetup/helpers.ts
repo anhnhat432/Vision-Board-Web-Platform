@@ -257,18 +257,14 @@ export function buildSmartGoalFromFormData(smartData: SMARTData, focusArea: stri
     measurableMetricName: smartData.measurable.metric_name,
     measurableBaselineValue: parseNumberInput(smartData.measurable.baseline_value),
     measurableTargetValue: parseNumberInput(smartData.measurable.target_value) ?? 0,
-    achievableWeeklyTimeCommitmentHours:
-      parseNumberInput(smartData.achievable.weekly_time_commitment_hours) ?? 0,
+    achievableWeeklyTimeCommitmentHours: parseNumberInput(smartData.achievable.weekly_time_commitment_hours) ?? 0,
     achievableRequiredSkills: normalizeListInput(smartData.achievable.required_skills),
     achievableSupportResources: normalizeListInput(smartData.achievable.support_resources),
     relevantMotivationReason: smartData.relevant.motivation_reason,
     relevantLifeDimensionAlignment: smartData.relevant.life_dimension_alignment,
-    timeBoundTargetDate:
-      smartData.timeBound.mode === "date" ? smartData.timeBound.target_date : undefined,
+    timeBoundTargetDate: smartData.timeBound.mode === "date" ? smartData.timeBound.target_date : undefined,
     timeBoundTargetWeeks:
-      smartData.timeBound.mode === "weeks"
-        ? parseNumberInput(smartData.timeBound.target_weeks)
-        : undefined,
+      smartData.timeBound.mode === "weeks" ? parseNumberInput(smartData.timeBound.target_weeks) : undefined,
   });
 }
 
@@ -281,17 +277,12 @@ const STEP_QUALITY_DIMENSIONS: Record<SmartStepKey, QualityDimension[]> = {
 };
 
 const DIMENSION_HINTS: Partial<Record<QualityDimension, string>> = {
-  specificity:
-    "Gợi ý: dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng để mục tiêu có hướng.",
+  specificity: "Gợi ý: dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng để mục tiêu có hướng.",
   measurableClarity: "Gợi ý: thêm đơn vị đo giúp chỉ số rõ ràng hơn.",
-  baselineTargetQuality:
-    "Gợi ý: thêm mốc hiện tại để đánh giá khoảng cách cần vượt qua.",
-  resourceSupportClarity:
-    "Gợi ý: thêm kỹ năng và nguồn hỗ trợ giúp kiểm tra tính khả thi chính xác hơn.",
-  relevanceMotivation:
-    "Gợi ý: gắn với lĩnh vực cuộc sống (sự nghiệp, sức khỏe...) giúp giữ cam kết lâu hơn.",
-  twelveWeekCompatibility:
-    "Gợi ý: chu kỳ 8–16 tuần phù hợp nhất với hệ thống 12 tuần.",
+  baselineTargetQuality: "Gợi ý: thêm mốc hiện tại để đánh giá khoảng cách cần vượt qua.",
+  resourceSupportClarity: "Gợi ý: thêm kỹ năng và nguồn hỗ trợ giúp kiểm tra tính khả thi chính xác hơn.",
+  relevanceMotivation: "Gợi ý: gắn với lĩnh vực cuộc sống (sự nghiệp, sức khỏe...) giúp giữ cam kết lâu hơn.",
+  twelveWeekCompatibility: "Gợi ý: chu kỳ 8–16 tuần phù hợp nhất với hệ thống 12 tuần.",
 };
 
 export function getStepQualityHint(
@@ -306,9 +297,7 @@ export function getStepQualityHint(
 
   const weakDimensions = dimensionKeys
     .map((key) => qualityResult.dimensions.find((d: DimensionScore) => d.dimension === key))
-    .filter(
-      (d): d is DimensionScore => d !== undefined && d.score < d.maxScore * 0.5,
-    );
+    .filter((d): d is DimensionScore => d !== undefined && d.score < d.maxScore * 0.5);
 
   if (weakDimensions.length === 0) return null;
 

@@ -37,7 +37,12 @@ interface BackendConflictGroup {
 
 type MutationQueueSyncResult = NonNullable<MutationQueueManualSyncStatus["lastResult"]>;
 type MutationQueueMergeReport = NonNullable<MutationQueueSyncResult["mergeReport"]>;
-type MutationQueueConflictAction = "review_details" | "export_local_backup" | "keep_local" | "retry_sync" | "use_cloud_version";
+type MutationQueueConflictAction =
+  | "review_details"
+  | "export_local_backup"
+  | "keep_local"
+  | "retry_sync"
+  | "use_cloud_version";
 
 const MAX_VISIBLE_PULL_ISSUES = 4;
 
@@ -396,9 +401,7 @@ function MutationQueueConflictResolutionPanel({
       <div className="flex items-start gap-2">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-app-warm">
-            Có thay đổi trên thiết bị này và trong tài khoản.
-          </p>
+          <p className="text-sm font-semibold text-app-warm">Có thay đổi trên thiết bị này và trong tài khoản.</p>
           <p className="mt-1 text-xs leading-5 text-app-warm">
             Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Nên tải bản sao trước khi xử lý khác biệt.
           </p>
@@ -517,12 +520,10 @@ function MutationQueueConflictResolutionPanel({
 
       {showCloudConfirm ? (
         <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
-          <p className="text-sm font-semibold text-red-900">
-            Xác nhận dùng dữ liệu từ tài khoản
-          </p>
+          <p className="text-sm font-semibold text-red-900">Xác nhận dùng dữ liệu từ tài khoản</p>
           <p className="mt-1 text-xs leading-5 text-red-800">
-            Hành động này sẽ thay thế toàn bộ dữ liệu 12 tuần trên thiết bị này bằng bản từ tài khoản.
-            Khuyên bạn tải bản sao trước khi tiếp tục.
+            Hành động này sẽ thay thế toàn bộ dữ liệu 12 tuần trên thiết bị này bằng bản từ tài khoản. Khuyên bạn tải
+            bản sao trước khi tiếp tục.
           </p>
           <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-red-800">
             <input
@@ -548,7 +549,10 @@ function MutationQueueConflictResolutionPanel({
               type="button"
               variant="outline"
               className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-              onClick={() => { setShowCloudConfirm(false); setConfirmExported(false); }}
+              onClick={() => {
+                setShowCloudConfirm(false);
+                setConfirmExported(false);
+              }}
             >
               Hủy
             </Button>
@@ -662,8 +666,8 @@ export function TwelveWeekLocalStatusSection({
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-app-warm">Cần chọn nguồn dữ liệu</p>
                 <p className="mt-1 text-xs leading-5 text-app-warm">
-                  Dữ liệu trên thiết bị và tài khoản đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ
-                  trước khi web tự đồng bộ tiếp.
+                  Dữ liệu trên thiết bị và tài khoản đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ
+                  cho từng chu kỳ trước khi web tự đồng bộ tiếp.
                 </p>
               </div>
             </div>
@@ -697,9 +701,7 @@ export function TwelveWeekLocalStatusSection({
                         </div>
                         <div className="min-w-0 rounded-lg bg-white p-2">
                           <p className="font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Thiết bị</p>
-                          <p className="mt-1 break-words text-app-ink">
-                            {getConflictValueLabel(conflict.localValue)}
-                          </p>
+                          <p className="mt-1 break-words text-app-ink">{getConflictValueLabel(conflict.localValue)}</p>
                         </div>
                         <div className="min-w-0 rounded-lg bg-white p-2">
                           <p className="font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tài khoản</p>
@@ -715,12 +717,12 @@ export function TwelveWeekLocalStatusSection({
                   </div>
                   <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
                     <div className="rounded-lg border border-app-line bg-app-bg p-2 leading-5 text-app-ink-soft">
-                      <span className="font-semibold text-app-ink">Dùng bản tài khoản:</span> thay dữ liệu trên thiết bị của chu
-                      kỳ này bằng bản đang lưu trong tài khoản.
+                      <span className="font-semibold text-app-ink">Dùng bản tài khoản:</span> thay dữ liệu trên thiết bị
+                      của chu kỳ này bằng bản đang lưu trong tài khoản.
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg p-2 leading-5 text-app-ink-soft">
-                      <span className="font-semibold text-app-ink">Giữ bản thiết bị:</span> dùng dữ liệu trên thiết bị này
-                      làm bản chính.
+                      <span className="font-semibold text-app-ink">Giữ bản thiết bị:</span> dùng dữ liệu trên thiết bị
+                      này làm bản chính.
                     </div>
                   </div>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -803,18 +805,26 @@ export function TwelveWeekLocalStatusSection({
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-3">
                 <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mạng</p>
-                  <p className={`mt-1 text-sm font-semibold ${
-                    mutationQueueSyncStatus.networkStatus === "offline"
-                      ? "text-app-warm"
+                  <p
+                    className={`mt-1 text-sm font-semibold ${
+                      mutationQueueSyncStatus.networkStatus === "offline"
+                        ? "text-app-warm"
+                        : mutationQueueSyncStatus.networkStatus === "online"
+                          ? "text-app-accent"
+                          : "text-app-ink-muted"
+                    }`}
+                  >
+                    {mutationQueueSyncStatus.networkStatus === "offline"
+                      ? "Mất mạng"
                       : mutationQueueSyncStatus.networkStatus === "online"
-                        ? "text-app-accent"
-                        : "text-app-ink-muted"
-                  }`}>
-                    {mutationQueueSyncStatus.networkStatus === "offline" ? "Mất mạng" : mutationQueueSyncStatus.networkStatus === "online" ? "Có mạng" : "Không rõ"}
+                        ? "Có mạng"
+                        : "Không rõ"}
                   </p>
                 </div>
                 <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tự thử lại khi có mạng</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    Tự thử lại khi có mạng
+                  </p>
                   <p className="mt-1 text-sm font-semibold text-app-ink">
                     {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
                   </p>

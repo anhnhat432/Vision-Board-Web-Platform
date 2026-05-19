@@ -35,12 +35,7 @@ const CATEGORY_OPTIONS: Array<{ value: DemoFeedbackCategory; label: string }> = 
   { value: "other", label: "Khác" },
 ];
 
-export function FeedbackDialog({
-  source,
-  context,
-  triggerLabel = "Góp ý",
-  triggerClassName,
-}: FeedbackDialogProps) {
+export function FeedbackDialog({ source, context, triggerLabel = "Góp ý", triggerClassName }: FeedbackDialogProps) {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState<DemoFeedbackRating | null>(null);
   const [feedbackCategory, setFeedbackCategory] = useState<DemoFeedbackCategory>("core_flow");

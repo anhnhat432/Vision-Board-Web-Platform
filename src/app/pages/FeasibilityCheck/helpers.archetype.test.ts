@@ -163,11 +163,7 @@ describe("getArchetypeFeasibilityOverride — accessor", () => {
   });
 
   it("provides scope guidance for project_completion at 'too_ambitious'", () => {
-    const override = getArchetypeFeasibilityOverride(
-      "project_completion",
-      "too_ambitious",
-      "clarity",
-    );
+    const override = getArchetypeFeasibilityOverride("project_completion", "too_ambitious", "clarity");
     expect(override.scopeRecommendation).not.toBeNull();
     expect(override.firstWeekGuidance).not.toBeNull();
   });

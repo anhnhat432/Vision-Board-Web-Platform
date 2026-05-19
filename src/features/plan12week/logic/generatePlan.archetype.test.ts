@@ -69,11 +69,7 @@ describe("generate12WeekPlan - health_fitness", () => {
 describe("generate12WeekPlan - project_completion", () => {
   it("milestones at weeks 4/8/12 reference deliverables (ship/scope/MVP)", () => {
     const plan = generate12WeekPlan(GOAL_INPUT, { goalArchetype: "project_completion" });
-    const combined = [
-      plan.weeks[3].expectedOutput,
-      plan.weeks[7].expectedOutput,
-      plan.weeks[11].expectedOutput,
-    ]
+    const combined = [plan.weeks[3].expectedOutput, plan.weeks[7].expectedOutput, plan.weeks[11].expectedOutput]
       .join(" ")
       .toLowerCase();
     expect(combined).toMatch(/ship|mvp|deliver|scope/);

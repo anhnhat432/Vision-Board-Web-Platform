@@ -60,9 +60,7 @@ describe("twelve-week-premium helpers", () => {
   });
 
   it("builds adaptive setup defaults for review day, load and mid-cycle milestones", () => {
-    const template = TWELVE_WEEK_TEMPLATE_CATALOG.find(
-      (item) => item.id === "creator-publishing-engine",
-    );
+    const template = TWELVE_WEEK_TEMPLATE_CATALOG.find((item) => item.id === "creator-publishing-engine");
 
     expect(template).toBeDefined();
     if (!template) {

@@ -1,7 +1,4 @@
-import {
-  BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY,
-  BACKEND_LINK_STORAGE_KEYS,
-} from "./storage-constants";
+import { BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY, BACKEND_LINK_STORAGE_KEYS } from "./storage-constants";
 import { readActiveAuthOwnerUid } from "./storage-auth-scope";
 
 type BackendLinkMap = Record<string, unknown>;

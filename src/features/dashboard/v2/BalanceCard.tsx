@@ -14,7 +14,10 @@ function clampScore(score: number): number {
 
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-balance-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      aria-labelledby="dashboard-balance-title"
+    >
       <div>
         <h2 id="dashboard-balance-title" className="text-[16px] font-semibold text-app-ink">
           Cân bằng cuộc sống

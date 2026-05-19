@@ -81,6 +81,17 @@ describe("geminiAssistantProvider prompt", () => {
     assert.match(prompt, /Nếu chỉ có 10 phút/);
   });
 
+  it("treats the current user message as usable form-fill context", async () => {
+    ensureBackendEnvForProviderImports();
+    const { buildSystemPrompt } = await import("../services/assistantPromptUtils");
+    const prompt = buildSystemPrompt();
+
+    assert.match(prompt, /tin nhắn hiện tại/i);
+    assert.match(prompt, /dữ liệu hợp lệ/i);
+    assert.match(prompt, /đừng trả lời.*chưa thấy/i);
+    assert.match(prompt, /ví dụ điền/i);
+  });
+
   it("summarizes enriched context for Gemini", async () => {
     ensureBackendEnvForProviderImports();
     const { summarizeContext } = await import("../services/assistantPromptUtils");

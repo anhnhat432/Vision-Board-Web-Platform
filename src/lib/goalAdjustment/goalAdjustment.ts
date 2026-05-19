@@ -1,15 +1,10 @@
 import type { DimensionKey, DimensionScores } from "../feasibility/dimensionScore";
 import { GOAL_ADJUSTMENT_RULES } from "./adjustmentRules";
-import type {
-  GoalAdjustmentRuleInput,
-  GoalAdjustmentSuggestion,
-} from "./adjustmentTypes";
+import type { GoalAdjustmentRuleInput, GoalAdjustmentSuggestion } from "./adjustmentTypes";
 
 const MAX_ADJUSTMENT_SUGGESTIONS = 4;
 
-function dedupeSuggestions(
-  suggestions: GoalAdjustmentSuggestion[],
-): GoalAdjustmentSuggestion[] {
+function dedupeSuggestions(suggestions: GoalAdjustmentSuggestion[]): GoalAdjustmentSuggestion[] {
   const seen = new Set<string>();
   const unique: GoalAdjustmentSuggestion[] = [];
 
@@ -23,9 +18,7 @@ function dedupeSuggestions(
   return unique;
 }
 
-function sortByPriority(
-  suggestions: GoalAdjustmentSuggestion[],
-): GoalAdjustmentSuggestion[] {
+function sortByPriority(suggestions: GoalAdjustmentSuggestion[]): GoalAdjustmentSuggestion[] {
   return [...suggestions].sort((left, right) => right.priority - left.priority);
 }
 

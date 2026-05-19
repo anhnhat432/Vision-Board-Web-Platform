@@ -44,10 +44,7 @@ function isNonEmptyString(value: unknown): value is string {
  * Read the pull cursor state for a specific authenticated user.
  * Returns empty state if the user has no stored cursor or if authUid is invalid.
  */
-export function readPullCursorState(
-  authUid: string | null | undefined,
-  storage?: Storage | null,
-): PullCursorState {
+export function readPullCursorState(authUid: string | null | undefined, storage?: Storage | null): PullCursorState {
   if (!isNonEmptyString(authUid)) return EMPTY_STATE;
 
   const store = storage ?? getStorage();
@@ -107,10 +104,7 @@ export function writePullCursorState(
  * Clear the stored pull cursor for a specific authenticated user.
  * Used when the backend reports an invalid cursor, so the next pull is a full pull.
  */
-export function clearPullCursor(
-  authUid: string | null | undefined,
-  storage?: Storage | null,
-): void {
+export function clearPullCursor(authUid: string | null | undefined, storage?: Storage | null): void {
   if (!isNonEmptyString(authUid)) return;
 
   const store = storage ?? getStorage();

@@ -1,23 +1,12 @@
 ﻿import { useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  CheckCircle2,
-  CircleAlert,
-  CircleDot,
-  TriangleAlert,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
+import { CheckCircle2, CircleAlert, CircleDot, TriangleAlert, Wrench, type LucideIcon } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
 import { cn } from "@/app/components/ui/utils";
 import { formatDateInputValue, getLifeAreaLabel } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
-import {
-  evaluateTwelveWeekPlanQuality,
-  getPlanRationale,
-  type PlanQualityLevel,
-} from "@/features/plan12week/logic";
+import { evaluateTwelveWeekPlanQuality, getPlanRationale, type PlanQualityLevel } from "@/features/plan12week/logic";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import {
   errorTextClass,
@@ -35,11 +24,7 @@ import {
   getReviewDayLabel,
 } from "../helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
-import {
-  getArchetypeForIntent,
-  getUserIntentId,
-  hasActionableArchetypeHint,
-} from "@/app/utils/user-intent";
+import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 
 interface ReviewStepProps {
   smartGoal: PendingSMARTGoal;
@@ -373,7 +358,8 @@ export function ReviewStep({
                       </span>
                     </div>
                     <p className="mt-1 text-[13px] text-app-ink-muted">
-                      {indicator.target || "1"} {indicator.unit || "lần/tuần"} · {formatScheduleDayLabels(indicator.schedule)}
+                      {indicator.target || "1"} {indicator.unit || "lần/tuần"} ·{" "}
+                      {formatScheduleDayLabels(indicator.schedule)}
                     </p>
                   </li>
                 ))}
@@ -394,7 +380,9 @@ export function ReviewStep({
                 { label: "Tuần 12", value: draft.week12Outcome },
               ].map((milestone) => (
                 <div key={milestone.label} className="rounded-lg border border-app-line bg-app-bg p-3">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{milestone.label}</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    {milestone.label}
+                  </p>
                   <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
                     {milestone.value.trim() || <EmptyValue>Chưa có.</EmptyValue>}
                   </p>
@@ -408,7 +396,10 @@ export function ReviewStep({
               {weekOneTaskPreview.length > 0 ? (
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                   {weekOneTaskPreview.map((task) => (
-                    <div key={task} className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] text-app-ink-soft">
+                    <div
+                      key={task}
+                      className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] text-app-ink-soft"
+                    >
                       {task}
                     </div>
                   ))}
@@ -432,7 +423,9 @@ export function ReviewStep({
                   <p className="mt-2 text-[15px] font-medium text-app-ink">
                     Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
                   </p>
-                  <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Đây là gợi ý — bạn vẫn có thể tạo kế hoạch.</p>
+                  <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+                    Đây là gợi ý — bạn vẫn có thể tạo kế hoạch.
+                  </p>
                 </div>
                 <span
                   className={cn(
@@ -449,7 +442,10 @@ export function ReviewStep({
                   const statusMeta = getDimensionStatusMeta(dimension.status);
                   const StatusIcon = statusMeta.icon;
                   return (
-                    <li key={dimension.id} className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2">
+                    <li
+                      key={dimension.id}
+                      className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2"
+                    >
                       <span className="text-[14px] text-app-ink-soft">{dimension.label}</span>
                       <span className={cn("flex items-center gap-1.5 text-[13px] font-medium", statusMeta.textClass)}>
                         <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -501,9 +497,16 @@ export function ReviewStep({
               <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">
                 Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc.
               </p>
-              <ul data-testid="plan-rationale-reasons" className="mt-3 space-y-2 text-[14px] leading-6 text-app-ink-soft">
+              <ul
+                data-testid="plan-rationale-reasons"
+                className="mt-3 space-y-2 text-[14px] leading-6 text-app-ink-soft"
+              >
                 {planRationale.reasons.map((reason) => (
-                  <li key={reason.id} data-reason-id={reason.id} className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
+                  <li
+                    key={reason.id}
+                    data-reason-id={reason.id}
+                    className="rounded-lg border border-app-line bg-app-surface px-3 py-2"
+                  >
                     • {reason.text}
                   </li>
                 ))}
@@ -529,7 +532,10 @@ export function ReviewStep({
               ) : null}
 
               {planRationale.adjustments.length > 0 ? (
-                <div data-testid="plan-rationale-adjustments" className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
+                <div
+                  data-testid="plan-rationale-adjustments"
+                  className="mt-3 rounded-lg border border-app-line bg-app-surface p-3"
+                >
                   <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
                     <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
@@ -567,7 +573,8 @@ export function ReviewStep({
           <div className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
             <p className="text-[14px] leading-6 text-app-ink-soft">
-              Tôi đã rà soát toàn bộ trước khi lưu. Nếu có điểm chưa khớp, dùng nút Sửa hoặc thanh bước phía trên để quay lại.
+              Tôi đã rà soát toàn bộ trước khi lưu. Nếu có điểm chưa khớp, dùng nút Sửa hoặc thanh bước phía trên để
+              quay lại.
             </p>
           </div>
         </div>

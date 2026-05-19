@@ -145,23 +145,127 @@ function isMilestoneSpecific(value: string): boolean {
  */
 const ACTION_VERB_ROOTS: readonly string[] = [
   // Vietnamese with diacritics
-  "viết", "đọc", "tập", "luyện", "làm", "chạy", "học", "ôn", "gặp", "gọi",
-  "ghi", "lập", "lên", "đặt", "chuẩn bị", "thiết lập", "tạo", "mở", "kiểm tra",
-  "đo", "chuyển", "khởi động", "hoàn thành", "bắt đầu", "tổng kết",
-  "phân tích", "ưu tiên", "đăng", "chỉnh", "hỏi", "trao đổi",
-  "nhắn", "gửi", "lưu", "in", "book", "lịch", "lướt", "luyện tập",
-  "thực hành", "thực hiện", "rèn", "dọn", "kiểm", "đi", "nấu",
+  "viết",
+  "đọc",
+  "tập",
+  "luyện",
+  "làm",
+  "chạy",
+  "học",
+  "ôn",
+  "gặp",
+  "gọi",
+  "ghi",
+  "lập",
+  "lên",
+  "đặt",
+  "chuẩn bị",
+  "thiết lập",
+  "tạo",
+  "mở",
+  "kiểm tra",
+  "đo",
+  "chuyển",
+  "khởi động",
+  "hoàn thành",
+  "bắt đầu",
+  "tổng kết",
+  "phân tích",
+  "ưu tiên",
+  "đăng",
+  "chỉnh",
+  "hỏi",
+  "trao đổi",
+  "nhắn",
+  "gửi",
+  "lưu",
+  "in",
+  "book",
+  "lịch",
+  "lướt",
+  "luyện tập",
+  "thực hành",
+  "thực hiện",
+  "rèn",
+  "dọn",
+  "kiểm",
+  "đi",
+  "nấu",
   // Vietnamese no diacritics
-  "viet", "doc", "tap", "luyen", "lam", "chay", "hoc", "on", "gap", "goi",
-  "lap", "len", "dat", "chuan bi", "thiet lap", "tao", "mo", "kiem tra",
-  "do", "chuyen", "khoi dong", "hoan thanh", "bat dau", "tong ket",
-  "phan tich", "uu tien", "dang", "chinh", "hoi", "trao doi",
-  "nhan", "gui", "luu", "thuc hanh", "thuc hien", "ren", "don", "kiem", "di", "nau",
+  "viet",
+  "doc",
+  "tap",
+  "luyen",
+  "lam",
+  "chay",
+  "hoc",
+  "on",
+  "gap",
+  "goi",
+  "lap",
+  "len",
+  "dat",
+  "chuan bi",
+  "thiet lap",
+  "tao",
+  "mo",
+  "kiem tra",
+  "do",
+  "chuyen",
+  "khoi dong",
+  "hoan thanh",
+  "bat dau",
+  "tong ket",
+  "phan tich",
+  "uu tien",
+  "dang",
+  "chinh",
+  "hoi",
+  "trao doi",
+  "nhan",
+  "gui",
+  "luu",
+  "thuc hanh",
+  "thuc hien",
+  "ren",
+  "don",
+  "kiem",
+  "di",
+  "nau",
   // English common starters
-  "write", "read", "do", "run", "start", "complete", "build", "ship", "code",
-  "draft", "edit", "publish", "post", "upload", "track", "log", "transfer",
-  "save", "set up", "set", "plan", "schedule", "call", "send", "book",
-  "open", "create", "deliver", "review", "demo", "prep", "finish", "check",
+  "write",
+  "read",
+  "do",
+  "run",
+  "start",
+  "complete",
+  "build",
+  "ship",
+  "code",
+  "draft",
+  "edit",
+  "publish",
+  "post",
+  "upload",
+  "track",
+  "log",
+  "transfer",
+  "save",
+  "set up",
+  "set",
+  "plan",
+  "schedule",
+  "call",
+  "send",
+  "book",
+  "open",
+  "create",
+  "deliver",
+  "review",
+  "demo",
+  "prep",
+  "finish",
+  "check",
 ];
 
 const GENERIC_TASK_PATTERNS: readonly RegExp[] = [
@@ -284,9 +388,7 @@ function evaluateMilestones(input: PlanQualityInput): { score: number; warnings:
   return { score, warnings, suggestions };
 }
 
-function evaluateLeadIndicators(
-  input: PlanQualityInput,
-): { score: number; warnings: string[]; suggestions: string[] } {
+function evaluateLeadIndicators(input: PlanQualityInput): { score: number; warnings: string[]; suggestions: string[] } {
   const warnings: string[] = [];
   const suggestions: string[] = [];
   let score = 0;
@@ -377,9 +479,7 @@ function evaluateTaskLoad(
     (indicator) => Array.isArray(indicator.schedule) && indicator.schedule.length > maxTasksPerTactic,
   );
   if (overloadedTactic) {
-    suggestions.push(
-      `Một việc đang được lên lịch nhiều hơn ${maxTasksPerTactic} lần/tuần — chia bớt sang việc khác.`,
-    );
+    suggestions.push(`Một việc đang được lên lịch nhiều hơn ${maxTasksPerTactic} lần/tuần — chia bớt sang việc khác.`);
   }
 
   return { score, warnings, suggestions };
@@ -438,9 +538,7 @@ function evaluateWeekOneStartability(
   if (weeklyTaskCount > 0 && context?.firstTaskTitle !== undefined) {
     const analysis = analyzeFirstTaskTitle(context.firstTaskTitle);
     if (analysis.isMissing) {
-      warnings.push(
-        "Việc đầu tiên tuần 1 chưa có tên — đặt tên rõ để bạn biết làm gì trong 24h tới.",
-      );
+      warnings.push("Việc đầu tiên tuần 1 chưa có tên — đặt tên rõ để bạn biết làm gì trong 24h tới.");
     } else {
       if (analysis.isVague) {
         warnings.push(
@@ -496,9 +594,7 @@ function evaluateFeasibilityAlignment(
     if (feasibility.planLoad === input.tacticLoadPreference) {
       score += 5;
     } else if (feasibility.planLoad === "lighter" && input.tacticLoadPreference === "push") {
-      warnings.push(
-        "Khả thi gợi ý nhịp 'lighter' nhưng bạn đang chọn 'push' — rủi ro mất nhịp sớm.",
-      );
+      warnings.push("Khả thi gợi ý nhịp 'lighter' nhưng bạn đang chọn 'push' — rủi ro mất nhịp sớm.");
     } else {
       suggestions.push(
         `Cân nhắc đổi nhịp về '${feasibility.planLoad}' theo gợi ý kiểm tra khả thi, hoặc giữ '${input.tacticLoadPreference}' nếu có lý do rõ.`,
@@ -541,9 +637,7 @@ function evaluateFeasibilityAlignment(
   return { score, warnings, suggestions };
 }
 
-function evaluateArchetypeFit(
-  input: PlanQualityInput,
-): { warnings: string[]; suggestions: string[] } {
+function evaluateArchetypeFit(input: PlanQualityInput): { warnings: string[]; suggestions: string[] } {
   const warnings: string[] = [];
   const suggestions: string[] = [];
 
@@ -611,9 +705,7 @@ function evaluateArchetypeFit(
         /đề thi|de thi|practice test|mock|luyện đề|luyen de/i.test(name.toLowerCase()),
       );
       if (validIndicators.length > 0 && !hasPracticeTest) {
-        warnings.push(
-          "Kế hoạch thi cử cần ít nhất 1 việc 'đề thi thử' mỗi tuần để theo dõi mốc hiện tại thật.",
-        );
+        warnings.push("Kế hoạch thi cử cần ít nhất 1 việc 'đề thi thử' mỗi tuần để theo dõi mốc hiện tại thật.");
       }
       break;
     }
@@ -688,10 +780,7 @@ export function evaluateTwelveWeekPlanQuality(
 
   const overallScore = dimensions.reduce((total, dimension) => total + dimension.score, 0);
   const archetypeFit = evaluateArchetypeFit(input);
-  const warnings = [
-    ...dimensionEvals.flatMap(({ evaluation }) => evaluation.warnings),
-    ...archetypeFit.warnings,
-  ];
+  const warnings = [...dimensionEvals.flatMap(({ evaluation }) => evaluation.warnings), ...archetypeFit.warnings];
   const suggestions = [
     ...dimensionEvals.flatMap(({ evaluation }) => evaluation.suggestions),
     ...archetypeFit.suggestions,

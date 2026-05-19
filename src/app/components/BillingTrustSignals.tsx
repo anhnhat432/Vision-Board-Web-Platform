@@ -38,7 +38,9 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
           role="img"
           aria-label="Logo ngân hàng đại diện"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-app-accent text-[13px] text-white">VN</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-app-accent text-[13px] text-white">
+            VN
+          </span>
           <span>Bank</span>
         </div>
       </div>
@@ -46,7 +48,9 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
       <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-2"}`}>
         <div className={itemClassName}>
           <Banknote className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
-          <p className="text-[15px] leading-6 text-app-ink-soft">Thanh toán qua chuyển khoản ngân hàng VN (Casso xác thực).</p>
+          <p className="text-[15px] leading-6 text-app-ink-soft">
+            Thanh toán qua chuyển khoản ngân hàng VN (Casso xác thực).
+          </p>
         </div>
         <div className={itemClassName}>
           <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />

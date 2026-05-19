@@ -8,6 +8,7 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
+import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
@@ -24,10 +25,7 @@ import {
   parseNumberInput,
   type SmartGoal,
 } from "@/lib/smart-goal";
-import {
-  getArchetypeQualityHints,
-  type GoalArchetype,
-} from "@/lib/smart-goal/goalArchetypes";
+import { getArchetypeQualityHints, type GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 import {
   getArchetypeForIntent,
   getUserIntentId,
@@ -159,6 +157,31 @@ export function SMARTGoalSetup() {
     setSetupState("ready");
   }, []);
 
+  const firstStepData = SMART_STEPS[0];
+  if (!firstStepData) {
+    throw new Error("Các bước mục tiêu SMART chưa được cấu hình.");
+  }
+
+  const currentStepData = SMART_STEPS[currentStep] ?? firstStepData;
+  const currentStepKey = currentStepData.key;
+
+  useSetAssistantPageContext({
+    pageType: "smart-wizard",
+    currentStep: currentStepKey,
+    hint:
+      currentStepKey === "specific"
+        ? "Đang viết mục tiêu cụ thể, có thể hình dung được"
+        : currentStepKey === "measurable"
+          ? "Đang đặt thước đo định lượng cho mục tiêu"
+          : currentStepKey === "achievable"
+            ? "Đang kiểm tra mục tiêu có làm được trong điều kiện hiện tại"
+            : currentStepKey === "relevant"
+              ? "Đang xác định lý do mục tiêu này quan trọng"
+              : currentStepKey === "timeBound"
+                ? "Đang chốt deadline và timeline"
+                : undefined,
+  });
+
   const intentArchetype: GoalArchetype | null = useMemo(() => {
     if (!userIntent || !hasActionableArchetypeHint(userIntent)) return null;
     return getArchetypeForIntent(userIntent);
@@ -181,13 +204,6 @@ export function SMARTGoalSetup() {
     return getArchetypeQualityHints(intentArchetype).recommendedMetric;
   }, [intentArchetype]);
 
-  const firstStepData = SMART_STEPS[0];
-  if (!firstStepData) {
-    throw new Error("Các bước mục tiêu SMART chưa được cấu hình.");
-  }
-
-  const currentStepData = SMART_STEPS[currentStep] ?? firstStepData;
-  const currentStepKey = currentStepData.key;
   const totalSteps = SMART_STEPS.length;
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
   const completedCount = useMemo(
@@ -209,8 +225,7 @@ export function SMARTGoalSetup() {
   );
   const currentStepError = getStepValidationError(currentStepKey, smartData);
   const hasMinimumGoalStatement = smartData.specific.goal_statement.trim().length >= 10;
-  const isCurrentStepValid =
-    currentStepError === null && (currentStepKey !== "timeBound" || hasMinimumGoalStatement);
+  const isCurrentStepValid = currentStepError === null && (currentStepKey !== "timeBound" || hasMinimumGoalStatement);
   const currentStepHasDraftContent = hasStepDraftContent(currentStepKey, smartData);
   const currentStarterPreview = getSmartGoalStarterPreview(currentStepKey, smartGoalStarter);
   const shouldShowCurrentStepError =
@@ -218,9 +233,7 @@ export function SMARTGoalSetup() {
   const liveSmartGoal = useMemo(() => buildSmartGoalFromFormData(smartData, focusArea), [smartData, focusArea]);
   const qualityResult = useMemo(() => evaluateSmartGoalQuality(liveSmartGoal), [liveSmartGoal]);
   const currentStepSoftWarning =
-    currentStepError === null
-      ? getStepQualityHint(currentStepKey, qualityResult, currentStepHasDraftContent)
-      : null;
+    currentStepError === null ? getStepQualityHint(currentStepKey, qualityResult, currentStepHasDraftContent) : null;
   const qualityFeedback =
     currentStepKey === "timeBound"
       ? {
@@ -517,7 +530,10 @@ export function SMARTGoalSetup() {
         </div>
 
         {!isVisionPromptDismissed ? (
-          <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
+          <section
+            className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+            aria-label="Tầm nhìn dài hạn"
+          >
             <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[13px] font-medium text-app-warm">
               Tầm nhìn dài hạn
             </span>

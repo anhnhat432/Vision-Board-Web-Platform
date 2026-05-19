@@ -420,7 +420,10 @@ export function OrderPage() {
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.label} className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-3.5">
+                    <div
+                      key={item.label}
+                      className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-3.5"
+                    >
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         <Icon className="h-3.5 w-3.5 text-app-accent" />
                         {item.label}
@@ -510,9 +513,7 @@ export function OrderPage() {
             <div className="stack-stack border-t border-slate-100 pt-6">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Người nhận</p>
-                <p className="text-sm text-slate-600">
-                  Thông tin tối thiểu để tạo đơn và theo dõi lại trên thiết bị.
-                </p>
+                <p className="text-sm text-slate-600">Thông tin tối thiểu để tạo đơn và theo dõi lại trên thiết bị.</p>
                 <p className="text-sm text-slate-500">Các trường có ghi “Bắt buộc” cần hoàn tất trước khi tạo đơn.</p>
               </div>
 
@@ -552,7 +553,9 @@ export function OrderPage() {
                   {showInlineErrors && fieldErrors.email ? (
                     <p className="text-sm text-rose-600">Vui lòng nhập email để lưu và nhận diện đơn.</p>
                   ) : (
-                    <p className="text-sm text-slate-500">Email hiện dùng cho luồng trên thiết bị, chưa có gửi thư thật.</p>
+                    <p className="text-sm text-slate-500">
+                      Email hiện dùng cho luồng trên thiết bị, chưa có gửi thư thật.
+                    </p>
                   )}
                 </div>
               </div>

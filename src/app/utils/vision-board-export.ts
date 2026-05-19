@@ -13,10 +13,7 @@ const RATIO_SIZES: Record<ExportOptions["ratio"], { width: number; height: numbe
 
 export const EXPORT_RATIOS: ExportOptions["ratio"][] = ["wallpaper", "desktop", "square"];
 
-export async function exportVisionBoardToPng(
-  canvasElement: HTMLElement,
-  options: ExportOptions,
-): Promise<string> {
+export async function exportVisionBoardToPng(canvasElement: HTMLElement, options: ExportOptions): Promise<string> {
   const size = RATIO_SIZES[options.ratio];
 
   return toPng(canvasElement, {

@@ -32,6 +32,8 @@ const LIFE_AREA_ICON_MAP: Record<string, LifeAreaIconComponent> = {
 };
 
 export function getLifeAreaIcon(areaName: string | null | undefined): LifeAreaIconComponent {
-  const key = String(areaName ?? "").trim().toLowerCase();
+  const key = String(areaName ?? "")
+    .trim()
+    .toLowerCase();
   return LIFE_AREA_ICON_MAP[key] ?? LifeAreaMindIcon;
 }

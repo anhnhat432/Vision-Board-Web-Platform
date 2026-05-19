@@ -34,19 +34,9 @@ function safeSetItem(key: string, value: unknown): boolean {
 
 // ============== Types ==============
 
-export type SyncStatus =
-  | "pending"
-  | "in_flight"
-  | "retry_scheduled"
-  | "failed_terminal"
-  | "succeeded";
+export type SyncStatus = "pending" | "in_flight" | "retry_scheduled" | "failed_terminal" | "succeeded";
 
-export type SyncType =
-  | "task_completed"
-  | "daily_checkin"
-  | "weekly_review"
-  | "plan_snapshot"
-  | "metric_upsert";
+export type SyncType = "task_completed" | "daily_checkin" | "weekly_review" | "plan_snapshot" | "metric_upsert";
 
 export interface SyncError {
   code: string;
@@ -167,7 +157,7 @@ export function getCollapseKey(
   syncType: SyncType,
   entityId?: string,
   _entityType?: string,
-  payload?: unknown
+  payload?: unknown,
 ): string {
   switch (syncType) {
     case "task_completed":
@@ -200,14 +190,14 @@ export function enqueueSync(
     entityId?: string;
     entityType?: "task" | "checkin" | "review" | "plan";
     maxAttempts?: number;
-  }
+  },
 ): { store: SyncQueueStore; item: SyncQueueItem } {
   const now = new Date().toISOString();
   const collapseKey = getCollapseKey(input.goalId, input.syncType, input.entityId, input.entityType, input.payload);
 
   // Check for existing pending or in_flight items with same collapseKey
   const existingIndex = store.items.findIndex(
-    (item) => item.collapseKey === collapseKey && (item.status === "pending" || item.status === "in_flight")
+    (item) => item.collapseKey === collapseKey && (item.status === "pending" || item.status === "in_flight"),
   );
 
   let newStore = { ...store };
@@ -253,15 +243,13 @@ export function enqueueSync(
 }
 
 export function listPendingSyncs(store: SyncQueueStore): SyncQueueItem[] {
-  return store.items.filter(
-    (item) => item.status === "pending" || item.status === "retry_scheduled"
-  );
+  return store.items.filter((item) => item.status === "pending" || item.status === "retry_scheduled");
 }
 
 export function markSyncInFlight(
   store: SyncQueueStore,
   itemId: string,
-  options: { now?: string } = {}
+  options: { now?: string } = {},
 ): SyncQueueStore {
   const now = options.now ?? new Date().toISOString();
   const index = store.items.findIndex((item) => item.id === itemId);
@@ -285,7 +273,7 @@ export function markSyncInFlight(
 export function markSyncSucceeded(
   store: SyncQueueStore,
   itemId: string,
-  options: { now?: string } = {}
+  options: { now?: string } = {},
 ): SyncQueueStore {
   const now = options.now ?? new Date().toISOString();
   const index = store.items.findIndex((item) => item.id === itemId);
@@ -313,7 +301,7 @@ export function markSyncFailed(
   options: {
     now?: string;
     nextRetryAt?: string;
-  } = {}
+  } = {},
 ): SyncQueueStore {
   const now = options.now ?? new Date().toISOString();
   const index = store.items.findIndex((item) => item.id === itemId);
@@ -353,15 +341,15 @@ export function compactSyncs(store: SyncQueueStore): SyncQueueStore {
 
   return {
     ...store,
-    items: Array.from(deduped.values()).sort((a, b) =>
-      new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+    items: Array.from(deduped.values()).sort(
+      (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
     ),
   };
 }
 
 export function cleanupOldSyncs(
   store: SyncQueueStore,
-  cutoffDate: Date
+  cutoffDate: Date,
 ): { store: SyncQueueStore; removedCount: number } {
   const retentionTime = cutoffDate.getTime() - SYNC_QUEUE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
@@ -415,7 +403,8 @@ export function getSyncQueueSummary(store: SyncQueueStore): SyncQueueStoreSummar
     totalCount: items.length,
     pendingCount: items.filter((i) => i.status === "pending").length,
     inFlightCount: items.filter((i) => i.status === "in_flight").length,
-    failedOrRetryableCount: items.filter((i) => i.status === "retry_scheduled" || i.status === "failed_terminal").length,
+    failedOrRetryableCount: items.filter((i) => i.status === "retry_scheduled" || i.status === "failed_terminal")
+      .length,
     succeededCount: items.filter((i) => i.status === "succeeded").length,
     lastDrainStartedAt: store.lastDrainStartedAt ?? null,
     lastDrainFinishedAt: store.lastDrainFinishedAt ?? null,
@@ -428,14 +417,12 @@ function enforceSizeLimit(store: SyncQueueStore): SyncQueueStore {
   }
 
   // Keep newest 500 items based on updatedAt
-  const sorted = [...store.items].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+  const sorted = [...store.items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   const kept = sorted.slice(0, 500);
 
   console.warn(
     `[SyncQueue] Size limit exceeded (${store.items.length} > ${SYNC_QUEUE_MAX_SIZE}). ` +
-    `Compacted to ${kept.length} newest items.`
+      `Compacted to ${kept.length} newest items.`,
   );
 
   return {

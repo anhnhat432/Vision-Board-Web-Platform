@@ -9,7 +9,12 @@ function parseLocalDateOnly(value: string): Date | null {
 }
 
 export function getDayKey(date: Date | string | number): string {
-  const d = typeof date === "string" ? (parseLocalDateOnly(date) ?? new Date(date)) : date instanceof Date ? date : new Date(date);
+  const d =
+    typeof date === "string"
+      ? (parseLocalDateOnly(date) ?? new Date(date))
+      : date instanceof Date
+        ? date
+        : new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");

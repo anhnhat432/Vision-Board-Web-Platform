@@ -176,14 +176,22 @@ export function LifeInsight() {
   return (
     <PageShell maxWidth="xl">
       <div ref={pageTopRef}>
-        <AlertDialog open={pendingFocusAreaName !== null} onOpenChange={(open) => !open && setPendingFocusAreaName(null)}>
+        <AlertDialog
+          open={pendingFocusAreaName !== null}
+          onOpenChange={(open) => !open && setPendingFocusAreaName(null)}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Bạn có bản nháp mục tiêu chưa lưu</AlertDialogTitle>
               <AlertDialogDescription>Đổi lĩnh vực sẽ xoá bản nháp hiện tại. Tiếp tục?</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <Button type="button" variant="ghost" className="sm:mr-auto" onClick={() => setPendingFocusAreaName(null)}>
+              <Button
+                type="button"
+                variant="ghost"
+                className="sm:mr-auto"
+                onClick={() => setPendingFocusAreaName(null)}
+              >
                 Huỷ
               </Button>
               <AlertDialogCancel>Giữ bản nháp</AlertDialogCancel>
@@ -202,7 +210,10 @@ export function LifeInsight() {
               <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                 BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
               </p>
-              <h1 className="mt-3 text-[32px] font-medium leading-tight tracking-tight text-app-ink" style={{ fontFamily: "var(--font-serif)" }}>
+              <h1
+                className="mt-3 text-[32px] font-medium leading-tight tracking-tight text-app-ink"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
                 Chọn nơi đáng ưu tiên trong 12 tuần tới.
               </h1>
               <p className="mt-2 text-[15px] text-app-ink-soft">
@@ -276,9 +287,7 @@ export function LifeInsight() {
                       Điểm hiện tại: {focusArea.score}/10
                     </span>
                   </p>
-                  <p className="mt-3 text-[15px] leading-relaxed text-app-ink">
-                    {smartGoalStarter.motivationReason}
-                  </p>
+                  <p className="mt-3 text-[15px] leading-relaxed text-app-ink">{smartGoalStarter.motivationReason}</p>
                   {selectedIntent && (
                     <div className="mt-3">
                       <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-[12px] text-app-ink-soft">
@@ -321,7 +330,9 @@ export function LifeInsight() {
                         <AreaIcon className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={`truncate text-[14px] font-medium ${isSelected ? "text-app-accent" : "text-app-ink"}`}>
+                        <p
+                          className={`truncate text-[14px] font-medium ${isSelected ? "text-app-accent" : "text-app-ink"}`}
+                        >
                           {getLifeAreaLabel(area.name)}
                         </p>
                         <p className={`mt-0.5 text-[12px] ${isSelected ? "text-app-accent" : "text-app-ink-muted"}`}>
@@ -339,9 +350,7 @@ export function LifeInsight() {
           {/* Intent options */}
           <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
             <div>
-              <h3 className="text-[16px] font-semibold text-app-ink">
-                Mục đích chính của bạn với lĩnh vực này
-              </h3>
+              <h3 className="text-[16px] font-semibold text-app-ink">Mục đích chính của bạn với lĩnh vực này</h3>
               <p className="mt-1 text-[13px] text-app-ink-muted">Chọn 1 — sẽ định hình kiểu mục tiêu SMART</p>
             </div>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -362,7 +371,9 @@ export function LifeInsight() {
                       <span className="text-[15px] font-medium">{option.label}</span>
                       {isSelected && <Check className="h-4 w-4 shrink-0" />}
                     </div>
-                    <p className={`text-[13px] leading-relaxed ${isSelected ? "text-app-accent" : "text-app-ink-soft"}`}>
+                    <p
+                      className={`text-[13px] leading-relaxed ${isSelected ? "text-app-accent" : "text-app-ink-soft"}`}
+                    >
                       {option.description}
                     </p>
                   </button>
@@ -390,9 +401,7 @@ export function LifeInsight() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[12px] uppercase tracking text-app-ink-muted">TIẾP THEO</p>
-                <h3 className="mt-1 text-[16px] font-medium text-app-ink">
-                  Biến trọng tâm này thành mục tiêu SMART
-                </h3>
+                <h3 className="mt-1 text-[16px] font-medium text-app-ink">Biến trọng tâm này thành mục tiêu SMART</h3>
                 <p className="mt-1 text-[13px] text-app-ink-muted">Khoảng 4 phút</p>
               </div>
               <Button
