@@ -473,7 +473,10 @@ function DashboardContent({
   const signedIn = Boolean(user);
   const goalLimitUsage = getFreeTierUsage(userData, "maxActiveGoals");
   const shouldShowFreeGoalLimit =
-    !isSignedOut && currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
+    !isSignedOut &&
+    currentPlanCode === "FREE" &&
+    Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals) &&
+    goalLimitUsage.current > 0;
   const lastSavedLabel = getLastSavedLabel(userData, dashboardData.activeSystemTodayTasks);
   const balanceRows = getLifeBalanceRows(visibleWheelOfLife);
 

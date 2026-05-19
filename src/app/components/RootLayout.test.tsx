@@ -431,6 +431,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/");
     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Đăng ký" }).length).toBeGreaterThan(0);
+    expect(screen.getByText("12 tuần sống có chủ đích")).toBeInTheDocument();
     expect(screen.getAllByText("Trang chính").length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Mục tiêu" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "12 tuần" })).not.toBeInTheDocument();
@@ -438,8 +439,27 @@ describe("RootLayout onboarding redirect", () => {
     expect(productionMock.syncPendingOutbox).not.toHaveBeenCalled();
   });
 
-  it("shows the AI assistant on dashboard, goal, and setup help routes", async () => {
+  it("does not auto-open the new user guide on the first dashboard visit", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(localStorage.getItem("visionboard_new_user_guide_seen_at")).toBeNull();
+  });
+
+  it("shows the AI assistant on dashboard, goal, and setup help routes for signed-in users", async () => {
     appModeMock.isDemoMode.mockReturnValue(true);
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
 
     for (const [path, testId] of [
       ["/", "home-page"],
@@ -546,6 +566,7 @@ describe("RootLayout onboarding redirect", () => {
     const { router } = renderAppShell("/goals");
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    expect(screen.getByAltText("Dear Our Future")).toHaveAttribute("src", "/favicon-512.png");
     expect(screen.getByText("v1.0")).toBeInTheDocument();
     expect(screen.getAllByText("plus@example.com").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Cài đặt" })).toHaveAttribute("href", "/settings");

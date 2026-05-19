@@ -5,7 +5,6 @@ import {
   CreditCard,
   Images,
   LayoutDashboard,
-  Package,
   Sparkles,
   Target,
   TrendingUp,
@@ -29,7 +28,6 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
   { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
   { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
-  { path: "/order-status", label: "Đơn hàng", compactLabel: "Đơn hàng", icon: Package },
 ];
 
 export const PRIMARY_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
@@ -48,7 +46,6 @@ export const SIGNED_OUT_HOME_NAV_ITEM: NavItem = {
 
 const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
   "/12-week-system": () => import("../../pages/12WeekSystem"),
-  "/order-status": () => import("../../pages/OrderStatusPage"),
 };
 
 export const WARM_PREFETCH_ROUTE_PATHS = ["/12-week-system"] as const;

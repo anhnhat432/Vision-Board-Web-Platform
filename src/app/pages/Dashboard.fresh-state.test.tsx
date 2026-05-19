@@ -176,11 +176,16 @@ describe("Dashboard fresh workspace states", () => {
       user: { uid: "fresh_user", email: "fresh@example.com" },
       userProfile: { id: "profile_fresh", email: "fresh@example.com" },
     });
+    const openGuideHandler = vi.fn();
+    window.addEventListener("visionboard:open-guide", openGuideHandler);
     expect(getUserData().goals).toEqual([]);
+    const user = userEvent.setup();
 
     renderDashboard();
 
     expect(await screen.findByTestId("fresh-workspace-empty-state")).toBeInTheDocument();
+    expect(screen.getByText("Cần hướng dẫn 6 bước?")).toBeInTheDocument();
+    expect(screen.queryByText(/Free: 0\/3/)).not.toBeInTheDocument();
     expect(screen.getByText(/Chưa có dữ liệu thực thi để hiển thị/i)).toBeInTheDocument();
     expect(screen.queryByText("Chưa có dữ liệu bánh xe cuộc sống")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng quan hiệu suất 12 tuần")).not.toBeInTheDocument();
@@ -188,5 +193,9 @@ describe("Dashboard fresh workspace states", () => {
     expect(screen.getByText("Cân bằng")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Tôi đã có insight" })).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu gần đây")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Mở →" }));
+    expect(openGuideHandler).toHaveBeenCalledTimes(1);
+    window.removeEventListener("visionboard:open-guide", openGuideHandler);
   });
 });

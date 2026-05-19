@@ -77,10 +77,11 @@ export function AppSidebar({
           aria-label="Về trang chủ Dear Our Future"
         >
           <img
-            src="/favicon-192.png"
-            alt=""
-            aria-hidden="true"
-            className="size-9 rounded-lg object-cover shadow-md ring-1 ring-app-accent/20"
+            src="/favicon-512.png"
+            alt="Dear Our Future"
+            width={36}
+            height={36}
+            className="size-9 rounded-lg"
           />
           <div className="min-w-0">
             <span className="block truncate text-[16px] font-semibold tracking-tight text-app-ink">

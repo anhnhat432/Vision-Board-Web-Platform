@@ -33,12 +33,6 @@ import {
   USER_DATA_UPDATED_EVENT_NAME,
 } from "../utils/storage";
 import { canSendRemoteAnalytics } from "../utils/analytics";
-import {
-  getNewUserGuideProgress,
-  hasSeenNewUserGuide,
-  isNewUserGuideDismissed,
-  markNewUserGuideSeen,
-} from "../utils/new-user-guide";
 import { isDemoMode, shouldEnable12WeekImportDryRun, shouldEnable12WeekCloudImport } from "../utils/app-mode";
 import {
   getAnonymousLocalDataMigrationCandidate,
@@ -433,30 +427,6 @@ export function RootLayout() {
       window.removeEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
     };
   }, []);
-
-  useEffect(() => {
-    if (demoMode) return;
-    if (shouldShowWorkspaceGate) return;
-    if (!user) return;
-    if (location.pathname !== "/") return;
-    if (localDataMigrationCandidate && isLocalDataMigrationPromptOpen) return;
-
-    const progress = getNewUserGuideProgress(guideUserData);
-    if (progress.isComplete || isNewUserGuideDismissed() || hasSeenNewUserGuide()) {
-      return;
-    }
-
-    setIsGuideOpen(true);
-    markNewUserGuideSeen();
-  }, [
-    demoMode,
-    guideUserData,
-    isLocalDataMigrationPromptOpen,
-    localDataMigrationCandidate,
-    location.pathname,
-    shouldShowWorkspaceGate,
-    user,
-  ]);
 
   useEffect(() => {
     if (demoMode || shouldShowWorkspaceGate || !user) {
@@ -1017,106 +987,106 @@ export function RootLayout() {
                   </div>
 
                   <nav className="hidden flex-1 items-center justify-center md:flex">
-                    <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
-                      {!isSignedOutVisitor ? (
-                        <>
-                          {primaryNavItems.map((item) => {
-                            const Icon = item.icon;
-                            const active = isActive(item.path);
+                    {isSignedOutVisitor ? (
+                      <span className="hidden text-[13px] text-app-ink-muted lg:inline">12 tuần sống có chủ đích</span>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
+                        {primaryNavItems.map((item) => {
+                          const Icon = item.icon;
+                          const active = isActive(item.path);
 
-                            return (
+                          return (
+                            <Button
+                              key={item.path}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigateAppRoute(item.path)}
+                              onPointerEnter={() => handlePrefetch(item.path)}
+                              aria-current={active ? "page" : undefined}
+                              title={item.label}
+                              className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
+                                active
+                                  ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                                  : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
+                              }`}
+                            >
+                              <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
+                              <span>{item.compactLabel ?? item.label}</span>
+                            </Button>
+                          );
+                        })}
+
+                        {secondaryNavItems.length > 0 ? (
+                          <>
+                            <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
+
+                            <div ref={desktopMoreRef} className="relative">
                               <Button
-                                key={item.path}
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => navigateAppRoute(item.path)}
-                                onPointerEnter={() => handlePrefetch(item.path)}
-                                aria-current={active ? "page" : undefined}
-                                title={item.label}
+                                aria-current={
+                                  secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined
+                                }
+                                aria-expanded={desktopMoreOpen}
+                                aria-haspopup="menu"
                                 className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
-                                  active
+                                  isDesktopMoreNavActive
                                     ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
                                     : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
                                 }`}
+                                onClick={() => setDesktopMoreOpen((open) => !open)}
                               >
-                                <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
-                                <span>{item.compactLabel ?? item.label}</span>
+                                <Menu className="h-3.5 w-3.5" />
+                                <span>Khác</span>
+                                <ChevronDown
+                                  className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                                />
                               </Button>
-                            );
-                          })}
 
-                          {secondaryNavItems.length > 0 ? (
-                            <>
-                              <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
-
-                              <div ref={desktopMoreRef} className="relative">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  aria-current={
-                                    secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined
-                                  }
-                                  aria-expanded={desktopMoreOpen}
-                                  aria-haspopup="menu"
-                                  className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
-                                    isDesktopMoreNavActive
-                                      ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
-                                      : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
-                                  }`}
-                                  onClick={() => setDesktopMoreOpen((open) => !open)}
+                              {desktopMoreOpen ? (
+                                <div
+                                  role="menu"
+                                  aria-label="Mục khác"
+                                  className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
                                 >
-                                  <Menu className="h-3.5 w-3.5" />
-                                  <span>Khác</span>
-                                  <ChevronDown
-                                    className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
-                                  />
-                                </Button>
-
-                                {desktopMoreOpen ? (
-                                  <div
-                                    role="menu"
-                                    aria-label="Mục khác"
-                                    className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
-                                  >
-                                    <div className="px-2.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
-                                      Mục khác
-                                    </div>
-                                    {secondaryNavItems.map((item) => {
-                                      const Icon = item.icon;
-                                      const active = isActive(item.path);
-
-                                      return (
-                                        <button
-                                          key={item.path}
-                                          type="button"
-                                          role="menuitem"
-                                          aria-current={active ? "page" : undefined}
-                                          onPointerEnter={() => handlePrefetch(item.path)}
-                                          onClick={() => {
-                                            setDesktopMoreOpen(false);
-                                            navigateAppRoute(item.path);
-                                          }}
-                                          className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[14px] font-medium tracking-tight outline-none transition-colors ${
-                                            active
-                                              ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
-                                              : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
-                                          }`}
-                                        >
-                                          <Icon
-                                            className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
-                                          />
-                                          <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                                        </button>
-                                      );
-                                    })}
+                                  <div className="px-2.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
+                                    Mục khác
                                   </div>
-                                ) : null}
-                              </div>
-                            </>
-                          ) : null}
-                        </>
-                      ) : null}
-                    </div>
+                                  {secondaryNavItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const active = isActive(item.path);
+
+                                    return (
+                                      <button
+                                        key={item.path}
+                                        type="button"
+                                        role="menuitem"
+                                        aria-current={active ? "page" : undefined}
+                                        onPointerEnter={() => handlePrefetch(item.path)}
+                                        onClick={() => {
+                                          setDesktopMoreOpen(false);
+                                          navigateAppRoute(item.path);
+                                        }}
+                                        className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[14px] font-medium tracking-tight outline-none transition-colors ${
+                                          active
+                                            ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
+                                            : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
+                                        }`}
+                                      >
+                                        <Icon
+                                          className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
+                                        />
+                                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              ) : null}
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    )}
                   </nav>
 
                   <div className="hidden shrink-0 items-center gap-1.5 md:flex">

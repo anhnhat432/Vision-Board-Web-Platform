@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
 import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
@@ -76,6 +76,17 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
         <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
           Trang chính sẽ sáng rõ hơn sau khi có một mục tiêu thật, một kế hoạch tuần và vài việc hôm nay.
         </p>
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-app-accent/30 bg-app-accent-soft px-3.5 py-1.5 text-[13px] font-medium text-app-accent">
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>Cần hướng dẫn 6 bước?</span>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
+            className="ml-1 font-semibold underline-offset-2 hover:underline"
+          >
+            Mở →
+          </button>
+        </div>
       </section>
 
       <section
