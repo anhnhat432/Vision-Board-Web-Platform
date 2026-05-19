@@ -4,6 +4,13 @@ import { AssistantMascot } from "../AssistantMascot";
 import type { NudgeState } from "../useProactiveNudge";
 
 const inactiveNudge: NudgeState = { active: false, reason: null, message: "" };
+const mascotPosition = { x: 120, y: 180 };
+const mascotProps = {
+  position: mascotPosition,
+  isDragging: false,
+  handlePointerDown: vi.fn(),
+  wasDragged: false,
+};
 
 describe("AssistantMascot", () => {
   beforeEach(() => {
@@ -16,7 +23,7 @@ describe("AssistantMascot", () => {
   });
 
   it("shows tooltip on keyboard focus and hides it after 2 seconds", () => {
-    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} />);
+    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
 
     expect(screen.queryByText("Kéo để di chuyển · Click để hỏi")).not.toBeInTheDocument();
 
@@ -39,7 +46,15 @@ describe("AssistantMascot", () => {
       message: "Tuần 3 bắt đầu rồi. Muốn mình tóm tắt và chọn ưu tiên không?",
     };
 
-    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={proactiveNudge} dismissNudge={dismissNudge} />);
+    render(
+      <AssistantMascot
+        isOpen={false}
+        onClick={vi.fn()}
+        nudge={proactiveNudge}
+        dismissNudge={dismissNudge}
+        {...mascotProps}
+      />,
+    );
 
     expect(screen.queryByText(proactiveNudge.message)).not.toBeInTheDocument();
 
@@ -53,5 +68,33 @@ describe("AssistantMascot", () => {
 
     expect(dismissNudge).toHaveBeenCalled();
     expect(screen.queryAllByText(proactiveNudge.message)).toHaveLength(0);
+  });
+
+  it("renders OwlIcon with blinking prop and animate-owl-breath class", () => {
+    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
+
+    const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
+    const owlIcon = button.querySelector("svg");
+
+    expect(owlIcon).toBeInTheDocument();
+    expect(owlIcon).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("applies animate-owl-breath class to mascot inner shell when not open/dragging", () => {
+    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
+
+    const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
+    const innerShell = button.querySelector(".animate-owl-breath");
+
+    expect(innerShell).toBeInTheDocument();
+  });
+
+  it("returns null when isOpen = true, preventing animation", () => {
+    const { container } = render(
+      <AssistantMascot isOpen={true} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />,
+    );
+
+    expect(container.firstChild).toBeNull();
+    expect(screen.queryByRole("button", { name: "Mở trợ lý AI" })).not.toBeInTheDocument();
   });
 });

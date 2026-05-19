@@ -3,22 +3,37 @@ import { X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { OwlIcon } from "./OwlIcon";
 import type { NudgeState } from "./useProactiveNudge";
-import { useDraggableMascot } from "./useDraggableMascot";
+import type { Position } from "./useDraggableMascot";
+import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 
 interface AssistantMascotProps {
   onClick: () => void;
   isOpen: boolean;
   nudge: NudgeState;
   dismissNudge: () => void;
+  position: Position;
+  isDragging: boolean;
+  handlePointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
+  wasDragged: boolean;
 }
 
-export function AssistantMascot({ onClick, isOpen, nudge, dismissNudge }: AssistantMascotProps) {
-  const { position, isDragging, handlePointerDown, wasDragged } = useDraggableMascot();
+export function AssistantMascot({
+  onClick,
+  isOpen,
+  nudge,
+  dismissNudge,
+  position,
+  isDragging,
+  handlePointerDown,
+  wasDragged,
+}: AssistantMascotProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeoutRef = useRef<number | null>(null);
   const tooltipAutoCloseRef = useRef<number | null>(null);
   const pointerFocusRef = useRef(false);
   const lastNudgeKeyRef = useRef<string | null>(null);
+
+  const { blinking } = useOwlIdleAnimation({ pause: isDragging || isOpen });
 
   useEffect(() => {
     return () => {
@@ -123,11 +138,13 @@ export function AssistantMascot({ onClick, isOpen, nudge, dismissNudge }: Assist
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="z-50 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 p-1 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:p-0.5"
+          className="z-50 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 p-1 shadow-lg transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:p-0.5 owl-mascot-shell"
         >
           <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-indigo-400/30" />
-          <span className="relative flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 sm:size-11">
-            <OwlIcon size={28} />
+          <span
+            className={`relative flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 sm:size-11 ${isDragging || isOpen ? "" : "animate-owl-breath"}`}
+          >
+            <OwlIcon size={28} blinking={blinking} />
             {nudge.active ? (
               <span className="absolute -top-1 -right-1 size-3 rounded-full bg-red-500 ring-2 ring-white animate-pulse" />
             ) : null}

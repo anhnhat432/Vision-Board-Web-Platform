@@ -6,7 +6,7 @@ const MIN_GAP = 8;
 const DRAG_THRESHOLD = 5;
 const LONG_PRESS_MS = 200;
 
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }

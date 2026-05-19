@@ -3084,6 +3084,67 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+/* ── Owl mascot animations ───────────────────────────────────
+ * Blink: scaleY 1 → 0.1 → 1 in 150ms, random 3-6s interval.
+ * Breath: scale 1 → 1.03 → 1 in 4s, gentle "alive" feeling.
+ * Both respect prefers-reduced-motion.
+ * ─────────────────────────────────────────────────────────── */
+
+.owl-eyes {
+  transform-origin: center;
+  transform: scaleY(1);
+}
+
+.owl-eyes.is-blinking {
+  animation: owl-blink 150ms ease-out;
+}
+
+@keyframes owl-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes owl-breath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-owl-breath {
+  animation: owl-breath 4s ease-in-out infinite;
+}
+
+/* Pause breathing when hovering to keep the mascot stable */
+@media (hover: hover) {
+  .owl-mascot-shell:hover .animate-owl-breath {
+    animation-play-state: paused;
+  }
+}
+
+/* Hover scale for the mascot shell */
+@media (hover: hover) {
+  .owl-mascot-shell:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .owl-eyes.is-blinking,
+  .animate-owl-breath {
+    animation: none;
+  }
+}
+
 @media (pointer: coarse) {
   /* Larger tap targets and simpler hover effects on touch devices */
   .card-interactive-base:hover,
