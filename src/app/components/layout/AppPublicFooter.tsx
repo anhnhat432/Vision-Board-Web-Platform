@@ -139,7 +139,11 @@ export function AppPublicFooter() {
         </div>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-app-line pt-6 text-[13px] text-app-ink-muted sm:flex-row sm:items-center">
-          <p>© {year} Dear Our Future. Made with at Vietnam.</p>
+          <p>
+            © {year} Dear Our Future. Made with{" "}
+            <span aria-hidden="true">❤️</span>
+            <span className="sr-only">tình yêu</span> ở Việt Nam.
+          </p>
           <p>Local-first · Hoạt động trên mọi thiết bị</p>
         </div>
       </div>

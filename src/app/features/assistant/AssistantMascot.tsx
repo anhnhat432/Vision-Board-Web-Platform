@@ -134,7 +134,7 @@ export function AssistantMascot({
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="assistant-mascot-shell z-50 inline-flex items-center gap-2 rounded-full bg-app-accent px-4 py-2.5 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+          className="assistant-mascot-shell z-50 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-app-accent px-4 py-2.5 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
         >
           <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-app-accent/25" />
           <Sparkles
