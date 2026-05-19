@@ -138,15 +138,19 @@ export function AssistantMascot({
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="z-50 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 p-1 shadow-lg transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:p-0.5 owl-mascot-shell"
+          className="owl-mascot-shell z-50 flex items-center justify-center rounded-full bg-app-accent p-1 shadow-md transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg sm:p-0.5"
         >
-          <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-indigo-400/30" />
+          <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-app-accent/25" />
           <span
-            className={`relative flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 sm:size-11 ${isDragging || isOpen ? "" : "animate-owl-breath"}`}
+            className={`relative flex size-12 items-center justify-center rounded-full bg-app-accent text-white sm:size-11 ${isDragging || isOpen ? "" : "animate-owl-breath"}`}
           >
-            <OwlIcon size={28} blinking={blinking} />
+            <OwlIcon
+              size={28}
+              blinking={blinking}
+              className="text-white [&_.owl-beak]:text-[color:var(--app-warm)]"
+            />
             {nudge.active ? (
-              <span className="absolute -top-1 -right-1 size-3 rounded-full bg-red-500 ring-2 ring-white animate-pulse" />
+              <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
             ) : null}
           </span>
         </button>
