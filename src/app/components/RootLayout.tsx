@@ -109,6 +109,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Toaster } from "./ui/sonner";
 import { AIAssistant } from "@/app/features/assistant/AIAssistant";
 import { AssistantPageContextProvider } from "@/app/features/assistant/AssistantPageContextProvider";
+import { AppPublicFooter } from "./layout/AppPublicFooter";
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -1443,6 +1444,7 @@ export function RootLayout() {
                 {pageMeta.label}
               </div>
               {pageTransitionContent}
+              {isSignedOutVisitor ? <AppPublicFooter /> : null}
             </main>
 
             {user ? (

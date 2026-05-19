@@ -1,6 +1,7 @@
 import { HelpCircle, LifeBuoy } from "lucide-react";
 import { Link } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { AppPublicFooter } from "../components/layout/AppPublicFooter";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
@@ -88,6 +89,7 @@ export function BillingFAQPage() {
           </div>
         </CardContent>
       </Card>
+      <AppPublicFooter />
     </div>
   );
 }

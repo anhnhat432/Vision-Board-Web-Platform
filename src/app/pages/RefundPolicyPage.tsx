@@ -118,28 +118,6 @@ export function RefundPolicyPage() {
         </p>
       </section>
 
-      <footer className="border-t border-app-line pt-6">
-        <div className="flex flex-wrap gap-4 text-sm">
-          <Link
-            to="/terms"
-            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
-          >
-            Điều khoản dịch vụ
-          </Link>
-          <Link
-            to="/privacy"
-            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
-          >
-            Chính sách bảo mật
-          </Link>
-          <Link
-            to="/billing/plan"
-            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
-          >
-            Gói & thanh toán
-          </Link>
-        </div>
-      </footer>
     </article>
   );
 }

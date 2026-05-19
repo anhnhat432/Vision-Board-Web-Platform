@@ -113,26 +113,6 @@ export function TermsPage() {
           </a>
         </p>
       </section>
-
-      <footer className="border-t border-app-line pt-6">
-        <div className="flex flex-wrap gap-4 text-sm">
-          <Link
-            to="/privacy"
-            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
-          >
-            Chính sách bảo mật
-          </Link>
-          <Link
-            to="/refund-policy"
-            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
-          >
-            Chính sách hoàn tiền
-          </Link>
-          <Link to="/" className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline">
-            Về trang chủ
-          </Link>
-        </div>
-      </footer>
     </article>
   );
 }
