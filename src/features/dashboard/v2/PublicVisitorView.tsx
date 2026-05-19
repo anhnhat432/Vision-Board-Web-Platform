@@ -37,7 +37,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)] md:items-center">
+      <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)] md:items-center md:gap-10">
         <div>
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
@@ -51,7 +51,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   aria-hidden="true"
                   viewBox="0 0 200 12"
                   preserveAspectRatio="none"
-                  className="absolute inset-x-0 -bottom-1 h-2 w-full text-app-warm appear-stroke"
+                  className="absolute inset-x-0 -bottom-1 h-2.5 w-full text-app-warm"
                 >
                   <path
                     d="M2 8 C 40 2, 80 10, 120 4 S 180 8, 198 5"
@@ -87,19 +87,19 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           </div>
         </div>
 
-        {/* Mockup preview card */}
+        {/* Mockup preview card — desktop only */}
         <div className="hidden rounded-card border border-app-line bg-app-surface p-5 shadow-sm md:block">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
                 <Target className="h-3.5 w-3.5" />
               </span>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Mục tiêu</p>
-                <p className="text-[13px] font-medium text-app-ink">Đọc 12 cuốn sách trong năm</p>
+                <p className="truncate text-[13px] font-medium text-app-ink">Đọc 12 cuốn sách trong năm</p>
               </div>
             </div>
-            <span className="rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[11px] font-semibold text-app-accent">
+            <span className="shrink-0 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[11px] font-semibold text-app-accent">
               Tuần 4/12
             </span>
           </div>
@@ -118,24 +118,24 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc hôm nay · 7/14</p>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="flex h-4 w-4 items-center justify-center rounded-[4px] bg-app-accent text-white">
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] bg-app-accent text-white">
                   <Check className="h-2.5 w-2.5" />
                 </span>
                 <span className="text-[13px] text-app-ink-muted line-through">Đọc 30 trang "Atomic Habits"</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-4 w-4 rounded-[4px] border border-app-line" aria-hidden="true" />
+                <span className="h-4 w-4 shrink-0 rounded-[4px] border border-app-line" aria-hidden="true" />
                 <span className="text-[13px] text-app-ink">Ghi 3 dòng phản tư</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-4 w-4 rounded-[4px] border border-app-line" aria-hidden="true" />
+                <span className="h-4 w-4 shrink-0 rounded-[4px] border border-app-line" aria-hidden="true" />
                 <span className="text-[13px] text-app-ink">Review tuần lúc 21h</span>
               </div>
             </div>
           </div>
 
           <p className="mt-4 border-t border-app-line pt-3 text-[11px] italic text-app-ink-muted">
-            Ảnh chụp giao diện — dữ liệu mô phỏng.
+            Ảnh chụp giao diện · dữ liệu mô phỏng
           </p>
         </div>
       </section>
