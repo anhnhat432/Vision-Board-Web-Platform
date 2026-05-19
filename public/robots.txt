@@ -1,5 +1,5 @@
-# Dear Our Future — vision-board-web-platform
-# https://vision-board-web-platform.vercel.app
+# Dear Our Future
+# https://dearourfuture.io.vn
 
 User-agent: *
 Allow: /
@@ -10,4 +10,4 @@ Disallow: /billing/confirm
 Disallow: /order
 Disallow: /order-status
 
-Sitemap: https://vision-board-web-platform.vercel.app/sitemap.xml
+Sitemap: https://dearourfuture.io.vn/sitemap.xml

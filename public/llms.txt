@@ -6,12 +6,12 @@ Sản phẩm tập trung vào productivity bình tĩnh + reflective journaling. 
 
 ## Trang chính
 
-- [Trang chủ](https://vision-board-web-platform.vercel.app/): Giới thiệu luồng chính Cân bằng → SMART → Review.
-- [Đăng nhập / Đăng ký](https://vision-board-web-platform.vercel.app/login): Hỗ trợ Google SSO và email/mật khẩu qua Firebase Auth.
+- [Trang chủ](https://dearourfuture.io.vn/): Giới thiệu luồng chính Cân bằng → SMART → Review.
+- [Đăng nhập / Đăng ký](https://dearourfuture.io.vn/login): Hỗ trợ Google SSO và email/mật khẩu qua Firebase Auth.
 
 ## Chính sách
 
-- [Điều khoản dịch vụ](https://vision-board-web-platform.vercel.app/terms)
-- [Chính sách bảo mật](https://vision-board-web-platform.vercel.app/privacy)
-- [Chính sách hoàn tiền](https://vision-board-web-platform.vercel.app/refund-policy)
-- [Câu hỏi thường gặp về thanh toán](https://vision-board-web-platform.vercel.app/billing/faq)
+- [Điều khoản dịch vụ](https://dearourfuture.io.vn/terms)
+- [Chính sách bảo mật](https://dearourfuture.io.vn/privacy)
+- [Chính sách hoàn tiền](https://dearourfuture.io.vn/refund-policy)
+- [Câu hỏi thường gặp về thanh toán](https://dearourfuture.io.vn/billing/faq)
