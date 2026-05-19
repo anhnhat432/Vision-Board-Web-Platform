@@ -325,10 +325,7 @@ describe("offline/online mutation queue hardening", () => {
     expect(store.items[0].id).toBe("toggle_2");
 
     // Write to storage and call sender
-    localStorage.setItem(
-      "visionboard_data_mutation_queue:auth:user_a",
-      JSON.stringify(store),
-    );
+    localStorage.setItem("visionboard_data_mutation_queue:auth:user_a", JSON.stringify(store));
 
     const postMutations = vi.fn().mockResolvedValue({
       accepted: [{ mutationId: "toggle_2", status: "accepted" }],
@@ -377,10 +374,7 @@ describe("offline/online mutation queue hardening", () => {
       },
       { now: at(1), createId: () => "fail_mutation" },
     );
-    localStorage.setItem(
-      "visionboard_data_mutation_queue:auth:user_a",
-      JSON.stringify(store),
-    );
+    localStorage.setItem("visionboard_data_mutation_queue:auth:user_a", JSON.stringify(store));
 
     const postMutations = vi.fn().mockRejectedValue(new Error("network failure"));
 

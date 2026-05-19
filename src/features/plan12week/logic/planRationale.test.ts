@@ -201,9 +201,7 @@ describe("getPlanRationale — warnings", () => {
       },
     );
     expect(warningIds(result)).toContain("week_one_overloaded");
-    expect(result.adjustments.map((a) => a.id)).toEqual(
-      expect.arrayContaining(["trim_week_one", "switch_to_lighter"]),
-    );
+    expect(result.adjustments.map((a) => a.id)).toEqual(expect.arrayContaining(["trim_week_one", "switch_to_lighter"]));
   });
 
   it("flags load mismatch when push + low capacity", () => {

@@ -53,7 +53,10 @@ function createPlusSubscription(renewsAt: string): Subscription {
   };
 }
 
-function createPlusUserData(renewsAt: string, entitlements: Entitlement[] = getEntitlementsForPlan("PLUS", NOW.toISOString())): UserData {
+function createPlusUserData(
+  renewsAt: string,
+  entitlements: Entitlement[] = getEntitlementsForPlan("PLUS", NOW.toISOString()),
+): UserData {
   return createUserData({
     subscription: createPlusSubscription(renewsAt),
     entitlements,

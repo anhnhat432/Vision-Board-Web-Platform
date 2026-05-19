@@ -42,9 +42,19 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 import { inputClass } from "./SMARTGoalSetup/components/formStyles";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
-import { getMigrationBackupSnapshots, restoreMigrationBackupSnapshot, type MigrationBackupSnapshot } from "../utils/local-data-migration";
+import {
+  getMigrationBackupSnapshots,
+  restoreMigrationBackupSnapshot,
+  type MigrationBackupSnapshot,
+} from "../utils/local-data-migration";
 import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
-import { deleteAllUserData, getUserData, parseStoredUserData, saveUserData, updateAppPreferences } from "../utils/storage";
+import {
+  deleteAllUserData,
+  getUserData,
+  parseStoredUserData,
+  saveUserData,
+  updateAppPreferences,
+} from "../utils/storage";
 import { exportAccountData } from "@/services/syncService";
 
 const themeOptions = [
@@ -92,7 +102,9 @@ export function SettingsPage() {
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
   const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
-  const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() => getMigrationBackupSnapshots());
+  const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() =>
+    getMigrationBackupSnapshots(),
+  );
   const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(null);
   const [isClearDataDialogOpen, setIsClearDataDialogOpen] = useState(false);
   const [clearDataConfirmStep, setClearDataConfirmStep] = useState<ClearDataConfirmStep>("review");
@@ -114,7 +126,9 @@ export function SettingsPage() {
       : "Chưa đăng nhập";
   const avatarUrl = userProfile?.avatarUrl ?? user?.photoURL ?? null;
   const accountInitial = getAccountInitial(accountLabel);
-  const localeLabel = (userProfile?.locale ?? "vi").startsWith("vi") ? "Tiếng Việt" : (userProfile?.locale ?? "Tiếng Việt");
+  const localeLabel = (userProfile?.locale ?? "vi").startsWith("vi")
+    ? "Tiếng Việt"
+    : (userProfile?.locale ?? "Tiếng Việt");
   const firstRecoverySnapshot = migrationBackups[0];
 
   useEffect(() => {
@@ -308,14 +322,20 @@ export function SettingsPage() {
             </div>
             <div>
               <h2 className="text-[16px] font-semibold text-app-ink">Tài khoản</h2>
-              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Thông tin đăng nhập hiện tại của không gian làm việc này.</p>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+                Thông tin đăng nhập hiện tại của không gian làm việc này.
+              </p>
             </div>
           </div>
 
           <div className="mt-5 grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
             <div className="flex items-center gap-3 md:block">
               <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-app-line bg-app-bg text-[24px] font-semibold text-app-accent">
-                {avatarUrl ? <img src={avatarUrl} alt="Ảnh đại diện" className="h-full w-full object-cover" /> : accountInitial}
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Ảnh đại diện" className="h-full w-full object-cover" />
+                ) : (
+                  accountInitial
+                )}
               </div>
               <div className="md:mt-3">
                 <p className="text-[13px] font-medium text-app-ink-muted">Ảnh đại diện</p>
@@ -343,27 +363,45 @@ export function SettingsPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="flex items-center gap-2 text-[14px] font-medium text-app-ink">
-                  <span className={`h-2.5 w-2.5 rounded-full ${isConfigured && user ? "bg-app-accent" : "bg-app-ink-muted"}`} />
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${isConfigured && user ? "bg-app-accent" : "bg-app-ink-muted"}`}
+                  />
                   {accountStatus}
                 </p>
-                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
+                  Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}
+                </p>
               </div>
-              <Button type="button" variant="outline" onClick={handleAccountExport} disabled={!isConfigured || !user || isExportingAccount}>
-                {isExportingAccount ? <Loader2 className="h-4 w-4 animate-spin" /> : <CloudDownload className="h-4 w-4" />}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAccountExport}
+                disabled={!isConfigured || !user || isExportingAccount}
+              >
+                {isExportingAccount ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CloudDownload className="h-4 w-4" />
+                )}
                 Xuất dữ liệu tài khoản
               </Button>
             </div>
           </div>
         </section>
 
-        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Tuỳ chọn trải nghiệm">
+        <section
+          className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+          aria-label="Tuỳ chọn trải nghiệm"
+        >
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
               <Palette className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-[16px] font-semibold text-app-ink">Tuỳ chọn trải nghiệm</h2>
-              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.</p>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+                Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.
+              </p>
             </div>
           </div>
 
@@ -373,7 +411,9 @@ export function SettingsPage() {
                 <Palette className="mt-0.5 h-4 w-4 text-app-ink-muted" />
                 <div className="min-w-0 flex-1">
                   <p className="text-[14px] font-semibold text-app-ink">Giao diện</p>
-                  <p className="mt-1 text-[13px] text-app-ink-muted">Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}</p>
+                  <p className="mt-1 text-[13px] text-app-ink-muted">
+                    Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}
+                  </p>
                   <fieldset className="mt-3 grid gap-2 sm:grid-cols-3">
                     <legend className="sr-only">Chọn giao diện</legend>
                     {themeOptions.map((option) => {
@@ -382,7 +422,9 @@ export function SettingsPage() {
                         <label
                           key={option.value}
                           className={`cursor-pointer rounded-lg border p-3 text-left transition-colors duration-150 focus-within:ring-2 focus-within:ring-app-accent/30 ${
-                            selected ? "border-app-accent bg-app-accent-soft text-app-accent" : "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                            selected
+                              ? "border-app-accent bg-app-accent-soft text-app-accent"
+                              : "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
                           }`}
                         >
                           <input
@@ -394,7 +436,9 @@ export function SettingsPage() {
                             className="sr-only"
                           />
                           <span className="block text-[14px] font-medium">{option.label}</span>
-                          <span className="mt-1 block text-[13px] leading-5 text-app-ink-muted">{option.description}</span>
+                          <span className="mt-1 block text-[13px] leading-5 text-app-ink-muted">
+                            {option.description}
+                          </span>
                         </label>
                       );
                     })}
@@ -413,7 +457,9 @@ export function SettingsPage() {
                     <label className="block rounded-lg border border-app-accent bg-app-accent-soft p-3 text-app-accent">
                       <input type="radio" name="settings-language" checked readOnly className="sr-only" />
                       <span className="block text-[14px] font-medium">{localeLabel}</span>
-                      <span className="mt-1 block text-[13px] leading-5 text-app-ink-muted">Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.</span>
+                      <span className="mt-1 block text-[13px] leading-5 text-app-ink-muted">
+                        Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.
+                      </span>
                     </label>
                   </fieldset>
                 </div>
@@ -427,7 +473,9 @@ export function SettingsPage() {
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <p className="text-[14px] font-semibold text-app-ink">Nhắc việc trong app</p>
-                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.</p>
+                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
+                        Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.
+                      </p>
                     </div>
                     <Switch
                       checked={appPreferences.enableInAppReminders}
@@ -442,7 +490,9 @@ export function SettingsPage() {
                         <Volume2 className="h-4 w-4 text-app-ink-muted" />
                         Âm thanh khi xong việc
                       </p>
-                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.</p>
+                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
+                        Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.
+                      </p>
                     </div>
                     <Switch
                       id="task-complete-sound"
@@ -465,7 +515,9 @@ export function SettingsPage() {
             </div>
             <div>
               <h2 className="text-[16px] font-semibold text-app-ink">Dữ liệu</h2>
-              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện.</p>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+                Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện.
+              </p>
             </div>
           </div>
 
@@ -473,23 +525,31 @@ export function SettingsPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-[14px] font-semibold text-app-ink">Thiết bị</p>
-                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Thay đổi được giữ ngay trên thiết bị này.</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
+                  Thay đổi được giữ ngay trên thiết bị này.
+                </p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-[14px] font-semibold text-app-ink">Tài khoản</p>
-                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
+                  {formatSyncTime(autoSyncState.lastSyncedAt)}
+                </p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-[14px] font-semibold text-app-ink">Đang chờ đồng bộ</p>
                 <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
-                  {autoSyncState.pendingCount > 0 ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ` : "Không có thay đổi chờ đồng bộ"}
+                  {autoSyncState.pendingCount > 0
+                    ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ`
+                    : "Không có thay đổi chờ đồng bộ"}
                 </p>
               </div>
             </div>
 
             <div className="rounded-lg border border-app-line bg-app-bg p-3 text-[14px] leading-6 text-app-ink-soft">
               <div className="flex gap-2">
-                <SyncIcon className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`} />
+                <SyncIcon
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`}
+                />
                 <p>
                   {autoSyncState.conflictPending
                     ? "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Ứng dụng sẽ hỏi bạn trước khi ghi đè."
@@ -518,8 +578,17 @@ export function SettingsPage() {
                 <Upload className="h-4 w-4" />
                 Nhập dữ liệu
               </Button>
-              <Button type="button" variant="outline" onClick={handleRetrySync} disabled={autoSyncState.syncing || !user}>
-                {autoSyncState.syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRetrySync}
+                disabled={autoSyncState.syncing || !user}
+              >
+                {autoSyncState.syncing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
                 Kiểm tra sao lưu
               </Button>
               <Button type="button" variant="outline" onClick={() => navigate("/12-week-system?tab=settings")}>
@@ -557,17 +626,31 @@ export function SettingsPage() {
           </div>
         </section>
 
-        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Thông tin ứng dụng">
+        <section
+          className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+          aria-label="Thông tin ứng dụng"
+        >
           <h2 className="text-[16px] font-semibold text-app-ink">Thông tin</h2>
-          <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.</p>
+          <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">
+            Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.
+          </p>
           <div className="mt-4 flex flex-wrap gap-3 text-[13px] font-medium text-app-ink-soft">
-            <Link to="/privacy" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
+            <Link
+              to="/privacy"
+              className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent"
+            >
               Bảo mật
             </Link>
-            <Link to="/terms" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
+            <Link
+              to="/terms"
+              className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent"
+            >
               Điều khoản
             </Link>
-            <Link to="/billing/faq" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
+            <Link
+              to="/billing/faq"
+              className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent"
+            >
               Hỏi đáp thanh toán
             </Link>
           </div>
@@ -579,7 +662,8 @@ export function SettingsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Khôi phục dữ liệu cũ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ liệu cũ. Hãy tải backup thiết bị trước nếu bạn muốn giữ cả hai phiên bản.
+              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ liệu cũ. Hãy tải backup thiết bị trước nếu
+              bạn muốn giữ cả hai phiên bản.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

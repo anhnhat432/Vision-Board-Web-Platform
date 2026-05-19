@@ -95,31 +95,19 @@ export function savePlanDetailsLink(goalId: string, details: PlanDetails): PlanL
   });
 }
 
-export function getWeekIdForGoal(
-  goalId: string,
-  weekNumber: number,
-): string | null {
+export function getWeekIdForGoal(goalId: string, weekNumber: number): string | null {
   const link = getPlanLink(goalId);
   return link?.weekIdByNumber[weekNumber] ?? null;
 }
 
-export function getMetricIdForGoal(
-  goalId: string,
-  weekNumber: number,
-  metricName: string,
-): string | null {
+export function getMetricIdForGoal(goalId: string, weekNumber: number, metricName: string): string | null {
   const link = getPlanLink(goalId);
   if (!link) return null;
 
   return link.metricIdByKey[createMetricLookupKey(weekNumber, metricName)] ?? null;
 }
 
-export function setMetricIdForGoal(
-  goalId: string,
-  weekNumber: number,
-  metricName: string,
-  metricId: string,
-): void {
+export function setMetricIdForGoal(goalId: string, weekNumber: number, metricName: string, metricId: string): void {
   upsertPlanLink(goalId, (currentLink) => ({
     planId: currentLink?.planId ?? "",
     planRevision: currentLink?.planRevision,
@@ -134,10 +122,7 @@ export function setMetricIdForGoal(
   }));
 }
 
-export function getRemoteTaskIdForGoal(
-  goalId: string,
-  localTaskId: string,
-): string | null {
+export function getRemoteTaskIdForGoal(goalId: string, localTaskId: string): string | null {
   const link = getPlanLink(goalId);
   if (!link) return null;
   return link.taskIdByLocalTaskId[localTaskId] ?? null;
@@ -159,9 +144,10 @@ export function setRemoteTaskIdForGoal(
       ...(currentLink?.taskIdByLocalTaskId ?? {}),
       [localTaskId]: remoteTaskId,
     },
-    taskRevisionByRemoteId: remoteRevision !== undefined
-      ? { ...(currentLink?.taskRevisionByRemoteId ?? {}), [remoteTaskId]: remoteRevision }
-      : currentLink?.taskRevisionByRemoteId ?? {},
+    taskRevisionByRemoteId:
+      remoteRevision !== undefined
+        ? { ...(currentLink?.taskRevisionByRemoteId ?? {}), [remoteTaskId]: remoteRevision }
+        : (currentLink?.taskRevisionByRemoteId ?? {}),
   }));
 }
 
@@ -187,7 +173,12 @@ export function updateWeekRevisionInLink(goalId: string, weekId: string, revisio
   }));
 }
 
-export function updateTaskRevisionInLink(goalId: string, localTaskId: string, remoteTaskId: string, revision: number): void {
+export function updateTaskRevisionInLink(
+  goalId: string,
+  localTaskId: string,
+  remoteTaskId: string,
+  revision: number,
+): void {
   upsertPlanLink(goalId, (currentLink) => ({
     planId: currentLink?.planId ?? "",
     planRevision: currentLink?.planRevision,

@@ -150,9 +150,7 @@ export function TwelveWeekPlanAccessSection({
           <p className="mt-2 font-serif text-lg font-medium text-app-ink">
             {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền Plus đang mở
           </p>
-          <p className="mt-1 text-[14px] text-app-ink-soft">
-            Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.
-          </p>
+          <p className="mt-1 text-[14px] text-app-ink-soft">Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.</p>
         </div>
 
         {shouldShowSubscriptionDetails ? (
@@ -187,8 +185,12 @@ export function TwelveWeekPlanAccessSection({
               </div>
               <div className="mt-3 space-y-1 text-[14px] text-app-ink-soft">
                 <p>Đơn vị thanh toán: {billingProviderStatus.providerLabel}</p>
-                <p>Thanh toán: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Dự phòng trên thiết bị")}</p>
-                <p>Khôi phục: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Dự phòng trên thiết bị")}</p>
+                <p>
+                  Thanh toán: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Dự phòng trên thiết bị")}
+                </p>
+                <p>
+                  Khôi phục: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Dự phòng trên thiết bị")}
+                </p>
                 <p>
                   Kiểm tra quyền:{" "}
                   {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Dự phòng trên thiết bị")}
@@ -255,9 +257,7 @@ export function TwelveWeekPlanAccessSection({
           <div className="rounded-lg border border-app-line bg-app-bg p-4">
             <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái gói</p>
             <p className="mt-2 font-serif text-lg font-medium text-app-ink">
-              {currentPlanCode === "FREE"
-                ? "Bạn đang dùng gói Miễn phí."
-                : "Gói Plus đang hoạt động."}
+              {currentPlanCode === "FREE" ? "Bạn đang dùng gói Miễn phí." : "Gói Plus đang hoạt động."}
             </p>
             <p className="mt-1 text-[14px] text-app-ink-soft">
               {currentPlanCode === "FREE"
@@ -271,7 +271,10 @@ export function TwelveWeekPlanAccessSection({
       <div className="mt-4 grid gap-2">
         {currentPlanCode === "FREE" ? (
           <>
-            <Button className="bg-app-accent text-white hover:bg-app-accent/90" onClick={() => onOpenUpgradePlan("PLUS")}>
+            <Button
+              className="bg-app-accent text-white hover:bg-app-accent/90"
+              onClick={() => onOpenUpgradePlan("PLUS")}
+            >
               Nâng cấp Plus
             </Button>
             <Button

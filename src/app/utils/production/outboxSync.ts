@@ -1,4 +1,3 @@
-
 import { apiClient } from "@/lib/api/apiClient";
 import { canSyncToCloud, getEmailVerificationRequiredMessage } from "../email-verification-guard";
 import { isDemoMode } from "../app-mode";
@@ -30,7 +29,6 @@ export function getLastOutboxSyncSnapshot(): OutboxSyncSnapshot | null {
     return null;
   }
 }
-
 
 export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
   if (isDemoMode()) {

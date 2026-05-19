@@ -111,9 +111,7 @@ describe("data mutation queue", () => {
   });
 
   it("creates mutation ids and scoped storage keys without storage side effects", () => {
-    expect(createMutationId(new Date("2026-04-30T00:00:00.000Z"), () => 0.5)).toMatch(
-      /^dmq_1777507200000_[a-z0-9]+$/,
-    );
+    expect(createMutationId(new Date("2026-04-30T00:00:00.000Z"), () => 0.5)).toMatch(/^dmq_1777507200000_[a-z0-9]+$/);
     expect(getMutationQueueStorageKey()).toBe("visionboard_data_mutation_queue:anonymous");
     expect(getMutationQueueStorageKey("firebase uid/one")).toBe(
       "visionboard_data_mutation_queue:auth:firebase%20uid%2Fone",
@@ -387,7 +385,8 @@ describe("data mutation queue", () => {
       expect(review.payload.executionScore).toBe(84);
       expect(review.payload.review.nextWeekPriority).toBe("latest priority");
     }
-    if (snapshot?.kind === "plan_snapshot_updated") expect(snapshot.payload.system.vision12Week).toBe("latest snapshot");
+    if (snapshot?.kind === "plan_snapshot_updated")
+      expect(snapshot.payload.system.vision12Week).toBe("latest snapshot");
     if (metric?.kind === "lead_metric_upserted") {
       expect(metric.payload.currentValue).toBe(2);
       expect(metric.payload.reason).toBe("task_progress");
@@ -471,7 +470,10 @@ describe("data mutation queue", () => {
             scheduledDate: "2026-04-30",
           },
         },
-        { now: at(ownerUid === "user_b" ? 3 : ownerUid === "user_a" ? 2 : 1), createId: () => `mutation_${ownerUid ?? "anonymous"}` },
+        {
+          now: at(ownerUid === "user_b" ? 3 : ownerUid === "user_a" ? 2 : 1),
+          createId: () => `mutation_${ownerUid ?? "anonymous"}`,
+        },
       );
     }
 
@@ -623,7 +625,12 @@ describe("data mutation queue", () => {
         },
         { now: at(1), createId: () => id },
       );
-      store = markMutationFailed(store, id, { code: String(httpStatus), message: "failed", httpStatus }, { now: at(2) });
+      store = markMutationFailed(
+        store,
+        id,
+        { code: String(httpStatus), message: "failed", httpStatus },
+        { now: at(2) },
+      );
     }
 
     expect(store.items.find((item) => item.id === "bad_payload")?.status).toBe("failed_validation");

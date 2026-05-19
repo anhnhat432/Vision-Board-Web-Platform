@@ -19,12 +19,9 @@ export function ProtectedRoute() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--r-pill)] bg-amber-100">
             <AlertTriangle className="h-7 w-7 text-amber-600" />
           </div>
-          <h2 className="text-lg font-semibold text-amber-800">
-            Lỗi cấu hình hệ thống
-          </h2>
+          <h2 className="text-lg font-semibold text-amber-800">Lỗi cấu hình hệ thống</h2>
           <p className="mt-2 text-sm leading-relaxed text-amber-700">
-            Ứng dụng chưa được cấu hình đầy đủ. Vui lòng liên hệ quản trị viên để
-            được hỗ trợ.
+            Ứng dụng chưa được cấu hình đầy đủ. Vui lòng liên hệ quản trị viên để được hỗ trợ.
           </p>
         </div>
       </div>

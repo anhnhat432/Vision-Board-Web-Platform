@@ -138,8 +138,7 @@ export function buildLeadMetricsSummary(plan: Plan12Week | null): MetricSummaryI
   if (!plan) return [];
 
   const activeWeekNumber = resolveActiveWeekNumber(plan);
-  const previousWeekNumber =
-    activeWeekNumber && activeWeekNumber > 1 ? activeWeekNumber - 1 : null;
+  const previousWeekNumber = activeWeekNumber && activeWeekNumber > 1 ? activeWeekNumber - 1 : null;
 
   const metricTotals = new Map<string, number>();
   const metricWeeklyTotals = new Map<string, Map<number, number>>();
@@ -161,8 +160,8 @@ export function buildLeadMetricsSummary(plan: Plan12Week | null): MetricSummaryI
   return Array.from(metricTotals.entries())
     .map(([name, totalValue]) => {
       const perWeek = metricWeeklyTotals.get(name) ?? new Map<number, number>();
-      const currentWeekValue = activeWeekNumber ? perWeek.get(activeWeekNumber) ?? 0 : 0;
-      const previousWeekValue = previousWeekNumber ? perWeek.get(previousWeekNumber) ?? 0 : 0;
+      const currentWeekValue = activeWeekNumber ? (perWeek.get(activeWeekNumber) ?? 0) : 0;
+      const previousWeekValue = previousWeekNumber ? (perWeek.get(previousWeekNumber) ?? 0) : 0;
 
       let trend: MetricTrend = "flat";
       if (currentWeekValue > previousWeekValue) trend = "up";

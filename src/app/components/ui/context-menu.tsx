@@ -6,9 +6,7 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 
 import { cn } from "./utils";
 
-function ContextMenu({
-  ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.Root>) {
+function ContextMenu({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Root>) {
   return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />;
 }
 
@@ -16,43 +14,24 @@ const ContextMenuTrigger = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Trigger>
 >((props, ref) => {
-  return (
-    <ContextMenuPrimitive.Trigger ref={ref} data-slot="context-menu-trigger" {...props} />
-  );
+  return <ContextMenuPrimitive.Trigger ref={ref} data-slot="context-menu-trigger" {...props} />;
 });
 ContextMenuTrigger.displayName = ContextMenuPrimitive.Trigger.displayName;
 
-function ContextMenuGroup({
-  ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.Group>) {
-  return (
-    <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />
-  );
+function ContextMenuGroup({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Group>) {
+  return <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />;
 }
 
-function ContextMenuPortal({
-  ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.Portal>) {
-  return (
-    <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />
-  );
+function ContextMenuPortal({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Portal>) {
+  return <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />;
 }
 
-function ContextMenuSub({
-  ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.Sub>) {
+function ContextMenuSub({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Sub>) {
   return <ContextMenuPrimitive.Sub data-slot="context-menu-sub" {...props} />;
 }
 
-function ContextMenuRadioGroup({
-  ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.RadioGroup>) {
-  return (
-    <ContextMenuPrimitive.RadioGroup
-      data-slot="context-menu-radio-group"
-      {...props}
-    />
-  );
+function ContextMenuRadioGroup({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.RadioGroup>) {
+  return <ContextMenuPrimitive.RadioGroup data-slot="context-menu-radio-group" {...props} />;
 }
 
 const ContextMenuSubTrigger = React.forwardRef<
@@ -60,12 +39,7 @@ const ContextMenuSubTrigger = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
     inset?: boolean;
   }
->(({
-  className,
-  inset,
-  children,
-  ...props
-}, ref) => {
+>(({ className, inset, children, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.SubTrigger
       ref={ref}
@@ -87,10 +61,7 @@ ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
 const ContextMenuSubContent = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.SubContent
       ref={ref}
@@ -108,10 +79,7 @@ ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName;
 const ContextMenuContent = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.Portal>
       <ContextMenuPrimitive.Content
@@ -134,12 +102,7 @@ const ContextMenuItem = React.forwardRef<
     inset?: boolean;
     variant?: "default" | "destructive";
   }
->(({
-  className,
-  inset,
-  variant = "default",
-  ...props
-}, ref) => {
+>(({ className, inset, variant = "default", ...props }, ref) => {
   return (
     <ContextMenuPrimitive.Item
       ref={ref}
@@ -159,12 +122,7 @@ ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName;
 const ContextMenuCheckboxItem = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.CheckboxItem>
->(({
-  className,
-  children,
-  checked,
-  ...props
-}, ref) => {
+>(({ className, children, checked, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.CheckboxItem
       ref={ref}
@@ -190,11 +148,7 @@ ContextMenuCheckboxItem.displayName = ContextMenuPrimitive.CheckboxItem.displayN
 const ContextMenuRadioItem = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.RadioItem>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.RadioItem>
->(({
-  className,
-  children,
-  ...props
-}, ref) => {
+>(({ className, children, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.RadioItem
       ref={ref}
@@ -221,20 +175,13 @@ const ContextMenuLabel = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & {
     inset?: boolean;
   }
->(({
-  className,
-  inset,
-  ...props
-}, ref) => {
+>(({ className, inset, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.Label
       ref={ref}
       data-slot="context-menu-label"
       data-inset={inset}
-      className={cn(
-        "text-foreground px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
-        className,
-      )}
+      className={cn("text-foreground px-2 py-1.5 text-sm font-medium data-[inset]:pl-8", className)}
       {...props}
     />
   );
@@ -244,10 +191,7 @@ ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName;
 const ContextMenuSeparator = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Separator>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <ContextMenuPrimitive.Separator
       ref={ref}
@@ -259,17 +203,11 @@ const ContextMenuSeparator = React.forwardRef<
 });
 ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName;
 
-function ContextMenuShortcut({
-  className,
-  ...props
-}: React.ComponentProps<"span">) {
+function ContextMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="context-menu-shortcut"
-      className={cn(
-        "text-muted-foreground ml-auto text-xs tracking-widest",
-        className,
-      )}
+      className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)}
       {...props}
     />
   );

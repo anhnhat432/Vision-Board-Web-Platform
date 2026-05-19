@@ -6,9 +6,7 @@ import { XIcon } from "lucide-react";
 
 import { cn } from "./utils";
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
@@ -20,9 +18,7 @@ const DialogTrigger = React.forwardRef<
 });
 DialogTrigger.displayName = DialogPrimitive.Trigger.displayName;
 
-function DialogPortal({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
@@ -53,11 +49,7 @@ DialogOverlay.displayName = "DialogOverlay";
 const DialogContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({
-  className,
-  children,
-  ...props
-}, ref) => {
+>(({ className, children, ...props }, ref) => {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -95,10 +87,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className,
-      )}
+      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
       {...props}
     />
   );
@@ -107,10 +96,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 const DialogTitle = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <DialogPrimitive.Title
       ref={ref}
@@ -125,10 +111,7 @@ DialogTitle.displayName = DialogPrimitive.Title.displayName;
 const DialogDescription = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <DialogPrimitive.Description
       ref={ref}

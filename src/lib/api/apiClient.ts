@@ -24,9 +24,7 @@ export interface ApiClientError extends AppError {
   serverUpdatedAt?: string;
 }
 
-type ResponseErrorInterceptor = (
-  error: ApiClientError,
-) => void | Promise<void>;
+type ResponseErrorInterceptor = (error: ApiClientError) => void | Promise<void>;
 
 const responseErrorInterceptors: ResponseErrorInterceptor[] = [];
 
@@ -51,8 +49,7 @@ function toApiClientError(error: unknown): ApiClientError {
           : "Request failed.",
       status: typeof withMessage.status === "number" ? withMessage.status : undefined,
       details: withMessage.details,
-      isNetworkError:
-        typeof withMessage.isNetworkError === "boolean" ? withMessage.isNetworkError : undefined,
+      isNetworkError: typeof withMessage.isNetworkError === "boolean" ? withMessage.isNetworkError : undefined,
       conflict: withMessage.conflict === true ? true : undefined,
       rateLimited: withMessage.rateLimited === true || withMessage.status === 429 ? true : undefined,
       retryAfterMs: typeof withMessage.retryAfterMs === "number" ? withMessage.retryAfterMs : undefined,
@@ -110,7 +107,10 @@ addResponseErrorInterceptor(handleUnauthorizedResponse);
 addResponseErrorInterceptor((error) => {
   if (error.status !== 403 || error.errorCode !== "EMAIL_NOT_VERIFIED") return;
   if (typeof window === "undefined") return;
-  window.sessionStorage.setItem("emailVerification:returnTo", `${window.location.pathname || "/"}${window.location.search || ""}`);
+  window.sessionStorage.setItem(
+    "emailVerification:returnTo",
+    `${window.location.pathname || "/"}${window.location.search || ""}`,
+  );
   window.dispatchEvent(new CustomEvent("email-verification:required"));
 });
 
@@ -220,18 +220,19 @@ async function request<TResponse, TBody = unknown>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (networkError) {
-    const apiError = networkError instanceof AuthError
-      ? createApiClientError({
-          message: networkError.message,
-          status: networkError.status,
-          errorCode: networkError.code,
-          details: networkError,
-        })
-      : createApiClientError({
-          message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
-          isNetworkError: true,
-          details: networkError,
-        });
+    const apiError =
+      networkError instanceof AuthError
+        ? createApiClientError({
+            message: networkError.message,
+            status: networkError.status,
+            errorCode: networkError.code,
+            details: networkError,
+          })
+        : createApiClientError({
+            message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+            isNetworkError: true,
+            details: networkError,
+          });
     await runResponseErrorInterceptors(apiError);
     throw apiError;
   }
@@ -250,12 +251,14 @@ async function request<TResponse, TBody = unknown>(
       rateLimited: isRateLimit || undefined,
       retryAfterMs,
       errorCode: getErrorCodeFromPayload(payload),
-      currentRevision: isConflict && payload && typeof payload === "object" && "currentRevision" in payload
-        ? (payload as { currentRevision?: number }).currentRevision
-        : undefined,
-      serverUpdatedAt: isConflict && payload && typeof payload === "object" && "serverUpdatedAt" in payload
-        ? String((payload as { serverUpdatedAt?: unknown }).serverUpdatedAt ?? "")
-        : undefined,
+      currentRevision:
+        isConflict && payload && typeof payload === "object" && "currentRevision" in payload
+          ? (payload as { currentRevision?: number }).currentRevision
+          : undefined,
+      serverUpdatedAt:
+        isConflict && payload && typeof payload === "object" && "serverUpdatedAt" in payload
+          ? String((payload as { serverUpdatedAt?: unknown }).serverUpdatedAt ?? "")
+          : undefined,
     });
 
     await runResponseErrorInterceptors(apiError);
@@ -281,10 +284,7 @@ async function request<TResponse, TBody = unknown>(
   return payload as TResponse;
 }
 
-export function get<TResponse>(
-  path: string,
-  options?: ApiRequestOptions,
-): Promise<TResponse> {
+export function get<TResponse>(path: string, options?: ApiRequestOptions): Promise<TResponse> {
   return request<TResponse>("GET", path, undefined, options);
 }
 
@@ -312,10 +312,7 @@ export function put<TResponse, TBody = unknown>(
   return request<TResponse, TBody>("PUT", path, body, options);
 }
 
-async function deleteRequest<TResponse>(
-  path: string,
-  options?: ApiRequestOptions,
-): Promise<TResponse> {
+async function deleteRequest<TResponse>(path: string, options?: ApiRequestOptions): Promise<TResponse> {
   return request<TResponse>("DELETE", path, undefined, options);
 }
 

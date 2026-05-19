@@ -87,77 +87,83 @@ describe("12-week core flows", () => {
     window.confirm = vi.fn(() => true);
   });
 
-  it("creates a 12-week system from setup and routes into the command center", async () => {
-    seedPendingSetupContext();
-    updateUserData((data) => {
-      data.aspirationalVision = {
-        id: "vision_3y_1",
-        horizonYears: 3,
-        summary: "Ba năm tới tôi có một sản phẩm ổn định và nhịp làm việc bền vững.",
-        lifeAreas: [],
-        createdAt: "2026-05-09T00:00:00.000Z",
-        updatedAt: "2026-05-09T00:00:00.000Z",
-      };
-    });
-    const { router } = renderAppRoute("/12-week-setup");
-    const user = userEvent.setup();
+  it(
+    "creates a 12-week system from setup and routes into the command center",
+    async () => {
+      seedPendingSetupContext();
+      updateUserData((data) => {
+        data.aspirationalVision = {
+          id: "vision_3y_1",
+          horizonYears: 3,
+          summary: "Ba năm tới tôi có một sản phẩm ổn định và nhịp làm việc bền vững.",
+          lifeAreas: [],
+          createdAt: "2026-05-09T00:00:00.000Z",
+          updatedAt: "2026-05-09T00:00:00.000Z",
+        };
+      });
+      const { router } = renderAppRoute("/12-week-setup");
+      const user = userEvent.setup();
 
-    await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
-    expect(screen.getByText(/Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+      await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
+      expect(screen.getByText(/Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
-    const tacticInputs = await screen.findAllByLabelText("Tên việc");
-    await user.clear(tacticInputs[0]);
-    await user.type(tacticInputs[0], "Ship phần việc cốt lõi");
-    await user.clear(tacticInputs[1]);
-    await user.type(tacticInputs[1], "Review cuối ngày");
+      const tacticInputs = await screen.findAllByLabelText("Tên việc");
+      await user.clear(tacticInputs[0]);
+      await user.type(tacticInputs[0], "Ship phần việc cốt lõi");
+      await user.clear(tacticInputs[1]);
+      await user.type(tacticInputs[1], "Review cuối ngày");
 
-    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
-    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
-    await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
+      await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+      await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+      await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
 
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/12-week-system");
-    });
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe("/12-week-system");
+      });
 
-    await screen.findByText("Nhịp 12 tuần");
+      await screen.findByText("Nhịp 12 tuần");
 
-    const data = getUserData();
-    const createdSystem = data.goals[0]?.twelveWeekSystem;
-    const weekOneTasks = createdSystem?.taskInstances.filter((task) => task.weekNumber === 1) ?? [];
-    const todayKey = formatDateInputValue(new Date());
+      const data = getUserData();
+      const createdSystem = data.goals[0]?.twelveWeekSystem;
+      const weekOneTasks = createdSystem?.taskInstances.filter((task) => task.weekNumber === 1) ?? [];
+      const todayKey = formatDateInputValue(new Date());
 
-    expect(data.goals).toHaveLength(1);
-    expect(createdSystem).toBeDefined();
-    expect(data.goals[0]?.aspirationalVisionId).toBe("vision_3y_1");
-    expect(weekOneTasks.length).toBeGreaterThan(0);
-    expect(weekOneTasks.every((task) => isCalendarDateKeyOnOrAfter(task.scheduledDate, todayKey))).toBe(true);
-    expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
+      expect(data.goals).toHaveLength(1);
+      expect(createdSystem).toBeDefined();
+      expect(data.goals[0]?.aspirationalVisionId).toBe("vision_3y_1");
+      expect(weekOneTasks.length).toBeGreaterThan(0);
+      expect(weekOneTasks.every((task) => isCalendarDateKeyOnOrAfter(task.scheduledDate, todayKey))).toBe(true);
+      expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
 
-    const snapshotMutation = listStoredPendingMutations(null).find((item) => item.kind === "plan_snapshot_updated");
-    expect(snapshotMutation).toEqual(
-      expect.objectContaining({ kind: "plan_snapshot_updated", goalId: data.goals[0]?.id }),
-    );
-    if (snapshotMutation?.kind === "plan_snapshot_updated") {
-      expect(snapshotMutation.payload.reason).toBe("setup");
-      expect(snapshotMutation.payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
-      expect(snapshotMutation.payload.system.vision12Week).toBe(createdSystem?.vision12Week);
-      expect(snapshotMutation.payload.system.weeklyPlans.length).toBe(createdSystem?.weeklyPlans.length);
-      expect("taskInstances" in snapshotMutation.payload.system).toBe(false);
-      expect("dailyCheckIns" in snapshotMutation.payload.system).toBe(false);
-      expect("weeklyReviews" in snapshotMutation.payload.system).toBe(false);
-      expect("dailyReminderTime" in snapshotMutation.payload.system).toBe(false);
-    }
+      const snapshotMutation = listStoredPendingMutations(null).find((item) => item.kind === "plan_snapshot_updated");
+      expect(snapshotMutation).toEqual(
+        expect.objectContaining({ kind: "plan_snapshot_updated", goalId: data.goals[0]?.id }),
+      );
+      if (snapshotMutation?.kind === "plan_snapshot_updated") {
+        expect(snapshotMutation.payload.reason).toBe("setup");
+        expect(snapshotMutation.payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
+        expect(snapshotMutation.payload.system.vision12Week).toBe(createdSystem?.vision12Week);
+        expect(snapshotMutation.payload.system.weeklyPlans.length).toBe(createdSystem?.weeklyPlans.length);
+        expect("taskInstances" in snapshotMutation.payload.system).toBe(false);
+        expect("dailyCheckIns" in snapshotMutation.payload.system).toBe(false);
+        expect("weeklyReviews" in snapshotMutation.payload.system).toBe(false);
+        expect("dailyReminderTime" in snapshotMutation.payload.system).toBe(false);
+      }
 
-    const leadMetricMutations = listStoredPendingMutations(null).filter((item) => item.kind === "lead_metric_upserted");
-    expect(leadMetricMutations.length).toBeGreaterThan(0);
-    if (leadMetricMutations[0]?.kind === "lead_metric_upserted") {
-      expect(leadMetricMutations[0].payload.reason).toBe("setup");
-      expect(leadMetricMutations[0].payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
-      expect(leadMetricMutations[0].payload.clientMetricId).toContain(":metric:");
-      expect(leadMetricMutations[0].payload.weeklyTarget).toBeGreaterThanOrEqual(0);
-    }
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      const leadMetricMutations = listStoredPendingMutations(null).filter(
+        (item) => item.kind === "lead_metric_upserted",
+      );
+      expect(leadMetricMutations.length).toBeGreaterThan(0);
+      if (leadMetricMutations[0]?.kind === "lead_metric_upserted") {
+        expect(leadMetricMutations[0].payload.reason).toBe("setup");
+        expect(leadMetricMutations[0].payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
+        expect(leadMetricMutations[0].payload.clientMetricId).toContain(":metric:");
+        expect(leadMetricMutations[0].payload.weeklyTarget).toBeGreaterThanOrEqual(0);
+      }
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
   it("shows a soft 3-year vision prompt in 12-week setup without blocking the flow", async () => {
     seedPendingSetupContext();
@@ -465,79 +471,87 @@ describe("12-week core flows", () => {
     }
   });
 
-  it("shows tactic commitment reminders in Today and Weekly Review", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    updateUserData((data) => {
-      const goal = data.goals.find((item) => item.id === goalId);
-      const system = goal?.twelveWeekSystem;
-      if (!system) return;
+  it(
+    "shows tactic commitment reminders in Today and Weekly Review",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      updateUserData((data) => {
+        const goal = data.goals.find((item) => item.id === goalId);
+        const system = goal?.twelveWeekSystem;
+        if (!system) return;
 
-      system.currentWeek = 2;
-      system.leadIndicators[0] = {
-        ...system.leadIndicators[0],
-        commitment: {
-          want: "Tôi muốn ship đều vì đây là lời hứa với chính mình.",
-          cost: "Dành sáng thứ Hai cho deep work.",
-          means: "Mở task đầu tiên trước 9h.",
-          tradeoff: "Giảm họp phụ.",
-          reward: "Một buổi nghỉ chủ động.",
-          filledAt: "2026-05-09T00:00:00.000Z",
-        },
-      };
-      system.weeklyReviews = [
-        {
-          ...makeCycleReview(1, 90),
-          nextWeekCommitments: [system.leadIndicators[0].name],
-          adjustments: system.leadIndicators[0].name,
-        },
-      ];
-    });
+        system.currentWeek = 2;
+        system.leadIndicators[0] = {
+          ...system.leadIndicators[0],
+          commitment: {
+            want: "Tôi muốn ship đều vì đây là lời hứa với chính mình.",
+            cost: "Dành sáng thứ Hai cho deep work.",
+            means: "Mở task đầu tiên trước 9h.",
+            tradeoff: "Giảm họp phụ.",
+            reward: "Một buổi nghỉ chủ động.",
+            filledAt: "2026-05-09T00:00:00.000Z",
+          },
+        };
+        system.weeklyReviews = [
+          {
+            ...makeCycleReview(1, 90),
+            nextWeekCommitments: [system.leadIndicators[0].name],
+            adjustments: system.leadIndicators[0].name,
+          },
+        ];
+      });
 
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    expect(await screen.findAllByText("« Tôi muốn ship đều vì đây là lời hứa với chính mình. »")).not.toHaveLength(0);
+      expect(await screen.findAllByText("« Tôi muốn ship đều vì đây là lời hứa với chính mình. »")).not.toHaveLength(0);
 
-    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
 
-    const commitmentsSection = await screen.findByTestId("wam-section-commitments");
-    expect(commitmentsSection).toHaveTextContent("Tôi muốn ship đều vì đây là lời hứa với chính mình.");
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      const commitmentsSection = await screen.findByTestId("wam-section-commitments");
+      expect(commitmentsSection).toHaveTextContent("Tôi muốn ship đều vì đây là lời hứa với chính mình.");
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-  it("compacts repeated daily check-ins for the same day to the latest queued payload", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+  it(
+    "compacts repeated daily check-ins for the same day to the latest queued payload",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    const noteInput = await screen.findByRole("textbox", { name: /note/i });
-    await user.type(noteInput, "First local check-in.");
-    await user.click(getPrimaryButton(/check-in/i));
+      const noteInput = await screen.findByRole("textbox", { name: /note/i });
+      await user.type(noteInput, "First local check-in.");
+      await user.click(getPrimaryButton(/check-in/i));
 
-    await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("First local check-in.");
-      expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.updatedCount).toBe(1);
-    });
+      await waitFor(() => {
+        expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("First local check-in.");
+        expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.updatedCount).toBe(1);
+      });
 
-    await user.clear(noteInput);
-    await user.type(noteInput, "Latest local check-in.");
-    await user.click(getPrimaryButton(/check-in/i));
+      await user.clear(noteInput);
+      await user.type(noteInput, "Latest local check-in.");
+      await user.click(getPrimaryButton(/check-in/i));
 
-    await waitFor(() => {
-      const checkIns = readGoal(goalId).twelveWeekSystem?.dailyCheckIns ?? [];
-      expect(checkIns[0]?.optionalNote).toBe("Latest local check-in.");
-      expect(checkIns[0]?.updatedCount).toBe(2);
-      expect(checkIns[1]?.optionalNote).toBe("First local check-in.");
-      expect(checkIns).toHaveLength(2);
-    });
+      await waitFor(() => {
+        const checkIns = readGoal(goalId).twelveWeekSystem?.dailyCheckIns ?? [];
+        expect(checkIns[0]?.optionalNote).toBe("Latest local check-in.");
+        expect(checkIns[0]?.updatedCount).toBe(2);
+        expect(checkIns[1]?.optionalNote).toBe("First local check-in.");
+        expect(checkIns).toHaveLength(2);
+      });
 
-    const dailyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "daily_check_in_upserted");
-    expect(dailyMutations).toHaveLength(1);
-    expect(dailyMutations[0].supersedes).toHaveLength(1);
-    if (dailyMutations[0].kind === "daily_check_in_upserted") {
-      expect(dailyMutations[0].payload.checkIn.optionalNote).toBe("Latest local check-in.");
-      expect(dailyMutations[0].payload.clientPlanId).toBe(`${goalId}:12-week-system`);
-    }
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      const dailyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "daily_check_in_upserted");
+      expect(dailyMutations).toHaveLength(1);
+      expect(dailyMutations[0].supersedes).toHaveLength(1);
+      if (dailyMutations[0].kind === "daily_check_in_upserted") {
+        expect(dailyMutations[0].payload.checkIn.optionalNote).toBe("Latest local check-in.");
+        expect(dailyMutations[0].payload.clientPlanId).toBe(`${goalId}:12-week-system`);
+      }
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
   it(
     "keeps only the five latest daily check-in entries after the seventh same-day save",

@@ -45,20 +45,16 @@ const TIMELINE_PHASES = [
     weekStart: 1,
     weekEnd: 4,
     icon: PhaseRampChipIcon,
-    tileClassName:
-      "border-app-accent-soft bg-app-accent-soft/40 text-app-accent hover:border-app-accent/60",
-    activeClassName:
-      "border-app-accent bg-app-accent text-white shadow-sm",
+    tileClassName: "border-app-accent-soft bg-app-accent-soft/40 text-app-accent hover:border-app-accent/60",
+    activeClassName: "border-app-accent bg-app-accent text-white shadow-sm",
   },
   {
     label: FEATURE_TERMS.peak,
     weekStart: 5,
     weekEnd: 8,
     icon: PhasePeakChipIcon,
-    tileClassName:
-      "border-app-warm-border bg-app-warm/30 text-app-warm-strong hover:border-app-warm-strong/40",
-    activeClassName:
-      "border-app-warm-strong bg-app-warm-strong text-white shadow-sm",
+    tileClassName: "border-app-warm-border bg-app-warm/30 text-app-warm-strong hover:border-app-warm-strong/40",
+    activeClassName: "border-app-warm-strong bg-app-warm-strong text-white shadow-sm",
   },
   {
     label: FEATURE_TERMS.harvest,
@@ -67,8 +63,7 @@ const TIMELINE_PHASES = [
     icon: PhaseHarvestChipIcon,
     tileClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100",
-    activeClassName:
-      "border-emerald-600 bg-emerald-700 text-white shadow-sm",
+    activeClassName: "border-emerald-600 bg-emerald-700 text-white shadow-sm",
   },
 ];
 
@@ -131,7 +126,8 @@ export function PlanPreview({
             <div>
               <h3 className="text-base font-semibold text-app-ink">Timeline 12 tuần</h3>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                {FEATURE_TERMS.ramp} 4 tuần đầu, {FEATURE_TERMS.peak} 4 tuần giữa, {FEATURE_TERMS.harvest} 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
+                {FEATURE_TERMS.ramp} 4 tuần đầu, {FEATURE_TERMS.peak} 4 tuần giữa, {FEATURE_TERMS.harvest} 4 tuần cuối.
+                Chọn từng tuần để xem nhịp dự kiến.
               </p>
             </div>
           </div>
@@ -199,16 +195,12 @@ export function PlanPreview({
           <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-500/30 dark:bg-emerald-950/30">
             <Zap className="h-4 w-4 text-emerald-700 dark:text-emerald-200" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-200">Lead</p>
-            <p className="mt-1 text-sm font-semibold text-app-ink">
-              {weekOneLeadMetrics.length} việc lặp lại
-            </p>
+            <p className="mt-1 text-sm font-semibold text-app-ink">{weekOneLeadMetrics.length} việc lặp lại</p>
           </div>
           <div className="rounded-[var(--r-tile)] border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/30">
             <CalendarDays className="h-4 w-4 text-amber-700 dark:text-amber-200" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-amber-700 dark:text-amber-200">Week 1</p>
-            <p className="mt-1 text-sm font-semibold text-app-ink">
-              {totalWeekOneTasks} việc đầu tiên
-            </p>
+            <p className="mt-1 text-sm font-semibold text-app-ink">{totalWeekOneTasks} việc đầu tiên</p>
           </div>
         </div>
       </section>
@@ -288,9 +280,7 @@ export function PlanPreview({
                           <div
                             key={task.id}
                             className={`flex items-start gap-3 rounded-[var(--r-control)] border p-3 ${
-                              task.title.startsWith("[CỐT LÕI]")
-                                ? "border-orange-200 bg-orange-50"
-                                : "border-gray-200"
+                              task.title.startsWith("[CỐT LÕI]") ? "border-orange-200 bg-orange-50" : "border-gray-200"
                             }`}
                           >
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-primary text-xs font-medium text-primary-foreground">

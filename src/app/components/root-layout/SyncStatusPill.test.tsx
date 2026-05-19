@@ -73,10 +73,7 @@ describe("SyncStatusPill", () => {
 
     const pill = screen.getByText("2 chờ sao lưu").closest("button");
 
-    expect(pill).toHaveAttribute(
-      "title",
-      "Đã lưu trên thiết bị. 2 thay đổi đã lưu, chờ sao lưu vào tài khoản.",
-    );
+    expect(pill).toHaveAttribute("title", "Đã lưu trên thiết bị. 2 thay đổi đã lưu, chờ sao lưu vào tài khoản.");
     expect(pill?.getAttribute("title")).not.toMatch(/đa thiết bị|tự đồng bộ/i);
   });
 

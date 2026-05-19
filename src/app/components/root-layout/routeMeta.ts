@@ -153,7 +153,11 @@ export function getRouteMeta(pathname: string): RouteMeta {
 export function getRouteTone(pathname: string): string {
   if (pathname.startsWith("/journal")) return "journal";
   if (pathname.startsWith("/achievements")) return "achievements";
-  if (pathname.startsWith("/onboarding") || pathname.startsWith("/life-balance") || pathname.startsWith("/life-insight")) {
+  if (
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/life-balance") ||
+    pathname.startsWith("/life-insight")
+  ) {
     return "balance";
   }
   if (pathname.startsWith("/smart-goal-setup") || pathname.startsWith("/feasibility")) return "system";

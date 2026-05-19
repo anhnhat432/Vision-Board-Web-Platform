@@ -81,9 +81,7 @@ export function MockBillingCheckout() {
     <div className="stack-section pb-12">
       <div className="rounded-[var(--r-control)] border-2 border-amber-400 bg-amber-50 px-4 py-3">
         <p className="font-semibold text-amber-900">Thanh toán dùng thử</p>
-        <p className="text-sm text-amber-800">
-          Màn này chỉ dùng cho bản demo/preview, không xử lý khoản thu thật.
-        </p>
+        <p className="text-sm text-amber-800">Màn này chỉ dùng cho bản demo/preview, không xử lý khoản thu thật.</p>
       </div>
 
       <Card className="overflow-hidden">
@@ -118,7 +116,10 @@ export function MockBillingCheckout() {
         </CardHeader>
         <CardContent className="stack-stack">
           {plan.highlights.map((feature) => (
-            <div key={feature} className="flex gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card px-4 py-3">
+            <div
+              key={feature}
+              className="flex gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card px-4 py-3"
+            >
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
               <p className="text-sm leading-7 text-foreground">{feature}</p>
             </div>

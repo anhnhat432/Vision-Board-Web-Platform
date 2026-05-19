@@ -69,7 +69,11 @@ export function AppErrorBoundary() {
                     <Home className="h-4 w-4" />
                     Về Trang chính
                   </Button>
-                  <Button variant="outline" className="border-app-line text-app-ink hover:bg-app-bg" onClick={() => window.location.reload()}>
+                  <Button
+                    variant="outline"
+                    className="border-app-line text-app-ink hover:bg-app-bg"
+                    onClick={() => window.location.reload()}
+                  >
                     <RefreshCw className="h-4 w-4" />
                     Tải lại trang
                   </Button>
@@ -83,7 +87,9 @@ export function AppErrorBoundary() {
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Trạng thái</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Trạng thái
+                    </p>
                     <p className="text-lg font-semibold text-foreground">
                       {errorCode ? `Lỗi ${errorCode}` : "Trang gặp lỗi ngoài dự kiến"}
                     </p>

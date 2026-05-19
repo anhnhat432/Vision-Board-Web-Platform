@@ -147,9 +147,7 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
               Hướng dẫn cho người mới
             </Badge>
             <div>
-              <h2 className={`${compact ? "text-lg" : "text-2xl"} font-bold tracking-normal text-app-ink`}>
-                {title}
-              </h2>
+              <h2 className={`${compact ? "text-lg" : "text-2xl"} font-bold tracking-normal text-app-ink`}>{title}</h2>
               <p className={`mt-2 max-w-2xl text-sm leading-7 ${compact ? "line-clamp-2" : ""} ${descriptionClass}`}>
                 {description}
               </p>
@@ -193,7 +191,9 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
 
           {!compact && (
             <div className="space-y-3 rounded-[var(--r-control)] border border-app-line bg-app-bg p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Trạng thái hiện tại</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                Trạng thái hiện tại
+              </p>
               <StepList userData={userData} />
             </div>
           )}

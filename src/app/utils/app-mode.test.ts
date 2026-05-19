@@ -66,9 +66,7 @@ describe("app-mode", () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const mod = await importWithMode("staging");
     expect(mod.getAppMode()).toBe("real");
-    expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid VITE_APP_MODE="staging"'),
-    );
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid VITE_APP_MODE="staging"'));
     errorSpy.mockRestore();
   });
 });

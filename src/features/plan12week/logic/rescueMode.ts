@@ -314,8 +314,7 @@ const TRIGGER_SUBTEXT: Record<RescueTriggerId, (status: RescueModeStatus) => str
     status.daysRemainingInWeek !== null
       ? `Tuần này còn ${status.daysRemainingInWeek} ngày, tiến độ chưa quá 50% — chốt 1 việc cốt lõi là đủ.`
       : "Tuần này tiến độ còn thấp — chốt 1 việc cốt lõi là đủ.",
-  "weekly-review-missed": () =>
-    "Bạn chưa chốt review tuần trước — 3 phút phản tư sẽ giúp tuần này nhẹ hơn.",
+  "weekly-review-missed": () => "Bạn chưa chốt review tuần trước — 3 phút phản tư sẽ giúp tuần này nhẹ hơn.",
 };
 
 export function getRescueModeMessage(status: RescueModeStatus): RescueModeMessage {

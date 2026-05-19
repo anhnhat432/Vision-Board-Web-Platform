@@ -24,9 +24,7 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
   const [localTactics, setLocalTactics] = useState<LeadIndicatorDraft[]>(tactics);
 
   const updateTactic = (index: number, updates: Partial<LeadIndicatorDraft>) => {
-    setLocalTactics((prev) =>
-      prev.map((t, i) => (i === index ? { ...t, ...updates } : t))
-    );
+    setLocalTactics((prev) => prev.map((t, i) => (i === index ? { ...t, ...updates } : t)));
   };
 
   const addTactic = () => {
@@ -56,7 +54,8 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
         <DialogHeader>
           <DialogTitle>Chỉnh sửa việc lặp lại</DialogTitle>
           <DialogDescription>
-            Chỉnh sửa tên, số lần, đơn vị và loại việc. Ngày trong tuần được tính tự động dựa trên ngày ưu tiên toàn chu kỳ.
+            Chỉnh sửa tên, số lần, đơn vị và loại việc. Ngày trong tuần được tính tự động dựa trên ngày ưu tiên toàn chu
+            kỳ.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,7 +69,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-name-${idx}`}>Tên việc</label>
+                      <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-name-${idx}`}>
+                        Tên việc
+                      </label>
                       <Input
                         id={`tactic-name-${idx}`}
                         value={tactic.name}
@@ -81,7 +82,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
 
                     <div className="flex gap-3">
                       <div className="w-1/2">
-                        <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-target-${idx}`}>Số lần/tuần</label>
+                        <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-target-${idx}`}>
+                          Số lần/tuần
+                        </label>
                         <Input
                           id={`tactic-target-${idx}`}
                           type="number"
@@ -92,7 +95,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                         />
                       </div>
                       <div className="w-1/2">
-                        <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-unit-${idx}`}>Đơn vị</label>
+                        <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-unit-${idx}`}>
+                          Đơn vị
+                        </label>
                         <Input
                           id={`tactic-unit-${idx}`}
                           value={tactic.unit}
@@ -103,7 +108,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-type-${idx}`}>Loại việc</label>
+                      <label className="mb-1 block text-sm font-medium" htmlFor={`tactic-type-${idx}`}>
+                        Loại việc
+                      </label>
                       <Select
                         value={tactic.type}
                         onValueChange={(value: "core" | "optional") => updateTactic(idx, { type: value })}

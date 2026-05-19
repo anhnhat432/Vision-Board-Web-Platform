@@ -17,16 +17,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "border border-transparent bg-app-accent text-white shadow-sm hover:bg-[#284f45]",
+        default: "border border-transparent bg-app-accent text-white shadow-sm hover:bg-[#284f45]",
         destructive:
           "border border-transparent bg-destructive text-white shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_-4px_rgba(220,38,38,0.32)] hover:bg-destructive/92 hover:-translate-y-px focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive",
-        outline:
-          "border border-app-line bg-app-surface text-app-ink hover:bg-app-bg",
-        secondary:
-          "border border-transparent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white",
-        ghost:
-          "text-app-ink hover:bg-app-bg",
+        outline: "border border-app-line bg-app-surface text-app-ink hover:bg-app-bg",
+        secondary: "border border-transparent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white",
+        ghost: "text-app-ink hover:bg-app-bg",
         link: "text-primary underline-offset-4 hover:underline px-0",
       },
       size: {

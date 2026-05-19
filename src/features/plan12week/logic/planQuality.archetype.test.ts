@@ -11,17 +11,15 @@ function makePlan(overrides: Partial<PlanQualityInput> = {}): PlanQualityInput {
     goalType: overrides.goalType,
     goalArchetype: overrides.goalArchetype,
     lagMetric: overrides.lagMetric ?? { name: "Chỉ số chính", target: "12", unit: "lần" },
-    leadIndicators:
-      overrides.leadIndicators ?? [
-        { name: "Việc 1", target: "2", schedule: [1, 4], type: "core" },
-        { name: "Việc 2", target: "1", schedule: [6], type: "core" },
-      ],
-    milestones:
-      overrides.milestones ?? {
-        week4: "Mốc tuần 4 đã hoàn thành một phần đầu tiên.",
-        week8: "Mốc tuần 8 đã đạt nửa mục tiêu.",
-        week12: "Đạt kết quả tuần 12.",
-      },
+    leadIndicators: overrides.leadIndicators ?? [
+      { name: "Việc 1", target: "2", schedule: [1, 4], type: "core" },
+      { name: "Việc 2", target: "1", schedule: [6], type: "core" },
+    ],
+    milestones: overrides.milestones ?? {
+      week4: "Mốc tuần 4 đã hoàn thành một phần đầu tiên.",
+      week8: "Mốc tuần 8 đã đạt nửa mục tiêu.",
+      week12: "Đạt kết quả tuần 12.",
+    },
     reviewDay: overrides.reviewDay ?? "Sunday",
     tacticLoadPreference: overrides.tacticLoadPreference ?? "balanced",
     dailyTimeBudget: overrides.dailyTimeBudget ?? "1h",
@@ -117,9 +115,7 @@ describe("planQuality - health_fitness archetype", () => {
         ],
       }),
     );
-    const hasRecoverySuggestion = result.suggestions.some((s) =>
-      /recovery|nghỉ/i.test(s),
-    );
+    const hasRecoverySuggestion = result.suggestions.some((s) => /recovery|nghỉ/i.test(s));
     expect(hasRecoverySuggestion).toBe(true);
   });
 });
@@ -136,9 +132,7 @@ describe("planQuality - project_completion archetype", () => {
         },
       }),
     );
-    const hasDeliverableWarning = result.warnings.some((w) =>
-      /deliverable|ship|release/i.test(w),
-    );
+    const hasDeliverableWarning = result.warnings.some((w) => /deliverable|ship|release/i.test(w));
     expect(hasDeliverableWarning).toBe(true);
   });
 
@@ -157,9 +151,7 @@ describe("planQuality - project_completion archetype", () => {
         },
       }),
     );
-    const hasDeliverableWarning = result.warnings.some((w) =>
-      /deliverable|ship/i.test(w) && /2 trong 3/.test(w),
-    );
+    const hasDeliverableWarning = result.warnings.some((w) => /deliverable|ship/i.test(w) && /2 trong 3/.test(w));
     expect(hasDeliverableWarning).toBe(false);
   });
 });
@@ -175,9 +167,7 @@ describe("planQuality - exam_study archetype", () => {
         ],
       }),
     );
-    const hasPracticeTestWarning = result.warnings.some((w) =>
-      /đề thi thử|practice test/i.test(w),
-    );
+    const hasPracticeTestWarning = result.warnings.some((w) => /đề thi thử|practice test/i.test(w));
     expect(hasPracticeTestWarning).toBe(true);
   });
 
@@ -191,9 +181,7 @@ describe("planQuality - exam_study archetype", () => {
         ],
       }),
     );
-    const hasPracticeTestWarning = result.warnings.some((w) =>
-      /đề thi thử|practice test/i.test(w),
-    );
+    const hasPracticeTestWarning = result.warnings.some((w) => /đề thi thử|practice test/i.test(w));
     expect(hasPracticeTestWarning).toBe(false);
   });
 });
@@ -216,14 +204,10 @@ describe("planQuality - financial_goal archetype", () => {
     const result = evaluateTwelveWeekPlanQuality(
       makePlan({
         goalArchetype: "financial_goal",
-        leadIndicators: [
-          { name: "Track chi tiêu", target: "7", schedule: [0, 1, 2, 3, 4, 5, 6], type: "core" },
-        ],
+        leadIndicators: [{ name: "Track chi tiêu", target: "7", schedule: [0, 1, 2, 3, 4, 5, 6], type: "core" }],
       }),
     );
-    const hasTwoActionsSuggestion = result.suggestions.some((s) =>
-      /2 hành động|weekly review/i.test(s),
-    );
+    const hasTwoActionsSuggestion = result.suggestions.some((s) => /2 hành động|weekly review/i.test(s));
     expect(hasTwoActionsSuggestion).toBe(true);
   });
 });
@@ -233,14 +217,10 @@ describe("planQuality - habit_building archetype", () => {
     const result = evaluateTwelveWeekPlanQuality(
       makePlan({
         goalArchetype: "habit_building",
-        leadIndicators: [
-          { name: "Đọc 30 phút", target: "7", schedule: [0, 1, 2, 3, 4, 5, 6], type: "core" },
-        ],
+        leadIndicators: [{ name: "Đọc 30 phút", target: "7", schedule: [0, 1, 2, 3, 4, 5, 6], type: "core" }],
       }),
     );
-    const hasCueSuggestion = result.suggestions.some((s) =>
-      /cue|trigger|routine|sau cà phê|đánh răng/i.test(s),
-    );
+    const hasCueSuggestion = result.suggestions.some((s) => /cue|trigger|routine|sau cà phê|đánh răng/i.test(s));
     expect(hasCueSuggestion).toBe(true);
   });
 });
@@ -250,9 +230,7 @@ describe("planQuality - fallback 'other' archetype", () => {
     const result = evaluateTwelveWeekPlanQuality(
       makePlan({
         goalArchetype: "other",
-        leadIndicators: [
-          { name: "Việc bất kỳ", target: "3", schedule: [1, 3, 5], type: "core" },
-        ],
+        leadIndicators: [{ name: "Việc bất kỳ", target: "3", schedule: [1, 3, 5], type: "core" }],
       }),
     );
     const archetypeSpecificWarnings = result.warnings.filter((w) =>

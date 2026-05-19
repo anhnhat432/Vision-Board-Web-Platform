@@ -1,8 +1,4 @@
-export type ExecutionStatus =
-  | "excellent_execution"
-  | "on_track"
-  | "at_risk"
-  | "critical";
+export type ExecutionStatus = "excellent_execution" | "on_track" | "at_risk" | "critical";
 
 export function interpretExecutionScore(score: number): ExecutionStatus {
   if (score >= 85) return "excellent_execution";

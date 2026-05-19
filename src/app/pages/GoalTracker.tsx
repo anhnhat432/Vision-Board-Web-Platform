@@ -7,15 +7,7 @@ import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twe
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Plus,
-  Search,
-  Target,
-  Trash2,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, Plus, Search, Target, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -159,7 +151,8 @@ function GoalTrackerContent({
     [backendSystemsByGoalId, goals, locallyUpdatedSystemGoalIds],
   );
   const hasGoals = effectiveGoals.length > 0;
-  const hasRealLifeBalance = viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
+  const hasRealLifeBalance =
+    viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
   const twelveWeekGoals = useMemo(
     () => effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem)),
@@ -312,7 +305,8 @@ function GoalTrackerContent({
     const backendGoalId = getBackendGoalId(deletedGoalId);
     const backendPlanId = getPlanLink(deletedGoalId)?.planId ?? null;
     const clientPlanId = getTwelveWeekClientPlanId(deletedGoalId);
-    const shouldQueueRemoteDelete = canSyncRemoteDelete && shouldEnable12WeekGoalTombstoneSync() && Boolean(backendPlanId || backendGoalId);
+    const shouldQueueRemoteDelete =
+      canSyncRemoteDelete && shouldEnable12WeekGoalTombstoneSync() && Boolean(backendPlanId || backendGoalId);
 
     deleteLocalGoal(deletedGoalId);
     // Optimistic local update so the card disappears immediately without
@@ -513,7 +507,7 @@ function GoalTrackerContent({
             <div className="flex items-baseline justify-between">
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
               <span className="text-[13px] text-app-ink-muted">
-                {systemTodayOpenTasks.filter(t => !t.completed).length}/{systemTodayOpenTasks.length}
+                {systemTodayOpenTasks.filter((t) => !t.completed).length}/{systemTodayOpenTasks.length}
               </span>
             </div>
             <div className="mt-2 space-y-1 max-h-[100px] overflow-y-auto">
@@ -525,7 +519,9 @@ function GoalTrackerContent({
                     onChange={() => handleToggleTask(goal.id, task.id)}
                     className="size-4 rounded border-[1.5px] border-[#C8C2B6] bg-app-surface data-[state=checked]:bg-app-accent data-[state=checked]:border-app-accent"
                   />
-                  <span className={`text-[14px] line-clamp-1 ${task.completed ? "line-through text-app-ink-muted" : "text-app-ink"}`}>
+                  <span
+                    className={`text-[14px] line-clamp-1 ${task.completed ? "line-through text-app-ink-muted" : "text-app-ink"}`}
+                  >
                     {task.title}
                   </span>
                 </div>
@@ -575,7 +571,10 @@ function GoalTrackerContent({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDeleteGoal} className="bg-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-fg)]">
+            <AlertDialogAction
+              onClick={handleConfirmDeleteGoal}
+              className="bg-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-fg)]"
+            >
               Xóa
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -618,10 +617,7 @@ function GoalTrackerContent({
         {overviewItems.map((item) => {
           const Icon = item.icon;
           return (
-            <div
-              key={item.title}
-              className="rounded-card border border-app-line bg-app-surface p-4"
-            >
+            <div key={item.title} className="rounded-card border border-app-line bg-app-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{item.title}</p>
@@ -656,10 +652,7 @@ function GoalTrackerContent({
               Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Button
-                className="bg-app-accent text-white hover:bg-[#284f45]"
-                onClick={handleStartGuidedGoalFlow}
-              >
+              <Button className="bg-app-accent text-white hover:bg-[#284f45]" onClick={handleStartGuidedGoalFlow}>
                 Bắt đầu chu kỳ 12 tuần →
               </Button>
               <Button
@@ -677,11 +670,11 @@ function GoalTrackerContent({
               <div className="mb-4">
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CHU KỲ 12 TUẦN</p>
-                    <h2 className="mt-1 text-[16px] font-semibold text-app-ink">Mục tiêu đang chạy</h2>
-                    <p className="mt-1 text-[13px] text-app-ink-muted">
-                      {filteredTwelveWeekGoals.length} mục tiêu
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                      CHU KỲ 12 TUẦN
                     </p>
+                    <h2 className="mt-1 text-[16px] font-semibold text-app-ink">Mục tiêu đang chạy</h2>
+                    <p className="mt-1 text-[13px] text-app-ink-muted">{filteredTwelveWeekGoals.length} mục tiêu</p>
                   </div>
                 </div>
                 <div className="stack-stack mt-4 space-y-3">
@@ -696,7 +689,9 @@ function GoalTrackerContent({
               <div className="mt-8">
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU THƯỜNG</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                      MỤC TIÊU THƯỜNG
+                    </p>
                     <h2 className="mt-1 text-[16px] font-semibold text-app-ink">
                       {filteredStandardGoals.length} mục tiêu
                     </h2>

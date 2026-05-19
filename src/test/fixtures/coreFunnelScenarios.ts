@@ -78,8 +78,7 @@ export const CORE_FUNNEL_SCENARIOS: CoreFunnelScenario[] = [
       "Người mới chuyển ngành, quỹ thời gian giới hạn (1-3h/tuần), kiến thức nền cơ bản. Kỳ vọng feasibility = challenging vì rõ phần yếu là thời gian + nguồn lực.",
     smartInput: {
       focusArea: "learning",
-      specificGoalStatement:
-        "Hoàn thành 6 dự án Rust nhỏ trong 12 tuần để xây portfolio backend.",
+      specificGoalStatement: "Hoàn thành 6 dự án Rust nhỏ trong 12 tuần để xây portfolio backend.",
       measurableMetricName: "Du an Rust hoan thanh",
       measurableTargetValue: 6,
       measurableBaselineValue: 0,
@@ -129,8 +128,7 @@ export const CORE_FUNNEL_SCENARIOS: CoreFunnelScenario[] = [
     id: "health-run-5k",
     goalType: "health",
     label: "Sức khỏe - Chạy 5K",
-    rationale:
-      "Người tập thể thao trung bình, có khoảng 3-5h/tuần, motivation rõ. Kỳ vọng realistic + balanced.",
+    rationale: "Người tập thể thao trung bình, có khoảng 3-5h/tuần, motivation rõ. Kỳ vọng realistic + balanced.",
     smartInput: {
       focusArea: "health",
       specificGoalStatement: "Đạt mốc chạy 5K liên tục dưới 30 phút trong 12 tuần.",
@@ -355,8 +353,7 @@ export const CORE_FUNNEL_SCENARIOS: CoreFunnelScenario[] = [
     id: "project-side-mvp-feedback",
     goalType: "project",
     label: "Hoàn thành dự án - Side project MVP",
-    rationale:
-      "Solo builder, capacity trung bình, mục tiêu rõ nhưng phức tạp. Kỳ vọng challenging + balanced.",
+    rationale: "Solo builder, capacity trung bình, mục tiêu rõ nhưng phức tạp. Kỳ vọng challenging + balanced.",
     smartInput: {
       focusArea: "career",
       specificGoalStatement: "Ra mắt MVP vision board planner với 8 phiên feedback người dùng.",

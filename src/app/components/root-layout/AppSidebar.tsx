@@ -92,9 +92,7 @@ export function AppSidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Mục điều hướng">
-        <p className="px-2.5 pb-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-          Đi nhanh
-        </p>
+        <p className="px-2.5 pb-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đi nhanh</p>
         <ul className="space-y-0.5">
           {primaryNavItems.map((item) => {
             const Icon = item.icon;

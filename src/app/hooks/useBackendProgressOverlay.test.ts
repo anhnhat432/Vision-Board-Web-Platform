@@ -18,13 +18,7 @@ function createMetric(
   };
 }
 
-function createPlanDetails({
-  metrics,
-  review,
-}: {
-  metrics: Metric[];
-  review?: WeekReview;
-}): PlanDetails {
+function createPlanDetails({ metrics, review }: { metrics: Metric[]; review?: WeekReview }): PlanDetails {
   return {
     plan: {
       id: "plan_1",
@@ -138,9 +132,7 @@ describe("applyBackendProgressOverlay", () => {
     });
     const details = createPlanDetails({
       metrics: [
-        createMetric("__daily_checkin__", [
-          { id: "daily_1", date: "2026-04-01", value: 1, completed: true },
-        ]),
+        createMetric("__daily_checkin__", [{ id: "daily_1", date: "2026-04-01", value: 1, completed: true }]),
         createMetric("Revenue", [{ id: "rev_1", date: "2026-04-01", value: 3, completed: true }]),
       ],
     });

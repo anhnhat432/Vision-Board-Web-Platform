@@ -231,7 +231,9 @@ export function VisionBoardGallery() {
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Snapshot thư viện
+            </p>
             <div className="mt-3 grid gap-2">
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
@@ -258,64 +260,64 @@ export function VisionBoardGallery() {
       />
 
       {userData.visionBoards.length > 0 && (
-      <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          {
-            title: "Tổng số vision board",
-            value: userData.visionBoards.length,
-            note: "bảng đang lưu",
-            icon: Images,
-            color: "from-app-accent/20 to-app-accent/5 text-app-accent",
-          },
-          {
-            title: "Năm bao quát",
-            value: years.length,
-            note: "mốc thời gian có bảng",
-            icon: Calendar,
-            color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
-          },
-          {
-            title: "Tổng phần tử",
-            value: totalItems,
-            note: "ảnh, câu nói và biểu tượng",
-            icon: Sparkles,
-            color: "from-amber-500/18 to-orange-500/10 text-amber-700",
-          },
-          {
-            title: "Trung bình mỗi bảng",
-            value: userData.visionBoards.length ? Math.round(totalItems / userData.visionBoards.length) : 0,
-            note: "mức độ phong phú của bảng",
-            icon: ImageIcon,
-            color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
-          },
-        ].map((item) => {
-          const Icon = item.icon;
+        <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              title: "Tổng số vision board",
+              value: userData.visionBoards.length,
+              note: "bảng đang lưu",
+              icon: Images,
+              color: "from-app-accent/20 to-app-accent/5 text-app-accent",
+            },
+            {
+              title: "Năm bao quát",
+              value: years.length,
+              note: "mốc thời gian có bảng",
+              icon: Calendar,
+              color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
+            },
+            {
+              title: "Tổng phần tử",
+              value: totalItems,
+              note: "ảnh, câu nói và biểu tượng",
+              icon: Sparkles,
+              color: "from-amber-500/18 to-orange-500/10 text-amber-700",
+            },
+            {
+              title: "Trung bình mỗi bảng",
+              value: userData.visionBoards.length ? Math.round(totalItems / userData.visionBoards.length) : 0,
+              note: "mức độ phong phú của bảng",
+              icon: ImageIcon,
+              color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
+            },
+          ].map((item) => {
+            const Icon = item.icon;
 
-          return (
-            <div key={item.title}>
-              <Card className="relative gap-4 overflow-hidden">
-                <div
-                  className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
-                />
-                <CardHeader className="relative flex flex-row items-start justify-between pb-0">
-                  <div>
-                    <CardDescription>{item.title}</CardDescription>
-                    <CardTitle className="mt-2 text-4xl">{item.value}</CardTitle>
-                  </div>
+            return (
+              <div key={item.title}>
+                <Card className="relative gap-4 overflow-hidden">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br ${item.color} opacity-90`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                </CardHeader>
-                <CardContent className="relative pt-0">
-                  <p className="text-sm text-slate-500">{item.note}</p>
-                </CardContent>
-              </Card>
-            </div>
-          );
-        })}
-      </div>
+                    className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
+                  />
+                  <CardHeader className="relative flex flex-row items-start justify-between pb-0">
+                    <div>
+                      <CardDescription>{item.title}</CardDescription>
+                      <CardTitle className="mt-2 text-4xl">{item.value}</CardTitle>
+                    </div>
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br ${item.color} opacity-90`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="relative pt-0">
+                    <p className="text-sm text-slate-500">{item.note}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {userData.visionBoards.length === 0 ? (
@@ -364,7 +366,9 @@ export function VisionBoardGallery() {
                         translate={8}
                         shine={false}
                       >
-                        <Card className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}>
+                        <Card
+                          className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}
+                        >
                           <CardHeader className="pb-0">
                             <div className="flex items-start justify-between gap-3">
                               <div>

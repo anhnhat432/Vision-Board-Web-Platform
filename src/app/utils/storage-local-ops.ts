@@ -133,20 +133,22 @@ export function updateAppPreferencesInData(
 }
 
 export function archiveOutboxItemInData(data: UserData, outboxId: string): void {
-  data.syncOutbox = data.syncOutbox.map((item) =>
-    item.id === outboxId ? { ...item, status: "archived" } : item,
-  );
+  data.syncOutbox = data.syncOutbox.map((item) => (item.id === outboxId ? { ...item, status: "archived" } : item));
 }
 
 export function restoreOutboxItemInData(data: UserData, outboxId: string): void {
   data.syncOutbox = data.syncOutbox.map((item) =>
-    item.id === outboxId ? { ...item, status: "pending", retryCount: 0, retryAt: undefined, failedAt: undefined } : item,
+    item.id === outboxId
+      ? { ...item, status: "pending", retryCount: 0, retryAt: undefined, failedAt: undefined }
+      : item,
   );
 }
 
 export function restoreArchivedOutboxInData(data: UserData): void {
   data.syncOutbox = data.syncOutbox.map((item) =>
-    item.status === "archived" ? { ...item, status: "pending", retryCount: 0, retryAt: undefined, failedAt: undefined } : item,
+    item.status === "archived"
+      ? { ...item, status: "pending", retryCount: 0, retryAt: undefined, failedAt: undefined }
+      : item,
   );
 }
 
@@ -180,10 +182,7 @@ export function getTwelveWeekFunnelSummaryFromData(
   });
 }
 
-export function getInAppRemindersFromData(
-  data: UserData,
-  referenceDate = new Date(),
-): InAppReminder[] {
+export function getInAppRemindersFromData(data: UserData, referenceDate = new Date()): InAppReminder[] {
   if (!data.appPreferences.enableInAppReminders) return [];
 
   const activeGoal = getActiveTwelveWeekGoal(data.goals);
@@ -201,7 +200,10 @@ export function getInAppRemindersFromData(
     reminders.push({
       id: `reminder_tasks_${activeGoal.id}_${todayKey}`,
       title: `${todayTasks.length} việc đang đợi trong hôm nay`,
-      description: `Tập trung vào ${todayTasks.slice(0, 2).map((task) => task.title).join(", ")}.`,
+      description: `Tập trung vào ${todayTasks
+        .slice(0, 2)
+        .map((task) => task.title)
+        .join(", ")}.`,
       href: "/12-week-system",
       kind: "tasks",
       goalId: activeGoal.id,
@@ -236,7 +238,10 @@ export function getInAppRemindersFromData(
         return {
           ...reminder,
           title: `${todayTasks.length} việc đang đợi trong hôm nay`,
-          description: `Tập trung vào ${todayTasks.slice(0, 2).map((task) => task.title).join(", ")}.`,
+          description: `Tập trung vào ${todayTasks
+            .slice(0, 2)
+            .map((task) => task.title)
+            .join(", ")}.`,
         };
       }
 
@@ -324,10 +329,7 @@ export function scheduleEmailReminderInData(
   // Avoid duplicate same-kind scheduled entries for the same goal+week
   const duplicate = schedule.find(
     (s) =>
-      s.kind === item.kind &&
-      s.goalId === item.goalId &&
-      s.weekNumber === item.weekNumber &&
-      s.status === "scheduled",
+      s.kind === item.kind && s.goalId === item.goalId && s.weekNumber === item.weekNumber && s.status === "scheduled",
   );
   if (duplicate) return;
 
@@ -351,10 +353,7 @@ export function markEmailReminderSentInData(data: UserData, id: string): void {
   );
 }
 
-export function getDueEmailRemindersInData(
-  data: UserData,
-  referenceDate = new Date(),
-): EmailReminderScheduleItem[] {
+export function getDueEmailRemindersInData(data: UserData, referenceDate = new Date()): EmailReminderScheduleItem[] {
   return (data.emailReminderSchedule ?? []).filter(
     (item) => item.status === "scheduled" && new Date(item.scheduledFor) <= referenceDate,
   );

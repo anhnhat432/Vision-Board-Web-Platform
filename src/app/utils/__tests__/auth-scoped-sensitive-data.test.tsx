@@ -2,7 +2,11 @@ import "@testing-library/jest-dom/vitest";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { getMockBillingAccount, mockBillingProvider, completeMockCheckoutSession } from "@/app/utils/production/mockBillingProvider";
+import {
+  getMockBillingAccount,
+  mockBillingProvider,
+  completeMockCheckoutSession,
+} from "@/app/utils/production/mockBillingProvider";
 import { MOCK_BILLING_ACCOUNT_KEY } from "@/app/utils/production/env";
 import {
   activateAuthenticatedUserData,
@@ -81,7 +85,9 @@ async function mockUpgradePlus(): Promise<void> {
 }
 
 function getAnonymousArchiveKeys(): string[] {
-  return Object.keys(localStorage).filter((key) => key.startsWith("previousAnonymousArchive_")).sort();
+  return Object.keys(localStorage)
+    .filter((key) => key.startsWith("previousAnonymousArchive_"))
+    .sort();
 }
 
 function PlanProbe() {
@@ -117,7 +123,9 @@ describe("auth-scoped sensitive data cleanup", () => {
     expect(localStorage.getItem("pendingMigration:firebase_uid_a")).toBeNull();
     expect(localStorage.getItem("pendingMigration:firebase_uid_b")).toBe("pending-b");
 
-    const scopedA = JSON.parse(localStorage.getItem(getScopedUserDataStorageKey("firebase_uid_a")) ?? "null") as UserData | null;
+    const scopedA = JSON.parse(
+      localStorage.getItem(getScopedUserDataStorageKey("firebase_uid_a")) ?? "null",
+    ) as UserData | null;
     expect(scopedA?.goals.map((goal) => goal.title)).toEqual(["A private goal"]);
     expect(scopedA?.subscription).toBeNull();
     expect(scopedA?.entitlements ?? []).toEqual([]);

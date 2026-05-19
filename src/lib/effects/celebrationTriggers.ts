@@ -10,7 +10,10 @@ function getBrowserStorage(): CelebrationStorage | null {
   return localStorage;
 }
 
-export function hasNewCelebrationIds(previousIds: ReadonlySet<string> | null, currentIds: ReadonlySet<string>): boolean {
+export function hasNewCelebrationIds(
+  previousIds: ReadonlySet<string> | null,
+  currentIds: ReadonlySet<string>,
+): boolean {
   if (!previousIds) return false;
   for (const id of currentIds) {
     if (!previousIds.has(id)) return true;

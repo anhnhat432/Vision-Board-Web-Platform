@@ -7,4 +7,3 @@ export interface AmbientIllustrationProps extends SVGProps<SVGSVGElement> {
 export function useIllustrationId(prefix: string) {
   return `${prefix}-${useId().replace(/:/g, "")}`;
 }
-

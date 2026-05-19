@@ -5,7 +5,7 @@ import {
   evaluateDiagnosticsFlag,
   shouldShowFunnelDiagnostics,
 } from "./funnel-diagnostics";
-import { LIFE_AREAS, } from "./storage";
+import { LIFE_AREAS } from "./storage";
 import { CURRENT_STORAGE_VERSION } from "./storage-constants";
 import type { TwelveWeekSystem, UserData } from "./storage-types";
 import { setUserIntent } from "./user-intent";

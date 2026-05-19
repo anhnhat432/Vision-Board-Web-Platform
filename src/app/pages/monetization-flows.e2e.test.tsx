@@ -63,9 +63,7 @@ describe("monetization flows", () => {
     const originPath = getCurrentUpgradeOriginPath();
 
     expect(originPath).toBe("/12-week-setup?step=template");
-    expect(buildBillingPlanUpgradePath(originPath)).toBe(
-      "/billing/plan?returnTo=%2F12-week-setup%3Fstep%3Dtemplate",
-    );
+    expect(buildBillingPlanUpgradePath(originPath)).toBe("/billing/plan?returnTo=%2F12-week-setup%3Fstep%3Dtemplate");
   });
 
   it("mock checkout flow upgrades user to Plus", async () => {

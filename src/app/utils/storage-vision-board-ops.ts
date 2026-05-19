@@ -10,12 +10,7 @@ import { generateId } from "./storage-types";
 
 const VALID_TYPES = ["image", "quote", "icon", "goal_card"] as const;
 const VALID_SIZE_PRESETS: VisionBoardSizePreset[] = ["S", "M", "L", "XL"];
-const VALID_QUOTE_FONTS: NonNullable<VisionBoardItemStyle["quoteFont"]>[] = [
-  "default",
-  "handwriting",
-  "serif",
-  "bold",
-];
+const VALID_QUOTE_FONTS: NonNullable<VisionBoardItemStyle["quoteFont"]>[] = ["default", "handwriting", "serif", "bold"];
 const VALID_IMAGE_FRAMES: NonNullable<VisionBoardItemStyle["imageFrame"]>[] = [
   "shadow",
   "polaroid",
@@ -130,11 +125,7 @@ export function addVisionBoardToData(
   return newBoard.id;
 }
 
-export function updateVisionBoardInData(
-  data: UserData,
-  boardId: string,
-  updates: Partial<VisionBoard>,
-): boolean {
+export function updateVisionBoardInData(data: UserData, boardId: string, updates: Partial<VisionBoard>): boolean {
   const boardIndex = data.visionBoards.findIndex((board) => board.id === boardId);
   if (boardIndex === -1) return false;
 

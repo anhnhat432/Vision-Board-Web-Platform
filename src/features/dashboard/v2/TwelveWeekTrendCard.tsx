@@ -51,7 +51,10 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
   const chartWidth = getChartWidth();
 
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-trend-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      aria-labelledby="dashboard-trend-title"
+    >
       <div>
         <h2 id="dashboard-trend-title" className="text-[16px] font-semibold text-app-ink">
           Đường 12 tuần

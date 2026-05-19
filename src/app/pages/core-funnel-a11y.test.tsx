@@ -429,18 +429,11 @@ describe("SpecificStep — a11y", () => {
   it("links textarea to the hint and counter via aria-describedby", () => {
     const setSmartData = vi.fn();
     render(
-      <SpecificStep
-        smartData={makeSmartData()}
-        setSmartData={setSmartData}
-        placeholder="Ví dụ..."
-        showError={false}
-      />,
+      <SpecificStep smartData={makeSmartData()} setSmartData={setSmartData} placeholder="Ví dụ..." showError={false} />,
     );
     const textarea = screen.getByLabelText("Câu trả lời của bạn");
     const describedBy = textarea.getAttribute("aria-describedby") ?? "";
-    expect(describedBy.split(/\s+/)).toEqual(
-      expect.arrayContaining(["smart-specific-hint", "smart-specific-counter"]),
-    );
+    expect(describedBy.split(/\s+/)).toEqual(expect.arrayContaining(["smart-specific-hint", "smart-specific-counter"]));
     expect(document.getElementById("smart-specific-hint")?.textContent).toMatch(/kiểm chứng/i);
     expect(document.getElementById("smart-specific-counter")?.textContent).toMatch(/ký tự/i);
   });
@@ -450,17 +443,11 @@ describe("MeasurableStep — a11y", () => {
   it("associates the metric-name hint via aria-describedby", () => {
     const setSmartData = vi.fn();
     render(
-      <MeasurableStep
-        smartData={makeSmartData()}
-        setSmartData={setSmartData}
-        currentStepHasDraftContent={false}
-      />,
+      <MeasurableStep smartData={makeSmartData()} setSmartData={setSmartData} currentStepHasDraftContent={false} />,
     );
     const input = screen.getByLabelText("Con số hoặc dấu hiệu theo dõi");
     expect(input.getAttribute("aria-describedby")).toBe("smart-metric-name-hint");
-    expect(document.getElementById("smart-metric-name-hint")?.textContent).toMatch(
-      /tăng hay đứng yên/i,
-    );
+    expect(document.getElementById("smart-metric-name-hint")?.textContent).toMatch(/tăng hay đứng yên/i);
   });
 });
 

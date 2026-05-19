@@ -11,15 +11,7 @@ const Slider = React.forwardRef<
     /** Optional inline color for the filled range (e.g. a life-area hex color) */
     trackColor?: string;
   }
->(({
-  className,
-  defaultValue,
-  value,
-  min = 0,
-  max = 100,
-  trackColor,
-  ...props
-}, ref) => {
+>(({ className, defaultValue, value, min = 0, max = 100, trackColor, ...props }, ref) => {
   const _values = React.useMemo(
     () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
     [value, defaultValue, min, max],

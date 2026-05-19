@@ -3,15 +3,7 @@ import { calculateMetricStreak } from "./streak";
 
 import type { Plan12Week } from "../types/planTypes";
 
-export type DayOfWeek =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday"
-  | "unknown";
+export type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday" | "unknown";
 
 export interface BehaviorInsights {
   bestDayOfWeek: DayOfWeek;
@@ -20,15 +12,7 @@ export interface BehaviorInsights {
   weakestWeek: number | null;
 }
 
-const DAY_BY_INDEX: DayOfWeek[] = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
+const DAY_BY_INDEX: DayOfWeek[] = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 const DEFAULT_BEHAVIOR_INSIGHTS: BehaviorInsights = {
   bestDayOfWeek: "unknown",
@@ -60,9 +44,7 @@ export function analyzeExecutionPatterns(plan: Plan12Week | null): BehaviorInsig
   const totalScore = weekScores.reduce((sum, item) => sum + item.score, 0);
   const averageExecutionScore = Math.round(totalScore / weekScores.length);
 
-  const weakestWeekEntry = weekScores.reduce((weakest, current) =>
-    current.score < weakest.score ? current : weakest,
-  );
+  const weakestWeekEntry = weekScores.reduce((weakest, current) => (current.score < weakest.score ? current : weakest));
 
   const longestMetricStreak = plan.weeks
     .flatMap((week) => week.leadMetrics)
@@ -92,8 +74,10 @@ export function analyzeExecutionPatterns(plan: Plan12Week | null): BehaviorInsig
       },
     );
 
-  const bestDayOfWeek = (Object.entries(completedTaskDayCount) as Array<[DayOfWeek, number]>)
-    .sort((left, right) => right[1] - left[1])[0]?.[0] ?? "unknown";
+  const bestDayOfWeek =
+    (Object.entries(completedTaskDayCount) as Array<[DayOfWeek, number]>).sort(
+      (left, right) => right[1] - left[1],
+    )[0]?.[0] ?? "unknown";
 
   return {
     bestDayOfWeek,

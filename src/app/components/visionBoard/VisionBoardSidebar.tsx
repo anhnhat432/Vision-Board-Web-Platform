@@ -1,15 +1,5 @@
 import { useMemo, type JSX } from "react";
-import {
-  BookOpen,
-  Briefcase,
-  HeartPulse,
-  Home,
-  Sparkles,
-  Sprout,
-  Users,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
+import { BookOpen, Briefcase, HeartPulse, Home, Sparkles, Sprout, Users, Wallet, type LucideIcon } from "lucide-react";
 
 import { Card, CardContent } from "@/app/components/ui/card";
 import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
@@ -76,7 +66,9 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
     <div className={`stack-stack ${className ?? ""}`}>
       <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Câu chuyện theo life area</h3>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            Câu chuyện theo life area
+          </h3>
           <p className="mt-1 text-xs text-app-ink-soft">
             Mỗi vùng đại diện một mảng cuộc sống. Vùng trống = cảm hứng đang thiếu.
           </p>

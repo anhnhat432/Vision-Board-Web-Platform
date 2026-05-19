@@ -58,7 +58,11 @@ async function fetchWithTimeout(input: RequestInfo, init: RequestInit): Promise<
   }
 }
 
-async function fetchWithToken(input: RequestInfo, init: RequestInit | undefined, token: string | null): Promise<Response> {
+async function fetchWithToken(
+  input: RequestInfo,
+  init: RequestInit | undefined,
+  token: string | null,
+): Promise<Response> {
   return fetchWithTimeout(input, {
     ...init,
     headers: createHeaders(init?.headers, token),

@@ -218,18 +218,18 @@ describe("two-device 12-week auto-sync integration", () => {
       expect(restoredGoal?.twelveWeekSystem?.weeklyReviews).toHaveLength(1);
     });
 
-await waitFor(() => {
-    expect(toastMock.success).toHaveBeenCalledTimes(1);
-  });
-  expect(toastMock.success).toHaveBeenCalledWith(
-    expect.stringContaining("1"),
-    expect.objectContaining({
-      description: expect.stringContaining("1"),
-    }),
-  );
+    await waitFor(() => {
+      expect(toastMock.success).toHaveBeenCalledTimes(1);
+    });
+    expect(toastMock.success).toHaveBeenCalledWith(
+      expect.stringContaining("1"),
+      expect.objectContaining({
+        description: expect.stringContaining("1"),
+      }),
+    );
 
-  // Toast component clears the summary after showing, so it should be null by now.
-  expect(mounted.getLatestState()?.firstLoginRestoreSummary).toBeNull();
+    // Toast component clears the summary after showing, so it should be null by now.
+    expect(mounted.getLatestState()?.firstLoginRestoreSummary).toBeNull();
   });
 
   it("surfaces concurrent edits instead of auto-overwriting either side", async () => {

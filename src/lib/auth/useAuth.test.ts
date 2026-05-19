@@ -19,9 +19,7 @@ beforeEach(() => {
 
 describe("resolveAuthErrorMessage", () => {
   it("explains missing Firebase Authentication setup", () => {
-    expect(resolveAuthErrorMessage({ code: "auth/configuration-not-found" })).toContain(
-      "Đăng nhập hiện chưa sẵn sàng",
-    );
+    expect(resolveAuthErrorMessage({ code: "auth/configuration-not-found" })).toContain("Đăng nhập hiện chưa sẵn sàng");
   });
 
   it("explains disabled sign-in providers", () => {

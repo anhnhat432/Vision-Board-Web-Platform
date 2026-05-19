@@ -1,8 +1,4 @@
-import type {
-  VisionBoardItemStyle,
-  VisionBoardSizePreset,
-  VisionBoardThemeId,
-} from "./storage-types";
+import type { VisionBoardItemStyle, VisionBoardSizePreset, VisionBoardThemeId } from "./storage-types";
 
 export interface VisionBoardTheme {
   id: VisionBoardThemeId;

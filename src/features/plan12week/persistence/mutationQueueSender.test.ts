@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  enqueueStoredMutation,
-  readMutationQueueStore,
-  type DataMutationItem,
-} from "./mutationQueue";
+import { enqueueStoredMutation, readMutationQueueStore, type DataMutationItem } from "./mutationQueue";
 import { sendPending12WeekMutations } from "./mutationQueueSender";
 import type { UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
 import type { TwelveWeekMutationBatchRequest, TwelveWeekMutationBatchResponse } from "@/services/syncService";
@@ -15,11 +11,7 @@ function at(minutes: number): string {
   return new Date(new Date(baseNow).getTime() + minutes * 60_000).toISOString();
 }
 
-function seedTaskMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  completed?: boolean;
-} = {}): void {
+function seedTaskMutation(input: { ownerUid?: string | null; mutationId?: string; completed?: boolean } = {}): void {
   enqueueStoredMutation(
     {
       kind: "task_completed_changed",
@@ -45,11 +37,7 @@ function seedTaskMutation(input: {
   );
 }
 
-function seedDailyCheckInMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  note?: string;
-} = {}): void {
+function seedDailyCheckInMutation(input: { ownerUid?: string | null; mutationId?: string; note?: string } = {}): void {
   const checkIn: UniversalDailyCheckIn = {
     date: "2026-04-30",
     didWorkToday: true,
@@ -83,11 +71,9 @@ function seedDailyCheckInMutation(input: {
   );
 }
 
-function seedWeeklyReviewMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  priority?: string;
-} = {}): void {
+function seedWeeklyReviewMutation(
+  input: { ownerUid?: string | null; mutationId?: string; priority?: string } = {},
+): void {
   const review: UniversalWeeklyReview = {
     weekNumber: 1,
     leadCompletionPercent: 80,
@@ -127,11 +113,9 @@ function seedWeeklyReviewMutation(input: {
   );
 }
 
-function seedPlanSnapshotMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  vision?: string;
-} = {}): void {
+function seedPlanSnapshotMutation(
+  input: { ownerUid?: string | null; mutationId?: string; vision?: string } = {},
+): void {
   enqueueStoredMutation(
     {
       kind: "plan_snapshot_updated",
@@ -189,11 +173,9 @@ function seedPlanSnapshotMutation(input: {
   );
 }
 
-function seedLeadMetricMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  currentValue?: number;
-} = {}): void {
+function seedLeadMetricMutation(
+  input: { ownerUid?: string | null; mutationId?: string; currentValue?: number } = {},
+): void {
   enqueueStoredMutation(
     {
       kind: "lead_metric_upserted",
@@ -227,11 +209,9 @@ function seedLeadMetricMutation(input: {
   );
 }
 
-function seedGoalDeleteMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  backendGoalId?: string;
-} = {}): void {
+function seedGoalDeleteMutation(
+  input: { ownerUid?: string | null; mutationId?: string; backendGoalId?: string } = {},
+): void {
   enqueueStoredMutation(
     {
       kind: "goal_deleted",
@@ -254,11 +234,9 @@ function seedGoalDeleteMutation(input: {
   );
 }
 
-function seedPlanDeleteMutation(input: {
-  ownerUid?: string | null;
-  mutationId?: string;
-  backendPlanId?: string;
-} = {}): void {
+function seedPlanDeleteMutation(
+  input: { ownerUid?: string | null; mutationId?: string; backendPlanId?: string } = {},
+): void {
   enqueueStoredMutation(
     {
       kind: "plan_deleted",
@@ -359,25 +337,26 @@ describe("mutation queue sender", () => {
     seedTaskMutation({ mutationId: "mutation_success" });
     const postMutations = vi.fn(
       async (request: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> => {
-      expect(request.mutations).toHaveLength(1);
-      expect(request.mutations[0]).toEqual(
-        expect.objectContaining({
-          mutationId: "mutation_success",
-          type: "task_completed_changed",
-          idempotencyKey: "user_1:device_1:mutation_success",
-        }),
-      );
-
-      return {
-        accepted: [
-          {
+        expect(request.mutations).toHaveLength(1);
+        expect(request.mutations[0]).toEqual(
+          expect.objectContaining({
             mutationId: "mutation_success",
             type: "task_completed_changed",
-            status: "accepted",
-          },
-        ],
-      };
-    });
+            idempotencyKey: "user_1:device_1:mutation_success",
+          }),
+        );
+
+        return {
+          accepted: [
+            {
+              mutationId: "mutation_success",
+              type: "task_completed_changed",
+              status: "accepted",
+            },
+          ],
+        };
+      },
+    );
 
     const result = await sendPending12WeekMutations({
       ownerUid: "user_1",
@@ -743,15 +722,17 @@ describe("mutation queue sender", () => {
 
   it("handles duplicate responses as safely succeeded", async () => {
     seedTaskMutation({ mutationId: "mutation_duplicate" });
-    const postMutations = vi.fn(async (): Promise<TwelveWeekMutationBatchResponse> => ({
-      duplicate: [
-        {
-          mutationId: "mutation_duplicate",
-          type: "task_completed_changed",
-          status: "duplicate",
-        },
-      ],
-    }));
+    const postMutations = vi.fn(
+      async (): Promise<TwelveWeekMutationBatchResponse> => ({
+        duplicate: [
+          {
+            mutationId: "mutation_duplicate",
+            type: "task_completed_changed",
+            status: "duplicate",
+          },
+        ],
+      }),
+    );
 
     const result = await sendPending12WeekMutations({
       ownerUid: "user_1",

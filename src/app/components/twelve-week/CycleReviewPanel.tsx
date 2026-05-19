@@ -23,11 +23,18 @@ interface CycleReviewPanelProps {
 const LESSON_FIELD_IDS = ["lesson-one", "lesson-two", "lesson-three"] as const;
 
 function sanitizeLessons(lessons: readonly string[]): string[] {
-  return lessons.map((lesson) => lesson.trim()).filter(Boolean).slice(0, 3);
+  return lessons
+    .map((lesson) => lesson.trim())
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 function EmptyListItem({ children }: { children: string }) {
-  return <li className="rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-[14px] text-app-ink-muted">{children}</li>;
+  return (
+    <li className="rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-[14px] text-app-ink-muted">
+      {children}
+    </li>
+  );
 }
 
 export function CycleReviewPanel({
@@ -39,10 +46,7 @@ export function CycleReviewPanel({
   aspirationalVisionSummary,
 }: CycleReviewPanelProps) {
   const [lessons, setLessons] = useState(["", "", ""]);
-  const summary = useMemo(
-    () => calculateCycleSummary(system, system.lagMetric, system.weeklyReviews),
-    [system],
-  );
+  const summary = useMemo(() => calculateCycleSummary(system, system.lagMetric, system.weeklyReviews), [system]);
   const sanitizedLessons = sanitizeLessons(lessons);
   const kpis = [
     { label: "Lag cuối cycle", value: `${summary.finalLagPercent}%`, icon: Trophy },
@@ -78,11 +82,7 @@ export function CycleReviewPanel({
               <RefreshCw className="mr-2 h-4 w-4" />
               Bắt đầu cycle mới
             </Button>
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={onOpenSettings}
-            >
+            <Button variant="outline" className="w-full sm:w-auto" onClick={onOpenSettings}>
               Mở cài đặt
             </Button>
           </>
@@ -93,7 +93,9 @@ export function CycleReviewPanel({
         </div>
         {aspirationalVisionSummary ? (
           <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[14px] text-app-ink-soft">
-            <p className="font-serif text-base font-medium text-app-ink">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
+            <p className="font-serif text-base font-medium text-app-ink">
+              Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?
+            </p>
             <p className="mt-1 text-app-ink-soft">{aspirationalVisionSummary}</p>
           </div>
         ) : null}
@@ -101,10 +103,7 @@ export function CycleReviewPanel({
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map(({ label, value, icon: Icon }) => (
-          <div
-            key={label}
-            className="rounded-card border border-app-line bg-app-surface p-4"
-          >
+          <div key={label} className="rounded-card border border-app-line bg-app-surface p-4">
             <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               <Icon className="h-3.5 w-3.5 text-app-accent" />
               {label}
@@ -122,7 +121,10 @@ export function CycleReviewPanel({
               <ul className="stack-tight">
                 {summary.biggestWins.length > 0 ? (
                   summary.biggestWins.map((win) => (
-                    <li key={win} className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-[14px] text-app-accent">
+                    <li
+                      key={win}
+                      className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-[14px] text-app-accent"
+                    >
                       {win}
                     </li>
                   ))
@@ -136,7 +138,10 @@ export function CycleReviewPanel({
               <ul className="stack-tight">
                 {summary.topAdjustments.length > 0 ? (
                   summary.topAdjustments.map((adjustment) => (
-                    <li key={adjustment} className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[14px] text-app-warm">
+                    <li
+                      key={adjustment}
+                      className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[14px] text-app-warm"
+                    >
                       {adjustment}
                     </li>
                   ))

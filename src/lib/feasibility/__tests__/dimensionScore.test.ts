@@ -1,8 +1,4 @@
-import {
-  calculateDimensionScore,
-  calculateDimensionScores,
-  type QuestionScoreAnswers,
-} from "@/lib/feasibility";
+import { calculateDimensionScore, calculateDimensionScores, type QuestionScoreAnswers } from "@/lib/feasibility";
 
 describe("dimensionScore", () => {
   it("calculates averaging rules for capacity/readiness/risk", () => {
@@ -48,10 +44,7 @@ describe("dimensionScore", () => {
     };
 
     // context = (0.333... * 0.8) + (0.8 * 0.2)
-    expect(calculateDimensionScore("context", answers, 80)).toBeCloseTo(
-      (1 / 3) * 0.8 + 0.8 * 0.2,
-      6,
-    );
+    expect(calculateDimensionScore("context", answers, 80)).toBeCloseTo((1 / 3) * 0.8 + 0.8 * 0.2, 6);
   });
 
   it("collects all normalized scores via calculateDimensionScores", () => {

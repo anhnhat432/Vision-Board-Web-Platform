@@ -72,9 +72,7 @@ function createEmptyWeek(weekNumber: number): Week {
   };
 }
 
-function _buildArchetypeLeadMetrics(
-  suggestions: readonly string[],
-): LeadMetric[] {
+function _buildArchetypeLeadMetrics(suggestions: readonly string[]): LeadMetric[] {
   return suggestions.map((name) => ({
     name,
     weeklyTarget: 0,
@@ -88,7 +86,7 @@ function buildArchetypeWeeks(
   userPreferences?: {
     tacticCount?: number;
     dailyTimeBudget?: string;
-  }
+  },
 ): Week[] {
   const defaults = getArchetypePlanFullDefaults(goalArchetype);
   const lowFeasibility = isLowFeasibility(feasibilityHint);
@@ -160,10 +158,7 @@ function weekOneTasksToTasks(tasks: WeekOneTask[]): Task[] {
   }));
 }
 
-export function generate12WeekPlan(
-  goal: Generate12WeekPlanInput,
-  options?: Generate12WeekPlanOptions,
-): Plan12Week {
+export function generate12WeekPlan(goal: Generate12WeekPlanInput, options?: Generate12WeekPlanOptions): Plan12Week {
   const goalArchetype = options?.goalArchetype;
   const weeks = goalArchetype
     ? buildArchetypeWeeks(goalArchetype, options?.feasibilityHint, options?.userPreferences)
@@ -177,4 +172,3 @@ export function generate12WeekPlan(
     weeks,
   };
 }
-

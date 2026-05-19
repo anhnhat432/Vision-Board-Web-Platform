@@ -113,52 +113,55 @@ export function useAuth(): UseAuthResult {
     return unsubscribe;
   }, []);
 
-  const login = useCallback(async (options?: LoginOptions): Promise<UserCredential | null> => {
-    const resolvedProvider = options?.provider ?? DEFAULT_LOGIN_OPTIONS.provider;
-    const resolvedMode = options?.mode ?? DEFAULT_LOGIN_OPTIONS.mode;
+  const login = useCallback(
+    async (options?: LoginOptions): Promise<UserCredential | null> => {
+      const resolvedProvider = options?.provider ?? DEFAULT_LOGIN_OPTIONS.provider;
+      const resolvedMode = options?.mode ?? DEFAULT_LOGIN_OPTIONS.mode;
 
-    setError(null);
-    setLoading(true);
+      setError(null);
+      setLoading(true);
 
-    try {
-      if (!isConfigured) {
-        return null;
-      }
+      try {
+        if (!isConfigured) {
+          return null;
+        }
 
-      if (resolvedProvider === "google") {
-        const credential = await loginWithGoogle();
+        if (resolvedProvider === "google") {
+          const credential = await loginWithGoogle();
+          if (credential) activateAuthenticatedUserData(credential.user.uid);
+          return credential;
+        }
+
+        const email = options?.email?.trim() ?? "";
+        const password = options?.password ?? "";
+
+        if (!email || !password) {
+          throw new Error("Vui lòng nhập email và mật khẩu.");
+        }
+
+        if (resolvedMode === "signup") {
+          const credential = await registerWithEmail(email, password);
+          if (credential) {
+            activateAuthenticatedUserData(credential.user.uid);
+            await recordSignupTermsAcceptance();
+          }
+          return credential;
+        }
+
+        const credential = await loginWithEmail(email, password);
         if (credential) activateAuthenticatedUserData(credential.user.uid);
         return credential;
+      } catch (nextError) {
+        const message = resolveAuthErrorMessage(nextError);
+        setError(message);
+        console.error("Login failed.", nextError);
+        return null;
+      } finally {
+        setLoading(false);
       }
-
-      const email = options?.email?.trim() ?? "";
-      const password = options?.password ?? "";
-
-      if (!email || !password) {
-        throw new Error("Vui lòng nhập email và mật khẩu.");
-      }
-
-      if (resolvedMode === "signup") {
-        const credential = await registerWithEmail(email, password);
-        if (credential) {
-          activateAuthenticatedUserData(credential.user.uid);
-          await recordSignupTermsAcceptance();
-        }
-        return credential;
-      }
-
-      const credential = await loginWithEmail(email, password);
-      if (credential) activateAuthenticatedUserData(credential.user.uid);
-      return credential;
-    } catch (nextError) {
-      const message = resolveAuthErrorMessage(nextError);
-      setError(message);
-      console.error("Login failed.", nextError);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [isConfigured]);
+    },
+    [isConfigured],
+  );
 
   const logout = useCallback(async () => {
     setError(null);

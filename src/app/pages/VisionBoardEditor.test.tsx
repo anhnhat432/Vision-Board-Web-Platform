@@ -77,7 +77,13 @@ vi.mock("../components/visuals/ProductVisual", () => ({
 }));
 
 vi.mock("../components/visionBoard/VisionBoardStoryWizard", () => ({
-  VisionBoardStoryWizard: ({ open, onComplete }: { open: boolean; onComplete: (seed: typeof storySeedMock) => void }) =>
+  VisionBoardStoryWizard: ({
+    open,
+    onComplete,
+  }: {
+    open: boolean;
+    onComplete: (seed: typeof storySeedMock) => void;
+  }) =>
     open ? (
       <div role="dialog" aria-label="Story Mode Wizard">
         <button type="button" onClick={() => onComplete(storySeedMock)}>
@@ -246,7 +252,12 @@ describe("VisionBoardEditor add dialog", () => {
     await user.click(screen.getByRole("button", { name: "Ghim mục tiêu vào bảng" }));
 
     expect(getCanvasItems()).toContainEqual(
-      expect.objectContaining({ type: "goal_card", content: "goal_1", lifeAreaId: "Health", style: { sizePreset: "M" } }),
+      expect.objectContaining({
+        type: "goal_card",
+        content: "goal_1",
+        lifeAreaId: "Health",
+        style: { sizePreset: "M" },
+      }),
     );
   });
 
@@ -276,7 +287,10 @@ describe("VisionBoardEditor add dialog", () => {
     await openAddDialog(user);
     await user.click(screen.getByRole("tab", { name: /Câu nói/ }));
     await user.click(screen.getByRole("button", { name: /Viết tay/ }));
-    await user.type(screen.getByPlaceholderText("Viết một câu nhắc nhở bạn muốn nhìn thấy mỗi ngày..."), "Tự do là chọn lựa");
+    await user.type(
+      screen.getByPlaceholderText("Viết một câu nhắc nhở bạn muốn nhìn thấy mỗi ngày..."),
+      "Tự do là chọn lựa",
+    );
     await user.click(screen.getByRole("button", { name: "Thêm câu nói vào bảng" }));
 
     expect(getCanvasItems()).toContainEqual(

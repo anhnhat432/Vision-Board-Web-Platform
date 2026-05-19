@@ -48,10 +48,7 @@ import {
   evaluateRescueTriggers,
   getLatestDailyCheckIn,
 } from "../utils/twelve-week-system-ui";
-import {
-  buildSuggestedNextWeekPlan,
-  buildWeeklyReviewPremiumInsight,
-} from "../utils/twelve-week-premium";
+import { buildSuggestedNextWeekPlan, buildWeeklyReviewPremiumInsight } from "../utils/twelve-week-premium";
 import { formatDateInputValue, getCalendarDateKey } from "../utils/storage";
 import {
   getExecutionInsights,
@@ -78,19 +75,23 @@ export function useTwelveWeekSystemSnapshot() {
   const [recentOutboxItems, setRecentOutboxItems] = useState<SyncOutboxItem[]>([]);
   const [funnelSteps, setFunnelSteps] = useState<FunnelStepSummary[]>([]);
   const [monetizationSteps, setMonetizationSteps] = useState<FunnelStepSummary[]>([]);
-  const [billingProviderStatus, setBillingProviderStatus] =
-    useState<BillingProviderStatus>(getBillingProviderStatus());
-  const [browserNotificationStatus, setBrowserNotificationStatus] =
-    useState<BrowserNotificationStatus>(getBrowserNotificationStatus());
+  const [billingProviderStatus, setBillingProviderStatus] = useState<BillingProviderStatus>(getBillingProviderStatus());
+  const [browserNotificationStatus, setBrowserNotificationStatus] = useState<BrowserNotificationStatus>(
+    getBrowserNotificationStatus(),
+  );
   const [lastSyncSnapshot, setLastSyncSnapshot] = useState<OutboxSyncSnapshot | null>(getLastOutboxSyncSnapshot());
-  const [lastEntitlementSyncSnapshot, setLastEntitlementSyncSnapshot] =
-    useState<BillingActionSnapshot | null>(getLastEntitlementSyncSnapshot());
-  const [lastRestoreAccessSnapshot, setLastRestoreAccessSnapshot] =
-    useState<BillingActionSnapshot | null>(getLastRestoreAccessSnapshot());
+  const [lastEntitlementSyncSnapshot, setLastEntitlementSyncSnapshot] = useState<BillingActionSnapshot | null>(
+    getLastEntitlementSyncSnapshot(),
+  );
+  const [lastRestoreAccessSnapshot, setLastRestoreAccessSnapshot] = useState<BillingActionSnapshot | null>(
+    getLastRestoreAccessSnapshot(),
+  );
   const [pendingOutboxCount, setPendingOutboxCount] = useState(0);
   const [archivedOutboxCount, setArchivedOutboxCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
-  const [activeSubscription, setActiveSubscription] = useState<import("../utils/storage-types").Subscription | null | undefined>(null);
+  const [activeSubscription, setActiveSubscription] = useState<
+    import("../utils/storage-types").Subscription | null | undefined
+  >(null);
 
   const loadGoalData = useCallback((preferredGoalId?: string) => {
     const data = getUserData();
@@ -109,7 +110,10 @@ export function useTwelveWeekSystemSnapshot() {
     setActiveReminders(getInAppReminders());
     setEventCount(data.eventLog.length);
     setPendingOutboxCount(data.syncOutbox.filter((item) => item.status === "pending").length);
-    setArchivedOutboxCount(data.syncOutbox.filter((item) => item.status === "archived" || item.status === "sent" || item.status === "failed").length);
+    setArchivedOutboxCount(
+      data.syncOutbox.filter((item) => item.status === "archived" || item.status === "sent" || item.status === "failed")
+        .length,
+    );
     setRecentOutboxItems(data.syncOutbox.slice(0, 3));
     setFunnelSteps(getTwelveWeekFunnelSummary(selectedGoal?.id));
     setMonetizationSteps(getTwelveWeekMonetizationSummary(selectedGoal?.id));
@@ -134,22 +138,23 @@ export function useTwelveWeekSystemSnapshot() {
     setActiveGoal((previousGoal) => {
       if (!previousGoal) return previousGoal;
       const nextGoal = updater(previousGoal);
-      setAllGoals((previousGoals) =>
-        previousGoals.map((goal) => (goal.id === nextGoal.id ? nextGoal : goal)),
-      );
+      setAllGoals((previousGoals) => previousGoals.map((goal) => (goal.id === nextGoal.id ? nextGoal : goal)));
       return nextGoal;
     });
   }, []);
 
-  const updateActiveSystemState = useCallback((updater: (system: TwelveWeekSystem) => TwelveWeekSystem) => {
-    updateActiveGoalState((goal) => {
-      if (!goal.twelveWeekSystem) return goal;
-      return {
-        ...goal,
-        twelveWeekSystem: updater(goal.twelveWeekSystem),
-      };
-    });
-  }, [updateActiveGoalState]);
+  const updateActiveSystemState = useCallback(
+    (updater: (system: TwelveWeekSystem) => TwelveWeekSystem) => {
+      updateActiveGoalState((goal) => {
+        if (!goal.twelveWeekSystem) return goal;
+        return {
+          ...goal,
+          twelveWeekSystem: updater(goal.twelveWeekSystem),
+        };
+      });
+    },
+    [updateActiveGoalState],
+  );
 
   const refreshSnapshotMeta = useCallback(() => {
     const data = getUserData();
@@ -194,192 +199,225 @@ export function useTwelveWeekSystemSnapshot() {
     invalidateOverlay,
   } = useBackendProgressOverlay(activeGoal?.id ?? null, system);
 
-  const currentWeek = useMemo(() =>
-    effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : 1
-  , [effectiveSystem]);
+  const currentWeek = useMemo(
+    () => (effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : 1),
+    [effectiveSystem],
+  );
 
-  const currentWeekRange = useMemo(() =>
-    effectiveSystem ? getTwelveWeekWeekRange(effectiveSystem, currentWeek) : null
-  , [effectiveSystem, currentWeek]);
+  const currentWeekRange = useMemo(
+    () => (effectiveSystem ? getTwelveWeekWeekRange(effectiveSystem, currentWeek) : null),
+    [effectiveSystem, currentWeek],
+  );
 
-  const currentWeekTasks = useMemo(() =>
-    effectiveSystem ? getTwelveWeekTasksForWeek(effectiveSystem, currentWeek) : []
-  , [effectiveSystem, currentWeek]);
+  const currentWeekTasks = useMemo(
+    () => (effectiveSystem ? getTwelveWeekTasksForWeek(effectiveSystem, currentWeek) : []),
+    [effectiveSystem, currentWeek],
+  );
 
-  const scheduledTodayTasks = useMemo(() =>
-    effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : []
-  , [effectiveSystem]);
+  const scheduledTodayTasks = useMemo(
+    () => (effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : []),
+    [effectiveSystem],
+  );
 
-  const missedTasks = useMemo(() =>
-    effectiveSystem ? getTwelveWeekMissedTasks(effectiveSystem) : []
-  , [effectiveSystem]);
+  const missedTasks = useMemo(
+    () => (effectiveSystem ? getTwelveWeekMissedTasks(effectiveSystem) : []),
+    [effectiveSystem],
+  );
 
   const snapshotTodayDateKey = useMemo(() => formatDateInputValue(new Date()), []);
 
-  const completedTodayTasks = useMemo(() =>
-    currentWeekTasks
-      .filter((task) => task.completed && !task.skipped && getCalendarDateKey(task.completedAt || "") === snapshotTodayDateKey)
-  , [currentWeekTasks, snapshotTodayDateKey]);
+  const completedTodayTasks = useMemo(
+    () =>
+      currentWeekTasks.filter(
+        (task) =>
+          task.completed && !task.skipped && getCalendarDateKey(task.completedAt || "") === snapshotTodayDateKey,
+      ),
+    [currentWeekTasks, snapshotTodayDateKey],
+  );
 
-  const fallbackTasks = useMemo(() =>
-    currentWeekTasks.filter((task) => !task.completed).slice(0, 3)
-  , [currentWeekTasks]);
+  const fallbackTasks = useMemo(
+    () => currentWeekTasks.filter((task) => !task.completed).slice(0, 3),
+    [currentWeekTasks],
+  );
 
-  const todayQueue = useMemo(() =>
-    dedupeTasks([
-      ...missedTasks.slice(0, 2),
-      ...completedTodayTasks,
-      ...(scheduledTodayTasks.length > 0 ? scheduledTodayTasks : fallbackTasks),
-    ])
-  , [missedTasks, completedTodayTasks, scheduledTodayTasks, fallbackTasks]);
+  const todayQueue = useMemo(
+    () =>
+      dedupeTasks([
+        ...missedTasks.slice(0, 2),
+        ...completedTodayTasks,
+        ...(scheduledTodayTasks.length > 0 ? scheduledTodayTasks : fallbackTasks),
+      ]),
+    [missedTasks, completedTodayTasks, scheduledTodayTasks, fallbackTasks],
+  );
 
-  const weekCompletion = useMemo(() =>
-    effectiveSystem
-      ? getTwelveWeekWeekCompletion(effectiveSystem, currentWeek)
-      : { completed: 0, total: 0, percent: 0 }
-  , [effectiveSystem, currentWeek]);
+  const weekCompletion = useMemo(
+    () =>
+      effectiveSystem
+        ? getTwelveWeekWeekCompletion(effectiveSystem, currentWeek)
+        : { completed: 0, total: 0, percent: 0 },
+    [effectiveSystem, currentWeek],
+  );
 
-  const currentReview = useMemo(() =>
-    effectiveSystem?.weeklyReviews.find((review) => review.weekNumber === currentWeek) ?? null
-  , [effectiveSystem, currentWeek]);
+  const currentReview = useMemo(
+    () => effectiveSystem?.weeklyReviews.find((review) => review.weekNumber === currentWeek) ?? null,
+    [effectiveSystem, currentWeek],
+  );
 
-  const currentScore = useMemo(() =>
-    effectiveSystem?.scoreboard.find((week) => week.weekNumber === currentWeek) ?? null
-  , [effectiveSystem, currentWeek]);
+  const currentScore = useMemo(
+    () => effectiveSystem?.scoreboard.find((week) => week.weekNumber === currentWeek) ?? null,
+    [effectiveSystem, currentWeek],
+  );
 
-  const currentPlan = useMemo(() =>
-    effectiveSystem?.weeklyPlans.find((plan) => plan.weekNumber === currentWeek) ?? null
-  , [effectiveSystem, currentWeek]);
+  const currentPlan = useMemo(
+    () => effectiveSystem?.weeklyPlans.find((plan) => plan.weekNumber === currentWeek) ?? null,
+    [effectiveSystem, currentWeek],
+  );
 
-  const currentPlanFocus = useMemo(() =>
-    currentPlan?.focus ?? DEFAULT_WEEK_FOCUS
-  , [currentPlan]);
+  const currentPlanFocus = useMemo(() => currentPlan?.focus ?? DEFAULT_WEEK_FOCUS, [currentPlan]);
 
-  const currentPlanMilestone = useMemo(() =>
-    currentPlan?.milestone ?? ""
-  , [currentPlan]);
+  const currentPlanMilestone = useMemo(() => currentPlan?.milestone ?? "", [currentPlan]);
 
-  const currentLagMetricValue = useMemo(() =>
-    currentReview?.lagProgressValue || effectiveSystem?.lagMetric.currentValue || ""
-  , [currentReview, effectiveSystem]);
+  const currentLagMetricValue = useMemo(
+    () => currentReview?.lagProgressValue || effectiveSystem?.lagMetric.currentValue || "",
+    [currentReview, effectiveSystem],
+  );
 
   const latestCheckIn = useMemo(() => getLatestDailyCheckIn(activeGoal), [activeGoal]);
 
-  const reviewDoneCount = useMemo(() =>
-    effectiveSystem?.scoreboard.filter((week) => week.reviewDone).length ?? 0
-  , [effectiveSystem]);
+  const reviewDoneCount = useMemo(
+    () => effectiveSystem?.scoreboard.filter((week) => week.reviewDone).length ?? 0,
+    [effectiveSystem],
+  );
 
-  const coreTacticCount = useMemo(() =>
-    effectiveSystem ? effectiveSystem.leadIndicators.filter((indicator) => indicator.type !== "optional").length : 0
-  , [effectiveSystem]);
+  const coreTacticCount = useMemo(
+    () =>
+      effectiveSystem ? effectiveSystem.leadIndicators.filter((indicator) => indicator.type !== "optional").length : 0,
+    [effectiveSystem],
+  );
 
-  const optionalTacticCount = useMemo(() =>
-    effectiveSystem ? effectiveSystem.leadIndicators.filter((indicator) => indicator.type === "optional").length : 0
-  , [effectiveSystem]);
+  const optionalTacticCount = useMemo(
+    () =>
+      effectiveSystem ? effectiveSystem.leadIndicators.filter((indicator) => indicator.type === "optional").length : 0,
+    [effectiveSystem],
+  );
 
-  const todayCompletedCount = useMemo(() =>
-    todayQueue.filter((task) => task.completed).length
-  , [todayQueue]);
+  const todayCompletedCount = useMemo(() => todayQueue.filter((task) => task.completed).length, [todayQueue]);
 
-  const todayRemainingCount = useMemo(() =>
-    todayQueue.filter((task) => !task.completed).length
-  , [todayQueue]);
+  const todayRemainingCount = useMemo(() => todayQueue.filter((task) => !task.completed).length, [todayQueue]);
 
-  const overdueOpenCount = useMemo(() =>
-    missedTasks.filter((task) => !task.completed).length
-  , [missedTasks]);
+  const overdueOpenCount = useMemo(() => missedTasks.filter((task) => !task.completed).length, [missedTasks]);
 
-  const currentWeekOpenTasks = useMemo(() =>
-    currentWeekTasks.filter((task) => !task.completed)
-  , [currentWeekTasks]);
+  const currentWeekOpenTasks = useMemo(() => currentWeekTasks.filter((task) => !task.completed), [currentWeekTasks]);
 
-  const optionalOpenThisWeekCount = useMemo(() =>
-    currentWeekOpenTasks.filter((task) => !task.isCore).length
-  , [currentWeekOpenTasks]);
+  const optionalOpenThisWeekCount = useMemo(
+    () => currentWeekOpenTasks.filter((task) => !task.isCore).length,
+    [currentWeekOpenTasks],
+  );
 
-  const openTodayTasks = useMemo(() =>
-    todayQueue.filter((task) => !task.completed)
-  , [todayQueue]);
+  const openTodayTasks = useMemo(() => todayQueue.filter((task) => !task.completed), [todayQueue]);
 
-  const firstPriorityTask = useMemo(() =>
-    openTodayTasks[0] ?? null
-  , [openTodayTasks]);
+  const firstPriorityTask = useMemo(() => openTodayTasks[0] ?? null, [openTodayTasks]);
 
-  const secondaryTodayTasks = useMemo(() =>
-    openTodayTasks.slice(1)
-  , [openTodayTasks]);
+  const secondaryTodayTasks = useMemo(() => openTodayTasks.slice(1), [openTodayTasks]);
 
   const averageScore = useMemo(() => {
     if (!effectiveSystem || effectiveSystem.scoreboard.length === 0) return 0;
     return Math.round(
-      effectiveSystem.scoreboard.reduce((sum, week) => sum + week.weeklyScore, 0) /
-      effectiveSystem.scoreboard.length
+      effectiveSystem.scoreboard.reduce((sum, week) => sum + week.weeklyScore, 0) / effectiveSystem.scoreboard.length,
     );
   }, [effectiveSystem]);
 
-  const reviewDueToday = useMemo(() =>
-    Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem))
-  , [effectiveSystem]);
+  const reviewDueToday = useMemo(
+    () => Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem)),
+    [effectiveSystem],
+  );
 
-  const currentWeekScoreValue = useMemo(() =>
-    currentScore?.weeklyScore ?? weekCompletion.percent
-  , [currentScore, weekCompletion.percent]);
+  const currentWeekScoreValue = useMemo(
+    () => currentScore?.weeklyScore ?? weekCompletion.percent,
+    [currentScore, weekCompletion.percent],
+  );
 
-  const reviewStatusLabel = useMemo(() =>
-    reviewDueToday
-      ? "Đến hạn hôm nay"
-      : `Review vào ${getReviewDayLabel(effectiveSystem?.reviewDay ?? "Sunday")}`
-  , [reviewDueToday, effectiveSystem]);
+  const reviewStatusLabel = useMemo(
+    () =>
+      reviewDueToday ? "Đến hạn hôm nay" : `Review vào ${getReviewDayLabel(effectiveSystem?.reviewDay ?? "Sunday")}`,
+    [reviewDueToday, effectiveSystem],
+  );
 
-  const coreIndicators = useMemo(() =>
-    effectiveSystem?.leadIndicators.filter((indicator) => indicator.type !== "optional") ?? []
-  , [effectiveSystem]);
+  const coreIndicators = useMemo(
+    () => effectiveSystem?.leadIndicators.filter((indicator) => indicator.type !== "optional") ?? [],
+    [effectiveSystem],
+  );
 
-  const optionalIndicators = useMemo(() =>
-    effectiveSystem?.leadIndicators.filter((indicator) => indicator.type === "optional") ?? []
-  , [effectiveSystem]);
+  const optionalIndicators = useMemo(
+    () => effectiveSystem?.leadIndicators.filter((indicator) => indicator.type === "optional") ?? [],
+    [effectiveSystem],
+  );
 
   const hasSmartRescue = useMemo(() => hasEntitlement("priority_reminders"), []);
 
-  const rescuePlanSummary = useMemo(() =>
-    buildRescuePlanSummary({ missedTasks, currentWeekTasks })
-  , [missedTasks, currentWeekTasks]);
+  const rescuePlanSummary = useMemo(
+    () => buildRescuePlanSummary({ missedTasks, currentWeekTasks }),
+    [missedTasks, currentWeekTasks],
+  );
 
-  const activeTriggers = useMemo(() =>
-    evaluateRescueTriggers({
-      system: effectiveSystem,
-      subscription: activeSubscription,
-      missedTasksCount: overdueOpenCount,
-      weekCompletionPercent: weekCompletion.percent,
-    })
-  , [effectiveSystem, activeSubscription, overdueOpenCount, weekCompletion.percent]);
+  const activeTriggers = useMemo(
+    () =>
+      evaluateRescueTriggers({
+        system: effectiveSystem,
+        subscription: activeSubscription,
+        missedTasksCount: overdueOpenCount,
+        weekCompletionPercent: weekCompletion.percent,
+      }),
+    [effectiveSystem, activeSubscription, overdueOpenCount, weekCompletion.percent],
+  );
 
   const hasPremiumReviewInsights = useMemo(() => hasEntitlement("premium_review_insights"), []);
 
-  const premiumReviewInsight = useMemo(() =>
-    buildWeeklyReviewPremiumInsight({
-      weekCompletionPercent: weekCompletion.percent,
-      currentScore: currentWeekScoreValue,
+  const premiumReviewInsight = useMemo(
+    () =>
+      buildWeeklyReviewPremiumInsight({
+        weekCompletionPercent: weekCompletion.percent,
+        currentScore: currentWeekScoreValue,
+        currentLagMetricValue,
+        missedTasksCount: overdueOpenCount,
+        coreTacticCount,
+        optionalTacticCount,
+        reviewDueToday,
+      }),
+    [
+      weekCompletion.percent,
+      currentWeekScoreValue,
       currentLagMetricValue,
-      missedTasksCount: overdueOpenCount,
+      overdueOpenCount,
       coreTacticCount,
       optionalTacticCount,
       reviewDueToday,
-    })
-  , [weekCompletion.percent, currentWeekScoreValue, currentLagMetricValue, overdueOpenCount, coreTacticCount, optionalTacticCount, reviewDueToday]);
+    ],
+  );
 
-  const suggestedNextWeekPlan = useMemo(() =>
-    buildSuggestedNextWeekPlan({
-      insight: premiumReviewInsight,
+  const suggestedNextWeekPlan = useMemo(
+    () =>
+      buildSuggestedNextWeekPlan({
+        insight: premiumReviewInsight,
+        currentPlanFocus,
+        currentPlanMilestone,
+        weekCompletionPercent: weekCompletion.percent,
+        currentScore: currentWeekScoreValue,
+        missedTasksCount: overdueOpenCount,
+        coreIndicators,
+        optionalIndicators,
+      }),
+    [
+      premiumReviewInsight,
       currentPlanFocus,
       currentPlanMilestone,
-      weekCompletionPercent: weekCompletion.percent,
-      currentScore: currentWeekScoreValue,
-      missedTasksCount: overdueOpenCount,
+      weekCompletion.percent,
+      currentWeekScoreValue,
+      overdueOpenCount,
       coreIndicators,
       optionalIndicators,
-    })
-  , [premiumReviewInsight, currentPlanFocus, currentPlanMilestone, weekCompletion.percent, currentWeekScoreValue, overdueOpenCount, coreIndicators, optionalIndicators]);
+    ],
+  );
 
   const hasAdvancedAnalytics = useMemo(() => hasEntitlement("advanced_analytics"), []);
   const executionHeatmap = useMemo(
@@ -445,13 +483,11 @@ export function useTwelveWeekSystemSnapshot() {
       const todayMs = Date.parse(`${todayKey}T00:00:00Z`);
       const endMs = Date.parse(`${end}T00:00:00Z`);
       const cappedTodayMs = Math.min(todayMs, endMs);
-      const daysElapsed = Number.isFinite(startMs) && Number.isFinite(cappedTodayMs)
-        ? Math.max(1, Math.round((cappedTodayMs - startMs) / 86_400_000) + 1)
-        : 7;
-      consistencyPercent = Math.min(
-        100,
-        Math.round((checkInsThisWeek / Math.min(daysElapsed, 7)) * 100),
-      );
+      const daysElapsed =
+        Number.isFinite(startMs) && Number.isFinite(cappedTodayMs)
+          ? Math.max(1, Math.round((cappedTodayMs - startMs) / 86_400_000) + 1)
+          : 7;
+      consistencyPercent = Math.min(100, Math.round((checkInsThisWeek / Math.min(daysElapsed, 7)) * 100));
     }
 
     return getNextWeekAdjustmentRecommendation({

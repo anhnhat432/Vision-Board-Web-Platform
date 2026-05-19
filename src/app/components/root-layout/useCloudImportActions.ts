@@ -125,9 +125,7 @@ export function useCloudImportActions({
     disabledMessage: "Đồng bộ dữ liệu tài khoản chưa được bật.",
   });
   const cloudImportAlreadyCompleted = Boolean(
-    userUid &&
-      localDataMigrationCandidate &&
-      hasCompletedCloudImport(userUid, localDataMigrationCandidate.fingerprint),
+    userUid && localDataMigrationCandidate && hasCompletedCloudImport(userUid, localDataMigrationCandidate.fingerprint),
   );
 
   const handleValidateCloudImport = useCallback(async (): Promise<CloudImportDryRunResult> => {

@@ -24,7 +24,9 @@ export function isAuthProtectedPath(pathname: string): boolean {
 }
 
 export function isPublicCheckoutPath(pathname: string): boolean {
-  return pathname === "/billing/confirm" || pathname === "/billing/checkout" || pathname.startsWith("/billing/checkout/");
+  return (
+    pathname === "/billing/confirm" || pathname === "/billing/checkout" || pathname.startsWith("/billing/checkout/")
+  );
 }
 
 export function isPublicHomePath(pathname: string): boolean {
@@ -32,7 +34,9 @@ export function isPublicHomePath(pathname: string): boolean {
 }
 
 export function isPublicLegalPath(pathname: string): boolean {
-  return pathname === "/terms" || pathname === "/privacy" || pathname === "/refund-policy" || pathname === "/billing/faq";
+  return (
+    pathname === "/terms" || pathname === "/privacy" || pathname === "/refund-policy" || pathname === "/billing/faq"
+  );
 }
 
 export function buildLoginRedirect(pathname: string, search: string, hash: string) {
@@ -56,8 +60,7 @@ export function resolveWorkspaceGateState({
   const canRenderWhileSignedOut =
     isPublicHome || isPublicLegalPath(pathname) || isAuthProtectedPath(pathname) || isPublicCheckoutPath(pathname);
   const hasUser = Boolean(user);
-  const shouldRedirectToLogin =
-    !demoMode && !authLoading && !hasUser && !canRenderWhileSignedOut;
+  const shouldRedirectToLogin = !demoMode && !authLoading && !hasUser && !canRenderWhileSignedOut;
   const shouldWaitForAuth = !demoMode && (!isPublicHome || hasUser) && authLoading;
   const shouldWaitForProfile =
     !demoMode && !authLoading && hasUser && (userProfileLoading || (!userProfile && !userProfileError));
@@ -68,7 +71,7 @@ export function resolveWorkspaceGateState({
       ? "auth"
       : shouldWaitForProfile
         ? "profile"
-      : "sync";
+        : "sync";
 
   return {
     shouldRedirectToLogin,

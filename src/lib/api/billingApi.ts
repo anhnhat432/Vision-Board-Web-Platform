@@ -66,10 +66,7 @@ export function hasServerPremiumAccess(snapshot: ServerEntitlementSnapshot | nul
  * Checks if a specific entitlement key is present in the server snapshot.
  * Returns false if the snapshot is null (safe fallback).
  */
-export function hasServerEntitlement(
-  snapshot: ServerEntitlementSnapshot | null,
-  key: EntitlementKey,
-): boolean {
+export function hasServerEntitlement(snapshot: ServerEntitlementSnapshot | null, key: EntitlementKey): boolean {
   if (!snapshot) return false;
   return snapshot.entitlements.includes(key);
 }

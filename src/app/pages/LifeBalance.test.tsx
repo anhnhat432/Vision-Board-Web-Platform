@@ -83,9 +83,7 @@ describe("LifeBalance", () => {
     seedCompletedZeroScoreWheel();
     const { router } = renderLifeBalance();
 
-    expect(
-      await screen.findByRole("heading", { level: 1, name: "Bức tranh hiện tại của bạn" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Bức tranh hiện tại của bạn" })).toBeInTheDocument();
     expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/life-balance");
   });

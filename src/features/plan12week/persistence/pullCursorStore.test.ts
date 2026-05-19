@@ -131,11 +131,15 @@ describe("pullCursorStore", () => {
 
   it("accepts explicit storage parameter", () => {
     const customStorage = localStorage;
-    writePullCursorState(userA, {
-      lastSuccessfulPullCursor: "cursor_custom",
-      lastPullAt: now,
-      lastPullStatus: "success",
-    }, customStorage);
+    writePullCursorState(
+      userA,
+      {
+        lastSuccessfulPullCursor: "cursor_custom",
+        lastPullAt: now,
+        lastPullStatus: "success",
+      },
+      customStorage,
+    );
 
     const state = readPullCursorState(userA, customStorage);
     expect(state.lastSuccessfulPullCursor).toBe("cursor_custom");

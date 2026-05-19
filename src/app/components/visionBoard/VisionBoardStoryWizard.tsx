@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
-import {
-  BookOpen,
-  Briefcase,
-  HeartPulse,
-  Home,
-  Sparkles,
-  Sprout,
-  Users,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
+import { BookOpen, Briefcase, HeartPulse, Home, Sparkles, Sprout, Users, Wallet, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
 import {

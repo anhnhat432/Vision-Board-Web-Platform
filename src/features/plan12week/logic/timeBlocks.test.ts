@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { TimeBlock } from "@/app/utils/storage-types";
-import {
-  getDefaultTimeBlocks,
-  getUpcomingStrategicBlock,
-  validateTimeBlocks,
-} from "./timeBlocks";
+import { getDefaultTimeBlocks, getUpcomingStrategicBlock, validateTimeBlocks } from "./timeBlocks";
 
 describe("timeBlocks", () => {
   it("returns the MVP default weekly Performance Time Blocking template", () => {

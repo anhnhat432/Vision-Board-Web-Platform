@@ -27,8 +27,11 @@ function buildSetupSteps(userData: UserData): SetupStep[] {
   const hasAnyGoal = userData.goals.length > 0;
   const hasInsight = hasLifeBalance && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea));
   const hasSmartGoal = hasInsight && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal));
-  const hasGoalWithFeasibility = userData.goals.some((goal) => Boolean(goal.feasibilityResult) || typeof goal.readinessScore === "number");
-  const hasFeasibility = hasSmartGoal && (hasGoalWithFeasibility || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult));
+  const hasGoalWithFeasibility = userData.goals.some(
+    (goal) => Boolean(goal.feasibilityResult) || typeof goal.readinessScore === "number",
+  );
+  const hasFeasibility =
+    hasSmartGoal && (hasGoalWithFeasibility || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult));
 
   return [
     {
@@ -74,7 +77,11 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
         </p>
       </section>
 
-      <section data-testid="fresh-workspace-empty-state" className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-new-user-title">
+      <section
+        data-testid="fresh-workspace-empty-state"
+        className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+        aria-labelledby="dashboard-new-user-title"
+      >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 id="dashboard-new-user-title" className="text-[16px] font-semibold text-app-ink">

@@ -22,24 +22,14 @@ export function getMetrics(weekId: string): Promise<Metric[]> {
   return get<Metric[]>(`/weeks/${weekId}/metrics`);
 }
 
-export function createMetric(
-  weekId: string,
-  payload: CreateMetricPayload,
-): Promise<Metric> {
+export function createMetric(weekId: string, payload: CreateMetricPayload): Promise<Metric> {
   return post<Metric, CreateMetricPayload>(`/weeks/${weekId}/metrics`, payload);
 }
 
-export function logMetric(
-  metricId: string,
-  payload: LogMetricPayload,
-): Promise<Metric> {
+export function logMetric(metricId: string, payload: LogMetricPayload): Promise<Metric> {
   return post<Metric, LogMetricPayload>(`/metrics/${metricId}/logs`, payload);
 }
 
-export function updateMetricLog(
-  metricId: string,
-  logId: string,
-  payload: UpdateMetricLogPayload,
-): Promise<Metric> {
+export function updateMetricLog(metricId: string, logId: string, payload: UpdateMetricLogPayload): Promise<Metric> {
   return patch<Metric, UpdateMetricLogPayload>(`/metrics/${metricId}/logs/${logId}`, payload);
 }

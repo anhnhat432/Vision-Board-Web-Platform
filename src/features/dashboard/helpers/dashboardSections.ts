@@ -21,7 +21,8 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     return {
       eyebrow: "Việc tiếp theo nên làm",
       title: "Bắt đầu hành trình",
-      description: "Chấm Cân bằng cuộc sống trước để Trang chính có dữ liệu thật, rồi mới chọn góc nhìn và mục tiêu SMART.",
+      description:
+        "Chấm Cân bằng cuộc sống trước để Trang chính có dữ liệu thật, rồi mới chọn góc nhìn và mục tiêu SMART.",
       ctaLabel: "Đánh giá cân bằng cuộc sống",
       ctaTarget: "/life-balance",
     };

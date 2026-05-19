@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AUTH_OWNER_STORAGE_KEY, CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES, STORAGE_KEY } from "./storage-constants";
+import {
+  AUTH_OWNER_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION,
+  DEFAULT_APP_PREFERENCES,
+  MOTIVATIONAL_QUOTES,
+  STORAGE_KEY,
+} from "./storage-constants";
 import { createEmptyUserData } from "./storage-demo-data";
 import { getScopedUserDataStorageKey } from "./storage-auth-scope";
 import {

@@ -49,12 +49,7 @@ import {
   type AdminReminderRunResult,
   type AdminUserSummary,
 } from "@/services/adminService";
-import {
-  adminGetOrders,
-  adminUpdateOrderStatus,
-  type ApiOrder,
-  type ApiOrderStatus,
-} from "@/services/orderService";
+import { adminGetOrders, adminUpdateOrderStatus, type ApiOrder, type ApiOrderStatus } from "@/services/orderService";
 
 const ADMIN_STATUS_TRANSITIONS: Record<ApiOrderStatus, ApiOrderStatus[]> = {
   pending: ["confirmed", "cancelled"],
@@ -236,7 +231,9 @@ function RecentPaymentList({
   payments: AdminPaymentOrderSummary[];
 }) {
   if (payments.length === 0) {
-    return <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán VietQR.</p>;
+    return (
+      <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán VietQR.</p>
+    );
   }
 
   return (
@@ -325,7 +322,13 @@ function PaymentRecoveryPanel({
               Dùng khi người dùng đã chuyển tiền nhưng Casso không match được nội dung chuyển khoản.
             </CardDescription>
           </div>
-          <Button type="button" variant="outline" className="rounded-[var(--r-control)]" disabled={loading} onClick={onRefresh}>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-[var(--r-control)]"
+            disabled={loading}
+            onClick={onRefresh}
+          >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Tải lại
           </Button>
@@ -371,7 +374,9 @@ function PaymentRecoveryPanel({
         </div>
 
         {payments.length === 0 ? (
-          <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Không tìm thấy đơn thanh toán phù hợp.</p>
+          <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">
+            Không tìm thấy đơn thanh toán phù hợp.
+          </p>
         ) : (
           <div className="overflow-hidden rounded-[var(--r-card)] border border-slate-100">
             <div className="hidden grid-cols-[1.1fr_1.2fr_0.8fr_0.8fr_1fr] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 lg:grid">
@@ -383,7 +388,8 @@ function PaymentRecoveryPanel({
             </div>
             <div className="divide-y divide-slate-100 bg-white">
               {payments.map((payment) => {
-                const canComplete = payment.status === "pending" || payment.status === "expired" || payment.status === "failed";
+                const canComplete =
+                  payment.status === "pending" || payment.status === "expired" || payment.status === "failed";
                 return (
                   <div
                     key={payment.orderId}
@@ -474,7 +480,13 @@ function RefundRequestsPanel({
               Danh sách yêu cầu hoàn tiền thủ công đang chờ admin duyệt và chuyển khoản.
             </CardDescription>
           </div>
-          <Button type="button" variant="outline" className="rounded-[var(--r-control)]" disabled={loading} onClick={onRefresh}>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-[var(--r-control)]"
+            disabled={loading}
+            onClick={onRefresh}
+          >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Tải lại
           </Button>
@@ -504,7 +516,9 @@ function RefundRequestsPanel({
                     <p className="mt-1 text-sm leading-6 text-slate-700">{request.reason}</p>
                   </div>
                   <div className="rounded-[var(--r-control)] bg-amber-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Tài khoản nhận hoàn tiền</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+                      Tài khoản nhận hoàn tiền
+                    </p>
                     <p className="mt-1 text-sm leading-6 text-amber-900">{request.refundAccount}</p>
                   </div>
                 </div>
@@ -591,7 +605,7 @@ function BillingReminderPanel({
               {expiringCount > 0
                 ? `${expiringCount.toLocaleString("vi-VN")} gói Plus sẽ hết hạn trong 7 ngày.`
                 : "Không có gói Plus nào sắp hết hạn trong 7 ngày."}{" "}
-              Nhà cung cấp email: {emailConfigured ? "đã cấu hình" : overview?.email.reason ?? "chưa cấu hình"}.
+              Nhà cung cấp email: {emailConfigured ? "đã cấu hình" : (overview?.email.reason ?? "chưa cấu hình")}.
             </p>
             {result ? (
               <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -617,14 +631,7 @@ function BillingReminderPanel({
 
 export function AdminOrdersPage() {
   const navigate = useNavigate();
-  const {
-    authLoading,
-    refreshUserProfile,
-    user,
-    userProfile,
-    userProfileError,
-    userProfileLoading,
-  } = useAuthContext();
+  const { authLoading, refreshUserProfile, user, userProfile, userProfileError, userProfileLoading } = useAuthContext();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [orders, setOrders] = useState<ApiOrder[]>([]);
   const [paymentOrders, setPaymentOrders] = useState<AdminPaymentOrderSummary[]>([]);
@@ -641,7 +648,9 @@ export function AdminOrdersPage() {
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
   const [busyPaymentOrderId, setBusyPaymentOrderId] = useState<string | null>(null);
   const [pendingManualPaymentOrderId, setPendingManualPaymentOrderId] = useState<string | null>(null);
-  const [manualPaymentNote, setManualPaymentNote] = useState("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
+  const [manualPaymentNote, setManualPaymentNote] = useState(
+    "Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.",
+  );
   const [pendingRefundAction, setPendingRefundAction] = useState<{
     request: AdminRefundRequestSummary;
     status: Extract<AdminRefundRequestSummary["status"], "completed" | "rejected">;
@@ -717,10 +726,7 @@ export function AdminOrdersPage() {
     void loadRefundRequests();
   }, [authLoading, isAdmin, loadAdminData, loadPaymentOrders, loadRefundRequests, user, userProfileLoading]);
 
-  const handlePaymentOrderSearch = (
-    nextQuery: string,
-    nextStatus: AdminPaymentOrderSummary["status"] | "all",
-  ) => {
+  const handlePaymentOrderSearch = (nextQuery: string, nextStatus: AdminPaymentOrderSummary["status"] | "all") => {
     setPaymentOrdersQuery(nextQuery);
     setPaymentOrdersStatus(nextStatus);
     void loadPaymentOrders(nextQuery, nextStatus);
@@ -783,7 +789,9 @@ export function AdminOrdersPage() {
     status: Extract<AdminRefundRequestSummary["status"], "completed" | "rejected">,
   ) => {
     setPendingRefundAction({ request, status });
-    setRefundAdminNote(status === "completed" ? "Đã chuyển khoản hoàn tiền thủ công." : "Không đủ điều kiện hoàn tiền.");
+    setRefundAdminNote(
+      status === "completed" ? "Đã chuyển khoản hoàn tiền thủ công." : "Không đủ điều kiện hoàn tiền.",
+    );
   };
 
   const confirmResolveRefundRequest = async () => {
@@ -799,7 +807,11 @@ export function AdminOrdersPage() {
       setRefundRequests((items) => items.filter((item) => item.id !== result.request.id));
       setPendingRefundAction(null);
       setRefundAdminNote("");
-      toast.success(status === "completed" ? `Đã đánh dấu hoàn tiền cho ${request.orderId}.` : `Đã từ chối hoàn tiền cho ${request.orderId}.`);
+      toast.success(
+        status === "completed"
+          ? `Đã đánh dấu hoàn tiền cho ${request.orderId}.`
+          : `Đã từ chối hoàn tiền cho ${request.orderId}.`,
+      );
       void loadRefundRequests();
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể xử lý yêu cầu hoàn tiền."));
@@ -839,7 +851,9 @@ export function AdminOrdersPage() {
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-slate-400" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Yêu cầu đăng nhập</h1>
-            <p className="mt-[var(--space-inline)] text-base text-slate-500">Bạn cần đăng nhập để truy cập trang quản trị.</p>
+            <p className="mt-[var(--space-inline)] text-base text-slate-500">
+              Bạn cần đăng nhập để truy cập trang quản trị.
+            </p>
             <Button className="mt-6" onClick={() => navigate("/login")}>
               Đăng nhập
             </Button>
@@ -977,7 +991,8 @@ export function AdminOrdersPage() {
               {pendingRefundAction?.status === "completed" ? "Xác nhận đã hoàn tiền?" : "Xác nhận từ chối hoàn tiền?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Đơn <span className="font-mono">{pendingRefundAction?.request.orderId ?? "—"}</span> · {pendingRefundAction?.request.contactEmail ?? "—"}
+              Đơn <span className="font-mono">{pendingRefundAction?.request.orderId ?? "—"}</span> ·{" "}
+              {pendingRefundAction?.request.contactEmail ?? "—"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-3">
@@ -987,7 +1002,9 @@ export function AdminOrdersPage() {
             </div>
             <div className="rounded-[var(--r-control)] bg-amber-50 p-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Tài khoản nhận hoàn tiền</p>
-              <p className="mt-1 text-sm leading-6 text-amber-900">{pendingRefundAction?.request.refundAccount ?? "—"}</p>
+              <p className="mt-1 text-sm leading-6 text-amber-900">
+                {pendingRefundAction?.request.refundAccount ?? "—"}
+              </p>
             </div>
             <div className="grid gap-2">
               <label htmlFor="refund-admin-note" className="text-sm font-medium text-slate-700">
@@ -1105,7 +1122,9 @@ export function AdminOrdersPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="text-base">Người dùng mới</CardTitle>
-            <CardDescription>Nhà cung cấp email: {overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}</CardDescription>
+            <CardDescription>
+              Nhà cung cấp email: {overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <RecentUserList users={overview?.recentUsers ?? []} />
@@ -1167,7 +1186,9 @@ export function AdminOrdersPage() {
               <EmptyOrdersIllustration className="mx-auto mb-4 w-40 text-app-accent opacity-80" />
               <ClipboardList className="mx-auto h-12 w-12 text-slate-300" />
               <h3 className="mt-6 text-xl font-semibold text-slate-900">Chưa có đơn hàng nào</h3>
-              <p className="mt-[var(--space-inline)] text-sm text-slate-500">Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có.</p>
+              <p className="mt-[var(--space-inline)] text-sm text-slate-500">
+                Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có.
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -1217,11 +1238,7 @@ export function AdminOrdersPage() {
                   ) : null}
 
                   <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                    <OrderActions
-                      order={order}
-                      busy={busyOrderId === order.id}
-                      onTransition={handleTransition}
-                    />
+                    <OrderActions order={order} busy={busyOrderId === order.id} onTransition={handleTransition} />
                   </div>
                 </CardContent>
               </Card>

@@ -35,9 +35,7 @@ describe("GoalArchetypeExamples", () => {
   });
 
   it("renders the lead indicator pair PLUS the week-1 starter for the lead_indicator variant", () => {
-    render(
-      <GoalArchetypeExamples archetype="health_fitness" variant="lead_indicator" defaultOpen />,
-    );
+    render(<GoalArchetypeExamples archetype="health_fitness" variant="lead_indicator" defaultOpen />);
     const panel = screen.getByTestId("goal-archetype-examples");
     expect(panel.textContent).toMatch(/Việc nhầm thành kết quả/i);
     expect(panel.textContent).toMatch(/Việc lặp lại tốt/i);

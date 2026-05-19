@@ -259,69 +259,72 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     setFirstLoginRestoreSummary(null);
   }, [fullSyncEnabled, ownerUid]);
 
-  const drainPendingMutations = useCallback(async (drainOptions: DrainPendingMutationsOptions = {}) => {
-    if (!drainSyncBaseReady || !isDocumentVisible() || !ownerUid) {
-      refreshPendingCount();
-      return null;
-    }
-
-    if (!drainOptions.allowDuringFullSync && inFlightRef.current) return null;
-    if (drainInFlightRef.current) return drainInFlightRef.current;
-
-    const currentPendingCount = getQueuePendingCount(ownerUid);
-    setPendingCount(currentPendingCount);
-    if (currentPendingCount <= 0) return null;
-    if (!drainOptions.bypassRateLimit && !hasElapsedSince(lastDrainStartedAtRef.current, minSyncIntervalMs)) {
-      return null;
-    }
-
-    console.log("[auto-sync] drain-only starting", { ownerUid, pendingCount: currentPendingCount });
-    lastDrainStartedAtRef.current = Date.now();
-    setDrainLoading(true);
-
-    const request = sendPending12WeekMutations({
-      ownerUid,
-      authenticated: true,
-      featureEnabled: mutationSyncEnabled,
-      realMode,
-      apiConfigured,
-      online: networkStatusInfo.isOnline,
-    })
-      .then((result) => {
+  const drainPendingMutations = useCallback(
+    async (drainOptions: DrainPendingMutationsOptions = {}) => {
+      if (!drainSyncBaseReady || !isDocumentVisible() || !ownerUid) {
         refreshPendingCount();
-        console.log("[auto-sync] drain-only finished", {
-          status: result.status,
-          attemptedCount: result.attemptedCount,
-          pendingCount: result.pendingCount,
-        });
+        return null;
+      }
 
-        if (shouldWarnForDrainResult(result)) {
-          console.warn("[auto-sync] drain-only finished with attention needed", {
+      if (!drainOptions.allowDuringFullSync && inFlightRef.current) return null;
+      if (drainInFlightRef.current) return drainInFlightRef.current;
+
+      const currentPendingCount = getQueuePendingCount(ownerUid);
+      setPendingCount(currentPendingCount);
+      if (currentPendingCount <= 0) return null;
+      if (!drainOptions.bypassRateLimit && !hasElapsedSince(lastDrainStartedAtRef.current, minSyncIntervalMs)) {
+        return null;
+      }
+
+      console.log("[auto-sync] drain-only starting", { ownerUid, pendingCount: currentPendingCount });
+      lastDrainStartedAtRef.current = Date.now();
+      setDrainLoading(true);
+
+      const request = sendPending12WeekMutations({
+        ownerUid,
+        authenticated: true,
+        featureEnabled: mutationSyncEnabled,
+        realMode,
+        apiConfigured,
+        online: networkStatusInfo.isOnline,
+      })
+        .then((result) => {
+          refreshPendingCount();
+          console.log("[auto-sync] drain-only finished", {
             status: result.status,
-            failedCount: result.failedCount,
+            attemptedCount: result.attemptedCount,
             pendingCount: result.pendingCount,
           });
-        }
 
-        return result;
-      })
-      .finally(() => {
-        drainInFlightRef.current = null;
-        setDrainLoading(false);
-      });
+          if (shouldWarnForDrainResult(result)) {
+            console.warn("[auto-sync] drain-only finished with attention needed", {
+              status: result.status,
+              failedCount: result.failedCount,
+              pendingCount: result.pendingCount,
+            });
+          }
 
-    drainInFlightRef.current = request;
-    return request;
-  }, [
-    apiConfigured,
-    drainSyncBaseReady,
-    minSyncIntervalMs,
-    mutationSyncEnabled,
-    networkStatusInfo.isOnline,
-    ownerUid,
-    realMode,
-    refreshPendingCount,
-  ]);
+          return result;
+        })
+        .finally(() => {
+          drainInFlightRef.current = null;
+          setDrainLoading(false);
+        });
+
+      drainInFlightRef.current = request;
+      return request;
+    },
+    [
+      apiConfigured,
+      drainSyncBaseReady,
+      minSyncIntervalMs,
+      mutationSyncEnabled,
+      networkStatusInfo.isOnline,
+      ownerUid,
+      realMode,
+      refreshPendingCount,
+    ],
+  );
 
   const triggerSyncNow = useCallback(async () => {
     if (fullSyncEnabled && ownerUid && userProfileReady && !networkStatusInfo.isOnline) {

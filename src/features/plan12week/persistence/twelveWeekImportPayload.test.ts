@@ -301,7 +301,10 @@ describe("createTwelveWeekImportPayload", () => {
     const secondPayload = createTwelveWeekImportPayload(goal);
 
     expect(secondPayload).toEqual(firstPayload);
-    expect(firstPayload?.plan.tasks.map((task) => task.clientTaskId)).toEqual(["task_launch_brief_1", "task_user_call_1"]);
+    expect(firstPayload?.plan.tasks.map((task) => task.clientTaskId)).toEqual([
+      "task_launch_brief_1",
+      "task_user_call_1",
+    ]);
     expect(firstPayload?.plan.weeks.map((week) => week.clientWeekId)).toEqual([
       "goal_mvp2_sync:week:1",
       "goal_mvp2_sync:week:2",

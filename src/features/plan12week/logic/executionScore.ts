@@ -39,4 +39,3 @@ export function calculateLagScore(lagMetric: LagMetric, weekNumber: number, tota
 
   return clampPercentage((currentValue / clampedExpectedSoFar) * 100);
 }
-

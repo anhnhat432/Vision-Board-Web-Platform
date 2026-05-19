@@ -1,9 +1,4 @@
-﻿import type {
-  PendingSMARTGoal,
-  SmartGoal,
-  SmartGoalDomain,
-  SmartGoalSummary,
-} from "./types";
+﻿import type { PendingSMARTGoal, SmartGoal, SmartGoalDomain, SmartGoalSummary } from "./types";
 
 export interface BuildSmartGoalInput {
   focusArea: string;
@@ -94,9 +89,7 @@ function normalizeMetricUnit(value: unknown): string | undefined {
 function extractNumbersFromText(value: string): number[] {
   const matches = value.match(/-?\d+(?:\.\d+)?/g) ?? [];
 
-  return matches
-    .map((item) => Number(item))
-    .filter((item) => Number.isFinite(item));
+  return matches.map((item) => Number(item)).filter((item) => Number.isFinite(item));
 }
 
 function extractDateFromText(value: string): string | undefined {
@@ -108,9 +101,7 @@ function parseMetricLabel(value: string): { metricName: string; metricUnit?: str
   const normalized = cleanText(value);
   if (!normalized) return { metricName: "" };
 
-  const label = normalized.includes(":")
-    ? cleanText(normalized.slice(0, normalized.indexOf(":")))
-    : normalized;
+  const label = normalized.includes(":") ? cleanText(normalized.slice(0, normalized.indexOf(":"))) : normalized;
 
   const unitMatch = label.match(/^(.*)\(([^)]+)\)$/);
   if (!unitMatch) {
@@ -233,10 +224,7 @@ function buildGoalSummary(goal: SmartGoal): SmartGoalSummary {
   return summary;
 }
 
-function toSmartGoalFromUnknown(
-  value: Record<string, unknown>,
-  fallbackFocusArea: string,
-): SmartGoal | null {
+function toSmartGoalFromUnknown(value: Record<string, unknown>, fallbackFocusArea: string): SmartGoal | null {
   if (!hasAnySmartGoalPayload(value)) {
     return null;
   }
@@ -255,13 +243,9 @@ function toSmartGoalFromUnknown(
 
   const parsedLegacyMeasurable = parseLegacyMeasurableText(legacyMeasurable);
 
-  const baselineValue =
-    normalizeNumber(measurableSection?.baseline_value) ?? parsedLegacyMeasurable.baselineValue;
-  const explicitTargetValue =
-    normalizeNumber(measurableSection?.target_value) ?? parsedLegacyMeasurable.targetValue;
-  const targetValue =
-    explicitTargetValue ??
-    (baselineValue !== undefined ? baselineValue + 1 : DEFAULT_TARGET_VALUE);
+  const baselineValue = normalizeNumber(measurableSection?.baseline_value) ?? parsedLegacyMeasurable.baselineValue;
+  const explicitTargetValue = normalizeNumber(measurableSection?.target_value) ?? parsedLegacyMeasurable.targetValue;
+  const targetValue = explicitTargetValue ?? (baselineValue !== undefined ? baselineValue + 1 : DEFAULT_TARGET_VALUE);
 
   const weeklyTimeCommitmentHours =
     normalizeNumber(achievableSection?.weekly_time_commitment_hours) ??
@@ -278,21 +262,16 @@ function toSmartGoalFromUnknown(
   const rawTargetDate =
     (typeof timeBoundSection?.target_date === "string" && cleanText(timeBoundSection.target_date)) ||
     extractDateFromText(legacyTimeBound);
-  const rawTargetWeeks =
-    normalizeNumber(timeBoundSection?.target_weeks) ?? extractNumbersFromText(legacyTimeBound)[0];
+  const rawTargetWeeks = normalizeNumber(timeBoundSection?.target_weeks) ?? extractNumbersFromText(legacyTimeBound)[0];
 
   const rawGoal: SmartGoal = {
     id: typeof value.id === "string" ? cleanText(value.id) || createSmartGoalId() : createSmartGoalId(),
     domain: isSmartGoalDomain(value.domain)
       ? value.domain
-      : mapFocusAreaToDomain(
-          typeof value.focusArea === "string" ? value.focusArea : fallbackFocusArea,
-        ),
+      : mapFocusAreaToDomain(typeof value.focusArea === "string" ? value.focusArea : fallbackFocusArea),
     specific: {
       goal_statement:
-        (typeof specificSection?.goal_statement === "string" && specificSection.goal_statement) ||
-        legacySpecific ||
-        "",
+        (typeof specificSection?.goal_statement === "string" && specificSection.goal_statement) || legacySpecific || "",
     },
     measurable: {
       metric_name:
@@ -308,8 +287,7 @@ function toSmartGoalFromUnknown(
     },
     relevant: {
       motivation_reason:
-        (typeof relevantSection?.motivation_reason === "string" &&
-          relevantSection.motivation_reason) ||
+        (typeof relevantSection?.motivation_reason === "string" && relevantSection.motivation_reason) ||
         legacyRelevant ||
         "",
     },
@@ -318,13 +296,10 @@ function toSmartGoalFromUnknown(
       target_weeks: rawTargetWeeks,
     },
     created_at:
-      typeof value.created_at === "string" && cleanText(value.created_at)
-        ? value.created_at
-        : new Date().toISOString(),
+      typeof value.created_at === "string" && cleanText(value.created_at) ? value.created_at : new Date().toISOString(),
   };
 
-  const metricUnit =
-    normalizeMetricUnit(measurableSection?.metric_unit) ?? parsedLegacyMeasurable.metricUnit;
+  const metricUnit = normalizeMetricUnit(measurableSection?.metric_unit) ?? parsedLegacyMeasurable.metricUnit;
   if (metricUnit) {
     rawGoal.measurable.metric_unit = metricUnit;
   }
@@ -337,9 +312,7 @@ function toSmartGoalFromUnknown(
     typeof relevantSection?.life_dimension_alignment === "string" &&
     cleanText(relevantSection.life_dimension_alignment)
   ) {
-    rawGoal.relevant.life_dimension_alignment = cleanText(
-      relevantSection.life_dimension_alignment,
-    );
+    rawGoal.relevant.life_dimension_alignment = cleanText(relevantSection.life_dimension_alignment);
   }
 
   return normalizeSmartGoal(rawGoal);
@@ -348,23 +321,15 @@ function toSmartGoalFromUnknown(
 function formatMeasurable(goal: SmartGoal): string {
   const metricName = cleanText(goal.measurable.metric_name);
   const metricUnit = normalizeMetricUnit(goal.measurable.metric_unit);
-  const metricLabel = metricName
-    ? metricUnit
-      ? `${metricName} (${metricUnit})`
-      : metricName
-    : "";
+  const metricLabel = metricName ? (metricUnit ? `${metricName} (${metricUnit})` : metricName) : "";
   const targetValue = formatNumber(goal.measurable.target_value);
   const baselineValue =
-    goal.measurable.baseline_value !== undefined
-      ? formatNumber(goal.measurable.baseline_value)
-      : null;
+    goal.measurable.baseline_value !== undefined ? formatNumber(goal.measurable.baseline_value) : null;
 
   if (!metricLabel && !targetValue) return "";
 
   if (baselineValue !== null) {
-    return metricLabel
-      ? `${metricLabel}: ${baselineValue} -> ${targetValue}`
-      : `${baselineValue} -> ${targetValue}`;
+    return metricLabel ? `${metricLabel}: ${baselineValue} -> ${targetValue}` : `${baselineValue} -> ${targetValue}`;
   }
 
   return metricLabel ? `${metricLabel}: ${targetValue}` : targetValue;
@@ -380,9 +345,7 @@ function formatAchievable(goal: SmartGoal): string {
     parts.push(`${formatNumber(goal.achievable.weekly_time_commitment_hours)} giờ/tuần`);
   }
 
-  const requiredSkills = goal.achievable.required_skills
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
+  const requiredSkills = goal.achievable.required_skills.map((item) => item.trim()).filter((item) => item.length > 0);
 
   if (requiredSkills.length > 0) {
     parts.push(`Kỹ năng: ${requiredSkills.join(", ")}`);
@@ -404,10 +367,7 @@ function formatTimeBound(goal: SmartGoal): string {
     return `Mốc đến ${goal.time_bound.target_date}`;
   }
 
-  if (
-    goal.time_bound.target_weeks !== undefined &&
-    Number.isFinite(goal.time_bound.target_weeks)
-  ) {
+  if (goal.time_bound.target_weeks !== undefined && Number.isFinite(goal.time_bound.target_weeks)) {
     return `Trong ${formatNumber(goal.time_bound.target_weeks)} tuần`;
   }
 
@@ -468,12 +428,9 @@ export function createSmartGoalId(now = new Date()): string {
   return `smart_goal_${now.getTime()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function normalizeTimeBound(
-  timeBound: SmartGoal["time_bound"] | undefined,
-): SmartGoal["time_bound"] {
+export function normalizeTimeBound(timeBound: SmartGoal["time_bound"] | undefined): SmartGoal["time_bound"] {
   const targetWeeks = normalizePositiveNumber(timeBound?.target_weeks);
-  const targetDate =
-    typeof timeBound?.target_date === "string" ? cleanText(timeBound.target_date) : "";
+  const targetDate = typeof timeBound?.target_date === "string" ? cleanText(timeBound.target_date) : "";
 
   if (targetWeeks !== undefined) {
     return { target_weeks: targetWeeks };
@@ -495,9 +452,7 @@ export function normalizeSmartGoal(goal: SmartGoal): SmartGoal {
     },
     measurable: normalizeMeasurableSection(goal.measurable),
     achievable: {
-      weekly_time_commitment_hours: clampWeeklyTimeCommitmentHours(
-        goal.achievable.weekly_time_commitment_hours,
-      ),
+      weekly_time_commitment_hours: clampWeeklyTimeCommitmentHours(goal.achievable.weekly_time_commitment_hours),
       required_skills: normalizeStringArray(goal.achievable.required_skills),
       support_resources: normalizeStringArray(goal.achievable.support_resources),
     },
@@ -509,9 +464,7 @@ export function normalizeSmartGoal(goal: SmartGoal): SmartGoal {
   };
 
   if (goal.relevant.life_dimension_alignment?.trim()) {
-    normalizedGoal.relevant.life_dimension_alignment = cleanText(
-      goal.relevant.life_dimension_alignment,
-    );
+    normalizedGoal.relevant.life_dimension_alignment = cleanText(goal.relevant.life_dimension_alignment);
   }
 
   normalizedGoal.goal_summary = buildGoalSummary(normalizedGoal);
@@ -519,10 +472,7 @@ export function normalizeSmartGoal(goal: SmartGoal): SmartGoal {
   return normalizedGoal;
 }
 
-export function parseSmartGoal(
-  value: unknown,
-  fallbackFocusArea: string,
-): SmartGoal | null {
+export function parseSmartGoal(value: unknown, fallbackFocusArea: string): SmartGoal | null {
   if (!isObjectRecord(value)) {
     return null;
   }
@@ -611,8 +561,7 @@ export function isSmartGoal(value: unknown): value is SmartGoal {
       typeof goalSummary.weekly_commitment === "number" &&
       Number.isFinite(goalSummary.weekly_commitment) &&
       (goalSummary.timeline_weeks === undefined ||
-        (typeof goalSummary.timeline_weeks === "number" &&
-          Number.isFinite(goalSummary.timeline_weeks))) &&
+        (typeof goalSummary.timeline_weeks === "number" && Number.isFinite(goalSummary.timeline_weeks))) &&
       (goalSummary.difficulty === undefined ||
         goalSummary.difficulty === "easy" ||
         goalSummary.difficulty === "medium" ||
@@ -626,8 +575,7 @@ export function isSmartGoal(value: unknown): value is SmartGoal {
     (metricUnit === undefined || typeof metricUnit === "string") &&
     typeof measurable.target_value === "number" &&
     Number.isFinite(measurable.target_value) &&
-    (baselineValue === undefined ||
-      (typeof baselineValue === "number" && Number.isFinite(baselineValue))) &&
+    (baselineValue === undefined || (typeof baselineValue === "number" && Number.isFinite(baselineValue))) &&
     typeof achievable.weekly_time_commitment_hours === "number" &&
     Number.isFinite(achievable.weekly_time_commitment_hours) &&
     Array.isArray(achievable.required_skills) &&
@@ -635,11 +583,9 @@ export function isSmartGoal(value: unknown): value is SmartGoal {
     Array.isArray(achievable.support_resources) &&
     achievable.support_resources.every((item) => typeof item === "string") &&
     typeof relevant.motivation_reason === "string" &&
-    (relevant.life_dimension_alignment === undefined ||
-      typeof relevant.life_dimension_alignment === "string") &&
+    (relevant.life_dimension_alignment === undefined || typeof relevant.life_dimension_alignment === "string") &&
     (targetDate === undefined || typeof targetDate === "string") &&
-    (targetWeeks === undefined ||
-      (typeof targetWeeks === "number" && Number.isFinite(targetWeeks))) &&
+    (targetWeeks === undefined || (typeof targetWeeks === "number" && Number.isFinite(targetWeeks))) &&
     typeof value.created_at === "string" &&
     hasValidGoalSummary
   );
@@ -671,10 +617,7 @@ export function toPendingSMARTGoal(goal: SmartGoal, focusArea: string): PendingS
   };
 }
 
-export function parsePendingSMARTGoal(
-  value: unknown,
-  fallbackFocusArea: string,
-): PendingSMARTGoal | null {
+export function parsePendingSMARTGoal(value: unknown, fallbackFocusArea: string): PendingSMARTGoal | null {
   if (isPendingSMARTGoal(value)) {
     return {
       focusArea: cleanText(value.focusArea) || fallbackFocusArea,
@@ -688,8 +631,7 @@ export function parsePendingSMARTGoal(
 
   if (isObjectRecord(value) && looksLikeLegacyPendingSmartGoal(value)) {
     return {
-      focusArea:
-        (typeof value.focusArea === "string" && cleanText(value.focusArea)) || fallbackFocusArea,
+      focusArea: (typeof value.focusArea === "string" && cleanText(value.focusArea)) || fallbackFocusArea,
       specific: typeof value.specific === "string" ? cleanText(value.specific) : "",
       measurable: typeof value.measurable === "string" ? cleanText(value.measurable) : "",
       achievable: typeof value.achievable === "string" ? cleanText(value.achievable) : "",

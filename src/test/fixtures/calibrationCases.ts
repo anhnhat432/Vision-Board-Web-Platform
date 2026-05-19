@@ -1,8 +1,5 @@
 import type { BuildSmartGoalInput } from "@/lib/smart-goal";
-import type {
-  GoalClarityLevel,
-  CalibratedDifficulty,
-} from "@/lib/smart-goal/quality";
+import type { GoalClarityLevel, CalibratedDifficulty } from "@/lib/smart-goal/quality";
 import type {
   PlanQualityLevel,
   WeekOneLoadLevel,
@@ -70,8 +67,7 @@ export const CALIBRATION_CASES: CalibrationCase[] = [
       achievableWeeklyTimeCommitmentHours: 4,
       achievableRequiredSkills: ["Phản hồi xây dựng"],
       achievableSupportResources: ["Mentor cấp Senior"],
-      relevantMotivationReason:
-        "Đội nhóm đang mất nhịp giao tiếp, mình muốn cải thiện điều đó trước khi mất người.",
+      relevantMotivationReason: "Đội nhóm đang mất nhịp giao tiếp, mình muốn cải thiện điều đó trước khi mất người.",
       timeBoundTargetWeeks: 12,
     },
     expectedClarityLevel: "moderate",
@@ -145,8 +141,7 @@ export const CALIBRATION_CASES: CalibrationCase[] = [
       achievableWeeklyTimeCommitmentHours: 5,
       achievableRequiredSkills: [],
       achievableSupportResources: [],
-      relevantMotivationReason:
-        "Tôi đã chán cảm giác giậm chân tại chỗ và muốn tạo ra thay đổi rõ ràng cho đời mình.",
+      relevantMotivationReason: "Tôi đã chán cảm giác giậm chân tại chỗ và muốn tạo ra thay đổi rõ ràng cho đời mình.",
       // No timeBoundTargetWeeks, no timeBoundTargetDate.
     },
     expectedClarityLevel: "weak",

@@ -1,20 +1,14 @@
 import type { Reflection, UserData } from "./storage-types";
 import { generateId } from "./storage-types";
 
-export function addReflectionToData(
-  data: UserData,
-  reflection: Omit<Reflection, "id">,
-): void {
+export function addReflectionToData(data: UserData, reflection: Omit<Reflection, "id">): void {
   data.reflections.unshift({
     ...reflection,
     id: generateId("reflection"),
   });
 }
 
-export function upsertReflectionInData(
-  data: UserData,
-  reflection: Omit<Reflection, "id">,
-): void {
+export function upsertReflectionInData(data: UserData, reflection: Omit<Reflection, "id">): void {
   const existingIndex = data.reflections.findIndex(
     (item) =>
       item.entryType === reflection.entryType &&

@@ -7,11 +7,17 @@ interface ReflectionPromptProps {
 
 export function ReflectionPrompt({ currentWeek, reviewHref }: ReflectionPromptProps) {
   return (
-    <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-labelledby="dashboard-reflection-title">
+    <section
+      className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+      aria-labelledby="dashboard-reflection-title"
+    >
       <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
         Đến lúc nhìn lại tuần
       </span>
-      <h2 id="dashboard-reflection-title" className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong">
+      <h2
+        id="dashboard-reflection-title"
+        className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong"
+      >
         Tuần {currentWeek ?? "--"} vừa qua, đâu là khoảnh khắc làm bạn tự hào nhất?
       </h2>
       <Link

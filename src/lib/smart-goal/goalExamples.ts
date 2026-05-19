@@ -57,8 +57,7 @@ const GOAL_EXAMPLES: Record<GoalArchetype, ArchetypeExample> = {
   health_fitness: {
     archetype: "health_fitness",
     weakGoal: "Khỏe hơn và giảm cân trong vài tháng.",
-    strongerGoal:
-      "Trong 12 tuần, tập đều 3 buổi/tuần và giảm 3-4 kg, giữ nhịp ngủ ≥ 6 giờ/đêm tối thiểu 5 đêm/tuần.",
+    strongerGoal: "Trong 12 tuần, tập đều 3 buổi/tuần và giảm 3-4 kg, giữ nhịp ngủ ≥ 6 giờ/đêm tối thiểu 5 đêm/tuần.",
     goodMetric: "Số buổi tập hoàn thành mỗi tuần và cân nặng đo cùng giờ thứ Hai mỗi tuần.",
     badMetric: "Cảm giác khỏe hơn (chủ quan, không so sánh được giữa các tuần).",
     goodLeadIndicator: "Đi bộ hoặc tập 30 phút, 3 buổi cố định mỗi tuần.",
@@ -129,8 +128,7 @@ const GOAL_EXAMPLES: Record<GoalArchetype, ArchetypeExample> = {
   creative_output: {
     archetype: "creative_output",
     weakGoal: "Trở thành writer giỏi và có nhiều người đọc.",
-    strongerGoal:
-      "Trong 12 tuần, xuất bản 12 bài blog (1 bài/tuần) trên nền tảng cá nhân, mỗi bài 600-1200 từ.",
+    strongerGoal: "Trong 12 tuần, xuất bản 12 bài blog (1 bài/tuần) trên nền tảng cá nhân, mỗi bài 600-1200 từ.",
     goodMetric: "Số bài đã xuất bản mỗi tuần và tổng số bài cuối chu kỳ.",
     badMetric: "Số người đăng ký theo dõi (phụ thuộc thuật toán + thời gian, không kiểm soát hết).",
     goodLeadIndicator: "Viết bản nháp 600 từ vào tối thứ Tư và xuất bản vào sáng thứ Bảy mỗi tuần.",

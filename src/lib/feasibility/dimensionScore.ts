@@ -24,10 +24,7 @@ function getWheelNormalizedScore(wheelScore: number): number {
   return clampToUnitInterval(normalizedWheel);
 }
 
-function getNormalizedQuestionScore(
-  answers: QuestionScoreAnswers,
-  questionId: number,
-): number {
+function getNormalizedQuestionScore(answers: QuestionScoreAnswers, questionId: number): number {
   return normalizeQuestionScore(answers[questionId] ?? 1);
 }
 
@@ -44,22 +41,14 @@ export function calculateDimensionScore(
   switch (dimensionKey) {
     case "capacity":
       return averageNormalizedScores(
-        DIMENSION_QUESTION_IDS.capacity.map((id) =>
-          getNormalizedQuestionScore(answers, id),
-        ),
+        DIMENSION_QUESTION_IDS.capacity.map((id) => getNormalizedQuestionScore(answers, id)),
       );
     case "readiness":
       return averageNormalizedScores(
-        DIMENSION_QUESTION_IDS.readiness.map((id) =>
-          getNormalizedQuestionScore(answers, id),
-        ),
+        DIMENSION_QUESTION_IDS.readiness.map((id) => getNormalizedQuestionScore(answers, id)),
       );
     case "risk":
-      return averageNormalizedScores(
-        DIMENSION_QUESTION_IDS.risk.map((id) =>
-          getNormalizedQuestionScore(answers, id),
-        ),
-      );
+      return averageNormalizedScores(DIMENSION_QUESTION_IDS.risk.map((id) => getNormalizedQuestionScore(answers, id)));
     case "context": {
       const contextQuestionScore = getNormalizedQuestionScore(answers, CONTEXT_QUESTION_ID);
       const wheelNormalized = getWheelNormalizedScore(wheelScore);
@@ -70,10 +59,7 @@ export function calculateDimensionScore(
   }
 }
 
-export function calculateDimensionScores(
-  answers: QuestionScoreAnswers,
-  wheelScore: number,
-): DimensionScores {
+export function calculateDimensionScores(answers: QuestionScoreAnswers, wheelScore: number): DimensionScores {
   return {
     capacity: calculateDimensionScore("capacity", answers, wheelScore),
     readiness: calculateDimensionScore("readiness", answers, wheelScore),

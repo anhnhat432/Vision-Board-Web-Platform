@@ -194,9 +194,7 @@ export function adminRejectRefundRequest(
   );
 }
 
-export function adminSendExpiringBillingReminders(
-  payload: AdminReminderRequest = {},
-): Promise<AdminReminderRunResult> {
+export function adminSendExpiringBillingReminders(payload: AdminReminderRequest = {}): Promise<AdminReminderRunResult> {
   return post<AdminReminderRunResult, AdminReminderRequest>("/admin/billing/reminders/expiring", payload);
 }
 

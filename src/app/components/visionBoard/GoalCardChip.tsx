@@ -17,7 +17,7 @@ export interface GoalCardChipProps {
 export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JSX.Element {
   const areaName = lifeAreaId ?? goal?.category;
   const area = LIFE_AREAS.find((item) => item.name === areaName);
-  const areaLabel = areaName ? LIFE_AREA_LABELS[areaName] ?? areaName : null;
+  const areaLabel = areaName ? (LIFE_AREA_LABELS[areaName] ?? areaName) : null;
 
   if (!goal) {
     return (
@@ -60,10 +60,7 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
           <span>{progress}%</span>
         </div>
         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-app-bg">
-          <div
-            className="h-full rounded-full bg-app-accent transition-all"
-            style={{ width: `${progress}%` }}
-          />
+          <div className="h-full rounded-full bg-app-accent transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>
     </div>

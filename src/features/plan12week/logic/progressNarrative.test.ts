@@ -17,9 +17,7 @@ function makeInput(overrides: Partial<ProgressTrendInput> = {}): ProgressTrendIn
 
 describe("interpretProgressTrend - no data state", () => {
   it("returns 'no_data' helpful copy when there are no tasks", () => {
-    const result = interpretProgressTrend(
-      makeInput({ hasAnyTasks: false, currentWeekScore: 0, reviewDoneCount: 0 }),
-    );
+    const result = interpretProgressTrend(makeInput({ hasAnyTasks: false, currentWeekScore: 0, reviewDoneCount: 0 }));
     expect(result.level).toBe("no_data");
     expect(result.headline.toLowerCase()).toContain("chưa có dữ liệu");
     expect(result.advice.toLowerCase()).toContain("việc lặp lại");
@@ -49,9 +47,7 @@ describe("interpretProgressTrend - low progress / at risk", () => {
   });
 
   it("recommends opening the Week tab when review is due and score is low", () => {
-    const result = interpretProgressTrend(
-      makeInput({ currentWeekScore: 20, reviewDueToday: true }),
-    );
+    const result = interpretProgressTrend(makeInput({ currentWeekScore: 20, reviewDueToday: true }));
     expect(result.nextAction.toLowerCase()).toContain("review");
   });
 });
@@ -65,9 +61,7 @@ describe("interpretProgressTrend - slowing", () => {
   });
 
   it("flags 'slowing' for mid-tier score even without a previous week", () => {
-    const result = interpretProgressTrend(
-      makeInput({ currentWeekScore: 45, previousWeekScore: null }),
-    );
+    const result = interpretProgressTrend(makeInput({ currentWeekScore: 45, previousWeekScore: null }));
     expect(result.level).toBe("slowing");
     expect(result.weekOverWeekDelta).toBeNull();
   });

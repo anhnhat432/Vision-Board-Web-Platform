@@ -15,8 +15,7 @@ const alertVariants = cva(
           "text-[color:var(--color-success-fg)] bg-[color:var(--color-success-bg)] border-[color:var(--color-success-border)] [&>svg]:text-current *:data-[slot=alert-description]:text-[color:var(--color-success-fg)]/85",
         warning:
           "text-[color:var(--color-warning-fg)] bg-[color:var(--color-warning-bg)] border-[color:var(--color-warning-border)] [&>svg]:text-current *:data-[slot=alert-description]:text-[color:var(--color-warning-fg)]/85",
-        info:
-          "text-[color:var(--color-info-fg)] bg-[color:var(--color-info-bg)] border-[color:var(--color-info-border)] [&>svg]:text-current *:data-[slot=alert-description]:text-[color:var(--color-info-fg)]/85",
+        info: "text-[color:var(--color-info-fg)] bg-[color:var(--color-info-bg)] border-[color:var(--color-info-border)] [&>svg]:text-current *:data-[slot=alert-description]:text-[color:var(--color-info-fg)]/85",
       },
     },
     defaultVariants: {
@@ -25,38 +24,21 @@ const alertVariants = cva(
   },
 );
 
-function Alert({
-  className,
-  variant,
-  ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
-  return (
-    <div
-      data-slot="alert"
-      role="alert"
-      className={cn(alertVariants({ variant }), className)}
-      {...props}
-    />
-  );
+function Alert({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+  return <div data-slot="alert" role="alert" className={cn(alertVariants({ variant }), className)} {...props} />;
 }
 
 function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-title"
-      className={cn(
-        "col-start-2 line-clamp-1 min-h-4 font-semibold tracking-tight text-[15px] leading-5",
-        className,
-      )}
+      className={cn("col-start-2 line-clamp-1 min-h-4 font-semibold tracking-tight text-[15px] leading-5", className)}
       {...props}
     />
   );
 }
 
-function AlertDescription({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function AlertDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-description"

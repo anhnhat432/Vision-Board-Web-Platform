@@ -113,11 +113,7 @@ export function TwelveWeekDashboardNotice({
         ? "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)]"
         : "border-app-warm-border bg-app-warm-soft";
   const iconClass =
-    tone === "success"
-      ? "text-app-accent"
-      : tone === "error"
-        ? "text-[color:var(--color-danger-fg)]"
-        : "text-app-warm";
+    tone === "success" ? "text-app-accent" : tone === "error" ? "text-[color:var(--color-danger-fg)]" : "text-app-warm";
   const titleClass =
     tone === "warning"
       ? "font-serif text-app-warm-strong"
@@ -193,7 +189,8 @@ export function TwelveWeekDashboardHeader({
             {activeGoal.title || "Kế hoạch hiện tại"}
           </h1>
           <p data-testid="twelve-week-header-description" className="mt-1 text-[14px] leading-6 text-app-ink-soft">
-            Tuần {currentWeek} / {system.totalWeeks}{domainLabel ? ` · ${domainLabel}` : ""}
+            Tuần {currentWeek} / {system.totalWeeks}
+            {domainLabel ? ` · ${domainLabel}` : ""}
           </p>
           <p className="mt-3 max-w-2xl text-[14px] leading-6 text-app-ink-soft">{nextActionLabel}</p>
         </div>
@@ -225,7 +222,9 @@ export function TwelveWeekDashboardHeader({
           <PhaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
           {phaseInfo.label}
         </span>
-        <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-medium ${tokenSyncBadgeClass}`}>
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-medium ${tokenSyncBadgeClass}`}
+        >
           <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
           {syncBadgeLabel}
         </span>

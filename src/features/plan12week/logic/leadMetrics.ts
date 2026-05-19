@@ -4,12 +4,7 @@ function sanitizeMetricValue(value: number): number {
   return Number.isFinite(value) ? value : 0;
 }
 
-export function logLeadMetric(
-  metric: LeadMetric,
-  date: string,
-  value: number,
-  completed = value > 0,
-): LeadMetric {
+export function logLeadMetric(metric: LeadMetric, date: string, value: number, completed = value > 0): LeadMetric {
   return {
     ...metric,
     logs: [

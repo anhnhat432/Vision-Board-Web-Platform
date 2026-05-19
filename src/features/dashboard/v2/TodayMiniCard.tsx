@@ -13,7 +13,10 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
   const visibleTasks = tasks.slice(0, 3);
 
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-5" aria-labelledby="dashboard-today-mini-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-5"
+      aria-labelledby="dashboard-today-mini-title"
+    >
       <div>
         <h2 id="dashboard-today-mini-title" className="text-[16px] font-semibold text-app-ink">
           {title}
@@ -33,7 +36,9 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
                   task.completed ? "border-app-accent bg-app-accent" : "border-[#C8C2B6] bg-app-surface"
                 }`}
               />
-              <p className={`min-w-0 flex-1 line-clamp-1 text-[14px] leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}>
+              <p
+                className={`min-w-0 flex-1 line-clamp-1 text-[14px] leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
+              >
                 {task.title}
               </p>
             </div>

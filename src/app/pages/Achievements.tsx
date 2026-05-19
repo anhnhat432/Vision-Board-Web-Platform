@@ -175,12 +175,17 @@ export function Achievements() {
       </section>
 
       {unlockedCount === 0 ? (
-        <section className="mt-6 rounded-card border border-app-line bg-app-surface p-6 text-center md:p-8" aria-label="Chưa có thành tựu">
+        <section
+          className="mt-6 rounded-card border border-app-line bg-app-surface p-6 text-center md:p-8"
+          aria-label="Chưa có thành tựu"
+        >
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
             <Award className="h-7 w-7" />
           </div>
           <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">{emptyNarratives.noAchievements.title}</h2>
-          <p className="mx-auto mt-2 max-w-md text-[15px] leading-6 text-app-ink-soft">{emptyNarratives.noAchievements.body}</p>
+          <p className="mx-auto mt-2 max-w-md text-[15px] leading-6 text-app-ink-soft">
+            {emptyNarratives.noAchievements.body}
+          </p>
           <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
             <Button type="button" onClick={() => navigate("/goals")}>
               <Target className="h-4 w-4" />

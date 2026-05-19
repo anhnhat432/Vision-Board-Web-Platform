@@ -1,9 +1,4 @@
-import {
-  formatDateInputValue,
-  getCalendarDateKey,
-  getCalendarDayIndex,
-  parseCalendarDate,
-} from "./storage-date-utils";
+import { formatDateInputValue, getCalendarDateKey, getCalendarDayIndex, parseCalendarDate } from "./storage-date-utils";
 import { getGoalExecutionStats } from "./storage-twelve-week";
 import type { Achievement, Goal, UserData } from "./storage-types";
 import { generateId } from "./storage-types";
@@ -106,10 +101,7 @@ export function checkAchievementsInData(data: UserData, referenceDate = new Date
     if (!currentDate) return;
 
     const currentDayIndex = getCalendarDayIndex(currentDate);
-    currentStreak =
-      previousDayIndex !== null && currentDayIndex === previousDayIndex + 1
-        ? currentStreak + 1
-        : 1;
+    currentStreak = previousDayIndex !== null && currentDayIndex === previousDayIndex + 1 ? currentStreak + 1 : 1;
     previousDayIndex = currentDayIndex;
     longestStreak = Math.max(longestStreak, currentStreak);
   });

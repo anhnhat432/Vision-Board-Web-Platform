@@ -2,10 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 import { listStoredPendingMutations } from "./mutationQueue";
-import {
-  buildLeadMetricUpsertedPayloads,
-  enqueueLeadMetricUpsertedMutations,
-} from "./leadMetricMutation";
+import { buildLeadMetricUpsertedPayloads, enqueueLeadMetricUpsertedMutations } from "./leadMetricMutation";
 
 function createSystem(): TwelveWeekSystem {
   return {

@@ -36,11 +36,7 @@ export function Reveal({
 
   if (shouldReduceMotion) {
     return (
-      <div
-        ref={ref}
-        className={cn("reveal-block", className)}
-        {...(props as HTMLAttributes<HTMLDivElement>)}
-      >
+      <div ref={ref} className={cn("reveal-block", className)} {...(props as HTMLAttributes<HTMLDivElement>)}>
         {children}
       </div>
     );

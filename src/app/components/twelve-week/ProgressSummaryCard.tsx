@@ -160,9 +160,7 @@ export function ProgressSummaryCard({
   const cycleWeeks = Array.from({ length: boundedTotalWeeks }, (_, index) => index + 1);
   const nextMilestoneWeek = milestoneWeekList.find((weekNumber) => weekNumber >= boundedCurrentWeek);
   const nextMilestoneLabel = nextMilestoneWeek ? `Week ${nextMilestoneWeek}` : `Week ${boundedTotalWeeks}`;
-  const previousMilestoneWeek = [...milestoneWeekList]
-    .reverse()
-    .find((weekNumber) => weekNumber < boundedCurrentWeek);
+  const previousMilestoneWeek = [...milestoneWeekList].reverse().find((weekNumber) => weekNumber < boundedCurrentWeek);
   const currentPhaseStartWeek = previousMilestoneWeek ?? boundedCurrentWeek;
   const currentPhaseEndWeek = nextMilestoneWeek ?? boundedTotalWeeks;
   const currentPhaseLabel =
@@ -199,16 +197,24 @@ export function ProgressSummaryCard({
               </div>
               {nextActionHandler && (
                 <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tiếp theo nên làm</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    Tiếp theo nên làm
+                  </p>
                   <p className="mt-1 text-[14px] leading-6 text-app-ink">{nextActionSuggestion.label}</p>
-                  <Button size="lg" className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto" onClick={nextActionHandler}>
+                  <Button
+                    size="lg"
+                    className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto"
+                    onClick={nextActionHandler}
+                  >
                     {nextActionSuggestion.buttonLabel}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>
               )}
             </div>
-            <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}>
+            <span
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
+            >
               {narrativeStyle.badgeLabel}
             </span>
           </div>
@@ -272,9 +278,7 @@ export function ProgressSummaryCard({
                 <Target className="h-3.5 w-3.5 text-app-accent" />
                 Bản đồ chu kỳ
               </p>
-              <p className="mt-2 font-serif text-lg font-medium text-app-ink">
-                Đường chạy {boundedTotalWeeks} tuần
-              </p>
+              <p className="mt-2 font-serif text-lg font-medium text-app-ink">Đường chạy {boundedTotalWeeks} tuần</p>
               <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
                 Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
               </p>

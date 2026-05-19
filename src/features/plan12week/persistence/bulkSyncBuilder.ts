@@ -52,11 +52,7 @@ function hasReviewContent(review: TwelveWeekSystem["weeklyReviews"][number]): bo
   );
 }
 
-function buildWeekInputs(
-  system: TwelveWeekSystem,
-  details: PlanDetails,
-  goalId: string,
-): BulkSyncWeekInput[] {
+function buildWeekInputs(system: TwelveWeekSystem, details: PlanDetails, goalId: string): BulkSyncWeekInput[] {
   const inputs: BulkSyncWeekInput[] = [];
 
   for (const weekPlan of system.weeklyPlans) {
@@ -78,11 +74,7 @@ function buildWeekInputs(
   return inputs;
 }
 
-function buildTaskInputs(
-  system: TwelveWeekSystem,
-  details: PlanDetails,
-  goalId: string,
-): BulkSyncTaskInput[] {
+function buildTaskInputs(system: TwelveWeekSystem, details: PlanDetails, goalId: string): BulkSyncTaskInput[] {
   const inputs: BulkSyncTaskInput[] = [];
 
   for (const task of system.taskInstances) {
@@ -128,34 +120,26 @@ function buildTaskInputs(
   return inputs;
 }
 
-function findRemoteTaskByTitle(
-  week: WeekDetails,
-  localTask: TwelveWeekTaskInstance,
-) {
+function findRemoteTaskByTitle(week: WeekDetails, localTask: TwelveWeekTaskInstance) {
   const localTitle = localTask.title.trim().toLowerCase();
   const localDateKey = getTaskDateKey(localTask.scheduledDate);
-  const sameTitleTasks = week.tasks.filter(
-    (t) => t.title.trim().toLowerCase() === localTitle,
-  );
-  const sameTitleAndDate = sameTitleTasks.filter(
-    (t) => getTaskDateKey(t.scheduledDate) === localDateKey,
-  );
+  const sameTitleTasks = week.tasks.filter((t) => t.title.trim().toLowerCase() === localTitle);
+  const sameTitleAndDate = sameTitleTasks.filter((t) => getTaskDateKey(t.scheduledDate) === localDateKey);
 
   if (sameTitleAndDate.length > 0) {
-    return [...sameTitleAndDate].sort((a, b) => {
-      const cp = Number(b.status === "done") - Number(a.status === "done");
-      if (cp !== 0) return cp;
-      return a.createdAt.localeCompare(b.createdAt);
-    })[0] ?? null;
+    return (
+      [...sameTitleAndDate].sort((a, b) => {
+        const cp = Number(b.status === "done") - Number(a.status === "done");
+        if (cp !== 0) return cp;
+        return a.createdAt.localeCompare(b.createdAt);
+      })[0] ?? null
+    );
   }
 
   return sameTitleTasks.length === 1 ? sameTitleTasks[0] : null;
 }
 
-function getTargetStatus(
-  remoteStatus: string,
-  localCompleted: boolean,
-): "done" | "todo" | "doing" {
+function getTargetStatus(remoteStatus: string, localCompleted: boolean): "done" | "todo" | "doing" {
   const localStatus = getTaskStatus(localCompleted);
   if (remoteStatus === "done" && localStatus !== "done") return remoteStatus as "done";
   return localStatus;
@@ -208,11 +192,7 @@ function buildMetricLogInputs(
   return inputs;
 }
 
-function buildReviewInputs(
-  system: TwelveWeekSystem,
-  details: PlanDetails,
-  goalId: string,
-): BulkSyncReviewInput[] {
+function buildReviewInputs(system: TwelveWeekSystem, details: PlanDetails, goalId: string): BulkSyncReviewInput[] {
   const inputs: BulkSyncReviewInput[] = [];
 
   for (const review of system.weeklyReviews.filter(hasReviewContent)) {
@@ -231,11 +211,7 @@ function buildReviewInputs(
   return inputs;
 }
 
-export function buildBulkSyncRequest(
-  system: TwelveWeekSystem,
-  details: PlanDetails,
-  goalId: string,
-): BulkSyncRequest {
+export function buildBulkSyncRequest(system: TwelveWeekSystem, details: PlanDetails, goalId: string): BulkSyncRequest {
   const weeks = buildWeekInputs(system, details, goalId);
   const tasks = buildTaskInputs(system, details, goalId);
   const metricLogs = buildMetricLogInputs(system, details, goalId);

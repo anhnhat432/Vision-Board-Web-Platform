@@ -48,7 +48,10 @@ describe("VisionBoardSidebar", () => {
 
   it("sorts focus areas first and renders focus badges", () => {
     render(
-      <VisionBoardSidebar items={[createItem({ id: "item_1", lifeAreaId: "Health" })]} focusAreaIds={["Health", "Career"]} />,
+      <VisionBoardSidebar
+        items={[createItem({ id: "item_1", lifeAreaId: "Health" })]}
+        focusAreaIds={["Health", "Career"]}
+      />,
     );
 
     const rows = screen.getAllByTestId(/life-area-row-/);
@@ -80,10 +83,7 @@ describe("VisionBoardSidebar", () => {
   it("fills progress bar by area count capped at four items", () => {
     render(
       <VisionBoardSidebar
-        items={[
-          createItem({ id: "item_1", lifeAreaId: "Health" }),
-          createItem({ id: "item_2", lifeAreaId: "Health" }),
-        ]}
+        items={[createItem({ id: "item_1", lifeAreaId: "Health" }), createItem({ id: "item_2", lifeAreaId: "Health" })]}
       />,
     );
 

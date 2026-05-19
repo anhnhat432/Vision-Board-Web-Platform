@@ -123,12 +123,17 @@ export function OutcomeStep({
           <div className={infoBoxClass}>
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mức tải</p>
             <p className="mt-1 text-[14px] font-medium text-app-ink">{getPlanLoadLabel(feasibility.planLoad)}</p>
-            <p className="mt-2">{feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}</p>
+            <p className="mt-2">
+              {feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}
+            </p>
           </div>
         </div>
       )}
 
-      <section className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6" aria-labelledby="outcome-required-title">
+      <section
+        className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6"
+        aria-labelledby="outcome-required-title"
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p id="outcome-required-title" className="text-[15px] font-medium text-app-ink">
@@ -175,7 +180,8 @@ export function OutcomeStep({
               className={cn(
                 textareaClass,
                 "min-h-[150px]",
-                milestoneError && "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                milestoneError &&
+                  "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
               )}
               onChange={(event) => onChange("week12Outcome", event.target.value)}
               placeholder="Ví dụ: Hoàn thành bản portfolio có 3 case study đủ gửi đi ứng tuyển."
@@ -257,9 +263,15 @@ export function OutcomeStep({
       </section>
 
       {selectedTemplate ? (
-        <section className="rounded-card border border-app-line bg-app-surface p-5" aria-labelledby="template-personalize-title">
+        <section
+          className="rounded-card border border-app-line bg-app-surface p-5"
+          aria-labelledby="template-personalize-title"
+        >
           <div>
-            <p id="template-personalize-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+            <p
+              id="template-personalize-title"
+              className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
+            >
               Cá nhân hóa khung
             </p>
             <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
@@ -276,14 +288,26 @@ export function OutcomeStep({
                 value={draft.dailyTimeBudget}
                 onValueChange={(value) => onTemplatePersonalizationChange("dailyTimeBudget", value)}
               >
-                <SelectTrigger id="daily-time-budget" aria-label="Chọn ngân sách thời gian mỗi ngày" className={selectTriggerClass}>
+                <SelectTrigger
+                  id="daily-time-budget"
+                  aria-label="Chọn ngân sách thời gian mỗi ngày"
+                  className={selectTriggerClass}
+                >
                   <SelectValue placeholder="Chọn thời lượng" />
                 </SelectTrigger>
                 <SelectContent className={selectContentClass}>
-                  <SelectItem value="30min" className={selectItemClass}>30 phút</SelectItem>
-                  <SelectItem value="1h" className={selectItemClass}>1 giờ</SelectItem>
-                  <SelectItem value="1.5h" className={selectItemClass}>1.5 giờ</SelectItem>
-                  <SelectItem value="2h+" className={selectItemClass}>2+ giờ</SelectItem>
+                  <SelectItem value="30min" className={selectItemClass}>
+                    30 phút
+                  </SelectItem>
+                  <SelectItem value="1h" className={selectItemClass}>
+                    1 giờ
+                  </SelectItem>
+                  <SelectItem value="1.5h" className={selectItemClass}>
+                    1.5 giờ
+                  </SelectItem>
+                  <SelectItem value="2h+" className={selectItemClass}>
+                    2+ giờ
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -329,14 +353,26 @@ export function OutcomeStep({
                   )
                 }
               >
-                <SelectTrigger id="personal-constraint" aria-label="Chọn trở ngại lớn nhất" className={selectTriggerClass}>
+                <SelectTrigger
+                  id="personal-constraint"
+                  aria-label="Chọn trở ngại lớn nhất"
+                  className={selectTriggerClass}
+                >
                   <SelectValue placeholder="Chọn trở ngại" />
                 </SelectTrigger>
                 <SelectContent className={selectContentClass}>
-                  <SelectItem value="time" className={selectItemClass}>Thiếu thời gian</SelectItem>
-                  <SelectItem value="motivation" className={selectItemClass}>Khó giữ động lực</SelectItem>
-                  <SelectItem value="consistency" className={selectItemClass}>Hay bị đứt nhịp</SelectItem>
-                  <SelectItem value="complexity" className={selectItemClass}>Mục tiêu phức tạp, chưa biết bắt đầu</SelectItem>
+                  <SelectItem value="time" className={selectItemClass}>
+                    Thiếu thời gian
+                  </SelectItem>
+                  <SelectItem value="motivation" className={selectItemClass}>
+                    Khó giữ động lực
+                  </SelectItem>
+                  <SelectItem value="consistency" className={selectItemClass}>
+                    Hay bị đứt nhịp
+                  </SelectItem>
+                  <SelectItem value="complexity" className={selectItemClass}>
+                    Mục tiêu phức tạp, chưa biết bắt đầu
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className={helperTextClass}>
@@ -351,7 +387,10 @@ export function OutcomeStep({
         </section>
       ) : null}
 
-      <section className="rounded-card border border-app-line bg-app-surface p-5" aria-labelledby="template-picker-title">
+      <section
+        className="rounded-card border border-app-line bg-app-surface p-5"
+        aria-labelledby="template-picker-title"
+      >
         <div className="flex items-start gap-2">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
@@ -368,7 +407,9 @@ export function OutcomeStep({
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Gợi ý cho mục tiêu này</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+                  Gợi ý cho mục tiêu này
+                </p>
                 <p className="mt-2 text-[17px] font-medium text-app-ink">{recommendedTemplate.name}</p>
                 <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{adaptiveTemplateRecommendation.reason}</p>
               </div>
@@ -395,12 +436,18 @@ export function OutcomeStep({
                 </summary>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div className={infoBoxClass}>
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1 nên thắng ở đâu</p>
-                    <p className="mt-2 text-[14px] font-medium text-app-ink">{recommendedTemplateSupport.week1Headline}</p>
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                      Tuần 1 nên thắng ở đâu
+                    </p>
+                    <p className="mt-2 text-[14px] font-medium text-app-ink">
+                      {recommendedTemplateSupport.week1Headline}
+                    </p>
                     <p className="mt-2">{recommendedTemplateSupport.week1Support}</p>
                   </div>
                   <div className={infoBoxClass}>
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp nên giữ</p>
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                      Nhịp nên giữ
+                    </p>
                     <p className="mt-2">{recommendedTemplateSupport.week1CadenceHint}</p>
                   </div>
                 </div>
@@ -410,7 +457,9 @@ export function OutcomeStep({
         ) : null}
 
         <details className="mt-4 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3">
-          <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem tất cả khung mẫu</summary>
+          <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+            Xem tất cả khung mẫu
+          </summary>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
               const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
@@ -429,7 +478,9 @@ export function OutcomeStep({
                   className={cn(
                     "rounded-lg border p-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isSelected && "border-app-accent bg-app-accent-soft text-app-accent",
-                    !isSelected && isLocked && "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent hover:bg-app-accent-soft",
+                    !isSelected &&
+                      isLocked &&
+                      "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent hover:bg-app-accent-soft",
                     !isSelected && !isLocked && "border-app-line bg-app-surface text-app-ink hover:bg-app-bg",
                   )}
                 >
@@ -451,7 +502,9 @@ export function OutcomeStep({
                   <p className="mt-3 text-[14px] leading-6 text-app-ink-soft">{template.description}</p>
                   <div className="mt-3 grid gap-2 text-[13px] leading-5 text-app-ink-soft sm:grid-cols-2">
                     <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Hợp khi</p>
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                        Hợp khi
+                      </p>
                       <p className="mt-1">{template.bestFor}</p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
@@ -485,10 +538,16 @@ export function OutcomeStep({
       </section>
 
       {selectedTemplate ? (
-        <section className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
+        <section
+          className="rounded-card border border-app-line bg-app-surface p-4"
+          aria-labelledby="selected-template-title"
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p id="selected-template-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <p
+                id="selected-template-title"
+                className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+              >
                 Khung đang dùng
               </p>
               <p className="mt-2 text-[16px] font-medium text-app-ink">{selectedTemplate.name}</p>
@@ -502,7 +561,9 @@ export function OutcomeStep({
       ) : null}
 
       <details className="rounded-lg border border-dashed border-app-line bg-app-bg p-4">
-        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem mục tiêu đã viết</summary>
+        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+          Xem mục tiêu đã viết
+        </summary>
         <div className="mt-4 grid gap-3">
           <div className="rounded-lg border border-app-line bg-app-surface p-4">
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu cụ thể</p>

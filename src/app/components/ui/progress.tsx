@@ -62,10 +62,7 @@ const Progress = React.forwardRef<
     <ProgressPrimitive.Root
       ref={ref}
       data-slot="progress"
-      className={cn(
-        "progress-shell relative h-2 w-full overflow-hidden rounded-full bg-app-accent-soft",
-        className,
-      )}
+      className={cn("progress-shell relative h-2 w-full overflow-hidden rounded-full bg-app-accent-soft", className)}
       {...props}
       aria-label={props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Tiến độ")}
     >

@@ -29,10 +29,7 @@ if (sentryDsn) {
     environment: optionalEnv(import.meta.env.VITE_SENTRY_ENVIRONMENT) ?? appMode,
     release: optionalEnv(import.meta.env.VITE_SENTRY_RELEASE),
     sendDefaultPii: false,
-    tracesSampleRate: parseSampleRate(
-      import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE,
-      DEFAULT_TRACES_SAMPLE_RATE,
-    ),
+    tracesSampleRate: parseSampleRate(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE, DEFAULT_TRACES_SAMPLE_RATE),
     integrations: [Sentry.browserTracingIntegration()],
   });
 }
@@ -42,10 +39,7 @@ interface FrontendCaptureContext extends Record<string, unknown> {
   extra?: Record<string, unknown>;
 }
 
-export function captureFrontendException(
-  error: unknown,
-  context?: FrontendCaptureContext,
-): void {
+export function captureFrontendException(error: unknown, context?: FrontendCaptureContext): void {
   if (!sentryEnabled) return;
 
   Sentry.withScope((scope) => {

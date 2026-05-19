@@ -1,9 +1,6 @@
 import type { UniversalWeeklyReview } from "@/app/utils/storage-types";
 
-export function getUniversalWeeklyReviewExecutionScore(
-  review: UniversalWeeklyReview,
-  fallback = 0,
-): number {
+export function getUniversalWeeklyReviewExecutionScore(review: UniversalWeeklyReview, fallback = 0): number {
   const scores = [
     review.progressScore,
     review.disciplineScore,

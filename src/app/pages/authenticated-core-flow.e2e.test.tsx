@@ -347,7 +347,8 @@ describe("authenticated new user core flow", () => {
 
     expect(
       await screen.findByText(
-        (_content, element) => element?.tagName === "H1" && /Cùng xem bức tranh hiện tại của bạn/i.test(element.textContent ?? ""),
+        (_content, element) =>
+          element?.tagName === "H1" && /Cùng xem bức tranh hiện tại của bạn/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     await waitFor(() => {

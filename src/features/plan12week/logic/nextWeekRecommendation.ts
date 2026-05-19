@@ -19,12 +19,7 @@ import type { RescueSeverity, RescueTriggerId } from "./rescueMode";
 
 // ---- Public types -----------------------------------------------------------
 
-export type NextWeekAdjustment =
-  | "lighter"
-  | "same"
-  | "push"
-  | "reset"
-  | "reduce_scope";
+export type NextWeekAdjustment = "lighter" | "same" | "push" | "reset" | "reduce_scope";
 
 export type NextWeekConfidence = "low" | "medium" | "high";
 
@@ -47,11 +42,7 @@ export type NextWeekReasonCode =
   | "no_completion_streak"
   | "no_signals";
 
-export type WorkloadDecisionInput =
-  | "keep same"
-  | "reduce slightly"
-  | "increase slightly"
-  | "";
+export type WorkloadDecisionInput = "keep same" | "reduce slightly" | "increase slightly" | "";
 
 export type FeasibilityPlanLoadInput = "lighter" | "balanced" | "push";
 
@@ -114,7 +105,10 @@ function _pushUnique<T>(list: T[], value: T): void {
   if (!list.includes(value)) list.push(value);
 }
 
-const COPY: Record<NextWeekAdjustment, Pick<NextWeekRecommendation, "headline" | "body" | "suggestedNextWeekPriority">> = {
+const COPY: Record<
+  NextWeekAdjustment,
+  Pick<NextWeekRecommendation, "headline" | "body" | "suggestedNextWeekPriority">
+> = {
   lighter: {
     headline: "Tuần sau nên nhẹ hơn",
     body: "Tuần này có vài chỗ chưa trơn. Nhẹ tải tuần sau giúp bạn giữ nhịp dài hạn — không phải lùi mục tiêu, chỉ là bước nhỏ hơn.",
@@ -133,7 +127,8 @@ const COPY: Record<NextWeekAdjustment, Pick<NextWeekRecommendation, "headline" |
   reset: {
     headline: "Tuần sau cần restart nhẹ",
     body: "Tuần này lệch nhịp khá rõ. Tuần sau hãy chốt 1 việc duy nhất, làm xong là đã quay lại đúng hướng — không cần dồn việc cũ.",
-    suggestedNextWeekPriority: "Chốt đúng 1 việc cốt lõi cho cả tuần. Mục tiêu là khởi động lại, không phải bù task cũ.",
+    suggestedNextWeekPriority:
+      "Chốt đúng 1 việc cốt lõi cho cả tuần. Mục tiêu là khởi động lại, không phải bù task cũ.",
   },
   reduce_scope: {
     headline: "Tuần sau nên thu hẹp scope",
@@ -256,8 +251,7 @@ function decideRecommendation(input: {
   // ---- 5. Push when everything is strong ------------------------------------
   const completionStrong = input.weekCompletionPercent >= HIGH_COMPLETION;
   const leadMetricStrong = input.leadMetric === null ? false : input.leadMetric >= HIGH_LEAD_METRIC;
-  const consistencyStrong =
-    input.consistency === null ? false : input.consistency >= HIGH_CHECKIN_CONSISTENCY;
+  const consistencyStrong = input.consistency === null ? false : input.consistency >= HIGH_CHECKIN_CONSISTENCY;
 
   if (completionStrong && leadMetricStrong && consistencyStrong) {
     reasonCodes.push("high_week_completion");
@@ -302,9 +296,7 @@ function deriveConfidence(frame: DecisionFrame): NextWeekConfidence {
 
 // ---- Public entry -----------------------------------------------------------
 
-export function getNextWeekAdjustmentRecommendation(
-  context: NextWeekRecommendationContext,
-): NextWeekRecommendation {
+export function getNextWeekAdjustmentRecommendation(context: NextWeekRecommendationContext): NextWeekRecommendation {
   const weekCompletionPercent = clampPercent(context.weekCompletionPercent) ?? 0;
   const leadMetric = clampPercent(context.leadMetricCompletionPercent ?? null);
   const consistency = clampPercent(context.dailyCheckInConsistencyPercent ?? null);

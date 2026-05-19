@@ -12,12 +12,7 @@ interface RelevantStepProps {
   currentStepHasDraftContent: boolean;
 }
 
-export function RelevantStep({
-  smartData,
-  setSmartData,
-  placeholder,
-  currentStepHasDraftContent,
-}: RelevantStepProps) {
+export function RelevantStep({ smartData, setSmartData, placeholder, currentStepHasDraftContent }: RelevantStepProps) {
   const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
 
   return (

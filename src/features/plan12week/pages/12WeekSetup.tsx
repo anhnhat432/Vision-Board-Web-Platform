@@ -278,7 +278,9 @@ export function TwelveWeekSetup() {
           previousDraft.vision12Week ||
           `Trong 12 tuần tới, tôi muốn biến mục tiêu "${prerequisites.parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
         week12Outcome:
-          previousDraft.week12Outcome || prerequisites.parsedSmartGoal.measurable || prerequisites.parsedSmartGoal.specific,
+          previousDraft.week12Outcome ||
+          prerequisites.parsedSmartGoal.measurable ||
+          prerequisites.parsedSmartGoal.specific,
         lagMetricName:
           previousDraft.lagMetricName ||
           prerequisites.smartGoalMetricName ||
@@ -1104,7 +1106,10 @@ export function TwelveWeekSetup() {
         <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
 
         {!isVisionPromptDismissed ? (
-          <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
+          <section
+            className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+            aria-label="Tầm nhìn dài hạn"
+          >
             <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[13px] font-medium text-app-warm">
               Tầm nhìn dài hạn
             </span>
@@ -1188,70 +1193,70 @@ export function TwelveWeekSetup() {
           isNextDisabled={Boolean(currentStepValidationError)}
           isSubmitDisabled={Boolean(currentStepValidationError)}
         >
-        {currentStep === 0 && (
-          <OutcomeStep
-            feasibility={feasibility}
-            draft={draft}
-            currentPlan={currentPlan}
-            smartGoal={smartGoal}
-            selectedTemplate={selectedTemplate}
-            recommendedTemplate={recommendedTemplate}
-            adaptiveTemplateRecommendation={adaptiveTemplateRecommendation}
-            recommendedTemplateSupport={recommendedTemplateSupport}
-            onChange={handleChange}
-            onTemplateSelect={handleTemplateSelect}
-            onTemplatePersonalizationChange={handleTemplatePersonalizationChange}
-            onPreferredDayToggle={handlePreferredDayToggle}
-          />
-        )}
+          {currentStep === 0 && (
+            <OutcomeStep
+              feasibility={feasibility}
+              draft={draft}
+              currentPlan={currentPlan}
+              smartGoal={smartGoal}
+              selectedTemplate={selectedTemplate}
+              recommendedTemplate={recommendedTemplate}
+              adaptiveTemplateRecommendation={adaptiveTemplateRecommendation}
+              recommendedTemplateSupport={recommendedTemplateSupport}
+              onChange={handleChange}
+              onTemplateSelect={handleTemplateSelect}
+              onTemplatePersonalizationChange={handleTemplatePersonalizationChange}
+              onPreferredDayToggle={handlePreferredDayToggle}
+            />
+          )}
 
-        {currentStep === 1 && (
-          <LeadIndicatorsStep
-            draft={draft}
-            coreCount={coreCount}
-            optionalCount={optionalCount}
-            setupGuideSupport={setupGuideSupport}
-            setupGuideTemplate={setupGuideTemplate}
-            selectedTemplate={selectedTemplate}
-            weekOneTaskPreview={weekOneTaskPreview}
-            weekOneTaskWarning={weekOneTaskWarning}
-            weekOneTaskGroups={previewTaskGroups}
-            onAddIndicator={handleAddIndicator}
-            onRemoveIndicator={handleRemoveIndicator}
-            onIndicatorChange={handleIndicatorChange}
-          />
-        )}
+          {currentStep === 1 && (
+            <LeadIndicatorsStep
+              draft={draft}
+              coreCount={coreCount}
+              optionalCount={optionalCount}
+              setupGuideSupport={setupGuideSupport}
+              setupGuideTemplate={setupGuideTemplate}
+              selectedTemplate={selectedTemplate}
+              weekOneTaskPreview={weekOneTaskPreview}
+              weekOneTaskWarning={weekOneTaskWarning}
+              weekOneTaskGroups={previewTaskGroups}
+              onAddIndicator={handleAddIndicator}
+              onRemoveIndicator={handleRemoveIndicator}
+              onIndicatorChange={handleIndicatorChange}
+            />
+          )}
 
-        {currentStep === 2 && (
-          <ScheduleStep
-            draft={draft}
-            cycleStartDate={cycleStartDate}
-            cycleEndDate={cycleEndDate}
-            setupGuideSupport={setupGuideSupport}
-            setupGuideTemplate={setupGuideTemplate}
-            hasPreviewTasks={previewTasks.length > 0}
-            weekOneTaskPreview={weekOneTaskPreview}
-            weekOneTaskWarning={weekOneTaskWarning}
-            onChange={handleChange}
-          />
-        )}
+          {currentStep === 2 && (
+            <ScheduleStep
+              draft={draft}
+              cycleStartDate={cycleStartDate}
+              cycleEndDate={cycleEndDate}
+              setupGuideSupport={setupGuideSupport}
+              setupGuideTemplate={setupGuideTemplate}
+              hasPreviewTasks={previewTasks.length > 0}
+              weekOneTaskPreview={weekOneTaskPreview}
+              weekOneTaskWarning={weekOneTaskWarning}
+              onChange={handleChange}
+            />
+          )}
 
-        {currentStep === 3 && isRealMode() && !auth.user && <RealModeLoginGate target="12WeekSetup" />}
+          {currentStep === 3 && isRealMode() && !auth.user && <RealModeLoginGate target="12WeekSetup" />}
 
-        {currentStep === 3 && (
-          <PlanPreviewStep
-            draft={draft}
-            smartGoal={smartGoal}
-            feasibility={feasibility}
-            focusArea={focusArea}
-            selectedTemplate={selectedTemplate}
-            onBack={handleBack}
-            onSubmit={handleSubmit}
-            onChange={handleChange}
-            validationMessage={currentStepValidationError}
-            canConfirm={!currentStepValidationError}
-          />
-        )}
+          {currentStep === 3 && (
+            <PlanPreviewStep
+              draft={draft}
+              smartGoal={smartGoal}
+              feasibility={feasibility}
+              focusArea={focusArea}
+              selectedTemplate={selectedTemplate}
+              onBack={handleBack}
+              onSubmit={handleSubmit}
+              onChange={handleChange}
+              validationMessage={currentStepValidationError}
+              canConfirm={!currentStepValidationError}
+            />
+          )}
         </SetupStepShell>
       </div>
     </PageShell>

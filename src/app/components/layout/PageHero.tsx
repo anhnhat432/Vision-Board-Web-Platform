@@ -103,19 +103,11 @@ export function PageHero({
 
   return (
     <Card
-      className={cn(
-        "relative overflow-hidden border border-app-line bg-app-surface",
-        className,
-      )}
+      className={cn("relative overflow-hidden border border-app-line bg-app-surface", className)}
       {...heroExtraProps}
     >
       <CardContent className={cn(DENSITY_CLASS[density], "relative", contentClassName)}>
-        <div
-          className={cn(
-            "grid items-start gap-5",
-            aside ? "xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]" : "",
-          )}
-        >
+        <div className={cn("grid items-start gap-5", aside ? "xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]" : "")}>
           <div className={cn("min-w-0 space-y-3", alignClass)}>
             {eyebrow ? (
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
@@ -124,10 +116,7 @@ export function PageHero({
                     {eyebrowIcon}
                   </span>
                 ) : (
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-1.5 w-1.5 rounded-full bg-app-accent"
-                  />
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-app-accent" />
                 )}
                 {eyebrow}
               </p>
@@ -150,9 +139,7 @@ export function PageHero({
               </div>
             )}
           </div>
-          {aside ? (
-            <div className="hidden min-w-0 sm:block">{aside}</div>
-          ) : null}
+          {aside ? <div className="hidden min-w-0 sm:block">{aside}</div> : null}
         </div>
       </CardContent>
     </Card>

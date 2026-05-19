@@ -1,8 +1,5 @@
 import type { GoalArchetype } from "@/lib/smart-goal";
-import {
-  getGoalArchetypeExample,
-  getGoalArchetypeLabel,
-} from "@/lib/smart-goal";
+import { getGoalArchetypeExample, getGoalArchetypeLabel } from "@/lib/smart-goal";
 import { CircleAlert, Lightbulb } from "lucide-react";
 
 /**

@@ -177,11 +177,9 @@ function createComparableAspirationalVision(vision: AspirationalVision | undefin
 }
 
 function createComparableWheelHistory(wheelHistory: WheelOfLifeRecord[]): Array<Omit<WheelOfLifeRecord, "date">> {
-  return [...wheelHistory]
-    .sort(compareWheelRecords)
-    .map((record) => ({
-      areas: record.areas,
-    }));
+  return [...wheelHistory].sort(compareWheelRecords).map((record) => ({
+    areas: record.areas,
+  }));
 }
 
 function createComparableUserWorkSnapshot(data: UserData): ComparableValue {
@@ -357,8 +355,7 @@ function createLocalDataMigrationSummary(data: UserData): LocalDataMigrationSumm
       twelveWeekSystems.reduce((total, system) => total + system.taskInstances.length, 0),
     dailyCheckInCount: twelveWeekSystems.reduce((total, system) => total + system.dailyCheckIns.length, 0),
     weeklyReviewCount: twelveWeekSystems.reduce((total, system) => total + system.weeklyReviews.length, 0),
-    wheelRecordCount:
-      data.wheelOfLifeHistory.length + (data.currentWheelOfLife.some((area) => area.score > 0) ? 1 : 0),
+    wheelRecordCount: data.wheelOfLifeHistory.length + (data.currentWheelOfLife.some((area) => area.score > 0) ? 1 : 0),
     reflectionCount: data.reflections.length,
     visionBoardCount: data.visionBoards.length,
   };

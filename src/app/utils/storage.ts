@@ -313,7 +313,10 @@ function normalizeAspirationalVision(value: unknown): AspirationalVision | undef
         .map((area) => {
           if (!area || typeof area !== "object" || Array.isArray(area)) return null;
           const areaRecord = area as { area?: unknown; statement?: unknown };
-          if (typeof areaRecord.area !== "string" || !ASPIRATIONAL_VISION_AREAS.has(areaRecord.area as AspirationalVisionArea)) {
+          if (
+            typeof areaRecord.area !== "string" ||
+            !ASPIRATIONAL_VISION_AREAS.has(areaRecord.area as AspirationalVisionArea)
+          ) {
             return null;
           }
           if (typeof areaRecord.statement !== "string") return null;
@@ -356,14 +359,16 @@ function normalizeUserData(data: UserData): UserData {
   const entitlements = Array.isArray(data.entitlements) ? data.entitlements : [];
   const subscriptionIsActive = subscription?.status === "active" || subscription?.status === "trialing";
   const subscriptionExpired = Boolean(
-    subscription?.renewsAt && Number.isFinite(new Date(subscription.renewsAt).valueOf()) && new Date(subscription.renewsAt) < new Date(),
+    subscription?.renewsAt &&
+      Number.isFinite(new Date(subscription.renewsAt).valueOf()) &&
+      new Date(subscription.renewsAt) < new Date(),
   );
   const normalizedEntitlements =
     subscriptionIsActive && !subscriptionExpired && entitlements.length === 0
       ? getEntitlementsForPlan(subscription.planCode, subscription.startedAt)
       : subscription && (!subscriptionIsActive || subscriptionExpired)
         ? []
-      : entitlements;
+        : entitlements;
 
   return {
     ...data,
@@ -396,7 +401,9 @@ function mergeGoalTaskMutations(localGoal: Goal, incomingGoal: Goal): Goal {
   const mergedTasks = incomingGoal.tasks.map((incomingTask) => {
     const localTask = localTasksById.get(incomingTask.id);
     if (!localTask) return incomingTask;
-    return getComparableLastModifiedAt(incomingTask) >= getComparableLastModifiedAt(localTask) ? incomingTask : localTask;
+    return getComparableLastModifiedAt(incomingTask) >= getComparableLastModifiedAt(localTask)
+      ? incomingTask
+      : localTask;
   });
 
   const localTaskInstancesById = new Map(
@@ -406,7 +413,9 @@ function mergeGoalTaskMutations(localGoal: Goal, incomingGoal: Goal): Goal {
   const mergedTaskInstances = incomingSystem?.taskInstances.map((incomingTask) => {
     const localTask = localTaskInstancesById.get(incomingTask.id);
     if (!localTask) return incomingTask;
-    return getComparableLastModifiedAt(incomingTask) >= getComparableLastModifiedAt(localTask) ? incomingTask : localTask;
+    return getComparableLastModifiedAt(incomingTask) >= getComparableLastModifiedAt(localTask)
+      ? incomingTask
+      : localTask;
   });
 
   return {
@@ -848,11 +857,7 @@ export function clearLocalDeviceSignals(): void {
   const data = getUserData();
   clearLocalDeviceSignalsInData(data);
   saveUserData(data);
-  [
-    "last_reminder_date",
-    "visionboard_last_browser_notification",
-    "visionboard_last_outbox_sync",
-  ].forEach((key) => {
+  ["last_reminder_date", "visionboard_last_browser_notification", "visionboard_last_outbox_sync"].forEach((key) => {
     localStorage.removeItem(key);
   });
 }

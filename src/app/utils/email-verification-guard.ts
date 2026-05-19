@@ -31,7 +31,9 @@ export function rememberEmailVerificationReturnPath(path?: string): void {
   window.sessionStorage.setItem(RETURN_TO_KEY, returnTo);
 }
 
-export function getEmailVerificationRequiredMessage(action: "upgrade" | "sync" | "refund" | "critical" = "critical"): string {
+export function getEmailVerificationRequiredMessage(
+  action: "upgrade" | "sync" | "refund" | "critical" = "critical",
+): string {
   if (action === "upgrade") {
     return "Vui lòng xác thực email trước khi thanh toán. Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền.";
   }

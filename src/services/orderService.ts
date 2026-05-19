@@ -1,12 +1,6 @@
 import { get, post, patch } from "@/lib/api/apiClient";
 
-export type ApiOrderStatus =
-  | "pending"
-  | "confirmed"
-  | "printing"
-  | "shipping"
-  | "delivered"
-  | "cancelled";
+export type ApiOrderStatus = "pending" | "confirmed" | "printing" | "shipping" | "delivered" | "cancelled";
 
 export interface ApiShippingAddress {
   line1: string;
@@ -81,9 +75,6 @@ export function adminGetOrders(): Promise<ApiOrder[]> {
   return get<ApiOrder[]>("/admin/orders");
 }
 
-export function adminUpdateOrderStatus(
-  orderId: string,
-  payload: AdminUpdateStatusPayload,
-): Promise<ApiOrder> {
+export function adminUpdateOrderStatus(orderId: string, payload: AdminUpdateStatusPayload): Promise<ApiOrder> {
   return patch<ApiOrder, AdminUpdateStatusPayload>(`/admin/orders/${orderId}/status`, payload);
 }

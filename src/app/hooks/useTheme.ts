@@ -11,7 +11,9 @@ function getStoredTheme(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "light" || stored === "dark" || stored === "system") return stored;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return "system";
 }
 
@@ -38,7 +40,11 @@ export function useTheme() {
 
   const setTheme = useCallback((next: Theme) => {
     currentTheme = next;
-    try { localStorage.setItem(STORAGE_KEY, next); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      /* ignore */
+    }
     applyTheme(next);
     for (const cb of listeners) cb();
   }, []);
@@ -49,7 +55,12 @@ export function useTheme() {
   useEffect(() => {
     applyTheme(theme);
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => { if (currentTheme === "system") { applyTheme("system"); for (const cb of listeners) cb(); } };
+    const handler = () => {
+      if (currentTheme === "system") {
+        applyTheme("system");
+        for (const cb of listeners) cb();
+      }
+    };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, [theme]);

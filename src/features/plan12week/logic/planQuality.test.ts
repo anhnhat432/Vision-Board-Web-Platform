@@ -12,23 +12,19 @@ import {
 function makePlan(overrides: Partial<PlanQualityInput> = {}): PlanQualityInput {
   return {
     vision12Week:
-      overrides.vision12Week ??
-      "Trong 12 tuần, tôi muốn xây thói quen viết blog hằng tuần để chia sẻ kiến thức.",
+      overrides.vision12Week ?? "Trong 12 tuần, tôi muốn xây thói quen viết blog hằng tuần để chia sẻ kiến thức.",
     week12Outcome: overrides.week12Outcome ?? "Xuất bản 12 bài blog dài 800+ từ.",
     goalType: overrides.goalType ?? "Habit Building",
     lagMetric: overrides.lagMetric ?? { name: "Số bài blog", target: "12", unit: "bài" },
-    leadIndicators:
-      overrides.leadIndicators ??
-      [
-        { name: "Viết draft", target: "2", schedule: [1, 4], type: "core" },
-        { name: "Edit & publish", target: "1", schedule: [6], type: "core" },
-      ],
-    milestones:
-      overrides.milestones ?? {
-        week4: "Hoàn thành 4 bài blog đầu tiên",
-        week8: "Đã publish 8 bài và có 50 followers mới",
-        week12: "Xuất bản 12 bài blog",
-      },
+    leadIndicators: overrides.leadIndicators ?? [
+      { name: "Viết draft", target: "2", schedule: [1, 4], type: "core" },
+      { name: "Edit & publish", target: "1", schedule: [6], type: "core" },
+    ],
+    milestones: overrides.milestones ?? {
+      week4: "Hoàn thành 4 bài blog đầu tiên",
+      week8: "Đã publish 8 bài và có 50 followers mới",
+      week12: "Xuất bản 12 bài blog",
+    },
     reviewDay: overrides.reviewDay ?? "Sunday",
     tacticLoadPreference: overrides.tacticLoadPreference ?? "balanced",
     dailyTimeBudget: overrides.dailyTimeBudget ?? "1h",
@@ -170,10 +166,7 @@ describe("push plan still respects max weekly tasks", () => {
 
 describe("no lead indicators shows warning", () => {
   it("warns when lead indicators array is empty", () => {
-    const result = evaluateTwelveWeekPlanQuality(
-      makePlan({ leadIndicators: [] }),
-      makeContext({ weeklyTaskCount: 0 }),
-    );
+    const result = evaluateTwelveWeekPlanQuality(makePlan({ leadIndicators: [] }), makeContext({ weeklyTaskCount: 0 }));
 
     expect(result.warnings.find((w) => w.toLowerCase().includes("việc lặp lại"))).toBeDefined();
     const dim = result.dimensions.find((d) => d.id === "lead-indicators");
@@ -345,9 +338,7 @@ describe("getPlanQualityWarnings / getPlanImprovementSuggestions", () => {
   it("getPlanImprovementSuggestions returns the same suggestions as evaluate()", () => {
     const plan = makePlan({ dailyTimeBudget: "" });
     const ctx = makeContext();
-    expect(getPlanImprovementSuggestions(plan, ctx)).toEqual(
-      evaluateTwelveWeekPlanQuality(plan, ctx).suggestions,
-    );
+    expect(getPlanImprovementSuggestions(plan, ctx)).toEqual(evaluateTwelveWeekPlanQuality(plan, ctx).suggestions);
   });
 });
 
@@ -448,9 +439,7 @@ describe("Week 1 Startability — first task warnings (additive)", () => {
       firstTaskTitle: "Việc 1",
     });
     expect(withVagueTitle.overallScore).toBe(baseline.overallScore);
-    expect(withVagueTitle.dimensions.map((d) => d.score)).toEqual(
-      baseline.dimensions.map((d) => d.score),
-    );
+    expect(withVagueTitle.dimensions.map((d) => d.score)).toEqual(baseline.dimensions.map((d) => d.score));
   });
 });
 

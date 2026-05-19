@@ -79,9 +79,7 @@ describe("UI primitive visual hierarchy", () => {
     expect(badgeVariants()).toContain("rounded-full");
 
     render(<Card data-testid="card" />);
-    expect(document.querySelector('[data-testid="card"]')?.className).toContain(
-      "rounded-[var(--r-card)]",
-    );
+    expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-[var(--r-card)]");
 
     render(<Input aria-label="Name" />);
     expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-lg");
@@ -93,9 +91,7 @@ describe("UI primitive visual hierarchy", () => {
         </DialogContent>
       </Dialog>,
     );
-    expect(document.querySelector('[data-slot="dialog-content"]')?.className).toContain(
-      "rounded-[var(--r-card)]",
-    );
+    expect(document.querySelector('[data-slot="dialog-content"]')?.className).toContain("rounded-[var(--r-card)]");
 
     render(
       <Sheet open>
@@ -104,8 +100,6 @@ describe("UI primitive visual hierarchy", () => {
         </SheetContent>
       </Sheet>,
     );
-    expect(document.querySelector('[data-slot="sheet-content"]')?.className).toContain(
-      "rounded-l-[var(--r-card)]",
-    );
+    expect(document.querySelector('[data-slot="sheet-content"]')?.className).toContain("rounded-l-[var(--r-card)]");
   });
 });

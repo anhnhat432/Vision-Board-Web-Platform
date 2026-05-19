@@ -19,11 +19,7 @@ describe("MeasurableStep — intent metric hint", () => {
   it("renders nothing extra when no intentMetricHint is provided (backwards-compat)", () => {
     const setSmartData = vi.fn();
     render(
-      <MeasurableStep
-        smartData={makeSmartData()}
-        setSmartData={setSmartData}
-        currentStepHasDraftContent={false}
-      />,
+      <MeasurableStep smartData={makeSmartData()} setSmartData={setSmartData} currentStepHasDraftContent={false} />,
     );
     expect(screen.queryByTestId("smart-intent-metric-hint")).toBeNull();
     const input = screen.getByLabelText("Con số hoặc dấu hiệu theo dõi");

@@ -1,4 +1,3 @@
-
 export type { BrowserNotificationStatus } from "./browserNotification";
 export {
   getBrowserNotificationStatus,

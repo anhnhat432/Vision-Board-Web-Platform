@@ -67,9 +67,7 @@ describe("FunnelDiagnosticsPanel — visibility", () => {
   });
 
   it("renders nothing when explicitly disabled even with a snapshot", () => {
-    const { container } = render(
-      <FunnelDiagnosticsPanel enabled={false} snapshot={makeSnapshot()} />,
-    );
+    const { container } = render(<FunnelDiagnosticsPanel enabled={false} snapshot={makeSnapshot()} />);
     expect(container).toBeEmptyDOMElement();
   });
 

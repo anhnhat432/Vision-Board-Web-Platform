@@ -76,7 +76,10 @@ export function ScheduleStep({
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <section className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6" aria-labelledby="schedule-main-title">
+      <section
+        className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6"
+        aria-labelledby="schedule-main-title"
+      >
         <div className="flex items-start gap-2">
           <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
@@ -180,7 +183,9 @@ export function ScheduleStep({
               );
             })}
           </div>
-          <p className={helperTextClass}>Ứng dụng lưu quỹ thời gian, không lưu giờ trong ngày, để giữ local-first gọn.</p>
+          <p className={helperTextClass}>
+            Ứng dụng lưu quỹ thời gian, không lưu giờ trong ngày, để giữ local-first gọn.
+          </p>
         </fieldset>
 
         <fieldset className="mt-5">
@@ -259,7 +264,10 @@ export function ScheduleStep({
 
       {setupGuideSupport && setupGuideTemplate ? (
         <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-guide-title">
-          <p id="schedule-guide-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+          <p
+            id="schedule-guide-title"
+            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+          >
             Nhịp tuần 1 theo khung
           </p>
           <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
@@ -272,15 +280,23 @@ export function ScheduleStep({
       ) : null}
 
       {setupGuideSupport ? (
-        <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-recommendation-title">
-          <p id="schedule-recommendation-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+        <section
+          className="rounded-lg border border-app-line bg-app-bg p-3"
+          aria-labelledby="schedule-recommendation-title"
+        >
+          <p
+            id="schedule-recommendation-title"
+            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+          >
             Ngày nhìn lại và mức tải tuần gợi ý
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
               <p className="mt-2 text-[14px] font-medium text-app-ink">{draft.reviewDay}</p>
-              <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.recommendedReviewReason}</p>
+              <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+                {setupGuideSupport.recommendedReviewReason}
+              </p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>
@@ -294,8 +310,14 @@ export function ScheduleStep({
       ) : null}
 
       {(draft.week4Milestone || draft.week8Milestone) && (
-        <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-milestones-title">
-          <p id="schedule-milestones-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+        <section
+          className="rounded-lg border border-app-line bg-app-bg p-3"
+          aria-labelledby="schedule-milestones-title"
+        >
+          <p
+            id="schedule-milestones-title"
+            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+          >
             Mốc gợi ý theo khung
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -304,7 +326,9 @@ export function ScheduleStep({
               { label: "Tuần 8", value: draft.week8Milestone },
             ].map((milestone) => (
               <div key={milestone.label} className="rounded-lg border border-app-line bg-app-surface p-3">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{milestone.label}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  {milestone.label}
+                </p>
                 <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{milestone.value}</p>
               </div>
             ))}
@@ -313,7 +337,10 @@ export function ScheduleStep({
       )}
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-week-one-title">
-        <p id="schedule-week-one-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+        <p
+          id="schedule-week-one-title"
+          className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+        >
           {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
         </p>
         <div className="mt-3 space-y-2">
@@ -323,14 +350,20 @@ export function ScheduleStep({
             </p>
           ) : (
             weekOneTaskPreview.map((task) => (
-              <div key={task} className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-[14px] text-app-ink-soft">
+              <div
+                key={task}
+                className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-[14px] text-app-ink-soft"
+              >
                 {task}
               </div>
             ))
           )}
         </div>
         {weekOneTaskWarning ? (
-          <p role="status" className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]">
+          <p
+            role="status"
+            className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
+          >
             <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>
               <span className="font-medium">Cảnh báo:</span> {weekOneTaskWarning}

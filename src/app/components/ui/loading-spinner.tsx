@@ -19,9 +19,7 @@ function LoadingSpinner({ className, label = "Đang tải..." }: { className?: s
           aria-hidden="true"
         />
       </div>
-      {label ? (
-        <p className="text-sm font-medium tracking-tight text-muted-foreground">{label}</p>
-      ) : null}
+      {label ? <p className="text-sm font-medium tracking-tight text-muted-foreground">{label}</p> : null}
     </div>
   );
 }

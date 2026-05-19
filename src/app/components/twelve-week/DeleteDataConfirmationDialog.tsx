@@ -1,4 +1,13 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 
 interface DeleteDataConfirmationDialogProps {
@@ -48,20 +57,22 @@ export function DeleteDataConfirmationDialog({
               </>
             ) : isSignedIn ? (
               <>
-                Tất cả dữ liệu trên đám mây và thiết bị sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần,
-                nhật ký, review và cài đặt. Tài khoản sẽ không còn có thể truy cập.
+                Tất cả dữ liệu trên đám mây và thiết bị sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần, nhật
+                ký, review và cài đặt. Tài khoản sẽ không còn có thể truy cập.
               </>
             ) : (
               <>
-                Tất cả dữ liệu trên thiết bị này sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần,
-                nhật ký, review và cài đặt.
+                Tất cả dữ liệu trên thiết bị này sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần, nhật ký,
+                review và cài đặt.
               </>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-4 py-3">
-          <p className="text-[14px] font-semibold text-[color:var(--color-danger-fg)]">Hành động này không thể hoàn tác.</p>
+          <p className="text-[14px] font-semibold text-[color:var(--color-danger-fg)]">
+            Hành động này không thể hoàn tác.
+          </p>
           <p className="mt-1 text-[14px] font-semibold text-[color:var(--color-danger-fg)]">
             Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
           </p>

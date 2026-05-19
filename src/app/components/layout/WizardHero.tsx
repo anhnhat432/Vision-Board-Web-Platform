@@ -65,19 +65,11 @@ export function WizardHero({
 
   return (
     <Card
-      className={cn(
-        "relative overflow-hidden border border-[color:var(--border)] bg-card",
-        className,
-      )}
+      className={cn("relative overflow-hidden border border-[color:var(--border)] bg-card", className)}
       {...heroExtraProps}
     >
       <CardContent className="relative p-5 sm:p-7 lg:p-8">
-        <div
-          className={cn(
-            "grid items-start gap-5",
-            aside ? "xl:grid-cols-[minmax(0,1fr)_minmax(260px,340px)]" : "",
-          )}
-        >
+        <div className={cn("grid items-start gap-5", aside ? "xl:grid-cols-[minmax(0,1fr)_minmax(260px,340px)]" : "")}>
           <div className="min-w-0 space-y-3">
             {eyebrow ? (
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -107,12 +99,7 @@ export function WizardHero({
         </div>
         {showSteps ? (
           <div className="mt-5">
-            <WizardStepPip
-              steps={steps}
-              currentStep={currentStep}
-              onJumpToStep={onJumpToStep}
-              mobileMode="compact"
-            />
+            <WizardStepPip steps={steps} currentStep={currentStep} onJumpToStep={onJumpToStep} mobileMode="compact" />
           </div>
         ) : null}
       </CardContent>

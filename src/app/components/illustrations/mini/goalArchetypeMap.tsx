@@ -42,6 +42,8 @@ const GOAL_ARCHETYPE_ICON_MAP: Record<string, GoalArchetypeIconComponent> = {
 };
 
 export function getGoalArchetypeIcon(archetype: string | null | undefined): GoalArchetypeIconComponent {
-  const key = String(archetype ?? "").trim().toLowerCase();
+  const key = String(archetype ?? "")
+    .trim()
+    .toLowerCase();
   return GOAL_ARCHETYPE_ICON_MAP[key] ?? GoalArchetypeHabitIcon;
 }

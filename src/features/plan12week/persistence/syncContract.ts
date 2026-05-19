@@ -44,7 +44,8 @@ export const TWELVE_WEEK_SOURCE_OF_TRUTH_CONTRACT = {
   demoMode: "localStorage is the only source of truth; backend API calls stay disabled.",
   realModeLocalFirst: "Local writes happen before remote sync so user progress survives offline or backend failure.",
   mutationQueue: "Remote writes are represented by per-user mutation queue items until backend applies them.",
-  pullSync: "Cloud pull may hydrate localStorage only after auth, profile bootstrap, API config, and conflict checks pass.",
+  pullSync:
+    "Cloud pull may hydrate localStorage only after auth, profile bootstrap, API config, and conflict checks pass.",
   conflictPolicy: "Conflict or unsafe sync blocks automatic overwrite until user action chooses local or cloud.",
 } as const;
 

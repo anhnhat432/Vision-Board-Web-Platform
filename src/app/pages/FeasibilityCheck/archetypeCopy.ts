@@ -49,16 +49,15 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
   health_fitness: {
     bottleneckOverlay: {
       time: "Tập đều 3 buổi ngắn quan trọng hơn 1 buổi dài. Cắt thời lượng, giữ tần suất.",
-      energy:
-        "Sức khỏe phụ thuộc recovery: ngủ và ăn quan trọng tuần 1 hơn cường độ buổi tập.",
-      resources: "Cần đo mốc hiện tại thật (cân, nhịp tim, kỹ thuật) trước khi tăng tải. Chấn thương từ kỹ thuật sai là rủi ro chính.",
+      energy: "Sức khỏe phụ thuộc recovery: ngủ và ăn quan trọng tuần 1 hơn cường độ buổi tập.",
+      resources:
+        "Cần đo mốc hiện tại thật (cân, nhịp tim, kỹ thuật) trước khi tăng tải. Chấn thương từ kỹ thuật sai là rủi ro chính.",
       routine: "Khóa lịch tập cố định và bảo vệ nó như cuộc họp — không 'tập khi rảnh'.",
     },
     firstWeek: {
       realistic:
         "Tuần 1 nhẹ: kiểm tra kỹ thuật, đo mốc hiện tại (cân, nhịp tim), 3 buổi ngắn. Giữ nhịp bền vững — đừng cố lập kỷ lục tuần đầu.",
-      challenging:
-        "Tuần 1 chỉ giữ frequency, không tăng tải. Ngày nghỉ có chủ đích quan trọng như ngày tập.",
+      challenging: "Tuần 1 chỉ giữ frequency, không tăng tải. Ngày nghỉ có chủ đích quan trọng như ngày tập.",
       too_ambitious:
         "Tuần 1 hạ phạm vi: 2 buổi ngắn mỗi tuần ở mức rất nhẹ. Phục hồi + giấc ngủ tuần 1 quan trọng hơn cường độ.",
     },
@@ -95,18 +94,15 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
   financial_goal: {
     bottleneckOverlay: {
       time: "Tài chính cần 5-10p/ngày để theo dõi, không phải buổi dài. Thiết lập tự động hóa thay vì làm tay.",
-      routine:
-        "Chuyển khoản tiết kiệm tự động vào ngày lương — đừng dựa vào ý chí cuối tháng.",
+      routine: "Chuyển khoản tiết kiệm tự động vào ngày lương — đừng dựa vào ý chí cuối tháng.",
       resources: "Cần 1 hệ thống theo dõi (YNAB, Excel) trước khi đặt số tiết kiệm. Theo dõi mới biết thật.",
       obstacle: "Thu nhập biến động là rủi ro lớn nhất. Cần plan B (giảm % tiết kiệm tháng thấp).",
     },
     firstWeek: {
       realistic:
         "Tuần 1 thiết lập theo dõi + chuyển khoản tự động. Đừng đặt số tiết kiệm to tuần đầu — kiểm chứng dòng tiền trước.",
-      challenging:
-        "Tuần 1 chỉ theo dõi chi tiêu hằng ngày 5-10p. Số tiết kiệm tuần đầu nên thấp hơn mục tiêu dài hạn.",
-      too_ambitious:
-        "Tuần 1 hạ mục tiêu xuống 50% và tạo khoảng đệm 1-2 tuần trước khi cam kết toàn bộ kế hoạch.",
+      challenging: "Tuần 1 chỉ theo dõi chi tiêu hằng ngày 5-10p. Số tiết kiệm tuần đầu nên thấp hơn mục tiêu dài hạn.",
+      too_ambitious: "Tuần 1 hạ mục tiêu xuống 50% và tạo khoảng đệm 1-2 tuần trước khi cam kết toàn bộ kế hoạch.",
     },
     scope: {
       challenging:
@@ -118,16 +114,14 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
   exam_study: {
     bottleneckOverlay: {
       time: "Thi cử có hạn chót cứng — tuần 1 phải làm đề thi thử để biết mốc hiện tại, không học lan man.",
-      clarity:
-        "Band/level cuối là phi tuyến. Đo bằng số đề thi thử + điểm thử thay vì hi vọng band tăng đều.",
+      clarity: "Band/level cuối là phi tuyến. Đo bằng số đề thi thử + điểm thử thay vì hi vọng band tăng đều.",
       resources: "Cần đề thi thật + người chữa speaking/writing. Tự học không có feedback là lỗ thủng lớn nhất.",
       confidence: "Tuần 1 làm 1 đề đầy đủ để biết mốc hiện tại thật, kể cả khi sợ điểm thấp.",
     },
     firstWeek: {
       realistic:
         "Tuần 1 làm 1 đề thi thử để biết mốc hiện tại thật. Sau đó ưu tiên kỹ năng yếu nhất, không học dàn trải 4 kỹ năng.",
-      challenging:
-        "Tuần 1 chỉ làm 1 đề + review lỗi + spaced repetition cho kỹ năng yếu. Bỏ qua tham vọng band cuối.",
+      challenging: "Tuần 1 chỉ làm 1 đề + review lỗi + spaced repetition cho kỹ năng yếu. Bỏ qua tham vọng band cuối.",
       too_ambitious:
         "Tuần 1 hạ mục tiêu xuống nửa band và làm 2 đề thi thử để mốc hiện tại rõ. Mức điểm lớn cần thời gian phi tuyến.",
     },
@@ -140,11 +134,11 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
   },
   project_completion: {
     bottleneckOverlay: {
-      clarity:
-        "Dự án dễ phình phạm vi. Mốc tuần 4 và tuần 8 phải rõ trước khi bắt đầu, không phải để 'thấy sao'.",
+      clarity: "Dự án dễ phình phạm vi. Mốc tuần 4 và tuần 8 phải rõ trước khi bắt đầu, không phải để 'thấy sao'.",
       resources: "Liệt kê phần phụ thuộc (API, người, ngân sách) tuần 1 — bị chặn sớm là chết kế hoạch.",
       time: "Cắt phạm vi, không cắt kết quả chính. Một tính năng hoàn tất tốt hơn ba tính năng dở.",
-      obstacle: "Góp ý từ người liên quan cần có từ tuần 2-3, không phải tuần 12. Làm trong khoảng trống là kiểu dễ thất bại.",
+      obstacle:
+        "Góp ý từ người liên quan cần có từ tuần 2-3, không phải tuần 12. Làm trong khoảng trống là kiểu dễ thất bại.",
     },
     firstWeek: {
       realistic:
@@ -167,8 +161,7 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
         "Thói quen cần tín hiệu kích hoạt + môi trường, không phải ý chí. Gắn thói quen vào nhịp quen thuộc có sẵn (sau cà phê sáng, trước bữa tối...).",
       energy: "Thói quen tuần 1 phải rất dễ — 2 phút thay vì 30 phút. Chuỗi ngày quan trọng hơn cường độ.",
       time: "Cắt thói quen về phiên bản 2-phút và gắn tín hiệu rõ. 'Tôi sẽ đọc 30p' luôn thua 'sau cà phê sáng tôi đọc 1 trang'.",
-      confidence:
-        "Thói quen khởi đầu bằng thắng nhỏ liên tiếp, không phải ngày bắt đầu hoành tráng.",
+      confidence: "Thói quen khởi đầu bằng thắng nhỏ liên tiếp, không phải ngày bắt đầu hoành tráng.",
     },
     firstWeek: {
       realistic:
@@ -181,37 +174,31 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
     scope: {
       challenging:
         "Chọn 1 thói quen chính + 1 tín hiệu cố định. Nhiều thói quen cùng lúc làm chuỗi ngày vỡ trong 2 tuần.",
-      too_ambitious:
-        "Hạ tần suất xuống 3 lần/tuần thay vì hằng ngày. Hằng ngày dễ vỡ chuỗi; 3-5 lần/tuần dễ phục hồi.",
+      too_ambitious: "Hạ tần suất xuống 3 lần/tuần thay vì hằng ngày. Hằng ngày dễ vỡ chuỗi; 3-5 lần/tuần dễ phục hồi.",
     },
   },
   creative_output: {
     bottleneckOverlay: {
-      confidence:
-        "Sáng tạo bị chặn bởi 'chưa đủ tốt để đưa ra'. Tuần 1 hoàn tất 1 bản thô — cầu toàn là kẻ thù chính.",
+      confidence: "Sáng tạo bị chặn bởi 'chưa đủ tốt để đưa ra'. Tuần 1 hoàn tất 1 bản thô — cầu toàn là kẻ thù chính.",
       clarity: "Đặt nhịp xuất bản (1 bài/tuần) thay vì 'viết khi có cảm hứng'.",
       time: "Buổi sáng tác ngắn cố định + buổi sửa tách rời. Đừng sửa trong lúc viết.",
       routine: "Lịch xuất bản cố định mới tạo nhịp. 'Khi xong sẽ đăng' = không bao giờ đăng.",
     },
     firstWeek: {
-      realistic:
-        "Tuần 1 hoàn tất 1 tác phẩm bản thô — không sửa vô hạn. Đặt lịch xuất bản cố định ngay tuần đầu.",
-      challenging:
-        "Tuần 1 cam kết 1 tác phẩm thay vì 3. Tách buổi sáng tác và buổi sửa để tránh bị cầu toàn chặn lại.",
+      realistic: "Tuần 1 hoàn tất 1 tác phẩm bản thô — không sửa vô hạn. Đặt lịch xuất bản cố định ngay tuần đầu.",
+      challenging: "Tuần 1 cam kết 1 tác phẩm thay vì 3. Tách buổi sáng tác và buổi sửa để tránh bị cầu toàn chặn lại.",
       too_ambitious:
         "Tuần 1 chỉ hoàn tất 1 phiên bản thô nhất có thể. Nhịp xuất bản quan trọng hơn chất lượng tác phẩm tuần đầu.",
     },
     scope: {
-      challenging:
-        "Cắt số tác phẩm còn 1/tuần. Lần sửa thứ 3 không tăng giá trị bằng tác phẩm tiếp theo.",
+      challenging: "Cắt số tác phẩm còn 1/tuần. Lần sửa thứ 3 không tăng giá trị bằng tác phẩm tiếp theo.",
       too_ambitious:
         "Đặt lại mục tiêu sang số tác phẩm xuất bản, không phải chất lượng. Nhịp hoàn tất đều là chỉ số quan trọng nhất.",
     },
   },
   relationship_life: {
     bottleneckOverlay: {
-      routine:
-        "Quan hệ chắc khi có ngày/giờ cố định, không phải 'khi rảnh thì gặp'.",
+      routine: "Quan hệ chắc khi có ngày/giờ cố định, không phải 'khi rảnh thì gặp'.",
       time: "Khóa 1 buổi cố định mỗi tuần và bảo vệ nó như cuộc họp.",
       clarity:
         "Đặt việc mình kiểm soát ('mình sẽ gọi 1 buổi/tuần') thay vì kết quả phụ thuộc người khác ('quan hệ tốt hơn').",
@@ -220,16 +207,12 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
     firstWeek: {
       realistic:
         "Tuần 1 chốt 1 ngày/giờ cố định trong tuần. Một hành động nhỏ thể hiện quan tâm quan trọng hơn buổi gặp dài.",
-      challenging:
-        "Tuần 1 đặt 1 buổi 30 phút cố định + 1 hành động nhỏ. Bỏ qua tham vọng 'quan hệ sâu sắc tuần đầu'.",
-      too_ambitious:
-        "Tuần 1 chỉ giữ 1 ngày cố định trong tuần. Đa hoạt động cùng lúc dễ vỡ.",
+      challenging: "Tuần 1 đặt 1 buổi 30 phút cố định + 1 hành động nhỏ. Bỏ qua tham vọng 'quan hệ sâu sắc tuần đầu'.",
+      too_ambitious: "Tuần 1 chỉ giữ 1 ngày cố định trong tuần. Đa hoạt động cùng lúc dễ vỡ.",
     },
     scope: {
-      challenging:
-        "Đặt việc có thể kiểm soát (số buổi gặp, lần gọi) thay vì kết quả phụ thuộc người khác.",
-      too_ambitious:
-        "Hạ tần suất xuống 1 buổi cố định/tuần. Quan hệ chắc lên từ consistency, không phải intensity.",
+      challenging: "Đặt việc có thể kiểm soát (số buổi gặp, lần gọi) thay vì kết quả phụ thuộc người khác.",
+      too_ambitious: "Hạ tần suất xuống 1 buổi cố định/tuần. Quan hệ chắc lên từ consistency, không phải intensity.",
     },
   },
   other: null,

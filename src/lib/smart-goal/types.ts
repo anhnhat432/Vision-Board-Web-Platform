@@ -1,10 +1,4 @@
-﻿export type SmartGoalDomain =
-  | "career"
-  | "health"
-  | "finance"
-  | "learning"
-  | "relationship"
-  | "life";
+﻿export type SmartGoalDomain = "career" | "health" | "finance" | "learning" | "relationship" | "life";
 
 export interface SmartGoalSummary {
   goal: string;

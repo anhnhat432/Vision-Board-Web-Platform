@@ -44,9 +44,7 @@ export function VisionBoardCanvas({
   emptyStateSlot,
 }: VisionBoardCanvasProps): JSX.Element {
   const theme = VISION_BOARD_THEMES.find((item) => item.id === themeId) ?? VISION_BOARD_THEMES[0];
-  const zoneAreas = focusAreaIds?.length
-    ? LIFE_AREAS.filter((area) => focusAreaIds.includes(area.name))
-    : LIFE_AREAS;
+  const zoneAreas = focusAreaIds?.length ? LIFE_AREAS.filter((area) => focusAreaIds.includes(area.name)) : LIFE_AREAS;
   const cols = zoneAreas.length <= 4 ? 2 : 4;
   const rows = Math.ceil(zoneAreas.length / cols);
 

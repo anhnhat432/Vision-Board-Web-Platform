@@ -16,14 +16,7 @@ const DEFAULT_CARD_STYLE = {
   "--card-shift-y": "0px",
 } as React.CSSProperties;
 
-function Card({
-  className,
-  interactive = false,
-  style,
-  onPointerMove,
-  onPointerLeave,
-  ...props
-}: CardProps) {
+function Card({ className, interactive = false, style, onPointerMove, onPointerLeave, ...props }: CardProps) {
   const prefersReducedMotion = useReducedMotion();
   const cardRef = React.useRef<HTMLDivElement | null>(null);
   const frameRef = React.useRef<number | null>(null);
@@ -57,12 +50,7 @@ function Card({
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event);
 
-    if (
-      event.defaultPrevented ||
-      !isInteractive ||
-      event.pointerType === "touch" ||
-      !cardRef.current
-    ) {
+    if (event.defaultPrevented || !isInteractive || event.pointerType === "touch" || !cardRef.current) {
       return;
     }
 
@@ -148,10 +136,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className,
-      )}
+      className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
       {...props}
     />
   );
@@ -177,12 +162,4 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardDescription,
-  CardContent,
-};
+export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };

@@ -31,9 +31,30 @@ function makeSystem(): TwelveWeekSystem {
     dailyCheckIns: [],
     weeklyReviews: [],
     scoreboard: [
-      { weekNumber: 1, leadCompletionPercent: 90, mainMetricProgress: "", outputDone: "", reviewDone: true, weeklyScore: 90 },
-      { weekNumber: 2, leadCompletionPercent: 70, mainMetricProgress: "", outputDone: "", reviewDone: true, weeklyScore: 70 },
-      { weekNumber: 3, leadCompletionPercent: 0, mainMetricProgress: "", outputDone: "", reviewDone: false, weeklyScore: 0 },
+      {
+        weekNumber: 1,
+        leadCompletionPercent: 90,
+        mainMetricProgress: "",
+        outputDone: "",
+        reviewDone: true,
+        weeklyScore: 90,
+      },
+      {
+        weekNumber: 2,
+        leadCompletionPercent: 70,
+        mainMetricProgress: "",
+        outputDone: "",
+        reviewDone: true,
+        weeklyScore: 70,
+      },
+      {
+        weekNumber: 3,
+        leadCompletionPercent: 0,
+        mainMetricProgress: "",
+        outputDone: "",
+        reviewDone: false,
+        weeklyScore: 0,
+      },
     ],
   };
 }

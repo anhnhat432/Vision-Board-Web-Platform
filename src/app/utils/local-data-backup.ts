@@ -39,9 +39,7 @@ export interface DataExportPayload {
 }
 
 export function createDataExportJson(data: UserData, activeGoalId?: string | null): string {
-  const activeGoal = activeGoalId
-    ? data.goals.find((g) => g.id === activeGoalId) ?? null
-    : data.goals[0] ?? null;
+  const activeGoal = activeGoalId ? (data.goals.find((g) => g.id === activeGoalId) ?? null) : (data.goals[0] ?? null);
 
   const payload: DataExportPayload = {
     exportVersion: "1.0",
@@ -72,19 +70,12 @@ export function downloadDataExport(data: UserData, activeGoalId?: string | null)
   window.URL.revokeObjectURL(url);
 }
 
-export function getLocalUserDataBackupFilename(
-  filenamePrefix = "vision-board-local-backup",
-  now = new Date(),
-): string {
+export function getLocalUserDataBackupFilename(filenamePrefix = "vision-board-local-backup", now = new Date()): string {
   const safePrefix = filenamePrefix.trim().replace(/[^a-zA-Z0-9._-]+/g, "-") || "vision-board-local-backup";
   return `${safePrefix}-${now.toISOString().slice(0, 10)}.json`;
 }
 
-export function downloadLocalUserDataBackup({
-  data,
-  filenamePrefix,
-  now,
-}: LocalUserDataBackupDownloadOptions): void {
+export function downloadLocalUserDataBackup({ data, filenamePrefix, now }: LocalUserDataBackupDownloadOptions): void {
   const blob = new Blob([createLocalUserDataBackupJson(data)], { type: "application/json;charset=utf-8" });
   const url = window.URL.createObjectURL(blob);
   const anchor = document.createElement("a");

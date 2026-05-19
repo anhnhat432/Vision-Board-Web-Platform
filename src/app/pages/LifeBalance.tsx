@@ -240,9 +240,7 @@ export function LifeBalance() {
 
           <section className="mt-8 rounded-card border border-app-line bg-app-surface p-10 text-center">
             <Compass className="mx-auto h-12 w-12 text-app-accent" aria-hidden="true" />
-            <h2 className="mt-4 font-serif text-[24px] font-medium text-app-ink">
-              Chưa có dữ liệu bánh xe
-            </h2>
+            <h2 className="mt-4 font-serif text-[24px] font-medium text-app-ink">Chưa có dữ liệu bánh xe</h2>
             <p className="mx-auto mt-2 max-w-md text-[15px] text-app-ink-soft">
               Bắt đầu bằng cách chấm điểm 8 lĩnh vực để xem bức tranh.
             </p>
@@ -310,9 +308,7 @@ export function LifeBalance() {
 
       <div ref={pageTopRef} className="pb-12">
         <header className="page-enter">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-            Bánh xe cuộc sống
-          </p>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Bánh xe cuộc sống</p>
           <h1 className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink">
             Bức tranh hiện tại của bạn
           </h1>
@@ -336,9 +332,7 @@ export function LifeBalance() {
 
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <article className="rounded-card border border-app-line bg-app-surface p-5">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              Trung bình
-            </p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
             <p className="mt-3 font-serif text-[36px] font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-[17px] font-medium text-app-ink-muted">/10</span>
@@ -382,11 +376,7 @@ export function LifeBalance() {
                   <p className="text-[13px] text-app-ink-muted">8 lĩnh vực hiện tại</p>
                 </header>
                 <div className="mt-4">
-                  <SimpleRadarChart
-                    className="mx-auto max-w-[600px]"
-                    data={radarData}
-                    height={460}
-                  />
+                  <SimpleRadarChart className="mx-auto max-w-[600px]" data={radarData} height={460} />
                 </div>
                 <div className="mt-3 text-right">
                   <Link to="/onboarding" className="text-[14px] text-app-accent hover:underline">
@@ -405,18 +395,13 @@ export function LifeBalance() {
                     const AreaIcon = getLifeAreaIcon(area.name);
 
                     return (
-                      <li
-                        key={area.name}
-                        className="border-b border-app-line py-3 last:border-0"
-                      >
+                      <li key={area.name} className="border-b border-app-line py-3 last:border-0">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
                             <span className="flex h-6 w-6 items-center justify-center rounded bg-app-accent-soft text-app-accent">
                               <AreaIcon className="h-4 w-4" />
                             </span>
-                            <span className="text-[14px] font-medium text-app-ink">
-                              {getLifeAreaLabel(area.name)}
-                            </span>
+                            <span className="text-[14px] font-medium text-app-ink">{getLifeAreaLabel(area.name)}</span>
                           </div>
                           <span className="font-serif text-[20px] font-medium tabular-nums text-app-ink">
                             {area.score}
@@ -458,9 +443,7 @@ export function LifeBalance() {
             <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
               <header>
                 <h2 className="text-[16px] font-semibold text-app-ink">Diễn biến 6 đợt gần nhất</h2>
-                <p className="text-[13px] text-app-ink-muted">
-                  Mỗi đường là một lĩnh vực; trục đứng là điểm 0–10.
-                </p>
+                <p className="text-[13px] text-app-ink-muted">Mỗi đường là một lĩnh vực; trục đứng là điểm 0–10.</p>
               </header>
               <div className="mt-4">
                 {historicalData.length > 0 ? (
@@ -475,9 +458,7 @@ export function LifeBalance() {
                   </Suspense>
                 ) : (
                   <div className="rounded-card border border-dashed border-app-line p-8 text-center">
-                    <p className="text-[14px] text-app-ink-soft">
-                      Chưa có lịch sử. Hãy lưu thay đổi để xem diễn biến.
-                    </p>
+                    <p className="text-[14px] text-app-ink-soft">Chưa có lịch sử. Hãy lưu thay đổi để xem diễn biến.</p>
                   </div>
                 )}
               </div>

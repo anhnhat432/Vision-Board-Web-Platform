@@ -57,33 +57,38 @@ export function BillingCheckoutQR() {
   const autoSyncedOrderRef = useRef<string | null>(null);
 
   // Fetch order status
-  const fetchStatus = useCallback(async (oid: string) => {
-    try {
-      const data = await apiClient.get<OrderStatusResponse>(
-        user ? `/billing/order-status/${oid}` : `/billing/public-order-status/${oid}`,
-      );
-      if (data) {
-        setOrder(data);
-        if (data.expiresAt) {
-          setTimeLeft(Math.max(0, new Date(data.expiresAt).getTime() - Date.now()));
+  const fetchStatus = useCallback(
+    async (oid: string) => {
+      try {
+        const data = await apiClient.get<OrderStatusResponse>(
+          user ? `/billing/order-status/${oid}` : `/billing/public-order-status/${oid}`,
+        );
+        if (data) {
+          setOrder(data);
+          if (data.expiresAt) {
+            setTimeLeft(Math.max(0, new Date(data.expiresAt).getTime() - Date.now()));
+          }
+          // Stop polling if terminal
+          if (data.status === "completed" || data.status === "expired" || data.status === "failed") {
+            if (pollRef.current) clearInterval(pollRef.current);
+          }
         }
-        // Stop polling if terminal
-        if (data.status === "completed" || data.status === "expired" || data.status === "failed") {
-          if (pollRef.current) clearInterval(pollRef.current);
+      } catch (err: unknown) {
+        if (
+          toastBillingNetworkError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid })
+        ) {
+          setError("Mạng có vấn đề, vui lòng thử lại");
+        } else {
+          logBillingUiError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid });
+          const msg = err instanceof Error ? err.message : "Lỗi khi kiểm tra đơn hàng";
+          setError(msg);
         }
+      } finally {
+        setLoading(false);
       }
-    } catch (err: unknown) {
-      if (toastBillingNetworkError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid })) {
-        setError("Mạng có vấn đề, vui lòng thử lại");
-      } else {
-        logBillingUiError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid });
-        const msg = err instanceof Error ? err.message : "Lỗi khi kiểm tra đơn hàng";
-        setError(msg);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+    },
+    [user],
+  );
 
   // Init: create or fetch
   useEffect(() => {
@@ -156,18 +161,19 @@ export function BillingCheckoutQR() {
 
       setEntitlementSyncStatus("failed");
       setEntitlementSyncMessage(
-        result.message ||
-          "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
+        result.message || "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
       );
       return false;
     } catch (error: unknown) {
-      if (toastBillingNetworkError(error, {
-        surface: "BillingCheckoutQR",
-        action: "sync_completed_order_access",
-        orderId: order.orderId,
-        amount: order.amount,
-        status: order.status,
-      })) {
+      if (
+        toastBillingNetworkError(error, {
+          surface: "BillingCheckoutQR",
+          action: "sync_completed_order_access",
+          orderId: order.orderId,
+          amount: order.amount,
+          status: order.status,
+        })
+      ) {
         setEntitlementSyncMessage("Mạng có vấn đề, vui lòng thử lại");
       } else {
         logBillingUiError(error, {
@@ -177,7 +183,9 @@ export function BillingCheckoutQR() {
           amount: order.amount,
           status: order.status,
         });
-        setEntitlementSyncMessage("Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.");
+        setEntitlementSyncMessage(
+          "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
+        );
       }
       setEntitlementSyncStatus("failed");
       return false;
@@ -305,7 +313,8 @@ export function BillingCheckoutQR() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <div className="sr-only" aria-live="polite">
-        {copyMessage || `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
+        {copyMessage ||
+          `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
       </div>
       <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
@@ -332,7 +341,11 @@ export function BillingCheckoutQR() {
             </div>
 
             <div className="mt-6 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-app-warm-soft px-4 py-2" role="status" aria-live="polite">
+              <div
+                className="inline-flex items-center gap-2 rounded-full bg-app-warm-soft px-4 py-2"
+                role="status"
+                aria-live="polite"
+              >
                 <Loader2 className="h-4 w-4 animate-spin text-app-warm" />
                 <span className="text-sm font-medium text-app-ink">Đang chờ xác nhận...</span>
               </div>
@@ -386,7 +399,11 @@ export function BillingCheckoutQR() {
                   highlight
                 />
               </div>
-              {copyMessage ? <p className="text-xs font-medium text-app-accent" aria-live="polite">{copyMessage}</p> : null}
+              {copyMessage ? (
+                <p className="text-xs font-medium text-app-accent" aria-live="polite">
+                  {copyMessage}
+                </p>
+              ) : null}
 
               <div className="rounded-lg border border-app-line bg-app-warm-soft px-4 py-3">
                 <p className="text-xs font-medium leading-5 text-app-ink">

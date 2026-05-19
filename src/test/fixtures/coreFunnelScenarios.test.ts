@@ -3,10 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildSmartGoal, hasOutcomeIndicator } from "@/lib/smart-goal";
 import { buildResult } from "@/app/pages/FeasibilityCheck/helpers";
 import { getFeasibilityDraftDefaults } from "@/app/pages/12WeekSetup/helpers";
-import {
-  buildLeadIndicatorSchedules,
-  getPreviewTasks,
-} from "@/app/pages/12WeekSetup/helpers";
+import { buildLeadIndicatorSchedules, getPreviewTasks } from "@/app/pages/12WeekSetup/helpers";
 import {
   getMaxTasksPerTactic,
   getMaxWeeklyTaskCount,
@@ -23,9 +20,7 @@ describe("core funnel scenarios — SMART quality", () => {
 
       it("produces a normalized SMART goal with goal_summary", () => {
         expect(goal.id).toMatch(/^smart_goal_/);
-        expect(goal.specific.goal_statement).toBe(
-          scenario.smartInput.specificGoalStatement,
-        );
+        expect(goal.specific.goal_statement).toBe(scenario.smartInput.specificGoalStatement);
         expect(goal.measurable.target_value).toBe(scenario.smartInput.measurableTargetValue);
         expect(goal.goal_summary).toBeDefined();
       });
@@ -35,9 +30,7 @@ describe("core funnel scenarios — SMART quality", () => {
       });
 
       it("specific statement passes hasOutcomeIndicator as expected", () => {
-        expect(hasOutcomeIndicator(goal.specific.goal_statement)).toBe(
-          scenario.expectedSmart.hasOutcomeIndicator,
-        );
+        expect(hasOutcomeIndicator(goal.specific.goal_statement)).toBe(scenario.expectedSmart.hasOutcomeIndicator);
       });
     });
   }
@@ -60,12 +53,8 @@ describe("core funnel scenarios — feasibility result", () => {
       });
 
       it("adjustedScore stays in expected range", () => {
-        expect(result.adjustedScore).toBeGreaterThanOrEqual(
-          scenario.expectedFeasibility.adjustedScoreAtLeast,
-        );
-        expect(result.adjustedScore).toBeLessThanOrEqual(
-          scenario.expectedFeasibility.adjustedScoreAtMost,
-        );
+        expect(result.adjustedScore).toBeGreaterThanOrEqual(scenario.expectedFeasibility.adjustedScoreAtLeast);
+        expect(result.adjustedScore).toBeLessThanOrEqual(scenario.expectedFeasibility.adjustedScoreAtMost);
       });
 
       it("returns guidance and recommendation strings", () => {
@@ -109,15 +98,11 @@ describe("core funnel scenarios — plan load constraints", () => {
       });
 
       it("max weekly task count matches expected", () => {
-        expect(getMaxWeeklyTaskCount(constraintsInput)).toBe(
-          scenario.expectedPlan.maxWeeklyTaskCount,
-        );
+        expect(getMaxWeeklyTaskCount(constraintsInput)).toBe(scenario.expectedPlan.maxWeeklyTaskCount);
       });
 
       it("max tasks per tactic matches expected", () => {
-        expect(getMaxTasksPerTactic(constraintsInput)).toBe(
-          scenario.expectedPlan.maxTasksPerTactic,
-        );
+        expect(getMaxTasksPerTactic(constraintsInput)).toBe(scenario.expectedPlan.maxTasksPerTactic);
       });
 
       it("week 1 task count from lead indicator schedule matches expected", () => {
@@ -167,37 +152,22 @@ describe("core funnel scenarios — coverage", () => {
     const goalTypes = new Set(CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.goalType));
     expect(goalTypes.size).toBe(8);
     expect(goalTypes).toEqual(
-      new Set([
-        "skill",
-        "health",
-        "finance",
-        "career",
-        "exam",
-        "project",
-        "habit",
-        "self_development",
-      ]),
+      new Set(["skill", "health", "finance", "career", "exam", "project", "habit", "self_development"]),
     );
   });
 
   it("covers all 3 resultType bands", () => {
-    const resultTypes = new Set(
-      CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.expectedFeasibility.resultType),
-    );
+    const resultTypes = new Set(CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.expectedFeasibility.resultType));
     expect(resultTypes).toEqual(new Set(["realistic", "challenging", "too_ambitious"]));
   });
 
   it("covers all 3 planLoad recommendations", () => {
-    const planLoads = new Set(
-      CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.expectedFeasibility.planLoad),
-    );
+    const planLoads = new Set(CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.expectedFeasibility.planLoad));
     expect(planLoads).toEqual(new Set(["lighter", "balanced", "push"]));
   });
 
   it("covers all 3 weeklyCapacity bands", () => {
-    const capacities = new Set(
-      CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.expectedFeasibility.weeklyCapacity),
-    );
+    const capacities = new Set(CORE_FUNNEL_SCENARIOS.map((scenario) => scenario.expectedFeasibility.weeklyCapacity));
     expect(capacities).toEqual(new Set(["low", "medium", "high"]));
   });
 

@@ -8,14 +8,7 @@ import type {
 import type { TwelveWeekImportValidationReport } from "@/services/syncService";
 import type { TwelveWeekImportResponse } from "@/services/syncService";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 
 export type CloudImportDryRunResultStatus = "valid" | "invalid" | "skipped" | "error";
 
@@ -191,8 +184,8 @@ export function LocalDataMigrationPrompt({
           </div>
           <DialogTitle>Chuyển dữ liệu cũ vào tài khoản?</DialogTitle>
           <DialogDescription className="leading-6">
-            Bạn vừa đăng nhập và trình duyệt này đang có dữ liệu đã tạo trước đó. Ứng dụng sẽ không tự ghi
-            đè tài khoản. Nếu chọn nhập, một bản sao sẽ được chuyển vào tài khoản trên thiết bị này.
+            Bạn vừa đăng nhập và trình duyệt này đang có dữ liệu đã tạo trước đó. Ứng dụng sẽ không tự ghi đè tài khoản.
+            Nếu chọn nhập, một bản sao sẽ được chuyển vào tài khoản trên thiết bị này.
           </DialogDescription>
         </DialogHeader>
 
@@ -217,19 +210,15 @@ export function LocalDataMigrationPrompt({
             role={importSucceeded ? "status" : "alert"}
           >
             {importSucceeded ? (
-              <p>
-                Đã chuyển dữ liệu vào tài khoản trên thiết bị này. Bản dữ liệu cũ vẫn được giữ nguyên.
-              </p>
+              <p>Đã chuyển dữ liệu vào tài khoản trên thiết bị này. Bản dữ liệu cũ vẫn được giữ nguyên.</p>
             ) : importBlocked ? (
               <div className="space-y-2">
                 <p>
-                  Tài khoản này đã có dữ liệu. Ứng dụng sẽ không ghi đè tự động. Hãy xem lại hoặc tải bản sao lưu
-                  trước khi gộp dữ liệu.
+                  Tài khoản này đã có dữ liệu. Ứng dụng sẽ không ghi đè tự động. Hãy xem lại hoặc tải bản sao lưu trước
+                  khi gộp dữ liệu.
                 </p>
                 {accountSummaryItems.length > 0 ? (
-                  <p className="text-xs font-medium">
-                    Dữ liệu tài khoản hiện có: {accountSummaryItems.join(", ")}.
-                  </p>
+                  <p className="text-xs font-medium">Dữ liệu tài khoản hiện có: {accountSummaryItems.join(", ")}.</p>
                 ) : null}
               </div>
             ) : importResult.status === "fingerprint_mismatch" ? (
@@ -243,7 +232,10 @@ export function LocalDataMigrationPrompt({
         ) : null}
 
         {showReview ? (
-          <section className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4" aria-label="Tóm tắt dữ liệu tìm thấy">
+          <section
+            className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4"
+            aria-label="Tóm tắt dữ liệu tìm thấy"
+          >
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
               <Eye className="h-4 w-4 text-slate-500" />
               Dữ liệu tìm thấy
@@ -263,15 +255,18 @@ export function LocalDataMigrationPrompt({
         ) : null}
 
         {hasTwelveWeekData ? (
-          <section className="rounded-[var(--r-card)] border border-sky-100 bg-sky-50/70 p-4" aria-label="Đồng bộ dữ liệu tài khoản">
+          <section
+            className="rounded-[var(--r-card)] border border-sky-100 bg-sky-50/70 p-4"
+            aria-label="Đồng bộ dữ liệu tài khoản"
+          >
             <div className="flex items-start gap-3">
               <Cloud className="mt-0.5 h-4 w-4 shrink-0 text-sky-700" />
               <div className="min-w-0 flex-1 space-y-3">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Đồng bộ dữ liệu 12 tuần lên tài khoản</p>
                   <p className="mt-1 text-sm leading-6 text-slate-700">
-                    Sau khi nhập vào tài khoản trên thiết bị này, bạn có thể gửi dữ liệu 12 tuần lên hệ thống để
-                    dùng lại khi đổi máy hoặc đăng nhập lại.
+                    Sau khi nhập vào tài khoản trên thiết bị này, bạn có thể gửi dữ liệu 12 tuần lên hệ thống để dùng
+                    lại khi đổi máy hoặc đăng nhập lại.
                   </p>
                 </div>
 
@@ -281,7 +276,8 @@ export function LocalDataMigrationPrompt({
                   </p>
                 ) : !cloudImportEnabled ? (
                   <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-amber-700">
-                    {cloudImportUnavailableReason ?? "Đồng bộ dữ liệu tài khoản chưa được bật cho không gian làm việc này."}
+                    {cloudImportUnavailableReason ??
+                      "Đồng bộ dữ liệu tài khoản chưa được bật cho không gian làm việc này."}
                   </p>
                 ) : cloudImportAlreadyCompleted && !cloudWriteSucceeded ? (
                   <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-emerald-700">
@@ -307,9 +303,7 @@ export function LocalDataMigrationPrompt({
                         Dữ liệu đã được ghi vào tài khoản. Bản trên thiết bị vẫn được giữ nguyên.
                       </p>
                     ) : (
-                      <p className="mt-1 text-xs">
-                        Dữ liệu trên thiết bị không bị ảnh hưởng. Bạn có thể thử lại.
-                      </p>
+                      <p className="mt-1 text-xs">Dữ liệu trên thiết bị không bị ảnh hưởng. Bạn có thể thử lại.</p>
                     )}
                   </div>
                 ) : null}
@@ -319,8 +313,8 @@ export function LocalDataMigrationPrompt({
                   <div className="rounded-[var(--r-tile)] border border-sky-200 bg-white p-3 space-y-3">
                     <p className="text-sm font-medium text-slate-900">Xác nhận đồng bộ</p>
                     <p className="text-xs leading-5 text-slate-600">
-                      Dữ liệu 12 tuần sẽ được gửi lên tài khoản. Bản trên thiết bị vẫn được giữ nguyên. Nên tải
-                      bản sao lưu trước khi tiếp tục.
+                      Dữ liệu 12 tuần sẽ được gửi lên tài khoản. Bản trên thiết bị vẫn được giữ nguyên. Nên tải bản sao
+                      lưu trước khi tiếp tục.
                     </p>
                     <div className="flex gap-2">
                       <Button
@@ -332,21 +326,12 @@ export function LocalDataMigrationPrompt({
                         Hủy
                       </Button>
                       {onExportBackup ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={onExportBackup}
-                        >
+                        <Button type="button" variant="outline" size="sm" onClick={onExportBackup}>
                           <Download className="h-3.5 w-3.5" />
                           Tải bản sao lưu
                         </Button>
                       ) : null}
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={handleCloudImport}
-                      >
+                      <Button type="button" size="sm" onClick={handleCloudImport}>
                         <Upload className="h-3.5 w-3.5" />
                         Xác nhận đồng bộ
                       </Button>
@@ -399,7 +384,11 @@ export function LocalDataMigrationPrompt({
                       disabled={!canRunCloudDryRun}
                       className="bg-white"
                     >
-                      {cloudImportChecking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Cloud className="h-4 w-4" />}
+                      {cloudImportChecking ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Cloud className="h-4 w-4" />
+                      )}
                       Kiểm tra dữ liệu
                     </Button>
                   ) : !cloudImportEnabled && cloudImportDryRunUnavailableReason ? null : null}
@@ -411,11 +400,7 @@ export function LocalDataMigrationPrompt({
                     disabled={!canRunCloudImport || showCloudImportConfirm}
                     className="bg-sky-600 hover:bg-sky-700 text-white"
                   >
-                    {cloudWriteLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
+                    {cloudWriteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     Đồng bộ lên tài khoản
                   </Button>
                 </div>

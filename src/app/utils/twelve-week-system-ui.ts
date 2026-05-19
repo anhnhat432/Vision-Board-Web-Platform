@@ -62,21 +62,23 @@ export function getLatestDailyCheckIn(goal: Goal | null): UniversalDailyCheckIn 
   const checkIns = goal?.twelveWeekSystem?.dailyCheckIns ?? [];
   if (checkIns.length === 0) return null;
 
-  return checkIns
-    .map((checkIn, index) => ({ checkIn, index }))
-    .sort((left, right) => {
-      const leftKey = getCalendarDateKey(left.checkIn.date) ?? left.checkIn.date;
-      const rightKey = getCalendarDateKey(right.checkIn.date) ?? right.checkIn.date;
-      const leftUpdateCount = left.checkIn.updatedCount ?? 0;
-      const rightUpdateCount = right.checkIn.updatedCount ?? 0;
+  return (
+    checkIns
+      .map((checkIn, index) => ({ checkIn, index }))
+      .sort((left, right) => {
+        const leftKey = getCalendarDateKey(left.checkIn.date) ?? left.checkIn.date;
+        const rightKey = getCalendarDateKey(right.checkIn.date) ?? right.checkIn.date;
+        const leftUpdateCount = left.checkIn.updatedCount ?? 0;
+        const rightUpdateCount = right.checkIn.updatedCount ?? 0;
 
-      return (
-        rightKey.localeCompare(leftKey) ||
-        rightUpdateCount - leftUpdateCount ||
-        right.checkIn.date.localeCompare(left.checkIn.date) ||
-        left.index - right.index
-      );
-    })[0]?.checkIn ?? null;
+        return (
+          rightKey.localeCompare(leftKey) ||
+          rightUpdateCount - leftUpdateCount ||
+          right.checkIn.date.localeCompare(left.checkIn.date) ||
+          left.index - right.index
+        );
+      })[0]?.checkIn ?? null
+  );
 }
 
 export function addDaysToDateKey(dateKey: string, amount: number): string {
@@ -392,8 +394,7 @@ export function evaluateRescueTriggers(input: {
         kind: "trial_ending",
         severity: daysLeft <= 1 ? "urgent" : "caution",
         headline: `Còn ${timeLabel} để giữ quyền Plus.`,
-        detail:
-          "Sau khi hết hạn, quyền Plus sẽ về mức Free.",
+        detail: "Sau khi hết hạn, quyền Plus sẽ về mức Free.",
         surfacedAt: now.toISOString(),
       });
     }

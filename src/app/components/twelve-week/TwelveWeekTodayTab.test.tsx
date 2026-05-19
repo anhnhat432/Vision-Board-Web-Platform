@@ -202,9 +202,7 @@ describe("TwelveWeekTodayTab — Performance Time Blocking", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi.")).toBeInTheDocument();
   });
 });
 
@@ -684,9 +682,7 @@ describe("TwelveWeekTodayTab — overdue task actions", () => {
     );
     const actions = screen.getByTestId("overdue-actions-task_core");
     expect(actions.querySelector('[data-action="skip-non-core"]')).toBeNull();
-    expect(screen.getByTestId("overdue-core-note-task_core")).toHaveTextContent(
-      /Việc cốt lõi không thể bỏ/i,
-    );
+    expect(screen.getByTestId("overdue-core-note-task_core")).toHaveTextContent(/Việc cốt lõi không thể bỏ/i);
   });
 
   it("invokes onRescheduleTaskWithinWeek with the task id when clicked", async () => {

@@ -124,11 +124,7 @@ export function PrimaryActionCard({
         {description && <CardDescription className={descriptionClassName}>{description}</CardDescription>}
       </CardHeader>
       {children && <CardContent className={cn("p-0", contentClassName)}>{children}</CardContent>}
-      {action && (
-        <div className={actionClassName}>
-          {action}
-        </div>
-      )}
+      {action && <div className={actionClassName}>{action}</div>}
     </Card>
   );
 }

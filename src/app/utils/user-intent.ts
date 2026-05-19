@@ -98,10 +98,7 @@ export function getUserIntentLabel(intent: UserIntentId): string {
 }
 
 export function isUserIntentId(value: unknown): value is UserIntentId {
-  return (
-    typeof value === "string" &&
-    INTENT_OPTIONS.some((option) => option.id === value)
-  );
+  return typeof value === "string" && INTENT_OPTIONS.some((option) => option.id === value);
 }
 
 // ---- Storage ---------------------------------------------------------------
@@ -212,8 +209,6 @@ export function hasActionableArchetypeHint(intent: UserIntentId | null | undefin
  * the id (no label, no description, no timestamp by default). Callers
  * should merge this with their event-specific fields.
  */
-export function buildIntentAnalyticsPayload(
-  intent: UserIntentId,
-): { intent_id: UserIntentId } {
+export function buildIntentAnalyticsPayload(intent: UserIntentId): { intent_id: UserIntentId } {
   return { intent_id: intent };
 }

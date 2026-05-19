@@ -12,9 +12,7 @@ describe("LocalOnlyNotice", () => {
   });
 
   it("uses a custom message when provided", () => {
-    render(
-      <LocalOnlyNotice message="Chỉ lưu trên máy này." testId="local" />,
-    );
+    render(<LocalOnlyNotice message="Chỉ lưu trên máy này." testId="local" />);
     expect(screen.getByTestId("local").textContent).toContain("Chỉ lưu trên máy này.");
   });
 
@@ -26,13 +24,7 @@ describe("LocalOnlyNotice", () => {
   });
 
   it("renders optional action slot when provided", () => {
-    render(
-      <LocalOnlyNotice
-        message="x"
-        action={<button type="button">Xuất bản sao</button>}
-        testId="local"
-      />,
-    );
+    render(<LocalOnlyNotice message="x" action={<button type="button">Xuất bản sao</button>} testId="local" />);
     expect(screen.getByRole("button", { name: "Xuất bản sao" })).toBeInTheDocument();
   });
 });

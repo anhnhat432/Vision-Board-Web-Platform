@@ -1,7 +1,12 @@
 import type { TacticType } from "@/app/utils/storage";
 import { getMaxTasksPerTactic, getMaxWeeklyTaskCount } from "@/features/plan12week/logic/taskConstraints";
 import { GOAL_TYPES, LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS } from "./constants";
-import type { LeadIndicatorDraft, PendingFeasibilityResult, PlanLoadRecommendation, TwelveWeekSetupDraft } from "./types";
+import type {
+  LeadIndicatorDraft,
+  PendingFeasibilityResult,
+  PlanLoadRecommendation,
+  TwelveWeekSetupDraft,
+} from "./types";
 
 export function getLoadPreferenceLabel(value: TwelveWeekSetupDraft["tacticLoadPreference"]): string {
   return LOAD_PREFERENCE_OPTIONS.find((option) => option.value === value)?.label ?? "Cân bằng";
@@ -27,19 +32,16 @@ export function getPlanLoadLabel(value: PlanLoadRecommendation | undefined): str
   return "Cân bằng";
 }
 
-export function getFeasibilityDraftDefaults(feasibility: PendingFeasibilityResult): Pick<
-  TwelveWeekSetupDraft,
-  "dailyTimeBudget" | "personalConstraint" | "tacticLoadPreference"
-> {
+export function getFeasibilityDraftDefaults(
+  feasibility: PendingFeasibilityResult,
+): Pick<TwelveWeekSetupDraft, "dailyTimeBudget" | "personalConstraint" | "tacticLoadPreference"> {
   const bottleneckAxis = feasibility.bottleneck?.axis;
 
   // Energy or confidence bottlenecks reduce effective capacity even if time is OK.
   const isEffectiveLowCapacity =
     feasibility.weeklyCapacity === "low" || bottleneckAxis === "energy" || bottleneckAxis === "confidence";
   const isEffectiveHighCapacity =
-    feasibility.weeklyCapacity === "high" &&
-    bottleneckAxis !== "energy" &&
-    bottleneckAxis !== "confidence";
+    feasibility.weeklyCapacity === "high" && bottleneckAxis !== "energy" && bottleneckAxis !== "confidence";
 
   const dailyTimeBudget = isEffectiveLowCapacity ? "30min" : isEffectiveHighCapacity ? "1.5h" : "1h";
 
@@ -125,7 +127,8 @@ export function buildPlanRationaleReasons(feasibility: PendingFeasibilityResult)
     reasons.push({
       id: "smart-quality-weak",
       title: "Mục tiêu hiện còn chung chung",
-      detail: "Giữ kết quả 12 tuần đơn giản ngay lúc này. Bạn có thể quay lại bước viết mục tiêu để làm rõ hơn nếu cần.",
+      detail:
+        "Giữ kết quả 12 tuần đơn giản ngay lúc này. Bạn có thể quay lại bước viết mục tiêu để làm rõ hơn nếu cần.",
     });
   }
 
@@ -189,20 +192,14 @@ export function parseTargetFrequency(targetInput: string | Pick<LeadIndicatorDra
   return Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 7) : null;
 }
 
-export function getLeadIndicatorTargetValidationError(
-  indicator: LeadIndicatorDraft,
-  index: number,
-): string | null {
+export function getLeadIndicatorTargetValidationError(indicator: LeadIndicatorDraft, index: number): string | null {
   if (parseTargetFrequency(indicator) !== null) return null;
 
   const label = indicator.name.trim() || `#${index + 1}`;
   return `Tần suất của việc lặp lại ${index + 1} (${label}) phải là số dương.`;
 }
 
-export function getLeadIndicatorUnitValidationError(
-  indicator: LeadIndicatorDraft,
-  index: number,
-): string | null {
+export function getLeadIndicatorUnitValidationError(indicator: LeadIndicatorDraft, index: number): string | null {
   if (indicator.unit.trim().length > 0) return null;
 
   const label = indicator.name.trim() || `#${index + 1}`;
@@ -217,11 +214,7 @@ function parseDateKey(value: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const [year, month, day] = value.split("-").map(Number);
   const parsed = new Date(year, month - 1, day);
-  if (
-    parsed.getFullYear() !== year ||
-    parsed.getMonth() !== month - 1 ||
-    parsed.getDate() !== day
-  ) {
+  if (parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) {
     return null;
   }
   parsed.setHours(0, 0, 0, 0);
@@ -253,11 +246,7 @@ export function getStartDateValidation(
   return { error: null, warning: null };
 }
 
-export function getMilestoneValidationError(input: {
-  week4: string;
-  week8: string;
-  week12: string;
-}): string | null {
+export function getMilestoneValidationError(input: { week4: string; week8: string; week12: string }): string | null {
   return [input.week4, input.week8, input.week12].some((value) => value.trim().length > 0)
     ? null
     : "Đặt ít nhất 1 cột mốc kiểm tra để cycle có nhịp";
@@ -267,11 +256,7 @@ function normalizePreferredDays(preferredDays: number[] | undefined): number[] {
   if (!Array.isArray(preferredDays) || preferredDays.length === 0) return [];
 
   return Array.from(
-    new Set(
-      preferredDays
-        .map((day) => Math.trunc(day))
-        .filter((day) => Number.isFinite(day) && day >= 0 && day <= 6),
-    ),
+    new Set(preferredDays.map((day) => Math.trunc(day)).filter((day) => Number.isFinite(day) && day >= 0 && day <= 6)),
   ).sort((left, right) => left - right);
 }
 
@@ -526,7 +511,9 @@ export function validateLeadIndicatorDraft(
       warnings.push("Tên còn quá chung chung — mô tả cụ thể hành động hằng tuần.");
     }
     if (OUTCOME_LIKE_PATTERNS.some((pattern) => pattern.test(trimmedName))) {
-      warnings.push("Tên đang giống một kết quả cuối, không phải hành động kiểm soát được. Đổi sang việc bạn làm hằng tuần.");
+      warnings.push(
+        "Tên đang giống một kết quả cuối, không phải hành động kiểm soát được. Đổi sang việc bạn làm hằng tuần.",
+      );
     }
   }
 
@@ -537,8 +524,7 @@ export function validateLeadIndicatorDraft(
   } else if (rawTarget > 7) {
     warnings.push("Tần suất tối đa là 7 lần/tuần (mỗi ngày một lần).");
   } else {
-    const maxTasksPerTactic =
-      options.maxTasksPerTactic ?? getMaxTasksPerTactic(options);
+    const maxTasksPerTactic = options.maxTasksPerTactic ?? getMaxTasksPerTactic(options);
     if (parsedTarget > maxTasksPerTactic) {
       warnings.push(
         `Vượt giới hạn ${maxTasksPerTactic} lần/tuần cho cấu hình hiện tại. Số việc sẽ được cắt bớt khi tạo kế hoạch.`,

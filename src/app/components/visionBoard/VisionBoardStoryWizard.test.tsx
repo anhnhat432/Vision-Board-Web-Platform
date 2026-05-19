@@ -11,7 +11,9 @@ const GOALS = [
   { id: "goal_career_1", title: "Ra mắt portfolio", category: "Career" },
 ];
 
-function renderWizard(options: { availableGoals?: typeof GOALS; onComplete?: (seed: VisionBoardStorySeed) => void } = {}) {
+function renderWizard(
+  options: { availableGoals?: typeof GOALS; onComplete?: (seed: VisionBoardStorySeed) => void } = {},
+) {
   const onOpenChange = vi.fn();
   const onComplete = options.onComplete ?? vi.fn();
 

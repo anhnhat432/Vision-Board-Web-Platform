@@ -63,9 +63,12 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}) {
     };
   }, [cancelReconnectTimer, reconnectDebounceMs]);
 
-  return useMemo(() => ({
-    status,
-    isOnline: status === "online",
-    isOffline: status === "offline",
-  }), [status]);
+  return useMemo(
+    () => ({
+      status,
+      isOnline: status === "online",
+      isOffline: status === "offline",
+    }),
+    [status],
+  );
 }

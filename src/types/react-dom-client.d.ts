@@ -11,10 +11,7 @@ declare module "react-dom/client" {
     onRecoverableError?: (error: unknown) => void;
   }
 
-  export function createRoot(
-    container: Element | DocumentFragment,
-    options?: RootOptions,
-  ): Root;
+  export function createRoot(container: Element | DocumentFragment, options?: RootOptions): Root;
 
   export function hydrateRoot(
     container: Element | DocumentFragment,

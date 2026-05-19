@@ -100,7 +100,10 @@ describe("authenticated user data scoping", () => {
     localStorage.setItem("backend_plan_links", JSON.stringify({ local_goal: { planId: "backend_plan" } }));
     localStorage.setItem("backend_order_links", JSON.stringify({ local_order: "backend_order" }));
     localStorage.setItem("backend_vision_board_links", JSON.stringify({ local_board: "backend_board" }));
-    localStorage.setItem("visionboard_local_data_import_backup:auth:firebase_uid_one:abc", JSON.stringify({ ok: true }));
+    localStorage.setItem(
+      "visionboard_local_data_import_backup:auth:firebase_uid_one:abc",
+      JSON.stringify({ ok: true }),
+    );
     localStorage.setItem("visionboard_orders_v1", JSON.stringify([{ id: "order_1" }]));
     localStorage.setItem("visionboard_mock_billing_account", JSON.stringify({ customerId: "customer_1" }));
     localStorage.setItem("visionboard_mock_billing_session_session_1", JSON.stringify({ id: "session_1" }));

@@ -83,7 +83,10 @@ export function SmartGoalStepShell({
   };
 
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-labelledby="smart-step-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      aria-labelledby="smart-step-title"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
@@ -222,7 +225,10 @@ export function SmartGoalStepShell({
         ) : null}
 
         {currentStepError ? (
-          <div className="rounded-lg border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-3 text-[color:var(--color-warning-fg)]" role="alert">
+          <div
+            className="rounded-lg border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-3 text-[color:var(--color-warning-fg)]"
+            role="alert"
+          >
             <div className="flex items-start gap-2">
               <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               <div>

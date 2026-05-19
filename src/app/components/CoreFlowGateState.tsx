@@ -39,9 +39,7 @@ export function CoreFlowGateState({
             </div>
           )}
 
-          <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-            {eyebrow}
-          </p>
+          <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">{eyebrow}</p>
           <h1 className="mx-auto mt-2 max-w-xl font-serif text-[26px] font-medium leading-tight tracking-[-0.01em] text-app-ink">
             {title}
           </h1>

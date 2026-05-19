@@ -160,14 +160,7 @@ export interface TwelveWeekTaskInstance {
 
 export type TimeBlockType = "strategic" | "buffer" | "breakout";
 
-export type TimeBlockDayOfWeek =
-  | "Monday"
-  | "Tuesday"
-  | "Wednesday"
-  | "Thursday"
-  | "Friday"
-  | "Saturday"
-  | "Sunday";
+export type TimeBlockDayOfWeek = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
 export interface TimeBlock {
   id: string;
@@ -376,11 +369,7 @@ export interface PrivacyConsentRecord {
 
 // ─── D4: Rescue trigger rule engine ──────────────────────────────────────────
 
-export type RescueTriggerKind =
-  | "missed_checkin"
-  | "low_execution_score"
-  | "overdue_pile"
-  | "trial_ending";
+export type RescueTriggerKind = "missed_checkin" | "low_execution_score" | "overdue_pile" | "trial_ending";
 
 export type RescueTriggerSeverity = "watch" | "caution" | "urgent";
 

@@ -46,7 +46,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             Một chỗ tĩnh để bạn nhìn lại tuần sống của mình.
           </h1>
           <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
-            Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.
+            Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp
+            theo hơn.
           </p>
 
           {/* 3 trust chip thay thế card sidebar cũ */}
@@ -67,8 +68,11 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </div>
       </section>
 
-        {hasLocalData ? (
-        <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-labelledby="dashboard-local-data-title">
+      {hasLocalData ? (
+        <section
+          className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+          aria-labelledby="dashboard-local-data-title"
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 gap-3">
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-surface text-app-warm">
@@ -79,7 +83,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   Có dữ liệu đã lưu trên thiết bị này
                 </h2>
                 <p className="mt-1 text-[14px] leading-6 text-app-warm-strong">
-                  Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài khoản nếu chưa có xác nhận của bạn.
+                  Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài
+                  khoản nếu chưa có xác nhận của bạn.
                 </p>
               </div>
             </div>
@@ -119,7 +124,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">Bước {feature.step}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">
+                    Bước {feature.step}
+                  </p>
                   <h2 className="mt-1 text-[16px] font-semibold text-app-ink">{feature.title}</h2>
                   <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{feature.description}</p>
                   <span className="mt-3 inline-flex text-[14px] font-medium text-app-accent transition-transform duration-200 group-hover:translate-x-0.5">
@@ -132,11 +139,19 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         })}
       </section>
 
-      <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-public-cta-title">
+      <section
+        className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+        aria-labelledby="dashboard-public-cta-title"
+      >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Bắt đầu đúng thứ tự</p>
-            <h2 id="dashboard-public-cta-title" className="mt-2 font-serif text-[26px] font-medium leading-8 text-app-ink">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              Bắt đầu đúng thứ tự
+            </p>
+            <h2
+              id="dashboard-public-cta-title"
+              className="mt-2 font-serif text-[26px] font-medium leading-8 text-app-ink"
+            >
               Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?
             </h2>
             <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">

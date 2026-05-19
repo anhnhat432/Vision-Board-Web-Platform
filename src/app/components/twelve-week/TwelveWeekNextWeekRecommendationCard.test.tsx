@@ -5,17 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import type { NextWeekRecommendation } from "@/features/plan12week/logic";
 
-function makeRecommendation(
-  overrides: Partial<NextWeekRecommendation> = {},
-): NextWeekRecommendation {
+function makeRecommendation(overrides: Partial<NextWeekRecommendation> = {}): NextWeekRecommendation {
   return {
     recommendation: overrides.recommendation ?? "lighter",
     confidence: overrides.confidence ?? "medium",
     reasonCodes: overrides.reasonCodes ?? ["low_week_completion"],
     headline: overrides.headline ?? "Tuần sau nên nhẹ hơn",
     body: overrides.body ?? "Tuần này có vài chỗ chưa trơn. Nhẹ tải tuần sau giúp giữ nhịp dài hạn.",
-    suggestedNextWeekPriority:
-      overrides.suggestedNextWeekPriority ?? "Chọn 1-2 việc cốt lõi cho tuần sau.",
+    suggestedNextWeekPriority: overrides.suggestedNextWeekPriority ?? "Chọn 1-2 việc cốt lõi cho tuần sau.",
   };
 }
 
@@ -23,12 +20,8 @@ describe("TwelveWeekNextWeekRecommendationCard", () => {
   it("renders the headline, body, and priority hint", () => {
     render(<TwelveWeekNextWeekRecommendationCard recommendation={makeRecommendation()} />);
     expect(screen.getByTestId("next-week-recommendation")).toBeInTheDocument();
-    expect(screen.getByTestId("next-week-recommendation-headline")).toHaveTextContent(
-      /Tuần sau nên nhẹ hơn/i,
-    );
-    expect(screen.getByTestId("next-week-recommendation-priority")).toHaveTextContent(
-      /việc cốt lõi/i,
-    );
+    expect(screen.getByTestId("next-week-recommendation-headline")).toHaveTextContent(/Tuần sau nên nhẹ hơn/i);
+    expect(screen.getByTestId("next-week-recommendation-priority")).toHaveTextContent(/việc cốt lõi/i);
   });
 
   it("shows the 'Bạn vẫn kiểm soát kế hoạch' control note", () => {
@@ -52,10 +45,7 @@ describe("TwelveWeekNextWeekRecommendationCard", () => {
   it("invokes onAcceptRecommendation only when the user clicks the apply button (no auto-apply)", async () => {
     const onAccept = vi.fn();
     render(
-      <TwelveWeekNextWeekRecommendationCard
-        recommendation={makeRecommendation()}
-        onAcceptRecommendation={onAccept}
-      />,
+      <TwelveWeekNextWeekRecommendationCard recommendation={makeRecommendation()} onAcceptRecommendation={onAccept} />,
     );
     expect(onAccept).not.toHaveBeenCalled();
     const button = screen.getByRole("button", { name: /Áp dụng cho tuần sau/i });
@@ -71,10 +61,7 @@ describe("TwelveWeekNextWeekRecommendationCard", () => {
   it("invokes onOpenTodayTab when 'Mở Hôm nay' is clicked", async () => {
     const onOpenTodayTab = vi.fn();
     render(
-      <TwelveWeekNextWeekRecommendationCard
-        recommendation={makeRecommendation()}
-        onOpenTodayTab={onOpenTodayTab}
-      />,
+      <TwelveWeekNextWeekRecommendationCard recommendation={makeRecommendation()} onOpenTodayTab={onOpenTodayTab} />,
     );
     await userEvent.click(screen.getByRole("button", { name: /Mở Hôm nay/i }));
     expect(onOpenTodayTab).toHaveBeenCalledTimes(1);
@@ -91,8 +78,6 @@ describe("TwelveWeekNextWeekRecommendationCard", () => {
     );
     const card = screen.getByTestId("next-week-recommendation");
     expect(card).toHaveAttribute("data-recommendation", "reset");
-    expect(screen.getByTestId("next-week-recommendation-headline")).toHaveTextContent(
-      /restart nhẹ/i,
-    );
+    expect(screen.getByTestId("next-week-recommendation-headline")).toHaveTextContent(/restart nhẹ/i);
   });
 });

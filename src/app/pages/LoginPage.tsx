@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
-import {
-  AlertCircle,
-  Compass,
-  Eye,
-  EyeOff,
-  Loader2,
-  LogOut,
-  RefreshCw,
-  ShieldCheck,
-  Target,
-} from "lucide-react";
+import { AlertCircle, Compass, Eye, EyeOff, Loader2, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../components/ui/button";
@@ -192,7 +182,9 @@ export function LoginPage() {
     setResetSubmitting(true);
     setResetError(null);
     if (isDemoMode()) {
-      toast.info("Demo đang chạy trên thiết bị này, chưa cần đặt lại mật khẩu. Trên phiên bản đầy đủ bạn sẽ nhận email đặt lại.");
+      toast.info(
+        "Demo đang chạy trên thiết bị này, chưa cần đặt lại mật khẩu. Trên phiên bản đầy đủ bạn sẽ nhận email đặt lại.",
+      );
       setResetSent(true);
       setResetSubmitting(false);
       return;
@@ -258,9 +250,7 @@ export function LoginPage() {
 
   const isSignIn = mode === "signin";
   const captionText = isSignIn ? "CHÀO BẠN QUAY LẠI" : "BẮT ĐẦU HÀNH TRÌNH";
-  const heroTitle = isSignIn
-    ? "Quay lại với 12 tuần của bạn"
-    : "Mở không gian 12 tuần đầu tiên";
+  const heroTitle = isSignIn ? "Quay lại với 12 tuần của bạn" : "Mở không gian 12 tuần đầu tiên";
   const heroSubline = isSignIn
     ? "Đăng nhập để tiếp tục theo dõi tiến độ và đồng bộ giữa các thiết bị."
     : "Tạo tài khoản để lưu kế hoạch 12 tuần và đồng bộ giữa các thiết bị.";
@@ -292,9 +282,7 @@ export function LoginPage() {
                 <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink max-w-md">
                   {heroTitle}
                 </h1>
-                <p className="mt-3 text-sm text-app-ink-soft max-w-md">
-                  {heroSubline}
-                </p>
+                <p className="mt-3 text-sm text-app-ink-soft max-w-md">{heroSubline}</p>
 
                 {/* Trust features */}
                 <div className="mt-8 grid grid-cols-1 gap-3 max-w-sm">
@@ -360,9 +348,7 @@ export function LoginPage() {
                     <Link
                       to={{ pathname: "/login", search: "" }}
                       className={`flex-1 text-[14px] font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
-                        isSignIn
-                          ? "bg-app-surface text-app-ink shadow-sm"
-                          : "text-app-ink-soft hover:text-app-ink"
+                        isSignIn ? "bg-app-surface text-app-ink shadow-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
                       Đăng nhập
@@ -370,9 +356,7 @@ export function LoginPage() {
                     <Link
                       to={{ pathname: "/login", search: "?mode=signup" }}
                       className={`flex-1 text-[14px] font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
-                        !isSignIn
-                          ? "bg-app-surface text-app-ink shadow-sm"
-                          : "text-app-ink-soft hover:text-app-ink"
+                        !isSignIn ? "bg-app-surface text-app-ink shadow-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
                       Đăng ký
@@ -539,7 +523,9 @@ export function LoginPage() {
                         }`}
                       >
                         <AlertCircle className="h-4 w-4 text-[color:var(--color-danger-fg)] shrink-0 mt-0.5" />
-                        <p className="text-[14px] text-[color:var(--color-danger-fg)] leading-relaxed">{displayError}</p>
+                        <p className="text-[14px] text-[color:var(--color-danger-fg)] leading-relaxed">
+                          {displayError}
+                        </p>
                       </div>
                     ) : null}
 
@@ -565,17 +551,11 @@ export function LoginPage() {
                     {!isSignIn ? (
                       <p className="text-center text-[13px] text-app-ink-soft leading-5">
                         Khi tạo tài khoản, bạn đồng ý với{" "}
-                        <Link
-                          to="/terms"
-                          className="font-medium text-app-accent hover:underline"
-                        >
+                        <Link to="/terms" className="font-medium text-app-accent hover:underline">
                           Điều khoản
                         </Link>{" "}
                         và{" "}
-                        <Link
-                          to="/privacy"
-                          className="font-medium text-app-accent hover:underline"
-                        >
+                        <Link to="/privacy" className="font-medium text-app-accent hover:underline">
                           Chính sách bảo mật
                         </Link>
                         .
@@ -596,11 +576,10 @@ export function LoginPage() {
                         <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                           <ShieldCheck className="h-5 w-5" />
                         </div>
-                        <p className="text-sm font-medium text-app-ink">
-                          Đã gửi email đặt lại mật khẩu
-                        </p>
+                        <p className="text-sm font-medium text-app-ink">Đã gửi email đặt lại mật khẩu</p>
                         <p className="mt-1 text-[14px] text-app-ink-soft">
-                          Kiểm tra hộp thư <strong>{resetEmail}</strong> và làm theo hướng dẫn. Nếu không thấy, hãy kiểm tra thư mục spam.
+                          Kiểm tra hộp thư <strong>{resetEmail}</strong> và làm theo hướng dẫn. Nếu không thấy, hãy kiểm
+                          tra thư mục spam.
                         </p>
                         <Button
                           variant="outline"
@@ -690,10 +669,7 @@ export function LoginPage() {
                   ) : (
                     <>
                       Đã có tài khoản?{" "}
-                      <Link
-                        to={{ pathname: "/login" }}
-                        className="font-medium text-app-accent hover:underline"
-                      >
+                      <Link to={{ pathname: "/login" }} className="font-medium text-app-accent hover:underline">
                         Đăng nhập →
                       </Link>
                     </>

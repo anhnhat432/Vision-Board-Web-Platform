@@ -130,9 +130,7 @@ export function NextWeekCommitmentsEditor({
                 data-state={duplicateKey === key ? "duplicate" : "idle"}
                 className={cn(
                   "inline-flex max-w-full min-w-0 items-center gap-1 rounded-full border bg-app-surface px-3 py-1 text-xs font-semibold text-app-accent transition-colors",
-                  duplicateKey === key
-                    ? "border-app-warm-border bg-app-warm-soft text-app-warm"
-                    : "border-app-line",
+                  duplicateKey === key ? "border-app-warm-border bg-app-warm-soft text-app-warm" : "border-app-line",
                 )}
               >
                 <span className="min-w-0 truncate">{commitment}</span>
@@ -166,7 +164,9 @@ export function NextWeekCommitmentsEditor({
           Đã đạt tối đa {maxItems} cam kết. Xoá bớt chip để thêm mới.
         </p>
       ) : (
-        <p className="text-xs leading-5 text-app-ink-muted">Đây sẽ là tactic chính tuần sau. Tối đa {maxItems} cam kết.</p>
+        <p className="text-xs leading-5 text-app-ink-muted">
+          Đây sẽ là tactic chính tuần sau. Tối đa {maxItems} cam kết.
+        </p>
       )}
     </div>
   );

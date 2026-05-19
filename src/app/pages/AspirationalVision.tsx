@@ -133,7 +133,10 @@ export function AspirationalVision() {
         </p>
       </header>
 
-      <section className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8" aria-label="Biểu mẫu tầm nhìn">
+      <section
+        className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8"
+        aria-label="Biểu mẫu tầm nhìn"
+      >
         <div className="max-w-3xl">
           <p className="font-serif text-[20px] font-medium leading-7 text-app-warm-strong">
             Trong 3 năm tới, bạn muốn cuộc sống mình trông như thế nào?
@@ -194,7 +197,9 @@ export function AspirationalVision() {
           <div>
             <div>
               <h2 className="text-[16px] font-semibold text-app-ink">Các mảng đời sống</h2>
-              <p className="mt-1 text-[14px] leading-6 text-[#6F4A3C]">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
+              <p className="mt-1 text-[14px] leading-6 text-[#6F4A3C]">
+                Điền ít nhất một mảng. Các mảng còn lại có thể để trống.
+              </p>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {LIFE_AREA_FIELDS.map(({ area, label, placeholder }) => (
@@ -257,7 +262,9 @@ export function AspirationalVision() {
             </article>
             {storedVision.lifeAreas.map((item) => (
               <article key={item.area} className="rounded-card border border-app-line bg-app-surface p-5">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{getAreaLabel(item.area)}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  {getAreaLabel(item.area)}
+                </p>
                 <p className="mt-3 font-serif text-[15px] italic leading-7 text-app-ink">"{item.statement}"</p>
               </article>
             ))}

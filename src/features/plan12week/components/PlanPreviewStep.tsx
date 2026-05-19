@@ -64,8 +64,8 @@ export function PlanPreviewStep({
 
     // Build leadMetrics from draft indicators
     const leadMetrics = draft.leadIndicators
-      .filter(indicator => indicator.name.trim() !== "")
-      .map(indicator => ({
+      .filter((indicator) => indicator.name.trim() !== "")
+      .map((indicator) => ({
         name: indicator.name,
         weeklyTarget: parseInt(indicator.target, 10) || 1,
       }));
@@ -81,8 +81,8 @@ export function PlanPreviewStep({
     const scheduledIndicators = buildLeadIndicatorSchedules(draft.leadIndicators, planLoadOptions);
 
     const weekOneTasks: Array<{ id: string; title: string; scheduledDate: string }> = [];
-    scheduledIndicators.forEach(indicator => {
-      indicator.schedule.forEach(dayOffset => {
+    scheduledIndicators.forEach((indicator) => {
+      indicator.schedule.forEach((dayOffset) => {
         const taskDate = new Date(weekStart);
         taskDate.setDate(weekStart.getDate() + dayOffset);
         const title = indicator.type === "core" ? `[CỐT LỖI] ${indicator.name}` : indicator.name;
@@ -111,9 +111,7 @@ export function PlanPreviewStep({
 
       if (weekNumber === 1) {
         focus = defaults?.weekOneFocus || "";
-        expectedOutput = defaults
-          ? `${defaults.weekOneExpectedOutput}\n\nViệc đầu tiên: ${firstAction}`
-          : "";
+        expectedOutput = defaults ? `${defaults.weekOneExpectedOutput}\n\nViệc đầu tiên: ${firstAction}` : "";
       } else if (weekNumber === 4) {
         expectedOutput = defaults?.milestoneTemplates.week4 || "";
       } else if (weekNumber === 8) {
@@ -184,11 +182,7 @@ export function PlanPreviewStep({
       />
 
       {isEditorOpen && (
-        <TacticsEditor
-          tactics={localDraft.leadIndicators}
-          onChange={handleTacticsChange}
-          onClose={handleCloseEditor}
-        />
+        <TacticsEditor tactics={localDraft.leadIndicators} onChange={handleTacticsChange} onClose={handleCloseEditor} />
       )}
     </>
   );

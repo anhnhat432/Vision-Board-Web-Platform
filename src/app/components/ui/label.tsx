@@ -8,10 +8,7 @@ import { cn } from "./utils";
 const Label = React.forwardRef<
   React.ComponentRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
->(({
-  className,
-  ...props
-}, ref) => {
+>(({ className, ...props }, ref) => {
   return (
     <LabelPrimitive.Root
       ref={ref}
