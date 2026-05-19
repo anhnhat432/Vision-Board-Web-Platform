@@ -147,6 +147,13 @@ describe("app routes", () => {
     expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
   });
 
+  it("does not register the mock checkout route", () => {
+    const rootRoute = appRoutes.find((route) => route.path === "/");
+    const childPaths = rootRoute && "children" in rootRoute ? rootRoute.children?.map((route) => route.path) : [];
+
+    expect(childPaths).not.toContain("billing/mock-checkout");
+  });
+
   it("redirects /billing to the billing plan page", async () => {
     authContextMock.useAuthContext.mockReturnValue({
       user: { displayName: "Test User", email: "test@example.com" },

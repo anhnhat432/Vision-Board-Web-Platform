@@ -186,10 +186,6 @@ export const appRoutes = [
         Component: BillingCheckoutQR,
       },
       {
-        path: "billing/mock-checkout",
-        ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
-      },
-      {
         path: "billing/plan",
         Component: BillingPlan,
       },
