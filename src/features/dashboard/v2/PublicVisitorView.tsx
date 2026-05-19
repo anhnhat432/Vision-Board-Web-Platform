@@ -1,4 +1,4 @@
-import { Compass, HardDrive, Lock, LogIn, RefreshCw, Smartphone, Target, UserPlus } from "lucide-react";
+import { Check, Compass, HardDrive, Lock, LogIn, RefreshCw, Smartphone, Target, UserPlus } from "lucide-react";
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
