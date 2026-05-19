@@ -360,6 +360,9 @@ export function SMARTGoalSetup() {
       return;
     }
 
+    // When going back from the first step, clear the focus area selection
+    // to prevent circular navigation back to life-insight
+    localStorage.removeItem(APP_STORAGE_KEYS.selectedFocusArea);
     navigate("/life-insight");
   };
 

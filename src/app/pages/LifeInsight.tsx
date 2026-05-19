@@ -23,7 +23,7 @@ import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter } from "../utils/smart-goal-starters";
-import { APP_STORAGE_KEYS, clearGoalPlanningDrafts, getLifeAreaLabel } from "../utils/storage";
+import { APP_STORAGE_KEYS, getLifeAreaLabel } from "../utils/storage";
 import {
   clearUserIntent,
   getUserIntentId,
@@ -147,19 +147,24 @@ export function LifeInsight() {
   }
 
   const continueToGoalSetup = (areaName: string) => {
-    clearGoalPlanningDrafts();
     localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, areaName);
     navigate("/smart-goal-setup");
   };
 
   const handleStartGoalSetup = () => {
     const currentDraftFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
+    const existingDraftStatement = getPendingSmartGoalStatement();
     const isChangingFocusArea = Boolean(currentDraftFocusArea && currentDraftFocusArea !== focusArea.name);
-    if (isChangingFocusArea && getPendingSmartGoalStatement().length > 0) {
+    
+    // If there's an existing draft from a different focus area, ask to clear it
+    if (existingDraftStatement.length > 0 && isChangingFocusArea) {
       setPendingFocusAreaName(focusArea.name);
       return;
     }
-
+    
+    // If there's a draft but no selectedFocusArea (user came back via Back button),
+    // keep the draft and just navigate to continue where they left off
+    // If there's no draft, proceed normally
     continueToGoalSetup(focusArea.name);
   };
 
