@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Instagram } from "lucide-react";
+import { Facebook, Instagram } from "lucide-react";
 
 type ProductLink = { label: string; to: string };
 type CompanyLink = { label: string; to?: string; href?: string };
@@ -23,8 +23,11 @@ const LEGAL_LINKS: LegalLink[] = [
   { label: "Chính sách hoàn tiền", to: "/refund-policy" },
 ];
 
-const TIKTOK_HREF = "https://www.tiktok.com/@dearourfuture";
-const INSTAGRAM_HREF = "https://www.instagram.com/dearourfuture";
+const FACEBOOK_HREF = "https://www.facebook.com/profile.php?id=61589773962146";
+const SOCIAL_ICON_CLASS =
+  "flex size-9 items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-soft transition-colors duration-150 hover:border-app-accent/40 hover:text-app-accent";
+const SOCIAL_PLACEHOLDER_ICON_CLASS =
+  "flex size-9 cursor-not-allowed items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-muted opacity-60";
 
 function TikTokIcon({ className = "" }: { className?: string }) {
   return (
@@ -51,23 +54,32 @@ export function AppPublicFooter() {
               Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
             </p>
             <div className="mt-4 flex items-center gap-2">
-              <a
-                href={TIKTOK_HREF}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="flex size-9 items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-soft transition-colors duration-150 hover:border-app-accent/40 hover:text-app-accent"
+              <button
+                type="button"
+                disabled
+                aria-label="TikTok dang cap nhat"
+                title="TikTok dang cap nhat link"
+                className={SOCIAL_PLACEHOLDER_ICON_CLASS}
               >
                 <TikTokIcon className="h-4 w-4" />
-              </a>
-              <a
-                href={INSTAGRAM_HREF}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="flex size-9 items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-soft transition-colors duration-150 hover:border-app-accent/40 hover:text-app-accent"
+              </button>
+              <button
+                type="button"
+                disabled
+                aria-label="Instagram dang cap nhat"
+                title="Instagram dang cap nhat link"
+                className={SOCIAL_PLACEHOLDER_ICON_CLASS}
               >
                 <Instagram className="h-4 w-4" />
+              </button>
+              <a
+                href={FACEBOOK_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className={SOCIAL_ICON_CLASS}
+              >
+                <Facebook className="h-4 w-4" />
               </a>
             </div>
           </div>
