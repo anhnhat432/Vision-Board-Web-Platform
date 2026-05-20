@@ -976,7 +976,7 @@ export function RootLayout() {
                         alt=""
                         aria-hidden="true"
                         loading="eager"
-                        className="size-10 rounded-lg object-cover shadow-md ring-1 ring-app-accent/20"
+                        className="size-10 rounded-lg object-cover shadow-sm ring-1 ring-app-accent/20"
                       />
                       <div className="min-w-0">
                         <span className="inline-block text-[15px] font-medium tracking-tight text-app-ink">
