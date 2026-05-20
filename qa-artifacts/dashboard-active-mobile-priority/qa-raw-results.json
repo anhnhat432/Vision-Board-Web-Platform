@@ -1,0 +1,100 @@
+{
+  "baseUrl": "http://127.0.0.1:5174",
+  "events": {
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/plan12week/hooks/usePlanExecutionSync.ts",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "http://127.0.0.1:5174/node_modules/.vite/deps/recharts.js?v=79533b23",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  "results": [
+    {
+      "viewport": {
+        "name": "mobile-375",
+        "width": 375,
+        "height": 812,
+        "screenshot": "dashboard-mobile-375.png"
+      },
+      "inspection": {
+        "url": "http://127.0.0.1:5174/",
+        "title": "Trang chính – Dear Our Future",
+        "bodyTextLength": 1191,
+        "todayHeadings": [],
+        "heroText": null,
+        "ctaText": null,
+        "ctaHref": null,
+        "mobileToday": [],
+        "horizontalOverflow": false,
+        "scrollWidth": 375,
+        "innerWidth": 375,
+        "cardTextSamples": [
+          "Bỏ qua điều hướngDear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Bỏ qua điều hướngDear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Dear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Xin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ý"
+        ]
+      }
+    },
+    {
+      "viewport": {
+        "name": "tablet-768",
+        "width": 768,
+        "height": 1024,
+        "screenshot": "dashboard-tablet-768.png"
+      },
+      "inspection": {
+        "url": "http://127.0.0.1:5174/",
+        "title": "Trang chính – Dear Our Future",
+        "bodyTextLength": 1404,
+        "todayHeadings": [],
+        "heroText": null,
+        "ctaText": null,
+        "ctaHref": null,
+        "mobileToday": [],
+        "horizontalOverflow": false,
+        "scrollWidth": 768,
+        "innerWidth": 768,
+        "cardTextSamples": [
+          "Bỏ qua điều hướngDear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Bỏ qua điều hướngDear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Dear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Xin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ý"
+        ]
+      }
+    },
+    {
+      "viewport": {
+        "name": "desktop-1440",
+        "width": 1440,
+        "height": 900,
+        "screenshot": "dashboard-desktop-1440.png"
+      },
+      "inspection": {
+        "url": "http://127.0.0.1:5174/",
+        "title": "Trang chính – Dear Our Future",
+        "bodyTextLength": 1429,
+        "todayHeadings": [],
+        "heroText": null,
+        "ctaText": null,
+        "ctaHref": null,
+        "mobileToday": [],
+        "horizontalOverflow": false,
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "cardTextSamples": [
+          "Bỏ qua điều hướngDear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Bỏ qua điều hướngDear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Dear Our Future12 tuần sống có chủ đíchĐăng nhậpĐăng kýTrang chínhĐăng kýTrang chínhXin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ýDear Our FutureMột chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.Sản phẩmTrang chínhTính năngGói & thanh toánHỏi đáp thanh toánCông tyVề Dear Our FutureLiên hệPháp lýĐiều khoản dịch vụChính sách bảo mậtChính sách hoàn tiền© 2026 Dear Our Future. Made with ❤️tình yêu ở Việt Nam.Local-first · Hoạt động trên mọi thiết bị",
+          "Xin chào, đây là Vision BoardMột chỗ tĩnh để bạn nhìn lại tuần sống của mình.Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.Local-first, không cần đăng nhập để xemĐồng bộ khi sẵn sàngHoạt động trên mobileMục tiêuĐọc 12 cuốn sách trong nămTuần 4/12Tiến độ chu kỳ42%Việc hôm nay · 7/14Đọc 30 trang \"Atomic Habits\"Ghi 3 dòng phản tưReview tuần lúc 21hẢnh chụp giao diện · dữ liệu mô phỏngBước 01Cân bằng trước mục tiêuChấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.Khám phá →Bước 02SMART Goal có nhịpBiến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.Khám phá →Bước 03Review để không trôiMỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.Khám phá →Bắt đầu đúng thứ tựSẵn sàng dựng chu kỳ 12 tuần đầu tiên?Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.Bắt đầu demoGóp ý"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# Cline Project Rules
+
+Follow `.roo/rules/00-project-agent-rules.md` and `AGENTS.md` for this repository.
+
+Quick defaults:
+
+- Keep changes small, typed, and focused on the user request.
+- Do not refactor unrelated code or introduce dependencies unless explicitly needed.
+- Never revert user changes in a dirty worktree.
+- Do not hardcode secrets, API keys, tokens, credentials, or service account JSON.
+- Do not dump large files into chat. Inspect targeted snippets instead.
+- Prefer existing components, helpers, hooks, storage utilities, billing/auth helpers, and route patterns.
+- After source changes, run the smallest relevant verification, usually `npm run typecheck` first.
+- Reply in concise Vietnamese with files changed, commands run, results, and remaining risks.

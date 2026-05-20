@@ -155,7 +155,7 @@ describe("Dashboard active 12-week system UX", () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 1024 });
   });
 
-  it("orders the active dashboard as hero, goals, rhythm, then trend", async () => {
+  it("orders the signed-in active dashboard as hero, mobile Today, goals, rhythm, then trend in the DOM", async () => {
     seedActiveDashboard();
     renderDashboard();
 
@@ -163,26 +163,48 @@ describe("Dashboard active 12-week system UX", () => {
     const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
     const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
     const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
+    const todayHeadings = screen.getAllByRole("heading", { name: "Việc hôm nay" });
+    const mobileTodayHeading = todayHeadings.find((heading) => heading.closest("aside") === null);
+    const desktopTodayHeading = todayHeadings.find((heading) => heading.closest("aside") !== null);
 
     expect(hero).toHaveTextContent("Đây là bức tranh tuần 1");
-    expect(hero.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(mobileTodayHeading).toBeDefined();
+    expect(desktopTodayHeading).toBeDefined();
+    expect(desktopTodayHeading?.closest("aside")).not.toBeNull();
+    expect(hero.compareDocumentPosition(mobileTodayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect((mobileTodayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("keeps mobile signed-in dashboard scannable in one column", async () => {
+  it("keeps mobile signed-in dashboard scannable with Today before active system cards", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     seedActiveDashboard();
     renderDashboard();
 
     const hero = await screen.findByTestId("dashboard-primary-action-card");
     const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
+    const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
+    const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
     const kpiRow = await screen.findByTestId("dashboard-kpi-row");
+    const todayHeadings = screen.getAllByRole("heading", { name: "Việc hôm nay" });
+    const mobileTodayHeading = todayHeadings.find((heading) => heading.closest("aside") === null);
+    const desktopTodayHeading = todayHeadings.find((heading) => heading.closest("aside") !== null);
 
-    expect(hero.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(todayHeadings).toHaveLength(2);
+    expect(mobileTodayHeading).toBeDefined();
+    expect(desktopTodayHeading).toBeDefined();
+    expect(desktopTodayHeading?.closest("aside")).not.toBeNull();
+    expect(hero.compareDocumentPosition(mobileTodayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect((mobileTodayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(goalsHeading.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(screen.getAllByText("Launch a focused dashboard").length).toBeGreaterThan(0);
-    expect(screen.getByRole("heading", { name: "Việc hôm nay" })).toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-main-card")).toBeNull();
   });
 

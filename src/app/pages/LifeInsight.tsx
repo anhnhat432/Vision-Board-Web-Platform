@@ -170,6 +170,7 @@ export function LifeInsight() {
 
   const handleConfirmDraftClear = () => {
     const nextFocusAreaName = pendingFocusAreaName ?? focusArea.name;
+    localStorage.removeItem(APP_STORAGE_KEYS.pendingSmartGoal);
     setPendingFocusAreaName(null);
     continueToGoalSetup(nextFocusAreaName);
   };

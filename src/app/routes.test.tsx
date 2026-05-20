@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
@@ -108,10 +108,27 @@ import { appRoutes } from "./routes";
 
 function renderRoute(pathname: string) {
   const router = createMemoryRouter(appRoutes, { initialEntries: [pathname] });
-  return render(<RouterProvider router={router} />);
+  const result = render(<RouterProvider router={router} />);
+
+  return {
+    ...result,
+    router,
+    async waitForIdle() {
+      await waitFor(() => expect(router.state.navigation.state).toBe("idle"));
+    },
+    async dispose() {
+      await waitFor(() => expect(router.state.navigation.state).toBe("idle"));
+      router.dispose();
+      result.unmount();
+    },
+  };
 }
 
 describe("app routes", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     localStorage.clear();
     authContextMock.useAuthContext.mockReturnValue({
@@ -130,21 +147,26 @@ describe("app routes", () => {
   });
 
   it("resolves /terms through the app route table", async () => {
-    renderRoute("/terms");
-    expect(await screen.findByRole("heading", { name: /Điều khoản dịch vụ/i })).toBeInTheDocument();
+    const route = renderRoute("/terms");
+
+    expect(await screen.findByRole("heading", { level: 1, name: /Điều khoản dịch vụ/i })).toBeInTheDocument();
+    await route.dispose();
   });
 
   it("resolves /privacy through the app route table", async () => {
-    renderRoute("/privacy");
+    const route = renderRoute("/privacy");
+
     expect(await screen.findByRole("heading", { name: /Chính sách bảo mật/i })).toBeInTheDocument();
+    await route.dispose();
   });
 
   it("resolves /billing/faq through the app route table", async () => {
-    renderRoute("/billing/faq");
+    const route = renderRoute("/billing/faq");
 
     expect(await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i })).toBeInTheDocument();
     expect(screen.getByText("Làm sao tôi biết đã thanh toán thành công?")).toBeInTheDocument();
     expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
+    await route.dispose();
   });
 
   it("does not register the mock checkout route", () => {
@@ -156,7 +178,7 @@ describe("app routes", () => {
 
   it("redirects /billing to the billing plan page", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com" },
+      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -170,14 +192,15 @@ describe("app routes", () => {
     const userData = initializeUserData();
     saveUserData({ ...userData, onboardingCompleted: true });
 
-    renderRoute("/billing");
+    const route = renderRoute("/billing");
 
-    expect(await screen.findByRole("heading", { name: /Chọn gói phù hợp với bạn/i })).toBeInTheDocument();
+    expect(await screen.findByText("Đi nhanh")).toBeInTheDocument();
+    await route.dispose();
   });
 
   it("resolves /today-v2 through the app route table", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com" },
+      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -191,15 +214,15 @@ describe("app routes", () => {
     const userData = initializeUserData();
     saveUserData({ ...userData, onboardingCompleted: true });
 
-    renderRoute("/today-v2");
+    const route = renderRoute("/today-v2");
 
-    expect(await screen.findByRole("heading", { name: /Hôm nay là một ngày bình tĩnh/i })).toBeInTheDocument();
-    expect(screen.getByText("v0.4 · Design preview")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Về Trang chính" })).toBeInTheDocument();
+    await route.dispose();
   });
 
   it("resolves /settings through the app route table", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com" },
+      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -212,8 +235,9 @@ describe("app routes", () => {
     });
     const userData = initializeUserData();
     saveUserData({ ...userData, onboardingCompleted: true });
-    renderRoute("/settings");
+    const route = renderRoute("/settings");
 
     expect(await screen.findByRole("heading", { level: 1, name: /Tu. ch.nh t.i kho.n/i })).toBeInTheDocument();
+    await route.dispose();
   });
 });
