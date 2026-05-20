@@ -229,7 +229,7 @@ export function LoginPage() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4">
         <div className="w-full max-w-sm rounded-card border border-app-line bg-app-surface p-7">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
               <Target className="h-5 w-5 text-white" />
             </div>
             <span className="text-[16px] font-semibold tracking-tight text-app-ink">Vision Board</span>
@@ -263,7 +263,7 @@ export function LoginPage() {
       {/* Top bar */}
       <header className="flex w-full items-center justify-center px-4 py-6">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
             <Target className="h-5 w-5 text-white" />
           </div>
           <span className="text-[16px] font-semibold tracking-tight text-app-ink">Vision Board</span>

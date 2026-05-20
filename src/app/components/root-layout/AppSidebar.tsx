@@ -81,7 +81,7 @@ export function AppSidebar({
             alt="Dear Our Future"
             width={36}
             height={36}
-            className="size-9 rounded-lg"
+            className="size-9 rounded-lg object-cover shadow-sm ring-1 ring-app-accent/20"
           />
           <div className="min-w-0">
             <span className="block truncate text-[16px] font-semibold tracking-tight text-app-ink">
