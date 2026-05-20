@@ -110,6 +110,7 @@ export function LeadIndicatorsStepLab({
   onRemoveIndicator,
   onIndicatorChange,
 }: LeadIndicatorsStepProps) {
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const validationOptions = {
     tacticLoadPreference: draft.tacticLoadPreference,
     dailyTimeBudget: draft.dailyTimeBudget,
@@ -134,6 +135,12 @@ export function LeadIndicatorsStepLab({
   const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>({});
   const canAddIndicator = draft.leadIndicators.length < 4;
 
+  const markFieldTouched = (fieldId: string) => {
+    setTouchedFields((previous) => ({ ...previous, [fieldId]: true }));
+  };
+
+  const shouldShowFieldError = (fieldId: string) => Boolean(touchedFields[fieldId]);
+
   const toggleCommitmentEditor = (indicatorId: string) => {
     setExpandedCommitments((previous) => ({
       ...previous,
@@ -155,6 +162,11 @@ export function LeadIndicatorsStepLab({
       }, 0);
     }
   };
+
+  const showNameError = (indicator: LeadIndicatorDraft, fieldKey: string) =>
+    shouldShowFieldError(fieldKey) && !indicator.name.trim();
+
+  const showHelperText = (fieldKey: string) => !shouldShowFieldError(fieldKey);
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 sm:space-y-5">
@@ -266,10 +278,21 @@ export function LeadIndicatorsStepLab({
                     <Input
                       id={`tactic-name-${index}`}
                       value={indicator.name}
+                      aria-describedby={showNameError(indicator, `name-${indicator.id}`) ? `tactic-name-${index}-error` : `tactic-name-${index}-helper`}
+                      onBlur={() => markFieldTouched(`name-${indicator.id}`)}
                       onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
                       placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
                       className={inputClass}
                     />
+                    {showNameError(indicator, `name-${indicator.id}`) ? (
+                      <p id={`tactic-name-${index}-error`} role="alert" className={errorTextClass}>
+                        Đặt tên cho việc lặp lại này.
+                      </p>
+                    ) : (
+                      <p id={`tactic-name-${index}-helper`} className={helperTextClass}>
+                        Đặt tên bằng một hành động cụ thể bạn có thể lặp lại trong tuần.
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -280,21 +303,31 @@ export function LeadIndicatorsStepLab({
                       <Input
                         id={`tactic-target-${index}`}
                         value={indicator.target}
-                        aria-invalid={Boolean(indicatorTargetErrors[index])}
-                        aria-describedby={indicatorTargetErrors[index] ? `tactic-target-${index}-error` : undefined}
+                        aria-invalid={Boolean(indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`))}
+                        aria-describedby={
+                          indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`)
+                            ? `tactic-target-${index}-error`
+                            : `tactic-target-${index}-helper`
+                        }
                         className={cn(
                           inputClass,
                           indicatorTargetErrors[index] &&
+                            shouldShowFieldError(`target-${indicator.id}`) &&
                             "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
                         )}
+                        onBlur={() => markFieldTouched(`target-${indicator.id}`)}
                         onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
                         placeholder="Ví dụ: 2"
                       />
-                      {indicatorTargetErrors[index] ? (
+                      {indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`) ? (
                         <p id={`tactic-target-${index}-error`} role="alert" className={errorTextClass}>
                           {indicatorTargetErrors[index]}
                         </p>
-                      ) : null}
+                      ) : (
+                        <p id={`tactic-target-${index}-helper`} className={helperTextClass}>
+                          Nhập số lần bạn muốn hoàn thành việc này trong mỗi tuần.
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -304,21 +337,31 @@ export function LeadIndicatorsStepLab({
                       <Input
                         id={`tactic-unit-${index}`}
                         value={indicator.unit}
-                        aria-invalid={Boolean(indicatorUnitErrors[index])}
-                        aria-describedby={indicatorUnitErrors[index] ? `tactic-unit-${index}-error` : undefined}
+                        aria-invalid={Boolean(indicatorUnitErrors[index] && shouldShowFieldError(`unit-${indicator.id}`))}
+                        aria-describedby={
+                          indicatorUnitErrors[index] && shouldShowFieldError(`unit-${indicator.id}`)
+                            ? `tactic-unit-${index}-error`
+                            : `tactic-unit-${index}-helper`
+                        }
                         className={cn(
                           inputClass,
                           indicatorUnitErrors[index] &&
+                            shouldShowFieldError(`unit-${indicator.id}`) &&
                             "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
                         )}
+                        onBlur={() => markFieldTouched(`unit-${indicator.id}`)}
                         onChange={(event) => onIndicatorChange(index, "unit", event.target.value)}
                         placeholder="buổi, bài, lần..."
                       />
-                      {indicatorUnitErrors[index] ? (
+                      {indicatorUnitErrors[index] && shouldShowFieldError(`unit-${indicator.id}`) ? (
                         <p id={`tactic-unit-${index}-error`} role="alert" className={errorTextClass}>
                           {indicatorUnitErrors[index]}
                         </p>
-                      ) : null}
+                      ) : (
+                        <p id={`tactic-unit-${index}-helper`} className={helperTextClass}>
+                          Dùng đơn vị gần với hành động: buổi, bài, lần, phút...
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

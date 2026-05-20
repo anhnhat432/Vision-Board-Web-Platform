@@ -68,7 +68,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
             <Target className="h-4 w-4 text-app-accent" aria-hidden="true" />
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Kết quả cuối 12 tuần</p>
-            <p className="mt-1 text-sm font-semibold text-app-ink">{draft.week12Outcome || "Chưa có nội dung"}</p>
+            <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-app-ink">{draft.week12Outcome || "Chưa có nội dung"}</p>
           </div>
 
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
@@ -79,10 +79,16 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             </p>
           </div>
 
-          <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
-            <Target className="h-4 w-4 text-app-ink-soft" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Vì sao mục tiêu này quan trọng</p>
-            <p className="mt-1 text-sm font-semibold text-app-ink">{draft.vision12Week || "Chưa có nội dung"}</p>
+          <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3 sm:col-span-2 lg:col-span-3">
+            <div className="flex items-start gap-2">
+              <Target className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-soft" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-[0.14em] text-app-ink-muted">Vì sao mục tiêu này quan trọng</p>
+                <p className="mt-2 line-clamp-4 max-w-3xl text-sm font-medium leading-6 text-app-ink">
+                  {draft.vision12Week || "Chưa có nội dung"}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">

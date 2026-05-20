@@ -36,7 +36,72 @@
 ## Console errors
 - console.error: Không ghi nhận.
 - uncaught exception: Không ghi nhận.
-- failed network request: Không ghi nhận.
+- failed network request: [
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/utils/feature-entitlements.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/useUpgradeDialog.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/usePlanEntitlements.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/UpgradePaywallDialog.tsx",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/dashboard/hooks/useDashboardPlanLink.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/utils/twelve-week-system-ui.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/plan12week/hooks/index.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/usePageTour.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/dashboard/helpers/dashboardSections.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/ui/skeleton.tsx",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/utils/text.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/SpotlightTour.tsx",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/FeedbackDialog.tsx",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/useBreakpoint.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/dashboard/helpers/dashboardNavigation.ts",
+    "failure": "net::ERR_ABORTED"
+  },
+  {
+    "url": "http://127.0.0.1:5174/node_modules/.vite/deps/recharts.js?v=79533b23",
+    "failure": "net::ERR_ABORTED"
+  }
+]
 - warnings quan trọng: Không ghi nhận warning ảnh hưởng UX.
 
 ## Route cũ có bị ảnh hưởng không
@@ -52,6 +117,71 @@
   "errors": [],
   "warnings": [],
   "exceptions": [],
-  "failedRequests": []
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/utils/feature-entitlements.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/useUpgradeDialog.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/usePlanEntitlements.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/UpgradePaywallDialog.tsx",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/dashboard/hooks/useDashboardPlanLink.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/utils/twelve-week-system-ui.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/plan12week/hooks/index.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/usePageTour.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/dashboard/helpers/dashboardSections.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/ui/skeleton.tsx",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/utils/text.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/SpotlightTour.tsx",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/FeedbackDialog.tsx",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/hooks/useBreakpoint.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/@fs/C:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/features/dashboard/helpers/dashboardNavigation.ts",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:5174/node_modules/.vite/deps/recharts.js?v=79533b23",
+      "failure": "net::ERR_ABORTED"
+    }
+  ]
 }
 ```

@@ -95,7 +95,7 @@ export function SetupStepShellLab({
         <div className="mb-2 flex items-center gap-2">
           <StepIcon className="h-4 w-4 text-app-accent" aria-hidden="true" />
           <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
-            Bước {currentStep + 1} / {stepCount} · {stepMeta.eyebrow.toUpperCase()}
+            Thiết lập kế hoạch 12 tuần · Bước nhỏ {currentStep + 1}/{stepCount} · {stepMeta.eyebrow.toUpperCase()}
           </p>
         </div>
         <h2 id="twelve-week-step-title" ref={titleFocusRef} tabIndex={-1} className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink focus:outline-none sm:text-[24px]">
@@ -103,7 +103,7 @@ export function SetupStepShellLab({
         </h2>
         <div className="mt-2 text-[15px] leading-6 text-app-ink-soft">{description}</div>
 
-        <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="mt-5 flex w-full gap-2">
+        <ol aria-label={`Thiết lập kế hoạch 12 tuần, bước ${currentStep + 1} trên ${stepCount}`} className="mt-5 flex w-full gap-2">
           {stepDefinitions.map((step, index) => {
             const isActive = index === currentStep;
             const isCompleted = index < currentStep;
@@ -134,7 +134,9 @@ export function SetupStepShellLab({
             );
           })}
         </ol>
-        <p className="mt-2 text-[14px] leading-5 text-app-ink-muted">{stepMeta.caption}</p>
+        <p className="mt-2 text-[14px] leading-5 text-app-ink-muted">
+          Wizard này có 4 bước nhỏ trong bước tổng “Kế hoạch 12 tuần”. {stepMeta.caption}
+        </p>
 
         {whyThisMatters ? (
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
@@ -161,7 +163,7 @@ export function SetupStepShellLab({
 
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[13px] text-app-ink-muted">
-          Bước {currentStep + 1} / {stepCount}
+          4 bước nhỏ để thiết lập kế hoạch 12 tuần · Đang ở bước {currentStep + 1}/{stepCount}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto" onClick={onBack} disabled={isSubmitting}>

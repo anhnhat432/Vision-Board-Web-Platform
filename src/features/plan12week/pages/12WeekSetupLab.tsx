@@ -1157,7 +1157,7 @@ export function TwelveWeekSetupLab() {
 
         <section aria-labelledby="twelve-week-setup-title">
           <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-            {getLifeAreaLabel(focusArea)} · Kế hoạch 12 tuần
+            {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
           </p>
           <h1
             id="twelve-week-setup-title"
@@ -1166,7 +1166,7 @@ export function TwelveWeekSetupLab() {
             Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
           </h1>
           <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
-            Chốt kết quả, việc lặp lại, lịch nhìn lại — tất cả trong 4 bước.
+            Bạn đang ở bước tổng “Kế hoạch 12 tuần”. Bên dưới là wizard 4 bước nhỏ để thiết lập: kết quả, việc lặp lại, lịch nhìn lại và rà soát.
           </p>
           <div className="mt-4 rounded-card border border-app-line bg-app-surface p-4">
             <p className="text-[13px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu hiện tại</p>

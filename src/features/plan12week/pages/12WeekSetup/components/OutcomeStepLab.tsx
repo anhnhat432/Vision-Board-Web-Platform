@@ -105,24 +105,6 @@ export function OutcomeStepLab({
 
         <div className="mt-4 space-y-4 sm:mt-5">
           <div>
-            <label htmlFor="goal-type" className={labelClass}>
-              Loại mục tiêu
-            </label>
-            <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
-              <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu" className={selectTriggerClass}>
-                <SelectValue placeholder="Chọn loại mục tiêu" />
-              </SelectTrigger>
-              <SelectContent className={selectContentClass}>
-                {GOAL_TYPES.map((item) => (
-                  <SelectItem key={item.value} value={item.value} className={selectItemClass}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <label htmlFor="week-12-outcome" className={labelClass}>
               Kết quả cuối 12 tuần
             </label>
@@ -167,6 +149,24 @@ export function OutcomeStepLab({
             <p className={helperTextClass}>Một câu đủ thật giúp bạn giữ nhịp khi tuần bận lên.</p>
           </div>
 
+          <div>
+            <label htmlFor="lag-metric-name" className={labelClass}>
+              Tên chỉ số cần theo dõi
+            </label>
+            <Input
+              id="lag-metric-name"
+              value={draft.lagMetricName}
+              onChange={(event) => onChange("lagMetricName", event.target.value)}
+              className={inputClass}
+              placeholder="Ví dụ: số bài xuất bản, số kg giảm, doanh thu mới..."
+            />
+            {lagMetricPreview ? (
+              <p className={helperTextClass}>
+                Đang theo dõi: <span>{lagMetricPreview}</span>
+              </p>
+            ) : null}
+          </div>
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_140px]">
             <div>
               <label htmlFor="lag-metric-target" className={labelClass}>
@@ -198,21 +198,21 @@ export function OutcomeStepLab({
           </div>
 
           <div>
-            <label htmlFor="lag-metric-name" className={labelClass}>
-              Tên chỉ số cần theo dõi
+            <label htmlFor="goal-type" className={labelClass}>
+              Loại mục tiêu
             </label>
-            <Input
-              id="lag-metric-name"
-              value={draft.lagMetricName}
-              onChange={(event) => onChange("lagMetricName", event.target.value)}
-              className={inputClass}
-              placeholder="Ví dụ: số bài xuất bản, số kg giảm, doanh thu mới..."
-            />
-            {lagMetricPreview ? (
-              <p className={helperTextClass}>
-                Đang theo dõi: <span>{lagMetricPreview}</span>
-              </p>
-            ) : null}
+            <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
+              <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu" className={selectTriggerClass}>
+                <SelectValue placeholder="Chọn loại mục tiêu" />
+              </SelectTrigger>
+              <SelectContent className={selectContentClass}>
+                {GOAL_TYPES.map((item) => (
+                  <SelectItem key={item.value} value={item.value} className={selectItemClass}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </section>
