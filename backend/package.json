@@ -39,6 +39,7 @@
     "typescript": "^5.7.2"
   },
   "overrides": {
-    "@tootallnate/once": "^3.0.1"
+    "@tootallnate/once": "^3.0.1",
+    "protobufjs": "7.5.8"
   }
 }
