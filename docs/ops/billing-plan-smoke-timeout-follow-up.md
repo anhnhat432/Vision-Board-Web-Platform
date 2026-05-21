@@ -223,3 +223,28 @@ Docs:
 - No PayOS adapter implementation.
 - No Casso renewal or retirement.
 - No route changes; `/billing/plan` and `/billing/confirm` still render so users can read the support copy and review their existing entitlement / payment history.
+
+## Production paid-checkout kill-switch activation
+
+Recorded 2026-05-21. Both kill-switch flags are now live in production. Documentation only; no code changed in this update.
+
+- Vercel frontend flag active: `VITE_BILLING_PAID_CHECKOUT_DISABLED=1` (real-mode project, redeployed).
+- Render backend flag active: `BILLING_PAID_DISABLED=1` (backend service, redeployed).
+- Paid checkout is disabled in production. Upgrade CTAs across `UpgradePaywallDialog`, `/billing/confirm`, and `/billing/plan` short-circuit before any POST to `/billing/checkout-session` or `/billing/public-checkout-session`.
+- Backend defense-in-depth returns HTTP 503 with `errorCode: "checkout_disabled"` for both checkout endpoints, so stale frontend bundles or direct API hits cannot create a `PaymentOrder`.
+- QR / payment instructions are blocked: no VietQR is generated, no `/billing/checkout/{orderId}` instructions surface to real-mode users.
+- Existing plan view, payment history, restore access, and entitlement checks remain available so current paid users can self-serve.
+- 12-week setup Full GO is unaffected (`/12-week-setup` -> `TwelveWeekSetupLab` continues per `docs/ux/12-week-setup-limited-rollout-monitoring.md`).
+- Keep both flags enabled until either:
+  - Casso Standard for `dear-our-feature` is renewed and the inbound webhook (`/api/billing/webhook/casso`) is verified end-to-end, or
+  - The PayOS adapter is implemented and tested against a real PayOS sandbox + webhook.
+
+Verification (in production after activation):
+
+- `/billing/plan` renders the "Thanh toán đang tạm khóa" banner; upgrade CTAs are blocked.
+- `/billing/confirm` does not POST to `/billing/checkout-session`; submit button stays at "Tạm khóa thanh toán".
+- `curl -X POST .../api/billing/checkout-session` returns HTTP 503 with `errorCode: "checkout_disabled"`.
+- Payment history, restore access, and entitlement endpoints continue to respond.
+- `/12-week-setup` is unchanged.
+
+Re-enable procedure remains the one in `Operational rollout` above. Do not unset either flag until one of the two unblock conditions is met and validated.
