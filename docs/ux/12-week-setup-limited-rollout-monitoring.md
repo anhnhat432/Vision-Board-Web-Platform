@@ -1,18 +1,18 @@
 # 12-Week Setup — Limited Rollout Monitoring
 
-Release commit: `d8b35b71`
-Status: **LIMITED ROLLOUT / MONITOR** (not full GO)
+Release commit: `173174db`
+Status: **LIMITED ROLLOUT / MONITOR** (not final rollout approval)
 Owner: 12-week setup surface
 
 ## 1. Current rollout state
 
-- Commit `d8b35b71` is live on production.
+- Commit `173174db` is live on production.
 - GitHub Actions checks green for the release.
 - Route replacement deployed: `/12-week-setup` now renders `TwelveWeekSetupLab` (new flow).
 - Legacy flow preserved at `/12-week-setup-old` for fallback / comparison.
 - QA reference still available at `/12-week-setup-lab`.
 - Production route label cleanup completed: `/12-week-setup` no longer shows the lab badge / reference link; `/12-week-setup-lab` keeps QA/reference labeling.
-- Rollout posture: **LIMITED ROLLOUT / MONITOR**. Do not mark full GO until manual user validation completes.
+- Rollout posture: **LIMITED ROLLOUT / MONITOR**. User validation blocker cleared; monitoring closeout still required before final rollout approval.
 
 ## 2. Production verification summary
 
@@ -27,7 +27,6 @@ Not yet verified:
 
 - 24-48h post-release monitoring window.
 - Cross-device continuity if not tested.
-- Real-user validation if not completed.
 - Billing `/billing/plan` payment-history hydration timeout remains tracked separately.
 
 ## 3. Route mapping confirmed on production
@@ -42,18 +41,18 @@ Confirmed via production bundle inspection and route smoke.
 
 ## 4. What passed
 
-- Production deployment of `d8b35b71`.
+- Production deployment of `173174db`.
 - GitHub Actions workflows for the release.
 - Production bundle component mapping for the three setup routes.
 - Production route smoke for 12-week setup route mapping.
 - Demo-copy leak check (real-mode copy clean).
+- User validation for `/12-week-setup` Step 1 -> Step 4 -> save -> `/12-week-system`.
 - 4/5 steps of `npm run smoke:prod:quick`.
 
 ## 5. What remains unverified
 
 - 24-48h monitoring window.
 - Cross-device continuity if not tested.
-- Real-user validation if not completed.
 - Billing `/billing/plan` timeout tracked separately.
 
 ## 6. Manual production smoke result
@@ -66,7 +65,16 @@ Confirmed via production bundle inspection and route smoke.
 - Step 2 validation timing result: PASS — required-field errors did not appear immediately on first entry; they appeared only after attempting to continue with missing data.
 - Save destination result: PASS — after clicking save, the app navigated to `/12-week-system` / weekly execution / Today.
 - Console/runtime errors: No uncaught runtime errors observed.
-- Final recommendation: Keep LIMITED ROLLOUT / MONITOR. Do not mark full GO.
+- Final recommendation: Keep LIMITED ROLLOUT / MONITOR until monitoring closeout.
+
+## User validation result
+
+- Validation status: completed.
+- User feedback: confirmed acceptable.
+- Affected flow: `/12-week-setup` Step 1 → Step 4 → save → `/12-week-system`.
+- Any user-reported blockers: none known.
+- Any user-reported confusion: none known.
+- Result: user validation blocker cleared.
 
 ## 7. Manual smoke checklist (safe test account)
 
@@ -158,15 +166,17 @@ Rollback path:
 
 ## 10. Decision options after monitoring
 
-After the 24-48h window plus completed manual walkthrough on a safe test account, choose one:
+Current recommendation: **FULL GO candidate — pending monitoring closeout**.
 
-- **Continue limited rollout** — telemetry healthy but manual validation or coverage still incomplete. Extend monitoring window. Re-evaluate.
+User validation is complete, but the 24-48h monitoring closeout is not documented yet. After monitoring closeout, choose one:
+
+- **Continue limited rollout** — telemetry or coverage still incomplete. Extend monitoring window. Re-evaluate.
 - **Fix-forward** — non-blocking issues detected. Ship targeted fixes, keep `/12-week-setup` on `TwelveWeekSetupLab`, re-monitor.
 - **Rollback** — any rollback trigger from section 9 fires. Revert route mapping, capture root cause, plan a re-release.
-- **Consider full GO** — only after:
-  1. Manual Step 1 -> Step 4 walkthrough on a safe test account passes end to end.
-  2. 24-48h monitoring window healthy with no rollback triggers.
-  3. No user-visible regressions reported.
-  4. Cross-device continuity verified for signed-in real-mode accounts.
+- **Ready for explicit product approval** — only after:
+  1. 24-48h monitoring window healthy with no rollback triggers.
+  2. No user-visible regressions reported.
+  3. Cross-device continuity verified for signed-in real-mode accounts if required for this rollout.
+  4. Rollback path remains documented and available through `/12-week-setup-old`.
 
-Full GO is **not** appropriate based on automated smoke alone. Manual / user validation is required.
+Automated smoke alone is not sufficient for final rollout approval. User validation blocker is cleared; monitoring closeout remains required.
