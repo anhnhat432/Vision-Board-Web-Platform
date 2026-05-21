@@ -56,7 +56,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Xác nhận kế hoạch</p>
             <h3 className="mt-2 text-xl font-semibold text-app-ink">Tóm tắt để rà soát nhanh</h3>
             <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-              Chỉ hiển thị phần cần kiểm tra trước khi lưu kế hoạch.
+              Sau khi lưu, bạn sẽ tiếp tục vào phần thực thi hằng tuần và màn Hôm nay để bắt đầu việc đầu tiên.
             </p>
           </div>
           <Badge variant="brand" className="inline-flex min-h-10 shrink-0 items-center px-3 py-2">
@@ -67,7 +67,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
             <Target className="h-4 w-4 text-app-accent" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Kết quả cuối 12 tuần</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Đích đến sau 12 tuần</p>
             <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-app-ink">{draft.week12Outcome || "Chưa có nội dung"}</p>
           </div>
 
@@ -99,7 +99,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
 
           <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3">
             <CalendarDays className="h-4 w-4 text-app-ink-soft" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Ngày nhìn lại tuần</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-ink-muted">Ngày xem lại tuần</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">{formatReviewDayLabel(draft.reviewDay)}</p>
           </div>
 
@@ -127,7 +127,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         <div className="mt-3 flex gap-2 rounded-[var(--r-tile)] border border-app-line bg-app-bg p-3 text-sm leading-6 text-app-ink-soft">
           <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <p>
-            Mỗi tuần bạn sẽ được tính điểm thực thi dựa trên số việc lặp lại đã hoàn thành. Ví dụ 8/10 việc = 80%.
+            Điểm thực thi chỉ đo bạn đã hoàn thành bao nhiêu việc lặp lại trong tuần. Đây không phải điểm đánh giá năng lực hay thành công chung. Ví dụ 8/10 việc = 80%.
           </p>
         </div>
 

@@ -85,7 +85,6 @@ export function ScheduleStepLab({
   cycleEndDate,
   setupGuideSupport,
   setupGuideTemplate,
-  hasPreviewTasks,
   weekOneTaskPreview,
   weekOneTaskWarning,
   todayDateKey,
@@ -118,7 +117,7 @@ export function ScheduleStepLab({
               Chốt lịch thực hiện
             </p>
             <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
-              Ngày bắt đầu, ngày nhìn lại và quỹ thời gian quyết định việc tuần 1 rơi vào đâu và nặng đến mức nào.
+              Chọn ngày bắt đầu, ngày bạn muốn xem lại tuần, và thời gian thật sự có thể dành mỗi ngày.
             </p>
           </div>
         </div>
@@ -153,7 +152,7 @@ export function ScheduleStepLab({
               </p>
             ) : null}
             <p id="cycle-start-date-helper" className={helperTextClass}>
-              Kế hoạch sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.
+              Kế hoạch sẽ tự xếp tuần làm việc từ Thứ Hai để việc trong tuần dễ theo dõi.
             </p>
           </div>
 
@@ -172,7 +171,7 @@ export function ScheduleStepLab({
         </div>
 
         <fieldset className="mt-5">
-          <legend className={labelClass}>Ngày nhìn lại tuần</legend>
+          <legend className={labelClass}>Ngày xem lại tuần</legend>
           <div className="grid grid-cols-4 gap-1 sm:grid-cols-7">
             {REVIEW_DAYS.map((day) => {
               const isActive = draft.reviewDay === day.value;
@@ -193,7 +192,7 @@ export function ScheduleStepLab({
             })}
           </div>
           <p className={helperTextClass}>
-            Một buổi nhìn lại cố định giúp bạn chỉnh sớm trước khi tuần lệch nhịp. Chọn ngày nào ít bận và dễ nhớ nhất.
+            Chọn một ngày cố định để xem tuần vừa rồi làm được gì và tuần tới cần chỉnh gì. Nên chọn ngày ít bận, dễ nhớ.
           </p>
         </fieldset>
 
@@ -218,13 +217,13 @@ export function ScheduleStepLab({
             })}
           </div>
           <p className={helperTextClass}>
-            Chọn theo năng lượng thật trong ngày thường. Ứng dụng chỉ lưu quỹ thời gian, không lưu giờ cụ thể.
-            Mốc 2+ giờ chỉ nên chọn khi bạn muốn review rất sâu.
+            Chọn theo ngày thường của bạn. Ứng dụng chỉ lưu khoảng thời gian có thể dành cho mục tiêu, không lưu giờ cụ thể.
+            Mốc 2+ giờ chỉ nên chọn khi bạn thật sự có nhiều thời gian.
           </p>
         </fieldset>
 
         <fieldset className="mt-5">
-          <legend className={labelClass}>Mức tải tuần đầu</legend>
+          <legend className={labelClass}>Tuần đầu nên nhẹ hay nhiều việc?</legend>
           <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
             {LOAD_PREFERENCE_OPTIONS.map((option) => {
               const isActive = draft.tacticLoadPreference === option.value;
@@ -242,7 +241,7 @@ export function ScheduleStepLab({
               );
             })}
           </div>
-          <p className={helperTextClass}>Đây là nhịp khởi đầu. Bạn vẫn có thể chỉnh lại sau trong phần Cài đặt.</p>
+          <p className={helperTextClass}>Đây chỉ là nhịp bắt đầu cho tuần 1. Bạn vẫn có thể chỉnh lại sau trong phần Cài đặt.</p>
         </fieldset>
 
         <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -295,7 +294,7 @@ export function ScheduleStepLab({
       </CollapsibleScheduleSection>
 
       {setupGuideSupport && setupGuideTemplate ? (
-        <CollapsibleScheduleSection id="schedule-guide-title" title="Nhịp tuần 1 theo khung">
+        <CollapsibleScheduleSection id="schedule-guide-title" title="Gợi ý cho tuần 1">
           <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
           <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
           <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
@@ -306,7 +305,7 @@ export function ScheduleStepLab({
       ) : null}
 
       {setupGuideSupport ? (
-        <CollapsibleScheduleSection id="schedule-recommendation-title" title="Ngày nhìn lại và mức tải tuần gợi ý">
+        <CollapsibleScheduleSection id="schedule-recommendation-title" title="Ngày xem lại và nhịp tuần gợi ý">
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>

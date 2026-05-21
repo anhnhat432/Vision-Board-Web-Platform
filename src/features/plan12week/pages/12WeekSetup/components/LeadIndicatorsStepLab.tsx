@@ -28,6 +28,7 @@ import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
 
 interface LeadIndicatorsStepProps {
   draft: TwelveWeekSetupDraft;
+  showValidationErrors: boolean;
   coreCount: number;
   optionalCount: number;
   setupGuideSupport: AdaptiveTemplateSupport | null;
@@ -64,13 +65,6 @@ const COMMITMENT_FIELDS = [
   },
 ] as const;
 
-const LEAD_EXAMPLES = [
-  { name: "Viết bản nháp 800 từ", target: "2", unit: "lần/tuần" },
-  { name: "Tập gym 45 phút", target: "3", unit: "buổi/tuần" },
-  { name: "Gửi 5 email chủ động", target: "2", unit: "lần/tuần" },
-  { name: "Học flashcard tiếng Anh", target: "4", unit: "buổi/tuần" },
-] as const;
-
 const selectTriggerClass =
   "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[15px] font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
@@ -99,6 +93,7 @@ function normalizeCommitmentChange(
 
 export function LeadIndicatorsStepLab({
   draft,
+  showValidationErrors,
   coreCount,
   optionalCount,
   setupGuideSupport,
@@ -110,7 +105,6 @@ export function LeadIndicatorsStepLab({
   onRemoveIndicator,
   onIndicatorChange,
 }: LeadIndicatorsStepProps) {
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const validationOptions = {
     tacticLoadPreference: draft.tacticLoadPreference,
     dailyTimeBudget: draft.dailyTimeBudget,
@@ -122,9 +116,11 @@ export function LeadIndicatorsStepLab({
     getLeadIndicatorUnitValidationError(indicator, index),
   );
   const indicatorWarnings = draft.leadIndicators.map((indicator, index) =>
-    validateLeadIndicatorDraft(indicator, validationOptions).warnings.filter(
-      (warning) => !indicatorUnitErrors[index] || !warning.toLocaleLowerCase("vi-VN").includes("đơn vị"),
-    ),
+    showValidationErrors
+      ? validateLeadIndicatorDraft(indicator, validationOptions).warnings.filter(
+          (warning) => !indicatorUnitErrors[index] || !warning.toLocaleLowerCase("vi-VN").includes("đơn vị"),
+        )
+      : [],
   );
   const intentArchetype: GoalArchetype | null = useMemo(() => {
     const intent = getUserIntentId();
@@ -135,11 +131,10 @@ export function LeadIndicatorsStepLab({
   const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>({});
   const canAddIndicator = draft.leadIndicators.length < 4;
 
-  const markFieldTouched = (fieldId: string) => {
-    setTouchedFields((previous) => ({ ...previous, [fieldId]: true }));
+  const shouldShowFieldError = (fieldId: string) => {
+    void fieldId;
+    return showValidationErrors;
   };
-
-  const shouldShowFieldError = (fieldId: string) => Boolean(touchedFields[fieldId]);
 
   const toggleCommitmentEditor = (indicatorId: string) => {
     setExpandedCommitments((previous) => ({
@@ -148,25 +143,8 @@ export function LeadIndicatorsStepLab({
     }));
   };
 
-  const addExampleIndicator = (example: (typeof LEAD_EXAMPLES)[number]) => {
-    if (!canAddIndicator) return;
-
-    const nextIndex = draft.leadIndicators.length;
-    onAddIndicator();
-
-    if (typeof window !== "undefined") {
-      window.setTimeout(() => {
-        onIndicatorChange(nextIndex, "name", example.name);
-        onIndicatorChange(nextIndex, "target", example.target);
-        onIndicatorChange(nextIndex, "unit", example.unit);
-      }, 0);
-    }
-  };
-
   const showNameError = (indicator: LeadIndicatorDraft, fieldKey: string) =>
     shouldShowFieldError(fieldKey) && !indicator.name.trim();
-
-  const showHelperText = (fieldKey: string) => !shouldShowFieldError(fieldKey);
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 sm:space-y-5">
@@ -174,10 +152,10 @@ export function LeadIndicatorsStepLab({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p id="lead-step-hero" className="text-[14px] leading-6 text-app-ink-soft">
-              Việc lặp lại là hành động bạn kiểm soát được mỗi tuần. Đây không phải kết quả cuối.
+              Việc lặp lại là việc bạn chủ động làm đều mỗi tuần. Chỉ số kết quả là con số bạn xem lại để biết mình đã tiến tới đâu.
             </p>
             <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
-              Chọn việc nhỏ, lặp lại đều, đủ rõ để bạn biết tuần này mình đã làm hay chưa.
+              Chọn việc nhỏ và đo bằng số lần thực hiện, không đo bằng kết quả cuối cùng.
             </p>
           </div>
           <button
@@ -194,11 +172,11 @@ export function LeadIndicatorsStepLab({
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-examples-title">
         <p id="lead-examples-title" className="text-[14px] font-medium text-app-ink">
-          Ví dụ để phân biệt đúng sai
+          Ví dụ dễ phân biệt
         </p>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div className="rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Không nên</p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Chỉ số kết quả — không nhập ở bước này</p>
             <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
               <li>- Có 100 người dùng</li>
               <li>- Hoàn thành app</li>
@@ -206,7 +184,7 @@ export function LeadIndicatorsStepLab({
             </ul>
           </div>
           <div className="rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nên</p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc lặp lại — nên nhập ở bước này</p>
             <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
               <li>- Demo sản phẩm cho 5 người / tuần</li>
               <li>- Code chức năng chính 5 buổi / tuần</li>
@@ -218,19 +196,19 @@ export function LeadIndicatorsStepLab({
 
       <details className="rounded-lg border border-app-line bg-app-surface p-3 sm:p-4">
         <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
-          Việc lặp lại khác kết quả cuối thế nào?
+          Việc lặp lại khác chỉ số kết quả thế nào?
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Việc lặp lại</p>
             <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
-              Hành động bạn chủ động làm trong tuần: viết 800 từ, tập 45 phút, gửi 5 email.
+              Việc bạn có thể mở lịch và làm trong tuần: viết 800 từ, tập 45 phút, gửi 5 email.
             </p>
           </div>
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chỉ số kết quả</p>
             <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
-              Kết quả đo cuối chu kỳ: tăng follower, giảm kg, có job mới, đạt IELTS 7.0.
+              Con số hoặc trạng thái để xem cuối kỳ có tiến bộ không: tăng follower, giảm kg, có job mới, đạt IELTS 7.0.
             </p>
           </div>
         </div>
@@ -279,7 +257,6 @@ export function LeadIndicatorsStepLab({
                       id={`tactic-name-${index}`}
                       value={indicator.name}
                       aria-describedby={showNameError(indicator, `name-${indicator.id}`) ? `tactic-name-${index}-error` : `tactic-name-${index}-helper`}
-                      onBlur={() => markFieldTouched(`name-${indicator.id}`)}
                       onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
                       placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
                       className={inputClass}
@@ -315,7 +292,6 @@ export function LeadIndicatorsStepLab({
                             shouldShowFieldError(`target-${indicator.id}`) &&
                             "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
                         )}
-                        onBlur={() => markFieldTouched(`target-${indicator.id}`)}
                         onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
                         placeholder="Ví dụ: 2"
                       />
@@ -349,7 +325,6 @@ export function LeadIndicatorsStepLab({
                             shouldShowFieldError(`unit-${indicator.id}`) &&
                             "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
                         )}
-                        onBlur={() => markFieldTouched(`unit-${indicator.id}`)}
                         onChange={(event) => onIndicatorChange(index, "unit", event.target.value)}
                         placeholder="buổi, bài, lần..."
                       />

@@ -218,6 +218,7 @@ export function TwelveWeekSetupLab() {
   const [feasibility, setFeasibility] = useState<PendingFeasibilityResult | null>(null);
   const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
   const [isVisionPromptDismissed, setIsVisionPromptDismissed] = useState(false);
+  const [attemptedStepIndexes, setAttemptedStepIndexes] = useState<Record<number, boolean>>({});
   const [draft, setDraft] = useState<TwelveWeekSetupDraft>({
     templateId: "",
     goalType: "Personal Growth",
@@ -365,6 +366,7 @@ export function TwelveWeekSetupLab() {
       );
     }
 
+    setAttemptedStepIndexes({});
     setIsLoading(false);
   }, [navigate]);
 
@@ -476,20 +478,20 @@ export function TwelveWeekSetupLab() {
     Boolean(auth.userProfile);
   const currentStepDescription =
     currentStep === 0
-      ? "Làm rõ kết quả bạn muốn chạm tới sau 12 tuần."
+      ? "Làm rõ trạng thái bạn muốn đạt được khi 12 tuần kết thúc."
       : currentStep === 1
         ? "Chọn 2-4 việc bạn kiểm soát được và lặp lại được mỗi tuần."
         : currentStep === 2
-          ? "Chốt ngày bắt đầu, ngày nhìn lại và chỉ số kết quả."
+          ? "Chốt ngày bắt đầu, ngày xem lại tuần và chỉ số kết quả."
           : "Xem trước kế hoạch tự động, chỉnh sửa nếu cần và xác nhận.";
   const currentStepWhy =
     currentStep === 0
       ? "Kết quả rõ giúp biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
       : currentStep === 1
-        ? "Việc lặp lại là phần bạn kiểm soát được. Đo việc, không đo kết quả — kết quả tự đến khi việc đều."
+        ? "Việc lặp lại là việc bạn chủ động làm đều. Chỉ số kết quả là con số xem lại sau để biết việc đó có tạo tiến bộ không."
         : currentStep === 2
-          ? "Lịch và buổi nhìn lại cố định giúp duy trì khi động lực giảm — quan trọng hơn nội dung từng tuần."
-          : "Kế hoạch được tạo tự động từ mục tiêu và việc lặp lại. Bạn có thể xem trước tuần 1 với lịch cụ thể và chỉnh sửa trước khi xác nhận.";
+          ? "Một ngày xem lại cố định giúp bạn biết tuần vừa rồi có lệch không và tuần tới cần chỉnh gì."
+          : "Kế hoạch được tạo tự động từ mục tiêu và việc lặp lại. Sau khi lưu, bạn sẽ vào phần thực thi hằng tuần và màn Hôm nay để bắt đầu.";
 
   if (isRealMode() && auth.authLoading) {
     return (
@@ -612,21 +614,24 @@ export function TwelveWeekSetupLab() {
     week8: draft.week8Milestone,
     week12: draft.week12Outcome,
   });
-  const currentStepValidationError = (() => {
+  const rawCurrentStepValidationError = (() => {
     if (currentStep === 0) {
       if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
       return milestoneError;
     }
 
     if (currentStep === 1) {
-      if (validIndicators.length < 2 || validIndicators.length > 4) {
+      if (draft.leadIndicators.length < 2 || draft.leadIndicators.length > 4) {
         return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
+      }
+      if (draft.leadIndicators.some((indicator) => !indicator.name.trim())) {
+        return "Cần đặt tên cho từng việc lặp lại trước khi tiếp tục.";
       }
       return invalidTargetError ?? invalidUnitError;
     }
 
     if (currentStep === 2) {
-      if (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay) {
+      if (!draft.lagMetricName.trim() || !cycleStartDate || !draft.reviewDay) {
         return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
       }
       if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Chọn ngày nhìn lại hợp lệ.";
@@ -634,15 +639,20 @@ export function TwelveWeekSetupLab() {
     }
 
     if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
-    if (validIndicators.length < 2 || validIndicators.length > 4) {
+    if (draft.leadIndicators.length < 2 || draft.leadIndicators.length > 4) {
       return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
     }
-    if (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay) {
+    if (draft.leadIndicators.some((indicator) => !indicator.name.trim())) {
+      return "Cần đặt tên cho từng việc lặp lại trước khi tiếp tục.";
+    }
+    if (!draft.lagMetricName.trim() || !cycleStartDate || !draft.reviewDay) {
       return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
     }
     if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Chọn ngày nhìn lại hợp lệ.";
     return invalidTargetError ?? invalidUnitError ?? startDateValidation.error ?? milestoneError;
   })();
+
+  const currentStepValidationError = attemptedStepIndexes[currentStep] ? rawCurrentStepValidationError : null;
 
   const applyTemplate = (template: TwelveWeekTemplateDefinition, announce = true) => {
     const nextPlan = getCurrentPlan();
@@ -843,20 +853,21 @@ export function TwelveWeekSetupLab() {
   };
 
   const validateCurrentStep = () => {
-    if (currentStepValidationError) {
-      toast.error(currentStepValidationError);
+    setAttemptedStepIndexes((previous) => ({ ...previous, [currentStep]: true }));
+    if (rawCurrentStepValidationError) {
+      toast.error(rawCurrentStepValidationError);
       if (
         currentStep !== 1 &&
-        (currentStepValidationError === invalidTargetError || currentStepValidationError === invalidUnitError)
+        (rawCurrentStepValidationError === invalidTargetError || rawCurrentStepValidationError === invalidUnitError)
       ) {
         setCurrentStep(1);
       } else if (
         currentStep !== 2 &&
-        (currentStepValidationError === startDateValidation.error ||
-          currentStepValidationError === "Chọn ngày nhìn lại hợp lệ.")
+        (rawCurrentStepValidationError === startDateValidation.error ||
+          rawCurrentStepValidationError === "Chọn ngày nhìn lại hợp lệ.")
       ) {
         setCurrentStep(2);
-      } else if (currentStep !== 0 && currentStepValidationError === milestoneError) {
+      } else if (currentStep !== 0 && rawCurrentStepValidationError === milestoneError) {
         setCurrentStep(0);
       }
       return false;
@@ -894,7 +905,7 @@ export function TwelveWeekSetupLab() {
   };
 
   const handleSubmit = async () => {
-    if (!validateCurrentStep() || validIndicators.length < 2 || validIndicators.length > 4) {
+    if (!validateCurrentStep()) {
       return;
     }
 
@@ -1203,8 +1214,8 @@ export function TwelveWeekSetupLab() {
           onSubmit={handleSubmit}
           onJumpToStep={handleJumpToStep}
           stepError={currentStepValidationError}
-          isNextDisabled={Boolean(currentStepValidationError)}
-          isSubmitDisabled={Boolean(currentStepValidationError)}
+          isNextDisabled={false}
+          isSubmitDisabled={false}
         >
           {currentStep === 0 && (
             <OutcomeStepLab
@@ -1226,6 +1237,7 @@ export function TwelveWeekSetupLab() {
           {currentStep === 1 && (
             <LeadIndicatorsStepLab
               draft={draft}
+              showValidationErrors={Boolean(attemptedStepIndexes[1])}
               coreCount={coreCount}
               optionalCount={optionalCount}
               setupGuideSupport={setupGuideSupport}

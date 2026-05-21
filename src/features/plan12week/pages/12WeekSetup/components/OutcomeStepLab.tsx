@@ -106,7 +106,7 @@ export function OutcomeStepLab({
         <div className="mt-4 space-y-4 sm:mt-5">
           <div>
             <label htmlFor="week-12-outcome" className={labelClass}>
-              Kết quả cuối 12 tuần
+              Đích đến sau 12 tuần
             </label>
             <Textarea
               id="week-12-outcome"
@@ -121,7 +121,7 @@ export function OutcomeStepLab({
                   "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
               )}
               onChange={(event) => onChange("week12Outcome", event.target.value)}
-              placeholder="Ví dụ: Hoàn thành bản portfolio có 3 case study đủ gửi đi ứng tuyển."
+              placeholder="Ví dụ: Sau 12 tuần, tôi có bản portfolio 3 case study đủ gửi đi ứng tuyển."
             />
             {milestoneError ? (
               <p id="week-12-outcome-error" role="alert" className={errorTextClass}>
@@ -129,7 +129,7 @@ export function OutcomeStepLab({
               </p>
             ) : (
               <p id="week-12-outcome-helper" className={helperTextClass}>
-                Viết kết quả bạn muốn nhìn thấy ở cuối tuần 12, không phải danh sách việc cần làm.
+                Mô tả trạng thái bạn muốn đạt được khi 12 tuần kết thúc. Đây là đích đến cuối chu kỳ, không phải việc cần làm mỗi ngày.
               </p>
             )}
           </div>
