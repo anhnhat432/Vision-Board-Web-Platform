@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useCallback, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
@@ -203,7 +203,9 @@ function readTwelveWeekSetupPrerequisites(): TwelveWeekSetupPrerequisites {
 }
 
 export function TwelveWeekSetupLab() {
+  const location = useLocation();
   const navigate = useNavigate();
+  const isQaReferenceRoute = location.pathname === "/12-week-setup-lab";
   const { actions: planSetupActions } = usePlanSetupSync();
   const auth = useAuthContext();
   const [currentStep, setCurrentStep] = useState(0);
@@ -1120,14 +1122,16 @@ export function TwelveWeekSetupLab() {
           className="[&_button]:min-h-10 [&_button]:px-3 [&_button]:py-2"
         />
 
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="inline-flex min-h-10 items-center rounded-full border border-app-line bg-app-bg px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-            LAB · UX thử nghiệm
-          </span>
-          <Link to="/12-week-setup" className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[13px] font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30">
-            Quay lại bản hiện tại
-          </Link>
-        </div>
+        {isQaReferenceRoute ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="inline-flex min-h-10 items-center rounded-full border border-app-line bg-app-bg px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              QA · bản tham chiếu
+            </span>
+            <Link to="/12-week-setup" className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[13px] font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30">
+              Mở bản chính
+            </Link>
+          </div>
+        ) : null}
 
         {!isVisionPromptDismissed ? (
           <section

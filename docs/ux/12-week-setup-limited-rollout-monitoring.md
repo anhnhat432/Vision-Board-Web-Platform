@@ -11,7 +11,8 @@ Owner: 12-week setup surface
 - Route replacement deployed: `/12-week-setup` now renders `TwelveWeekSetupLab` (new flow).
 - Legacy flow preserved at `/12-week-setup-old` for fallback / comparison.
 - QA reference still available at `/12-week-setup-lab`.
-- Rollout posture: **limited rollout under monitoring**. Do not mark full GO until manual user validation completes.
+- Production route label cleanup completed: `/12-week-setup` no longer shows the lab badge / reference link; `/12-week-setup-lab` keeps QA/reference labeling.
+- Rollout posture: **LIMITED ROLLOUT / MONITOR**. Do not mark full GO until manual user validation completes.
 
 ## 2. Production verification summary
 
