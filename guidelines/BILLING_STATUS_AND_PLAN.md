@@ -585,11 +585,11 @@ Backend (6 new route tests):
 ### What Was Added
 
 1. **`PaymentProviderAdapter` interface** (`backend/src/services/paymentProviderAdapter.ts`)
-   - `createCheckoutSession` — create a checkout URL
-   - `verifyWebhookSignature` — validate webhook authenticity before parsing
-   - `parseWebhookEvent` — transform provider payload into `NormalizedProviderEvent`
-   - `mapSubscriptionStatus` — pure function mapping provider status to domain
-   - `createCustomerPortalSession` — optional self-service portal
+   - `createCheckoutSession` ï¿½ create a checkout URL
+   - `verifyWebhookSignature` ï¿½ validate webhook authenticity before parsing
+   - `parseWebhookEvent` ï¿½ transform provider payload into `NormalizedProviderEvent`
+   - `mapSubscriptionStatus` ï¿½ pure function mapping provider status to domain
+   - `createCustomerPortalSession` ï¿½ optional self-service portal
    - Error types: `PaymentProviderNotConfiguredError`, `PaymentProviderError`
 
 2. **Mock adapter** (`backend/src/services/mockPaymentAdapter.ts`)
@@ -602,7 +602,7 @@ Backend (6 new route tests):
    - Supported values: `mock` (default), `stripe`, `payos`, `momo`, `vnpay`
    - Missing/unknown env falls back to mock (app never crashes)
    - Placeholder adapter for unconfigured providers (all methods throw safe error)
-   - `isPaymentProviderReady()` — returns false for mock/placeholder
+   - `isPaymentProviderReady()` ï¿½ returns false for mock/placeholder
 
 4. **Tests** (`backend/src/tests/paymentProviderAdapter.test.ts`)
    - 21 tests covering: mock checkout, webhook verify/parse, status mapping,
@@ -624,7 +624,7 @@ Backend (6 new route tests):
 4. Add webhook endpoint route (`POST /api/billing/webhook/{provider}`).
 5. Wire adapter into registry switch statement.
 6. Add integration tests with provider test/sandbox keys.
-7. Do NOT remove mock adapter — keep for dev/test.
+7. Do NOT remove mock adapter ï¿½ keep for dev/test.
 
 ---
 
@@ -637,7 +637,7 @@ Backend (6 new route tests):
    - Validates: `planCode` allowlist (only PLUS), `returnUrl`/`cancelUrl` format and origin
    - Calls `PaymentProviderAdapter.createCheckoutSession()`
    - Returns: `{ checkoutSessionId, checkoutUrl, provider, expiresAt, currentEntitlement }`
-   - **Does NOT grant entitlement** — response includes `currentEntitlement` proving plan is still FREE
+   - **Does NOT grant entitlement** ï¿½ response includes `currentEntitlement` proving plan is still FREE
    - Unconfigured provider returns 503 with `provider_not_configured` error code
 
 2. **Backend route** (`backend/src/routes/billingRoutes.ts`)
@@ -658,7 +658,7 @@ Backend (6 new route tests):
      - Polls `GET /api/billing/entitlement` via `syncEntitlementsWithProvider()`
      - Only updates local state if server confirms PLUS
      - Shows confirmed/failed banner with retry option
-   - **Return URL alone does NOT unlock premium** — server must confirm
+   - **Return URL alone does NOT unlock premium** ï¿½ server must confirm
    - Clears URL params after processing to prevent re-trigger
 
 5. **Tests** (`backend/src/tests/billingRoutes.test.ts`)
@@ -693,7 +693,7 @@ Backend (6 new route tests):
    - Event parsing via `adapter.parseWebhookEvent()`
    - Idempotent processing via `BillingService.upsertSubscriptionFromProviderEvent()`
    - Handles: checkout_completed, subscription_created, subscription_updated, subscription_canceled, subscription_expired, payment_succeeded, payment_failed
-   - `payment_failed` forces status to `past_due` — never grants entitlements
+   - `payment_failed` forces status to `past_due` ï¿½ never grants entitlements
    - `subscription_canceled`/`subscription_expired` forces status to `canceled`
    - Unknown event types acknowledged with 200 (no processing, no retry)
    - Missing `userId` acknowledged with 200 and ignored
@@ -701,7 +701,7 @@ Backend (6 new route tests):
 
 2. **Webhook routes** (`backend/src/routes/webhookRoutes.ts`)
    - Mounted BEFORE `authMiddleware` in route chain
-   - Providers send webhooks directly — no Firebase auth required
+   - Providers send webhooks directly ï¿½ no Firebase auth required
    - Signature verification is the security gate
 
 3. **Route mounting** (`backend/src/routes/index.ts`)
@@ -723,12 +723,12 @@ Backend (6 new route tests):
 5. **No entitlement from checkout/return URL**: Only verified webhook events grant entitlements
 6. **payment_failed safety**: Forced to `past_due` status regardless of event payload
 7. **Idempotent**: Duplicate `providerEventId` returns 200 no-op
-8. **No provider SDK**: Uses adapter interface — provider logic isolated in adapters
+8. **No provider SDK**: Uses adapter interface ï¿½ provider logic isolated in adapters
 9. **Graceful unknown events**: Returns 200 to prevent provider retries on unhandled types
 
 ---
 
-## Subscription Management — Portal & Cancel (Added 2026-05-02)
+## Subscription Management ï¿½ Portal & Cancel (Added 2026-05-02)
 
 ### What Was Added
 
@@ -742,13 +742,13 @@ Backend (6 new route tests):
 2. **Backend: `POST /api/billing/subscription/cancel`** (`billingController.ts`)
    - Auth required
    - Soft cancel: sets `cancelAtPeriodEnd = true`
-   - Does NOT immediately remove entitlements — user keeps access until period end
+   - Does NOT immediately remove entitlements ï¿½ user keeps access until period end
    - Returns `already_canceled` or `already_pending_cancel` for idempotency
    - Response includes full `currentEntitlement` snapshot
 
 3. **Backend service** (`billingService.ts`)
-   - `getSubscriptionForUser(userId)` — returns raw subscription
-   - `markCancelAtPeriodEnd(userId)` — sets cancel flag without revoking entitlements
+   - `getSubscriptionForUser(userId)` ï¿½ returns raw subscription
+   - `markCancelAtPeriodEnd(userId)` ï¿½ sets cancel flag without revoking entitlements
 
 4. **Backend routes** (`billingRoutes.ts`)
    - `POST /api/billing/customer-portal`\n   - `POST /api/billing/subscription/cancel`
@@ -793,14 +793,14 @@ Detects and fixes mismatches between subscription records and their entitlement 
 
 ### Files
 
-- `backend/src/services/billingReconciliation.ts` — Pure reconciliation service
-- `backend/scripts/reconcile-entitlements.ts` — CLI tool
-- `backend/src/tests/billingReconciliation.test.ts` — 15 tests
+- `backend/src/services/billingReconciliation.ts` ï¿½ Pure reconciliation service
+- `backend/scripts/reconcile-entitlements.ts` ï¿½ CLI tool
+- `backend/src/tests/billingReconciliation.test.ts` ï¿½ 15 tests
 
 ### CLI Usage
 
 ```bash
-# Dry-run all users (default — no writes)
+# Dry-run all users (default ï¿½ no writes)
 npm --prefix backend run reconcile:entitlements
 
 # Fix all mismatches
@@ -839,3 +839,27 @@ npm --prefix backend run reconcile:entitlements -- --user uid123 --write
 - No admin UI for reconciliation
 - No frontend changes
 - Does not call payment provider external APIs
+
+## Payment provider decision note
+
+Recorded 2026-05-21. Documentation only; no code changed in this update.
+
+- **Casso Standard expired.** Casso Standard registration for business `dear-our-feature` has expired. Casso must not be used for accepting real payments unless the Standard plan is renewed and inbound webhook delivery to `/api/billing/webhook/casso` is verified end-to-end (signature valid, `PaymentOrder` transitions `pending` -> `completed`, entitlements flip to PLUS).
+- **PayOS migration is planned later.** PayOS is the intended next provider for VietQR-style bank transfer checkout once the Casso situation is resolved. Migration is **not** in scope yet.
+- **PayOS is not currently implemented in code.** `backend/src/services/paymentProviderRegistry.ts:82` routes `payos` (and `momo`, `vnpay`) through `createPlaceholderAdapter(...)`. The placeholder is fail-closed:
+  - `isConfigured: false`
+  - `createCheckoutSession` rejects with `PaymentProviderNotConfiguredError`
+  - `verifyWebhookSignature` returns `{ valid: false, reason: "payos not configured" }`
+  - `parseWebhookEvent` throws `PaymentProviderNotConfiguredError`
+  - `mapSubscriptionStatus` returns `null`; `createCustomerPortalSession` resolves `null`
+
+  Setting `BILLING_PROVIDER=payos` in any environment therefore disables real checkout and webhook ingestion until the adapter is implemented.
+- **Paid checkout stays disabled / mock / manual.** Until a real PayOS adapter is implemented and tested against a PayOS sandbox + live webhook delivery, paid checkout in real-mode production should remain disabled, mocked, or handled manually (e.g. ops-assisted bank transfer with manual entitlement grant via the reconciliation tooling). Do not flip `BILLING_PROVIDER=payos` and do not promote Casso back into the hot path without renewal + webhook verification.
+- **No impact on 12-week setup Full GO.** This decision is scoped to the billing surface. The 12-week setup route replacement (`/12-week-setup` -> `TwelveWeekSetupLab`) is unaffected and remains Full GO per `docs/ux/12-week-setup-limited-rollout-monitoring.md`.
+
+Cross-reference: see `docs/ops/billing-plan-smoke-timeout-follow-up.md` (Casso expiration investigation + payment provider decision note) for the smoke-context and code-path evidence behind this decision.
+
+Action items (not implemented in this doc update):
+1. Confirm Casso dashboard state for `dear-our-feature`; renew Standard + verify webhook health, or formally retire Casso.
+2. Implement and test a real PayOS adapter (checkout session, webhook verify/parse, status mapping, optional customer portal stub) before flipping `BILLING_PROVIDER=payos`.
+3. Until either of the above is complete, keep paid checkout entry points gated to demo / mock / manual paths in real-mode deployments and avoid promoting any "real payment" copy in production.
