@@ -863,3 +863,79 @@ Action items (not implemented in this doc update):
 1. Confirm Casso dashboard state for `dear-our-feature`; renew Standard + verify webhook health, or formally retire Casso.
 2. Implement and test a real PayOS adapter (checkout session, webhook verify/parse, status mapping, optional customer portal stub) before flipping `BILLING_PROVIDER=payos`.
 3. Until either of the above is complete, keep paid checkout entry points gated to demo / mock / manual paths in real-mode deployments and avoid promoting any "real payment" copy in production.
+
+## Paid Checkout Kill-Switch
+
+Recorded 2026-05-21. Mitigation for the Casso-expired / PayOS-not-ready window.
+
+### Summary
+
+A two-layer env kill-switch disables paid checkout entry points without removing routes, paywalls, or the billing settings page. Independent of `BILLING_PROVIDER` so a stale Casso config or a half-shipped PayOS migration cannot leak unsafe checkout.
+
+- Frontend flag: `VITE_BILLING_PAID_CHECKOUT_DISABLED` (Vite, build-time).
+- Backend flag: `BILLING_PAID_DISABLED` (Node, runtime).
+- Both accept `1` / `true` / `yes` / `on` (case-insensitive). Anything else is treated as off.
+
+### Frontend behavior when enabled
+
+`src/app/utils/app-mode.ts:isPaidCheckoutDisabled()` returns `true`.
+
+- `UpgradePaywallDialog`:
+  - Renders a "Thanh toán đang tạm khóa" banner above plan cards with the support email link.
+  - Disables every plan upgrade button.
+  - Swaps button label to "Tạm khóa thanh toán".
+  - `handleUpgrade(...)` returns early so the dialog cannot navigate to `/billing/confirm`.
+- `/billing/confirm` (`src/app/pages/BillingConfirm.tsx`):
+  - Renders the same banner above the form.
+  - `handleConfirm(...)` returns early with an inline error before any POST.
+  - Submit button label switches to "Tạm khóa thanh toán" and stays disabled.
+  - No POST to `/billing/checkout-session` or `/billing/public-checkout-session`.
+- `/billing/plan` (`src/app/pages/BillingPlan.tsx`):
+  - Renders a banner under `PageHero` explaining the temporary lock.
+  - `handleOpenUpgrade(...)` and `handleRenewPlan(...)` toast a support message and return early — the paywall dialog never opens.
+  - Free→Plus, renewal-priority notice, current-plan renewal, and recommended-plan upgrade CTAs are all disabled with "Tạm khóa thanh toán" copy.
+  - Existing entitlement, restore, sync, payment history, refund, and customer-portal flows remain reachable.
+
+The 12-week setup, dashboard, and other product surfaces are unaffected.
+
+### Backend behavior when enabled
+
+`backend/src/controllers/billingController.ts:isPaidCheckoutDisabled()` returns `true`.
+
+- `POST /api/billing/checkout-session` and `POST /api/billing/public-checkout-session` short-circuit with `ApiError(503, ..., "checkout_disabled")` before invoking `getPaymentProviderAdapter()`.
+- No `PaymentOrder` row is created.
+- No VietQR URL is generated.
+- Other billing endpoints (`/billing/entitlement`, `/billing/payment-history`, `/billing/customer-portal`, `/billing/orders/.../refund-request`, `/billing/subscription/cancel`) keep working so existing paid users can self-serve.
+
+### Defense-in-depth rationale
+
+The two layers cover different failure modes:
+
+- Frontend flag protects fresh real-mode visits and prevents the user from ever seeing a checkout UI when paid is disabled.
+- Backend flag protects against:
+  - Stale frontend bundles cached on the user's device or CDN.
+  - Direct API hits from scripts, browser devtools, or third parties.
+  - Demo previews accidentally pointed at the real backend.
+
+Operationally: flip both flags. Verify with `curl -X POST .../api/billing/checkout-session` returning 503 `checkout_disabled` and `/billing/plan` rendering the banner.
+
+### Why not just flip `BILLING_PROVIDER=payos`?
+
+Setting `BILLING_PROVIDER=payos` does fail-close the money path (placeholder adapter rejects `createCheckoutSession`), but it leaks a technical English error to the user (`Payment provider "payos" is not configured...`) and still lets the frontend get all the way to `/billing/checkout/{orderId}` request, where it surfaces the raw error string. The kill-switch flags are layered above the provider router so the UX copy stays Vietnamese and account-bound.
+
+### Re-enabling when PayOS adapter is ready
+
+1. Implement and merge the PayOS adapter; verify checkout/webhook end-to-end on a sandbox.
+2. Unset `BILLING_PAID_DISABLED` on Render; redeploy backend.
+3. Unset `VITE_BILLING_PAID_CHECKOUT_DISABLED` on Vercel; redeploy frontend.
+4. Smoke `/billing/plan` and a single test checkout to confirm the money path is healthy before announcing re-opening.
+
+### Files
+
+- `src/app/utils/app-mode.ts`
+- `src/app/components/UpgradePaywallDialog.tsx`
+- `src/app/pages/BillingConfirm.tsx`
+- `src/app/pages/BillingPlan.tsx`
+- `backend/src/controllers/billingController.ts`
+- `.env.example`, `backend/.env.example`
+- Cross-reference: `docs/ops/billing-plan-smoke-timeout-follow-up.md` (paid checkout exposure audit section).

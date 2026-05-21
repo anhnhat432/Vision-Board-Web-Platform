@@ -36,6 +36,7 @@ vi.mock("../utils/app-mode", () => ({
   shouldEnable12WeekGoalTombstoneSync: () => true,
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
+  isPaidCheckoutDisabled: () => false,
 }));
 
 type MockMessageListener = (event: MessageEvent<unknown>) => void;

@@ -27,6 +27,7 @@ vi.mock("../utils/app-mode", () => ({
   shouldEnable12WeekGoalTombstoneSync: () => true,
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
+  isPaidCheckoutDisabled: () => false,
 }));
 
 function setSignedInAuthContext() {

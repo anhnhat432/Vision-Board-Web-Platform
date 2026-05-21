@@ -30,6 +30,7 @@ vi.mock("../utils/app-mode", () => ({
   isRealMode: () => appModeMock.mode === "real",
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
+  isPaidCheckoutDisabled: () => false,
 }));
 
 vi.mock("@/features/dashboard/hooks/useDashboardPlanLink", () => ({

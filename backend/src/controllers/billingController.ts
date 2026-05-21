@@ -9,6 +9,27 @@ import { requireAuthUser } from "./controllerHelpers";
 
 const ALLOWED_PLAN_CODES = new Set(["PLUS"]);
 
+/**
+ * Whether paid checkout is administratively disabled via env kill-switch.
+ *
+ * When `BILLING_PAID_DISABLED=1` (or `true`/`yes`/`on`):
+ * - `/billing/checkout-session` and `/billing/public-checkout-session` return 503
+ *   `checkout_disabled` without invoking the payment provider adapter.
+ * - The frontend kill-switch (`VITE_BILLING_PAID_CHECKOUT_DISABLED`) provides the
+ *   primary UX guard; this is defense-in-depth in case a stale frontend bundle
+ *   is still served while ops disable paid checkout.
+ *
+ * Independent of `BILLING_PROVIDER` so a stale Casso config or a not-yet-ready
+ * PayOS adapter cannot leak unsafe checkout to real users.
+ */
+function isPaidCheckoutDisabled(): boolean {
+  const raw = process.env.BILLING_PAID_DISABLED?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
+const PAID_CHECKOUT_DISABLED_MESSAGE =
+  "Paid checkout is temporarily disabled. Please contact support to upgrade manually.";
+
 function isValidHttpUrl(value: unknown): value is string {
   if (typeof value !== "string" || value.length === 0 || value.length > 2048) return false;
   try {
@@ -73,6 +94,10 @@ export async function getEntitlement(req: Request, res: Response): Promise<void>
  * (or manual admin action) confirms payment completion.
  */
 export async function createCheckoutSession(req: Request, res: Response): Promise<void> {
+  if (isPaidCheckoutDisabled()) {
+    throw new ApiError(503, PAID_CHECKOUT_DISABLED_MESSAGE, undefined, "checkout_disabled");
+  }
+
   const user = requireAuthUser(req);
   const { planCode, returnUrl, cancelUrl, billingCycle, locale, receiptEmail, receiptName } = req.body ?? {};
 
@@ -149,6 +174,10 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
  * frontend unlocks the local device after polling a completed order.
  */
 export async function createPublicCheckoutSession(req: Request, res: Response): Promise<void> {
+  if (isPaidCheckoutDisabled()) {
+    throw new ApiError(503, PAID_CHECKOUT_DISABLED_MESSAGE, undefined, "checkout_disabled");
+  }
+
   const { planCode, returnUrl, cancelUrl, billingCycle, locale, clientUserId, receiptEmail, receiptName } = req.body ?? {};
 
   if (!planCode || typeof planCode !== "string" || !ALLOWED_PLAN_CODES.has(planCode)) {

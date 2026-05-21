@@ -68,6 +68,7 @@ vi.mock("./utils/app-mode", () => ({
   shouldEnable12WeekGoalTombstoneSync: () => true,
   shouldEnable12WeekImportDryRun: () => false,
   shouldEnable12WeekCloudImport: () => false,
+  isPaidCheckoutDisabled: () => false,
 }));
 
 vi.mock("@/lib/api/apiClient", () => ({

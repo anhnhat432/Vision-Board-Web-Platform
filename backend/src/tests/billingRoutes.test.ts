@@ -373,6 +373,22 @@ describe("POST /api/billing/checkout-session", () => {
     assert.equal(response.status, 503);
     assert.equal(response.body.errorCode, "provider_not_configured");
   });
+
+  it("returns 503 with checkout_disabled when BILLING_PAID_DISABLED=1 (auth)", async () => {
+    process.env.BILLING_PROVIDER = "mock";
+    process.env.BILLING_PAID_DISABLED = "1";
+    try {
+      const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
+        token: "checkout-token",
+        body: validBody,
+      });
+
+      assert.equal(response.status, 503);
+      assert.equal(response.body.errorCode, "checkout_disabled");
+    } finally {
+      delete process.env.BILLING_PAID_DISABLED;
+    }
+  });
 });
 
 // ─── POST /api/billing/customer-portal Tests ─────────────────────────────────
@@ -418,6 +434,21 @@ describe("POST /api/billing/public-checkout-session", () => {
     assert.ok(typeof data.checkoutSessionId === "string");
     assert.ok(typeof data.checkoutUrl === "string");
     assert.equal(data.provider, "mock");
+  });
+
+  it("returns 503 with checkout_disabled when BILLING_PAID_DISABLED=true (public)", async () => {
+    process.env.BILLING_PAID_DISABLED = "true";
+    try {
+      const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
+        token: null,
+        body: validBody,
+      });
+
+      assert.equal(response.status, 503);
+      assert.equal(response.body.errorCode, "checkout_disabled");
+    } finally {
+      delete process.env.BILLING_PAID_DISABLED;
+    }
   });
 });
 

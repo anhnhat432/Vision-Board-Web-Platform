@@ -1,11 +1,12 @@
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
-import { CheckCircle2, Loader2, Mail, ReceiptText, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Loader2, LockKeyhole, Mail, ReceiptText, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { BillingPlusIllustration } from "../components/illustrations";
+import { isPaidCheckoutDisabled } from "../utils/app-mode";
 import { formatVndAmount, PLUS_MONTHLY_PRICE_VND, PLUS_PRICE_CYCLE_LABEL } from "../utils/billing-pricing";
 import {
   canUpgradeToPlus,
@@ -55,6 +56,7 @@ export function BillingConfirm() {
   const [sendingVerification, setSendingVerification] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const paidCheckoutDisabled = isPaidCheckoutDisabled();
   const userEmail = user?.email?.trim() ?? "";
   const emailVerified = user?.emailVerified === true;
   const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
@@ -62,7 +64,13 @@ export function BillingConfirm() {
   const amount = getAmount(checkoutInfo);
   const planName = getPlanName(checkoutInfo?.billingCycle ?? "monthly");
   const emailInvalid = receiptEmail.trim().length > 0 && !isValidEmail(receiptEmail);
-  const canSubmit = agreed && isValidEmail(receiptEmail) && !submitting && !authLoading && !emailVerificationRequired;
+  const canSubmit =
+    !paidCheckoutDisabled &&
+    agreed &&
+    isValidEmail(receiptEmail) &&
+    !submitting &&
+    !authLoading &&
+    !emailVerificationRequired;
 
   useEffect(() => {
     if (authLoading) return;
@@ -92,12 +100,13 @@ export function BillingConfirm() {
   }, []);
 
   const submitLabel = useMemo(() => {
+    if (paidCheckoutDisabled) return "Tạm khóa thanh toán";
     if (submitting) return "Đang tạo mã QR...";
     if (emailVerificationRequired) return "Cần xác thực email trước";
     if (!agreed) return "Cần đồng ý điều khoản trước";
     if (!isValidEmail(receiptEmail)) return "Nhập email nhận biên nhận";
     return "Xác nhận và tạo mã QR";
-  }, [agreed, emailVerificationRequired, receiptEmail, submitting]);
+  }, [agreed, emailVerificationRequired, paidCheckoutDisabled, receiptEmail, submitting]);
 
   const handleSendVerification = useCallback(async () => {
     setSendingVerification(true);
@@ -113,6 +122,13 @@ export function BillingConfirm() {
   }, []);
 
   const handleConfirm = useCallback(async () => {
+    if (paidCheckoutDisabled) {
+      setError(
+        "Thanh toán đang tạm khóa do đổi nhà cung cấp. Vui lòng liên hệ hỗ trợ qua " +
+          `${BILLING_SUPPORT_EMAIL} nếu bạn cần nâng cấp gấp.`,
+      );
+      return;
+    }
     if (emailVerificationRequired) {
       rememberEmailVerificationReturnPath("/billing/confirm");
       setError(getEmailVerificationRequiredMessage("upgrade"));
@@ -148,7 +164,7 @@ export function BillingConfirm() {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, checkoutInfo?.billingCycle, emailVerificationRequired, navigate, receiptEmail, user]);
+  }, [canSubmit, checkoutInfo?.billingCycle, emailVerificationRequired, navigate, paidCheckoutDisabled, receiptEmail, user]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -230,6 +246,29 @@ export function BillingConfirm() {
               .
             </span>
           </label>
+
+          {paidCheckoutDisabled ? (
+            <div
+              data-testid="paid-checkout-disabled-banner"
+              className="mt-4 rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong"
+            >
+              <p className="flex items-center gap-2 font-semibold">
+                <LockKeyhole className="h-4 w-4 text-app-warm" />
+                Thanh toán đang tạm khóa.
+              </p>
+              <p className="mt-2 leading-6 text-app-ink-soft">
+                Chúng tôi đang chuyển sang nhà cung cấp thanh toán mới nên tạm thời chưa nhận chuyển khoản tự động qua
+                trang này. Vui lòng liên hệ{" "}
+                <a
+                  href={`mailto:${BILLING_SUPPORT_EMAIL}`}
+                  className="font-medium text-app-ink underline-offset-4 hover:underline"
+                >
+                  {BILLING_SUPPORT_EMAIL}
+                </a>{" "}
+                nếu bạn cần nâng cấp gấp.
+              </p>
+            </div>
+          ) : null}
 
           {emailVerificationRequired ? (
             <div className="mt-4 rounded-[var(--r-card)] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

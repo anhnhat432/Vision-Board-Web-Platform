@@ -7,6 +7,7 @@ import {
   Crown,
   LifeBuoy,
   Loader2,
+  LockKeyhole,
   ReceiptText,
   RefreshCw,
   Shield,
@@ -51,7 +52,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { isRealMode, shouldShowBillingDebugUi } from "../utils/app-mode";
+import { isRealMode, isPaidCheckoutDisabled, shouldShowBillingDebugUi } from "../utils/app-mode";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { getSubscriptionGraceState } from "../utils/billing-grace-period";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
@@ -332,6 +333,7 @@ export function BillingPlan() {
   }, [isCheckoutReturn, checkoutReturnStatus, pollServerEntitlement]);
 
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
+  const paidCheckoutDisabled = isPaidCheckoutDisabled();
   const profileEmail = authContext?.user?.email?.trim() ?? "";
   const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
   const subscription = userData.subscription;
@@ -346,6 +348,12 @@ export function BillingPlan() {
   );
 
   const handleOpenUpgrade = (context: PremiumFeatureContext = "plan") => {
+    if (paidCheckoutDisabled) {
+      toast.info(
+        "Thanh toán đang tạm khóa do đổi nhà cung cấp. Vui lòng liên hệ hỗ trợ để được nâng cấp thủ công.",
+      );
+      return;
+    }
     trackPaywallCtaClicked({
       goalId: undefined,
       context,
@@ -570,6 +578,12 @@ export function BillingPlan() {
   };
 
   const handleRenewPlan = () => {
+    if (paidCheckoutDisabled) {
+      toast.info(
+        "Thanh toán đang tạm khóa do đổi nhà cung cấp. Vui lòng liên hệ hỗ trợ để gia hạn thủ công.",
+      );
+      return;
+    }
     trackPaywallCtaClicked({
       goalId: undefined,
       context: "plan",
@@ -741,6 +755,35 @@ export function BillingPlan() {
         description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
       />
 
+      {paidCheckoutDisabled && (
+        <div
+          data-testid="paid-checkout-disabled-banner"
+          className="rounded-card border border-app-warm-border bg-app-warm-soft p-4"
+        >
+          <div className="flex items-start gap-3">
+            <LockKeyhole className="mt-0.5 h-5 w-5 text-app-warm" />
+            <div className="flex-1">
+              <p className="font-medium text-app-ink">Thanh toán đang tạm khóa.</p>
+              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
+                Chúng tôi đang chuyển sang nhà cung cấp thanh toán mới. Trong thời gian này, các nút nâng cấp/gia hạn
+                sẽ tạm bị khóa. Vui lòng liên hệ{" "}
+                {BILLING_SUPPORT_EMAIL ? (
+                  <a
+                    href={`mailto:${BILLING_SUPPORT_EMAIL}`}
+                    className="font-medium text-app-ink underline-offset-4 hover:underline"
+                  >
+                    {BILLING_SUPPORT_EMAIL}
+                  </a>
+                ) : (
+                  "đội hỗ trợ"
+                )}{" "}
+                nếu bạn cần nâng cấp thủ công. Quyền hiện có trên tài khoản của bạn không bị ảnh hưởng.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Checkout return status */}
       {checkoutReturnStatus === "pending" && (
         <div className="rounded-card border border-app-line bg-app-warm-soft p-4">
@@ -810,9 +853,17 @@ export function BillingPlan() {
                     : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
               </p>
             </div>
-            <Button onClick={handleRenewPlan} className="ml-auto bg-app-accent text-white hover:bg-[#284f45]">
+            <Button
+              onClick={handleRenewPlan}
+              disabled={paidCheckoutDisabled}
+              className="ml-auto bg-app-accent text-white hover:bg-[#284f45]"
+            >
               <RefreshCw className="mr-2 h-4 w-4" />
-              {isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
+              {paidCheckoutDisabled
+                ? "Tạm khóa thanh toán"
+                : isInRenewalPriority
+                  ? "Gia hạn ngay"
+                  : "Gia hạn Plus"}
             </Button>
           </div>
         </div>
@@ -835,17 +886,19 @@ export function BillingPlan() {
           }
           action={
             isInRenewalPriority && realMode ? (
-              <Button className="w-full sm:w-auto" onClick={handleRenewPlan}>
+              <Button className="w-full sm:w-auto" onClick={handleRenewPlan} disabled={paidCheckoutDisabled}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Gia hạn ngay
+                {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Gia hạn ngay"}
               </Button>
             ) : currentPlanCode === "FREE" ? (
               <Button
                 className="w-full bg-app-accent text-white hover:bg-[#284f45] sm:w-auto"
                 onClick={() => handleOpenUpgrade("plan")}
+                disabled={paidCheckoutDisabled}
+                data-testid="billing-plan-upgrade-cta"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                Nâng cấp Plus
+                {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
               </Button>
             ) : realMode || billingStatus.manageBillingReady ? (
               <Button
@@ -936,9 +989,17 @@ export function BillingPlan() {
           {currentPlanCode !== "FREE" && (
             <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap">
               {realMode && (
-                <Button onClick={handleRenewPlan} className="bg-app-accent text-white hover:bg-[#284f45]">
+                <Button
+                  onClick={handleRenewPlan}
+                  disabled={paidCheckoutDisabled}
+                  className="bg-app-accent text-white hover:bg-[#284f45]"
+                >
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  {isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
+                  {paidCheckoutDisabled
+                    ? "Tạm khóa thanh toán"
+                    : isInRenewalPriority
+                      ? "Gia hạn ngay"
+                      : "Gia hạn Plus"}
                 </Button>
               )}
               {realMode && (
@@ -1348,8 +1409,9 @@ export function BillingPlan() {
                     <Button
                       className="mt-6 w-full bg-app-accent text-white hover:bg-[#284f45]"
                       onClick={() => handleOpenUpgrade("plan")}
+                      disabled={paidCheckoutDisabled}
                     >
-                      Nâng cấp Plus
+                      {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
                     </Button>
                   )}
                   {isCurrent && !isPlus && (
