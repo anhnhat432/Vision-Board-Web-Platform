@@ -20,7 +20,7 @@ Scope: billing surface only. Not attributed to release `d8b35b71` (12-week setup
 - Demo-copy leak check passed.
 - Failure is isolated to the billing surface and shares no code path or deployment artifact specific to the 12-week setup change.
 
-Conclusion: tracked as an independent billing-surface issue. Does not block 12-week setup limited rollout monitoring.
+Conclusion: tracked as an independent billing-surface issue. Does not block the 12-week setup Full GO route replacement.
 
 ## 3. Suspected causes
 
@@ -55,10 +55,10 @@ In order:
    - If hydration timing is fragile: improve frontend loading state so the wait condition resolves on a stable signal (e.g. data-attribute on the hydrated section) rather than network-idle.
    - If endpoint latency is the root cause: optimize the query / cache the response, do not paper over with a longer timeout.
 
-## 5. Impact on 12-week setup limited rollout
+## 5. Impact on 12-week setup Full GO
 
-- **No block** on the 12-week setup limited rollout from this billing failure.
+- **No block** on the 12-week setup Full GO route replacement from this billing failure.
 - Reassess only if either of the following becomes true:
   - The billing failure becomes user-visible in real-mode production (users report payment history not loading, paywall hangs, or upgrade flow stalls on `/billing/plan`).
   - A direct link is established between this billing failure and release `d8b35b71` (e.g. shared dependency, shared bundle change, or shared backend deploy artifact).
-- Otherwise, continue to track this in the billing surface follow-up. Limited rollout monitoring for the 12-week setup proceeds per `docs/ux/12-week-setup-limited-rollout-monitoring.md`.
+- Otherwise, continue to track this in the billing surface follow-up. The 12-week setup route replacement remains Full GO per `docs/ux/12-week-setup-limited-rollout-monitoring.md`.

@@ -2,32 +2,31 @@
 
 ## 1. Current decision state
 
-- Current candidate: `/12-week-setup-lab`.
-- Current recommendation: **LIMITED GO candidate only — not full GO**.
-- Must-fix polish for the lab flow has been completed and post-polish verification is reported as passing.
-- This plan does **not** approve immediate broad release. It defines a small, reversible route replacement to run only after an explicit product decision.
-- Known remaining risks: no completed real-user validation round, small click-target findings, `net::ERR_ABORTED` QA log noise to monitor, and possible Step 4 preview density.
+- Current recommendation: **Full GO** for the 12-week setup route replacement.
+- Route replacement is complete: `/12-week-setup` now renders `TwelveWeekSetupLab` as the primary new setup flow.
+- Temporary reference routes remain: `/12-week-setup-old` is rollback/reference; `/12-week-setup-lab` is QA/reference.
+- Product-owner approval, user validation, accessible monitoring closeout, and latest green `main` checks are recorded in `docs/ux/12-week-setup-limited-rollout-monitoring.md`.
+- Route cleanup is a future follow-up, not immediate work.
 
 ## 2. Scope of the route replacement
 
-The future change should be route-level only:
+Completed route-level behavior:
 
-- Preserve the previous `/12-week-setup` implementation under `/12-week-setup-old`.
-- Make `/12-week-setup` render the current lab implementation.
-- Keep `/12-week-setup-lab` temporarily available as a QA/reference route, or redirect it to `/12-week-setup` if the final product decision prefers one canonical URL.
-- Avoid changing storage schema, submit behavior, backend sync, auth, billing, dashboard behavior, plan generation logic, or weekly execution logic.
+- `/12-week-setup` renders the new setup flow through `TwelveWeekSetupLab`.
+- `/12-week-setup-old` preserves the previous setup implementation temporarily for rollback/reference.
+- `/12-week-setup-lab` stays temporarily available as a QA/reference route.
+- Storage schema, submit behavior, backend sync, auth, billing, dashboard behavior, plan generation logic, and weekly execution logic were not part of the route replacement.
 
-## 3. Files likely to be touched
+## 3. Completed implementation touchpoints
 
-Likely route/page/test surfaces for the future implementation:
+Known route/page/test surfaces from the completed implementation:
 
 - `src/app/routes.tsx` — route registration and path mapping.
-- `src/app/routes.test.tsx` — route expectation updates, if existing route tests assert page mappings.
-- `src/app/pages/12WeekSetupLab.ts` — likely page export used by the lab route.
-- Current previous setup page/module referenced by `/12-week-setup` — preserve and expose as the old route.
-- Any route constants/sitemap/navigation references only if they explicitly list setup paths and must remain consistent.
+- `src/app/routes.test.tsx` — route expectation updates where route mapping is asserted.
+- `src/app/pages/12WeekSetupLab.ts` — page export used by the new setup route and QA/reference route.
+- Previous setup page/module remains reachable through `/12-week-setup-old`.
 
-Keep the diff as small as possible and avoid opportunistic cleanup.
+No source code or route changes are part of this documentation status update.
 
 ## 4. Files that must not be touched
 
@@ -43,40 +42,37 @@ Do not touch these in the route replacement change unless a separate approved ta
 
 ## 5. Exact intended route behavior
 
-Target behavior after the future route replacement:
+Current behavior after route replacement:
 
-| Path                 | Intended behavior                                                                                                                                                                                                                            |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/12-week-setup-old` | Renders the previous implementation exactly as it existed before replacement. This is the fast rollback/reference path.                                                                                                                      |
-| `/12-week-setup`     | Renders the current lab implementation. This becomes the canonical setup entry route for the limited replacement window.                                                                                                                     |
-| `/12-week-setup-lab` | Temporarily stays as a QA/reference route **or** redirects to `/12-week-setup`, depending on final release decision. Prefer keeping it temporarily if QA needs side-by-side checks; prefer redirecting if product wants one canonical route. |
+| Path                 | Current behavior                                                            |
+| -------------------- | --------------------------------------------------------------------------- |
+| `/12-week-setup`     | Primary new setup flow; renders `TwelveWeekSetupLab`.                       |
+| `/12-week-setup-old` | Temporary rollback/reference; renders the previous setup implementation.    |
+| `/12-week-setup-lab` | Temporary QA/reference; renders `TwelveWeekSetupLab`.                       |
 
-Decision required before implementation: choose whether `/12-week-setup-lab` stays available temporarily or redirects.
+Decision deferred: route cleanup and eventual retirement or redirect of temporary routes is a future follow-up, not immediate work.
 
 ## 6. Pre-change checklist
 
 Before editing routes later, confirm:
 
-- Product owner explicitly approves **limited replacement**, not full GO.
+- Product owner approved **Full GO** for the route replacement.
 - Target branch has current passing verification for the lab state.
 - The previous `/12-week-setup` implementation can be imported/rendered under `/12-week-setup-old` without changing its internals.
 - The lab implementation can be rendered at `/12-week-setup` without storage or submit changes.
 - Manual smoke test on current `/12-week-setup-lab` passes on desktop and mobile.
-- Known remaining risks are accepted for a limited rollout window.
+- Known remaining risks are tracked as follow-ups after Full GO.
 - Rollback owner and rollback trigger threshold are agreed before merge.
 
-## 7. Implementation steps
+## 7. Implementation status
 
-1. Create a small route-only branch.
-2. Identify the current component used by `/12-week-setup` and keep it available as the old implementation.
-3. Register `/12-week-setup-old` to render the previous implementation.
-4. Change `/12-week-setup` to render the lab implementation.
-5. Apply the final decision for `/12-week-setup-lab`:
-   - Option A: keep it rendering the lab implementation for QA/reference.
-   - Option B: redirect it to `/12-week-setup`.
-6. Update only route tests that fail because the expected route mapping changed.
-7. Do not edit copy, layout, storage, sync, submit, dashboard, or backend code in the same change.
-8. Run verification commands and complete manual smoke tests before merge.
+1. Route replacement branch completed and merged.
+2. Previous `/12-week-setup` implementation remains reachable at `/12-week-setup-old`.
+3. `/12-week-setup` renders `TwelveWeekSetupLab` as the primary new setup flow.
+4. `/12-week-setup-lab` remains available temporarily for QA/reference.
+5. Route mapping and manual smoke checks passed.
+6. Full GO evidence is recorded in `docs/ux/12-week-setup-limited-rollout-monitoring.md`.
+7. Route cleanup remains deferred as a future follow-up.
 
 ## 8. Verification commands
 
@@ -121,7 +117,7 @@ If `npm run smoke:prod` cannot run because deployment credentials, preview URL, 
 
 - Repeat the route checks at a narrow mobile viewport.
 - Complete Step 1 → Step 4 without horizontal overflow blocking primary actions.
-- Confirm CTA visibility and tap targets are usable enough for the limited rollout.
+- Confirm CTA visibility and tap targets remain usable after Full GO.
 - Confirm validation messages are readable and not shown prematurely.
 - Confirm Step 4 preview remains understandable despite known density risk.
 - Save the setup and confirm the post-save transition works.
@@ -140,7 +136,7 @@ Rollback must be route-level and data-safe:
 
 Suggested rollback triggers:
 
-- Setup completion rate drops materially during the limited rollout window.
+- Setup completion rate drops materially after Full GO.
 - Users cannot save or transition into weekly execution / Today.
 - Validation blocks valid users from reaching Step 4.
 - Route registration causes blank screen, navigation loop, or production-only crash.
@@ -148,7 +144,7 @@ Suggested rollback triggers:
 
 ## 11. Post-replacement monitoring notes
 
-During the limited rollout window, monitor:
+After Full GO, monitor:
 
 - Setup start → Step 4 completion.
 - Save success and transition into weekly execution / Today.
@@ -158,20 +154,22 @@ During the limited rollout window, monitor:
 - Mobile usability issues: blocked CTA, overflow, or unreadable preview.
 - Any `net::ERR_ABORTED` pattern that becomes user-visible or correlates with failed saves/navigation.
 
-Decision after monitoring should be one of:
+Decision after monitoring:
 
-- Continue limited rollout and collect real-user validation.
-- Roll back to previous `/12-week-setup`.
-- Keep the route replacement but schedule targeted follow-up polish.
+- Full GO for the route replacement is approved and documented.
+- Roll back to previous `/12-week-setup` only if a later rollback trigger fires.
+- Keep the route replacement and schedule route cleanup as a future follow-up.
 
 ## 12. Explicit non-goals
 
-This route replacement plan does not include:
+This route replacement plan/status document does not include:
 
-- Declaring full GO for the lab implementation.
-- Replacing routes immediately in this documentation task.
+- Claiming paid subscription is live.
+- Claiming cloud sync is complete.
 - Changing source code, tests, app routes, storage, sync, auth, billing, or backend behavior now.
 - Redesigning the lab UI or rewriting setup copy beyond already completed must-fix polish.
 - Changing dashboard, Today, weekly execution, reflection, or review flows.
 - Adding new analytics providers, billing logic, or production environment requirements.
 - Running account/data migrations.
+- Cleaning up `/12-week-setup-old` or `/12-week-setup-lab` immediately.
+- Resolving the separate `/billing/plan` smoke-timeout follow-up.

@@ -2,7 +2,7 @@
 
 ## 1. Purpose of this check
 
-This document records the post-polish decision state for `/12-week-setup-lab` after the must-fix copy and clarity items were completed. It is meant to support a route replacement decision later, not to approve an immediate replacement now.
+This document records the post-polish decision state for `/12-week-setup-lab` after the must-fix copy and clarity items were completed. It is historical context for the route replacement decision; the replacement is now Full GO and the current source of truth is `docs/ux/12-week-setup-limited-rollout-monitoring.md`.
 
 ## 2. Previous status: POLISH
 
@@ -36,55 +36,54 @@ Additional context:
 - Step 2 validation timing remains intentional: errors appear after attempting to continue with missing data, not immediately on entry.
 - Step 3 disabled-state concern was traced to QA automation behavior, not an app UX blocker.
 
-## 5. What was not changed
+## 5. Historical post-polish state
 
-No route behavior was changed.
+At the time of the post-polish check, no route behavior was changed.
 
-Specifically:
+Current state supersedes that historical snapshot:
 
-- `/12-week-setup` was **not** replaced.
-- `/12-week-setup-lab` remains a separate lab route.
-- Dashboard behavior was not changed.
-- Storage schema, backend sync, auth, paywall, billing, and submit behavior were not changed.
-- No source-code changes are part of this documentation task.
+- `/12-week-setup` is now replaced by `TwelveWeekSetupLab` as the primary new setup flow.
+- `/12-week-setup-lab` remains a separate temporary QA/reference route.
+- Dashboard behavior was not changed by the route replacement.
+- Storage schema, backend sync, auth, paywall, billing, and submit behavior were not changed by the route replacement.
+- No source-code changes are part of this documentation status update.
 
 ## 6. Remaining risks
 
-Remaining risks before a broader replacement decision:
+Remaining risks after Full GO:
 
-- No real user testing has been completed or claimed for this post-polish state.
 - Click target findings below 40px still need product/design judgment, especially around secondary navigation/footer links.
 - `net::ERR_ABORTED` entries from browser QA logs should remain documented as likely dev-server/navigation noise unless they reproduce as user-visible failures.
 - Step 4 preview may still feel dense for some users, even after copy clarification.
-- The lab route has passed automated and local QA checks, but it has not yet proven conversion, comprehension, or completion quality with real users.
+- Continue monitoring setup conversion, comprehension, completion quality, support reports, runtime errors, and sync failures after Full GO.
+- Cloud sync is not claimed complete, and paid subscription is not claimed live by this route replacement decision.
 
-## 7. Updated recommendation: LIMITED GO candidate
+## 7. Updated recommendation: Full GO route replacement
 
-Updated recommendation: **LIMITED GO candidate only**.
+Updated recommendation: **Full GO** for the 12-week setup route replacement.
 
-This is **not full GO**.
+`/12-week-setup` now renders `TwelveWeekSetupLab` as the primary new setup flow. `/12-week-setup-old` remains temporary rollback/reference, and `/12-week-setup-lab` remains temporary QA/reference. Route cleanup is a future follow-up, not immediate work.
 
-`/12-week-setup-lab` is now a candidate for limited exposure or a controlled replacement plan because must-fix clarity issues are resolved and verification is passing. It should not be treated as fully approved for broad release until the replacement conditions below are satisfied.
+## 8. Replacement approval evidence
 
-## 8. Conditions required before replacing `/12-week-setup`
+Replacement approval is complete:
 
-Before replacing `/12-week-setup`, require:
-
-1. A deliberate product decision approving limited rollout scope.
-2. Confirmation that the current passing verification remains valid on the target branch.
-3. A short manual smoke check of the full setup path on mobile and desktop.
-4. Explicit acknowledgment that real user testing is still pending, or completion of a small real-user validation round.
-5. A rollback plan that can restore `/12-week-setup` quickly if completion, comprehension, or route stability regresses.
-6. Monitoring focus after replacement: setup completion, validation friction, save-to-execution transition, and error reports.
+1. Product-owner approval is recorded.
+2. Latest monitored `main` checks are green.
+3. Manual and production route smoke passed for the setup route mapping.
+4. User validation confirmed `/12-week-setup` Step 1 -> Step 4 -> save -> `/12-week-system` as acceptable.
+5. Rollback path remains documented while `/12-week-setup-old` stays available.
+6. Monitoring focus after Full GO: setup completion, validation friction, save-to-execution transition, support reports, runtime errors, and sync failures.
 
 ## 9. Rollback-aware route replacement option
 
-Recommended route replacement approach, if approved later:
+Current route replacement behavior:
 
-- Keep the existing `/12-week-setup` implementation available during the first replacement window.
-- Swap route registration so `/12-week-setup` renders the lab implementation.
-- Preserve `/12-week-setup-lab` temporarily as a direct QA/reference route if safe for the deployment mode.
-- Use a small, easily reversible route-level diff only; avoid combining replacement with unrelated UI, storage, sync, or dashboard changes.
+- `/12-week-setup` renders `TwelveWeekSetupLab` as the primary new setup flow.
+- `/12-week-setup-old` preserves the previous setup implementation temporarily for rollback/reference.
+- `/12-week-setup-lab` remains temporarily available as a direct QA/reference route.
 - If regressions appear, roll back by restoring `/12-week-setup` to the previous implementation without changing stored user data.
+- Route cleanup is a future follow-up; do not retire or redirect temporary routes immediately.
+- The separate `/billing/plan` smoke timeout remains an ops follow-up and does not change this Full GO decision.
 
-Decision state: **LIMITED GO candidate only — not full GO**.
+Decision state: **Full GO** for 12-week setup route replacement.

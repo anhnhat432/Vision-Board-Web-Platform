@@ -4,11 +4,11 @@
 
 Route-level replacement has been completed for the 12-week setup experience:
 
-- `/12-week-setup` now renders the lab implementation.
-- `/12-week-setup-old` preserves access to the previous setup implementation.
-- `/12-week-setup-lab` remains available as a QA/reference route and also renders the lab implementation.
+- `/12-week-setup` now renders `TwelveWeekSetupLab` as the primary new setup flow.
+- `/12-week-setup-old` preserves access to the previous setup implementation as temporary rollback/reference.
+- `/12-week-setup-lab` remains temporarily available as a QA/reference route and also renders `TwelveWeekSetupLab`.
 
-This is a controlled route replacement result, not a broad release-readiness sign-off.
+This route replacement is now **Full GO** for the 12-week setup surface after product-owner approval, user validation, accessible monitoring closeout, and green latest `main` checks.
 
 ## 2. Files changed
 
@@ -33,9 +33,9 @@ Follow-up smoke documentation update added:
 
 | Route                | Final behavior                                                        |
 | -------------------- | --------------------------------------------------------------------- |
-| `/12-week-setup`     | Renders the lab 12-week setup implementation.                         |
-| `/12-week-setup-old` | Renders the previous setup implementation for rollback/reference.     |
-| `/12-week-setup-lab` | Remains available as QA/reference and renders the lab implementation. |
+| `/12-week-setup`     | Primary new setup flow; renders `TwelveWeekSetupLab`.                         |
+| `/12-week-setup-old` | Temporary rollback/reference; renders the previous setup implementation.      |
+| `/12-week-setup-lab` | Temporary QA/reference; renders `TwelveWeekSetupLab`.                         |
 
 ## 4. Verification results
 
@@ -107,9 +107,9 @@ Console/runtime errors:
 
 Current decision state after final smoke:
 
-**LIMITED ROLLOUT / MONITOR**
+**FULL GO**
 
-This is still not a full GO. Route replacement, Step 2 first-entry validation timing, and post-save navigation are confirmed in the seeded local demo smoke.
+Route replacement, Step 2 first-entry validation timing, and post-save navigation are confirmed in seeded local demo smoke, later production monitoring closeout, user validation, and product-owner approval. See `docs/ux/12-week-setup-limited-rollout-monitoring.md` for Full GO closeout evidence.
 
 ## 7. Smoke caveats / limitations
 
@@ -133,11 +133,9 @@ The route replacement did not intentionally change:
 
 ## 9. Current decision state
 
-**LIMITED ROLLOUT / MONITOR**
+**FULL GO**
 
-This is not a full GO.
-
-The lab implementation is now the primary `/12-week-setup` route, with the previous setup still available at `/12-week-setup-old`. The current evidence supports limited rollout and close monitoring, not broad release readiness or completion of real user testing.
+The new setup flow is now the primary `/12-week-setup` route, with the previous setup still temporarily available at `/12-week-setup-old` and the QA/reference path still temporarily available at `/12-week-setup-lab`. Current evidence supports Full GO for the route replacement. Route cleanup is a future follow-up, not immediate work.
 
 ## 10. Rollback path
 
@@ -154,7 +152,7 @@ If issues appear after replacement:
 
 ## 11. Monitoring checklist
 
-Monitor during limited rollout:
+Monitor after Full GO:
 
 - Users can enter `/12-week-setup` from the intended product flow.
 - Step navigation works across the full lab setup flow.
@@ -169,7 +167,8 @@ Monitor during limited rollout:
 
 ## 12. Recommended next steps
 
-1. Recheck save destination in authenticated real-mode QA as part of normal production verification, not because the local demo smoke still fails.
-2. Keep the focused smoke helper in CI/manual release checks so save destination and validation-timing regressions fail explicitly.
-3. Monitor early usage and error reports before considering broader rollout.
-4. Decide later whether to retire `/12-week-setup-old` only after stable usage evidence and explicit release approval.
+1. Keep the focused smoke helper in CI/manual release checks so save destination and validation-timing regressions fail explicitly.
+2. Continue normal production monitoring for setup completion, support reports, runtime errors, and sync failures.
+3. Keep `/12-week-setup-old` and `/12-week-setup-lab` temporarily available while rollback/reference value remains.
+4. Schedule route cleanup later; do not remove or redirect temporary routes as immediate work.
+5. Keep `/billing/plan` smoke timeout tracked as a separate ops follow-up; it does not change the 12-week setup Full GO decision.

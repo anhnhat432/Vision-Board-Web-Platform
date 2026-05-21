@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last reviewed: 2026-05-10
+Last reviewed: 2026-05-21
 
 Purpose: this file records the current code-backed state of Vision Board Web Platform so humans and AI coding agents do not assume features are more complete than they are.
 
@@ -15,6 +15,7 @@ Important documentation nuance:
 - `README.md` correctly describes the product as full-stack, but the current architecture is still local-first with selective backend sync.
 - `.env.production` in repo is set to `VITE_APP_MODE=real` and `VITE_BILLING_PROVIDER_MODE=api_contract`. Vercel project-level env vars still win at build time, so the live deployment mode depends on those overrides. The MVP 1 demo override path is preserved through the rollback steps in `MVP_1_RELEASE_CHECKLIST.md`.
 - `backend/package.json` requires Node `20.x`; some local and CI commands may use Node 22 and can show engine warnings.
+- 12-week setup route replacement is **Full GO** as of 2026-05-21. Current route behavior: `/12-week-setup` is the primary new setup flow, `/12-week-setup-old` is temporary rollback/reference, and `/12-week-setup-lab` is temporary QA/reference. Route cleanup is a future follow-up, not immediate work.
 
 ## 2. Core user flow
 
@@ -67,7 +68,11 @@ Frontend app:
 
 12-week planning:
 
-- `src/app/pages/12WeekSetup.tsx` creates the local goal and local `twelveWeekSystem` first.
+- `/12-week-setup` now renders `TwelveWeekSetupLab` as the primary setup flow under the Full GO route replacement.
+- `/12-week-setup-old` keeps the previous `TwelveWeekSetup` implementation temporarily for rollback/reference.
+- `/12-week-setup-lab` keeps the same `TwelveWeekSetupLab` flow temporarily for QA/reference.
+- Route cleanup for the temporary old/lab routes is a future follow-up, not immediate work.
+- The setup flow creates the local goal and local `twelveWeekSystem` first.
 - Backend sync is conditional and best-effort:
   - app must not be in demo mode
   - Firebase/auth must be configured
@@ -116,7 +121,7 @@ Implemented in the frontend:
 - Life insight flow.
 - SMART goal setup helpers.
 - Feasibility scoring logic and tests.
-- 12-week plan setup.
+- 12-week plan setup with route replacement at Full GO: `/12-week-setup` is the primary new setup flow, `/12-week-setup-old` is temporary rollback/reference, and `/12-week-setup-lab` is temporary QA/reference.
 - 12-week execution system with today/week/progress/settings style areas.
 - Local-first goals, progress, reviews, achievements, reminders, and app preferences.
 - Auth-scoped local data handling.
@@ -154,6 +159,7 @@ These areas should not be described as fully production-ready:
 - Many product areas still rely on browser localStorage as the primary source of truth.
 - Some backend route surfaces exist before the whole product has been migrated to backend-first data ownership.
 - Production smoke e2e depends on repository secrets and the deployed environment being configured correctly.
+- `/billing/plan` payment-history hydration timeout remains a separate ops follow-up in `docs/ops/billing-plan-smoke-timeout-follow-up.md`; it is not a 12-week setup blocker and does not prove paid subscription readiness.
 
 ## 7. What is not implemented yet
 
@@ -161,7 +167,7 @@ Not fully implemented or not proven production-ready:
 
 - Full backend-as-source-of-truth for every product area.
 - Field-complete round-trip restore for plan setup metadata, lead metric history logs, and tombstones; the auto-sync path applies the supported subset only.
-- Live Casso/VietQR transaction was smoke-tested end-to-end on 2026-05-10: real bank transfer cleared, webhook fired, entitlement granted, Plus plan activated. The integration is now considered live-verified for the small smoke amount; production scale-up to 200 users still needs a watch-and-monitor period.
+- Paid subscription is not claimed live for production users. A small Casso/VietQR smoke transaction passed on 2026-05-10, but provider/billing readiness still needs production monitoring, support operations, and the separate `/billing/plan` smoke-timeout follow-up.
 - Complete production analytics pipeline with verified GA4 setup.
 - Full account lifecycle features such as export, delete account, and server-side data cleanup.
 - End-to-end monitoring, alerting, and error reporting for production incidents.

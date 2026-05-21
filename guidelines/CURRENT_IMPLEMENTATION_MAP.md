@@ -1,6 +1,6 @@
 # Current Implementation Map
 
-Audited: 2026-05-02. Source: code files, not docs.
+Audited: 2026-05-02. Status overlay updated 2026-05-21 for the 12-week setup route replacement Full GO state. Source: code-backed docs and verified route monitoring, not assumptions.
 
 ---
 
@@ -10,7 +10,7 @@ Audited: 2026-05-02. Source: code files, not docs.
 |---|--------|--------|-----------|-------|
 | 1 | **MVP 1 local-first demo** | ✅ Implemented | `storage.ts`, `.env.production` (demo mode) | 321 frontend |
 | 2 | **Dashboard / onboarding / core funnel** | ✅ Implemented | `Dashboard.tsx`, `Onboarding.tsx`, `LifeBalance.tsx`, `LifeInsight.tsx` | Yes |
-| 3 | **12-week setup** | ✅ Implemented | `12WeekSetup.tsx` (37KB), `planService.ts` | Yes |
+| 3 | **12-week setup** | ✅ Implemented; route replacement **Full GO** | `/12-week-setup` -> `TwelveWeekSetupLab` primary flow; `/12-week-setup-old` temporary rollback/reference; `/12-week-setup-lab` temporary QA/reference | Yes |
 | 4 | **12-week execution** | ✅ Implemented | `12WeekSystem.tsx` (34KB), `useTwelveWeekExecutionActions.ts` | Yes |
 | 5 | **localStorage / auth-scoped storage** | ✅ Implemented | `storage.ts`, `storage-types.ts`, `storage-twelve-week.ts` | Yes |
 | 6 | **MVP 2 mutation queue** | ✅ Implemented | `mutationQueue.ts`, `mutationQueueSender.ts` | Yes |
@@ -29,6 +29,13 @@ Audited: 2026-05-02. Source: code files, not docs.
 | 19 | **Customer portal / cancel** | ✅ Implemented | `POST /billing/customer-portal`, `POST /billing/subscription/cancel` | 7 tests |
 | 20 | **Reconciliation CLI** | ✅ Implemented | `billingReconciliation.ts`, `scripts/reconcile-entitlements.ts` | 16 tests |
 | 21 | **Paid go/no-go** | ✅ Documented | `PAID_MVP_GO_NO_GO.md` — decision: NO-GO | — |
+
+### 12-week setup route replacement status
+
+- Status: **Full GO** after product-owner approval, user validation, accessible monitoring closeout, and green latest `main` checks.
+- Current route behavior: `/12-week-setup` is the primary new setup flow powered by `TwelveWeekSetupLab`; `/12-week-setup-old` remains a temporary rollback/reference route; `/12-week-setup-lab` remains a temporary QA/reference route.
+- Cleanup posture: route cleanup and eventual retirement or redirect of temporary routes is a future follow-up, not immediate work.
+- Separate ops follow-up: `/billing/plan` smoke timeout remains tracked independently in `docs/ops/billing-plan-smoke-timeout-follow-up.md` and does not imply paid subscription is live.
 
 ### Billing sub-components detail
 
