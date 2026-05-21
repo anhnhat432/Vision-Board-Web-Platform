@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 
+import { summarizeEnvIssues, validateBackendEnv } from "./envValidation";
+
 dotenv.config();
 
 export function getOptionalEnv(name: string): string | undefined {
@@ -35,6 +37,30 @@ function parsePort(rawPort: string | undefined): number {
 }
 
 const nodeEnv = process.env.NODE_ENV ?? "development";
+
+// Fail-fast production validation. Aggregates every problem so operators
+// see the full report instead of patching one issue at a time. Skipped
+// outside production to keep dev/test boots forgiving.
+if (nodeEnv === "production") {
+  const issues = validateBackendEnv(process.env, { nodeEnv });
+  const errors = issues.filter((issue) => issue.level === "error");
+  const warnings = issues.filter((issue) => issue.level === "warning");
+
+  if (warnings.length > 0) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[env] ${warnings.length} production env warning(s):\n${summarizeEnvIssues(warnings).join("\n")}`,
+    );
+  }
+
+  if (errors.length > 0) {
+    const summary = summarizeEnvIssues(errors).join("\n");
+    throw new Error(
+      `Production environment is not safe to start. ${errors.length} error(s):\n${summary}`,
+    );
+  }
+}
+
 const billingProvider = getOptionalEnv("BILLING_PROVIDER")?.toLowerCase();
 const rawPrivateKey = getRequiredEnv("FIREBASE_PRIVATE_KEY");
 const assistantProvider = getOptionalEnv("ASSISTANT_PROVIDER")?.toLowerCase();

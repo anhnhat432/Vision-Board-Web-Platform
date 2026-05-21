@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "check": "npm run typecheck && npm run build",
+    "check:env": "npm run build && node dist/scripts/checkProductionEnv.js",
     "cleanup:tombstones": "npm run build && node dist/scripts/cleanupTombstones.js",
     "rebuild:soft-delete-indexes": "npm run build && node dist/scripts/rebuildSoftDeleteIndexes.js",
     "reconcile:entitlements": "npx ts-node scripts/reconcile-entitlements.ts"
