@@ -19,6 +19,7 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@payos/node": "^2.0.5",
     "@sentry/node": "^10.52.0",
     "@vision-board/shared-types": "file:../shared-types",
     "cors": "^2.8.5",

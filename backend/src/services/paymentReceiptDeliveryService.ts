@@ -27,6 +27,16 @@ function getPlanName(order: { planCode: string; billingCycle?: string }): string
   return order.planCode;
 }
 
+function resolvePaymentReference(order: PaymentOrderDocument): string | null | undefined {
+  if (order.provider === "payos") {
+    const payos = order.metadata?.payos;
+    if (payos && typeof payos === "object") {
+      return payos.webhookReference || payos.paymentLinkId || (payos.orderCode ? String(payos.orderCode) : undefined);
+    }
+  }
+  return order.cassoTransactionId;
+}
+
 async function resolveReceiptRecipient(order: PaymentOrderDocument): Promise<{ email: string | null; name?: string | null }> {
   if (isConfiguredEmailAddress(order.receiptEmail)) {
     return { email: order.receiptEmail.trim().toLowerCase(), name: order.receiptName };
@@ -86,7 +96,7 @@ export async function deliverReceiptForOrder(orderId: string): Promise<{ sent: b
       currency: order.currency,
       planName: getPlanName(order),
       paidAt: order.completedAt,
-      paymentRef: order.cassoTransactionId,
+      paymentRef: resolvePaymentReference(order),
     });
 
     if (result.status !== "sent") {
@@ -118,7 +128,7 @@ export async function deliverReceiptForOrder(orderId: string): Promise<{ sent: b
     backendMonitoring.captureBackendException(error, {
       tags: {
         event: "payment_receipt_send_failed",
-        provider: "casso",
+        provider: order.provider || "unknown",
       },
       extra: {
         orderId: order.orderId,

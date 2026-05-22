@@ -5,7 +5,8 @@
  *
  * Rules:
  * - If no provider env is configured, returns the mock adapter for demo/local.
- * - Casso is the production payment adapter for VietQR bank transfer checkout.
+ * - Casso remains available for legacy VietQR bank transfer checkout/webhooks.
+ * - PayOS is the production payment-link adapter behind the paid-checkout kill-switch.
  * - Providers without an implementation return placeholders and fail closed.
  * - App does not crash if provider env is missing.
  *
@@ -18,6 +19,7 @@ import type { PaymentProviderAdapter } from "./paymentProviderAdapter";
 import { PaymentProviderNotConfiguredError } from "./paymentProviderAdapter";
 import { createCassoPaymentAdapter } from "./cassoPaymentAdapter";
 import { createMockPaymentAdapter } from "./mockPaymentAdapter";
+import { createPayosPaymentAdapter } from "./payosPaymentAdapter";
 
 export type SupportedProviderId =
   | "mock"
@@ -41,7 +43,7 @@ function getProviderIdFromEnv(): SupportedProviderId {
 }
 
 function createPlaceholderAdapter(
-  providerId: Exclude<SupportedProviderId, "mock" | "casso">,
+  providerId: Exclude<SupportedProviderId, "mock" | "casso" | "payos">,
 ): PaymentProviderAdapter {
   const err = () => new PaymentProviderNotConfiguredError(providerId);
   return {
@@ -80,6 +82,9 @@ export function getPaymentProviderAdapter(): PaymentProviderAdapter {
       break;
 
     case "payos":
+      adapter = createPayosPaymentAdapter();
+      break;
+
     case "momo":
     case "vnpay":
       adapter = createPlaceholderAdapter(providerId);

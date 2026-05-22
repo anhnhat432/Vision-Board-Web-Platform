@@ -24,6 +24,7 @@ export type EnvIssueCategory =
   | "firebase"
   | "billing"
   | "casso"
+  | "payos"
   | "monitoring"
   | "email";
 
@@ -128,8 +129,17 @@ function validatePort(value: string): EnvValidationIssue | null {
   return null;
 }
 
+function isPaidCheckoutDisabled(env: NodeJS.ProcessEnv): boolean {
+  const raw = env.BILLING_PAID_DISABLED?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
 function isCassoBillingActive(env: NodeJS.ProcessEnv): boolean {
   return env.BILLING_PROVIDER?.trim().toLowerCase() === "casso";
+}
+
+function isPayosBillingActive(env: NodeJS.ProcessEnv): boolean {
+  return env.BILLING_PROVIDER?.trim().toLowerCase() === "payos";
 }
 
 function hasAnyCassoSecret(env: NodeJS.ProcessEnv): boolean {
@@ -241,6 +251,53 @@ function validateCassoConfig(env: NodeJS.ProcessEnv, isProduction: boolean): Env
   return issues;
 }
 
+function validatePayosConfig(env: NodeJS.ProcessEnv, isProduction: boolean): EnvValidationIssue[] {
+  if (!isPayosBillingActive(env)) return [];
+
+  const issues: EnvValidationIssue[] = [];
+  const strict = isProduction && !isPaidCheckoutDisabled(env);
+  const requiredPayosFields: Array<{ key: string; label: string }> = [
+    { key: "PAYOS_CLIENT_ID", label: "PayOS client ID" },
+    { key: "PAYOS_API_KEY", label: "PayOS API key" },
+    { key: "PAYOS_CHECKSUM_KEY", label: "PayOS checksum key for webhook verification" },
+  ];
+
+  for (const { key, label } of requiredPayosFields) {
+    if (!isNonEmpty(env[key])) {
+      issues.push({
+        level: strict ? "error" : "warning",
+        key,
+        category: "payos",
+        message: strict
+          ? `is required when BILLING_PROVIDER=payos and BILLING_PAID_DISABLED is not enabled (${label}).`
+          : `is not set while BILLING_PROVIDER=payos. Checkout remains safe only if BILLING_PAID_DISABLED=true; PayOS webhooks without PAYOS_CHECKSUM_KEY are rejected.`,
+      });
+    }
+  }
+
+  const priceRaw = env.PLUS_PRICE_VND?.trim();
+  if (!isNonEmpty(priceRaw)) {
+    issues.push({
+      level: strict ? "error" : "warning",
+      key: "PLUS_PRICE_VND",
+      category: "payos",
+      message: "is required when BILLING_PROVIDER=payos (PLUS plan price in VND).",
+    });
+  } else {
+    const parsed = Number.parseInt(priceRaw, 10);
+    if (!Number.isFinite(parsed) || parsed < 1000) {
+      issues.push({
+        level: "error",
+        key: "PLUS_PRICE_VND",
+        category: "payos",
+        message: "must be a positive integer >= 1000 (VND).",
+      });
+    }
+  }
+
+  return issues;
+}
+
 function validateMonitoring(env: NodeJS.ProcessEnv, isProduction: boolean): EnvValidationIssue[] {
   if (!isProduction) return [];
   const issues: EnvValidationIssue[] = [];
@@ -326,6 +383,7 @@ export function validateBackendEnv(
   issues.push(...validateBillingProvider(env));
   issues.push(...validateBillingRepository(env, isProduction));
   issues.push(...validateCassoConfig(env, isProduction));
+  issues.push(...validatePayosConfig(env, isProduction));
   issues.push(...validateMonitoring(env, isProduction));
   issues.push(...validateSupportEmail(env, isProduction));
 

@@ -185,6 +185,69 @@ describe("validateBackendEnv: Casso billing", () => {
   });
 });
 
+describe("validateBackendEnv: PayOS billing", () => {
+  function basePayosEnv(): NodeJS.ProcessEnv {
+    return {
+      ...baseProductionEnv(),
+      BILLING_PROVIDER: "payos",
+      BILLING_PAID_DISABLED: "true",
+      PAYOS_CLIENT_ID: "payos-client-id",
+      PAYOS_API_KEY: "payos-api-key",
+      PAYOS_CHECKSUM_KEY: "payos-checksum-key",
+      PLUS_PRICE_VND: "99000",
+    };
+  }
+
+  it("accepts a fully configured PayOS production env while checkout is locked", () => {
+    const issues = validateBackendEnv(basePayosEnv(), { nodeEnv: "production" });
+    const errors = issues.filter((issue) => issue.level === "error");
+    assert.deepEqual(errors, []);
+  });
+
+  it("does not require Casso env when BILLING_PROVIDER=payos", () => {
+    const env = basePayosEnv();
+    delete env.CASSO_WEBHOOK_SECRET;
+    delete env.CASSO_BANK_ACCOUNT;
+    delete env.CASSO_BANK_NAME;
+    delete env.CASSO_ACCOUNT_NAME;
+    const issues = validateBackendEnv(env, { nodeEnv: "production" });
+    const cassoErrors = issues.filter((issue) => issue.category === "casso" && issue.level === "error");
+    assert.deepEqual(cassoErrors, []);
+  });
+
+  it("warns instead of errors for missing PayOS secrets while backend checkout is locked", () => {
+    const env = basePayosEnv();
+    delete env.PAYOS_CLIENT_ID;
+    delete env.PAYOS_API_KEY;
+    delete env.PAYOS_CHECKSUM_KEY;
+    env.BILLING_PAID_DISABLED = "true";
+
+    const issues = validateBackendEnv(env, { nodeEnv: "production" });
+    const payosErrors = issues.filter((issue) => issue.category === "payos" && issue.level === "error");
+    const payosWarnings = issues.filter((issue) => issue.category === "payos" && issue.level === "warning");
+
+    assert.deepEqual(payosErrors, []);
+    assert.ok(payosWarnings.length >= 3);
+  });
+
+  it("errors for missing PayOS secrets when production checkout is not locked", () => {
+    const env = basePayosEnv();
+    delete env.PAYOS_CLIENT_ID;
+    delete env.PAYOS_API_KEY;
+    delete env.PAYOS_CHECKSUM_KEY;
+    env.BILLING_PAID_DISABLED = "false";
+
+    const issues = validateBackendEnv(env, { nodeEnv: "production" });
+    const missingKeys = issues
+      .filter((issue) => issue.category === "payos" && issue.level === "error")
+      .map((issue) => issue.key);
+
+    assert.ok(missingKeys.includes("PAYOS_CLIENT_ID"));
+    assert.ok(missingKeys.includes("PAYOS_API_KEY"));
+    assert.ok(missingKeys.includes("PAYOS_CHECKSUM_KEY"));
+  });
+});
+
 describe("validateBackendEnv: dev/test forgiveness", () => {
   it("does not require Casso config when BILLING_PROVIDER=mock", () => {
     const env = { ...baseProductionEnv(), BILLING_PROVIDER: "mock" };

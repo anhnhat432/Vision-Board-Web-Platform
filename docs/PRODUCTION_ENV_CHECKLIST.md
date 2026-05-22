@@ -27,6 +27,9 @@ npm run env:check:full
 
 # If using Casso billing
 npm run env:check:casso
+
+# If using PayOS billing, keep checkout locked until E2E sign-off
+BILLING_PROVIDER=payos BILLING_PAID_DISABLED=true npm --prefix backend run check:env
 ```
 
 `check:env` exits with code 1 if any error-level issue is found. It never
@@ -58,58 +61,58 @@ and non-HTTPS origins (other than localhost) are rejected.
 
 ## Required for backend (`backend/.env` on Render)
 
-| Variable | Used in | Example (safe) | Risk if missing/wrong | Verify |
-| --- | --- | --- | --- | --- |
-| `NODE_ENV` | All env-aware code paths | `production` | Validation skips production checks; localhost CORS fallthrough; Sentry env mislabeled. | `echo $NODE_ENV` on host; `check:env` prints `(strict)` next to it. |
-| `PORT` | `backend/src/config/env.ts` | `4000` (Render injects automatically) | Boot crash if non-numeric or non-positive. | `curl $RENDER_URL/api/health` returns 200. |
-| `MONGODB_URI` | `backend/src/config/env.ts`, `backend/src/config/mongo.ts` | `mongodb+srv://user:pass@cluster.mongodb.net/vision_board` | Boot crash; sync, billing, plans all unavailable. Localhost in prod is flagged as warning. | `mongosh "$MONGODB_URI" --eval 'db.runCommand({ping:1})'` from a maintenance shell. |
-| `FIREBASE_PROJECT_ID` | `backend/src/config/firebase.ts` | `vision-board-prod` | Boot crash; protected routes reject every request. | `check:env`; later `curl /api/auth/me` with a valid ID token returns 200. |
-| `FIREBASE_CLIENT_EMAIL` | Same | `firebase-adminsdk-xxxx@vision-board-prod.iam.gserviceaccount.com` | Auth verification fails; user accounts cannot sync. | Same as above. |
-| `FIREBASE_PRIVATE_KEY` | Same | `"-----BEGIN PRIVATE KEY-----\nXXXX\n-----END PRIVATE KEY-----\n"` (escape newlines as `\n`) | Auth verifier crashes; signed-in users get 401. | `check:env` validates BEGIN/END markers without printing the key. |
-| `FRONTEND_ORIGIN` | `backend/src/app.ts`, `backend/src/middleware/corsOrigin.ts` | `https://vision-board.example.com,https://app.example.com` | Browsers blocked by CORS; checkout return URLs rejected. Wildcard `*`, http (non-localhost), or paths are refused at boot. | DevTools network log shows `Access-Control-Allow-Origin: <your origin>` on a real request. |
+| Variable                | Used in                                                      | Example (safe)                                                                               | Risk if missing/wrong                                                                                                      | Verify                                                                                     |
+| ----------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `NODE_ENV`              | All env-aware code paths                                     | `production`                                                                                 | Validation skips production checks; localhost CORS fallthrough; Sentry env mislabeled.                                     | `echo $NODE_ENV` on host; `check:env` prints `(strict)` next to it.                        |
+| `PORT`                  | `backend/src/config/env.ts`                                  | `4000` (Render injects automatically)                                                        | Boot crash if non-numeric or non-positive.                                                                                 | `curl $RENDER_URL/api/health` returns 200.                                                 |
+| `MONGODB_URI`           | `backend/src/config/env.ts`, `backend/src/config/mongo.ts`   | `mongodb+srv://user:pass@cluster.mongodb.net/vision_board`                                   | Boot crash; sync, billing, plans all unavailable. Localhost in prod is flagged as warning.                                 | `mongosh "$MONGODB_URI" --eval 'db.runCommand({ping:1})'` from a maintenance shell.        |
+| `FIREBASE_PROJECT_ID`   | `backend/src/config/firebase.ts`                             | `vision-board-prod`                                                                          | Boot crash; protected routes reject every request.                                                                         | `check:env`; later `curl /api/auth/me` with a valid ID token returns 200.                  |
+| `FIREBASE_CLIENT_EMAIL` | Same                                                         | `firebase-adminsdk-xxxx@vision-board-prod.iam.gserviceaccount.com`                           | Auth verification fails; user accounts cannot sync.                                                                        | Same as above.                                                                             |
+| `FIREBASE_PRIVATE_KEY`  | Same                                                         | `"-----BEGIN PRIVATE KEY-----\nXXXX\n-----END PRIVATE KEY-----\n"` (escape newlines as `\n`) | Auth verifier crashes; signed-in users get 401.                                                                            | `check:env` validates BEGIN/END markers without printing the key.                          |
+| `FRONTEND_ORIGIN`       | `backend/src/app.ts`, `backend/src/middleware/corsOrigin.ts` | `https://vision-board.example.com,https://app.example.com`                                   | Browsers blocked by CORS; checkout return URLs rejected. Wildcard `*`, http (non-localhost), or paths are refused at boot. | DevTools network log shows `Access-Control-Allow-Origin: <your origin>` on a real request. |
 
 ### Required only when paid billing runs through the backend
 
-| Variable | Used in | Example (safe) | Risk if missing/wrong | Verify |
-| --- | --- | --- | --- | --- |
-| `BILLING_PROVIDER` | `backend/src/services/paymentProviderRegistry.ts` | `casso` (or `mock` for staging) | Unknown values silently fall back to `mock`. Must match your real adapter. | `check:env` prints provider; `GET /api/billing/checkout-info` shows the right `provider`. |
-| `BILLING_REPOSITORY` | `backend/src/services/billingServiceInstance.ts` | `mongo` | If `memory` is used in production, paid entitlements vanish on restart. `unset` in production triggers a warning. | `check:env`; verify a paid user keeps `PLUS` after a forced redeploy. |
-| `BILLING_PAID_DISABLED` | `backend/src/controllers/billingController.ts` | `0` (or `1` to kill paid checkout) | Defense-in-depth kill switch. Set to `1` while a payment provider is unavailable to return `503 checkout_disabled` instead of opening unsafe sessions. Always pair with the frontend `VITE_BILLING_PAID_CHECKOUT_DISABLED`. | `POST /api/billing/checkout-session` returns 503 with `errorCode: "checkout_disabled"` when set. |
+| Variable                | Used in                                           | Example (safe)                                                                | Risk if missing/wrong                                                                                                                                                                                                       | Verify                                                                                           |
+| ----------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `BILLING_PROVIDER`      | `backend/src/services/paymentProviderRegistry.ts` | `payos` for PayOS rollout, `casso` for legacy, or `mock` for staging previews | Unknown values silently fall back to `mock`. Must match your real adapter.                                                                                                                                                  | `check:env` prints provider; `GET /api/billing/checkout-info` shows the right `provider`.        |
+| `BILLING_REPOSITORY`    | `backend/src/services/billingServiceInstance.ts`  | `mongo`                                                                       | If `memory` is used in production, paid entitlements vanish on restart. `unset` in production triggers a warning.                                                                                                           | `check:env`; verify a paid user keeps `PLUS` after a forced redeploy.                            |
+| `BILLING_PAID_DISABLED` | `backend/src/controllers/billingController.ts`    | `0` (or `1` to kill paid checkout)                                            | Defense-in-depth kill switch. Set to `1` while a payment provider is unavailable to return `503 checkout_disabled` instead of opening unsafe sessions. Always pair with the frontend `VITE_BILLING_PAID_CHECKOUT_DISABLED`. | `POST /api/billing/checkout-session` returns 503 with `errorCode: "checkout_disabled"` when set. |
 
 ---
 
 ## Required for frontend (Vercel project env, `VITE_*`)
 
-| Variable | Used in | Example (safe) | Risk if missing/wrong | Verify |
-| --- | --- | --- | --- | --- |
-| `VITE_APP_MODE` | `src/app/utils/app-mode.ts` | `real` | Unknown/blank values default to `real`; `demo` in production silently disables Firebase login and real billing. | DevTools console: missing/invalid value logs `[app-mode] Invalid VITE_APP_MODE`. Settings page shows real-mode UI. |
-| `VITE_API_BASE_URL` | `src/lib/api/apiClient.ts` | `https://api.vision-board.example.com/api` | Frontend silently calls `http://localhost:4000/api` and every request fails. | DevTools network tab targets the production API host, not localhost. |
-| `VITE_FIREBASE_API_KEY` | `src/lib/auth/firebase.ts` | `AIzaSy...` (Firebase web API key, restricted by host) | Login disabled; sync impossible. | Sign-in flow opens Firebase popup successfully. |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Same | `vision-board-prod.firebaseapp.com` | Auth popup/redirect breaks. | Same. |
-| `VITE_FIREBASE_PROJECT_ID` | Same | `vision-board-prod` | Token audience mismatch with backend; 401 on every protected call. | Backend logs do not show `auth/argument-error`. |
-| `VITE_FIREBASE_APP_ID` | Same | `1:1234:web:abcd1234` | SDK init throws. | Console shows no Firebase init error. |
-| `VITE_BILLING_PROVIDER_MODE` | `src/app/utils/production/env.ts` | `api_contract` for real billing, `mock_provider` for previews | Demo mock copy may surface in production paywall; real checkout silently disabled. | Paywall dialog labels match the real provider. |
-| `VITE_BILLING_PROVIDER_LABEL` | Same | `Casso + VietQR` | Generic "Mock provider" label leaks in production UI. | Settings → Billing shows the real label. |
-| `VITE_BILLING_SUPPORT_EMAIL` | `src/lib/billing/...`, refund flows | `support@example.com` | Customers cannot reach support from refund/cancel screens. | Click "Liên hệ hỗ trợ" → opens correct mailto. |
-| `VITE_BILLING_PLUS_MONTHLY_PRICE_VND` | `src/app/utils/billing-pricing.ts` | `99000` | Wrong price displayed to users; UX mismatch with backend `PLUS_PRICE_VND`. | Paywall shows the same price the backend charges. |
-| `VITE_BILLING_PAID_CHECKOUT_DISABLED` | `src/app/utils/app-mode.ts` | `0` (default) or `1` to disable | When paired with backend `BILLING_PAID_DISABLED`, hides "Tiếp tục thanh toán" CTAs and shows support copy. | Upgrade dialog renders the disabled-state banner when set. |
+| Variable                              | Used in                             | Example (safe)                                                               | Risk if missing/wrong                                                                                           | Verify                                                                                                             |
+| ------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `VITE_APP_MODE`                       | `src/app/utils/app-mode.ts`         | `real`                                                                       | Unknown/blank values default to `real`; `demo` in production silently disables Firebase login and real billing. | DevTools console: missing/invalid value logs `[app-mode] Invalid VITE_APP_MODE`. Settings page shows real-mode UI. |
+| `VITE_API_BASE_URL`                   | `src/lib/api/apiClient.ts`          | `https://api.vision-board.example.com/api`                                   | Frontend silently calls `http://localhost:4000/api` and every request fails.                                    | DevTools network tab targets the production API host, not localhost.                                               |
+| `VITE_FIREBASE_API_KEY`               | `src/lib/auth/firebase.ts`          | `AIzaSy...` (Firebase web API key, restricted by host)                       | Login disabled; sync impossible.                                                                                | Sign-in flow opens Firebase popup successfully.                                                                    |
+| `VITE_FIREBASE_AUTH_DOMAIN`           | Same                                | `vision-board-prod.firebaseapp.com`                                          | Auth popup/redirect breaks.                                                                                     | Same.                                                                                                              |
+| `VITE_FIREBASE_PROJECT_ID`            | Same                                | `vision-board-prod`                                                          | Token audience mismatch with backend; 401 on every protected call.                                              | Backend logs do not show `auth/argument-error`.                                                                    |
+| `VITE_FIREBASE_APP_ID`                | Same                                | `1:1234:web:abcd1234`                                                        | SDK init throws.                                                                                                | Console shows no Firebase init error.                                                                              |
+| `VITE_BILLING_PROVIDER_MODE`          | `src/app/utils/production/env.ts`   | `api_contract` for real billing, `mock_provider` for previews                | Demo mock copy may surface in production paywall; real checkout silently disabled.                              | Paywall dialog labels match the real provider.                                                                     |
+| `VITE_BILLING_PROVIDER_LABEL`         | Same                                | `PayOS` after rollout, or provider-neutral `Thanh toán bảo mật` while locked | Generic "Mock provider" label leaks in production UI.                                                           | Settings → Billing shows the real/provider-neutral label.                                                          |
+| `VITE_BILLING_SUPPORT_EMAIL`          | `src/lib/billing/...`, refund flows | `support@example.com`                                                        | Customers cannot reach support from refund/cancel screens.                                                      | Click "Liên hệ hỗ trợ" → opens correct mailto.                                                                     |
+| `VITE_BILLING_PLUS_MONTHLY_PRICE_VND` | `src/app/utils/billing-pricing.ts`  | `99000`                                                                      | Wrong price displayed to users; UX mismatch with backend `PLUS_PRICE_VND`.                                      | Paywall shows the same price the backend charges.                                                                  |
+| `VITE_BILLING_PAID_CHECKOUT_DISABLED` | `src/app/utils/app-mode.ts`         | `0` (default) or `1` to disable                                              | When paired with backend `BILLING_PAID_DISABLED`, hides "Tiếp tục thanh toán" CTAs and shows support copy.      | Upgrade dialog renders the disabled-state banner when set.                                                         |
 
 ---
 
 ## Required for Casso/VietQR (when `BILLING_PROVIDER=casso`)
 
-| Variable | Used in | Example (safe) | Risk if missing/wrong | Verify |
-| --- | --- | --- | --- | --- |
-| `CASSO_WEBHOOK_SECRET` | `backend/src/controllers/cassoWebhookController.ts`, `backend/src/services/cassoPaymentAdapter.ts` | `casso_webhook_secret_value` | Webhooks rejected with `401 Invalid webhook signature`. Order never moves to `completed`. | Casso dashboard webhook test; backend log shows `event=casso_webhook_success`. |
-| `CASSO_WEBHOOK_CHECKSUM_KEY` | Webhook V2 HMAC sha512 verification | `checksum_key_value` | Casso V2 signed requests fail. (`CASSO_WEBHOOK_SECRET` may double as this if you only have one secret.) | Same as above. |
-| `CASSO_CHECKSUM_KEY` | Alias for above (legacy) | optional | Same. | Same. |
-| `CASSO_SECURE_TOKEN` | Webhook secure-token header verification | optional | Legacy secure-token webhooks fail. | Same. |
-| `CASSO_BANK_ACCOUNT` | Adapter, order status controller | `0123456789` | Checkout cannot generate a VietQR; users cannot pay. | `GET /api/billing/checkout-info` returns the account number. |
-| `CASSO_BANK_NAME` | Adapter (BIN map) | `MB` (must match the keys in `cassoPaymentAdapter.BANK_BIN_MAP`) | VietQR URL points to wrong BIN; QR scan fails. | Test scan returns a real bank screen. |
-| `CASSO_ACCOUNT_NAME` | Adapter, VietQR `addInfo` | `NGUYEN VAN A` | Payer sees blank account name in their banking app. | Test transfer shows the right name. |
-| `PLUS_PRICE_VND` | Adapter, order status controller | `99000` (must be ≥ `1000`) | Validator errors on boot; checkout cannot create orders. Mismatched value vs `VITE_BILLING_PLUS_MONTHLY_PRICE_VND` causes UX confusion. | `check:env` confirms numeric ≥ 1000; UI price equals backend price. |
-| `CASSO_API_BASE_URL` (optional) | `backend/src/services/billingReconciliation.ts` | `https://oauth.casso.vn/v2` | Reconciliation job hits the wrong API host. | Cron log shows successful reconciliation pulls. |
-| `CASSO_API_KEY` / `CASSO_ACCESS_TOKEN` (optional) | Same | `casso_personal_token` | Reconciliation cannot poll Casso transactions; only realtime webhooks work. | Reconciliation log shows `transactions_fetched > 0`. |
+| Variable                                          | Used in                                                                                            | Example (safe)                                                   | Risk if missing/wrong                                                                                                                   | Verify                                                                         |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `CASSO_WEBHOOK_SECRET`                            | `backend/src/controllers/cassoWebhookController.ts`, `backend/src/services/cassoPaymentAdapter.ts` | `casso_webhook_secret_value`                                     | Webhooks rejected with `401 Invalid webhook signature`. Order never moves to `completed`.                                               | Casso dashboard webhook test; backend log shows `event=casso_webhook_success`. |
+| `CASSO_WEBHOOK_CHECKSUM_KEY`                      | Webhook V2 HMAC sha512 verification                                                                | `checksum_key_value`                                             | Casso V2 signed requests fail. (`CASSO_WEBHOOK_SECRET` may double as this if you only have one secret.)                                 | Same as above.                                                                 |
+| `CASSO_CHECKSUM_KEY`                              | Alias for above (legacy)                                                                           | optional                                                         | Same.                                                                                                                                   | Same.                                                                          |
+| `CASSO_SECURE_TOKEN`                              | Webhook secure-token header verification                                                           | optional                                                         | Legacy secure-token webhooks fail.                                                                                                      | Same.                                                                          |
+| `CASSO_BANK_ACCOUNT`                              | Adapter, order status controller                                                                   | `0123456789`                                                     | Checkout cannot generate a VietQR; users cannot pay.                                                                                    | `GET /api/billing/checkout-info` returns the account number.                   |
+| `CASSO_BANK_NAME`                                 | Adapter (BIN map)                                                                                  | `MB` (must match the keys in `cassoPaymentAdapter.BANK_BIN_MAP`) | VietQR URL points to wrong BIN; QR scan fails.                                                                                          | Test scan returns a real bank screen.                                          |
+| `CASSO_ACCOUNT_NAME`                              | Adapter, VietQR `addInfo`                                                                          | `NGUYEN VAN A`                                                   | Payer sees blank account name in their banking app.                                                                                     | Test transfer shows the right name.                                            |
+| `PLUS_PRICE_VND`                                  | Adapter, order status controller                                                                   | `99000` (must be ≥ `1000`)                                       | Validator errors on boot; checkout cannot create orders. Mismatched value vs `VITE_BILLING_PLUS_MONTHLY_PRICE_VND` causes UX confusion. | `check:env` confirms numeric ≥ 1000; UI price equals backend price.            |
+| `CASSO_API_BASE_URL` (optional)                   | `backend/src/services/billingReconciliation.ts`                                                    | `https://oauth.casso.vn/v2`                                      | Reconciliation job hits the wrong API host.                                                                                             | Cron log shows successful reconciliation pulls.                                |
+| `CASSO_API_KEY` / `CASSO_ACCESS_TOKEN` (optional) | Same                                                                                               | `casso_personal_token`                                           | Reconciliation cannot poll Casso transactions; only realtime webhooks work.                                                             | Reconciliation log shows `transactions_fetched > 0`.                           |
 
 ### Webhook health verification
 
@@ -129,6 +132,39 @@ Then trigger a small real transfer with a test order ID and check:
 - Backend log: `event=casso_webhook_success`.
 - `GET /api/billing/orders/<orderId>` shows `status: "completed"`.
 - User entitlement at `GET /api/billing/entitlement` shows `PLUS`.
+
+---
+
+## Required for PayOS (when `BILLING_PROVIDER=payos`)
+
+PayOS adapter and webhook support are available, but production checkout must stay locked with `BILLING_PAID_DISABLED=true` and `VITE_BILLING_PAID_CHECKOUT_DISABLED=true` until staging E2E and ops sign-off pass.
+
+| Variable             | Used in                                       | Example (safe)             | Risk if missing/wrong                                                                  | Verify                                                                          |
+| -------------------- | --------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `PAYOS_CLIENT_ID`    | `backend/src/services/payosPaymentAdapter.ts` | `payos_client_id`          | Checkout creation fails closed with `provider_not_configured` when kill-switch is off. | `check:env` warns while locked; errors when checkout is unlocked in production. |
+| `PAYOS_API_KEY`      | Same                                          | `payos_api_key`            | PayOS SDK cannot create payment links.                                                 | Same.                                                                           |
+| `PAYOS_CHECKSUM_KEY` | PayOS adapter + webhook controller            | `payos_checksum_key`       | Webhooks are rejected with `401 Invalid webhook signature`; Plus is never granted.     | Invalid webhook returns 401; valid sandbox webhook completes the order.         |
+| `PLUS_PRICE_VND`     | PayOS adapter                                 | `99000` (must be ≥ `1000`) | Wrong amount or boot validation error when checkout is enabled.                        | UI price equals backend amount; amount mismatch webhook does not grant.         |
+
+### PayOS webhook verification
+
+```bash
+curl -i $RENDER_URL/api/billing/webhook/payos/health
+# Expected: 200 with provider: "payos", configured: true/false, status, timestamp
+```
+
+Configure the public webhook URL in the PayOS dashboard as:
+
+```
+$RENDER_URL/api/billing/webhook/payos
+```
+
+Rules before opening checkout:
+
+- PayOS return/cancel URLs are navigation only and must not grant Plus.
+- Plus is granted only after a verified PayOS webhook succeeds, matches a pending `PaymentOrder`, matches amount/currency, and is not expired.
+- Duplicate webhook deliveries are idempotent and must not grant Plus twice.
+- Keep the backend/frontend kill-switches enabled during env setup and production smoke.
 
 ---
 
@@ -160,11 +196,12 @@ curl -i -H "Authorization: Bearer $ID_TOKEN" $RENDER_URL/api/auth/me
 
 ## Required for MongoDB
 
-| Variable | Used in | Example (safe) | Risk |
-| --- | --- | --- | --- |
+| Variable      | Used in                       | Example (safe)                                                                                  | Risk                                                                                                                              |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `MONGODB_URI` | `backend/src/config/mongo.ts` | `mongodb+srv://user:pass@cluster0.example.mongodb.net/vision_board?retryWrites=true&w=majority` | Boot crash if missing. Localhost in production raises a warning — the validator does not block, but it is almost certainly wrong. |
 
 Recommended cluster hardening:
+
 - Enable IP access list (Render egress IPs or `0.0.0.0/0` only if the URI
   uses SCRAM auth + TLS).
 - Use a dedicated user with `readWrite` on `vision_board` only.
@@ -182,19 +219,19 @@ curl -s $RENDER_URL/api/health | jq
 
 ## Optional but recommended
 
-| Variable | Purpose | Notes |
-| --- | --- | --- |
-| `SENTRY_DSN` (backend) / `VITE_SENTRY_DSN` (frontend) | Error monitoring | Validator warns if missing in production. Strongly recommended. |
-| `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE` | Sentry tagging and sampling | Backend defaults: env from `NODE_ENV`, sample rate 0.05. Frontend defaults: env from `VITE_APP_MODE`, sample rate 0.02. |
-| `BILLING_SUPPORT_EMAIL` / `SUPPORT_EMAIL` | Refund and customer-portal emails | Validator warns if missing in production. |
-| `EMAIL_PROVIDER` (`disabled` / `resend` / `smtp`) | Receipt and refund emails | When `disabled`, email-bound flows skip sending without crashing. Set to `resend` or `smtp` for production transactional email. |
-| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SMTP_*` | Email transport | Required when `EMAIL_PROVIDER` is enabled. |
-| `REFUND_WINDOW_DAYS`, `REFUND_MAX_USED_PERCENT` | Manual refund policy | Defaults documented in `.env.example`. |
-| `ADMIN_EMAILS` | Admin role bootstrap | Comma-separated list. Used at first login to flag admin accounts. |
-| `MONGODB_BACKUP_*`, `R2_*`, `MONGODUMP_BIN`, `GPG_BIN` | Backup script | Used by `scripts/backup-mongodb.mjs`. Not required for runtime. |
-| `ASSISTANT_PROVIDER`, `GROQ_API_KEY` / `GEMINI_API_KEY` | AI assistant feature | Optional. Falls back to default Groq model name when missing. |
-| `VITE_ANALYTICS_MODE`, `VITE_GA_MEASUREMENT_ID` | GA4 analytics | Default: `off`. |
-| `VITE_OUTBOX_SYNC_ENDPOINT`, `VITE_BILLING_API_BASE`, `VITE_PUSH_VAPID_PUBLIC_KEY`, `VITE_PUSH_SUBSCRIBE_ENDPOINT`, `VITE_EMAIL_REMINDER_ENDPOINT` | Optional integrations | Leave blank to disable. |
+| Variable                                                                                                                                           | Purpose                           | Notes                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `SENTRY_DSN` (backend) / `VITE_SENTRY_DSN` (frontend)                                                                                              | Error monitoring                  | Validator warns if missing in production. Strongly recommended.                                                                 |
+| `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`                                                                                | Sentry tagging and sampling       | Backend defaults: env from `NODE_ENV`, sample rate 0.05. Frontend defaults: env from `VITE_APP_MODE`, sample rate 0.02.         |
+| `BILLING_SUPPORT_EMAIL` / `SUPPORT_EMAIL`                                                                                                          | Refund and customer-portal emails | Validator warns if missing in production.                                                                                       |
+| `EMAIL_PROVIDER` (`disabled` / `resend` / `smtp`)                                                                                                  | Receipt and refund emails         | When `disabled`, email-bound flows skip sending without crashing. Set to `resend` or `smtp` for production transactional email. |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SMTP_*`                                                                                         | Email transport                   | Required when `EMAIL_PROVIDER` is enabled.                                                                                      |
+| `REFUND_WINDOW_DAYS`, `REFUND_MAX_USED_PERCENT`                                                                                                    | Manual refund policy              | Defaults documented in `.env.example`.                                                                                          |
+| `ADMIN_EMAILS`                                                                                                                                     | Admin role bootstrap              | Comma-separated list. Used at first login to flag admin accounts.                                                               |
+| `MONGODB_BACKUP_*`, `R2_*`, `MONGODUMP_BIN`, `GPG_BIN`                                                                                             | Backup script                     | Used by `scripts/backup-mongodb.mjs`. Not required for runtime.                                                                 |
+| `ASSISTANT_PROVIDER`, `GROQ_API_KEY` / `GEMINI_API_KEY`                                                                                            | AI assistant feature              | Optional. Falls back to default Groq model name when missing.                                                                   |
+| `VITE_ANALYTICS_MODE`, `VITE_GA_MEASUREMENT_ID`                                                                                                    | GA4 analytics                     | Default: `off`.                                                                                                                 |
+| `VITE_OUTBOX_SYNC_ENDPOINT`, `VITE_BILLING_API_BASE`, `VITE_PUSH_VAPID_PUBLIC_KEY`, `VITE_PUSH_SUBSCRIBE_ENDPOINT`, `VITE_EMAIL_REMINDER_ENDPOINT` | Optional integrations             | Leave blank to disable.                                                                                                         |
 
 ---
 
@@ -240,8 +277,9 @@ the report once at startup so on-call sees it without paging.
 2. `npm run env:check:full` from the workstation pointing at the host config
    you exported (no localhost, no `*`, no missing keys).
 3. Casso (if active): `curl /api/billing/webhook/casso/health` → 200.
-4. Firebase: sign in on the production frontend; protected API call returns
+4. PayOS (if selected): `curl /api/billing/webhook/payos/health` → 200 and configure the same URL in PayOS dashboard.
+5. Firebase: sign in on the production frontend; protected API call returns
    200; sign-out clears the session.
-5. MongoDB: `/api/health` reports `mongo: "connected"`.
-6. Real billing: confirm `BILLING_PAID_DISABLED` is `0`, `VITE_BILLING_PAID_CHECKOUT_DISABLED` is `0`, and a small real test transfer flows end to end.
-7. Sentry: confirm a test error reaches the dashboard from both backend and frontend with the expected `environment` tag.
+6. MongoDB: `/api/health` reports `mongo: "connected"`.
+7. Real billing: confirm `BILLING_PAID_DISABLED` is `0`, `VITE_BILLING_PAID_CHECKOUT_DISABLED` is `0`, and a small controlled provider transaction flows end to end.
+8. Sentry: confirm a test error reaches the dashboard from both backend and frontend with the expected `environment` tag.

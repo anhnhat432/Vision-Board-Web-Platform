@@ -88,7 +88,7 @@ export function renderPaymentReceiptEmail(input: SendPaymentReceiptInput): Rende
     `Gói: ${input.planName}`,
     `Số tiền: ${amountLabel}`,
     `Ngày thanh toán: ${paidAtLabel}`,
-    `Mã giao dịch Casso: ${paymentRef}`,
+    `Mã giao dịch thanh toán: ${paymentRef}`,
     `Email nhận biên nhận: ${to}`,
     `Nếu cần hỗ trợ hoặc hoàn tiền, liên hệ ${supportEmail}.`,
     "Lưu ý: email này không phải hóa đơn VAT điện tử.",
@@ -99,7 +99,7 @@ export function renderPaymentReceiptEmail(input: SendPaymentReceiptInput): Rende
     ["Gói", input.planName],
     ["Số tiền", amountLabel],
     ["Ngày thanh toán", paidAtLabel],
-    ["Mã giao dịch Casso", paymentRef],
+    ["Mã giao dịch thanh toán", paymentRef],
     ["Email nhận biên nhận", to],
   ];
 

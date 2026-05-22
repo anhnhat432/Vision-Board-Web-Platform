@@ -1,6 +1,6 @@
 # PayOS Migration Plan
 
-Status: plan only. PayOS is not implemented, not enabled, and not live.
+Status: step-1 backend adapter/webhook implemented. Paid checkout remains kill-switched and is not live.
 Date: 2026-05-22
 Scope: billing surface only. 12-week setup is Full GO and must not be changed by this migration.
 
@@ -9,9 +9,10 @@ Scope: billing surface only. 12-week setup is Full GO and must not be changed by
 - Production paid checkout is intentionally disabled while the provider migration is unresolved.
 - Frontend billing remains mode-driven through `VITE_BILLING_PROVIDER_MODE`. Real production uses `api_contract` so frontend calls backend `/billing/*` endpoints instead of unlocking local entitlements.
 - Backend provider selection is controlled by `BILLING_PROVIDER` in `backend/src/services/paymentProviderRegistry.ts`.
-- `casso` is the only real-ish adapter currently implemented. It creates a local `PaymentOrder`, returns a VietQR image URL, and relies on Casso webhooks to mark the order completed.
-- `payos`, `momo`, and `vnpay` currently resolve to placeholder adapters. The placeholders fail closed: checkout rejects, webhook verification returns invalid, event parsing throws, and status mapping returns `null`.
-- Entitlements must not be granted from checkout creation or frontend return URLs. They are granted only after a verified provider event is processed by backend billing services.
+- `casso` remains implemented for legacy VietQR orders/webhooks and must not be deleted during migration.
+- `payos` now resolves to a real PayOS adapter backed by the official `@payos/node` SDK. It creates hosted payment links and local `PaymentOrder` records, but the backend kill-switch prevents checkout creation while `BILLING_PAID_DISABLED=true`.
+- `momo` and `vnpay` remain placeholder adapters and fail closed.
+- Entitlements must not be granted from checkout creation or frontend return URLs. They are granted only after a verified PayOS webhook is processed by backend billing services.
 
 ## 2. Why Casso Is Retired/Paused
 
@@ -41,7 +42,7 @@ These flags must remain enabled until PayOS implementation is merged, tested in 
 
 ## 4. PayOS Adapter Scope
 
-Implement a real `PaymentProviderAdapter` in a new backend service file, likely `backend/src/services/payosPaymentAdapter.ts`. Do not replace the provider-agnostic interface unless PayOS requires fields that cannot be represented safely.
+Implemented in `backend/src/services/payosPaymentAdapter.ts` as the first backend migration step. Do not replace the provider-agnostic interface unless PayOS later requires fields that cannot be represented safely.
 
 ### createCheckoutSession
 
@@ -63,6 +64,8 @@ Required behavior:
   - `expiresAt`: provider expiry if available, otherwise local expiry
 - Never grant PLUS entitlement in this method.
 - Fail closed with `PaymentProviderNotConfiguredError` or `PaymentProviderError` if PayOS config, amount, order creation, or provider response is invalid.
+
+Implementation note: PayOS `orderCode` is numeric. The adapter keeps the existing local `PaymentOrder.orderId` format (`VB` + 8 chars) for polling/admin/refund compatibility, stores the PayOS numeric `orderCode` and `paymentLinkId` in `PaymentOrder.metadata.payos`, and maps webhook payloads back by `metadata.payos.orderCode`, `metadata.payos.paymentLinkId`, or the local order id echoed in the PayOS description.
 
 ### verifyWebhookSignature
 
@@ -109,14 +112,15 @@ For PLUS access, one successful PayOS payment should create a 12-week active ent
 
 ## 5. Required PayOS Env Vars
 
-Exact names must be confirmed against the PayOS dashboard, SDK, and API docs before implementation. Proposed backend env names:
+Confirmed against the official `@payos/node` SDK v2.0.5:
 
 - `BILLING_PROVIDER=payos`
 - `BILLING_REPOSITORY=mongo`
+- `BILLING_PAID_DISABLED=true` until rollout sign-off
 - `PAYOS_CLIENT_ID`
 - `PAYOS_API_KEY`
 - `PAYOS_CHECKSUM_KEY`
-- `PAYOS_ENV=sandbox|production` or equivalent if the SDK/API needs explicit environment selection
+- `PLUS_PRICE_VND`
 - `PAYOS_API_BASE_URL` only if PayOS does not infer base URL from environment
 - `PLUS_PRICE_VND=99000` or current approved 12-week price
 - `FRONTEND_ORIGIN=https://...` for return/cancel URL origin validation
@@ -300,9 +304,8 @@ Immediate rollback if webhook failures, amount mismatches, pending orders, entit
 
 ## 13. Explicit Non-Goals
 
-- Do not implement PayOS in this planning task.
-- Do not change source code in this planning task.
-- Do not turn off `VITE_BILLING_PAID_CHECKOUT_DISABLED` or `BILLING_PAID_DISABLED` in this planning task.
+- Do not treat the step-1 PayOS adapter/webhook as production checkout readiness.
+- Do not turn off `VITE_BILLING_PAID_CHECKOUT_DISABLED` or `BILLING_PAID_DISABLED` in this task.
 - Do not claim PayOS is live, production-ready, or accepting real payments.
 - Do not reactivate Casso for real payments unless its Standard plan and webhook delivery are verified separately.
 - Do not touch 12-week setup, 12-week execution, plan generation, or sync behavior for this migration.

@@ -436,22 +436,26 @@ describe("PaymentProviderRegistry", () => {
     assert.equal(isPaymentProviderReady(), true);
   });
 
-  it("placeholder createCheckoutSession rejects with PaymentProviderNotConfiguredError", async () => {
+  it("returns unconfigured real PayOS adapter when PayOS env is missing", async () => {
     process.env.BILLING_PROVIDER = "payos";
+    delete process.env.PAYOS_CLIENT_ID;
+    delete process.env.PAYOS_API_KEY;
+    delete process.env.PAYOS_CHECKSUM_KEY;
     const adapter = getPaymentProviderAdapter();
-    try {
-      await adapter.createCheckoutSession({
-        userId: "user_1",
-        planCode: "PLUS",
-        billingCycle: "monthly",
-        successUrl: "https://example.com/success",
-        cancelUrl: "https://example.com/cancel",
-      });
-      assert.fail("Should have thrown");
-    } catch (error) {
-      assert.ok(error instanceof PaymentProviderNotConfiguredError);
-      assert.equal(error.code, "PROVIDER_NOT_CONFIGURED");
-    }
+
+    assert.equal(adapter.providerId, "payos");
+    assert.equal(adapter.isConfigured, false);
+    await assert.rejects(
+      () =>
+        adapter.createCheckoutSession({
+          userId: "user_1",
+          planCode: "PLUS",
+          billingCycle: "monthly",
+          successUrl: "https://example.com/success",
+          cancelUrl: "https://example.com/cancel",
+        }),
+      PaymentProviderNotConfiguredError,
+    );
   });
 
   it("placeholder verifyWebhookSignature returns invalid", () => {

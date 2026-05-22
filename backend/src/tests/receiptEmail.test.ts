@@ -30,7 +30,7 @@ describe("receiptEmailService", () => {
     assert.match(rendered.text, /Dear Our Future đã xác nhận thanh toán/);
     assert.match(rendered.text, /Gói: Plus monthly/);
     assert.match(rendered.text, /Số tiền: 99\.000\s?₫/);
-    assert.match(rendered.text, /Mã giao dịch Casso: casso_tx_123/);
+    assert.match(rendered.text, /Mã giao dịch thanh toán: casso_tx_123/);
     assert.match(rendered.text, /Nếu cần hỗ trợ hoặc hoàn tiền, liên hệ support@example\.test/);
     assert.match(rendered.text, /không phải hóa đơn VAT điện tử/);
     assert.match(rendered.html, /Biên nhận thanh toán/);

@@ -42,6 +42,18 @@ export interface PaymentOrderEntity {
   reconciliationLastError?: string | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
+    payos?: {
+      orderCode?: number;
+      paymentLinkId?: string;
+      checkoutUrl?: string;
+      qrCode?: string;
+      status?: string;
+      webhookReference?: string;
+      webhookCode?: string;
+      webhookDescription?: string;
+      transactionDateTime?: string;
+    } | null;
+    [key: string]: unknown;
   } | null;
   manualCompletedBy?: string | null;
   manualCompletedAt?: Date | null;
@@ -97,7 +109,6 @@ const paymentOrderSchema = new Schema(
     provider: {
       type: String,
       required: true,
-      default: "casso",
     },
     bankAccount: {
       type: String,
@@ -173,10 +184,9 @@ const paymentOrderSchema = new Schema(
       maxlength: 500,
     },
     metadata: {
-      userConfirmedTransferAt: {
-        type: Date,
-        required: false,
-      },
+      type: Schema.Types.Mixed,
+      required: false,
+      default: undefined,
     },
     manualCompletedBy: {
       type: String,
@@ -208,6 +218,9 @@ const paymentOrderSchema = new Schema(
 paymentOrderSchema.index({ orderId: 1, status: 1 });
 // User's order history
 paymentOrderSchema.index({ userId: 1, createdAt: -1 });
+// PayOS webhook lookup by metadata identifiers (sparse — only PayOS orders carry these)
+paymentOrderSchema.index({ provider: 1, "metadata.payos.orderCode": 1 }, { sparse: true });
+paymentOrderSchema.index({ provider: 1, "metadata.payos.paymentLinkId": 1 }, { sparse: true });
 export const PaymentOrderModel = model("PaymentOrder", paymentOrderSchema);
 
 export type PaymentOrderDocument = Document & {
@@ -235,6 +248,18 @@ export type PaymentOrderDocument = Document & {
   reconciliationLastError?: string | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
+    payos?: {
+      orderCode?: number;
+      paymentLinkId?: string;
+      checkoutUrl?: string;
+      qrCode?: string;
+      status?: string;
+      webhookReference?: string;
+      webhookCode?: string;
+      webhookDescription?: string;
+      transactionDateTime?: string;
+    } | null;
+    [key: string]: unknown;
   } | null;
   manualCompletedBy?: string | null;
   manualCompletedAt?: Date | null;

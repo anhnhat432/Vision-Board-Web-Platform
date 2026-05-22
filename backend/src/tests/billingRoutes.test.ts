@@ -380,9 +380,12 @@ describe("POST /api/billing/checkout-session", () => {
     assert.deepEqual(entitlement.entitlements, []);
   });
 
-  it("returns 503 when PayOS provider is selected but not implemented", async () => {
+  it("returns 503 when PayOS provider env is missing", async () => {
     process.env.BILLING_PROVIDER = "payos";
     process.env.BILLING_PAID_DISABLED = "false";
+    delete process.env.PAYOS_CLIENT_ID;
+    delete process.env.PAYOS_API_KEY;
+    delete process.env.PAYOS_CHECKSUM_KEY;
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
       token: "checkout-token",
       body: validBody,
@@ -472,9 +475,12 @@ describe("POST /api/billing/public-checkout-session", () => {
     assert.equal(data.provider, "mock");
   });
 
-  it("returns 503 for public checkout when PayOS provider is selected but not implemented", async () => {
+  it("returns 503 for public checkout when PayOS provider env is missing", async () => {
     process.env.BILLING_PROVIDER = "payos";
     process.env.BILLING_PAID_DISABLED = "false";
+    delete process.env.PAYOS_CLIENT_ID;
+    delete process.env.PAYOS_API_KEY;
+    delete process.env.PAYOS_CHECKSUM_KEY;
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
       token: null,
       body: validBody,

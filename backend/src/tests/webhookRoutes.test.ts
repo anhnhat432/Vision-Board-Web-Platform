@@ -358,8 +358,9 @@ describe("POST /api/billing/webhook/:provider", () => {
       eventId: uniqueEventId(),
     });
 
-    // Send to "payos" when active provider is "casso"
-    const response = await postWebhook(createWebhookTestApp(), "payos", body);
+    // Send to a generic inactive provider when active provider is "casso".
+    // PayOS has a dedicated checksum-verified controller and no longer uses the generic handler.
+    const response = await postWebhook(createWebhookTestApp(), "vnpay", body);
     assert.equal(response.status, 200);
     assert.ok((response.body.message as string).includes("not active"));
   });
