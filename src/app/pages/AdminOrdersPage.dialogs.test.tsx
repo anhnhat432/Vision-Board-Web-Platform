@@ -221,12 +221,12 @@ describe("AdminOrdersPage dialogs", () => {
     const dialog = await screen.findByRole("alertdialog", { name: "Mở Plus thủ công?" });
     const noteInput = within(dialog).getByLabelText("Ghi chú đối chiếu");
     await user.clear(noteInput);
-    await user.type(noteInput, "Đã đối chiếu tiền vào Casso thành công.");
+    await user.type(noteInput, "Đã đối chiếu tiền vào cổng thanh toán thành công.");
     await user.click(within(dialog).getByRole("button", { name: "Xác nhận mở Plus" }));
 
     await waitFor(() => {
       expect(adminServiceMock.adminCompletePaymentOrderManually).toHaveBeenCalledWith("VBPAY00001", {
-        manualCompletionNote: "Đã đối chiếu tiền vào Casso thành công.",
+        manualCompletionNote: "Đã đối chiếu tiền vào cổng thanh toán thành công.",
       });
     });
 

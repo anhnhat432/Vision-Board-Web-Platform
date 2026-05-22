@@ -350,7 +350,7 @@ export function BillingPlan() {
   const handleOpenUpgrade = (context: PremiumFeatureContext = "plan") => {
     if (paidCheckoutDisabled) {
       toast.info(
-        "Thanh toán đang tạm khóa do đổi nhà cung cấp. Vui lòng liên hệ hỗ trợ để được nâng cấp thủ công.",
+        "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu cần nâng cấp thủ công.",
       );
       return;
     }
@@ -580,7 +580,7 @@ export function BillingPlan() {
   const handleRenewPlan = () => {
     if (paidCheckoutDisabled) {
       toast.info(
-        "Thanh toán đang tạm khóa do đổi nhà cung cấp. Vui lòng liên hệ hỗ trợ để gia hạn thủ công.",
+        "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu cần gia hạn thủ công.",
       );
       return;
     }
@@ -765,8 +765,8 @@ export function BillingPlan() {
             <div className="flex-1">
               <p className="font-medium text-app-ink">Thanh toán đang tạm khóa.</p>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Chúng tôi đang chuyển sang nhà cung cấp thanh toán mới. Trong thời gian này, các nút nâng cấp/gia hạn
-                sẽ tạm bị khóa. Vui lòng liên hệ{" "}
+                Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu
+                cần nâng cấp thủ công: {" "}
                 {BILLING_SUPPORT_EMAIL ? (
                   <a
                     href={`mailto:${BILLING_SUPPORT_EMAIL}`}
@@ -776,8 +776,8 @@ export function BillingPlan() {
                   </a>
                 ) : (
                   "đội hỗ trợ"
-                )}{" "}
-                nếu bạn cần nâng cấp thủ công. Quyền hiện có trên tài khoản của bạn không bị ảnh hưởng.
+                )}
+                .
               </p>
             </div>
           </div>
@@ -1123,10 +1123,14 @@ export function BillingPlan() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`)}
+                            onClick={() => {
+                              if (paidCheckoutDisabled) return;
+                              navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`);
+                            }}
+                            disabled={paidCheckoutDisabled}
                             className="border-app-line hover:bg-app-bg"
                           >
-                            Tiếp tục thanh toán
+                            {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Tiếp tục thanh toán"}
                           </Button>
                         )}
                         {order.status === "completed" && (

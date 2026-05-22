@@ -1,7 +1,7 @@
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
-import { CheckCircle2, Loader2, LockKeyhole, Mail, ReceiptText, ShieldCheck } from "lucide-react";
+import { CheckCircle2, CreditCard, Loader2, LockKeyhole, Mail, ReceiptText, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { BillingTrustSignals } from "../components/BillingTrustSignals";
@@ -101,11 +101,11 @@ export function BillingConfirm() {
 
   const submitLabel = useMemo(() => {
     if (paidCheckoutDisabled) return "Tạm khóa thanh toán";
-    if (submitting) return "Đang tạo mã QR...";
+    if (submitting) return "Đang tạo thanh toán...";
     if (emailVerificationRequired) return "Cần xác thực email trước";
     if (!agreed) return "Cần đồng ý điều khoản trước";
     if (!isValidEmail(receiptEmail)) return "Nhập email nhận biên nhận";
-    return "Xác nhận và tạo mã QR";
+    return "Xác nhận và tạo thanh toán";
   }, [agreed, emailVerificationRequired, paidCheckoutDisabled, receiptEmail, submitting]);
 
   const handleSendVerification = useCallback(async () => {
@@ -124,8 +124,8 @@ export function BillingConfirm() {
   const handleConfirm = useCallback(async () => {
     if (paidCheckoutDisabled) {
       setError(
-        "Thanh toán đang tạm khóa do đổi nhà cung cấp. Vui lòng liên hệ hỗ trợ qua " +
-          `${BILLING_SUPPORT_EMAIL} nếu bạn cần nâng cấp gấp.`,
+        "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. " +
+          `Liên hệ ${BILLING_SUPPORT_EMAIL} nếu cần nâng cấp thủ công.`,
       );
       return;
     }
@@ -160,7 +160,7 @@ export function BillingConfirm() {
 
       throw new Error("Không nhận được mã đơn hàng.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Không thể tạo mã QR thanh toán.");
+      setError(err instanceof Error ? err.message : "Không thể tạo phiên thanh toán.");
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +180,7 @@ export function BillingConfirm() {
               </p>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight text-app-ink">Bạn đang mua gì?</h1>
               <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-                Vui lòng kiểm tra gói, số tiền và email nhận biên nhận trước khi tạo mã QR chuyển khoản.
+                Vui lòng kiểm tra gói, số tiền và email nhận biên nhận trước khi tạo phiên thanh toán.
               </p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export function BillingConfirm() {
               value={loadingInfo ? "Đang tải..." : `${formatVndAmount(amount)} ${checkoutInfo?.currency ?? "VND"}`}
               highlight
             />
-            <ConfirmRow label="Phương thức" value="Chuyển khoản VietQR qua Casso" />
+            <ConfirmRow label="Phương thức" value="Thanh toán tự động qua nhà cung cấp thanh toán" />
           </div>
 
           <BillingTrustSignals className="mt-6" supportEmail={BILLING_SUPPORT_EMAIL} />
@@ -257,15 +257,15 @@ export function BillingConfirm() {
                 Thanh toán đang tạm khóa.
               </p>
               <p className="mt-2 leading-6 text-app-ink-soft">
-                Chúng tôi đang chuyển sang nhà cung cấp thanh toán mới nên tạm thời chưa nhận chuyển khoản tự động qua
-                trang này. Vui lòng liên hệ{" "}
+                Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu
+                cần nâng cấp thủ công: {" "}
                 <a
                   href={`mailto:${BILLING_SUPPORT_EMAIL}`}
                   className="font-medium text-app-ink underline-offset-4 hover:underline"
                 >
                   {BILLING_SUPPORT_EMAIL}
-                </a>{" "}
-                nếu bạn cần nâng cấp gấp.
+                </a>
+                .
               </p>
             </div>
           ) : null}
@@ -301,7 +301,13 @@ export function BillingConfirm() {
               disabled={!canSubmit}
               className="inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-app-accent px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-app-ink disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none"
             >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : paidCheckoutDisabled ? (
+                <LockKeyhole className="h-4 w-4" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
               {submitLabel}
             </button>
             <button
@@ -320,13 +326,13 @@ export function BillingConfirm() {
             <div className="flex gap-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
               <p className="text-sm leading-6 text-app-ink-soft">
-                Mã QR chỉ được tạo sau khi bạn xác nhận rõ số tiền và email nhận biên nhận.
+                Phiên thanh toán chỉ được tạo sau khi bạn xác nhận rõ số tiền và email nhận biên nhận.
               </p>
             </div>
             <div className="flex gap-3">
-              <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
+              <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
               <p className="text-sm leading-6 text-app-ink-soft">
-                Sau khi Casso xác nhận giao dịch, Dear Our Future gửi biên nhận thanh toán đơn giản qua email.
+                Sau khi hệ thống xác nhận giao dịch, Dear Our Future gửi biên nhận thanh toán đơn giản qua email.
               </p>
             </div>
           </div>

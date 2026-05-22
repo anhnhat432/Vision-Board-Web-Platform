@@ -23,7 +23,7 @@ describe("UpgradePaywallDialog unverified email guard", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_APP_MODE", "real");
     vi.stubEnv("VITE_BILLING_PROVIDER_MODE", "api_contract");
-    vi.stubEnv("VITE_BILLING_PROVIDER_LABEL", "Casso + VietQR");
+    vi.stubEnv("VITE_BILLING_PROVIDER_LABEL", "Nhà cung cấp thanh toán");
     authContextMock.useOptionalAuthContext.mockReturnValue({
       user: {
         uid: "user_unverified",

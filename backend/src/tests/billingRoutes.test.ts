@@ -8,7 +8,8 @@ import { errorMiddleware } from "../middleware/errorMiddleware";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { billingRoutes, publicBillingRoutes } from "../routes/billingRoutes";
 import { billingService } from "../services/billingServiceInstance";
-import { _resetAdapterCacheForTesting } from "../services/paymentProviderRegistry";
+import type { PaymentProviderAdapter } from "../services/paymentProviderAdapter";
+import { _resetAdapterCacheForTesting, _setAdapterForTesting } from "../services/paymentProviderRegistry";
 
 // ─── Test Helpers ────────────────────────────────────────────────────────────
 
@@ -76,6 +77,31 @@ async function requestJson(
       });
     });
   }
+}
+
+function createCheckoutSpyAdapter(providerId: PaymentProviderAdapter["providerId"]): {
+  adapter: PaymentProviderAdapter;
+  getCheckoutCallCount: () => number;
+} {
+  let checkoutCallCount = 0;
+
+  return {
+    adapter: {
+      providerId,
+      isConfigured: true,
+      async createCheckoutSession() {
+        checkoutCallCount += 1;
+        throw new Error("Adapter createCheckoutSession should not be called when checkout is disabled.");
+      },
+      verifyWebhookSignature: () => ({ valid: false }),
+      parseWebhookEvent: () => {
+        throw new Error("Not used in billing route tests.");
+      },
+      mapSubscriptionStatus: () => null,
+      createCustomerPortalSession: async () => null,
+    },
+    getCheckoutCallCount: () => checkoutCallCount,
+  };
 }
 
 // ─── GET /api/billing/entitlement Tests ──────────────────────────────────────
@@ -239,6 +265,7 @@ describe("POST /api/billing/checkout-session", () => {
   beforeEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
     delete process.env.CASSO_BANK_ACCOUNT;
     delete process.env.CASSO_BANK_NAME;
@@ -249,6 +276,7 @@ describe("POST /api/billing/checkout-session", () => {
   afterEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
     delete process.env.CASSO_BANK_ACCOUNT;
     delete process.env.CASSO_BANK_NAME;
@@ -352,8 +380,9 @@ describe("POST /api/billing/checkout-session", () => {
     assert.deepEqual(entitlement.entitlements, []);
   });
 
-  it("returns 503 when provider is configured but not implemented", async () => {
+  it("returns 503 when PayOS provider is selected but not implemented", async () => {
     process.env.BILLING_PROVIDER = "payos";
+    process.env.BILLING_PAID_DISABLED = "false";
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
       token: "checkout-token",
       body: validBody,
@@ -361,6 +390,8 @@ describe("POST /api/billing/checkout-session", () => {
 
     assert.equal(response.status, 503);
     assert.equal(response.body.errorCode, "provider_not_configured");
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.data, undefined);
   });
 
   it("returns 503 when Casso provider env is missing", async () => {
@@ -374,21 +405,24 @@ describe("POST /api/billing/checkout-session", () => {
     assert.equal(response.body.errorCode, "provider_not_configured");
   });
 
-  it("returns 503 with checkout_disabled when BILLING_PAID_DISABLED=1 (auth)", async () => {
-    process.env.BILLING_PROVIDER = "mock";
-    process.env.BILLING_PAID_DISABLED = "1";
-    try {
+  for (const providerId of ["mock", "casso", "payos"] as const) {
+    it(`returns 503 checkout_disabled and does not call adapter when BILLING_PAID_DISABLED=1 (${providerId})`, async () => {
+      process.env.BILLING_PROVIDER = providerId;
+      process.env.BILLING_PAID_DISABLED = "1";
+      const spy = createCheckoutSpyAdapter(providerId);
+      _setAdapterForTesting(providerId, spy.adapter);
+
+      const token = providerId === "mock" ? "checkout-token" : providerId === "casso" ? "owner-token" : "other-token";
       const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
-        token: "checkout-token",
+        token,
         body: validBody,
       });
 
       assert.equal(response.status, 503);
       assert.equal(response.body.errorCode, "checkout_disabled");
-    } finally {
-      delete process.env.BILLING_PAID_DISABLED;
-    }
-  });
+      assert.equal(spy.getCheckoutCallCount(), 0);
+    });
+  }
 });
 
 // ─── POST /api/billing/customer-portal Tests ─────────────────────────────────
@@ -404,6 +438,7 @@ describe("POST /api/billing/public-checkout-session", () => {
   beforeEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
     delete process.env.CASSO_BANK_ACCOUNT;
     delete process.env.CASSO_BANK_NAME;
@@ -414,6 +449,7 @@ describe("POST /api/billing/public-checkout-session", () => {
   afterEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
     delete process.env.CASSO_BANK_ACCOUNT;
     delete process.env.CASSO_BANK_NAME;
@@ -436,9 +472,27 @@ describe("POST /api/billing/public-checkout-session", () => {
     assert.equal(data.provider, "mock");
   });
 
-  it("returns 503 with checkout_disabled when BILLING_PAID_DISABLED=true (public)", async () => {
-    process.env.BILLING_PAID_DISABLED = "true";
-    try {
+  it("returns 503 for public checkout when PayOS provider is selected but not implemented", async () => {
+    process.env.BILLING_PROVIDER = "payos";
+    process.env.BILLING_PAID_DISABLED = "false";
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
+      token: null,
+      body: validBody,
+    });
+
+    assert.equal(response.status, 503);
+    assert.equal(response.body.errorCode, "provider_not_configured");
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.data, undefined);
+  });
+
+  for (const providerId of ["mock", "casso", "payos"] as const) {
+    it(`returns 503 checkout_disabled and does not call adapter when BILLING_PAID_DISABLED=true (public, ${providerId})`, async () => {
+      process.env.BILLING_PROVIDER = providerId;
+      process.env.BILLING_PAID_DISABLED = "true";
+      const spy = createCheckoutSpyAdapter(providerId);
+      _setAdapterForTesting(providerId, spy.adapter);
+
       const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
         token: null,
         body: validBody,
@@ -446,10 +500,9 @@ describe("POST /api/billing/public-checkout-session", () => {
 
       assert.equal(response.status, 503);
       assert.equal(response.body.errorCode, "checkout_disabled");
-    } finally {
-      delete process.env.BILLING_PAID_DISABLED;
-    }
-  });
+      assert.equal(spy.getCheckoutCallCount(), 0);
+    });
+  }
 });
 
 describe("GET /api/billing/order-status/:orderId", () => {

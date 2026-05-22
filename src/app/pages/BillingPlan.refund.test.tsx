@@ -32,7 +32,7 @@ describe("BillingPlan refund request", () => {
     vi.resetModules();
     vi.stubEnv("VITE_APP_MODE", "real");
     vi.stubEnv("VITE_BILLING_PROVIDER_MODE", "api_contract");
-    vi.stubEnv("VITE_BILLING_PROVIDER_LABEL", "Casso + VietQR");
+    vi.stubEnv("VITE_BILLING_PROVIDER_LABEL", "Nhà cung cấp thanh toán");
     vi.stubEnv("VITE_BILLING_SUPPORT_EMAIL", "support@example.test");
     vi.stubEnv("VITE_REFUND_WINDOW_DAYS", "7");
     apiClientMock.get.mockReset();

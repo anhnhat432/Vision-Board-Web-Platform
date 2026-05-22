@@ -102,6 +102,10 @@ export function getActiveProviderId(): SupportedProviderId {
   return getProviderIdFromEnv();
 }
 
+export function _setAdapterForTesting(providerId: SupportedProviderId, adapter: PaymentProviderAdapter): void {
+  adapterCache.set(providerId, adapter);
+}
+
 export function _resetAdapterCacheForTesting(): void {
   adapterCache.clear();
 }

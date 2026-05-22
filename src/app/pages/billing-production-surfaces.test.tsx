@@ -186,7 +186,7 @@ describe("production billing surfaces", () => {
   it(
     "does not request protected payment history before a user signs in",
     async () => {
-      const apiClient = stubRealBillingEnv("Casso + VietQR");
+      const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
       stubAuthContext(null);
       const { BillingPlan } = await import("./BillingPlan");
 
@@ -207,7 +207,7 @@ describe("production billing surfaces", () => {
     "localizes payment history rate-limit errors",
     async () => {
       stubRealBillingEnv(
-        "Casso + VietQR",
+        "Nhà cung cấp thanh toán",
         {
           planCode: "FREE",
           status: "none",
@@ -259,7 +259,7 @@ describe("production billing surfaces", () => {
       const dialog = await screen.findByRole("dialog");
       expect(within(dialog).getByText("Thanh toán qua VNPay")).toBeInTheDocument();
       expect(within(dialog).getByText(/99\.000\s*₫\s*\/\s*tháng/i)).toBeInTheDocument();
-      expect(within(dialog).getByText(/Bạn sẽ chuyển khoản 99\.000 ₫ đến tài khoản ngân hàng/i)).toBeInTheDocument();
+      expect(within(dialog).getByText(/Bạn sẽ thanh toán 99\.000 ₫ qua nhà cung cấp thanh toán/i)).toBeInTheDocument();
       expect(within(dialog).getByRole("button", { name: "Tiếp tục thanh toán" })).toBeInTheDocument();
       expect(
         within(dialog).queryByText(/demo|dùng thử miễn phí|thử miễn phí|mô phỏng|Bản dùng thử/i),
@@ -271,7 +271,7 @@ describe("production billing surfaces", () => {
   it(
     "redirects the legacy checkout route to the payment confirmation page",
     async () => {
-      stubRealBillingEnv("Casso + VietQR");
+      stubRealBillingEnv("Nhà cung cấp thanh toán");
       const { MockBillingCheckout } = await import("./MockBillingCheckout");
 
       const router = createMemoryRouter(
@@ -294,7 +294,7 @@ describe("production billing surfaces", () => {
   it(
     "routes the real Plus upgrade CTA to the confirmation page",
     async () => {
-      stubRealBillingEnv("Casso + VietQR");
+      stubRealBillingEnv("Nhà cung cấp thanh toán");
       const { BillingPlan } = await import("./BillingPlan");
       const user = userEvent.setup();
 
@@ -325,9 +325,9 @@ describe("production billing surfaces", () => {
   );
 
   it(
-    "creates a public VietQR checkout session only after confirmation",
+    "creates a public payment session only after confirmation",
     async () => {
-      const apiClient = stubRealBillingEnv("Casso + VietQR");
+      const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
       vi.doMock("@/lib/auth/AuthContext", () => ({
         useAuthContext: () => ({
           user: null,
@@ -341,7 +341,7 @@ describe("production billing surfaces", () => {
           { path: "/billing/confirm", element: <BillingConfirm /> },
           {
             path: "/billing/checkout/:orderId",
-            element: <div data-testid="vietqr-checkout-page">VietQR checkout</div>,
+            element: <div data-testid="payment-checkout-page">Payment checkout</div>,
           },
         ],
         {
@@ -353,7 +353,7 @@ describe("production billing surfaces", () => {
       expect(await screen.findByRole("heading", { name: "Bạn đang mua gì?" })).toBeInTheDocument();
       await userEvent.type(screen.getByLabelText(/Email sẽ nhận biên nhận/i), "buyer@example.test");
       await userEvent.click(screen.getByRole("checkbox"));
-      await userEvent.click(screen.getByRole("button", { name: /Xác nhận và tạo mã QR/i }));
+      await userEvent.click(screen.getByRole("button", { name: /Xác nhận và tạo thanh toán/i }));
 
       await waitFor(() => {
         expect(apiClient.post).toHaveBeenCalledWith(
@@ -368,7 +368,7 @@ describe("production billing surfaces", () => {
       await waitFor(() => {
         expect(router.state.location.pathname).toBe("/billing/checkout/checkout_test");
       });
-      expect(await screen.findByTestId("vietqr-checkout-page")).toBeInTheDocument();
+      expect(await screen.findByTestId("payment-checkout-page")).toBeInTheDocument();
     },
     UI_TEST_TIMEOUT_MS,
   );

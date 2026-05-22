@@ -48,8 +48,7 @@ export function TermsPage() {
             <strong>Gói Plus:</strong> nâng cấp tính năng cao cấp cho chu kỳ 12 tuần.
           </li>
           <li>
-            Thanh toán qua chuyển khoản ngân hàng (VietQR). Gói được kích hoạt sau khi hệ thống xác nhận giao dịch thành
-            công.
+            Thanh toán qua nhà cung cấp thanh toán. Gói được kích hoạt sau khi hệ thống xác nhận giao dịch thành công.
           </li>
           <li id="refund" className="scroll-mt-24">
             <strong>Hoàn tiền:</strong> yêu cầu hoàn tiền được xử lý thủ công qua support/admin, không tự động qua cổng

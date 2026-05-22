@@ -111,7 +111,7 @@ export const ROUTE_META: RouteMeta[] = [
     match: (pathname: string) => pathname.startsWith("/billing/checkout"),
     label: "Thanh toán",
     title: "Thanh toán nâng cấp – Dear Our Future",
-    tagline: "Quét mã QR để nâng cấp gói Plus.",
+    tagline: "Theo dõi trạng thái thanh toán nâng cấp gói Plus.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/settings"),

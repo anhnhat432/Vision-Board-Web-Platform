@@ -49,7 +49,7 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
         <div className={itemClassName}>
           <Banknote className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
           <p className="text-[15px] leading-6 text-app-ink-soft">
-            Thanh toán qua chuyển khoản ngân hàng VN (Casso xác thực).
+            Thanh toán tự động được xác nhận qua nhà cung cấp thanh toán.
           </p>
         </div>
         <div className={itemClassName}>

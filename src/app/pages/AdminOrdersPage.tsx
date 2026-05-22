@@ -232,7 +232,7 @@ function RecentPaymentList({
 }) {
   if (payments.length === 0) {
     return (
-      <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán VietQR.</p>
+      <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán tự động.</p>
     );
   }
 
@@ -316,10 +316,10 @@ function PaymentRecoveryPanel({
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              Khôi phục thanh toán VietQR
+              Khôi phục thanh toán tự động
             </CardTitle>
             <CardDescription>
-              Dùng khi người dùng đã chuyển tiền nhưng Casso không match được nội dung chuyển khoản.
+              Dùng khi người dùng đã chuyển tiền nhưng thanh toán tự động không match được nội dung chuyển khoản.
             </CardDescription>
           </div>
           <Button
@@ -370,7 +370,7 @@ function PaymentRecoveryPanel({
           <span>
             Hiển thị {payments.length.toLocaleString("vi-VN")} / {total.toLocaleString("vi-VN")} đơn
           </span>
-          <span>Chỉ bấm mở Plus sau khi đã đối chiếu số tiền trong app ngân hàng/Casso.</span>
+          <span>Chỉ bấm mở Plus sau khi đã đối chiếu số tiền trong app ngân hàng hoặc cổng thanh toán.</span>
         </div>
 
         {payments.length === 0 ? (
@@ -408,7 +408,7 @@ function PaymentRecoveryPanel({
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900">{formatVnd(payment.amount)}</p>
-                      <p className="mt-1 text-xs text-slate-500">{payment.bankName ?? "VietQR"}</p>
+                      <p className="mt-1 text-xs text-slate-500">{payment.bankName ?? "Nhà cung cấp thanh toán"}</p>
                     </div>
                     <div>
                       <Badge variant="outline" className={PAYMENT_STATUS_COLORS[payment.status]}>
@@ -649,7 +649,7 @@ export function AdminOrdersPage() {
   const [busyPaymentOrderId, setBusyPaymentOrderId] = useState<string | null>(null);
   const [pendingManualPaymentOrderId, setPendingManualPaymentOrderId] = useState<string | null>(null);
   const [manualPaymentNote, setManualPaymentNote] = useState(
-    "Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.",
+    "Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.",
   );
   const [pendingRefundAction, setPendingRefundAction] = useState<{
     request: AdminRefundRequestSummary;
@@ -692,7 +692,7 @@ export function AdminOrdersPage() {
         setPaymentOrders(result.items);
         setPaymentOrdersTotal(result.total);
       } catch (err) {
-        toast.error(getErrorMessage(err, "Không thể tải danh sách thanh toán VietQR."));
+        toast.error(getErrorMessage(err, "Không thể tải danh sách thanh toán tự động."));
       } finally {
         setPaymentOrdersLoading(false);
       }
@@ -761,7 +761,7 @@ export function AdminOrdersPage() {
 
   const handleManualCompletePayment = (orderId: string) => {
     setPendingManualPaymentOrderId(orderId);
-    setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
+    setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.");
   };
 
   const confirmManualCompletePayment = async () => {
@@ -774,7 +774,7 @@ export function AdminOrdersPage() {
       });
       toast.success(`Đã mở Plus cho đơn ${result.orderId}.`);
       setPendingManualPaymentOrderId(null);
-      setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
+      setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.");
       void loadAdminData();
       void loadPaymentOrders(paymentOrdersQuery, paymentOrdersStatus);
     } catch (err) {
@@ -940,7 +940,7 @@ export function AdminOrdersPage() {
         onOpenChange={(open) => {
           if (open) return;
           setPendingManualPaymentOrderId(null);
-          setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
+          setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.");
         }}
       >
         <AlertDialogContent>
@@ -948,7 +948,7 @@ export function AdminOrdersPage() {
             <AlertDialogTitle>Mở Plus thủ công?</AlertDialogTitle>
             <AlertDialogDescription>
               Đơn <span className="font-mono">{pendingManualPaymentOrderId ?? "—"}</span> sẽ được đánh dấu đã nhận tiền.
-              Chỉ xác nhận sau khi đã đối chiếu số tiền trong Casso/app ngân hàng.
+              Chỉ xác nhận sau khi đã đối chiếu số tiền trong cổng thanh toán/app ngân hàng.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2">
@@ -1050,7 +1050,7 @@ export function AdminOrdersPage() {
                   Người dùng, <span className="text-gradient-vibrant">thanh toán</span> và đơn hàng
                 </h1>
                 <p className="mt-[var(--space-inline)] max-w-3xl text-base leading-7 text-muted-foreground">
-                  Theo dõi người dùng, doanh thu VietQR, trạng thái email và xử lý đơn in từ một màn hình.
+                  Theo dõi người dùng, doanh thu thanh toán, trạng thái email và xử lý đơn in từ một màn hình.
                 </p>
               </div>
             </div>
@@ -1107,8 +1107,8 @@ export function AdminOrdersPage() {
       <section className="grid gap-4 lg:grid-cols-2">
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-base">Thanh toán VietQR gần đây</CardTitle>
-            <CardDescription>Các đơn Casso/VietQR mới nhất.</CardDescription>
+            <CardTitle className="text-base">Thanh toán tự động gần đây</CardTitle>
+            <CardDescription>Các đơn thanh toán tự động mới nhất.</CardDescription>
           </CardHeader>
           <CardContent>
             <RecentPaymentList
@@ -1139,7 +1139,7 @@ export function AdminOrdersPage() {
             variant={activeOperationalTab === "payments" ? "default" : "outline"}
             onClick={() => setActiveOperationalTab("payments")}
           >
-            Thanh toán VietQR
+            Thanh toán tự động
           </Button>
           <Button
             type="button"

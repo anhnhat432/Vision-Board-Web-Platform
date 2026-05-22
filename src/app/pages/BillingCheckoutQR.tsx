@@ -1,9 +1,10 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
 
 import { apiClient } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { isPaidCheckoutDisabled } from "../utils/app-mode";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount } from "../utils/billing-pricing";
 import { syncEntitlementsWithProvider } from "../utils/production";
@@ -26,6 +27,8 @@ interface OrderStatusResponse {
 }
 
 type EntitlementSyncStatus = "idle" | "syncing" | "synced" | "failed";
+
+const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -52,6 +55,7 @@ export function BillingCheckoutQR() {
   const [entitlementSyncStatus, setEntitlementSyncStatus] = useState<EntitlementSyncStatus>("idle");
   const [entitlementSyncMessage, setEntitlementSyncMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
+  const paidCheckoutDisabled = isPaidCheckoutDisabled();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoSyncedOrderRef = useRef<string | null>(null);
@@ -258,14 +262,24 @@ export function BillingCheckoutQR() {
             <Clock className="h-8 w-8 text-white" />
           </div>
           <h2 className="font-serif text-xl font-medium text-app-ink">Hết thời gian thanh toán</h2>
-          <p className="mt-2 text-sm text-app-ink-soft">Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục.</p>
+          <p className="mt-2 text-sm text-app-ink-soft">
+            {paidCheckoutDisabled
+              ? "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng."
+              : "Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục."}
+          </p>
           <button
             type="button"
-            onClick={() => navigate("/billing/confirm")}
+            onClick={() => {
+              if (paidCheckoutDisabled) {
+                navigate("/billing/plan");
+                return;
+              }
+              navigate("/billing/confirm");
+            }}
             className="mt-6 inline-flex items-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
           >
             <RefreshCw className="h-4 w-4" />
-            Tạo đơn mới
+            {paidCheckoutDisabled ? "Quay lại trang gói" : "Tạo đơn mới"}
           </button>
         </div>
       </div>
@@ -308,6 +322,37 @@ export function BillingCheckoutQR() {
     );
   }
 
+  if (paidCheckoutDisabled && order.status === "pending") {
+    return (
+      <div className="mx-auto max-w-md px-4 py-12">
+        <div
+          data-testid="paid-checkout-disabled-banner"
+          className="rounded-card border border-app-warm-border bg-app-warm-soft p-8 text-center"
+        >
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-warm">
+            <LockKeyhole className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="font-serif text-xl font-medium text-app-ink">Thanh toán đang tạm khóa</h2>
+          <p className="mt-2 text-sm leading-6 text-app-ink-soft">
+            Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu cần
+            nâng cấp thủ công: {" "}
+            <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="font-medium text-app-ink underline-offset-4 hover:underline">
+              {BILLING_SUPPORT_EMAIL}
+            </a>
+            .
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/billing/plan")}
+            className="mt-6 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
+          >
+            Quay lại trang gói
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ─── Pending — QR checkout ──────────────────────────────────────────────
 
   return (
@@ -322,7 +367,7 @@ export function BillingCheckoutQR() {
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft">
               <QrCode className="h-6 w-6 text-app-accent" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán VietQR</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán tự động</p>
             <h1 className="font-serif text-2xl font-medium text-app-ink mt-2">Nâng cấp gói Plus</h1>
             <p className="mt-2 text-3xl font-medium text-app-accent">
               {formatVndAmount(order.amount)}
@@ -333,7 +378,7 @@ export function BillingCheckoutQR() {
               <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
                 <img
                   src={order.qrDataUrl}
-                  alt="Mã QR chuyển khoản"
+                  alt="Mã thanh toán tự động"
                   className="h-56 w-56 object-contain sm:h-64 sm:w-64"
                   loading="eager"
                 />
@@ -416,11 +461,11 @@ export function BillingCheckoutQR() {
                 <h3 className="text-sm font-semibold text-app-ink">Cách thanh toán</h3>
                 <ol className="grid gap-2 text-sm text-app-ink-soft">
                   {[
-                    "Mở app ngân hàng trên điện thoại.",
-                    "Chọn quét mã QR hoặc chuyển khoản.",
-                    "Kiểm tra số tiền và nội dung chuyển khoản.",
+                    "Mở ứng dụng thanh toán hoặc ngân hàng trên điện thoại.",
+                    "Làm theo hướng dẫn từ cổng thanh toán mới.",
+                    "Kiểm tra số tiền và nội dung thanh toán.",
                     "Xác nhận giao dịch và giữ trang này mở.",
-                    "Plus sẽ được kích hoạt sau khi hệ thống nhận thanh toán.",
+                    "Plus sẽ được kích hoạt sau khi hệ thống xác nhận giao dịch.",
                   ].map((step, index) => (
                     <li key={step} className="flex gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-2">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-app-accent text-xs font-semibold text-white">

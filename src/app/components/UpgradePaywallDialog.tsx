@@ -77,7 +77,9 @@ export function UpgradePaywallDialog({
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = appMode.shouldShowBillingDebugUi();
   const paidCheckoutDisabled = getPaidCheckoutDisabledSafe();
-  const providerLabel = billingProviderStatus.providerLabel || "Casso + VietQR";
+  const providerLabel = paidCheckoutDisabled
+    ? "cổng thanh toán mới"
+    : billingProviderStatus.providerLabel || "nhà cung cấp thanh toán";
   const upgradeFeatureLabel = paywallCopy.bullets[0] ?? paywallCopy.title;
   const blockedFeatureLabel = title ?? upgradeFeatureLabel;
   const plusPriceAmountLabel = formatVndAmount(PLUS_MONTHLY_PRICE_VND);
@@ -243,8 +245,8 @@ export function UpgradePaywallDialog({
                     Thanh toán đang tạm khóa.
                   </p>
                   <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
-                    Chúng tôi đang chuyển sang nhà cung cấp thanh toán mới nên tạm thời chưa nhận chuyển khoản tự động.
-                    Vui lòng quay lại sau hoặc liên hệ{" "}
+                    Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support
+                    nếu cần nâng cấp thủ công: {" "}
                     {BILLING_SUPPORT_EMAIL ? (
                       <a
                         href={`mailto:${BILLING_SUPPORT_EMAIL}`}
@@ -254,8 +256,8 @@ export function UpgradePaywallDialog({
                       </a>
                     ) : (
                       "đội hỗ trợ"
-                    )}{" "}
-                    nếu bạn cần nâng cấp gấp.
+                    )}
+                    .
                   </p>
                 </div>
               ) : null}
@@ -307,7 +309,7 @@ export function UpgradePaywallDialog({
                         <p className="mt-2 text-[15px] leading-7 text-app-ink-soft">{plan.description}</p>
                         <p className="mt-2 text-[15px] leading-7 text-app-ink-soft">
                           Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()}. Quyền Plus được kích hoạt
-                          sau khi Casso xác nhận chuyển khoản ngân hàng.
+                          sau khi hệ thống xác nhận giao dịch.
                         </p>
                       </div>
                       <div className="rounded-lg border border-app-line bg-app-surface p-3 text-app-accent">
@@ -363,8 +365,8 @@ export function UpgradePaywallDialog({
 
           <DialogFooter className="flex flex-col gap-3 border-t border-app-line bg-app-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-[15px] leading-7 text-app-ink-soft">
-              Bạn sẽ chuyển khoản {plusPriceAmountLabel} đến tài khoản ngân hàng. Sau khi chúng tôi nhận được tiền
-              (thường trong 1-2 phút), quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}. Xem thêm{" "}
+              Bạn sẽ thanh toán {plusPriceAmountLabel} qua nhà cung cấp thanh toán. Sau khi hệ thống xác nhận giao dịch,
+              quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}. Xem thêm{" "}
               <Link to="/billing/faq" className="font-medium text-app-accent underline-offset-4 hover:underline">
                 câu hỏi thanh toán
               </Link>

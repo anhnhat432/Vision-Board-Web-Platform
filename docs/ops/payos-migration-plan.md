@@ -26,8 +26,8 @@ Scope: billing surface only. 12-week setup is Full GO and must not be changed by
 
 Production is currently protected by two independent flags:
 
-- Frontend: `VITE_BILLING_PAID_CHECKOUT_DISABLED=1`
-- Backend: `BILLING_PAID_DISABLED=1`
+- Frontend: `VITE_BILLING_PAID_CHECKOUT_DISABLED=true`
+- Backend: `BILLING_PAID_DISABLED=true`
 
 Expected behavior while enabled:
 
@@ -129,7 +129,7 @@ Frontend/env already needed for real mode:
 - `VITE_BILLING_PROVIDER_LABEL=PayOS`
 - `VITE_BILLING_SUPPORT_EMAIL`
 - `VITE_API_BASE_URL`
-- `VITE_BILLING_PAID_CHECKOUT_DISABLED=1` until final rollout sign-off
+- `VITE_BILLING_PAID_CHECKOUT_DISABLED=true` until final rollout sign-off
 
 Operational PayOS dashboard/config values:
 
@@ -213,7 +213,7 @@ Backend unit tests:
 
 Backend route tests:
 
-- `POST /api/billing/checkout-session` still returns `checkout_disabled` when `BILLING_PAID_DISABLED=1`, even with PayOS configured.
+- `POST /api/billing/checkout-session` still returns `checkout_disabled` when `BILLING_PAID_DISABLED=true`, even with PayOS configured.
 - With kill-switch off and PayOS configured, checkout returns provider `payos` plus PayOS checkout URL.
 - `POST /api/billing/webhook/payos` rejects invalid signature.
 - Valid success webhook grants PLUS once.
@@ -269,8 +269,8 @@ Do not start until sandbox checklist passes.
 
 1. Merge PayOS adapter and tests with kill-switch defaults unchanged.
 2. Add PayOS env vars to Render production without disabling `BILLING_PAID_DISABLED`.
-3. Update Vercel provider label/copy env as needed, keeping `VITE_BILLING_PAID_CHECKOUT_DISABLED=1`.
-4. Deploy backend with `BILLING_PROVIDER=payos`, `BILLING_REPOSITORY=mongo`, PayOS secrets, and `BILLING_PAID_DISABLED=1` still active.
+3. Update Vercel provider label/copy env as needed, keeping `VITE_BILLING_PAID_CHECKOUT_DISABLED=true`.
+4. Deploy backend with `BILLING_PROVIDER=payos`, `BILLING_REPOSITORY=mongo`, PayOS secrets, and `BILLING_PAID_DISABLED=true` still active.
 5. Configure PayOS production webhook URL to `/api/billing/webhook/payos`.
 6. Verify backend health, billing health, and direct checkout POST still returns `checkout_disabled` while kill-switch is on.
 7. Run production smoke for non-money billing surfaces: `/billing/plan`, entitlement, payment history, restore, support copy.
@@ -287,8 +287,8 @@ Do not start until sandbox checklist passes.
 
 Immediate rollback if webhook failures, amount mismatches, pending orders, entitlement grants, or user reports indicate unsafe payment behavior:
 
-1. Set `VITE_BILLING_PAID_CHECKOUT_DISABLED=1` on Vercel and redeploy.
-2. Set `BILLING_PAID_DISABLED=1` on Render and redeploy.
+1. Set `VITE_BILLING_PAID_CHECKOUT_DISABLED=true` on Vercel and redeploy.
+2. Set `BILLING_PAID_DISABLED=true` on Render and redeploy.
 3. Keep `BILLING_PROVIDER=payos` or switch to placeholder/mock only if doing so does not break webhook processing for already-paid PayOS orders.
 4. Do not delete PayOS webhook route while unresolved PayOS payments may still send events.
 5. Export/list pending PayOS `PaymentOrder` records for manual reconciliation.
