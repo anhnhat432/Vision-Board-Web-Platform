@@ -1,18 +1,23 @@
 # Production Launch Checklist
 
-Last updated: 2026-05-08
+Last updated: 2026-05-22
 
-Scope: final gate before public use for about 200 users with Casso + VietQR billing.
+Scope: final gate before public use for paid users via PayOS hosted payment links.
+
+Casso giữ trong code làm provider legacy nhưng không được dùng cho real payment đến khi Standard plan + webhook được khôi phục và verify lại độc lập. Kế hoạch chuyển đổi: [docs/ops/payos-migration-plan.md](../docs/ops/payos-migration-plan.md). Hạ tầng: [PRODUCTION_INFRA_CHECKLIST.md](PRODUCTION_INFRA_CHECKLIST.md).
 
 ## Billing safety
 
-Verified by backend tests:
+Verified by backend tests (`npm --prefix backend test`):
 
-- Duplicate Casso webhook does not grant PLUS twice.
-- Underpaid bank transfer does not grant PLUS.
-- Wrong transfer description does not match an order and does not grant PLUS.
-- Pending order past `expiresAt` becomes `expired` and does not grant PLUS.
+- PayOS webhook with invalid HMAC-SHA256 signature is rejected with 401.
+- PayOS webhook with mismatching `amount`, non-VND `currency`, or PayOS code ≠ `00` does not grant PLUS.
+- PayOS webhook with mismatching `metadata.payos.orderCode` or `paymentLinkId` is ignored.
+- Pending PayOS order past `expiresAt` becomes `expired` and does not grant PLUS.
+- Concurrent PayOS webhooks for the same order: only the first wins the atomic claim, the second returns `status: "duplicate"` without granting PLUS twice.
+- Replay of a completed PayOS order returns `status: "duplicate"`.
 - Active PLUS subscription past `currentPeriodEnd` resolves to no active entitlements.
+- Casso legacy: duplicate webhook does not grant PLUS twice; underpaid transfer does not grant PLUS; expired pending Casso order does not grant PLUS (these tests still run for legacy safety).
 
 Commands:
 
@@ -57,7 +62,7 @@ Run before inviting real users:
 npm run smoke:prod:quick
 ```
 
-For a deeper production smoke without creating a real bank transfer:
+For a deeper production smoke without creating a real PayOS payment:
 
 ```bash
 PROD_SMOKE_SKIP_CHECKOUT=1 npm run smoke:prod
@@ -73,7 +78,7 @@ Coverage:
 - Desktop and mobile viewport checks.
 - No visible demo/mock checkout copy in real billing flow.
 
-Live Casso payment cannot be fully smoke-tested without an actual bank transfer or a signed Casso webhook from Casso. The backend safety cases above cover the webhook logic; run one small real transfer before final public launch if possible.
+Live PayOS payment cannot be fully smoke-tested without an actual transaction or a signed PayOS webhook from the PayOS dashboard. The backend safety cases above cover the webhook logic; run one small real transaction in the controlled rollout window before final public launch (xem step 8–11 trong [docs/ops/payos-migration-plan.md](../docs/ops/payos-migration-plan.md)).
 
 ## Plus expiration reminders
 
@@ -87,8 +92,10 @@ Live Casso payment cannot be fully smoke-tested without an actual bank transfer 
 Manual Sentry setup before launch:
 
 - Create an issue alert for any event where `feature=billing` and `severity=critical`; notify Slack and email immediately.
-- Create a metric alert for a spike in 4xx/5xx responses on `POST /api/webhooks/casso`, `POST /api/webhook/casso`, and `POST /api/billing/webhook/casso`; notify Slack and email immediately.
-- Create a metric or issue alert when Casso reconciliation fails more than 2 consecutive runs; use events tagged `event=casso_reconciliation_job_failed` or `/api/health/billing` returning `reconciliation=stale`.
+- Create a metric alert for a spike in 4xx/5xx responses on PayOS webhook routes (`POST /api/webhooks/payos`, `POST /api/billing/webhook/payos`); notify Slack and email immediately.
+- Keep a parallel metric alert for legacy Casso webhook routes (`POST /api/webhooks/casso`, `POST /api/webhook/casso`, `POST /api/billing/webhook/casso`) until Casso is fully decommissioned.
+- Create a metric or issue alert when reconciliation fails more than 2 consecutive runs; use events tagged `event=billing_reconciliation_job_failed` or `/api/health/billing` returning `reconciliation=stale`.
+- Watch Sentry tag `provider=payos` for `payos_webhook_signature_mismatch`, `payos_webhook_amount_mismatch`, `payos_webhook_identifier_mismatch`, `payos_webhook_unknown_order` — these should stay near zero in steady state.
 - Keep Sentry `sendDefaultPii=false`; billing alert context must only include `orderId`, `amount`, and `status`.
 
 ## Operational risks
@@ -98,19 +105,21 @@ Render free cold start:
 - For public use, prefer Render Starter or higher.
 - If staying on free tier, expect first request after idle to be slow and keep `/api/health` visible for checks.
 
-Wrong bank transfer description:
+PayOS webhook delivery:
 
-- VietQR embeds the order code automatically.
-- Keep checkout warning: user must not edit transfer content.
-- Admin/manual recovery remains the fallback for a paid transfer that Casso cannot match.
+- PayOS retries failed webhook delivery. Atomic claim + `providerEventId` dedup guarantee idempotency, but watch for sustained 4xx/5xx that prevent eventual settlement.
+- If webhook URL changes, update PayOS dashboard immediately; backend route alias `/api/billing/webhook/payos` exists for backwards compatibility.
+- Manual recovery path: admin order screen + PayOS dashboard transaction lookup.
 
 No automatic recurring billing:
 
 - PLUS is a 12-week period.
-- Entitlement resolution now stops granting PLUS after `currentPeriodEnd`.
+- Entitlement resolution stops granting PLUS after `currentPeriodEnd`.
+- Renewals are new one-time PayOS payments, not provider-managed recurring subscriptions.
 - Use payment history and expiration reminders for renewal handling.
 
 Rate limit during QA:
 
 - Avoid repeated rapid checkout/auth/sync tests from the same IP.
 - If QA hits 429, wait for the limiter window instead of loosening production limits.
+- PayOS webhook rate limiter keys on `x-payos-merchant-id` header or IP; do not send synthetic webhook traffic from production-facing IPs.
