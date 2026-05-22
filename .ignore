@@ -15,6 +15,7 @@ codex-backups/
 
 # QA, screenshots, and generated reports
 artifacts/
+audit/
 screenshots/
 test-results/
 playwright-report/

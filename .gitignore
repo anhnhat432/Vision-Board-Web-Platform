@@ -8,6 +8,7 @@ dist/
 codex-backups/
 .codex-test.txt
 artifacts/
+audit/
 backups/
 .env
 .env.local
