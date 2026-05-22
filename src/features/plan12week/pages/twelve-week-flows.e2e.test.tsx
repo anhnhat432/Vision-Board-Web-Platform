@@ -104,7 +104,7 @@ describe("12-week core flows", () => {
       const { router } = renderAppRoute("/12-week-setup");
       const user = userEvent.setup();
 
-      await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
+      await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" });
       expect(screen.getByText(/Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
       await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
@@ -170,7 +170,7 @@ describe("12-week core flows", () => {
 
     renderAppRoute("/12-week-setup");
 
-    await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
+    await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" });
     expect(
       screen.getByText("Đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm."),
     ).toBeInTheDocument();

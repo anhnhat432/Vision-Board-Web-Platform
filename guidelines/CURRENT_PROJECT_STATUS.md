@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last reviewed: 2026-05-21
+Last reviewed: 2026-05-22
 
 Purpose: this file records the current code-backed state of Vision Board Web Platform so humans and AI coding agents do not assume features are more complete than they are.
 
@@ -15,7 +15,7 @@ Important documentation nuance:
 - `README.md` correctly describes the product as full-stack, but the current architecture is still local-first with selective backend sync.
 - `.env.production` in repo is set to `VITE_APP_MODE=real` and `VITE_BILLING_PROVIDER_MODE=api_contract`. Vercel project-level env vars still win at build time, so the live deployment mode depends on those overrides. The MVP 1 demo override path is preserved through the rollback steps in `MVP_1_RELEASE_CHECKLIST.md`.
 - `backend/package.json` requires Node `20.x`; some local and CI commands may use Node 22 and can show engine warnings.
-- 12-week setup route replacement is **Full GO** as of 2026-05-21. Current route behavior: `/12-week-setup` is the primary new setup flow, `/12-week-setup-old` is temporary rollback/reference, and `/12-week-setup-lab` is temporary QA/reference. Route cleanup is a future follow-up, not immediate work.
+- 12-week setup route replacement is **Full GO** as of 2026-05-21. Current route behavior: `/12-week-setup` is the only setup route and renders `TwelveWeekSetupLab`. The `/12-week-setup-old` (legacy `TwelveWeekSetup`) and `/12-week-setup-lab` (QA reference) routes have been removed in 2026-05-22 cleanup; the legacy `12WeekSetup.tsx` page and its dedicated backend-sync test have also been deleted. The barrel re-export `src/app/pages/12WeekSetup.ts` now aliases `TwelveWeekSetup` to the current `TwelveWeekSetupLab` implementation so existing tests and app-flow helpers continue to work.
 
 ## 2. Core user flow
 
@@ -68,10 +68,8 @@ Frontend app:
 
 12-week planning:
 
-- `/12-week-setup` now renders `TwelveWeekSetupLab` as the primary setup flow under the Full GO route replacement.
-- `/12-week-setup-old` keeps the previous `TwelveWeekSetup` implementation temporarily for rollback/reference.
-- `/12-week-setup-lab` keeps the same `TwelveWeekSetupLab` flow temporarily for QA/reference.
-- Route cleanup for the temporary old/lab routes is a future follow-up, not immediate work.
+- `/12-week-setup` renders `TwelveWeekSetupLab` (the only remaining setup flow after 2026-05-22 cleanup).
+- The previous `/12-week-setup-old` and `/12-week-setup-lab` routes and the legacy `TwelveWeekSetup` component have been removed.
 - The setup flow creates the local goal and local `twelveWeekSystem` first.
 - Backend sync is conditional and best-effort:
   - app must not be in demo mode

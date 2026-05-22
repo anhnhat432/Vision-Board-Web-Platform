@@ -105,15 +105,7 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
       },
       {
-        path: "12-week-setup-old",
-        ...lazyRoute(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
-      },
-      {
         path: "12-week-setup",
-        ...lazyRoute(() => import("./pages/12WeekSetupLab"), "TwelveWeekSetupLab"),
-      },
-      {
-        path: "12-week-setup-lab",
         ...lazyRoute(() => import("./pages/12WeekSetupLab"), "TwelveWeekSetupLab"),
       },
       {

@@ -255,7 +255,7 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
+  await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" });
   await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
   const tacticInputs = await screen.findAllByLabelText("Tên việc");
