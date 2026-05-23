@@ -32,7 +32,6 @@ import {
   trackAppEvent,
   USER_DATA_UPDATED_EVENT_NAME,
 } from "../../utils/storage";
-import { canSendRemoteAnalytics } from "../../utils/analytics";
 import { isDemoMode, shouldEnable12WeekImportDryRun, shouldEnable12WeekCloudImport } from "../../utils/app-mode";
 import {
   getAnonymousLocalDataMigrationCandidate,
@@ -79,7 +78,6 @@ import {
   MOBILE_NAV_LABELS,
   NAV_ITEMS,
   prefetchRoute,
-  WARM_PREFETCH_ROUTE_PATHS,
 } from "./navConfig";
 import { GUIDED_PATHS, getRouteMeta } from "./routeMeta";
 import {
@@ -111,6 +109,8 @@ import {
   getRouteTone,
   isRecord,
 } from "./helpers";
+import { useCommandPaletteHotkey, useWarmPrefetch } from "./hooks/useUiBootstrap";
+import { usePageViewAnalytics } from "./hooks/usePageViewAnalytics";
 
 export function RootLayout() {
   const navigate = useNavigate();
@@ -151,16 +151,7 @@ export function RootLayout() {
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      const isHotkey = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
-      if (!isHotkey) return;
-      event.preventDefault();
-      setCommandPaletteOpen((open) => !open);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  useCommandPaletteHotkey(setCommandPaletteOpen);
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -298,24 +289,6 @@ export function RootLayout() {
   }, [demoMode, isConfigured, user, userProfile]);
 
   useEffect(() => {
-    if (!canSendRemoteAnalytics() || typeof window === "undefined" || typeof window.gtag !== "function") {
-      return;
-    }
-
-    const route = `${location.pathname}${location.search}${location.hash}`;
-    const timeoutId = window.setTimeout(() => {
-      window.gtag?.("event", "page_view", {
-        app: "vision_board_web",
-        page_path: route,
-        page_title: document.title,
-        signed_in: Boolean(user),
-      });
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [location.hash, location.pathname, location.search, user]);
-
-  useEffect(() => {
     if (!desktopMoreOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
@@ -425,18 +398,8 @@ export function RootLayout() {
     };
   }, [demoMode, user]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const warmPrimaryHeavyRoutes = () => {
-      for (const path of WARM_PREFETCH_ROUTE_PATHS) {
-        prefetchRoute(path);
-      }
-    };
-
-    const timeoutId = globalThis.setTimeout(warmPrimaryHeavyRoutes, 300);
-    return () => globalThis.clearTimeout(timeoutId);
-  }, []);
+  useWarmPrefetch();
+  usePageViewAnalytics(Boolean(user));
 
   const isActive = (path: string) => isActiveRoute(location.pathname, path);
 
