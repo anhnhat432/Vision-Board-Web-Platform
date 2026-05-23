@@ -144,7 +144,7 @@ export function LoginPage() {
   // land directly in the admin console instead of the normal user workspace.
   if (!authLoading && user) {
     if (userProfile?.role === "admin") {
-      return <Navigate to="/admin/orders" replace />;
+      return <Navigate to={redirectTo.startsWith("/admin/") ? redirectTo : "/admin/orders"} replace />;
     }
 
     if (userProfile) {
