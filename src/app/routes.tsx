@@ -171,6 +171,10 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
+        path: "admin/catalog",
+        ...lazyRoute(() => import("./pages/AdminCatalogPage"), "AdminCatalogPage"),
+      },
+      {
         path: "goals",
         ...lazyRoute(() => import("./pages/GoalTracker"), "GoalTracker"),
       },

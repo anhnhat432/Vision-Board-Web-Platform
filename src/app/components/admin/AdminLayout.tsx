@@ -175,6 +175,14 @@ export function AdminLayout() {
             </Button>
             <Button
               type="button"
+              variant="ghost"
+              className="hidden text-slate-300 hover:bg-white/10 hover:text-white sm:inline-flex"
+              onClick={() => navigate("/admin/catalog")}
+            >
+              Catalog
+            </Button>
+            <Button
+              type="button"
               variant="outline"
               className="gap-2 border-white/15 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
               onClick={handleLogout}
