@@ -9,7 +9,7 @@ import {
   sendExpiringBillingReminders,
 } from "../controllers/adminController";
 import { getAdminAuditLogs } from "../controllers/auditLogController";
-import { listAllCatalog } from "../controllers/orderCatalogController";
+import { createCatalogItem, listAllCatalog } from "../controllers/orderCatalogController";
 import {
   completeAdminRefundRequest,
   getAdminRefundRequests,
@@ -102,6 +102,19 @@ adminRoutes.get("/admin/overview", asyncHandler(requireAdmin), asyncHandler(getA
 adminRoutes.get("/admin/reconciliation/last-run", asyncHandler(requireAdmin), asyncHandler(getReconciliationLastRun));
 adminRoutes.get("/admin/audit-logs", asyncHandler(requireAdmin), asyncHandler(getAdminAuditLogs));
 adminRoutes.get("/admin/order-catalog", asyncHandler(requireAdmin), asyncHandler(listAllCatalog));
+adminRoutes.post(
+  "/admin/order-catalog",
+  auditedAdminAction({
+    action: "createOrderCatalogItem",
+    target: "order_catalog",
+    getTargetId: (req) => {
+      const itemId = (req.body as Record<string, unknown> | undefined)?.itemId;
+      return typeof itemId === "string" ? itemId : null;
+    },
+    validators: [validateOptionalJsonObjectBody],
+    handler: createCatalogItem,
+  }),
+);
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
 adminRoutes.post(
   "/admin/cache/clear-role/:uid",

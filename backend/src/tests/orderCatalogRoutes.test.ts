@@ -6,6 +6,7 @@ import express, { type Express } from "express";
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
+import { AuditLogModel } from "../models/auditLogModel";
 import { OrderCatalogModel } from "../models/OrderCatalogModel";
 import { adminRoutes } from "../routes/adminRoutes";
 import { orderCatalogRoutes } from "../routes/orderCatalogRoutes";
@@ -32,9 +33,14 @@ type ChainableQuery = {
 
 type MockableModel = {
   find: unknown;
+  findOne: unknown;
+  create: unknown;
 };
 
 const originalFind = OrderCatalogModel.find;
+const originalFindOne = OrderCatalogModel.findOne;
+const originalCreate = OrderCatalogModel.create;
+const originalAuditCreate = AuditLogModel.create;
 
 function mockFind(items: unknown[], captured: CapturedFindCall[]): void {
   (OrderCatalogModel as unknown as MockableModel).find = (filter: unknown) => {
@@ -56,6 +62,9 @@ function mockFind(items: unknown[], captured: CapturedFindCall[]): void {
 
 function restoreFind(): void {
   (OrderCatalogModel as unknown as MockableModel).find = originalFind;
+  (OrderCatalogModel as unknown as MockableModel).findOne = originalFindOne;
+  (OrderCatalogModel as unknown as MockableModel).create = originalCreate;
+  (AuditLogModel as unknown as { create: unknown }).create = originalAuditCreate;
 }
 
 function createCatalogTestApp(): Express {
@@ -171,7 +180,7 @@ function createAdminCatalogTestApp(): Express {
 async function requestAdminJson(
   app: Express,
   path: string,
-  options: { token?: string } = {},
+  options: { token?: string; method?: string; body?: unknown } = {},
 ): Promise<JsonResponse> {
   const server = app.listen(0);
   await new Promise<void>((resolve) => {
@@ -183,11 +192,15 @@ async function requestAdminJson(
   if (options.token !== undefined) {
     headers.authorization = `Bearer ${options.token}`;
   }
+  if (options.body !== undefined) {
+    headers["content-type"] = "application/json";
+  }
 
   try {
     const response = await fetch(`http://127.0.0.1:${address.port}${path}`, {
-      method: "GET",
+      method: options.method ?? "GET",
       headers,
+      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     });
     const text = await response.text();
     const responseHeaders: Record<string, string> = {};
@@ -262,5 +275,95 @@ describe("GET /api/admin/order-catalog", () => {
     });
 
     assert.equal(response.status, 403);
+  });
+});
+
+describe("POST /api/admin/order-catalog", () => {
+  afterEach(() => {
+    restoreFind();
+    clearAdminRoleCache();
+  });
+
+  it("creates item, returns 201, and writes audit log", async () => {
+    const auditEntries: Array<Record<string, unknown>> = [];
+    const createdItems: Array<Record<string, unknown>> = [];
+    (OrderCatalogModel as unknown as MockableModel).findOne = async () => null;
+    (OrderCatalogModel as unknown as MockableModel).create = async (doc: Record<string, unknown>) => {
+      createdItems.push(doc);
+      return doc;
+    };
+    (AuditLogModel as unknown as { create: unknown }).create = async (entry: Record<string, unknown>) => {
+      auditEntries.push(entry);
+      return entry;
+    };
+
+    const response = await requestAdminJson(createAdminCatalogTestApp(), "/api/admin/order-catalog", {
+      token: "admin-token",
+      method: "POST",
+      body: {
+        itemId: "sticker:new-x",
+        type: "sticker",
+        label: "New X",
+        priceVnd: 20000,
+        maxQty: 5,
+      },
+    });
+
+    assert.equal(response.status, 201);
+    assert.equal(response.body.success, true);
+    assert.equal(createdItems.length, 1);
+    assert.equal(createdItems[0]?.itemId, "sticker:new-x");
+    assert.equal(auditEntries.length, 1);
+    assert.equal(auditEntries[0]?.action, "createOrderCatalogItem");
+    assert.equal(auditEntries[0]?.target, "order_catalog");
+    assert.equal(auditEntries[0]?.targetId, "sticker:new-x");
+    assert.equal(auditEntries[0]?.success, true);
+  });
+
+  it("rejects invalid itemId format with 400", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOne = async () => null;
+    (OrderCatalogModel as unknown as MockableModel).create = async () => {
+      throw new Error("create should not run");
+    };
+
+    const response = await requestAdminJson(createAdminCatalogTestApp(), "/api/admin/order-catalog", {
+      token: "admin-token",
+      method: "POST",
+      body: { itemId: "bogus", type: "frame", label: "X", priceVnd: 100 },
+    });
+
+    assert.equal(response.status, 400);
+  });
+
+  it("rejects negative priceVnd with 400", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOne = async () => null;
+    (OrderCatalogModel as unknown as MockableModel).create = async () => {
+      throw new Error("create should not run");
+    };
+
+    const response = await requestAdminJson(createAdminCatalogTestApp(), "/api/admin/order-catalog", {
+      token: "admin-token",
+      method: "POST",
+      body: { itemId: "frame:bad", type: "frame", label: "Bad", priceVnd: -1 },
+    });
+
+    assert.equal(response.status, 400);
+  });
+
+  it("rejects duplicate itemId with 409", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOne = async () => ({
+      itemId: "frame:20x30",
+    });
+    (OrderCatalogModel as unknown as MockableModel).create = async () => {
+      throw new Error("create should not run");
+    };
+
+    const response = await requestAdminJson(createAdminCatalogTestApp(), "/api/admin/order-catalog", {
+      token: "admin-token",
+      method: "POST",
+      body: { itemId: "frame:20x30", type: "frame", label: "Dup", priceVnd: 100 },
+    });
+
+    assert.equal(response.status, 409);
   });
 });
