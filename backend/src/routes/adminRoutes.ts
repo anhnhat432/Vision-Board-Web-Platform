@@ -9,6 +9,7 @@ import {
   sendExpiringBillingReminders,
 } from "../controllers/adminController";
 import { getAdminAuditLogs } from "../controllers/auditLogController";
+import { listAllCatalog } from "../controllers/orderCatalogController";
 import {
   completeAdminRefundRequest,
   getAdminRefundRequests,
@@ -100,6 +101,7 @@ async function clearRoleCacheHandler(req: Request, res: Response): Promise<void>
 adminRoutes.get("/admin/overview", asyncHandler(requireAdmin), asyncHandler(getAdminOverview));
 adminRoutes.get("/admin/reconciliation/last-run", asyncHandler(requireAdmin), asyncHandler(getReconciliationLastRun));
 adminRoutes.get("/admin/audit-logs", asyncHandler(requireAdmin), asyncHandler(getAdminAuditLogs));
+adminRoutes.get("/admin/order-catalog", asyncHandler(requireAdmin), asyncHandler(listAllCatalog));
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
 adminRoutes.post(
   "/admin/cache/clear-role/:uid",

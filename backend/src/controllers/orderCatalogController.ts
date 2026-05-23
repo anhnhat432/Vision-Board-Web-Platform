@@ -10,3 +10,10 @@ export async function listActiveCatalog(_req: Request, res: Response): Promise<v
   res.set("Cache-Control", "public, max-age=60");
   res.status(200).json(successResponse(items));
 }
+
+export async function listAllCatalog(_req: Request, res: Response): Promise<void> {
+  const items = await OrderCatalogModel.find({})
+    .sort({ sortOrder: 1, itemId: 1 })
+    .lean();
+  res.status(200).json(successResponse(items));
+}
