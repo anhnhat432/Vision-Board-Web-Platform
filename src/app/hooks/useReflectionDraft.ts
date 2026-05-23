@@ -30,7 +30,7 @@ function parseReflectionDraft(raw: string | null): ReflectionDraft | null {
 }
 
 export function useReflectionDraft(weekId?: string | null) {
-  const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const timeoutRef = useRef<number | null>(null);
   const storageKey = useMemo(() => createReflectionDraftKey(weekId), [weekId]);
 
   const cancelPendingSave = useCallback(() => {
