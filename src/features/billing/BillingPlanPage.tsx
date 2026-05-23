@@ -13,7 +13,7 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { BillingTrustSignals } from "../../app/components/BillingTrustSignals";
@@ -79,7 +79,6 @@ import {
   formatPaymentAmount,
   formatPaymentDate,
   getBillingCycleLabel,
-  getPaymentHistoryErrorMessage,
   getPaymentStatusClassName,
   getPaymentStatusLabel,
   getRefundStatusLabel,
@@ -87,14 +86,14 @@ import {
   isOrderRefundEligible,
 } from "./helpers";
 import type {
-  CheckoutReturnStatus,
   PaymentHistoryOrder,
   PaymentHistoryRefundRequest,
-  PaymentHistoryResponse,
   RefundFormState,
   RefundRequestResponse,
   ResendReceiptResponse,
 } from "./types";
+import { useCheckoutReturn } from "./useCheckoutReturn";
+import { usePaymentHistory } from "./usePaymentHistory";
 
 export function BillingPlan() {
   const navigate = useNavigate();
@@ -115,10 +114,6 @@ export function BillingPlan() {
   const [isRestoring, setIsRestoring] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const [showStopUsingConfirm, setShowStopUsingConfirm] = useState(false);
-  const [checkoutReturnStatus, setCheckoutReturnStatus] = useState<CheckoutReturnStatus>("idle");
-  const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryOrder[]>([]);
-  const [isLoadingPaymentHistory, setIsLoadingPaymentHistory] = useState(false);
-  const [paymentHistoryError, setPaymentHistoryError] = useState<string | null>(null);
   const [resendingReceiptOrderId, setResendingReceiptOrderId] = useState<string | null>(null);
   const [refundDialogOrder, setRefundDialogOrder] = useState<PaymentHistoryOrder | null>(null);
   const [refundForm, setRefundForm] = useState<RefundFormState>({
@@ -136,65 +131,20 @@ export function BillingPlan() {
   const signedInUserId = authContext?.user?.uid ?? null;
   const canLoadPaymentHistory = realMode && signedInUserId !== null;
 
-  const loadPaymentHistory = useCallback(async () => {
-    if (!canLoadPaymentHistory) return;
-    setIsLoadingPaymentHistory(true);
-    setPaymentHistoryError(null);
+  const {
+    paymentHistory,
+    setPaymentHistory,
+    isLoadingPaymentHistory,
+    paymentHistoryError,
+    loadPaymentHistory,
+  } = usePaymentHistory(canLoadPaymentHistory);
 
-    try {
-      const response = await apiClient.get<PaymentHistoryResponse>("/billing/payment-history");
-      setPaymentHistory(response.orders);
-    } catch (error: unknown) {
-      if (toastBillingNetworkError(error, { surface: "BillingPlan", action: "load_payment_history" })) {
-        setPaymentHistoryError("Mạng có vấn đề, vui lòng thử lại");
-      } else {
-        logBillingUiError(error, { surface: "BillingPlan", action: "load_payment_history" });
-        setPaymentHistoryError(getPaymentHistoryErrorMessage(error));
-      }
-    } finally {
-      setIsLoadingPaymentHistory(false);
-    }
-  }, [canLoadPaymentHistory]);
-
-  useEffect(() => {
-    if (!canLoadPaymentHistory) return;
-    void loadPaymentHistory();
-  }, [canLoadPaymentHistory, loadPaymentHistory]);
-
-  const pollServerEntitlement = useCallback(async () => {
-    if (!isCheckoutReturn) return;
-    setCheckoutReturnStatus("pending");
-
-    // Clear the URL params so refreshing doesn't re-trigger
-    const newParams = new URLSearchParams(searchParams);
-    newParams.delete("status");
-    newParams.delete("context");
-    setSearchParams(newParams, { replace: true });
-
-    try {
-      const result = await syncEntitlementsWithProvider();
-      reloadUserData();
-      if (result.ok && result.planCode !== "FREE") {
-        setCheckoutReturnStatus("confirmed");
-        toast.success(`Đã xác nhận gói ${result.planCode} trên tài khoản.`);
-      } else {
-        setCheckoutReturnStatus("pending");
-        toast.info("Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận.");
-      }
-    } catch (error: unknown) {
-      setCheckoutReturnStatus("failed");
-      if (!toastBillingNetworkError(error, { surface: "BillingPlan", action: "poll_server_entitlement" })) {
-        logBillingUiError(error, { surface: "BillingPlan", action: "poll_server_entitlement" });
-        toast.error("Không thể kiểm tra quyền trên tài khoản. Vui lòng thử lại.");
-      }
-    }
-  }, [isCheckoutReturn, searchParams, setSearchParams, reloadUserData]);
-
-  useEffect(() => {
-    if (isCheckoutReturn && checkoutReturnStatus === "idle") {
-      pollServerEntitlement();
-    }
-  }, [isCheckoutReturn, checkoutReturnStatus, pollServerEntitlement]);
+  const { checkoutReturnStatus, retry: retryCheckoutEntitlement } = useCheckoutReturn({
+    isCheckoutReturn,
+    searchParams,
+    setSearchParams,
+    reloadUserData,
+  });
 
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
   const paidCheckoutDisabled = isPaidCheckoutDisabled();
@@ -684,7 +634,7 @@ export function BillingPlan() {
               <p className="font-medium text-[color:var(--color-danger-fg)]">Không thể kiểm tra thanh toán</p>
               <p className="text-sm text-app-ink-soft">Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.</p>
             </div>
-            <Button variant="outline" size="sm" onClick={pollServerEntitlement} className="ml-auto">
+            <Button variant="outline" size="sm" onClick={retryCheckoutEntitlement} className="ml-auto">
               Thử lại
             </Button>
           </div>
