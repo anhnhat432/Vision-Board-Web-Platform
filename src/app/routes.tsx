@@ -154,7 +154,7 @@ export const appRoutes = [
         children: [
           {
             path: "order",
-            ...lazyRoute(() => import("./pages/OrderPage"), "OrderPage"),
+            ...lazyRoute(() => import("@/features/order/pages/OrderPage"), "OrderPage"),
           },
           {
             path: "order-status/:orderId?",
