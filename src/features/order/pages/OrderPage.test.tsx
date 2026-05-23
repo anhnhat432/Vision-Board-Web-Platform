@@ -3,12 +3,18 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 
 import { DEFAULT_CATALOG } from "@/features/order/catalog/defaults";
+import { getOrders } from "@/features/order/storage/order";
+import { saveOrderLink } from "@/lib/api/orderLinkStore";
 import { createOrder } from "@/services/orderService";
 
 import OrderPage from "./OrderPage";
 
 vi.mock("@/services/orderService", () => ({
   createOrder: vi.fn(),
+}));
+
+vi.mock("@/lib/api/orderLinkStore", () => ({
+  saveOrderLink: vi.fn(),
 }));
 
 function renderOrderPage() {
@@ -61,5 +67,10 @@ describe("OrderPage", () => {
       expect(payload?.itemIds).toEqual(["frame:30x40", "theme:money"]);
       expect("priceVnd" in (payload ?? {})).toBe(false);
     });
+
+    const [localOrder] = getOrders();
+    expect(localOrder).toBeDefined();
+    expect(saveOrderLink).toHaveBeenCalledWith(localOrder.id, "srv-1");
+    expect(await screen.findByText("order-status")).toBeInTheDocument();
   });
 });

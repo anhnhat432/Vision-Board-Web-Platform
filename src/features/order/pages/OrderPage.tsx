@@ -11,6 +11,7 @@ import {
 } from "@/features/order/lib/pricing";
 import { validateOrderDraft } from "@/features/order/lib/validators";
 import { createLocalOrder } from "@/features/order/storage/order";
+import { saveOrderLink } from "@/lib/api/orderLinkStore";
 import { createOrder } from "@/services/orderService";
 
 import { FrameSizePicker } from "../components/FrameSizePicker";
@@ -71,13 +72,6 @@ export function OrderPage() {
         keywords: notes.keywords,
         note: notes.note,
       };
-      let serverId: string | null = null;
-      try {
-        const order = await createOrder(payload);
-        serverId = order.id;
-      } catch {
-        // offline: fall through to local-only save
-      }
       const order = createLocalOrder({
         lines,
         subtotalVnd: subtotal,
@@ -92,7 +86,13 @@ export function OrderPage() {
         keywords: notes.keywords,
         note: notes.note,
       });
-      navigate(`/order-status/${serverId ?? order.id}`);
+      try {
+        const backendOrder = await createOrder(payload);
+        saveOrderLink(order.id, backendOrder.id);
+      } catch {
+        // offline: fall through to local-only status page
+      }
+      navigate(`/order-status/${order.id}`);
     } catch {
       setSubmitError("Không thể tạo đơn lúc này. Vui lòng thử lại.");
     } finally {
