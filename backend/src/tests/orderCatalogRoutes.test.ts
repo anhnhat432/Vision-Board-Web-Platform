@@ -34,11 +34,13 @@ type ChainableQuery = {
 type MockableModel = {
   find: unknown;
   findOne: unknown;
+  findOneAndUpdate: unknown;
   create: unknown;
 };
 
 const originalFind = OrderCatalogModel.find;
 const originalFindOne = OrderCatalogModel.findOne;
+const originalFindOneAndUpdate = OrderCatalogModel.findOneAndUpdate;
 const originalCreate = OrderCatalogModel.create;
 const originalAuditCreate = AuditLogModel.create;
 
@@ -63,6 +65,7 @@ function mockFind(items: unknown[], captured: CapturedFindCall[]): void {
 function restoreFind(): void {
   (OrderCatalogModel as unknown as MockableModel).find = originalFind;
   (OrderCatalogModel as unknown as MockableModel).findOne = originalFindOne;
+  (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = originalFindOneAndUpdate;
   (OrderCatalogModel as unknown as MockableModel).create = originalCreate;
   (AuditLogModel as unknown as { create: unknown }).create = originalAuditCreate;
 }
@@ -365,5 +368,129 @@ describe("POST /api/admin/order-catalog", () => {
     });
 
     assert.equal(response.status, 409);
+  });
+});
+
+describe("PUT /api/admin/order-catalog/:itemId", () => {
+  afterEach(() => {
+    restoreFind();
+    clearAdminRoleCache();
+  });
+
+  it("updates allowed fields, returns 200, and writes audit log", async () => {
+    const auditEntries: Array<Record<string, unknown>> = [];
+    let capturedFilter: unknown;
+    let capturedUpdate: unknown;
+    let capturedOptions: unknown;
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async (
+      filter: unknown,
+      update: unknown,
+      options: unknown,
+    ) => {
+      capturedFilter = filter;
+      capturedUpdate = update;
+      capturedOptions = options;
+      return {
+        itemId: "frame:20x30",
+        type: "frame",
+        label: "New",
+        priceVnd: 60000,
+      };
+    };
+    (AuditLogModel as unknown as { create: unknown }).create = async (entry: Record<string, unknown>) => {
+      auditEntries.push(entry);
+      return entry;
+    };
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:20x30",
+      {
+        token: "admin-token",
+        method: "PUT",
+        body: { label: "New", priceVnd: 60000 },
+      },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.label, "New");
+    assert.equal(data.priceVnd, 60000);
+    assert.deepEqual(capturedFilter, { itemId: "frame:20x30" });
+    assert.deepEqual(capturedUpdate, { label: "New", priceVnd: 60000 });
+    assert.equal((capturedOptions as Record<string, unknown>)?.new, true);
+    assert.equal(auditEntries.length, 1);
+    assert.equal(auditEntries[0]?.action, "updateOrderCatalogItem");
+    assert.equal(auditEntries[0]?.target, "order_catalog");
+    assert.equal(auditEntries[0]?.targetId, "frame:20x30");
+    assert.equal(auditEntries[0]?.success, true);
+  });
+
+  it("returns 404 when itemId not found", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async () => null;
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:nope",
+      {
+        token: "admin-token",
+        method: "PUT",
+        body: { priceVnd: 999 },
+      },
+    );
+
+    assert.equal(response.status, 404);
+  });
+
+  it("rejects negative priceVnd with 400", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async () => {
+      throw new Error("findOneAndUpdate should not run");
+    };
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:20x30",
+      {
+        token: "admin-token",
+        method: "PUT",
+        body: { priceVnd: -1 },
+      },
+    );
+
+    assert.equal(response.status, 400);
+  });
+
+  it("ignores attempts to change itemId or type", async () => {
+    let capturedUpdate: unknown;
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async (
+      _filter: unknown,
+      update: unknown,
+    ) => {
+      capturedUpdate = update;
+      return {
+        itemId: "frame:20x30",
+        type: "frame",
+        label: "X",
+        priceVnd: 100,
+      };
+    };
+    (AuditLogModel as unknown as { create: unknown }).create = async () => null;
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:20x30",
+      {
+        token: "admin-token",
+        method: "PUT",
+        body: { itemId: "frame:hacked", type: "sticker", label: "Y" },
+      },
+    );
+
+    assert.equal(response.status, 200);
+    const update = capturedUpdate as Record<string, unknown>;
+    assert.equal("itemId" in update, false);
+    assert.equal("type" in update, false);
+    assert.equal(update.label, "Y");
   });
 });

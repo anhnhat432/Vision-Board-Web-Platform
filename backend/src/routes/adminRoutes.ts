@@ -9,7 +9,7 @@ import {
   sendExpiringBillingReminders,
 } from "../controllers/adminController";
 import { getAdminAuditLogs } from "../controllers/auditLogController";
-import { createCatalogItem, listAllCatalog } from "../controllers/orderCatalogController";
+import { createCatalogItem, listAllCatalog, updateCatalogItem } from "../controllers/orderCatalogController";
 import {
   completeAdminRefundRequest,
   getAdminRefundRequests,
@@ -113,6 +113,16 @@ adminRoutes.post(
     },
     validators: [validateOptionalJsonObjectBody],
     handler: createCatalogItem,
+  }),
+);
+adminRoutes.put(
+  "/admin/order-catalog/:itemId",
+  auditedAdminAction({
+    action: "updateOrderCatalogItem",
+    target: "order_catalog",
+    getTargetId: (req) => req.params.itemId ?? null,
+    validators: [validateOptionalJsonObjectBody],
+    handler: updateCatalogItem,
   }),
 );
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));

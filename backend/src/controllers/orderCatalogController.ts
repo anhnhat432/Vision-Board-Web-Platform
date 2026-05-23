@@ -118,3 +118,62 @@ export async function createCatalogItem(req: Request, res: Response): Promise<vo
 
   res.status(201).json(successResponse(created, "Catalog item created."));
 }
+
+export async function updateCatalogItem(req: Request, res: Response): Promise<void> {
+  const itemId = req.params.itemId;
+  if (typeof itemId !== "string" || !ITEM_ID_RE.test(itemId)) {
+    throw new ApiError(400, "Invalid itemId.", undefined, "invalid_item_id");
+  }
+
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const update: Record<string, unknown> = {};
+
+  if ("label" in body) {
+    update.label = requireString(body.label, "label", MAX_LABEL_LENGTH);
+  }
+  if ("description" in body) {
+    const value = body.description;
+    if (value === null || value === "") {
+      update.description = "";
+    } else {
+      update.description = requireString(value, "description", MAX_DESCRIPTION_LENGTH);
+    }
+  }
+  if ("thumbnail" in body) {
+    const value = body.thumbnail;
+    if (value === null || value === "") {
+      update.thumbnail = "";
+    } else {
+      update.thumbnail = requireString(value, "thumbnail", MAX_THUMBNAIL_LENGTH);
+    }
+  }
+  if ("priceVnd" in body) {
+    if (typeof body.priceVnd !== "number" || !Number.isFinite(body.priceVnd) || body.priceVnd < 0) {
+      throw new ApiError(400, "priceVnd must be a number >= 0.", undefined, "invalid_price");
+    }
+    update.priceVnd = body.priceVnd;
+  }
+  if ("sortOrder" in body) {
+    const value = optionalNonNegativeInt(body.sortOrder, "sortOrder");
+    if (value !== undefined) update.sortOrder = value;
+  }
+  if ("maxQty" in body) {
+    const value = optionalPositiveInt(body.maxQty, "maxQty");
+    if (value !== undefined) update.maxQty = value;
+  }
+  if ("isActive" in body) {
+    const value = optionalBoolean(body.isActive, "isActive");
+    if (value !== undefined) update.isActive = value;
+  }
+
+  if (Object.keys(update).length === 0) {
+    throw new ApiError(400, "No updatable fields provided.", undefined, "invalid_payload");
+  }
+
+  const updated = await OrderCatalogModel.findOneAndUpdate({ itemId }, update, { new: true });
+  if (!updated) {
+    throw new ApiError(404, `Catalog item "${itemId}" not found.`, undefined, "not_found");
+  }
+
+  res.status(200).json(successResponse(updated, "Catalog item updated."));
+}
