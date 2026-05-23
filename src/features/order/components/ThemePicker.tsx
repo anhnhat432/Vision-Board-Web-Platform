@@ -50,6 +50,20 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
                   : "border-[color:var(--border)] hover:border-app-accent/50",
               )}
             >
+              {theme.thumbnail ? (
+                <img
+                  src={theme.thumbnail}
+                  alt={theme.label}
+                  className="mb-2 aspect-square w-full rounded-[var(--r-card-sm)] object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div
+                  data-testid="catalog-thumbnail-placeholder"
+                  aria-hidden="true"
+                  className="mb-2 aspect-square w-full rounded-[var(--r-card-sm)] bg-gradient-to-br from-app-accent/10 to-app-accent/5"
+                />
+              )}
               <div className="text-sm font-medium">{theme.label}</div>
               <div className="mt-1 text-xs text-app-accent">{formatVnd(theme.priceVnd)}</div>
             </button>

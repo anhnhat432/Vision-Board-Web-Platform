@@ -45,4 +45,17 @@ describe("ThemePicker", () => {
     render(<ThemePicker themes={themes} selected={["theme:money"]} onChange={() => {}} />);
     expect(screen.getByText(/Đã chọn 1 set/i)).toBeInTheDocument();
   });
+
+  it("renders thumbnail image when provided", () => {
+    const withImg: CatalogItem[] = [{ ...themes[0], thumbnail: "/img/money.png" }];
+    render(<ThemePicker themes={withImg} selected={[]} onChange={() => {}} />);
+    const img = screen.getByAltText("MONEY") as HTMLImageElement;
+    expect(img.tagName).toBe("IMG");
+    expect(img.getAttribute("src")).toBe("/img/money.png");
+  });
+
+  it("renders placeholder when thumbnail missing", () => {
+    render(<ThemePicker themes={themes} selected={[]} onChange={() => {}} />);
+    expect(screen.getAllByTestId("catalog-thumbnail-placeholder")).toHaveLength(2);
+  });
 });

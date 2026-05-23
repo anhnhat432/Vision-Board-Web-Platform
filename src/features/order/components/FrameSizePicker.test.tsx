@@ -37,4 +37,19 @@ describe("FrameSizePicker", () => {
     fireEvent.click(screen.getByText("30×40"));
     expect(onChange).toHaveBeenCalledWith("frame:30x40");
   });
+
+  it("renders thumbnail image when provided", () => {
+    const withImg: CatalogItem[] = [
+      { ...frames[0], thumbnail: "/img/frame-20x30.png" },
+    ];
+    render(<FrameSizePicker frames={withImg} selected={null} onChange={() => {}} />);
+    const img = screen.getByAltText("20×30") as HTMLImageElement;
+    expect(img.tagName).toBe("IMG");
+    expect(img.getAttribute("src")).toBe("/img/frame-20x30.png");
+  });
+
+  it("renders placeholder when thumbnail missing", () => {
+    render(<FrameSizePicker frames={frames} selected={null} onChange={() => {}} />);
+    expect(screen.getAllByTestId("catalog-thumbnail-placeholder")).toHaveLength(2);
+  });
 });

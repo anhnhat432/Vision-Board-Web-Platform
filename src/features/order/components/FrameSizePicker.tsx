@@ -26,6 +26,20 @@ export function FrameSizePicker({ frames, selected, onChange }: FrameSizePickerP
                 : "border-[color:var(--border)] hover:border-app-accent/50",
             )}
           >
+            {frame.thumbnail ? (
+              <img
+                src={frame.thumbnail}
+                alt={frame.label}
+                className="mb-3 aspect-[3/4] w-full rounded-[var(--r-card-sm)] object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div
+                data-testid="catalog-thumbnail-placeholder"
+                aria-hidden="true"
+                className="mb-3 aspect-[3/4] w-full rounded-[var(--r-card-sm)] bg-gradient-to-br from-app-accent/10 to-app-accent/5"
+              />
+            )}
             <div className="text-base font-semibold">{frame.label}</div>
             {frame.description && (
               <div className="mt-1 text-xs text-muted-foreground">{frame.description}</div>

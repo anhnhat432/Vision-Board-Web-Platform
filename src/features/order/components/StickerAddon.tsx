@@ -22,10 +22,26 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
 
   return (
     <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="font-medium">{sticker.label}</div>
-          <div className="text-xs text-muted-foreground">{formatVnd(sticker.priceVnd)} / tờ</div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          {sticker.thumbnail ? (
+            <img
+              src={sticker.thumbnail}
+              alt={sticker.label}
+              className="h-14 w-14 shrink-0 rounded-[var(--r-card-sm)] object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div
+              data-testid="catalog-thumbnail-placeholder"
+              aria-hidden="true"
+              className="h-14 w-14 shrink-0 rounded-[var(--r-card-sm)] bg-gradient-to-br from-app-accent/10 to-app-accent/5"
+            />
+          )}
+          <div>
+            <div className="font-medium">{sticker.label}</div>
+            <div className="text-xs text-muted-foreground">{formatVnd(sticker.priceVnd)} / tờ</div>
+          </div>
         </div>
         {expanded ? (
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>

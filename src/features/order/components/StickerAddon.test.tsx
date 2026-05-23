@@ -34,4 +34,17 @@ describe("StickerAddon", () => {
     fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "99" } });
     expect(onChange).toHaveBeenLastCalledWith({ itemId: sticker.itemId, qty: 5 });
   });
+
+  it("renders thumbnail image when provided", () => {
+    const withImg: CatalogItem = { ...sticker, thumbnail: "/img/sticker.png" };
+    render(<StickerAddon sticker={withImg} value={null} onChange={() => {}} />);
+    const img = screen.getByAltText("Sticker tròn HynBee") as HTMLImageElement;
+    expect(img.tagName).toBe("IMG");
+    expect(img.getAttribute("src")).toBe("/img/sticker.png");
+  });
+
+  it("renders placeholder when thumbnail missing", () => {
+    render(<StickerAddon sticker={sticker} value={null} onChange={() => {}} />);
+    expect(screen.getByTestId("catalog-thumbnail-placeholder")).toBeInTheDocument();
+  });
 });
