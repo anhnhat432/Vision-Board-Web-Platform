@@ -21,7 +21,6 @@ import {
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import {
   maybeShowBrowserReminderNotification,
-  syncEntitlementsWithProvider,
   syncPendingOutbox,
 } from "../../utils/production";
 import {
@@ -110,6 +109,7 @@ import {
   isRecord,
 } from "./helpers";
 import { useCommandPaletteHotkey, useWarmPrefetch } from "./hooks/useUiBootstrap";
+import { useEntitlementsAutoSync } from "./hooks/useEntitlementsAutoSync";
 import { usePageViewAnalytics } from "./hooks/usePageViewAnalytics";
 
 export function RootLayout() {
@@ -161,7 +161,6 @@ export function RootLayout() {
   );
   const [isLocalDataMigrationPromptOpen, setIsLocalDataMigrationPromptOpen] = useState(false);
   const [mobileVisitorMenuOpen, setMobileVisitorMenuOpen] = useState(false);
-  const entitlementAutoSyncScopeRef = useRef<string | null>(null);
 
   const routeScrollKey = `${location.pathname}${location.search}`;
   const currentRouteKey = `${routeScrollKey}${location.hash}`;
@@ -260,33 +259,13 @@ export function RootLayout() {
     }
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (demoMode || !isConfigured || !isApiBaseUrlConfigured() || !user || !userProfile) return;
-    if (userProfile.role === "admin") return;
-
-    const scopeKey = userProfile.id || user.uid;
-    if (entitlementAutoSyncScopeRef.current === scopeKey) return;
-
-    const currentData = getUserData();
-    if (getCurrentPlan(currentData) !== "FREE") {
-      entitlementAutoSyncScopeRef.current = scopeKey;
-      return;
-    }
-
-    entitlementAutoSyncScopeRef.current = scopeKey;
-    let cancelled = false;
-
-    syncEntitlementsWithProvider().then((result) => {
-      if (cancelled) return;
-      if (result.ok && result.planCode !== "FREE") {
-        setGuideUserData(getUserData());
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [demoMode, isConfigured, user, userProfile]);
+  useEntitlementsAutoSync({
+    demoMode,
+    isConfigured,
+    user,
+    userProfile,
+    onPlanUpgraded: () => setGuideUserData(getUserData()),
+  });
 
   useEffect(() => {
     if (!desktopMoreOpen) return;
