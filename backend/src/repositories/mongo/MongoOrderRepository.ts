@@ -19,11 +19,28 @@ export interface StatusHistoryEntry {
   changedBy: string;
 }
 
+export type OrderLineType = "frame" | "theme" | "sticker";
+
+export interface OrderLine {
+  itemId: string;
+  label: string;
+  type: OrderLineType;
+  qty: number;
+  unitPriceVnd: number;
+  lineTotalVnd: number;
+}
+
 export interface OrderEntity {
   id: string;
   userId: string;
   status: OrderStatus;
-  kitType: string;
+  schemaVersion: number;
+  lines: OrderLine[];
+  subtotalVnd: number;
+  shippingVnd: number;
+  totalVnd: number;
+  keywords: string[];
+  kitType?: string;
   fullName: string;
   email: string;
   phone: string;
@@ -40,13 +57,19 @@ export interface OrderEntity {
 
 export interface CreateOrderData {
   userId: string;
-  kitType: string;
   fullName: string;
   email: string;
   phone: string;
   shippingAddress: ShippingAddress;
   note?: string;
   goalSnapshot?: GoalSnapshot;
+  schemaVersion: number;
+  lines: OrderLine[];
+  subtotalVnd: number;
+  shippingVnd: number;
+  totalVnd: number;
+  keywords: string[];
+  kitType?: string;
 }
 
 export interface UpdateOrderStatusData {
@@ -63,15 +86,39 @@ function mapOrder(doc: any): OrderEntity {
     id: doc._id.toString(),
     userId: doc.userId,
     status: doc.status as OrderStatus,
-    kitType: doc.kitType,
+    schemaVersion: doc.schemaVersion ?? 2,
+    lines: Array.isArray(doc.lines)
+      ? doc.lines.map(
+          (line: {
+            itemId: string;
+            label: string;
+            type: string;
+            qty: number;
+            unitPriceVnd: number;
+            lineTotalVnd: number;
+          }) => ({
+            itemId: line.itemId,
+            label: line.label,
+            type: line.type as OrderLineType,
+            qty: line.qty,
+            unitPriceVnd: line.unitPriceVnd,
+            lineTotalVnd: line.lineTotalVnd,
+          }),
+        )
+      : [],
+    subtotalVnd: doc.subtotalVnd ?? 0,
+    shippingVnd: doc.shippingVnd ?? 0,
+    totalVnd: doc.totalVnd ?? 0,
+    keywords: Array.isArray(doc.keywords) ? doc.keywords : [],
+    kitType: doc.kitType ?? undefined,
     fullName: doc.fullName,
     email: doc.email,
     phone: doc.phone,
     shippingAddress: {
-      line1: doc.shippingAddress.line1,
-      line2: doc.shippingAddress.line2 ?? undefined,
-      city: doc.shippingAddress.city,
-      country: doc.shippingAddress.country,
+      line1: doc.shippingAddress?.line1 ?? "",
+      line2: doc.shippingAddress?.line2 ?? undefined,
+      city: doc.shippingAddress?.city ?? "",
+      country: doc.shippingAddress?.country ?? "",
     },
     note: doc.note ?? undefined,
     goalSnapshot: doc.goalSnapshot
@@ -101,6 +148,12 @@ export class MongoOrderRepository {
     const doc = await OrderModel.create({
       userId: data.userId,
       status: "pending",
+      schemaVersion: data.schemaVersion,
+      lines: data.lines,
+      subtotalVnd: data.subtotalVnd,
+      shippingVnd: data.shippingVnd,
+      totalVnd: data.totalVnd,
+      keywords: data.keywords,
       kitType: data.kitType,
       fullName: data.fullName,
       email: data.email,
@@ -111,7 +164,8 @@ export class MongoOrderRepository {
       statusHistory: [{ status: "pending", changedAt: new Date(), changedBy: data.userId }],
     });
 
-    return mapOrder(doc.toObject());
+    const obj = typeof doc.toObject === "function" ? doc.toObject() : doc;
+    return mapOrder(obj);
   }
 
   async getOrderById(id: string): Promise<OrderEntity | null> {

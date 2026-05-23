@@ -4,8 +4,9 @@ const shippingAddressSchema = new Schema(
   {
     line1: { type: String, required: true, trim: true },
     line2: { type: String, required: false, trim: true },
-    city: { type: String, required: true, trim: true },
-    country: { type: String, required: true, trim: true },
+    // v2: city/country optional (frontend chỉ thu shippingAddress dạng string đơn giản).
+    city: { type: String, required: false, trim: true, default: "" },
+    country: { type: String, required: false, trim: true, default: "" },
   },
   { _id: false },
 );
