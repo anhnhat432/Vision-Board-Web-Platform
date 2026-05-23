@@ -2,6 +2,17 @@ import { get, post, patch } from "@/lib/api/apiClient";
 
 export type ApiOrderStatus = "pending" | "confirmed" | "printing" | "shipping" | "delivered" | "cancelled";
 
+export type ApiOrderLineType = "frame" | "theme" | "sticker";
+
+export interface ApiOrderLine {
+  itemId: string;
+  label: string;
+  type: ApiOrderLineType;
+  qty: number;
+  unitPriceVnd: number;
+  lineTotalVnd: number;
+}
+
 export interface ApiShippingAddress {
   line1: string;
   line2?: string;
@@ -19,7 +30,14 @@ export interface ApiOrder {
   id: string;
   userId: string;
   status: ApiOrderStatus;
-  kitType: string;
+  schemaVersion?: number;
+  lines?: ApiOrderLine[];
+  subtotalVnd?: number;
+  shippingVnd?: number;
+  totalVnd?: number;
+  keywords?: string[];
+  // Deprecated v2: kitType vẫn có thể tồn tại trên đơn cũ.
+  kitType?: string;
   fullName: string;
   email: string;
   phone: string;

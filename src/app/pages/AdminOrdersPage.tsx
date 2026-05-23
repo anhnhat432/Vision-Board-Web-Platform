@@ -1209,14 +1209,24 @@ export function AdminOrdersPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="stack-stack">
-                  <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-5">
                     <div>
                       <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mã đơn</span>
                       <p className="mt-0.5 font-mono text-xs text-slate-600">{order.id}</p>
                     </div>
                     <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Loại kit</span>
-                      <p className="mt-0.5 text-slate-700">{order.kitType}</p>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Khung</span>
+                      <p className="mt-0.5 text-slate-700">
+                        {order.lines?.find((l) => l.type === "frame")?.label
+                          ?? order.kitType
+                          ?? "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Số set ảnh</span>
+                      <p className="mt-0.5 text-slate-700">
+                        {order.lines?.filter((l) => l.type === "theme").length ?? 0}
+                      </p>
                     </div>
                     <div>
                       <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Ngày tạo</span>
