@@ -476,4 +476,104 @@ describe("PayOS webhook controller", () => {
     assert.equal((response.body as Record<string, unknown>).status, "ignored");
     assert.equal(grant.calls.count, 0);
   });
+
+  it("returns 400 when webhook body is not valid JSON", async () => {
+    configurePayosEnv();
+    const grant = stubGrantForbidden();
+    const response = createResponse();
+
+    await handlePayosWebhook(
+      { body: "{not-json", headers: {}, rawBody: Buffer.from("{not-json", "utf-8") } as unknown as Request,
+      response as unknown as Response,
+    );
+
+    assert.equal(response.statusCode, 401);
+    assert.equal(grant.calls.count, 0);
+  });
+
+  it("ignores webhook when payload has no usable order identifier", async () => {
+    configurePayosEnv();
+    const persistence = mockOrderPersistence(null);
+    const grant = stubGrantForbidden();
+    const response = createResponse();
+
+    // Build a payload whose description has no VB-prefix order id, no
+    // valid orderCode (NaN serializes to null → !Number.isFinite), and
+    // an empty paymentLinkId — buildPayosOrderLookup should return null
+    // and short-circuit before findOne.
+    const data = {
+      orderCode: null,
+      amount: 99000,
+      description: "no-prefix-text",
+      accountNumber: "123456789",
+      reference: "TF_PAYOS_NOID",
+      transactionDateTime: "2026-05-22 09:00:00",
+      currency: "VND",
+      paymentLinkId: "",
+      code: "00",
+      desc: "Thành công",
+    };
+    const payload = {
+      code: "00",
+      desc: "success",
+      success: true,
+      data,
+      signature: createPayosSignatureFromData(
+        data as unknown as Record<string, unknown>,
+        "payos_checksum_key_test",
+      ),
+    };
+
+    await handlePayosWebhook(
+      createRequest(JSON.parse(JSON.stringify(payload))),
+      response as unknown as Response,
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.equal((response.body as Record<string, unknown>).status, "ignored");
+    assert.equal(persistence.findOneCalls.length, 0);
+    assert.equal(persistence.claimCalls.length, 0);
+    assert.equal(grant.calls.count, 0);
+  });
+
+  it("ignores webhook when stored order is in a non-pending non-completed status (expired)", async () => {
+    configurePayosEnv();
+    const order = createOrder({ status: "expired" });
+    const persistence = mockOrderPersistence(order);
+    const grant = stubGrantForbidden();
+    const response = createResponse();
+
+    await handlePayosWebhook(createRequest(JSON.parse(createWebhookPayload())), response as unknown as Response);
+
+    assert.equal(response.statusCode, 200);
+    const body = response.body as Record<string, unknown>;
+    assert.equal(body.status, "ignored");
+    assert.equal(body.orderStatus, "expired");
+    assert.equal(persistence.claimCalls.length, 0);
+    assert.equal(grant.calls.count, 0);
+  });
+
+  it("returns 500 with retry message when billingService upsert throws after a successful claim", async () => {
+    configurePayosEnv();
+    const order = createOrder();
+    mockOrderPersistence(order);
+    const calls = mock.fn();
+    (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = async (
+      event: Record<string, unknown>,
+    ) => {
+      calls(event);
+      throw new Error("downstream upsert exploded");
+    };
+    const response = createResponse();
+
+    await handlePayosWebhook(createRequest(JSON.parse(createWebhookPayload())), response as unknown as Response);
+
+    assert.equal(response.statusCode, 500);
+    const body = response.body as Record<string, unknown>;
+    assert.equal(body.success, false);
+    assert.match(String(body.message), /retried/i);
+    // Order was claimed before throw; status reflects atomic claim
+    assert.equal(order.status, "completed");
+    assert.equal(calls.mock.callCount(), 1);
+  });
 });
