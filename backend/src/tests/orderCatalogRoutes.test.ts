@@ -494,3 +494,90 @@ describe("PUT /api/admin/order-catalog/:itemId", () => {
     assert.equal(update.label, "Y");
   });
 });
+
+describe("PATCH /api/admin/order-catalog/:itemId/active", () => {
+  afterEach(() => {
+    restoreFind();
+    clearAdminRoleCache();
+  });
+
+  it("toggles isActive=false, returns 200, and writes audit log", async () => {
+    const auditEntries: Array<Record<string, unknown>> = [];
+    let capturedFilter: unknown;
+    let capturedUpdate: unknown;
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async (
+      filter: unknown,
+      update: unknown,
+    ) => {
+      capturedFilter = filter;
+      capturedUpdate = update;
+      return {
+        itemId: "frame:20x30",
+        type: "frame",
+        label: "A",
+        priceVnd: 1,
+        isActive: false,
+      };
+    };
+    (AuditLogModel as unknown as { create: unknown }).create = async (entry: Record<string, unknown>) => {
+      auditEntries.push(entry);
+      return entry;
+    };
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:20x30/active",
+      {
+        token: "admin-token",
+        method: "PATCH",
+        body: { isActive: false },
+      },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.isActive, false);
+    assert.deepEqual(capturedFilter, { itemId: "frame:20x30" });
+    assert.deepEqual(capturedUpdate, { isActive: false });
+    assert.equal(auditEntries.length, 1);
+    assert.equal(auditEntries[0]?.action, "toggleOrderCatalogItemActive");
+    assert.equal(auditEntries[0]?.target, "order_catalog");
+    assert.equal(auditEntries[0]?.targetId, "frame:20x30");
+    assert.equal(auditEntries[0]?.success, true);
+  });
+
+  it("rejects non-boolean isActive with 400", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async () => {
+      throw new Error("findOneAndUpdate should not run");
+    };
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:20x30/active",
+      {
+        token: "admin-token",
+        method: "PATCH",
+        body: { isActive: "yes" },
+      },
+    );
+
+    assert.equal(response.status, 400);
+  });
+
+  it("returns 404 when itemId not found", async () => {
+    (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = async () => null;
+
+    const response = await requestAdminJson(
+      createAdminCatalogTestApp(),
+      "/api/admin/order-catalog/frame:nope/active",
+      {
+        token: "admin-token",
+        method: "PATCH",
+        body: { isActive: false },
+      },
+    );
+
+    assert.equal(response.status, 404);
+  });
+});

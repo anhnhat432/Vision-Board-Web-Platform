@@ -177,3 +177,26 @@ export async function updateCatalogItem(req: Request, res: Response): Promise<vo
 
   res.status(200).json(successResponse(updated, "Catalog item updated."));
 }
+
+export async function toggleCatalogItemActive(req: Request, res: Response): Promise<void> {
+  const itemId = req.params.itemId;
+  if (typeof itemId !== "string" || !ITEM_ID_RE.test(itemId)) {
+    throw new ApiError(400, "Invalid itemId.", undefined, "invalid_item_id");
+  }
+
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  if (typeof body.isActive !== "boolean") {
+    throw new ApiError(400, "isActive must be a boolean.", undefined, "invalid_payload");
+  }
+
+  const updated = await OrderCatalogModel.findOneAndUpdate(
+    { itemId },
+    { isActive: body.isActive },
+    { new: true },
+  );
+  if (!updated) {
+    throw new ApiError(404, `Catalog item "${itemId}" not found.`, undefined, "not_found");
+  }
+
+  res.status(200).json(successResponse(updated, "Catalog item active state updated."));
+}
