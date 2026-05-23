@@ -6,7 +6,6 @@ import {
   Eye,
   Image as ImageIcon,
   Images,
-  Package,
   Plus,
   Sparkles,
   Trash2,
@@ -170,9 +169,6 @@ export function VisionBoardGallery() {
     typeof location.state === "object" && location.state && "spotlightBoardId" in location.state
       ? (location.state as { spotlightBoardId?: string }).spotlightBoardId
       : undefined;
-  const orderSourceBoard =
-    (spotlightBoardId ? userData.visionBoards.find((board) => board.id === spotlightBoardId) : undefined) ??
-    latestBoard;
 
   return (
     <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
@@ -215,19 +211,9 @@ export function VisionBoardGallery() {
           </Button>
         }
         secondaryCta={
-          orderSourceBoard ? (
-            <Button
-              variant="outline"
-              onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
-            >
-              <Package className="h-4 w-4" />
-              {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
-            </Button>
-          ) : (
-            <Button variant="outline" onClick={() => navigate("/")}>
-              Về Trang chính
-            </Button>
-          )
+          <Button variant="outline" onClick={() => navigate("/")}>
+            Về Trang chính
+          </Button>
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
