@@ -22,7 +22,6 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import {
-  getKitTypeLabel,
   getLatestOrder,
   getNextOrderStatus,
   getOrderById,
@@ -41,6 +40,8 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 import { apiClient } from "@/lib/api/apiClient";
 import { getOrder as getBackendOrder, type ApiOrder } from "@/services/orderService";
 import { getBackendOrderId } from "@/lib/api/orderLinkStore";
+import { INCLUDED_DOCS } from "@/features/order/catalog/included";
+import { formatVnd } from "@/features/order/lib/pricing";
 
 const UNLINKED_GOAL_TITLE = "Chưa gắn mục tiêu cụ thể";
 const DEFAULT_FOCUS_AREA = "Chưa chọn trọng tâm";
@@ -748,18 +749,58 @@ export function OrderStatusPage() {
                 <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
-                    Cấu hình kit
+                    Chi tiết đơn
                   </div>
-                  <p className="mt-[var(--space-inline)] text-base font-semibold text-slate-900">
-                    {getKitTypeLabel(order.kitType)}
-                  </p>
-                  <p className="mt-1 text-sm leading-7 text-slate-600">
+                  {order.lines && order.lines.length > 0 ? (
+                    <ul className="mt-[var(--space-inline)] space-y-2 text-sm">
+                      {order.lines.map((line) => (
+                        <li
+                          key={`${line.itemId}-${line.qty}`}
+                          className="flex items-start justify-between gap-2"
+                        >
+                          <span className="text-slate-900">
+                            {line.label}
+                            {line.qty > 1 ? ` × ${line.qty}` : ""}
+                          </span>
+                          <span className="shrink-0 tabular-nums text-slate-700">
+                            {formatVnd(line.lineTotalVnd)}
+                          </span>
+                        </li>
+                      ))}
+                      {INCLUDED_DOCS.map((doc) => (
+                        <li
+                          key={doc.id}
+                          className="flex items-start justify-between gap-2 text-muted-foreground"
+                        >
+                          <span>{doc.label}</span>
+                          <span className="shrink-0">Tặng kèm — 0đ</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
+                      Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết.
+                    </p>
+                  )}
+                  {typeof order.totalVnd === "number" && order.totalVnd > 0 && (
+                    <div className="mt-3 flex items-center justify-between border-t border-[color:var(--border)] pt-3 text-sm font-semibold">
+                      <span>Tổng đơn</span>
+                      <span className="tabular-nums">{formatVnd(order.totalVnd)}</span>
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-slate-500">
                     {hasKeywords
                       ? `${order.keywords.length} từ khóa đã được lưu cùng đơn này.`
                       : "Chưa có từ khóa cụ thể cho kit."}
                   </p>
                 </div>
               </div>
+
+              {(!order.lines || order.lines.length === 0) && (
+                <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết và giá.
+                </div>
+              )}
 
               <div className="space-y-1 border-t border-slate-100 pt-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -964,7 +1005,10 @@ export function OrderStatusPage() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-slate-900">{item.goalTitle}</p>
                       <p className="mt-1 text-xs text-slate-500">
-                        {getOrderStatusLabel(item.status)} · {getKitTypeLabel(item.kitType)}
+                        {getOrderStatusLabel(item.status)}
+                        {typeof item.totalVnd === "number" && item.totalVnd > 0
+                          ? ` · ${formatVnd(item.totalVnd)}`
+                          : ""}
                       </p>
                       <p className="mt-1 text-xs text-slate-400">
                         {formatCalendarDate(item.createdAt, "vi-VN", {
