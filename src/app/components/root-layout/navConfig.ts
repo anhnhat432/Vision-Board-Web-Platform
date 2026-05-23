@@ -5,6 +5,7 @@ import {
   CreditCard,
   Images,
   LayoutDashboard,
+  Package,
   Sparkles,
   Target,
   TrendingUp,
@@ -27,6 +28,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/life-balance", label: "Cân bằng cuộc sống", compactLabel: "Cân bằng", icon: TrendingUp },
   { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
   { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
+  { path: "/order", label: "Đặt kit", compactLabel: "Đặt kit", icon: Package },
   { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
 ];
 
