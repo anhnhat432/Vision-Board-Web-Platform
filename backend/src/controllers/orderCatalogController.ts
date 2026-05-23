@@ -227,6 +227,10 @@ function buildCatalogThumbnailKey(itemId: string, ext: string): string {
   return `order-catalog/${safeName}.${ext}`;
 }
 
+function buildVersionedThumbnailUrl(publicUrl: string): string {
+  return `${publicUrl}?v=${Date.now()}`;
+}
+
 export async function uploadCatalogItemThumbnail(req: Request, res: Response): Promise<void> {
   const itemId = req.params.itemId;
   if (typeof itemId !== "string" || !ITEM_ID_RE.test(itemId)) {
@@ -267,7 +271,7 @@ export async function uploadCatalogItemThumbnail(req: Request, res: Response): P
     cacheControl: "public, max-age=86400, immutable",
   });
 
-  const publicUrl = storage.publicUrl(key);
+  const publicUrl = buildVersionedThumbnailUrl(storage.publicUrl(key));
 
   const updated = await OrderCatalogModel.findOneAndUpdate(
     { itemId },

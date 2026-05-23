@@ -291,13 +291,15 @@ describe("POST /api/admin/order-catalog/:itemId/thumbnail", () => {
     assert.equal(response.body.success, true);
     const data = response.body.data as Record<string, unknown>;
     const expectedKey = "order-catalog/frame-20x30.webp";
-    const expectedUrl = `${publicBaseUrl}/${expectedKey}`;
-    assert.equal(data.thumbnail, expectedUrl);
+    const expectedUrlPrefix = `${publicBaseUrl}/${expectedKey}?v=`;
+    assert.equal(typeof data.thumbnail, "string");
+    assert.ok((data.thumbnail as string).startsWith(expectedUrlPrefix));
     assert.equal(calls.length, 1);
     assert.equal(calls[0]?.key, expectedKey);
     assert.equal(calls[0]?.contentType, "image/webp");
     assert.deepEqual(capturedFilter, { itemId: "frame:20x30" });
-    assert.deepEqual(capturedUpdate, { thumbnail: expectedUrl });
+    assert.equal(typeof (capturedUpdate as Record<string, unknown>).thumbnail, "string");
+    assert.ok(((capturedUpdate as Record<string, unknown>).thumbnail as string).startsWith(expectedUrlPrefix));
     assert.equal(auditEntries.length, 1);
     assert.equal(auditEntries[0]?.action, "uploadOrderCatalogItemThumbnail");
     assert.equal(auditEntries[0]?.target, "order_catalog");
