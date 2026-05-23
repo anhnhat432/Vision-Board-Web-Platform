@@ -1,6 +1,7 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { env } from "../config/env";
+import { ApiError } from "../utils/apiError";
 
 export interface PutObjectInput {
   key: string;
@@ -26,22 +27,55 @@ function ensureR2Configured(): {
   endpoint: string;
 } {
   const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_PUBLIC_BASE_URL, R2_ENDPOINT } = env;
-  if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET || !R2_PUBLIC_BASE_URL) {
-    throw new Error(
-      "R2 storage is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET and R2_PUBLIC_BASE_URL.",
+  const missing = [
+    ["R2_ACCOUNT_ID", R2_ACCOUNT_ID],
+    ["R2_ACCESS_KEY_ID", R2_ACCESS_KEY_ID],
+    ["R2_SECRET_ACCESS_KEY", R2_SECRET_ACCESS_KEY],
+    ["R2_BUCKET", R2_BUCKET],
+    ["R2_PUBLIC_BASE_URL", R2_PUBLIC_BASE_URL],
+  ]
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+
+  if (missing.length > 0) {
+    throw new ApiError(
+      503,
+      `R2 storage is not configured. Missing: ${missing.join(", ")}.`,
+      { missing },
+      "storage_not_configured",
     );
   }
   const endpoint = R2_ENDPOINT && R2_ENDPOINT.length > 0
     ? R2_ENDPOINT
     : `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
   return {
-    accountId: R2_ACCOUNT_ID,
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-    bucket: R2_BUCKET,
-    publicBaseUrl: R2_PUBLIC_BASE_URL.replace(/\/+$/, ""),
+    accountId: R2_ACCOUNT_ID as string,
+    accessKeyId: R2_ACCESS_KEY_ID as string,
+    secretAccessKey: R2_SECRET_ACCESS_KEY as string,
+    bucket: R2_BUCKET as string,
+    publicBaseUrl: (R2_PUBLIC_BASE_URL as string).replace(/\/+$/, ""),
     endpoint,
   };
+}
+
+function getProviderErrorSummary(error: unknown): { code: string; statusCode?: number } {
+  if (!error || typeof error !== "object") return { code: "unknown" };
+
+  const record = error as {
+    name?: unknown;
+    Code?: unknown;
+    code?: unknown;
+    $metadata?: { httpStatusCode?: unknown };
+  };
+  const code =
+    (typeof record.Code === "string" && record.Code) ||
+    (typeof record.code === "string" && record.code) ||
+    (typeof record.name === "string" && record.name) ||
+    "unknown";
+  const statusCode =
+    typeof record.$metadata?.httpStatusCode === "number" ? record.$metadata.httpStatusCode : undefined;
+
+  return { code, statusCode };
 }
 
 function createR2Adapter(): ImageStorageAdapter {
@@ -57,15 +91,25 @@ function createR2Adapter(): ImageStorageAdapter {
 
   return {
     async putObject({ key, body, contentType, cacheControl }) {
-      await client.send(
-        new PutObjectCommand({
-          Bucket: config.bucket,
-          Key: key,
-          Body: body,
-          ContentType: contentType,
-          CacheControl: cacheControl,
-        }),
-      );
+      try {
+        await client.send(
+          new PutObjectCommand({
+            Bucket: config.bucket,
+            Key: key,
+            Body: body,
+            ContentType: contentType,
+            CacheControl: cacheControl,
+          }),
+        );
+      } catch (error) {
+        const summary = getProviderErrorSummary(error);
+        throw new ApiError(
+          502,
+          `R2 upload failed (${summary.code}). Check R2 endpoint, bucket name, and access key permissions.`,
+          summary,
+          "storage_upload_failed",
+        );
+      }
     },
     publicUrl(key: string) {
       return `${config.publicBaseUrl}/${key}`;
