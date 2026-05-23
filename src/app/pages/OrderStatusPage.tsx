@@ -145,7 +145,6 @@ function mapBackendOrderToLocal(api: ApiOrder, localOrder: LocalOrder | null): L
     shippingAddress: addressParts || localOrder?.shippingAddress || "",
     keywords: localOrder?.keywords ?? [],
     note: api.note ?? localOrder?.note ?? "",
-    kitType: (api.kitType as LocalOrder["kitType"]) ?? localOrder?.kitType ?? "vision-kit",
   };
 }
 

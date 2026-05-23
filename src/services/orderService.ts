@@ -1,4 +1,4 @@
-import { get, post, patch } from "@/lib/api/apiClient";
+import { get, patch } from "@/lib/api/apiClient";
 
 export type ApiOrderStatus = "pending" | "confirmed" | "printing" | "shipping" | "delivered" | "cancelled";
 
@@ -57,17 +57,16 @@ export interface ApiOrder {
 }
 
 export interface CreateOrderPayload {
-  kitType: string;
+  itemIds: string[];
+  sticker?: { itemId: string; qty: number } | null;
   fullName: string;
   email: string;
   phone: string;
-  shippingAddress: ApiShippingAddress;
+  shippingAddress: string;
+  goalId?: string | null;
+  goalTitle?: string;
+  keywords?: string[];
   note?: string;
-  goalId?: string;
-}
-
-export function createOrder(payload: CreateOrderPayload): Promise<ApiOrder> {
-  return post<ApiOrder, CreateOrderPayload>("/orders", payload);
 }
 
 export function getOrders(): Promise<ApiOrder[]> {
