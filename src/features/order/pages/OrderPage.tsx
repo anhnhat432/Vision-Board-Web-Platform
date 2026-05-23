@@ -11,6 +11,7 @@ import {
 } from "@/features/order/lib/pricing";
 import { validateOrderDraft } from "@/features/order/lib/validators";
 import { createLocalOrder } from "@/features/order/storage/order";
+import { createOrder } from "@/services/orderService";
 
 import { FrameSizePicker } from "../components/FrameSizePicker";
 import { IncludedItemsCard } from "../components/IncludedItemsCard";
@@ -72,15 +73,8 @@ export function OrderPage() {
       };
       let serverId: string | null = null;
       try {
-        const res = await fetch("/api/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          const json = (await res.json()) as { data: { id: string } };
-          serverId = json.data.id;
-        }
+        const order = await createOrder(payload);
+        serverId = order.id;
       } catch {
         // offline: fall through to local-only save
       }

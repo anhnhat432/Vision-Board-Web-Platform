@@ -1,4 +1,4 @@
-import { get, patch } from "@/lib/api/apiClient";
+import { get, patch, post } from "@/lib/api/apiClient";
 
 export type ApiOrderStatus = "pending" | "confirmed" | "printing" | "shipping" | "delivered" | "cancelled";
 
@@ -79,6 +79,10 @@ export function getOrder(orderId: string): Promise<ApiOrder> {
 
 export function cancelOrder(orderId: string): Promise<ApiOrder> {
   return patch<ApiOrder>(`/orders/${orderId}/cancel`);
+}
+
+export function createOrder(payload: CreateOrderPayload): Promise<ApiOrder> {
+  return post<ApiOrder, CreateOrderPayload>("/orders", payload);
 }
 
 // --- Admin endpoints ---

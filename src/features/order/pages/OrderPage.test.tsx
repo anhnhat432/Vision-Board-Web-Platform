@@ -3,8 +3,13 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 
 import { DEFAULT_CATALOG } from "@/features/order/catalog/defaults";
+import { createOrder } from "@/services/orderService";
 
 import OrderPage from "./OrderPage";
+
+vi.mock("@/services/orderService", () => ({
+  createOrder: vi.fn(),
+}));
 
 function renderOrderPage() {
   const router = createMemoryRouter(
@@ -20,6 +25,7 @@ function renderOrderPage() {
 beforeEach(() => {
   window.localStorage.clear();
   vi.restoreAllMocks();
+  vi.mocked(createOrder).mockResolvedValue({ id: "srv-1" } as Awaited<ReturnType<typeof createOrder>>);
   vi.stubGlobal(
     "fetch",
     vi.fn((url: string) => {
@@ -27,12 +33,6 @@ beforeEach(() => {
         return Promise.resolve({
           ok: true,
           json: async () => ({ data: DEFAULT_CATALOG }),
-        });
-      }
-      if (typeof url === "string" && url.includes("/api/orders")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ data: { id: "srv-1" } }),
         });
       }
       return Promise.reject(new Error("unhandled"));
@@ -56,14 +56,10 @@ describe("OrderPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /Đặt đơn/ }));
 
     await waitFor(() => {
-      const calls = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
-      const submitCall = calls.find(
-        (c) => typeof c[0] === "string" && (c[0] as string).includes("/api/orders"),
-      );
-      expect(submitCall).toBeDefined();
-      const body = JSON.parse((submitCall![1] as { body: string }).body);
-      expect(body.itemIds).toEqual(["frame:30x40", "theme:money"]);
-      expect("priceVnd" in body).toBe(false);
+      expect(createOrder).toHaveBeenCalled();
+      const payload = vi.mocked(createOrder).mock.calls[0]?.[0];
+      expect(payload?.itemIds).toEqual(["frame:30x40", "theme:money"]);
+      expect("priceVnd" in (payload ?? {})).toBe(false);
     });
   });
 });
