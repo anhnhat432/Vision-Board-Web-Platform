@@ -290,7 +290,7 @@ describe("POST /api/admin/order-catalog/:itemId/thumbnail", () => {
     assert.equal(response.status, 200);
     assert.equal(response.body.success, true);
     const data = response.body.data as Record<string, unknown>;
-    const expectedKey = `order-catalog/${encodeURIComponent("frame:20x30")}.webp`;
+    const expectedKey = "order-catalog/frame-20x30.webp";
     const expectedUrl = `${publicBaseUrl}/${expectedKey}`;
     assert.equal(data.thumbnail, expectedUrl);
     assert.equal(calls.length, 1);

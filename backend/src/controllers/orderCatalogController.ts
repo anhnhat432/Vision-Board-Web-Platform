@@ -222,6 +222,11 @@ function getUploadedFile(req: Request): MulterFileLike | undefined {
   return file;
 }
 
+function buildCatalogThumbnailKey(itemId: string, ext: string): string {
+  const safeName = itemId.replace(/[^a-z0-9-]/g, "-");
+  return `order-catalog/${safeName}.${ext}`;
+}
+
 export async function uploadCatalogItemThumbnail(req: Request, res: Response): Promise<void> {
   const itemId = req.params.itemId;
   if (typeof itemId !== "string" || !ITEM_ID_RE.test(itemId)) {
@@ -253,7 +258,7 @@ export async function uploadCatalogItemThumbnail(req: Request, res: Response): P
   }
 
   const storage = getImageStorageAdapter();
-  const key = `order-catalog/${encodeURIComponent(itemId)}.${ext}`;
+  const key = buildCatalogThumbnailKey(itemId, ext);
 
   await storage.putObject({
     key,
