@@ -1,6 +1,7 @@
 import { Suspense, lazy, type ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
+import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
 import { loadWithChunkReload } from "./utils/chunkLoad";
@@ -167,12 +168,18 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
       },
       {
-        path: "admin/orders",
-        ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
-      },
-      {
-        path: "admin/catalog",
-        ...lazyRoute(() => import("./pages/AdminCatalogPage"), "AdminCatalogPage"),
+        path: "admin",
+        Component: AdminLayout,
+        children: [
+          {
+            path: "orders",
+            ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
+          },
+          {
+            path: "catalog",
+            ...lazyRoute(() => import("./pages/AdminCatalogPage"), "AdminCatalogPage"),
+          },
+        ],
       },
       {
         path: "goals",

@@ -143,6 +143,16 @@ export function LoginPage() {
   // If already signed in, wait for profile so admin accounts can
   // land directly in the admin console instead of the normal user workspace.
   if (!authLoading && user) {
+    if (userProfileLoading || (!userProfile && !userProfileError)) {
+      return (
+        <LoginStatusCard
+          icon={<Loader2 className="h-5 w-5 animate-spin text-white" />}
+          title="Đang tải hồ sơ"
+          description="Hệ thống đang kiểm tra quyền tài khoản trước khi mở trang tiếp theo."
+        />
+      );
+    }
+
     if (userProfile?.role === "admin") {
       return <Navigate to={redirectTo.startsWith("/admin/") ? redirectTo : "/admin/orders"} replace />;
     }
