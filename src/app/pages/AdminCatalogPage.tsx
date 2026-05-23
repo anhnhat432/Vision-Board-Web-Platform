@@ -1,13 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import type { CatalogItem, CatalogItemType } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
+import { getApiBaseUrl } from "@/lib/api/apiClient";
+import { authedFetch } from "@/lib/auth/authedFetch";
+
+function buildAdminApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  const normalizedPath = path.startsWith("/api/") ? path.slice(4) : path;
+  const apiPath = normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`;
+  return `${getApiBaseUrl()}${apiPath}`;
+}
 
 async function adminFetch<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(path, {
+  const res = await authedFetch(buildAdminApiUrl(path), {
     ...init,
     credentials: "include",
     headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
@@ -20,11 +29,20 @@ interface CatalogResponse {
   data: CatalogItem[];
 }
 
+interface CatalogItemResponse {
+  data: CatalogItem;
+}
+
+const ALLOWED_THUMBNAIL_MIMES = new Set(["image/png", "image/jpeg", "image/webp"]);
+const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+
 export function AdminCatalogPage() {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -77,6 +95,50 @@ export function AdminCatalogPage() {
     }
   }
 
+  async function uploadThumbnail(itemId: string, file: File) {
+    if (!ALLOWED_THUMBNAIL_MIMES.has(file.type)) {
+      setError("Chỉ chấp nhận ảnh PNG, JPEG hoặc WebP.");
+      return;
+    }
+    if (file.size > MAX_THUMBNAIL_BYTES) {
+      setError("Ảnh quá lớn. Tối đa 2MB.");
+      return;
+    }
+
+    setError(null);
+    setUploading(itemId);
+    try {
+      const formData = new FormData();
+      formData.append("thumbnail", file);
+      const res = await authedFetch(buildAdminApiUrl(`/api/admin/order-catalog/${encodeURIComponent(itemId)}/thumbnail`), {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (!res.ok) {
+        let message = `HTTP ${res.status}`;
+        try {
+          const body = (await res.json()) as { message?: string };
+          if (body?.message) message = body.message;
+        } catch {
+          // ignore body parse error
+        }
+        throw new Error(message);
+      }
+      const json = (await res.json()) as CatalogItemResponse;
+      const updated = json.data;
+      setItems((prev) =>
+        prev.map((i) => (i.itemId === itemId ? { ...i, thumbnail: updated.thumbnail } : i)),
+      );
+    } catch (err) {
+      setError(`Lỗi upload ảnh: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setUploading(null);
+      const input = fileInputs.current[itemId];
+      if (input) input.value = "";
+    }
+  }
+
   function renderTab(type: CatalogItemType) {
     const list = items
       .filter((i) => i.type === type)
@@ -89,6 +151,7 @@ export function AdminCatalogPage() {
         <thead className="text-left text-muted-foreground">
           <tr>
             <th className="py-2">Item ID</th>
+            <th>Ảnh</th>
             <th>Tên</th>
             <th>Giá (đ)</th>
             <th>Trạng thái</th>
@@ -98,6 +161,44 @@ export function AdminCatalogPage() {
           {list.map((item) => (
             <tr key={item.itemId} className="border-t border-[color:var(--border)]">
               <td className="py-2 font-mono text-xs">{item.itemId}</td>
+              <td>
+                <div className="flex items-center gap-2">
+                  {item.thumbnail ? (
+                    <img
+                      src={item.thumbnail}
+                      alt={item.label}
+                      className="h-12 w-12 rounded border border-[color:var(--border)] object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded border border-dashed border-[color:var(--border)] text-[10px] text-muted-foreground">
+                      no img
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <input
+                      ref={(el) => {
+                        fileInputs.current[item.itemId] = el;
+                      }}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadThumbnail(item.itemId, file);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={uploading === item.itemId}
+                      onClick={() => fileInputs.current[item.itemId]?.click()}
+                    >
+                      {uploading === item.itemId ? "Đang upload..." : "Đổi ảnh"}
+                    </Button>
+                  </div>
+                </div>
+              </td>
               <td>{item.label}</td>
               <td>
                 <div className="flex items-center gap-2">
@@ -139,7 +240,8 @@ export function AdminCatalogPage() {
     <div className="mx-auto max-w-5xl px-4 py-6">
       <h1 className="text-2xl font-bold">Quản lý catalog đơn kit</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Sửa giá, ẩn/hiện sản phẩm. Thay đổi áp dụng ngay khi user reload trang đặt đơn.
+        Sửa giá, ẩn/hiện sản phẩm, cập nhật ảnh đại diện. Thay đổi áp dụng ngay khi user reload trang
+        đặt đơn.
       </p>
       {error && (
         <div className="mt-3 rounded bg-destructive/10 px-3 py-2 text-xs text-destructive">

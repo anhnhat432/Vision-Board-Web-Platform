@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 
 import { OrderCatalogModel } from "../models/OrderCatalogModel";
+import { getImageStorageAdapter } from "../services/r2StorageService";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 
@@ -9,6 +10,13 @@ const ALLOWED_TYPES = new Set(["frame", "theme", "sticker"]);
 const MAX_LABEL_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 1000;
 const MAX_THUMBNAIL_LENGTH = 2048;
+
+const ALLOWED_THUMBNAIL_MIME: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
 
 export async function listActiveCatalog(_req: Request, res: Response): Promise<void> {
   const items = await OrderCatalogModel.find({ isActive: true })
@@ -199,4 +207,71 @@ export async function toggleCatalogItemActive(req: Request, res: Response): Prom
   }
 
   res.status(200).json(successResponse(updated, "Catalog item active state updated."));
+}
+
+interface MulterFileLike {
+  fieldname: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
+function getUploadedFile(req: Request): MulterFileLike | undefined {
+  const file = (req as Request & { file?: MulterFileLike }).file;
+  return file;
+}
+
+export async function uploadCatalogItemThumbnail(req: Request, res: Response): Promise<void> {
+  const itemId = req.params.itemId;
+  if (typeof itemId !== "string" || !ITEM_ID_RE.test(itemId)) {
+    throw new ApiError(400, "Invalid itemId.", undefined, "invalid_item_id");
+  }
+
+  const file = getUploadedFile(req);
+  if (!file || !file.buffer || file.size === 0) {
+    throw new ApiError(400, "Image file is required (field name \"thumbnail\").", undefined, "missing_file");
+  }
+
+  const ext = ALLOWED_THUMBNAIL_MIME[file.mimetype];
+  if (!ext) {
+    throw new ApiError(
+      400,
+      "Unsupported image type. Allowed: image/png, image/jpeg, image/webp.",
+      undefined,
+      "invalid_mime",
+    );
+  }
+
+  if (file.size > MAX_THUMBNAIL_BYTES) {
+    throw new ApiError(400, "Image is too large. Max 2MB.", undefined, "file_too_large");
+  }
+
+  const existing = await OrderCatalogModel.findOne({ itemId });
+  if (!existing) {
+    throw new ApiError(404, `Catalog item "${itemId}" not found.`, undefined, "not_found");
+  }
+
+  const storage = getImageStorageAdapter();
+  const key = `order-catalog/${encodeURIComponent(itemId)}.${ext}`;
+
+  await storage.putObject({
+    key,
+    body: file.buffer,
+    contentType: file.mimetype,
+    cacheControl: "public, max-age=86400, immutable",
+  });
+
+  const publicUrl = storage.publicUrl(key);
+
+  const updated = await OrderCatalogModel.findOneAndUpdate(
+    { itemId },
+    { thumbnail: publicUrl },
+    { new: true },
+  );
+  if (!updated) {
+    throw new ApiError(404, `Catalog item "${itemId}" not found.`, undefined, "not_found");
+  }
+
+  res.status(200).json(successResponse(updated, "Catalog item thumbnail uploaded."));
 }

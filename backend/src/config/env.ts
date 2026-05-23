@@ -87,6 +87,12 @@ export const env = {
   GEMINI_MODEL: geminiModel,
   GROQ_API_KEY: groqApiKey,
   GROQ_MODEL: groqModel,
+  R2_ACCOUNT_ID: getOptionalEnv("R2_ACCOUNT_ID"),
+  R2_ACCESS_KEY_ID: getOptionalEnv("R2_ACCESS_KEY_ID"),
+  R2_SECRET_ACCESS_KEY: getOptionalEnv("R2_SECRET_ACCESS_KEY"),
+  R2_BUCKET: getOptionalEnv("R2_BUCKET"),
+  R2_ENDPOINT: getOptionalEnv("R2_ENDPOINT"),
+  R2_PUBLIC_BASE_URL: getOptionalEnv("R2_PUBLIC_BASE_URL"),
 };
 
 export type Env = typeof env;

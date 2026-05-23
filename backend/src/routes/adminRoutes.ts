@@ -1,5 +1,6 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { Router } from "express";
+import multer from "multer";
 
 import {
   completePaymentOrderManually,
@@ -14,6 +15,7 @@ import {
   listAllCatalog,
   toggleCatalogItemActive,
   updateCatalogItem,
+  uploadCatalogItemThumbnail,
 } from "../controllers/orderCatalogController";
 import {
   completeAdminRefundRequest,
@@ -23,10 +25,36 @@ import {
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
 import { validateOptionalJsonObjectBody, validateOrderIdParam } from "../middleware/requestValidation";
 import { logAdminAction } from "../services/auditLogService";
+import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const adminRoutes = Router();
+
+const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+
+const thumbnailUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { files: 1, fileSize: MAX_THUMBNAIL_BYTES },
+});
+
+const uploadThumbnailMiddleware: RequestHandler = (req, res, next) => {
+  thumbnailUpload.single("thumbnail")(req, res, (err: unknown) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        next(new ApiError(400, "Image is too large. Max 2MB.", undefined, "file_too_large"));
+        return;
+      }
+      next(new ApiError(400, `Upload error: ${err.message}`, undefined, "upload_error"));
+      return;
+    }
+    if (err) {
+      next(err as Error);
+      return;
+    }
+    next();
+  });
+};
 
 type AdminHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
 
@@ -138,6 +166,16 @@ adminRoutes.patch(
     getTargetId: (req) => req.params.itemId ?? null,
     validators: [validateOptionalJsonObjectBody],
     handler: toggleCatalogItemActive,
+  }),
+);
+adminRoutes.post(
+  "/admin/order-catalog/:itemId/thumbnail",
+  auditedAdminAction({
+    action: "uploadOrderCatalogItemThumbnail",
+    target: "order_catalog",
+    getTargetId: (req) => req.params.itemId ?? null,
+    validators: [uploadThumbnailMiddleware],
+    handler: uploadCatalogItemThumbnail,
   }),
 );
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
