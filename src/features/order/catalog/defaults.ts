@@ -1,0 +1,72 @@
+import type { CatalogItem } from "./types";
+
+const THEME_SLUGS = [
+  "text-1",
+  "text-2",
+  "text-3",
+  "text-4",
+  "text-5",
+  "text-6",
+  "books",
+  "body",
+  "money",
+  "study",
+  "followers",
+  "cloth",
+  "friends",
+  "desk-corner",
+  "coffee",
+  "cars",
+  "lose-weight",
+  "travel",
+];
+
+export const DEFAULT_CATALOG: CatalogItem[] = [
+  {
+    itemId: "frame:20x30",
+    type: "frame",
+    label: "Khung 20×30 cm",
+    description: "Để bàn, nhỏ gọn",
+    priceVnd: 79000,
+    sortOrder: 1,
+    isActive: true,
+  },
+  {
+    itemId: "frame:30x40",
+    type: "frame",
+    label: "Khung 30×40 cm",
+    description: "Phổ biến nhất",
+    priceVnd: 119000,
+    sortOrder: 2,
+    isActive: true,
+  },
+  {
+    itemId: "frame:40x60",
+    type: "frame",
+    label: "Khung 40×60 cm",
+    description: "Treo tường ấn tượng",
+    priceVnd: 189000,
+    sortOrder: 3,
+    isActive: true,
+  },
+  ...THEME_SLUGS.map(
+    (slug, i): CatalogItem => ({
+      itemId: `theme:${slug}`,
+      type: "theme",
+      label: slug.replace(/-/g, " ").toUpperCase(),
+      priceVnd: 18000,
+      sortOrder: 10 + i,
+      isActive: true,
+    }),
+  ),
+  {
+    itemId: "sticker:hynbee-round-v1",
+    type: "sticker",
+    label: "Sticker tròn HynBee",
+    description: "Phụ kiện trang trí postcard",
+    priceVnd: 15000,
+    sortOrder: 50,
+    isActive: true,
+    maxQty: 10,
+  },
+];
