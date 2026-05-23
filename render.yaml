@@ -44,3 +44,19 @@ services:
         sync: false
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
+
+  - type: cron
+    name: seed-order-catalog
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: node dist/scripts/seedOrderCatalog.js
+    schedule: "0 0 1 1 *"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        fromService:
+          name: vision-board-backend
+          type: web
+          envVarKey: MONGODB_URI
