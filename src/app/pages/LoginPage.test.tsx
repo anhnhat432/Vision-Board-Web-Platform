@@ -224,12 +224,12 @@ describe("LoginPage", () => {
       <MemoryRouter initialEntries={["/login"]}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin/orders" element={<DestinationProbe />} />
+          <Route path="/admin/dashboard" element={<DestinationProbe />} />
         </Routes>
       </MemoryRouter>,
     );
 
-    expect(await screen.findByTestId("destination")).toHaveTextContent("/admin/orders");
+    expect(await screen.findByTestId("destination")).toHaveTextContent("/admin/dashboard");
   });
 
   it("redirects authenticated users while profile routing is still loading", async () => {

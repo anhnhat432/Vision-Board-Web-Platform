@@ -154,7 +154,7 @@ export function LoginPage() {
     }
 
     if (userProfile?.role === "admin") {
-      return <Navigate to={redirectTo.startsWith("/admin/") ? redirectTo : "/admin/orders"} replace />;
+      return <Navigate to={redirectTo.startsWith("/admin/") ? redirectTo : "/admin/dashboard"} replace />;
     }
 
     if (userProfile) {

@@ -204,7 +204,7 @@ export function RootLayout() {
   useEffect(() => {
     if (userProfile?.role === "admin") {
       if (!location.pathname.startsWith("/admin/")) {
-        navigate("/admin/orders", { replace: true });
+        navigate("/admin/dashboard", { replace: true });
       }
       return;
     }

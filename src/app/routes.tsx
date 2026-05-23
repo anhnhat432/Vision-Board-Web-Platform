@@ -172,8 +172,24 @@ export const appRoutes = [
         Component: AdminLayout,
         children: [
           {
+            index: true,
+            element: <Navigate to="/admin/dashboard" replace />,
+          },
+          {
+            path: "dashboard",
+            ...lazyRoute(() => import("./pages/AdminDashboardPage"), "AdminDashboardPage"),
+          },
+          {
             path: "orders",
             ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
+          },
+          {
+            path: "payments",
+            ...lazyRoute(() => import("./pages/AdminPaymentsPage"), "AdminPaymentsPage"),
+          },
+          {
+            path: "refunds",
+            ...lazyRoute(() => import("./pages/AdminRefundsPage"), "AdminRefundsPage"),
           },
           {
             path: "catalog",

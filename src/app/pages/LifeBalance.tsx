@@ -41,7 +41,7 @@ type FlushableDebouncedSave<T> = {
 };
 
 function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: number): FlushableDebouncedSave<T> {
-  let timer: ReturnType<typeof window.setTimeout> | null = null;
+  let timer: number | null = null;
   let pendingValue: T | null = null;
 
   const flush = () => {

@@ -127,10 +127,34 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Xem gói hiện tại, quyền truy cập và thao tác thanh toán.",
   },
   {
+    match: (pathname: string) => pathname.startsWith("/admin/dashboard"),
+    label: "Tổng quan vận hành",
+    title: "Tổng quan vận hành – Dear Our Future",
+    tagline: "Theo dõi nhanh user, doanh thu Plus, đơn thanh toán và đơn in.",
+  },
+  {
     match: (pathname: string) => pathname.startsWith("/admin/orders"),
     label: "Quản trị đơn hàng",
     title: "Quản trị đơn hàng – Dear Our Future",
-    tagline: "Xem và chuyển trạng thái đơn hàng từ người dùng.",
+    tagline: "Xem và chuyển trạng thái đơn hàng in từ người dùng.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/admin/payments"),
+    label: "Thanh toán tự động",
+    title: "Thanh toán tự động – Dear Our Future",
+    tagline: "Đối chiếu giao dịch Plus và mở Plus thủ công khi cần.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/admin/refunds"),
+    label: "Hoàn tiền",
+    title: "Hoàn tiền – Dear Our Future",
+    tagline: "Duyệt yêu cầu hoàn tiền thủ công từ người dùng.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/admin/catalog"),
+    label: "Catalog đơn kit",
+    title: "Catalog đơn kit – Dear Our Future",
+    tagline: "Quản lý giá, ảnh và trạng thái catalog đơn kit.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/order-status"),

@@ -174,7 +174,7 @@ export function Onboarding() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
   const flowTopRef = useRef<HTMLDivElement | null>(null);
-  const autosaveTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const autosaveTimerRef = useRef<number | null>(null);
 
   const guardedRef = useRef(false);
   useEffect(() => {

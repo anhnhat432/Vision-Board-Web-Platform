@@ -1,10 +1,15 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
-import { AlertTriangle, Loader2, LogOut, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Loader2, LogOut, RefreshCw } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import { Sheet, SheetContent } from "../ui/sheet";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { AdminPendingCountsProvider, useAdminPendingCounts } from "./AdminPendingCountsContext";
+import { AdminSearchProvider } from "./AdminSearchContext";
+import { AdminSidebar } from "./AdminSidebar";
+import { AdminTopbar } from "./AdminTopbar";
 
 function AdminStatusCard({
   action,
@@ -52,6 +57,7 @@ export function AdminLayout() {
     userProfileError,
     userProfileLoading,
   } = useAuthContext();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const destination = `${location.pathname}${location.search}${location.hash}`;
   const loginPath = `/login?next=${encodeURIComponent(destination)}`;
 
@@ -147,56 +153,71 @@ export function AdminLayout() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login?next=/admin/orders", { replace: true });
+    navigate("/login?next=/admin/dashboard", { replace: true });
+  };
+
+  return (
+    <AdminPendingCountsProvider>
+      <AdminSearchProvider>
+        <AdminLayoutShell
+          email={userProfile.email}
+          mobileOpen={mobileOpen}
+          onMobileOpenChange={setMobileOpen}
+          onLogout={() => void handleLogout()}
+        />
+      </AdminSearchProvider>
+    </AdminPendingCountsProvider>
+  );
+}
+
+function AdminLayoutShell({
+  email,
+  mobileOpen,
+  onMobileOpenChange,
+  onLogout,
+}: {
+  email: string;
+  mobileOpen: boolean;
+  onMobileOpenChange: (next: boolean) => void;
+  onLogout: () => void;
+}) {
+  const { counts } = useAdminPendingCounts();
+  const pendingCounts = {
+    "/admin/orders": counts.orders,
+    "/admin/payments": counts.payments,
+    "/admin/refunds": counts.refunds,
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950/92 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-cyan-400 text-slate-950">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">Dear Our Future Admin</p>
-              <p className="truncate text-xs text-slate-400">{userProfile.email}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              className="hidden text-slate-300 hover:bg-white/10 hover:text-white sm:inline-flex"
-              onClick={() => navigate("/admin/orders")}
-            >
-              Vận hành
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="hidden text-slate-300 hover:bg-white/10 hover:text-white sm:inline-flex"
-              onClick={() => navigate("/admin/catalog")}
-            >
-              Catalog
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="gap-2 border-white/15 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              Đăng xuất
-            </Button>
+      <div className="flex min-h-screen">
+        <div className="hidden w-60 shrink-0 lg:block">
+          <div className="sticky top-0 h-screen">
+            <AdminSidebar email={email} onLogout={onLogout} pendingCounts={pendingCounts} />
           </div>
         </div>
-      </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Outlet />
-      </main>
+        <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
+          <SheetContent
+            side="left"
+            className="w-72 border-r border-white/10 bg-slate-950 p-0 text-slate-100"
+          >
+            <AdminSidebar
+              email={email}
+              onLogout={onLogout}
+              onNavigate={() => onMobileOpenChange(false)}
+              pendingCounts={pendingCounts}
+            />
+          </SheetContent>
+        </Sheet>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AdminTopbar onOpenSidebar={() => onMobileOpenChange(true)} />
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <Outlet />
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
