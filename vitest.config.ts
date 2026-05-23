@@ -14,7 +14,13 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test/setup.ts",
     css: true,
-    pool: "vmThreads",
+    pool: "threads",
+    fileParallelism: false,
+    server: {
+      deps: {
+        inline: [/@radix-ui\//, /^lucide-react$/],
+      },
+    },
     testTimeout: 15_000,
     hookTimeout: 15_000,
     exclude: [
