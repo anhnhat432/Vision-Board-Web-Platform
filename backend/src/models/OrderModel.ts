@@ -28,6 +28,18 @@ const statusHistoryEntrySchema = new Schema(
   { _id: false },
 );
 
+const orderLineSchema = new Schema(
+  {
+    itemId: { type: String, required: true, trim: true },
+    label: { type: String, required: true, trim: true },
+    type: { type: String, required: true, enum: ["frame", "theme", "sticker"] },
+    qty: { type: Number, required: true, min: 1 },
+    unitPriceVnd: { type: Number, required: true, min: 0 },
+    lineTotalVnd: { type: Number, required: true, min: 0 },
+  },
+  { _id: false },
+);
+
 const orderSchema = new Schema(
   {
     userId: {
@@ -42,9 +54,37 @@ const orderSchema = new Schema(
       required: true,
       default: "pending",
     },
+    schemaVersion: {
+      type: Number,
+      default: 2,
+    },
+    lines: {
+      type: [orderLineSchema],
+      default: [],
+    },
+    subtotalVnd: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    shippingVnd: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalVnd: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    keywords: {
+      type: [String],
+      default: [],
+    },
+    // Deprecated v2: giữ optional để rollback an toàn, sẽ xoá ở release sau khi mọi order đã migrate.
     kitType: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
     fullName: {
