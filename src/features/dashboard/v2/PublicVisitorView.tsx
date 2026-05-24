@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   CalendarRange,
   Check,
   Compass,
@@ -24,15 +25,15 @@ const HOW_IT_WORKS_STEPS = [
   {
     step: "01",
     icon: Compass,
-    title: "Soi cuộc sống",
-    description: "Chấm điểm 4 lĩnh vực để biết nên ưu tiên đâu trước.",
+    title: "Chấm điểm hiện tại",
+    description: "Nhìn nhanh các lĩnh vực sống để biết điểm nào đang kéo bạn xuống.",
     duration: "≈3 phút",
   },
   {
     step: "02",
     icon: Target,
-    title: "Đặt mục tiêu SMART",
-    description: "Biến mong muốn thành mục tiêu đo được và kiểm tra tính thực tế.",
+    title: "Chọn một mục tiêu đáng làm",
+    description: "Viết mục tiêu đo được, có hạn rõ ràng, rồi kiểm tra tính khả thi.",
     duration: "≈5 phút",
   },
   {
@@ -51,11 +52,18 @@ const HOW_IT_WORKS_STEPS = [
   },
 ] as const;
 
+const FIRST_RUN_FLOW = [
+  "Chấm điểm cuộc sống",
+  "Chọn mục tiêu chính",
+  "Chia kế hoạch 12 tuần",
+  "Mở Today để làm việc hôm nay",
+] as const;
+
 const FEATURE_ROWS = [
   {
-    tag: "Local-first",
-    title: "Mở là dùng được, không bắt đăng nhập",
-    description: "Dữ liệu lưu ngay trên thiết bị của bạn. Đăng nhập chỉ khi muốn sao lưu lên cloud.",
+    tag: "Miễn phí",
+    title: "Bắt đầu không tốn xu nào",
+    description: "Dữ liệu lưu trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập.",
     href: "/life-balance",
     icon: Lock,
   },
@@ -76,7 +84,11 @@ const FEATURE_ROWS = [
 ] as const;
 
 export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onSignUp }: PublicVisitorViewProps) {
-  const primaryLabel = isDemo ? "Bắt đầu demo" : "Đăng nhập để bắt đầu";
+  const primaryLabel = isDemo ? "Đăng ký miễn phí" : "Tạo tài khoản để bắt đầu";
+  const heroStartLabel = isDemo ? "Dùng thử lộ trình 4 bước" : "Bắt đầu với mục tiêu của bạn";
+  const scrollToHowItWorks = () => {
+    document.getElementById("dashboard-how-it-works-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="space-y-6">
@@ -84,10 +96,10 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         <div>
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              Dear Our Future · Hệ thống mục tiêu 12 tuần
+              Dear Our Future · App lập kế hoạch cá nhân
             </p>
-            <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
-              Biến mục tiêu mơ hồ thành{" "}
+            <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] text-app-ink sm:text-[44px]">
+              App biến mục tiêu lớn thành{" "}
               <span className="relative inline-block">
                 <span className="relative z-10">kế hoạch 12 tuần</span>
                 <svg
@@ -105,19 +117,57 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   />
                 </svg>
               </span>{" "}
-              và việc làm mỗi ngày.
+              và việc hôm nay.
             </h1>
             <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
-              Bạn chấm điểm các lĩnh vực sống, viết mục tiêu SMART, chia thành chu kỳ 12 tuần, rồi mỗi ngày
-              chỉ cần mở Today để biết hôm nay làm gì và cuối tuần review lại — tất cả trong một nơi, lưu
-              ngay trên thiết bị của bạn.
+              Dear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính
+              khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.
             </p>
 
-            {/* 3 trust chip thay thế card sidebar cũ */}
+            <div className="mt-5 border-l-2 border-app-accent pl-4">
+              <p className="text-[14px] font-semibold text-app-ink">Nói ngắn gọn</p>
+              <p className="mt-1 max-w-2xl text-[14px] leading-6 text-app-ink-muted">
+                Đây không phải trang ghi chú tự do. App là lộ trình từng bước để biến một mong muốn lớn thành kế hoạch
+                có thể làm thật.
+              </p>
+            </div>
+
+            <ol className="mt-5 grid grid-cols-2 gap-2">
+              {FIRST_RUN_FLOW.map((step, index) => (
+                <li
+                  key={step}
+                  className="flex min-h-10 items-center gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-[13px] text-app-ink-soft"
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-[12px] font-semibold text-app-accent">
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0 leading-5">{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={onStart}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              >
+                {heroStartLabel}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={scrollToHowItWorks}
+                className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:border-app-accent/40 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              >
+                Xem cách app hoạt động
+              </button>
+            </div>
+
             <ul className="mt-5 flex flex-wrap gap-2">
               <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
                 <Lock className="h-3.5 w-3.5 text-app-accent" />
-                Local-first, không cần đăng nhập để xem
+                Mở trang là dùng được, không cần email
               </li>
               <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-soft">
                 <RefreshCw className="h-3.5 w-3.5 text-app-accent" />
@@ -159,7 +209,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           </div>
 
           <div className="mt-4 space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc hôm nay · 7/14</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              Việc hôm nay · 7/14
+            </p>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] bg-app-accent text-white">
@@ -230,13 +282,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         aria-labelledby="dashboard-how-it-works-title"
       >
         <div className="flex flex-col gap-1">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-            Cách hoạt động
-          </p>
-          <h2
-            id="dashboard-how-it-works-title"
-            className="font-serif text-[24px] font-medium leading-8 text-app-ink"
-          >
+          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Cách hoạt động</p>
+          <h2 id="dashboard-how-it-works-title" className="font-serif text-[24px] font-medium leading-8 text-app-ink">
             Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước.
           </h2>
         </div>
@@ -245,10 +292,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           {HOW_IT_WORKS_STEPS.map((step) => {
             const Icon = step.icon;
             return (
-              <li
-                key={step.step}
-                className="rounded-card border border-app-line bg-app-bg p-4"
-              >
+              <li key={step.step} className="rounded-card border border-app-line bg-app-bg p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                     <Icon className="h-4 w-4" />
@@ -281,9 +325,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">
-                    {feature.tag}
-                  </p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">{feature.tag}</p>
                   <h2 className="mt-1 text-[16px] font-semibold text-app-ink">{feature.title}</h2>
                   <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{feature.description}</p>
                   <span className="mt-3 inline-flex text-[14px] font-medium text-app-accent transition-transform duration-200 group-hover:translate-x-0.5">
@@ -312,7 +354,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?
             </h2>
             <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
-              Tạo tài khoản hoặc đăng nhập để mở không gian 12 tuần và đồng bộ giữa các thiết bị.
+              Đăng ký miễn phí trong 30 giây. Dữ liệu của bạn tự đồng bộ giữa điện thoại và máy tính.
             </p>
           </div>
           <div className="shrink-0">

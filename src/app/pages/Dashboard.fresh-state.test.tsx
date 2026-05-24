@@ -143,7 +143,7 @@ describe("Dashboard fresh workspace states", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: /Biến mục tiêu mơ hồ thành.*kế hoạch 12 tuần.*việc làm mỗi ngày/i,
+        name: /App biến mục tiêu lớn thành.*kế hoạch 12 tuần.*việc hôm nay/i,
       }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Private stale goal must stay hidden")).not.toBeInTheDocument();
@@ -161,10 +161,10 @@ describe("Dashboard fresh workspace states", () => {
 
     renderDashboard();
 
-    const startButton = await screen.findByRole("button", { name: /Bắt đầu demo/i });
+    const startButton = await screen.findByRole("button", { name: /Đăng ký miễn phí/i });
     expect(
       screen.getByRole("heading", {
-        name: /Biến mục tiêu mơ hồ thành.*kế hoạch 12 tuần.*việc làm mỗi ngày/i,
+        name: /App biến mục tiêu lớn thành.*kế hoạch 12 tuần.*việc hôm nay/i,
       }),
     ).toBeInTheDocument();
 
