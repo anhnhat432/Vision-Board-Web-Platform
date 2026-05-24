@@ -6,12 +6,14 @@ import { toast } from "sonner";
 import { post } from "@/lib/api/apiClient";
 import type { UserProfile } from "@/types/api";
 import { type LoginOptions, useAuth } from "./useAuth";
+import { clearCachedUserProfile, readCachedUserProfile, writeCachedUserProfile } from "./userProfileCache";
 
 interface AuthContextValue {
   user: User | null;
   userProfile: UserProfile | null;
   userProfileLoading: boolean;
   userProfileError: string | null;
+  isProfileFromCache: boolean;
   authLoading: boolean;
   error: string | null;
   login: (options?: LoginOptions) => Promise<UserCredential | null>;
@@ -24,6 +26,8 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const PROFILE_BOOTSTRAP_TIMEOUT_MS = 60_000;
 const PROFILE_BOOTSTRAP_MAX_ATTEMPTS = 3;
 const PROFILE_BOOTSTRAP_RETRY_DELAYS_MS = [1_200, 2_500] as const;
+const PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS = [1_000, 2_000, 4_000] as const;
+const PROFILE_BOOTSTRAP_MAX_RATE_LIMIT_DELAY_MS = 8_000;
 const EMAIL_VERIFICATION_RECHECK_INTERVAL_MS = 30_000;
 const EMAIL_VERIFICATION_RECHECK_MAX_MS = 10 * 60_000;
 
@@ -57,20 +61,46 @@ function getErrorStatus(error: unknown): number | null {
   return typeof error.status === "number" ? error.status : null;
 }
 
+function isRateLimitError(error: unknown): boolean {
+  if (!isRecord(error)) return false;
+  if (error.rateLimited === true) return true;
+  return getErrorStatus(error) === 429;
+}
+
+function getRetryAfterMs(error: unknown): number | null {
+  if (!isRecord(error)) return null;
+  return typeof error.retryAfterMs === "number" ? error.retryAfterMs : null;
+}
+
 function isNetworkError(error: unknown): boolean {
   return isRecord(error) && error.isNetworkError === true;
 }
 
 function shouldRetryProfileBootstrap(error: unknown, timedOut: boolean): boolean {
   if (timedOut || isNetworkError(error)) return true;
+  if (isRateLimitError(error)) return true;
 
   const status = getErrorStatus(error);
   return status !== null && status >= 500;
 }
 
-function waitForProfileRetry(attemptIndex: number): Promise<void> {
-  const fallbackDelay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[PROFILE_BOOTSTRAP_RETRY_DELAYS_MS.length - 1] ?? 0;
-  const delay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[attemptIndex] ?? fallbackDelay;
+function waitForProfileRetry(attemptIndex: number, error: unknown): Promise<void> {
+  let delay: number;
+  if (isRateLimitError(error)) {
+    const retryAfter = getRetryAfterMs(error);
+    const fallback =
+      PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS[attemptIndex] ??
+      PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS[PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS.length - 1] ??
+      0;
+    delay = Math.min(
+      PROFILE_BOOTSTRAP_MAX_RATE_LIMIT_DELAY_MS,
+      Math.max(fallback, retryAfter ?? 0),
+    );
+  } else {
+    const fallbackDelay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[PROFILE_BOOTSTRAP_RETRY_DELAYS_MS.length - 1] ?? 0;
+    delay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[attemptIndex] ?? fallbackDelay;
+  }
+
   if (delay <= 0) return Promise.resolve();
 
   return new Promise((resolve) => {
@@ -97,10 +127,11 @@ async function requestUserProfileWithTimeout(): Promise<{ profile: UserProfile; 
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, loading, error, login, logout, isConfigured, refreshUser } = useAuth();
+  const { user, loading, error, login, logout: rawLogout, isConfigured, refreshUser } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
   const [userProfileError, setUserProfileError] = useState<string | null>(null);
+  const [isProfileFromCache, setIsProfileFromCache] = useState(false);
   const [profileRefreshIndex, setProfileRefreshIndex] = useState(0);
   const bootstrappedUid = useRef<string | null>(null);
   const previousEmailVerified = useRef<boolean | null>(null);
@@ -109,6 +140,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     bootstrappedUid.current = null;
     setProfileRefreshIndex((index) => index + 1);
   }, []);
+
+  const logout = useCallback(async () => {
+    const currentUid = user?.uid;
+    if (currentUid) {
+      clearCachedUserProfile(currentUid);
+    }
+    await rawLogout();
+  }, [rawLogout, user?.uid]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -126,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserProfile(null);
       setUserProfileLoading(false);
       setUserProfileError(null);
+      setIsProfileFromCache(false);
       bootstrappedUid.current = null;
       return;
     }
@@ -134,10 +174,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const bootstrapKey = `${user.uid}:${profileRefreshIndex}`;
     if (bootstrappedUid.current === bootstrapKey) return;
     bootstrappedUid.current = bootstrapKey;
+
+    const cachedProfile = readCachedUserProfile(user.uid);
+    if (cachedProfile) {
+      // Hiển thị profile từ cache ngay để gate không lock UI khi đang refresh
+      // ngầm. `isProfileFromCache=true` báo cho guard chấp nhận session này.
+      setUserProfile(cachedProfile);
+      setIsProfileFromCache(true);
+    } else {
+      setIsProfileFromCache(false);
+    }
+
     setUserProfileLoading(true);
     setUserProfileError(null);
 
     let cancelled = false;
+    const bootstrapUid = user.uid;
 
     async function bootstrapProfile() {
       let lastError: unknown = null;
@@ -149,6 +201,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (cancelled) return;
           setUserProfile(result.profile);
           setUserProfileError(null);
+          setIsProfileFromCache(false);
+          writeCachedUserProfile(result.profile);
           return;
         } catch (thrown: unknown) {
           if (cancelled) return;
@@ -160,7 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           const hasAttemptsLeft = attempt < PROFILE_BOOTSTRAP_MAX_ATTEMPTS - 1;
           if (hasAttemptsLeft && shouldRetryProfileBootstrap(error, timedOut)) {
-            await waitForProfileRetry(attempt);
+            await waitForProfileRetry(attempt, error);
             if (cancelled) return;
             continue;
           }
@@ -171,7 +225,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (cancelled) return;
       console.error("Failed to bootstrap user profile.", lastError);
+
+      // Hết retry: nếu lỗi là 429/network, ưu tiên giữ session bằng cache
+      // (đã set ở trên hoặc đọc lại để chắc chắn). Chỉ kick về null khi
+      // không có cache hoặc lỗi nặng (5xx liên tục).
+      const cachedFallback = readCachedUserProfile(bootstrapUid);
+      const errorIsRecoverable = isRateLimitError(lastError) || isNetworkError(lastError) || lastTimedOut;
+      if (cachedFallback && errorIsRecoverable) {
+        setUserProfile(cachedFallback);
+        setIsProfileFromCache(true);
+        setUserProfileError(null);
+        bootstrappedUid.current = null;
+        return;
+      }
+
       setUserProfile(null);
+      setIsProfileFromCache(false);
       setUserProfileError(getProfileBootstrapErrorMessage(lastError, lastTimedOut));
       // Allow retry on next user change
       bootstrappedUid.current = null;
@@ -226,6 +295,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userProfile,
     userProfileLoading,
     userProfileError,
+    isProfileFromCache,
     authLoading: loading,
     error,
     login,

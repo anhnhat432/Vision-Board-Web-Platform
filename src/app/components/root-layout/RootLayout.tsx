@@ -231,10 +231,19 @@ export function RootLayout() {
     const onboardingDeferred =
       typeof window !== "undefined" && window.sessionStorage.getItem("onboarding-deferred") === "1";
 
+    // Fresh browser/incognito chưa có userData.onboardingCompleted=true trong
+    // localStorage. Nhưng nếu backend trả userProfile.onboardingCompletedAt
+    // (user đã onboard từ trước trên thiết bị khác), không được bounce về
+    // /onboarding — họ đã làm rồi. P1 audit 2026-05-24 phát hiện regression
+    // này khi /api/auth/profile bị rate-limit → cache profile vẫn có
+    // onboardingCompletedAt nên ta tin nó.
+    const hasServerOnboardingFlag = Boolean(userProfile?.onboardingCompletedAt);
+
     if (
       !demoMode &&
       user &&
       !userData.onboardingCompleted &&
+      !hasServerOnboardingFlag &&
       !onboardingDeferred &&
       location.pathname !== "/onboarding"
     ) {
@@ -249,6 +258,7 @@ export function RootLayout() {
     shouldRedirectToLogin,
     shouldWaitForWorkspace,
     user,
+    userProfile?.onboardingCompletedAt,
     userProfile?.role,
   ]);
 
