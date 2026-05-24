@@ -27,6 +27,7 @@ import {
   type TwelveWeekPullResponse,
 } from "@/services/syncService";
 import type { UserData } from "@/app/utils/storage-types";
+import { isLocalDataUntouchedSeed } from "@/lib/sync/conflict-policy";
 import {
   clearPullCursor,
   readPullCursorState,
@@ -270,6 +271,56 @@ export async function runTwelveWeekManualCloudSync(
     const mergeReport = createPulledWorkspaceMergeReport(localData, pullResponse, {
       pendingMutations: unresolvedLocalMutations,
     });
+
+    // B2 policy: when local is an untouched fresh seed (no goals, reflections,
+    // achievements, vision boards, wheel history, not onboarded, not hydrated
+    // from demo) AND there are no pending local mutations, any merge mismatch
+    // with the cloud snapshot is a false-positive conflict. Apply the cloud
+    // snapshot directly so the user does not see the "Cần chọn bản dữ liệu"
+    // banner on a fresh login.
+    if (
+      !mergeReport.safeToApply &&
+      unresolvedLocalMutations.length === 0 &&
+      isLocalDataUntouchedSeed(localData)
+    ) {
+      const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+      const didWrite = (options.writeUserData ?? saveUserData)(nextData);
+      if (!didWrite) {
+        const recordErrorFn =
+          options.recordErrorFn ??
+          ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
+        recordErrorFn(ownerUid);
+        return {
+          status: "error",
+          message: "Không thể lưu bản gộp vào thiết bị này. Dữ liệu cũ trên thiết bị vẫn được giữ.",
+          drainResult,
+          pullResponse,
+          mergeReport,
+        };
+      }
+
+      const writeCursorFn =
+        options.writeCursor ??
+        ((uid: string, cursor: string | null) =>
+          recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
+      writeCursorFn(ownerUid, pullResponse.nextCursor);
+
+      console.info("[auto-sync] overwrote untouched local seed with cloud snapshot", {
+        ownerUid,
+        cloudOnlyCount: mergeReport.summary.cloudOnlyCount,
+        missingClientIdCount: mergeReport.summary.missingClientIdCount,
+        unsupportedFieldCount: mergeReport.summary.unsupportedFieldCount,
+      });
+
+      return {
+        status: "applied",
+        message: "Đã đồng bộ dữ liệu tài khoản về thiết bị này.",
+        drainResult,
+        pullResponse,
+        mergeReport,
+        appliedGoalCount: nextData.goals.length,
+      };
+    }
 
     // Auto-resolve conflicts using Last-Write-Wins if autoResolvable
     if (mergeReport.conflicts.length > 0 || mergeReport.localOnlyChanges.length > 0) {

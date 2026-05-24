@@ -124,8 +124,8 @@ export function BillingConfirm() {
   const handleConfirm = useCallback(async () => {
     if (paidCheckoutDisabled) {
       setError(
-        "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. " +
-          `Liên hệ ${BILLING_SUPPORT_EMAIL} nếu cần nâng cấp thủ công.`,
+        "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. " +
+          `Nếu bạn muốn nâng cấp ngay, liên hệ ${BILLING_SUPPORT_EMAIL} để mở Plus thủ công.`,
       );
       return;
     }
@@ -257,15 +257,15 @@ export function BillingConfirm() {
                 Thanh toán đang tạm khóa.
               </p>
               <p className="mt-2 leading-6 text-app-ink-soft">
-                Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu
-                cần nâng cấp thủ công: {" "}
+                Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
+                hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
                 <a
                   href={`mailto:${BILLING_SUPPORT_EMAIL}`}
                   className="font-medium text-app-ink underline-offset-4 hover:underline"
                 >
                   {BILLING_SUPPORT_EMAIL}
                 </a>
-                .
+                {" "}để mở Plus thủ công.
               </p>
             </div>
           ) : null}

@@ -859,4 +859,82 @@ describe("runTwelveWeekManualCloudSync", () => {
     expect(result.status).toBe("error");
     expect(writeUserData).not.toHaveBeenCalled();
   });
+
+  describe("untouched seed policy (B2)", () => {
+    function createCloudWorkspaceWithMissingClientIds(): TwelveWeekPulledWorkspace {
+      // Cloud has a legacy goal without clientGoalId → mergeReport.missingClientIds > 0
+      // → safeToApply=false, autoResolvable=false → would fall back to "unsafe" status.
+      return createEmptyWorkspace({
+        goals: [
+          {
+            id: "backend_goal_legacy",
+            title: "Legacy goal",
+            category: "Career",
+            description: "Legacy",
+            status: "active",
+          } as TwelveWeekPulledWorkspace["goals"][number],
+        ],
+      });
+    }
+
+    it("auto-overwrites untouched local seed with cloud snapshot instead of returning unsafe", async () => {
+      const writeUserData = vi.fn(() => true);
+      const writeCursor = vi.fn();
+      const recordConflictFn = vi.fn();
+
+      const result = await runTwelveWeekManualCloudSync({
+        ...baseOptions(),
+        drainMutations: vi.fn(async () => ({
+          status: "idle" as const,
+          skipReason: "empty" as const,
+          attemptedCount: 0,
+          succeededCount: 0,
+          duplicateCount: 0,
+          failedCount: 0,
+          pendingCount: 0,
+        })),
+        pullWorkspace: vi.fn(async () => createPullResponse(createCloudWorkspaceWithMissingClientIds())),
+        readUserData: () => createUserData(), // empty seed: no goals, no reflections, etc.
+        writeUserData,
+        readCursor: () => null,
+        writeCursor,
+        recordConflictFn,
+      });
+
+      // Seed is untouched, so we must not show conflict/unsafe.
+      expect(result.status).toBe("applied");
+      expect(writeUserData).toHaveBeenCalledTimes(1);
+      expect(writeCursor).toHaveBeenCalledWith("user_1", "cursor_1");
+      expect(recordConflictFn).not.toHaveBeenCalled();
+    });
+
+    it("still returns conflict when local has user data and cloud merge is unsafe", async () => {
+      const writeUserData = vi.fn(() => true);
+      const recordConflictFn = vi.fn();
+
+      const result = await runTwelveWeekManualCloudSync({
+        ...baseOptions(),
+        drainMutations: vi.fn(async () => ({
+          status: "idle" as const,
+          skipReason: "empty" as const,
+          attemptedCount: 0,
+          succeededCount: 0,
+          duplicateCount: 0,
+          failedCount: 0,
+          pendingCount: 0,
+        })),
+        pullWorkspace: vi.fn(async () => createPullResponse(createCloudWorkspaceWithMissingClientIds())),
+        readUserData: () => createLocalDataWithDifferentTask(),
+        writeUserData,
+        readCursor: () => null,
+        writeCursor: vi.fn(),
+        recordConflictFn,
+      });
+
+      // Local has real user work → must NOT auto-overwrite. Banner-eligible state.
+      expect(result.status === "conflict" || result.status === "unsafe").toBe(true);
+      expect(writeUserData).not.toHaveBeenCalled();
+      expect(recordConflictFn).toHaveBeenCalledWith("user_1");
+    });
+  });
 });

@@ -164,7 +164,7 @@ export function BillingPlan() {
   const handleOpenUpgrade = (context: PremiumFeatureContext = "plan") => {
     if (paidCheckoutDisabled) {
       toast.info(
-        "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu cần nâng cấp thủ công.",
+        "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ support để mở Plus thủ công.",
       );
       return;
     }
@@ -394,7 +394,7 @@ export function BillingPlan() {
   const handleRenewPlan = () => {
     if (paidCheckoutDisabled) {
       toast.info(
-        "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu cần gia hạn thủ công.",
+        "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. Nếu bạn muốn gia hạn ngay, liên hệ support để xử lý thủ công.",
       );
       return;
     }
@@ -579,8 +579,8 @@ export function BillingPlan() {
             <div className="flex-1">
               <p className="font-medium text-app-ink">Thanh toán đang tạm khóa.</p>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu
-                cần nâng cấp thủ công: {" "}
+                Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị
+                ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
                 {BILLING_SUPPORT_EMAIL ? (
                   <a
                     href={`mailto:${BILLING_SUPPORT_EMAIL}`}
@@ -591,7 +591,7 @@ export function BillingPlan() {
                 ) : (
                   "đội hỗ trợ"
                 )}
-                .
+                {" "}để mở Plus thủ công.
               </p>
             </div>
           </div>

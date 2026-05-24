@@ -123,9 +123,9 @@ describe("paid checkout kill-switch", () => {
         const dialog = await screen.findByRole("dialog");
         const banner = within(dialog).getByTestId("paid-checkout-disabled-banner");
         expect(banner).toBeInTheDocument();
-        expect(banner).toHaveTextContent("Thanh toán đang tạm khóa do chuyển nhà cung cấp");
+        expect(banner).toHaveTextContent("Đang hoàn tất tích hợp hệ thống thanh toán mới");
         expect(banner).toHaveTextContent("Quyền hiện có không bị ảnh hưởng");
-        expect(banner).toHaveTextContent("nâng cấp thủ công");
+        expect(banner).toHaveTextContent("mở Plus thủ công");
         const cta = within(dialog).getByTestId("paywall-upgrade-cta-plus");
         expect(cta).toBeDisabled();
         expect(cta).toHaveTextContent("Tạm khóa thanh toán");
@@ -209,9 +209,9 @@ describe("paid checkout kill-switch", () => {
         expect(await screen.findByRole("heading", { name: "Bạn đang mua gì?" })).toBeInTheDocument();
         const banner = screen.getByTestId("paid-checkout-disabled-banner");
         expect(banner).toBeInTheDocument();
-        expect(banner).toHaveTextContent("Thanh toán đang tạm khóa do chuyển nhà cung cấp");
+        expect(banner).toHaveTextContent("Đang hoàn tất tích hợp hệ thống thanh toán mới");
         expect(banner).toHaveTextContent("Quyền hiện có không bị ảnh hưởng");
-        expect(banner).toHaveTextContent("nâng cấp thủ công");
+        expect(banner).toHaveTextContent("mở Plus thủ công");
 
         const submit = screen.getByRole("button", { name: /Tạm khóa thanh toán/i });
         expect(submit).toBeDisabled();
@@ -245,7 +245,7 @@ describe("paid checkout kill-switch", () => {
 
         const banner = await screen.findByTestId("paid-checkout-disabled-banner");
         expect(banner).toHaveTextContent("Thanh toán đang tạm khóa");
-        expect(banner).toHaveTextContent("nâng cấp thủ công");
+        expect(banner).toHaveTextContent("mở Plus thủ công");
         expect(screen.queryByAltText(/Mã thanh toán tự động/i)).not.toBeInTheDocument();
         expect(screen.queryByText("Thông tin chuyển khoản")).not.toBeInTheDocument();
         expect(screen.queryByText("Tiếp tục thanh toán")).not.toBeInTheDocument();
@@ -270,9 +270,9 @@ describe("paid checkout kill-switch", () => {
         await screen.findByRole("heading", { name: "Chọn gói phù hợp với bạn" });
         const banner = screen.getByTestId("paid-checkout-disabled-banner");
         expect(banner).toBeInTheDocument();
-        expect(banner).toHaveTextContent("Thanh toán đang tạm khóa do chuyển nhà cung cấp");
+        expect(banner).toHaveTextContent("Đang hoàn tất tích hợp hệ thống thanh toán mới");
         expect(banner).toHaveTextContent("Quyền hiện có không bị ảnh hưởng");
-        expect(banner).toHaveTextContent("nâng cấp thủ công");
+        expect(banner).toHaveTextContent("mở Plus thủ công");
 
         const upgradeCta = screen.getByTestId("billing-plan-upgrade-cta");
         expect(upgradeCta).toBeDisabled();

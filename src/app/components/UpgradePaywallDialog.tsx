@@ -245,8 +245,8 @@ export function UpgradePaywallDialog({
                     Thanh toán đang tạm khóa.
                   </p>
                   <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
-                    Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support
-                    nếu cần nâng cấp thủ công: {" "}
+                    Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị
+                    ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
                     {BILLING_SUPPORT_EMAIL ? (
                       <a
                         href={`mailto:${BILLING_SUPPORT_EMAIL}`}
@@ -257,7 +257,7 @@ export function UpgradePaywallDialog({
                     ) : (
                       "đội hỗ trợ"
                     )}
-                    .
+                    {" "}để mở Plus thủ công.
                   </p>
                 </div>
               ) : null}

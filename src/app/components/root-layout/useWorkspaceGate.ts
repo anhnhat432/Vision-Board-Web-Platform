@@ -62,8 +62,16 @@ export function resolveWorkspaceGateState({
   const hasUser = Boolean(user);
   const shouldRedirectToLogin = !demoMode && !authLoading && !hasUser && !canRenderWhileSignedOut;
   const shouldWaitForAuth = !demoMode && (!isPublicHome || hasUser) && authLoading;
+  // Khi đã có profile (kể cả từ cache), không lock UI dù đang refresh ngầm —
+  // tránh việc bootstrap 429 khiến class demo bị giữ ở splash hoặc bounce
+  // sang /onboarding (B1 fallback).
   const shouldWaitForProfile =
-    !demoMode && !authLoading && hasUser && (userProfileLoading || (!userProfile && !userProfileError));
+    !demoMode &&
+    !authLoading &&
+    hasUser &&
+    !userProfile &&
+    !userProfileError &&
+    userProfileLoading;
   const shouldWaitForWorkspace = shouldWaitForAuth || shouldWaitForProfile;
   const workspaceGateStage: WorkspaceGateStage = shouldRedirectToLogin
     ? "redirect-login"
