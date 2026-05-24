@@ -3226,3 +3226,15 @@
     font-size: max(16px, 1rem);
   }
 }
+
+/* ── Dark mode contrast overrides (R3 carryover from P1-05) ──
+ * White text on accent (#5BA590) and warm (#E89878) fills fails
+ * WCAG AA in dark mode (~2.6–2.9:1). Override text → app-bg
+ * (#1C1A15) for ~6:1 idle, ~5.8:1 on opacity-90 hover, ~9:1 on
+ * darker-hex hover. Applies to all states for consistency.
+ * ───────────────────────────────────────────────────────────── */
+html.dark .bg-app-accent.text-white,
+html.dark .bg-app-warm.text-white {
+  color: var(--app-bg);
+}
+
