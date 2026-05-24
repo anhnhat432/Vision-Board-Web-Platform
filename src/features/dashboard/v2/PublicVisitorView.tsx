@@ -1,4 +1,16 @@
-import { Check, Compass, HardDrive, Lock, LogIn, RefreshCw, Smartphone, Target, UserPlus } from "lucide-react";
+import {
+  CalendarRange,
+  Check,
+  Compass,
+  HardDrive,
+  Lock,
+  LogIn,
+  RefreshCw,
+  Smartphone,
+  Sun,
+  Target,
+  UserPlus,
+} from "lucide-react";
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -8,27 +20,58 @@ interface PublicVisitorViewProps {
   onSignUp: () => void;
 }
 
-const FEATURE_ROWS = [
+const HOW_IT_WORKS_STEPS = [
   {
     step: "01",
-    title: "Cân bằng trước mục tiêu",
-    description: "Chấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.",
-    href: "/life-balance",
     icon: Compass,
+    title: "Soi cuộc sống",
+    description: "Chấm điểm 4 lĩnh vực để biết nên ưu tiên đâu trước.",
+    duration: "≈3 phút",
   },
   {
     step: "02",
-    title: "SMART Goal có nhịp",
-    description: "Biến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.",
-    href: "/smart-goal-setup",
     icon: Target,
+    title: "Đặt mục tiêu SMART",
+    description: "Biến mong muốn thành mục tiêu đo được và kiểm tra tính thực tế.",
+    duration: "≈5 phút",
   },
   {
     step: "03",
-    title: "Review để không trôi",
-    description: "Mỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.",
-    href: "/journal",
-    icon: RefreshCw,
+    icon: CalendarRange,
+    title: "Dựng chu kỳ 12 tuần",
+    description: "Chia mục tiêu thành 2-4 thói quen tuần và cột mốc tuần 4/8/12.",
+    duration: "≈10 phút",
+  },
+  {
+    step: "04",
+    icon: Sun,
+    title: "Today + Review tuần",
+    description: "Mở Today biết việc hôm nay, cuối tuần review để chỉnh tải.",
+    duration: "Mỗi ngày 1-2 phút",
+  },
+] as const;
+
+const FEATURE_ROWS = [
+  {
+    tag: "Local-first",
+    title: "Mở là dùng được, không bắt đăng nhập",
+    description: "Dữ liệu lưu ngay trên thiết bị của bạn. Đăng nhập chỉ khi muốn sao lưu lên cloud.",
+    href: "/life-balance",
+    icon: Lock,
+  },
+  {
+    tag: "Đúng thứ tự",
+    title: "Không phải trang trắng như Notion",
+    description: "App dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.",
+    href: "/12-week-setup",
+    icon: Compass,
+  },
+  {
+    tag: "Mobile-ready",
+    title: "Đủ nhẹ cho buổi sáng vội",
+    description: "Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng.",
+    href: "/today-v2",
+    icon: Smartphone,
   },
 ] as const;
 
@@ -41,12 +84,12 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         <div>
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              Xin chào, đây là Vision Board
+              Dear Our Future · Hệ thống mục tiêu 12 tuần
             </p>
             <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
-              Một chỗ tĩnh để bạn nhìn lại{" "}
+              Biến mục tiêu mơ hồ thành{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">tuần sống</span>
+                <span className="relative z-10">kế hoạch 12 tuần</span>
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 200 12"
@@ -62,11 +105,12 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   />
                 </svg>
               </span>{" "}
-              của mình.
+              và việc làm mỗi ngày.
             </h1>
             <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
-              Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp
-              theo hơn.
+              Bạn chấm điểm các lĩnh vực sống, viết mục tiêu SMART, chia thành chu kỳ 12 tuần, rồi mỗi ngày
+              chỉ cần mở Today để biết hôm nay làm gì và cuối tuần review lại — tất cả trong một nơi, lưu
+              ngay trên thiết bị của bạn.
             </p>
 
             {/* 3 trust chip thay thế card sidebar cũ */}
@@ -181,7 +225,48 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </section>
       ) : null}
 
-      <section className="grid gap-4 lg:grid-cols-3" aria-label="Điểm nổi bật">
+      <section
+        className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+        aria-labelledby="dashboard-how-it-works-title"
+      >
+        <div className="flex flex-col gap-1">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            Cách hoạt động
+          </p>
+          <h2
+            id="dashboard-how-it-works-title"
+            className="font-serif text-[24px] font-medium leading-8 text-app-ink"
+          >
+            Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước.
+          </h2>
+        </div>
+
+        <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {HOW_IT_WORKS_STEPS.map((step) => {
+            const Icon = step.icon;
+            return (
+              <li
+                key={step.step}
+                className="rounded-card border border-app-line bg-app-bg p-4"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-accent">
+                    Bước {step.step}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-[15px] font-semibold text-app-ink">{step.title}</h3>
+                <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{step.description}</p>
+                <p className="mt-3 text-[12px] font-medium text-app-ink-soft">{step.duration}</p>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
         {FEATURE_ROWS.map((feature) => {
           const Icon = feature.icon;
 
@@ -197,12 +282,12 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">
-                    Bước {feature.step}
+                    {feature.tag}
                   </p>
                   <h2 className="mt-1 text-[16px] font-semibold text-app-ink">{feature.title}</h2>
                   <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{feature.description}</p>
                   <span className="mt-3 inline-flex text-[14px] font-medium text-app-accent transition-transform duration-200 group-hover:translate-x-0.5">
-                    Khám phá →
+                    Tìm hiểu →
                   </span>
                 </div>
               </div>
