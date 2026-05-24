@@ -54,7 +54,6 @@ export function LoginPage() {
     user,
     userProfile,
     userProfileError,
-    userProfileLoading,
     authLoading,
     error: authError,
     login,
@@ -140,19 +139,12 @@ export function LoginPage() {
     }
   }, [authLoading, googleSubmitting]);
 
-  // If already signed in, wait for profile so admin accounts can
-  // land directly in the admin console instead of the normal user workspace.
+  // If already signed in, route based on profile state.
+  // Admin users with a fully loaded profile go to the admin console.
+  // Other users (including profiles still loading) go to the requested destination immediately
+  // — AdminLayout will guard /admin routes if a non-admin lands there. Blocking on profile
+  // load here regressed the post-login redirect (see commit 5ab779f9).
   if (!authLoading && user) {
-    if (userProfileLoading || (!userProfile && !userProfileError)) {
-      return (
-        <LoginStatusCard
-          icon={<Loader2 className="h-5 w-5 animate-spin text-white" />}
-          title="Đang tải hồ sơ"
-          description="Hệ thống đang kiểm tra quyền tài khoản trước khi mở trang tiếp theo."
-        />
-      );
-    }
-
     if (userProfile?.role === "admin") {
       return <Navigate to={redirectTo.startsWith("/admin/") ? redirectTo : "/admin/dashboard"} replace />;
     }
@@ -161,29 +153,30 @@ export function LoginPage() {
       return <Navigate to={redirectTo} replace />;
     }
 
-    if (userProfileLoading || !userProfileError) {
-      return <Navigate to={redirectTo} replace />;
+    if (userProfileError) {
+      return (
+        <LoginStatusCard
+          icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
+          title="Không tải được hồ sơ"
+          description={userProfileError}
+          action={
+            <>
+              <Button type="button" className="gap-2" onClick={refreshUserProfile}>
+                <RefreshCw className="h-4 w-4" />
+                Thử lại
+              </Button>
+              <Button type="button" variant="outline" className="gap-2" onClick={() => void logout()}>
+                <LogOut className="h-4 w-4" />
+                Đăng xuất
+              </Button>
+            </>
+          }
+        />
+      );
     }
 
-    return (
-      <LoginStatusCard
-        icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
-        title="Không tải được hồ sơ"
-        description={userProfileError}
-        action={
-          <>
-            <Button type="button" className="gap-2" onClick={refreshUserProfile}>
-              <RefreshCw className="h-4 w-4" />
-              Thử lại
-            </Button>
-            <Button type="button" variant="outline" className="gap-2" onClick={() => void logout()}>
-              <LogOut className="h-4 w-4" />
-              Đăng xuất
-            </Button>
-          </>
-        }
-      />
-    );
+    // userProfileLoading hoặc (profile null && chưa có error) → redirect ngay
+    return <Navigate to={redirectTo} replace />;
   }
 
   async function handleResetPassword(e: React.FormEvent) {
