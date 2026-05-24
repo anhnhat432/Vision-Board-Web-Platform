@@ -55,7 +55,7 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
         </div>
       )}
       <div className="mt-3">
-        <div className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-wider text-app-ink-soft">
+        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-app-ink-soft">
           <span>Tiến độ</span>
           <span>{progress}%</span>
         </div>

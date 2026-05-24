@@ -44,12 +44,12 @@ interface OutcomeStepLabProps {
 }
 
 const selectTriggerClass =
-  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[15px] font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
-const selectItemClass = "cursor-pointer text-[15px] text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
-const infoBoxClass = "rounded-lg border border-app-line bg-app-bg p-3 text-[13px] leading-5 text-app-ink-soft";
+const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
+const infoBoxClass = "rounded-lg border border-app-line bg-app-bg p-3 text-xs leading-5 text-app-ink-soft";
 const chipClass =
-  "rounded-full border border-app-line px-3 py-1 text-[13px] text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent";
+  "rounded-full border border-app-line px-3 py-1 text-xs text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent";
 
 const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
 
@@ -91,14 +91,14 @@ export function OutcomeStepLab({
       <section className="rounded-card border border-app-line bg-app-surface p-4 shadow-sm sm:p-5" aria-labelledby="outcome-required-title">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p id="outcome-required-title" className="text-[15px] font-medium text-app-ink">
+            <p id="outcome-required-title" className="text-sm font-medium text-app-ink">
               Chốt phần bắt buộc trước
             </p>
-            <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-1 text-sm leading-6 text-app-ink-soft">
               Ba mục này đủ để đi tiếp. Khung gợi ý phía dưới chỉ là phần hỗ trợ nhanh.
             </p>
           </div>
-          <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[13px] font-medium text-app-ink-muted">
+          <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs font-medium text-app-ink-muted">
             Bắt buộc
           </span>
         </div>
@@ -221,12 +221,12 @@ export function OutcomeStepLab({
         <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-personalize-title">
           <summary
             id="template-personalize-title"
-            className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent"
+            className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-accent"
           >
             Cá nhân hóa khung
           </summary>
           <div>
-            <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-1 text-sm leading-6 text-app-ink-soft">
               Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
             </p>
           </div>
@@ -276,7 +276,7 @@ export function OutcomeStepLab({
                       aria-pressed={isActive}
                       onClick={() => onPreferredDayToggle(dayIndex)}
                       className={cn(
-                        "rounded-md border border-app-line bg-app-surface px-2 py-2 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                        "rounded-md border border-app-line bg-app-surface px-2 py-2 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                         isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
                       )}
                     >
@@ -343,10 +343,10 @@ export function OutcomeStepLab({
         <summary className="flex cursor-pointer list-none items-start gap-2 py-1">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <span>
-            <span id="template-picker-title" className="block text-[15px] font-medium text-app-ink">
+            <span id="template-picker-title" className="block text-sm font-medium text-app-ink">
               Bắt đầu nhanh bằng khung gợi ý
             </span>
-            <span className="mt-1 block text-[14px] leading-6 text-app-ink-soft">
+            <span className="mt-1 block text-sm leading-6 text-app-ink-soft">
               Dùng khung nếu muốn có nhịp ban đầu. Bạn vẫn sửa được mọi trường.
             </span>
           </span>
@@ -356,20 +356,20 @@ export function OutcomeStepLab({
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
                   Gợi ý cho mục tiêu này
                 </p>
-                <p className="mt-2 text-[17px] font-medium text-app-ink">{recommendedTemplate.name}</p>
-                <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{adaptiveTemplateRecommendation.reason}</p>
+                <p className="mt-2 text-lg font-medium text-app-ink">{recommendedTemplate.name}</p>
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">{adaptiveTemplateRecommendation.reason}</p>
               </div>
-              <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] text-app-ink-muted">
+              <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs text-app-ink-muted">
                 {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
               </span>
             </div>
             <button
               type="button"
               className={cn(
-                "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-4 py-2.5 text-[15px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto",
+                "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto",
                 selectedTemplate?.id === recommendedTemplate.id
                   ? "border border-app-accent bg-app-accent-soft text-app-accent"
                   : "bg-app-accent text-white hover:bg-[#284f45]",
@@ -380,21 +380,21 @@ export function OutcomeStepLab({
             </button>
             {recommendedTemplateSupport ? (
               <details className="mt-4 rounded-lg border border-app-line bg-app-surface px-4 py-3">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
                   Xem gợi ý tuần 1 và nhịp giữ
                 </summary>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div className={infoBoxClass}>
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                       Tuần 1 nên thắng ở đâu
                     </p>
-                    <p className="mt-2 text-[14px] font-medium text-app-ink">
+                    <p className="mt-2 text-sm font-medium text-app-ink">
                       {recommendedTemplateSupport.week1Headline}
                     </p>
                     <p className="mt-2">{recommendedTemplateSupport.week1Support}</p>
                   </div>
                   <div className={infoBoxClass}>
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                       Nhịp nên giữ
                     </p>
                     <p className="mt-2">{recommendedTemplateSupport.week1CadenceHint}</p>
@@ -406,7 +406,7 @@ export function OutcomeStepLab({
         ) : null}
 
         <details className="mt-4 rounded-lg border border-dashed border-app-line bg-app-bg px-3 py-3 sm:px-4">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
             Xem tất cả khung mẫu
           </summary>
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
@@ -436,28 +436,28 @@ export function OutcomeStepLab({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[15px] font-medium">{template.name}</p>
-                        <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[12px] text-app-ink-muted">
+                        <p className="text-sm font-medium">{template.name}</p>
+                        <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs text-app-ink-muted">
                           {template.requiredPlan ? `Khung ${getPlanLabel(template.requiredPlan)}` : "Khung miễn phí"}
                         </span>
                       </div>
-                      <p className="mt-1 text-[14px] leading-5 text-app-ink-soft">{template.subtitle}</p>
+                      <p className="mt-1 text-sm leading-5 text-app-ink-soft">{template.subtitle}</p>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[12px] text-app-ink-muted">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs text-app-ink-muted">
                       {isLocked ? <Lock className="h-3 w-3" aria-hidden="true" /> : null}
                       {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
                     </span>
                   </div>
-                  <p className="mt-3 text-[14px] leading-6 text-app-ink-soft">{template.description}</p>
-                  <div className="mt-3 grid gap-2 text-[13px] leading-5 text-app-ink-soft sm:grid-cols-2">
+                  <p className="mt-3 text-sm leading-6 text-app-ink-soft">{template.description}</p>
+                  <div className="mt-3 grid gap-2 text-xs leading-5 text-app-ink-soft sm:grid-cols-2">
                     <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                         Hợp khi
                       </p>
                       <p className="mt-1">{template.bestFor}</p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1</p>
                       <p className="mt-1">{template.firstWeekWin}</p>
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export function OutcomeStepLab({
                     ))}
                   </div>
                   {isLocked ? (
-                    <div className="mt-4 flex items-center justify-between border-t border-app-line pt-3 text-[13px] font-medium text-app-accent">
+                    <div className="mt-4 flex items-center justify-between border-t border-app-line pt-3 text-xs font-medium text-app-accent">
                       <span>Cần gói Plus để dùng khung này</span>
                       <span>Mở khóa →</span>
                     </div>
@@ -488,16 +488,16 @@ export function OutcomeStepLab({
 
       {selectedTemplate ? (
         <details className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
-          <summary id="selected-template-title" className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
+          <summary id="selected-template-title" className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
             Khung đang dùng: {selectedTemplate.name}
           </summary>
           <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Khung đang dùng</p>
-              <p className="mt-2 text-[16px] font-medium text-app-ink">{selectedTemplate.name}</p>
-              <p className="mt-1 text-[14px] leading-5 text-app-ink-soft">{selectedTemplate.subtitle}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Khung đang dùng</p>
+              <p className="mt-2 text-base font-medium text-app-ink">{selectedTemplate.name}</p>
+              <p className="mt-1 text-sm leading-5 text-app-ink-soft">{selectedTemplate.subtitle}</p>
             </div>
-            <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[13px] text-app-ink-muted">
+            <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-muted">
               {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Miễn phí"}
             </span>
           </div>
@@ -505,34 +505,34 @@ export function OutcomeStepLab({
       ) : null}
 
       <details className="rounded-lg border border-dashed border-app-line bg-app-bg p-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
           Xem mục tiêu đã viết
         </summary>
         <div className="mt-4 grid gap-3">
           <div className="rounded-lg border border-app-line bg-app-surface p-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu cụ thể</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{smartGoal.specific}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu cụ thể</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{smartGoal.specific}</p>
           </div>
           <div className="rounded-lg border border-app-line bg-app-surface p-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Cách đo kết quả</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{smartGoal.measurable}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Cách đo kết quả</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{smartGoal.measurable}</p>
           </div>
         </div>
       </details>
 
       {planRationaleReasons.length > 0 ? (
         <details className="rounded-lg border border-app-line bg-app-bg p-3">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">Vì sao kế hoạch này được đề xuất</summary>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">Vì sao kế hoạch này được đề xuất</summary>
           <ul className="mt-3 grid gap-2 md:grid-cols-2">
             {planRationaleReasons.map((reason) => (
               <li key={reason.id} className="rounded-lg border border-app-line bg-app-surface p-3">
-                <p className="text-[14px] font-medium text-app-ink">{reason.title}</p>
-                <p className="mt-1 text-[13px] leading-5 text-app-ink-soft">{reason.detail}</p>
+                <p className="text-sm font-medium text-app-ink">{reason.title}</p>
+                <p className="mt-1 text-xs leading-5 text-app-ink-soft">{reason.detail}</p>
               </li>
             ))}
           </ul>
           {feasibility.smartGoalQualityNote ? (
-            <div className="mt-3 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-[13px] leading-5 text-app-ink-soft">
+            <div className="mt-3 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs leading-5 text-app-ink-soft">
               {feasibility.smartGoalQualityNote}
             </div>
           ) : null}
@@ -541,20 +541,20 @@ export function OutcomeStepLab({
 
       {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
         <details className="rounded-lg border border-app-line bg-app-bg p-3">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">Các hint từ feasibility</summary>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">Các hint từ feasibility</summary>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div className={infoBoxClass}>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Cần chú ý</p>
-              <p className="mt-1 text-[14px] font-medium text-app-ink">{feasibility.bottleneck?.label ?? "Chưa có"}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Cần chú ý</p>
+              <p className="mt-1 text-sm font-medium text-app-ink">{feasibility.bottleneck?.label ?? "Chưa có"}</p>
               {feasibility.bottleneck?.action ? <p className="mt-2">{feasibility.bottleneck.action}</p> : null}
             </div>
             <div className={infoBoxClass}>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1</p>
               <p className="mt-1">{feasibility.firstWeekGuidance ?? "Giữ tuần đầu vừa sức để tạo nhịp."}</p>
             </div>
             <div className={infoBoxClass}>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mức tải</p>
-              <p className="mt-1 text-[14px] font-medium text-app-ink">{getPlanLoadLabel(feasibility.planLoad)}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mức tải</p>
+              <p className="mt-1 text-sm font-medium text-app-ink">{getPlanLoadLabel(feasibility.planLoad)}</p>
               <p className="mt-2">{feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}</p>
             </div>
           </div>

@@ -127,9 +127,9 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
 
   return (
     <div className="flex flex-col items-center gap-2 text-center">
-      <span className="text-[12px] font-medium text-app-ink-muted">{day.label}</span>
+      <span className="text-xs font-medium text-app-ink-muted">{day.label}</span>
       {barContent}
-      <span className="text-[12px] tabular-nums text-app-ink-muted">
+      <span className="text-xs tabular-nums text-app-ink-muted">
         {day.completed}/{day.total}
       </span>
     </div>
@@ -183,10 +183,10 @@ export function WeekRhythmCard({
       aria-labelledby="dashboard-week-rhythm-title"
     >
       <div>
-        <h2 id="dashboard-week-rhythm-title" className="text-[16px] font-semibold text-app-ink">
+        <h2 id="dashboard-week-rhythm-title" className="text-base font-semibold text-app-ink">
           Nhịp tuần {safeWeek}
         </h2>
-        <p className="mt-1 text-[14px] text-app-ink-muted">
+        <p className="mt-1 text-sm text-app-ink-muted">
           {completedCount}/{totalCount} việc tuần này
         </p>
       </div>
@@ -198,13 +198,13 @@ export function WeekRhythmCard({
           return (
             <div key={item.caption} className="rounded-xl border border-app-line bg-app-bg p-3">
               <Icon className="h-4 w-4 text-app-accent" />
-              <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 {item.caption}
               </p>
-              <p className="mt-1 font-serif text-[28px] font-medium leading-none text-app-ink sm:text-[30px]">
+              <p className="mt-1 font-serif text-3xl font-medium leading-none text-app-ink sm:text-3xl">
                 {item.value}
               </p>
-              <p className="mt-2 text-[12px] text-app-ink-muted">{item.subLine}</p>
+              <p className="mt-2 text-xs text-app-ink-muted">{item.subLine}</p>
             </div>
           );
         })}

@@ -94,14 +94,14 @@ export function SetupStepShellLab({
       <div>
         <div className="mb-2 flex items-center gap-2">
           <StepIcon className="h-4 w-4 text-app-accent" aria-hidden="true" />
-          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
             Thiết lập kế hoạch 12 tuần · Bước nhỏ {currentStep + 1}/{stepCount} · {stepMeta.eyebrow.toUpperCase()}
           </p>
         </div>
-        <h2 id="twelve-week-step-title" ref={titleFocusRef} tabIndex={-1} className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink focus:outline-none sm:text-[24px]">
+        <h2 id="twelve-week-step-title" ref={titleFocusRef} tabIndex={-1} className="mt-2 font-serif text-2xl font-medium leading-7 text-app-ink focus:outline-none sm:text-2xl">
           {title}
         </h2>
-        <div className="mt-2 text-[15px] leading-6 text-app-ink-soft">{description}</div>
+        <div className="mt-2 text-sm leading-6 text-app-ink-soft">{description}</div>
 
         <ol aria-label={`Thiết lập kế hoạch 12 tuần, bước ${currentStep + 1} trên ${stepCount}`} className="mt-5 flex w-full gap-2">
           {stepDefinitions.map((step, index) => {
@@ -134,17 +134,17 @@ export function SetupStepShellLab({
             );
           })}
         </ol>
-        <p className="mt-2 text-[14px] leading-5 text-app-ink-muted">
+        <p className="mt-2 text-sm leading-5 text-app-ink-muted">
           Wizard này có 4 bước nhỏ trong bước tổng “Kế hoạch 12 tuần”. {stepMeta.caption}
         </p>
 
         {whyThisMatters ? (
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
-            <button type="button" className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-[13px] font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30" onClick={() => setIsWhyOpen((isOpen) => !isOpen)} aria-expanded={isWhyOpen} aria-controls="twelve-week-step-why">
+            <button type="button" className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-xs font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30" onClick={() => setIsWhyOpen((isOpen) => !isOpen)} aria-expanded={isWhyOpen} aria-controls="twelve-week-step-why">
               <span>Tại sao bước này quan trọng?</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform duration-150", isWhyOpen && "rotate-180")} aria-hidden="true" />
             </button>
-            {isWhyOpen ? <div id="twelve-week-step-why" className="mt-2 text-[14px] leading-6 text-app-ink-soft">{whyThisMatters}</div> : null}
+            {isWhyOpen ? <div id="twelve-week-step-why" className="mt-2 text-sm leading-6 text-app-ink-soft">{whyThisMatters}</div> : null}
           </div>
         ) : null}
       </div>
@@ -155,28 +155,28 @@ export function SetupStepShellLab({
           <div role="alert" className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-[color:var(--color-danger-fg)]">
             <div className="flex items-start gap-2">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <p className="text-[14px] font-medium leading-5">{stepError}</p>
+              <p className="text-sm font-medium leading-5">{stepError}</p>
             </div>
           </div>
         ) : null}
       </div>
 
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[13px] text-app-ink-muted">
+        <p className="text-xs text-app-ink-muted">
           4 bước nhỏ để thiết lập kế hoạch 12 tuần · Đang ở bước {currentStep + 1}/{stepCount}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
+          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Quay lại
           </button>
           {isLastStep ? (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
+            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
               {isSubmitting ? <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
               {isSubmitting ? "Đang lưu..." : "Lưu kế hoạch"}
             </button>
           ) : (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
+            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
               Tiếp →
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>

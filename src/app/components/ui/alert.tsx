@@ -32,7 +32,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-title"
-      className={cn("col-start-2 line-clamp-1 min-h-4 font-semibold tracking-tight text-[15px] leading-5", className)}
+      className={cn("col-start-2 line-clamp-1 min-h-4 font-semibold tracking-tight text-sm leading-5", className)}
       {...props}
     />
   );

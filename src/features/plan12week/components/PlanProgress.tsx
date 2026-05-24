@@ -46,8 +46,8 @@ export function PlanProgress({ weeks, totalWeeks = 12, currentWeek }: PlanProgre
   return (
     <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
       <div>
-        <h3 className="text-[16px] font-semibold text-app-ink">Đường 12 tuần</h3>
-        <p className="mt-1 text-[14px] text-app-ink-muted">
+        <h3 className="text-base font-semibold text-app-ink">Đường 12 tuần</h3>
+        <p className="mt-1 text-sm text-app-ink-muted">
           Tiến độ % theo tuần · {completedWeeks}/{totalWeeks} tuần đã review
         </p>
       </div>

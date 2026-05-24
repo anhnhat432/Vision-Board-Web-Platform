@@ -277,28 +277,28 @@ function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
     <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_260px] md:items-end">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             {viewModel.dateCaption}
           </p>
-          <span className="rounded-full bg-app-accent-soft px-3 py-1 text-[13px] font-medium text-app-accent">
+          <span className="rounded-full bg-app-accent-soft px-3 py-1 text-xs font-medium text-app-accent">
             Tuần {viewModel.currentWeek} / {viewModel.totalWeeks}
           </span>
         </div>
-        <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
+        <h1 className="mt-4 max-w-3xl font-serif text-4xl font-medium tracking-tight text-app-ink sm:text-5xl">
           Hôm nay là một ngày bình tĩnh để tiến từng bước.
         </h1>
       </div>
 
       <div className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
-        <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">12-Week Goal</p>
-        <p className="mt-2 line-clamp-3 break-words text-[15px] font-medium leading-5 text-app-ink">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">12-Week Goal</p>
+        <p className="mt-2 line-clamp-3 break-words text-sm font-medium leading-5 text-app-ink">
           {viewModel.goalTitle}
         </p>
         <div className="mt-4 flex items-center gap-3">
           <div className="h-1.5 w-[160px] overflow-hidden rounded-full bg-app-accent-soft" aria-hidden="true">
             <div className="h-full rounded-full bg-app-accent" style={{ width: `${viewModel.goalProgressPercent}%` }} />
           </div>
-          <span className="text-[13px] font-semibold text-app-accent">{viewModel.goalProgressPercent}%</span>
+          <span className="text-xs font-semibold text-app-accent">{viewModel.goalProgressPercent}%</span>
         </div>
       </div>
     </section>
@@ -341,16 +341,16 @@ function TodayTasksCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 id="today-v2-tasks-title" className="text-[16px] font-semibold text-app-ink">
+          <h2 id="today-v2-tasks-title" className="font-serif text-xl font-medium text-app-ink">
             Việc hôm nay
           </h2>
-          <p className="mt-1 text-[14px] text-app-ink-muted">
+          <p className="mt-1 text-sm text-app-ink-muted">
             {completedCount} trong {totalCount} việc đã xong
           </p>
         </div>
         <Link
           to="/12-week-system?tab=week"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           <Plus className="h-3.5 w-3.5" />
           Thêm việc
@@ -374,16 +374,16 @@ function TodayTasksCard({
             />
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[15px] font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
+                className={`text-sm font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
               >
                 {task.title}
               </p>
-              <p className="mt-0.5 text-[13px] text-app-ink-muted">
+              <p className="mt-0.5 text-xs text-app-ink-muted">
                 {task.domain} · {task.meta}
               </p>
             </div>
             {task.isCurrent ? (
-              <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+              <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
                 Đang làm
               </span>
             ) : null}
@@ -431,9 +431,9 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
 
   return (
     <div className="flex flex-col items-center gap-2 text-center">
-      <span className="text-[12px] font-medium text-app-ink-muted">{day.label}</span>
+      <span className="text-xs font-medium text-app-ink-muted">{day.label}</span>
       {barContent}
-      <span className="text-[12px] tabular-nums text-app-ink-muted">
+      <span className="text-xs tabular-nums text-app-ink-muted">
         {day.completed}/{day.total}
       </span>
     </div>
@@ -457,10 +457,10 @@ function WeekProgressCard({
       aria-labelledby="today-v2-week-title"
     >
       <div>
-        <h2 id="today-v2-week-title" className="text-[16px] font-semibold text-app-ink">
+        <h2 id="today-v2-week-title" className="font-serif text-xl font-medium text-app-ink">
           Tuần {currentWeek} · Tiến độ
         </h2>
-        <p className="mt-1 text-[14px] text-app-ink-muted">
+        <p className="mt-1 text-sm text-app-ink-muted">
           {completedCount}/{totalCount} việc
         </p>
       </div>
@@ -480,18 +480,18 @@ function ReflectionPrompt() {
       className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
       aria-labelledby="today-v2-reflection-title"
     >
-      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
+      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-xs font-medium text-app-warm ring-1 ring-app-warm-border">
         Phản tư cuối ngày
       </span>
       <h2
         id="today-v2-reflection-title"
-        className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong"
+        className="mt-4 font-serif text-2xl font-medium leading-7 text-app-warm-strong"
       >
         Hôm nay điều gì khiến bạn cảm thấy gần với phiên bản tốt hơn của chính mình?
       </h2>
       <Link
         to="/journal"
-        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
       >
         Viết phản tư →
       </Link>
@@ -506,18 +506,18 @@ function LifeBalanceCard({ rows }: { rows: LifeBalanceRow[] }) {
       aria-labelledby="today-v2-balance-title"
     >
       <div>
-        <h2 id="today-v2-balance-title" className="text-[16px] font-semibold text-app-ink">
+        <h2 id="today-v2-balance-title" className="font-serif text-xl font-medium text-app-ink">
           Cân bằng cuộc sống
         </h2>
-        <p className="mt-1 text-[14px] text-app-ink-muted">Tuần này so với mục tiêu</p>
+        <p className="mt-1 text-sm text-app-ink-muted">Tuần này so với mục tiêu</p>
       </div>
 
       <div className="mt-5 space-y-4">
         {rows.map((row) => (
           <div key={row.label}>
             <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="text-[14px] font-medium text-app-ink-soft">{row.label}</span>
-              <span className="text-[13px] tabular-nums text-app-ink-muted">{row.score}/10</span>
+              <span className="text-sm font-medium text-app-ink-soft">{row.label}</span>
+              <span className="text-xs tabular-nums text-app-ink-muted">{row.score}/10</span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-[#EFEAE2]" aria-hidden="true">
               <div className="h-full rounded-full bg-app-accent" style={{ width: `${row.score * 10}%` }} />
@@ -532,8 +532,8 @@ function LifeBalanceCard({ rows }: { rows: LifeBalanceRow[] }) {
 function QuoteBlock() {
   return (
     <figure className="px-4 text-center">
-      <blockquote className="font-serif text-[15px] italic leading-6 text-app-ink-soft">“{QUOTE.text}”</blockquote>
-      <figcaption className="mt-2 text-[12px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">
+      <blockquote className="font-serif text-sm italic leading-6 text-app-ink-soft">“{QUOTE.text}”</blockquote>
+      <figcaption className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">
         {QUOTE.author}
       </figcaption>
     </figure>
@@ -542,7 +542,7 @@ function QuoteBlock() {
 
 function TodayV2Footer({ lastSavedLabel }: { lastSavedLabel: string }) {
   return (
-    <footer className="border-t border-app-line py-5 text-[13px] text-app-ink-muted">
+    <footer className="border-t border-app-line py-5 text-xs text-app-ink-muted">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <span>Đã lưu cục bộ · {lastSavedLabel}</span>
         <span>Hôm nay · Dear Our Future</span>
@@ -559,11 +559,11 @@ function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void 
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
             <Calendar className="h-7 w-7" />
           </div>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-accent">HÔM NAY</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">HÔM NAY</p>
           <h1 className="mt-3 font-serif text-3xl font-medium leading-tight text-app-ink">
             Bạn chưa có chu kỳ 12 tuần đang chạy.
           </h1>
-          <p className="mx-auto mt-3 max-w-md text-[15px] leading-7 text-app-ink-soft">
+          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-app-ink-soft">
             Tạo một mục tiêu 12 tuần để Hôm nay biết bạn nên làm gì, tuần đang ở đâu và khi nào cần review.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">

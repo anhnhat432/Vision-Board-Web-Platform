@@ -37,7 +37,7 @@ export function PageHeader({ eyebrow, title, description, level = 2, className }
         {title}
       </HeadingTag>
       {description && (
-        <p className="text-[16px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">{description}</p>
+        <p className="text-base leading-relaxed tracking-tight text-muted-foreground sm:text-base">{description}</p>
       )}
     </div>
   );

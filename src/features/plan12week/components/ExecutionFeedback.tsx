@@ -37,8 +37,8 @@ export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
     <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Phản hồi thực hiện</p>
-          <p className="mt-1 text-[16px] font-semibold text-app-ink">{getStatusLabel(status)}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Phản hồi thực hiện</p>
+          <p className="mt-1 text-base font-semibold text-app-ink">{getStatusLabel(status)}</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="font-serif text-3xl font-medium text-app-ink">{score}</span>
@@ -49,7 +49,7 @@ export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
           </span>
         </div>
       </div>
-      <p className="mt-3 text-[14px] leading-6 text-app-ink-soft">{suggestion}</p>
+      <p className="mt-3 text-sm leading-6 text-app-ink-soft">{suggestion}</p>
     </div>
   );
 }

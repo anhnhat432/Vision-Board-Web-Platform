@@ -54,7 +54,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
           style={{ width: "100%" }}
         />
         {frame.decorationsLayout === "polaroid" && (
-          <div className="mt-2 px-1 pb-1 text-center text-[12px] uppercase tracking-widest text-app-ink-soft">
+          <div className="mt-2 px-1 pb-1 text-center text-xs uppercase tracking-widest text-app-ink-soft">
             {areaLabel ?? "Tầm nhìn"}
           </div>
         )}

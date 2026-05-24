@@ -848,7 +848,7 @@ export function VisionBoardEditor() {
               </div>
 
               <div className="hidden xl:block rounded-xl border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt bảng</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt bảng</p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                   {[
@@ -861,7 +861,7 @@ export function VisionBoardEditor() {
                     },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl border border-app-line bg-app-surface px-4 py-4">
-                      <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
                       <p className="mt-2 text-3xl font-bold text-app-ink">{item.value}</p>
                       <p className="mt-1 text-sm text-app-ink-soft">{item.note}</p>
                     </div>
@@ -1138,14 +1138,14 @@ export function VisionBoardEditor() {
                           >
                             {area && (
                               <span
-                                className="inline-flex rounded-full px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wider"
+                                className="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wider"
                                 style={{ backgroundColor: `${area.color}22`, color: area.color }}
                               >
                                 {areaLabel}
                               </span>
                             )}
                             <p className="mt-2 line-clamp-2 text-sm font-semibold text-app-ink">{goal.title}</p>
-                            <div className="mt-2 flex items-center justify-between text-[12px] text-app-ink-soft">
+                            <div className="mt-2 flex items-center justify-between text-xs text-app-ink-soft">
                               <span>HSD: {formatShortDate(goal.deadline)}</span>
                               <span className="font-semibold">{progress}%</span>
                             </div>
@@ -1242,7 +1242,7 @@ export function VisionBoardEditor() {
                       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                         <Sparkles className="h-7 w-7" />
                       </div>
-                      <h2 className="mt-5 font-serif text-[24px] font-medium text-app-ink sm:mt-6 sm:text-3xl">
+                      <h2 className="mt-5 font-serif text-2xl font-medium text-app-ink sm:mt-6 sm:text-3xl">
                         Bảng của bạn đang chờ câu chuyện đầu tiên
                       </h2>
                       <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">

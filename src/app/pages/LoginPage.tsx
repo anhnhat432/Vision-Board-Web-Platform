@@ -371,7 +371,7 @@ export function LoginPage() {
                     onClick={handleGoogleLogin}
                     disabled={googleSubmitting || authLoading}
                     className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                    aria-label="Đăng nhập với Google"
+                    aria-label="Tiếp tục với Google"
                   >
                     {googleSubmitting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -420,6 +420,8 @@ export function LoginPage() {
                         disabled={submitting || authLoading}
                         className={inputClass}
                         required
+                        aria-invalid={displayError ? true : undefined}
+                        aria-describedby={displayError ? "login-form-error" : undefined}
                       />
                     </div>
 
@@ -455,11 +457,13 @@ export function LoginPage() {
                           disabled={submitting || authLoading}
                           className={`${inputClass} pr-11`}
                           required
+                          aria-invalid={displayError ? true : undefined}
+                          aria-describedby={displayError ? "login-form-error" : undefined}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword((current) => !current)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-app-ink-muted hover:text-app-ink"
+                          className="absolute right-2 top-1/2 inline-flex min-h-[24px] min-w-[24px] -translate-y-1/2 items-center justify-center rounded-md p-1 text-app-ink-muted hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                           disabled={submitting || authLoading}
                           aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                         >
@@ -485,11 +489,13 @@ export function LoginPage() {
                             disabled={submitting || authLoading}
                             className={`${inputClass} pr-11`}
                             required
+                            aria-invalid={displayError ? true : undefined}
+                            aria-describedby={displayError ? "login-form-error" : undefined}
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword((current) => !current)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-app-ink-muted hover:text-app-ink"
+                            className="absolute right-2 top-1/2 inline-flex min-h-[24px] min-w-[24px] -translate-y-1/2 items-center justify-center rounded-md p-1 text-app-ink-muted hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                             disabled={submitting || authLoading}
                             aria-label={showConfirmPassword ? "Ẩn mật khẩu xác nhận" : "Hiện mật khẩu xác nhận"}
                           >
@@ -520,6 +526,7 @@ export function LoginPage() {
                     {/* Error message */}
                     {displayError ? (
                       <div
+                        id="login-form-error"
                         role="alert"
                         className={`flex gap-2 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 ${
                           prefersReducedMotion ? "" : ""

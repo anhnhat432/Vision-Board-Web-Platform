@@ -77,7 +77,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
 
   const tooltip = getTooltip(state, relativeTime, syncState.pendingCount);
   const baseClass =
-    "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-[13px] font-medium leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+    "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
   const sizeClass = compact ? "" : "mt-2";
 
   const config = {

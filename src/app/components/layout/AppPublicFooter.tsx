@@ -40,7 +40,7 @@ export function AppPublicFooter() {
               <img src="/favicon-512.png" alt="" width={32} height={32} className="size-8 rounded-md" />
               <span className="font-serif text-lg font-medium text-app-ink">Dear Our Future</span>
             </Link>
-            <p className="mt-3 max-w-xs text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-3 max-w-xs text-sm leading-6 text-app-ink-soft">
               Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
             </p>
             <div className="mt-4 flex items-center gap-2">
@@ -58,13 +58,13 @@ export function AppPublicFooter() {
 
           {/* Product column */}
           <div>
-            <h4 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Sản phẩm</h4>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Sản phẩm</h3>
             <ul className="mt-3 space-y-2">
               {PRODUCT_LINKS.map((item) => (
                 <li key={item.label}>
                   <Link
                     to={item.to}
-                    className="text-[14px] text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
+                    className="text-sm text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
                   >
                     {item.label}
                   </Link>
@@ -75,7 +75,7 @@ export function AppPublicFooter() {
 
           {/* Company column */}
           <div>
-            <h4 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Công ty</h4>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Công ty</h3>
             <ul className="mt-3 space-y-2">
               {COMPANY_LINKS.map((item) => {
                 if (item.href) {
@@ -83,7 +83,7 @@ export function AppPublicFooter() {
                     <li key={item.label}>
                       <a
                         href={item.href}
-                        className="text-[14px] text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
+                        className="text-sm text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
                       >
                         {item.label}
                       </a>
@@ -94,7 +94,7 @@ export function AppPublicFooter() {
                   <li key={item.label}>
                     <Link
                       to={item.to!}
-                      className="text-[14px] text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
+                      className="text-sm text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
                     >
                       {item.label}
                     </Link>
@@ -106,13 +106,13 @@ export function AppPublicFooter() {
 
           {/* Legal column */}
           <div>
-            <h4 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Pháp lý</h4>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Pháp lý</h3>
             <ul className="mt-3 space-y-2">
               {LEGAL_LINKS.map((item) => (
                 <li key={item.label}>
                   <Link
                     to={item.to}
-                    className="text-[14px] text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
+                    className="text-sm text-app-ink-soft transition-colors duration-150 hover:text-app-ink"
                   >
                     {item.label}
                   </Link>
@@ -122,7 +122,7 @@ export function AppPublicFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-app-line pt-6 text-[13px] text-app-ink-muted sm:flex-row sm:items-center">
+        <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-app-line pt-6 text-xs text-app-ink-muted sm:flex-row sm:items-center">
           <p>
             © {year} Dear Our Future. Made with{" "}
             <span aria-hidden="true">❤️</span>

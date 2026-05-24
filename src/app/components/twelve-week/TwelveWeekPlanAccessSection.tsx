@@ -115,9 +115,9 @@ export function TwelveWeekPlanAccessSection({
     <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-accent">Gói và quyền của bạn</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Gói và quyền của bạn</p>
           <p className="mt-2 font-serif text-2xl font-medium text-app-ink">{getPlanLabel(currentPlanCode)}</p>
-          <p className="mt-2 text-[14px] leading-7 text-app-ink-soft">{currentPlanDefinition.description}</p>
+          <p className="mt-2 text-sm leading-7 text-app-ink-soft">{currentPlanDefinition.description}</p>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-app-accent/20 bg-app-accent-soft text-app-accent">
           <Crown className="h-5 w-5" />
@@ -146,28 +146,28 @@ export function TwelveWeekPlanAccessSection({
 
       <div className="mt-4 grid gap-3">
         <div className="rounded-lg border border-app-line bg-app-bg p-4">
-          <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái nhanh</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái nhanh</p>
           <p className="mt-2 font-serif text-lg font-medium text-app-ink">
             {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền Plus đang mở
           </p>
-          <p className="mt-1 text-[14px] text-app-ink-soft">Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.</p>
+          <p className="mt-1 text-sm text-app-ink-soft">Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.</p>
         </div>
 
         {shouldShowSubscriptionDetails ? (
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-app-line bg-app-bg p-4">
-              <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái</p>
-              <p className="mt-2 text-[14px] font-semibold text-app-ink">
+              <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái</p>
+              <p className="mt-2 text-sm font-semibold text-app-ink">
                 {getSubscriptionStatusLabel(subscription?.status)}
               </p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-bg p-4">
-              <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">{renewalLabel}</p>
-              <p className="mt-2 text-[14px] font-semibold text-app-ink">{formatPlanDate(subscription?.renewsAt)}</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">{renewalLabel}</p>
+              <p className="mt-2 text-sm font-semibold text-app-ink">{formatPlanDate(subscription?.renewsAt)}</p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-bg p-4">
-              <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Chu kỳ</p>
-              <p className="mt-2 text-[14px] font-semibold text-app-ink">
+              <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Chu kỳ</p>
+              <p className="mt-2 text-sm font-semibold text-app-ink">
                 {getBillingCycleLabel(subscription?.billingCycle)}
               </p>
             </div>
@@ -178,12 +178,12 @@ export function TwelveWeekPlanAccessSection({
           <>
             <div className="rounded-lg border border-app-line bg-app-bg p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Billing contract</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Billing contract</p>
                 <Badge variant="outline" className="border-app-accent/20 bg-app-accent-soft text-app-accent">
                   {getBillingProviderModeLabel(billingProviderStatus.mode)}
                 </Badge>
               </div>
-              <div className="mt-3 space-y-1 text-[14px] text-app-ink-soft">
+              <div className="mt-3 space-y-1 text-sm text-app-ink-soft">
                 <p>Đơn vị thanh toán: {billingProviderStatus.providerLabel}</p>
                 <p>
                   Thanh toán: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Dự phòng trên thiết bị")}
@@ -208,17 +208,17 @@ export function TwelveWeekPlanAccessSection({
               )}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em]">Kiểm tra quyền trên thiết bị</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Kiểm tra quyền trên thiết bị</p>
                 <Badge variant="outline" className="border-current/20 bg-app-surface/70 text-current">
                   {getBillingActionStatusLabel(lastEntitlementSyncSnapshot?.status ?? "local_only")}
                 </Badge>
               </div>
-              <p className="mt-3 text-[14px] font-semibold">
+              <p className="mt-3 text-sm font-semibold">
                 {lastEntitlementSyncSnapshot
                   ? `${lastEntitlementSyncSnapshot.planCode} · ${lastEntitlementSyncSnapshot.entitlementCount} quyền`
                   : "Chưa có lần kiểm tra nào"}
               </p>
-              <p className="mt-1 text-[14px] opacity-80">
+              <p className="mt-1 text-sm opacity-80">
                 {lastEntitlementSyncSnapshot?.message ??
                   "Khi kiểm tra, web sẽ đọc lại trạng thái quyền từ đơn vị thanh toán hoặc bản dự phòng trên thiết bị."}
               </p>
@@ -234,17 +234,17 @@ export function TwelveWeekPlanAccessSection({
               )}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em]">Khôi phục quyền Plus</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Khôi phục quyền Plus</p>
                 <Badge variant="outline" className="border-current/20 bg-app-surface/70 text-current">
                   {getBillingActionStatusLabel(lastRestoreAccessSnapshot?.status ?? "local_only")}
                 </Badge>
               </div>
-              <p className="mt-3 text-[14px] font-semibold">
+              <p className="mt-3 text-sm font-semibold">
                 {lastRestoreAccessSnapshot
                   ? `${lastRestoreAccessSnapshot.planCode} · ${lastRestoreAccessSnapshot.entitlementCount} quyền`
                   : "Chưa có lần khôi phục nào"}
               </p>
-              <p className="mt-1 text-[14px] opacity-80">
+              <p className="mt-1 text-sm opacity-80">
                 {lastRestoreAccessSnapshot?.message ??
                   "Dùng khi bạn đã từng mở Plus và muốn lấy lại quyền trên thiết bị này."}
               </p>
@@ -255,11 +255,11 @@ export function TwelveWeekPlanAccessSection({
           </>
         ) : (
           <div className="rounded-lg border border-app-line bg-app-bg p-4">
-            <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái gói</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Trạng thái gói</p>
             <p className="mt-2 font-serif text-lg font-medium text-app-ink">
               {currentPlanCode === "FREE" ? "Bạn đang dùng gói Miễn phí." : "Gói Plus đang hoạt động."}
             </p>
-            <p className="mt-1 text-[14px] text-app-ink-soft">
+            <p className="mt-1 text-sm text-app-ink-soft">
               {currentPlanCode === "FREE"
                 ? "Nâng cấp Plus để mở quyền nâng cao cho chu kỳ 12 tuần."
                 : "Quyền nâng cao được đồng bộ từ tài khoản."}
@@ -286,7 +286,7 @@ export function TwelveWeekPlanAccessSection({
             </Button>
           </>
         ) : (
-          <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-[14px] text-app-ink-soft">
+          <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-sm text-app-ink-soft">
             Gói Plus đang hoạt động trên tài khoản của bạn.
           </div>
         )}

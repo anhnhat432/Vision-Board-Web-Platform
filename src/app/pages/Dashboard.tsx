@@ -635,7 +635,7 @@ function DashboardContent({
         <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line bg-app-surface/95 p-4 shadow-[0_-1px_2px_rgba(26,26,26,0.04)] backdrop-blur md:hidden">
           <button
             type="button"
-            className="w-full rounded-lg border border-app-line bg-app-surface px-4 py-3 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="w-full rounded-lg border border-app-line bg-app-surface px-4 py-3 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={() => navigate("/today-v2")}
           >
             Mở Today - {dashboardData.dashboardOpenTaskCount} việc
@@ -778,17 +778,17 @@ function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; lim
     <section className="mb-5 rounded-card border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[15px] font-semibold text-app-ink">
+          <p className="text-sm font-semibold text-app-ink">
             Gói Free: {current}/{limit} mục tiêu
           </p>
-          <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">
+          <p className="mt-1 text-sm leading-6 text-app-ink-muted">
             Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.
           </p>
         </div>
         <button
           type="button"
           onClick={onUpgrade}
-          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-[14px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Mở Plus
         </button>
@@ -812,7 +812,7 @@ function TrialCountdownBanner({
 
   return (
     <section
-      className="mb-5 rounded-card border border-app-line bg-app-surface p-4 text-[14px] text-app-ink-soft"
+      className="mb-5 rounded-card border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft"
       aria-label="Thời hạn Plus"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -825,7 +825,7 @@ function TrialCountdownBanner({
         <button
           type="button"
           onClick={onOpenPlan}
-          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-[14px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:ml-auto"
+          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:ml-auto"
         >
           Chi tiết
         </button>
@@ -845,7 +845,7 @@ function DashboardPlanStateNotice({
 }) {
   if (planLoading && !hasPlan) {
     return (
-      <div className="rounded-card border border-app-line bg-app-surface p-4 text-[14px] text-app-ink-muted">
+      <div className="rounded-card border border-app-line bg-app-surface p-4 text-sm text-app-ink-muted">
         Đang tải dữ liệu Trang chính 12 tuần...
       </div>
     );
@@ -853,7 +853,7 @@ function DashboardPlanStateNotice({
 
   if (planError) {
     return (
-      <div className="rounded-card border border-app-line bg-app-surface p-4 text-[14px] text-app-ink-soft">
+      <div className="rounded-card border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft">
         {planError.message}
       </div>
     );
@@ -867,15 +867,15 @@ function DemoDataNotice({ onOpenLifeBalance }: { onOpenLifeBalance: () => void }
     <section className="mt-6 rounded-card border border-app-line bg-app-accent-soft p-5" aria-label="Dữ liệu mẫu">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[15px] font-semibold text-app-accent">Dữ liệu đang hiển thị là ví dụ mẫu</p>
-          <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+          <p className="text-sm font-semibold text-app-accent">Dữ liệu đang hiển thị là ví dụ mẫu</p>
+          <p className="mt-1 text-sm leading-6 text-app-ink-soft">
             Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
           </p>
         </div>
         <button
           type="button"
           onClick={onOpenLifeBalance}
-          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Cập nhật ngay
         </button>

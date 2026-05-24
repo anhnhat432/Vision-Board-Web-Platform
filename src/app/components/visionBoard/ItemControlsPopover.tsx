@@ -64,7 +64,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
             <button
               type="button"
               onClick={() => onUpdate(item.id, { lifeAreaId: undefined })}
-              className={`rounded-full border px-2.5 py-0.5 text-[12px] transition ${
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition ${
                 !item.lifeAreaId
                   ? "border-slate-400 bg-app-bg text-app-ink"
                   : "border-app-line bg-app-surface text-app-ink-muted"
@@ -77,7 +77,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                 key={area.name}
                 type="button"
                 onClick={() => onUpdate(item.id, { lifeAreaId: area.name })}
-                className={`rounded-full border px-2.5 py-0.5 text-[12px] font-medium transition ${
+                className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${
                   item.lifeAreaId === area.name
                     ? "border-app-accent bg-app-accent-soft text-app-accent"
                     : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
@@ -98,7 +98,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                   key={frame.id}
                   type="button"
                   onClick={() => updateStyle({ imageFrame: frame.id })}
-                  className={`rounded-md border px-2 py-1.5 text-[12px] font-medium transition ${
+                  className={`rounded-md border px-2 py-1.5 text-xs font-medium transition ${
                     currentFrame === frame.id
                       ? "border-app-accent bg-app-accent-soft text-app-accent"
                       : "border-app-line bg-app-surface text-app-ink-soft"
@@ -130,7 +130,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                   >
                     Aa
                   </p>
-                  <p className="mt-0.5 text-[12px] text-app-ink-muted">{font.label}</p>
+                  <p className="mt-0.5 text-xs text-app-ink-muted">{font.label}</p>
                 </button>
               ))}
             </div>

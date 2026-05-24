@@ -45,7 +45,7 @@ const DAILY_TIME_OPTIONS = [
 ] as const;
 
 const radioButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const radioButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
 
 export function ScheduleStep({
@@ -83,10 +83,10 @@ export function ScheduleStep({
         <div className="flex items-start gap-2">
           <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
-            <p id="schedule-main-title" className="text-[15px] font-medium text-app-ink">
+            <p id="schedule-main-title" className="text-sm font-medium text-app-ink">
               Khóa lịch trước khi lưu
             </p>
-            <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-1 text-sm leading-6 text-app-ink-soft">
               Ngày bắt đầu, ngày nhìn lại và quỹ thời gian giúp tuần đầu không bị trôi.
             </p>
           </div>
@@ -152,7 +152,7 @@ export function ScheduleStep({
                   aria-pressed={isActive}
                   onClick={() => onChange("reviewDay", day.value)}
                   className={cn(
-                    "rounded-md border border-app-line bg-app-surface px-2 py-2 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    "rounded-md border border-app-line bg-app-surface px-2 py-2 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
                   )}
                 >
@@ -178,7 +178,7 @@ export function ScheduleStep({
                   className={cn(radioButtonClass, isActive && radioButtonActiveClass)}
                 >
                   <span>{option.label}</span>
-                  <span className="text-[12px] font-normal opacity-80">{option.hint}</span>
+                  <span className="text-xs font-normal opacity-80">{option.hint}</span>
                 </button>
               );
             })}
@@ -202,7 +202,7 @@ export function ScheduleStep({
                   className={cn(radioButtonClass, isActive && radioButtonActiveClass)}
                 >
                   <span>{option.label}</span>
-                  <span className="text-[12px] font-normal opacity-80">
+                  <span className="text-xs font-normal opacity-80">
                     {option.value === "lighter" ? "Giữ sức" : option.value === "push" ? "Đẩy hơn" : "Vừa tay"}
                   </span>
                 </button>
@@ -254,10 +254,10 @@ export function ScheduleStep({
       </section>
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-summary-title">
-        <p id="schedule-summary-title" className="text-[14px] font-medium text-app-ink">
+        <p id="schedule-summary-title" className="text-sm font-medium text-app-ink">
           Chu kỳ 12 tuần
         </p>
-        <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+        <p className="mt-1 text-sm leading-6 text-app-ink-soft">
           {cycleStartDate} đến {cycleEndDate}
         </p>
       </section>
@@ -266,15 +266,15 @@ export function ScheduleStep({
         <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-guide-title">
           <p
             id="schedule-guide-title"
-            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
           >
             Nhịp tuần 1 theo khung
           </p>
-          <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
-          <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
+          <p className="mt-2 text-sm font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+          <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
           <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Gợi ý duy trì</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1CadenceHint}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Gợi ý duy trì</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1CadenceHint}</p>
           </div>
         </section>
       ) : null}
@@ -286,24 +286,24 @@ export function ScheduleStep({
         >
           <p
             id="schedule-recommendation-title"
-            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
           >
             Ngày nhìn lại và mức tải tuần gợi ý
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
-              <p className="mt-2 text-[14px] font-medium text-app-ink">{draft.reviewDay}</p>
-              <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
+              <p className="mt-2 text-sm font-medium text-app-ink">{draft.reviewDay}</p>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                 {setupGuideSupport.recommendedReviewReason}
               </p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>
-              <p className="mt-2 text-[14px] font-medium text-app-ink">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>
+              <p className="mt-2 text-sm font-medium text-app-ink">
                 {getLoadPreferenceLabel(draft.tacticLoadPreference)}
               </p>
-              <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.recommendedLoadReason}</p>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.recommendedLoadReason}</p>
             </div>
           </div>
         </section>
@@ -316,7 +316,7 @@ export function ScheduleStep({
         >
           <p
             id="schedule-milestones-title"
-            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
           >
             Mốc gợi ý theo khung
           </p>
@@ -326,10 +326,10 @@ export function ScheduleStep({
               { label: "Tuần 8", value: draft.week8Milestone },
             ].map((milestone) => (
               <div key={milestone.label} className="rounded-lg border border-app-line bg-app-surface p-3">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                   {milestone.label}
                 </p>
-                <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{milestone.value}</p>
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">{milestone.value}</p>
               </div>
             ))}
           </div>
@@ -339,20 +339,20 @@ export function ScheduleStep({
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-week-one-title">
         <p
           id="schedule-week-one-title"
-          className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+          className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
         >
           {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
         </p>
         <div className="mt-3 space-y-2">
           {weekOneTaskPreview.length === 0 ? (
-            <p className="text-[14px] leading-6 text-app-ink-soft">
+            <p className="text-sm leading-6 text-app-ink-soft">
               Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
             </p>
           ) : (
             weekOneTaskPreview.map((task) => (
               <div
                 key={task}
-                className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-[14px] text-app-ink-soft"
+                className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-sm text-app-ink-soft"
               >
                 {task}
               </div>
@@ -362,7 +362,7 @@ export function ScheduleStep({
         {weekOneTaskWarning ? (
           <p
             role="status"
-            className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
+            className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-[color:var(--color-danger-fg)]"
           >
             <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>

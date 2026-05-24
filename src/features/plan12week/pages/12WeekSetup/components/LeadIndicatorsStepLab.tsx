@@ -66,11 +66,11 @@ const COMMITMENT_FIELDS = [
 ] as const;
 
 const selectTriggerClass =
-  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[15px] font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
-const selectItemClass = "cursor-pointer text-[15px] text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
+const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const optionButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const optionButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
 
 function normalizeCommitmentChange(
@@ -151,10 +151,10 @@ export function LeadIndicatorsStepLab({
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-step-hero">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p id="lead-step-hero" className="text-[14px] leading-6 text-app-ink-soft">
+            <p id="lead-step-hero" className="text-sm leading-6 text-app-ink-soft">
               Việc lặp lại là việc bạn chủ động làm đều mỗi tuần. Chỉ số kết quả là con số bạn xem lại để biết mình đã tiến tới đâu.
             </p>
-            <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
+            <p className="mt-1 text-xs leading-5 text-app-ink-muted">
               Chọn việc nhỏ và đo bằng số lần thực hiện, không đo bằng kết quả cuối cùng.
             </p>
           </div>
@@ -162,7 +162,7 @@ export function LeadIndicatorsStepLab({
             type="button"
             onClick={onAddIndicator}
             disabled={!canAddIndicator}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-[15px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             Thêm việc lặp lại
@@ -171,21 +171,21 @@ export function LeadIndicatorsStepLab({
       </section>
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-examples-title">
-        <p id="lead-examples-title" className="text-[14px] font-medium text-app-ink">
+        <p id="lead-examples-title" className="text-sm font-medium text-app-ink">
           Ví dụ dễ phân biệt
         </p>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div className="rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Chỉ số kết quả — không nhập ở bước này</p>
-            <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">Chỉ số kết quả — không nhập ở bước này</p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-app-ink-soft">
               <li>- Có 100 người dùng</li>
               <li>- Hoàn thành app</li>
               <li>- Giảm 5kg</li>
             </ul>
           </div>
           <div className="rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc lặp lại — nên nhập ở bước này</p>
-            <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc lặp lại — nên nhập ở bước này</p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-app-ink-soft">
               <li>- Demo sản phẩm cho 5 người / tuần</li>
               <li>- Code chức năng chính 5 buổi / tuần</li>
               <li>- Tập 3 buổi / tuần</li>
@@ -195,19 +195,19 @@ export function LeadIndicatorsStepLab({
       </section>
 
       <details className="rounded-lg border border-app-line bg-app-surface p-3 sm:p-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-[14px] font-medium text-app-ink">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
           Việc lặp lại khác chỉ số kết quả thế nào?
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Việc lặp lại</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">Việc lặp lại</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">
               Việc bạn có thể mở lịch và làm trong tuần: viết 800 từ, tập 45 phút, gửi 5 email.
             </p>
           </div>
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chỉ số kết quả</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chỉ số kết quả</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">
               Con số hoặc trạng thái để xem cuối kỳ có tiến bộ không: tăng follower, giảm kg, có job mới, đạt IELTS 7.0.
             </p>
           </div>
@@ -228,10 +228,10 @@ export function LeadIndicatorsStepLab({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p id={`tactic-card-title-${index}`} className="text-[15px] font-medium text-app-ink">
+                    <p id={`tactic-card-title-${index}`} className="text-sm font-medium text-app-ink">
                       Việc {index + 1}
                     </p>
-                    <p className="mt-0.5 text-[13px] text-app-ink-muted">
+                    <p className="mt-0.5 text-xs text-app-ink-muted">
                       {indicator.name || "Chưa có tên"} · {indicator.target || "0"} / tuần · {indicator.unit || "chưa có đơn vị"}
                     </p>
                   </div>
@@ -240,7 +240,7 @@ export function LeadIndicatorsStepLab({
                       type="button"
                       onClick={() => onRemoveIndicator(index)}
                       aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
                       Xoá
@@ -344,13 +344,13 @@ export function LeadIndicatorsStepLab({
                 <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
                   <button
                     type="button"
-                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-[14px] font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-expanded={Boolean(expandedCommitments[indicator.id])}
                     aria-controls={`tactic-commitment-${index}`}
                     onClick={() => toggleCommitmentEditor(indicator.id)}
                   >
                     <span>Cài đặt nâng cao</span>
-                    <span className="flex items-center gap-2 text-[13px] font-medium text-app-ink-muted">
+                    <span className="flex items-center gap-2 text-xs font-medium text-app-ink-muted">
                       <ChevronDown
                         className={cn(
                           "h-4 w-4 transition-transform duration-150",
@@ -385,7 +385,7 @@ export function LeadIndicatorsStepLab({
                                   className={cn(optionButtonClass, "min-h-11 px-4 py-3", active && optionButtonActiveClass)}
                                 >
                                   <span>{option.label}</span>
-                                  <span className="text-[12px] font-normal opacity-80">{option.hint}</span>
+                                  <span className="text-xs font-normal opacity-80">{option.hint}</span>
                                 </button>
                               );
                             })}
@@ -449,7 +449,7 @@ export function LeadIndicatorsStepLab({
 
                 {indicatorWarnings[index]?.length > 0 ? (
                   <ul
-                    className="mt-3 space-y-1 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-3 py-2 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
+                    className="mt-3 space-y-1 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-3 py-2 text-xs leading-5 text-[color:var(--color-danger-fg)]"
                     aria-label={`Cảnh báo cho việc ${index + 1}`}
                   >
                     {indicatorWarnings[index].map((warning) => (
@@ -467,48 +467,48 @@ export function LeadIndicatorsStepLab({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p
             id="week-one-preview-title"
-            className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
           >
             Xem trước tuần 1
           </p>
-          <span className="inline-flex min-h-10 items-center rounded-full bg-app-accent-soft px-3 py-2 text-[13px] font-medium text-app-accent">
+          <span className="inline-flex min-h-10 items-center rounded-full bg-app-accent-soft px-3 py-2 text-xs font-medium text-app-accent">
             {coreCount} cốt lõi · {optionalCount} tùy chọn
           </span>
         </div>
 
         {setupGuideSupport && setupGuideTemplate ? (
           <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
             </p>
-            <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
-            <p className="mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-2 text-sm font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
+            <p className="mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm leading-6 text-app-ink-soft">
               {setupGuideSupport.week1CadenceHint}
             </p>
           </div>
         ) : null}
 
-        <p className="mt-3 text-[13px] leading-5 text-app-ink-muted">
+        <p className="mt-3 text-xs leading-5 text-app-ink-muted">
           Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
         </p>
         <div className="mt-3 space-y-2">
           {weekOneTaskGroups.length === 0 ? (
-            <p className="text-[14px] text-app-ink-soft">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
+            <p className="text-sm text-app-ink-soft">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
           ) : (
             weekOneTaskGroups.map((group) => (
               <div key={group.id} className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-[14px] font-medium text-app-ink">{group.name}</p>
-                  <span className="inline-flex min-h-10 items-center rounded-full bg-app-accent-soft px-3 py-2 text-[13px] font-medium text-app-accent">
+                  <p className="text-sm font-medium text-app-ink">{group.name}</p>
+                  <span className="inline-flex min-h-10 items-center rounded-full bg-app-accent-soft px-3 py-2 text-xs font-medium text-app-accent">
                     {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                   </span>
                 </div>
-                <p className="mt-1 text-[13px] text-app-ink-muted">
+                <p className="mt-1 text-xs text-app-ink-muted">
                   {group.taskTitles.length} việc / tuần · Lịch: {formatScheduleDayLabels(group.scheduleDays)}
                 </p>
                 {group.taskTitles.length > 0 ? (
-                  <ul className="mt-2 space-y-1 text-[13px] leading-5 text-app-ink-soft">
+                  <ul className="mt-2 space-y-1 text-xs leading-5 text-app-ink-soft">
                     {group.taskTitles.map((title) => (
                       <li key={title}>→ {title}</li>
                     ))}
@@ -522,7 +522,7 @@ export function LeadIndicatorsStepLab({
         {weekOneTaskWarning ? (
           <p
             role="status"
-            className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
+            className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-[color:var(--color-danger-fg)]"
           >
             <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>
