@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+
 import { cn } from "@/app/components/ui/utils";
 import type { CatalogItem } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
@@ -20,12 +22,17 @@ export function FrameSizePicker({ frames, selected, onChange }: FrameSizePickerP
             onClick={() => onChange(frame.itemId)}
             aria-pressed={isSelected}
             className={cn(
-              "rounded-[var(--r-card)] border bg-card p-4 text-left transition",
+              "group relative rounded-[var(--r-card)] border bg-[var(--order-card)] p-4 text-left transition-all duration-150",
               isSelected
-                ? "border-app-accent ring-2 ring-app-accent/30"
-                : "border-[color:var(--border)] hover:border-app-accent/50",
+                ? "border-[var(--order-accent)] ring-2 ring-[var(--order-accent-soft)]"
+                : "border-[var(--order-border)] hover:-translate-y-[2px] hover:border-[var(--order-accent)]/60 hover:shadow-sm",
             )}
           >
+            {isSelected && (
+              <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--order-accent)] text-white shadow-sm">
+                <Check className="h-3.5 w-3.5" />
+              </span>
+            )}
             {frame.thumbnail ? (
               <img
                 src={frame.thumbnail}
@@ -37,14 +44,16 @@ export function FrameSizePicker({ frames, selected, onChange }: FrameSizePickerP
               <div
                 data-testid="catalog-thumbnail-placeholder"
                 aria-hidden="true"
-                className="mb-3 aspect-[3/4] w-full rounded-[var(--r-card-sm)] bg-gradient-to-br from-app-accent/10 to-app-accent/5"
+                className="mb-3 aspect-[3/4] w-full rounded-[var(--r-card-sm)] bg-gradient-to-br from-[var(--order-accent-soft)]/40 to-[var(--order-bg)]"
               />
             )}
             <div className="text-base font-semibold">{frame.label}</div>
             {frame.description && (
-              <div className="mt-1 text-xs text-muted-foreground">{frame.description}</div>
+              <div className="mt-1 text-xs text-[var(--order-text-muted)]">
+                {frame.description}
+              </div>
             )}
-            <div className="mt-2 text-sm font-medium text-app-accent">
+            <div className="mt-2 text-sm font-semibold text-[var(--order-accent)]">
               {formatVnd(frame.priceVnd)}
             </div>
           </button>

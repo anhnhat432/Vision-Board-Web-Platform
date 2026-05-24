@@ -14,7 +14,8 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test/setup.ts",
     css: true,
-    pool: "forks",
+    pool: "threads",
+    fileParallelism: false,
     server: {
       deps: {
         inline: [/@radix-ui\//, /^lucide-react$/],

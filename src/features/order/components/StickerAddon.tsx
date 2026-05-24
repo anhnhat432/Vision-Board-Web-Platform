@@ -21,7 +21,7 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
   }
 
   return (
-    <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+    <div className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           {sticker.thumbnail ? (
@@ -35,12 +35,12 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
             <div
               data-testid="catalog-thumbnail-placeholder"
               aria-hidden="true"
-              className="h-14 w-14 shrink-0 rounded-[var(--r-card-sm)] bg-gradient-to-br from-app-accent/10 to-app-accent/5"
+              className="h-14 w-14 shrink-0 rounded-[var(--r-card-sm)] bg-gradient-to-br from-[var(--order-accent-soft)]/40 to-[var(--order-bg)]"
             />
           )}
           <div>
             <div className="font-medium">{sticker.label}</div>
-            <div className="text-xs text-muted-foreground">{formatVnd(sticker.priceVnd)} / tờ</div>
+            <div className="text-xs text-[var(--order-text-muted)]">{formatVnd(sticker.priceVnd)} / tờ</div>
           </div>
         </div>
         {expanded ? (
@@ -60,7 +60,7 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
       </div>
       {expanded && value && (
         <div className="mt-3 flex items-center gap-3">
-          <label className="text-sm text-muted-foreground" htmlFor="sticker-qty">
+          <label className="text-sm text-[var(--order-text-muted)]" htmlFor="sticker-qty">
             Số lượng
           </label>
           <input
@@ -70,9 +70,9 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
             max={maxQty}
             value={value.qty}
             onChange={(e) => setQty(Number(e.target.value))}
-            className="w-20 rounded border border-[color:var(--border)] px-2 py-1 text-sm"
+            className="w-20 rounded border border-[var(--order-border)] px-2 py-1 text-sm"
           />
-          <div className="text-xs text-muted-foreground">Tối đa {maxQty}</div>
+          <div className="text-xs text-[var(--order-text-muted)]">Tối đa {maxQty}</div>
         </div>
       )}
     </div>
