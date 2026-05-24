@@ -59,7 +59,7 @@ describe("OrderPage", () => {
     fireEvent.change(screen.getByLabelText(/Số điện thoại/), { target: { value: "0900000000" } });
     fireEvent.change(screen.getByLabelText(/Địa chỉ giao hàng/), { target: { value: "Hanoi" } });
 
-    fireEvent.click(screen.getByRole("button", { name: /Đặt đơn/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
 
     await waitFor(() => {
       expect(createOrder).toHaveBeenCalled();
