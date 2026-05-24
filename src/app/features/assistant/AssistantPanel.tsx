@@ -193,7 +193,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col rounded-t-2xl bg-white shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl"
+        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col rounded-t-2xl bg-app-surface shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl"
         style={{ height: "min(80vh, 720px)" }}
         role="dialog"
         aria-modal="true"
@@ -365,7 +365,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             {isShowingCommands && (
               <div
                 ref={dropdownRef}
-                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-10"
+                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-app-surface shadow-lg z-10"
               >
                 {filteredCommands.map((cmd, idx) => (
                   <button
