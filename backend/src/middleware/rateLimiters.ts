@@ -162,10 +162,17 @@ export const generalApiRateLimiter = createLimiter({
   keyGenerator: userOrIpKey,
 });
 
+// Bootstrap /api/auth/profile được trigger nhiều lần ngay sau login (auto-sync
+// hydrate, navigation listener, retry on 429). P1 production audit 2026-05-24
+// phát hiện cấu hình cũ (120/15min = 8 req/phút/user, sau đó là 30 req/phút/user)
+// gây bounce về /onboarding khi fresh login do bootstrap profile bị 429.
+// Nới lên 60 req/phút/user — đủ cho bootstrap + retry trong burst sau login,
+// vẫn an toàn vì keyGenerator là per-user (Firebase UID), không phải per-IP,
+// nên class demo nhiều người login đồng thời không share quota.
 export const authProfileRateLimiter = createLimiter({
   keyPrefix: "auth-profile",
-  windowMs: FIFTEEN_MINUTES_MS,
-  limit: 120,
+  windowMs: ONE_MINUTE_MS,
+  limit: 60,
   keyGenerator: userOrIpKey,
 });
 
