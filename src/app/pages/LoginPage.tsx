@@ -263,6 +263,9 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-app-bg">
+      <a href="#login-main" className="skip-to-content">
+        Bỏ qua điều hướng
+      </a>
       {/* Top bar */}
       <header className="flex w-full items-center justify-center px-4 py-6">
         <div className="flex items-center gap-2.5">
@@ -273,7 +276,7 @@ export function LoginPage() {
         </div>
       </header>
 
-      <main className="flex flex-1 items-center justify-center px-4 pb-12">
+      <main id="login-main" aria-label="Đăng nhập" className="flex flex-1 items-center justify-center px-4 pb-12">
         <div className="w-full max-w-6xl">
           <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12">
             {/* Left column - Hero panel (desktop only) */}
