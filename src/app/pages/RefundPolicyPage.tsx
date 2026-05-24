@@ -15,13 +15,13 @@ export function RefundPolicyPage() {
   const refundMaxUsedPercent = getSafePositiveNumber(REFUND_MAX_USED_PERCENT, 25);
 
   return (
-    <article className="mx-auto max-w-3xl space-y-8 py-4">
+    <article className="mx-auto max-w-3xl space-y-8 px-4 py-4 sm:px-6">
       <header className="space-y-3">
         <div className="flex items-center gap-2 text-app-accent">
           <RefreshCw className="h-5 w-5" />
-          <span className="text-xs font-semibold uppercase tracking-[0.14em]">Dear Our Future</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em]">Dear Our Future</span>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-app-ink">Chính sách hoàn tiền</h1>
+        <h1 className="font-serif text-3xl font-medium tracking-tight text-app-ink">Chính sách hoàn tiền</h1>
         <p className="text-sm text-app-ink-muted">Cập nhật lần cuối: {LAST_UPDATED}</p>
         <p className="text-sm leading-7 text-app-ink-soft">
           Dear Our Future cho phép hoàn tiền thủ công cho gói Plus trong một số trường hợp hợp lý. Quy trình này không
@@ -49,7 +49,7 @@ export function RefundPolicyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">1. Điều kiện hoàn tiền</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">1. Điều kiện hoàn tiền</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Chúng tôi cho phép hoàn tiền trong <strong>{refundWindowDays} ngày</strong> kể từ ngày thanh toán nếu bạn chưa
           sử dụng quá <strong>{refundMaxUsedPercent}%</strong> chu kỳ Plus hiện tại. Với gói 12 tuần, mức sử dụng được
@@ -66,7 +66,7 @@ export function RefundPolicyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">2. Cách gửi yêu cầu</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">2. Cách gửi yêu cầu</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Cách nhanh nhất là mở trang{" "}
           <Link
@@ -93,7 +93,7 @@ export function RefundPolicyPage() {
       </section>
 
       <section className="space-y-3 rounded-[var(--r-card)] border border-amber-100 bg-amber-50/70 p-5">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-amber-950">
+        <h2 className="flex items-center gap-2 font-serif text-xl font-medium text-amber-950">
           <Mail className="h-5 w-5" />
           Quy trình xử lý thủ công
         </h2>
@@ -109,7 +109,7 @@ export function RefundPolicyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">3. Hủy gói và chu kỳ chưa dùng</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">3. Hủy gói và chu kỳ chưa dùng</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Hiện tại Plus không tự động gia hạn, nên không có thao tác hủy auto-renewal qua cổng thanh toán. Nếu bạn không
           muốn tiếp tục sử dụng, bạn có thể bấm <strong>“Tôi không muốn dùng nữa”</strong> trong trang gói để ghi nhận ý

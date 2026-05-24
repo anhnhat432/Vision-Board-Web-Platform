@@ -230,12 +230,12 @@ export function LoginPage() {
     // Sign-in not configured — show a notice instead of a broken form
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4">
-        <div className="w-full max-w-sm rounded-card border border-app-line bg-app-surface p-7">
+        <div className="w-full max-w-md rounded-card border border-app-line bg-app-surface p-6">
           <div className="flex items-center gap-2.5">
             <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
               <Target className="h-5 w-5 text-white" />
             </div>
-            <span className="text-[16px] font-semibold tracking-tight text-app-ink">Vision Board</span>
+            <span className="text-base font-semibold tracking-tight text-app-ink">Vision Board</span>
           </div>
           <h2 className="mt-4 font-serif text-xl font-medium text-app-ink">Chưa cấu hình xác thực</h2>
           <p className="mt-1 text-sm text-app-ink-muted">Xác thực chưa được thiết lập trong môi trường này.</p>
@@ -269,7 +269,7 @@ export function LoginPage() {
           <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
             <Target className="h-5 w-5 text-white" />
           </div>
-          <span className="text-[16px] font-semibold tracking-tight text-app-ink">Vision Board</span>
+          <span className="text-base font-semibold tracking-tight text-app-ink">Vision Board</span>
         </div>
       </header>
 
@@ -279,7 +279,7 @@ export function LoginPage() {
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block">
               <div className="rounded-[14px] border border-app-line bg-app-surface p-8">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                   {captionText}
                 </p>
                 <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink max-w-md">
@@ -315,7 +315,7 @@ export function LoginPage() {
                 {/* Mobile hero - simplified */}
                 <div className="lg:hidden mb-6">
                   <div className="text-center">
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       {captionText}
                     </p>
                     <h1 className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink">
@@ -329,7 +329,7 @@ export function LoginPage() {
                       {TRUST_FEATURES.map(({ icon: Icon, title }) => (
                         <li
                           key={title}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-[12px] text-app-ink-soft whitespace-nowrap"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
                         >
                           <Icon className="h-3.5 w-3.5 text-app-accent" />
                           {title}
@@ -343,14 +343,14 @@ export function LoginPage() {
                   {/* Form header */}
                   <div>
                     <h2 className="font-serif text-2xl font-medium text-app-ink">{formTitle}</h2>
-                    <p className="text-[14px] text-app-ink-soft mt-1">{formDescription}</p>
+                    <p className="text-sm text-app-ink-soft mt-1">{formDescription}</p>
                   </div>
 
                   {/* Mode switch */}
                   <div className="mt-5 inline-flex w-full gap-1 p-1 rounded-full border border-app-line bg-app-bg">
                     <Link
                       to={{ pathname: "/login", search: "" }}
-                      className={`flex-1 text-[14px] font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
+                      className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
                         isSignIn ? "bg-app-surface text-app-ink shadow-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
@@ -358,7 +358,7 @@ export function LoginPage() {
                     </Link>
                     <Link
                       to={{ pathname: "/login", search: "?mode=signup" }}
-                      className={`flex-1 text-[14px] font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
+                      className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
                         !isSignIn ? "bg-app-surface text-app-ink shadow-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
@@ -370,7 +370,7 @@ export function LoginPage() {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={googleSubmitting || authLoading}
-                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Đăng nhập với Google"
                   >
                     {googleSubmitting ? (
@@ -400,7 +400,7 @@ export function LoginPage() {
 
                   <div className="my-5 flex items-center gap-3">
                     <div className="h-px flex-1 bg-app-line" />
-                    <span className="text-[13px] text-app-ink-muted">hoặc dùng email</span>
+                    <span className="text-xs text-app-ink-muted">hoặc dùng email</span>
                     <div className="h-px flex-1 bg-app-line" />
                   </div>
 
@@ -438,7 +438,7 @@ export function LoginPage() {
                               setResetSent(false);
                               setResetError(null);
                             }}
-                            className="text-[13px] text-app-accent hover:underline"
+                            className="text-xs text-app-accent hover:underline"
                           >
                             Quên mật khẩu?
                           </button>
@@ -501,7 +501,7 @@ export function LoginPage() {
                           {passwordRequirementItems.map((item) => (
                             <div
                               key={item.label}
-                              className={`flex items-center gap-2 text-[13px] ${
+                              className={`flex items-center gap-2 text-xs ${
                                 item.passed ? "text-green-700" : "text-app-ink-soft"
                               }`}
                             >
@@ -526,7 +526,7 @@ export function LoginPage() {
                         }`}
                       >
                         <AlertCircle className="h-4 w-4 text-[color:var(--color-danger-fg)] shrink-0 mt-0.5" />
-                        <p className="text-[14px] text-[color:var(--color-danger-fg)] leading-relaxed">
+                        <p className="text-sm text-[color:var(--color-danger-fg)] leading-relaxed">
                           {displayError}
                         </p>
                       </div>
@@ -535,7 +535,7 @@ export function LoginPage() {
                     {/* Submit button */}
                     <Button
                       type="submit"
-                      className="w-full bg-app-accent text-white py-2.5 text-[15px] font-medium hover:bg-[#284f45] transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
+                      className="w-full bg-app-accent text-white py-2.5 text-sm font-medium hover:bg-[#284f45] transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
                       disabled={submitting || authLoading || !email || !password || !canSubmitSignup}
                     >
                       {submitting ? (
@@ -552,7 +552,7 @@ export function LoginPage() {
 
                     {/* Terms text (signup only) */}
                     {!isSignIn ? (
-                      <p className="text-center text-[13px] text-app-ink-soft leading-5">
+                      <p className="text-center text-xs text-app-ink-soft leading-5">
                         Khi tạo tài khoản, bạn đồng ý với{" "}
                         <Link to="/terms" className="font-medium text-app-accent hover:underline">
                           Điều khoản
@@ -566,7 +566,7 @@ export function LoginPage() {
                     ) : null}
                   </form>
 
-                  <p className="mt-4 text-[13px] leading-5 text-app-ink-muted">
+                  <p className="mt-4 text-xs leading-5 text-app-ink-muted">
                     Nếu trước đây bạn đăng nhập bằng Google, hãy dùng button trên thay vì email/mật khẩu.
                   </p>
                 </div>
@@ -580,7 +580,7 @@ export function LoginPage() {
                           <ShieldCheck className="h-5 w-5" />
                         </div>
                         <p className="text-sm font-medium text-app-ink">Đã gửi email đặt lại mật khẩu</p>
-                        <p className="mt-1 text-[14px] text-app-ink-soft">
+                        <p className="mt-1 text-sm text-app-ink-soft">
                           Kiểm tra hộp thư <strong>{resetEmail}</strong> và làm theo hướng dẫn. Nếu không thấy, hãy kiểm
                           tra thư mục spam.
                         </p>
@@ -599,7 +599,7 @@ export function LoginPage() {
                       <form onSubmit={handleResetPassword} className="space-y-4">
                         <div>
                           <h3 className="font-serif text-base font-medium text-app-ink">Quên mật khẩu?</h3>
-                          <p className="text-[14px] text-app-ink-soft mt-1">
+                          <p className="mt-1 text-sm text-app-ink-soft">
                             Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại.
                           </p>
                         </div>
@@ -625,7 +625,7 @@ export function LoginPage() {
                             className="flex gap-2 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3"
                           >
                             <AlertCircle className="h-4 w-4 text-[color:var(--color-danger-fg)] shrink-0 mt-0.5" />
-                            <p className="text-[14px] text-[color:var(--color-danger-fg)]">{resetError}</p>
+                            <p className="text-sm text-[color:var(--color-danger-fg)]">{resetError}</p>
                           </div>
                         ) : null}
                         <div className="flex gap-2">
@@ -658,7 +658,7 @@ export function LoginPage() {
                 ) : null}
 
                 {/* Bottom switch link */}
-                <p className="mt-4 text-center text-[14px] text-app-ink-soft">
+                <p className="mt-4 text-center text-sm text-app-ink-soft">
                   {isSignIn ? (
                     <>
                       Chưa có tài khoản?{" "}
@@ -702,7 +702,7 @@ function LoginStatusCard({
 }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4">
-      <div className="w-full max-w-sm rounded-[14px] border border-app-line bg-app-surface p-7 text-center">
+      <div className="w-full max-w-md rounded-[14px] border border-app-line bg-app-surface p-6 text-center">
         <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-app-accent shadow-lg">
           {icon}
         </div>
