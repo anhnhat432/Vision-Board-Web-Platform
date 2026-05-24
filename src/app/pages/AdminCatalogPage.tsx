@@ -175,8 +175,10 @@ export function AdminCatalogPage() {
     }
 
     return (
-      <div className="rounded-[var(--r-card)] border border-white/10 bg-white/[0.02]">
-        <Table className="text-slate-200">
+      <Table
+        containerClassName="rounded-[var(--r-card)] border-white/10 bg-white/[0.02] shadow-none"
+        className="text-slate-200"
+      >
           <TableHeader className="bg-white/[0.04] [&_tr]:border-b [&_tr]:border-white/10">
             <TableRow className="border-white/10 hover:bg-transparent">
               <TableHead className="text-slate-400">Ảnh</TableHead>
@@ -267,7 +269,6 @@ export function AdminCatalogPage() {
             ))}
           </TableBody>
         </Table>
-      </div>
     );
   }
 
