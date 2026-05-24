@@ -9,6 +9,7 @@ describe("OrderProgressBar", () => {
       <OrderProgressBar
         currentStep={2}
         completedSteps={[1]}
+        progressPercent={33}
         onStepClick={() => {}}
       />,
     );
@@ -32,6 +33,7 @@ describe("OrderProgressBar", () => {
       <OrderProgressBar
         currentStep={1}
         completedSteps={[]}
+        progressPercent={0}
         onStepClick={onStepClick}
       />,
     );
@@ -44,6 +46,7 @@ describe("OrderProgressBar", () => {
       <OrderProgressBar
         currentStep={2}
         completedSteps={[1]}
+        progressPercent={33}
         onStepClick={() => {}}
       />,
     );

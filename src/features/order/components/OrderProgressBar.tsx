@@ -13,12 +13,15 @@ const STEPS = [
 export interface OrderProgressBarProps {
   currentStep: number;
   completedSteps: number[];
+  /** 0-100, percent fill for the mobile progress bar. Distinct from completedSteps which may include optional steps for status purposes. */
+  progressPercent: number;
   onStepClick: (step: number) => void;
 }
 
 export function OrderProgressBar({
   currentStep,
   completedSteps,
+  progressPercent,
   onStepClick,
 }: OrderProgressBarProps) {
   function statusOf(num: number): "done" | "current" | "pending" {
@@ -30,7 +33,7 @@ export function OrderProgressBar({
   const currentLabel = STEPS.find((s) => s.num === currentStep)?.label ?? "";
 
   return (
-    <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-[var(--order-border)] bg-[var(--order-bg)]/95 px-4 py-3 backdrop-blur">
+    <div className="sticky top-14 z-20 -mx-4 mb-6 border-b border-[var(--order-border)] bg-[var(--order-bg)]/95 px-4 py-3 backdrop-blur lg:top-0">
       <div className="mx-auto max-w-6xl">
         <div className="hidden gap-2 sm:flex">
           {STEPS.map((s) => {
@@ -91,7 +94,7 @@ export function OrderProgressBar({
             <div
               className="bg-[var(--order-accent)] transition-all"
               style={{
-                width: `${(completedSteps.length / STEPS.length) * 100}%`,
+                width: `${progressPercent}%`,
               }}
             />
           </div>

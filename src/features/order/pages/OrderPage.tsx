@@ -97,7 +97,7 @@ export function OrderPage() {
   const shippingFieldsOk =
     validation.ok ||
     !(["fullName", "email", "phone", "shippingAddress"] as const).some(
-      (k) => !validation.ok && validation.errors[k],
+      (k) => k in errorMap,
     );
   if (
     shippingFieldsOk &&
@@ -112,6 +112,15 @@ export function OrderPage() {
 
   const currentStep =
     [1, 2, 3, 4, 5].find((s) => !completedSteps.includes(s)) ?? 5;
+
+  // Required steps for the mobile progress bar fill — sticker (3) and notes (5) are optional.
+  const REQUIRED_STEPS = [1, 2, 4] as const;
+  const requiredDone = REQUIRED_STEPS.filter((s) =>
+    completedSteps.includes(s),
+  ).length;
+  const progressPercent = Math.round(
+    (requiredDone / REQUIRED_STEPS.length) * 100,
+  );
 
   const selectedFrame =
     frames.find((f) => f.itemId === draft.frameItemId) ?? null;
@@ -190,6 +199,7 @@ export function OrderPage() {
         <OrderProgressBar
           currentStep={currentStep}
           completedSteps={completedSteps.filter((s) => s !== currentStep)}
+          progressPercent={progressPercent}
           onStepClick={scrollToStep}
         />
 

@@ -158,9 +158,14 @@ export function OrderSummary({
           type="button"
           className="mt-4 w-full bg-[var(--order-accent)] text-white shadow-sm transition-all hover:-translate-y-[1px] hover:bg-[var(--order-accent)]/90 hover:shadow-md"
           disabled={isSubmitting}
+          aria-disabled={!isSubmittable || isSubmitting}
           onClick={onSubmit}
         >
-          {isSubmitting ? "Đang gửi..." : `Đặt đơn — ${formatVnd(totalVnd)}`}
+          {isSubmitting
+            ? "Đang gửi..."
+            : isSubmittable
+              ? `Đặt đơn — ${formatVnd(totalVnd)}`
+              : "Kiểm tra lại để đặt đơn"}
         </Button>
       </div>
     </aside>
