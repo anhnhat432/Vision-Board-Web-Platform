@@ -237,7 +237,7 @@ export function AspirationalVision() {
             <Button
               type="button"
               variant="outline"
-              className="w-full border-app-warm-border bg-app-surface text-app-warm-strong hover:bg-white focus-visible:ring-app-warm/30 sm:w-auto"
+              className="w-full border-app-warm-border bg-app-surface text-app-warm-strong focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4" />

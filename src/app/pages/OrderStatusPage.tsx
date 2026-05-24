@@ -811,7 +811,7 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <Mail className="h-3.5 w-3.5" />
                     Người nhận
@@ -824,7 +824,7 @@ export function OrderStatusPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <MapPin className="h-3.5 w-3.5" />
                     Địa chỉ giao
@@ -853,7 +853,7 @@ export function OrderStatusPage() {
                     {hasKeywords && (
                       <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
                         {order.keywords.map((keyword) => (
-                          <Badge key={keyword} variant="outline" className="border-slate-200 bg-white text-slate-700">
+                          <Badge key={keyword} variant="outline" className="border-slate-200 bg-app-surface text-slate-700">
                             {keyword}
                           </Badge>
                         ))}
@@ -888,7 +888,7 @@ export function OrderStatusPage() {
                   <div
                     key={step.status}
                     className={`flex items-start gap-4 rounded-[var(--r-card)] border px-4 py-4 ${
-                      isActive ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"
+                      isActive ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-app-surface"
                     }`}
                   >
                     <div
@@ -905,12 +905,12 @@ export function OrderStatusPage() {
                           {getOrderStatusLabel(step.status)}
                         </p>
                         {isCurrent && (
-                          <Badge variant="outline" className="border-emerald-200 bg-white text-emerald-800">
+                          <Badge variant="outline" className="border-emerald-200 bg-app-surface text-emerald-800">
                             Trạng thái hiện tại
                           </Badge>
                         )}
                         {!isCurrent && isCompleted && (
-                          <Badge variant="outline" className="border-emerald-200 bg-white text-emerald-800">
+                          <Badge variant="outline" className="border-emerald-200 bg-app-surface text-emerald-800">
                             Đã hoàn thành
                           </Badge>
                         )}
@@ -951,7 +951,7 @@ export function OrderStatusPage() {
                           Dùng để cập nhật đơn lưu trên thiết bị khi chưa có dữ liệu từ máy chủ.
                         </p>
                       </div>
-                      <Badge variant="outline" className="border-slate-200 bg-white text-slate-700">
+                      <Badge variant="outline" className="border-slate-200 bg-app-surface text-slate-700">
                         Trên thiết bị
                       </Badge>
                     </div>
@@ -996,7 +996,7 @@ export function OrderStatusPage() {
                   key={item.id}
                   type="button"
                   className={`w-full rounded-[var(--r-card)] border px-4 py-4 text-left transition-colors ${
-                    item.id === order.id ? "border-sky-200 bg-sky-50" : "border-slate-200 bg-white hover:bg-slate-50"
+                    item.id === order.id ? "border-sky-200 bg-sky-50" : "border-slate-200 bg-app-surface hover:bg-slate-50"
                   }`}
                   onClick={() => navigate(`/order-status/${item.id}`)}
                 >
@@ -1019,7 +1019,7 @@ export function OrderStatusPage() {
                     </div>
 
                     {item.id === order.id && (
-                      <Badge variant="outline" className="border-sky-200 bg-white text-sky-700">
+                      <Badge variant="outline" className="border-sky-200 bg-app-surface text-sky-700">
                         Đang xem
                       </Badge>
                     )}
