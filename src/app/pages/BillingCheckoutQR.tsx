@@ -264,7 +264,7 @@ export function BillingCheckoutQR() {
           <h2 className="font-serif text-xl font-medium text-app-ink">Hết thời gian thanh toán</h2>
           <p className="mt-2 text-sm text-app-ink-soft">
             {paidCheckoutDisabled
-              ? "Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng."
+              ? "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng."
               : "Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục."}
           </p>
           <button
@@ -334,12 +334,12 @@ export function BillingCheckoutQR() {
           </div>
           <h2 className="font-serif text-xl font-medium text-app-ink">Thanh toán đang tạm khóa</h2>
           <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-            Thanh toán đang tạm khóa do chuyển nhà cung cấp. Quyền hiện có không bị ảnh hưởng. Liên hệ support nếu cần
-            nâng cấp thủ công: {" "}
+            Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
+            hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
             <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="font-medium text-app-ink underline-offset-4 hover:underline">
               {BILLING_SUPPORT_EMAIL}
             </a>
-            .
+            {" "}để mở Plus thủ công.
           </p>
           <button
             type="button"
