@@ -267,7 +267,7 @@ export function VisionBoardStoryWizard({
                       disabled={disabled}
                       onClick={() => toggleFocusArea(area.name)}
                       className={cn(
-                        "min-h-32 rounded-[var(--r-card)] border bg-white p-4 text-left shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-45",
+                        "min-h-32 rounded-[var(--r-card)] border bg-app-surface p-4 text-left shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-45",
                         active
                           ? "border-app-accent bg-app-accent-soft ring-2 ring-app-accent/50"
                           : "border-slate-200 hover:border-app-accent/50 hover:bg-app-bg/60",

@@ -409,29 +409,29 @@ function MutationQueueConflictResolutionPanel({
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
-        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Khác biệt</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.conflictCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Chỉ trên máy</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.localOnlyCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Chỉ tài khoản</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.cloudOnlyCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Thiếu liên kết</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.missingClientIdCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Cần kiểm tra</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.unsupportedFieldCount}</p>
         </div>
       </div>
 
-      <details className="mt-3 rounded-lg border border-app-warm/30 bg-white p-3" onToggle={handleDetailsToggle}>
+      <details className="mt-3 rounded-lg border border-app-warm/30 bg-app-surface p-3" onToggle={handleDetailsToggle}>
         <summary className="cursor-pointer text-sm font-semibold text-app-ink">Xem chi tiết</summary>
         <div className="mt-3 stack-tight text-xs leading-5 text-app-ink-soft">
           <p>
@@ -476,7 +476,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
+          className="whitespace-normal border-app-warm/30 bg-app-surface text-center text-app-ink hover:bg-app-warm-soft"
           onClick={handleExport}
         >
           <FileDown className="mr-2 h-4 w-4" />
@@ -485,7 +485,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
+          className="whitespace-normal border-app-warm/30 bg-app-surface text-center text-app-ink hover:bg-app-warm-soft"
           onClick={handleKeepLocal}
         >
           Giữ bản trên thiết bị
@@ -493,7 +493,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
+          className="whitespace-normal border-app-warm/30 bg-app-surface text-center text-app-ink hover:bg-app-warm-soft"
           disabled={syncLoading}
           onClick={handleRetry}
         >
@@ -503,7 +503,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
+          className="whitespace-normal border-app-warm/30 bg-app-surface text-center text-app-ink hover:bg-app-warm-soft"
           disabled={!canUseCloudVersion}
           onClick={handleShowCloudConfirm}
         >
@@ -538,7 +538,7 @@ function MutationQueueConflictResolutionPanel({
             <Button
               type="button"
               variant="outline"
-              className="border-red-200 bg-white text-red-800 hover:bg-red-50"
+              className="border-red-200 bg-app-surface text-red-800 hover:bg-red-50"
               disabled={!confirmExported}
               onClick={handleConfirmUseCloud}
             >
@@ -561,7 +561,7 @@ function MutationQueueConflictResolutionPanel({
       ) : null}
 
       {keptLocal ? (
-        <p className="mt-3 rounded-lg border border-app-warm/30 bg-white px-3 py-2 text-xs leading-5 text-app-warm">
+        <p className="mt-3 rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2 text-xs leading-5 text-app-warm">
           Đã giữ bản trên thiết bị cho hiện tại. Không có dữ liệu nào bị xóa hoặc ghi đè.
         </p>
       ) : null}
@@ -677,7 +677,7 @@ export function TwelveWeekLocalStatusSection({
               const hiddenCount = group.conflicts.length - visibleConflicts.length;
 
               return (
-                <div key={group.goalId} className="rounded-lg border border-app-warm/30 bg-white p-3">
+                <div key={group.goalId} className="rounded-lg border border-app-warm/30 bg-app-surface p-3">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <p className="break-words text-sm font-semibold text-app-ink">{group.goalTitle}</p>
@@ -699,11 +699,11 @@ export function TwelveWeekLocalStatusSection({
                           <p className="font-semibold text-app-ink">{getConflictKindLabel(conflict.kind)}</p>
                           <p className="mt-1 text-app-ink-muted">{getConflictScopeLabel(conflict)}</p>
                         </div>
-                        <div className="min-w-0 rounded-lg bg-white p-2">
+                        <div className="min-w-0 rounded-lg bg-app-surface p-2">
                           <p className="font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Thiết bị</p>
                           <p className="mt-1 break-words text-app-ink">{getConflictValueLabel(conflict.localValue)}</p>
                         </div>
-                        <div className="min-w-0 rounded-lg bg-white p-2">
+                        <div className="min-w-0 rounded-lg bg-app-surface p-2">
                           <p className="font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tài khoản</p>
                           <p className="mt-1 break-words text-app-ink">
                             {getConflictValueLabel(conflict.backendValue)}
@@ -877,7 +877,7 @@ export function TwelveWeekLocalStatusSection({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full whitespace-normal border-red-200 bg-white text-center text-red-700 hover:bg-red-50"
+                className="w-full whitespace-normal border-red-200 bg-app-surface text-center text-red-700 hover:bg-red-50"
                 disabled={!canRunMutationQueueSync}
                 onClick={onDeleteCloudWorkspace}
               >

@@ -233,7 +233,7 @@ export function LocalDataMigrationPrompt({
 
         {showReview ? (
           <section
-            className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4"
+            className="rounded-[var(--r-card)] border border-slate-200 bg-app-surface p-4"
             aria-label="Tóm tắt dữ liệu tìm thấy"
           >
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
@@ -310,7 +310,7 @@ export function LocalDataMigrationPrompt({
 
                 {/* Confirmation dialog inline */}
                 {showCloudImportConfirm && canRunCloudImport && !cloudWriteLoading ? (
-                  <div className="rounded-[var(--r-tile)] border border-sky-200 bg-white p-3 space-y-3">
+                  <div className="rounded-[var(--r-tile)] border border-sky-200 bg-app-surface p-3 space-y-3">
                     <p className="text-sm font-medium text-slate-900">Xác nhận đồng bộ</p>
                     <p className="text-xs leading-5 text-slate-600">
                       Dữ liệu 12 tuần sẽ được gửi lên tài khoản. Bản trên thiết bị vẫn được giữ nguyên. Nên tải bản sao
@@ -382,7 +382,7 @@ export function LocalDataMigrationPrompt({
                       variant="outline"
                       onClick={handleValidateCloudImport}
                       disabled={!canRunCloudDryRun}
-                      className="bg-white"
+                      className="bg-app-surface"
                     >
                       {cloudImportChecking ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

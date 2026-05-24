@@ -98,7 +98,7 @@ export function CommitmentBadge({ tacticName, commitment, disabled = false, onSa
         variant="outline"
         size="sm"
         disabled={disabled}
-        className="bg-white"
+        className="bg-app-surface"
         onClick={() => setIsOpen(true)}
       >
         {getBadgeLabel(commitment)}

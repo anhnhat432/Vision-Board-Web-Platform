@@ -50,7 +50,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
           </span>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-700">Funnel diagnostics (dev)</p>
         </div>
-        <span className="rounded-[var(--r-pill)] border border-slate-300 bg-white px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
+        <span className="rounded-[var(--r-pill)] border border-slate-300 bg-app-surface px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
           Local-only
         </span>
       </header>

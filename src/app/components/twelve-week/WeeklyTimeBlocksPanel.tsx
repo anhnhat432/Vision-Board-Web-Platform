@@ -189,7 +189,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
 
         <div className="grid gap-3 md:grid-cols-3">
           {(["strategic", "buffer", "breakout"] as const).map((type) => (
-            <div key={type} className="rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
+            <div key={type} className="rounded-[var(--r-control)] border border-slate-200 bg-app-surface p-4">
               <Badge variant="outline" className={TYPE_CHIP_CLASS[type]}>
                 {TYPE_LABELS[type]}
               </Badge>

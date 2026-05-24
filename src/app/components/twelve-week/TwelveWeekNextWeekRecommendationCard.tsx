@@ -93,7 +93,7 @@ export function TwelveWeekNextWeekRecommendationCard({
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {onAcceptRecommendation && (
-              <Button size="sm" variant="outline" className="bg-white" onClick={onAcceptRecommendation}>
+              <Button size="sm" variant="outline" className="bg-app-surface" onClick={onAcceptRecommendation}>
                 <ArrowRight className="mr-1 h-3.5 w-3.5" />
                 Áp dụng cho tuần sau
               </Button>

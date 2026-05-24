@@ -528,7 +528,7 @@ export function TwelveWeekDeviceDetailsSection({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mt-3 bg-white"
+                    className="mt-3 bg-app-surface"
                     onClick={() => onOpenReminder(reminder)}
                   >
                     {getReminderActionLabel(reminder.kind)}
@@ -572,7 +572,7 @@ export function TwelveWeekDeviceDetailsSection({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mt-3 bg-white"
+                    className="mt-3 bg-app-surface"
                     onClick={() => onOutboxItemToggle(item)}
                   >
                     {item.status === "pending" ? "Lưu mục này" : "Khôi phục về hàng chờ"}

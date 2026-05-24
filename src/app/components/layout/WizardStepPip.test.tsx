@@ -59,7 +59,7 @@ describe("WizardStepPip", () => {
             class="min-w-fit flex-1"
           >
             <button
-              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors text-slate-600 hover:bg-white"
+              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors text-slate-600 hover:bg-app-bg"
               type="button"
             >
               <span
@@ -132,7 +132,7 @@ describe("WizardStepPip", () => {
             >
               <span
                 aria-hidden="true"
-                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-slate-300 bg-white text-slate-400"
+                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-slate-300 bg-app-surface text-slate-400"
               >
                 3
               </span>
