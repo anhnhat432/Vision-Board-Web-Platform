@@ -860,7 +860,7 @@ export function TwelveWeekSystem() {
           ].map((item, index) => (
             <div
               key={item}
-              className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-[14px] leading-5 text-app-ink-soft"
+              className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-sm leading-5 text-app-ink-soft"
             >
               <span className="mr-2 font-medium text-app-ink">0{index + 1}</span>
               {item}
@@ -870,14 +870,14 @@ export function TwelveWeekSystem() {
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-lg bg-app-accent px-5 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
             Tạo mục tiêu 12 tuần
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
             onClick={() => navigate("/goals")}
           >
             Mở mục tiêu đã có
@@ -1009,21 +1009,21 @@ export function TwelveWeekSystem() {
           >
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={markWeeklyReviewCompleted}
             >
               Đã đánh giá xong tuần này
             </button>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={handleSnoozeWeeklyReview}
             >
               Nhắc lại sau 24h
             </button>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={() => handleTabChange("week")}
             >
               Mở review tuần
@@ -1045,14 +1045,14 @@ export function TwelveWeekSystem() {
           >
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={() => navigate("/life-insight")}
             >
               Tạo lại chu kỳ
             </button>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={() => handleTabChange("settings")}
             >
               Mở cài đặt chu kỳ
@@ -1068,7 +1068,7 @@ export function TwelveWeekSystem() {
           >
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-[color:var(--color-danger-fg)] px-4 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:opacity-90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-[color:var(--color-danger-fg)] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:opacity-90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
               disabled={isBackendSyncing}
               onClick={handleRunOutboxSync}
             >
@@ -1076,7 +1076,7 @@ export function TwelveWeekSystem() {
             </button>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
               onClick={() => handleTabChange("settings")}
             >
               Xem trạng thái
@@ -1123,7 +1123,7 @@ export function TwelveWeekSystem() {
                 value={value}
                 aria-controls={tabPanelId}
                 aria-label={`Mở tab ${label}`}
-                className="flex-none rounded-full px-3.5 py-1.5 text-[14px] sm:px-4"
+                className="flex-none rounded-full px-3.5 py-1.5 text-sm sm:px-4"
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
                 <span>{label}</span>
@@ -1286,7 +1286,7 @@ export function TwelveWeekSystem() {
                   <div className="mb-4 flex justify-end">
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                       onClick={() => setShowFullProgress(false)}
                     >
                       Quay lại tóm tắt

@@ -56,10 +56,10 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
       aria-labelledby="dashboard-trend-title"
     >
       <div>
-        <h2 id="dashboard-trend-title" className="text-[16px] font-semibold text-app-ink">
+        <h2 id="dashboard-trend-title" className="text-base font-semibold text-app-ink">
           Đường 12 tuần
         </h2>
-        <p className="mt-1 text-[14px] text-app-ink-muted">Tiến độ % theo tuần</p>
+        <p className="mt-1 text-sm text-app-ink-muted">Tiến độ % theo tuần</p>
       </div>
 
       <div className="mt-5 h-[180px] overflow-hidden">

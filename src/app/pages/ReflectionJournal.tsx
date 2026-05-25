@@ -312,9 +312,9 @@ export function ReflectionJournal() {
       {/* Hero Section */}
       <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8">
         <div className="flex flex-col gap-3">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
-          <h1 className="font-serif text-[32px] font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
-          <p className="max-w-2xl text-[15px] leading-6 text-app-ink-soft">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
+          <h1 className="font-serif text-4xl font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
+          <p className="max-w-2xl text-sm leading-6 text-app-ink-soft">
             Ghi lại điều bạn học được, biết ơn, và muốn cải thiện.
           </p>
         </div>
@@ -337,7 +337,7 @@ export function ReflectionJournal() {
                 type="button"
                 onClick={() => setFilterType(type)}
                 className={cn(
-                  "rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] transition-colors",
+                  "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-colors",
                   filterType === type ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
@@ -358,7 +358,7 @@ export function ReflectionJournal() {
                   type="button"
                   onClick={() => setFilterMood(mood)}
                   className={cn(
-                    "rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] transition-colors",
+                    "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-colors",
                     filterMood === mood ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
                   )}
                 >
@@ -418,12 +418,12 @@ export function ReflectionJournal() {
             {/* New Entry Section - Warm Tone */}
             <div className="rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8">
               <div className="flex items-center gap-2 mb-4">
-                <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
+                <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-xs font-medium text-app-warm ring-1 ring-app-warm-border">
                   Phản tư hôm nay
                 </span>
               </div>
 
-              <p className="font-serif text-[22px] font-medium leading-7 text-app-warm-strong mb-4">
+              <p className="font-serif text-2xl font-medium leading-7 text-app-warm-strong mb-4">
                 {JOURNAL_PROMPTS[0]}
               </p>
 
@@ -437,12 +437,12 @@ export function ReflectionJournal() {
                     handleAddReflection();
                   }
                 }}
-                className="min-h-[140px] rounded-lg border border-app-warm-border bg-app-surface px-3.5 py-2.5 text-[15px] text-app-ink focus:border-app-warm focus:ring-app-warm/30"
+                className="min-h-[140px] rounded-lg border border-app-warm-border bg-app-surface px-3.5 py-2.5 text-sm text-app-ink focus:border-app-warm focus:ring-app-warm/30"
               />
 
               {/* Mood Selector */}
               <div className="mt-4">
-                <Label className="mb-2 block text-[14px] font-medium text-app-ink">
+                <Label className="mb-2 block text-sm font-medium text-app-ink">
                   Hôm nay bạn đang cảm thấy thế nào?
                 </Label>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -458,7 +458,7 @@ export function ReflectionJournal() {
                         type="button"
                         onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
                         className={cn(
-                          "rounded-full border px-3 py-1.5 text-[14px] transition-colors",
+                          "rounded-full border px-3 py-1.5 text-sm transition-colors",
                           isActive
                             ? "bg-app-warm text-white border-app-warm"
                             : "bg-app-surface border-app-warm-border text-app-ink-soft hover:bg-app-warm-soft",
@@ -495,7 +495,7 @@ export function ReflectionJournal() {
                         return getReflectionInputForContent(content, prev);
                       });
                     }}
-                    className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 text-[13px] text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm transition-colors text-left"
+                    className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 text-xs text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm transition-colors text-left"
                   >
                     {prompt}
                   </button>
@@ -515,8 +515,8 @@ export function ReflectionJournal() {
             { label: "Review tuần", value: weeklyReviewCount },
           ].map((item) => (
             <Card key={item.label} className="rounded-card border border-app-line bg-app-surface p-4">
-              <p className="text-[12px] uppercase tracking-[0.2em] text-app-ink-muted">{item.label}</p>
-              <p className="mt-1 font-serif text-[28px] font-medium text-app-ink tabular-nums">
+              <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">{item.label}</p>
+              <p className="mt-1 font-serif text-3xl font-medium text-app-ink tabular-nums">
                 <CountUp value={item.value} />
               </p>
             </Card>
@@ -528,8 +528,8 @@ export function ReflectionJournal() {
       {sortedReflections.length === 0 ? (
         <Card className="rounded-card border border-app-line bg-app-surface p-10 text-center">
           <BookOpen className="mx-auto h-12 w-12 text-app-accent" />
-          <h2 className="mt-4 font-serif text-[24px] font-medium text-app-ink">Bắt đầu nhật ký của bạn</h2>
-          <p className="mx-auto mt-2 max-w-md text-[15px] text-app-ink-soft">
+          <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Bắt đầu nhật ký của bạn</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
             Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển.
           </p>
           <Button
@@ -544,8 +544,8 @@ export function ReflectionJournal() {
         /* Past Entries List */
         <section>
           <div className="mb-4">
-            <p className="text-[12px] uppercase tracking-[0.2em] text-app-ink-muted">GHI CHÉP CŨ</p>
-            <h2 className="mt-1 text-[22px] font-medium text-app-ink">{filteredReflections.length} bài viết</h2>
+            <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">GHI CHÉP CŨ</p>
+            <h2 className="mt-1 font-serif text-2xl font-medium text-app-ink">{filteredReflections.length} bài viết</h2>
           </div>
 
           <div className="space-y-4">
@@ -559,20 +559,20 @@ export function ReflectionJournal() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[12px] uppercase tracking-[0.12em] text-app-ink-muted">
+                        <p className="text-xs uppercase tracking-[0.14em] text-app-ink-muted">
                           {formatCalendarDate(reflection.date, "vi-VN", {
                             weekday: "short",
                             month: "short",
                             day: "numeric",
                           })}
                         </p>
-                        <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-[12px]", mood.badge)}>
+                        <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-xs", mood.badge)}>
                           {mood.label}
                         </Badge>
                         {reflection.entryType === "weekly-review" && (
                           <Badge
                             variant="outline"
-                            className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-[12px] text-app-ink-soft"
+                            className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-xs text-app-ink-soft"
                           >
                             Review tuần
                           </Badge>
@@ -580,16 +580,16 @@ export function ReflectionJournal() {
                         {reflection.linkedWeekNumber && (
                           <Badge
                             variant="outline"
-                            className={cn("rounded-full px-2.5 py-0.5 text-[12px]", phaseTone.soft)}
+                            className={cn("rounded-full px-2.5 py-0.5 text-xs", phaseTone.soft)}
                           >
                             Tuần {reflection.linkedWeekNumber}
                           </Badge>
                         )}
                       </div>
 
-                      <h3 className="mt-2 text-[17px] font-medium text-app-ink">{reflection.title}</h3>
+                      <h3 className="mt-2 font-serif text-lg font-medium text-app-ink">{reflection.title}</h3>
 
-                      <p className="mt-2 text-[15px] leading-relaxed text-app-ink whitespace-pre-line">
+                      <p className="mt-2 text-sm leading-relaxed text-app-ink whitespace-pre-line">
                         {reflection.content}
                       </p>
 
@@ -644,7 +644,7 @@ export function ReflectionJournal() {
 
           {filteredReflections.length === 0 && sortedReflections.length > 0 && (
             <Card className="rounded-card border border-app-line border-dashed bg-app-bg p-8 text-center">
-              <p className="text-[15px] text-app-ink-muted">Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.</p>
+              <p className="text-sm text-app-ink-muted">Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.</p>
             </Card>
           )}
         </section>

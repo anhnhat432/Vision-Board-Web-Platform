@@ -217,22 +217,22 @@ export function VisionBoardGallery() {
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Snapshot thư viện
             </p>
             <div className="mt-3 grid gap-2">
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
+                  <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">{userData.visionBoards.length}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
+                  <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">{totalItems}</p>
                 </div>
               </div>
               <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
+                <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
                 <p className="mt-1 truncate text-sm font-semibold text-foreground">
                   {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
                 </p>
@@ -308,7 +308,7 @@ export function VisionBoardGallery() {
 
       {userData.visionBoards.length === 0 ? (
         <Card className="overflow-hidden">
-          <CardContent className="p-10 text-center lg:p-14">
+          <CardContent className="p-10 text-center lg:p-12">
             <VisionMapIllustration className="mx-auto mb-4 w-56 text-app-accent sm:w-64" />
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
               <Images className="h-10 w-10" />
@@ -416,7 +416,7 @@ export function VisionBoardGallery() {
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-[var(--r-tile)] border border-white/80 bg-white/90 px-3 py-2 text-[12px] italic leading-4 text-slate-700 shadow-sm">
+                                        <div className="rounded-[var(--r-tile)] border border-white/80 bg-white/90 px-3 py-2 text-xs italic leading-4 text-slate-700 shadow-sm">
                                           {item.content}
                                         </div>
                                       )}

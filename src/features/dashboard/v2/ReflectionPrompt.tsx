@@ -11,18 +11,18 @@ export function ReflectionPrompt({ currentWeek, reviewHref }: ReflectionPromptPr
       className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
       aria-labelledby="dashboard-reflection-title"
     >
-      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
+      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-xs font-medium text-app-warm ring-1 ring-app-warm-border">
         Đến lúc nhìn lại tuần
       </span>
       <h2
         id="dashboard-reflection-title"
-        className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong"
+        className="mt-4 font-serif text-xl font-medium leading-7 text-app-warm-strong"
       >
         Tuần {currentWeek ?? "--"} vừa qua, đâu là khoảnh khắc làm bạn tự hào nhất?
       </h2>
       <Link
         to={reviewHref}
-        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
       >
         Mở review →
       </Link>

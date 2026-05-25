@@ -52,7 +52,7 @@ const LOAD_HINTS: Record<TwelveWeekSetupDraft["tacticLoadPreference"], string> =
 };
 
 const radioButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const radioButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
 
 function CollapsibleScheduleSection({
@@ -68,11 +68,11 @@ function CollapsibleScheduleSection({
     <details className="group rounded-lg border border-app-line bg-app-bg p-3 sm:p-4">
       <summary
         id={id}
-        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-[14px] font-medium text-app-ink marker:hidden"
+        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-sm font-medium text-app-ink marker:hidden"
       >
         <span>{title}</span>
-        <span className="text-[12px] font-medium text-app-ink-muted group-open:hidden">Mở</span>
-        <span className="hidden text-[12px] font-medium text-app-ink-muted group-open:inline">Thu gọn</span>
+        <span className="text-xs font-medium text-app-ink-muted group-open:hidden">Mở</span>
+        <span className="hidden text-xs font-medium text-app-ink-muted group-open:inline">Thu gọn</span>
       </summary>
       <div className="mt-3">{children}</div>
     </details>
@@ -113,10 +113,10 @@ export function ScheduleStepLab({
         <div className="flex items-start gap-2">
           <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
-            <p id="schedule-main-title" className="text-[15px] font-medium text-app-ink">
+            <p id="schedule-main-title" className="text-sm font-medium text-app-ink">
               Chốt lịch thực hiện
             </p>
-            <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-1 text-sm leading-6 text-app-ink-soft">
               Chọn ngày bắt đầu, ngày bạn muốn xem lại tuần, và thời gian thật sự có thể dành mỗi ngày.
             </p>
           </div>
@@ -182,7 +182,7 @@ export function ScheduleStepLab({
                   aria-pressed={isActive}
                   onClick={() => onChange("reviewDay", day.value)}
                   className={cn(
-                    "min-h-10 rounded-md border border-app-line bg-app-surface px-2.5 py-2.5 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    "min-h-10 rounded-md border border-app-line bg-app-surface px-2.5 py-2.5 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
                   )}
                 >
@@ -211,7 +211,7 @@ export function ScheduleStepLab({
                   className={cn(radioButtonClass, "min-h-11 px-3.5 py-3", isActive && radioButtonActiveClass)}
                 >
                   <span>{option.label}</span>
-                  <span className="text-[12px] font-normal opacity-80">{option.hint}</span>
+                  <span className="text-xs font-normal opacity-80">{option.hint}</span>
                 </button>
               );
             })}
@@ -236,7 +236,7 @@ export function ScheduleStepLab({
                   className={cn(radioButtonClass, "min-h-11 px-3.5 py-3", isActive && radioButtonActiveClass)}
                 >
                   <span>{option.label}</span>
-                  <span className="text-[12px] font-normal opacity-80">{LOAD_HINTS[option.value]}</span>
+                  <span className="text-xs font-normal opacity-80">{LOAD_HINTS[option.value]}</span>
                 </button>
               );
             })}
@@ -288,18 +288,18 @@ export function ScheduleStepLab({
       </section>
 
       <CollapsibleScheduleSection id="schedule-summary-title" title="Chu kỳ 12 tuần">
-        <p className="text-[14px] leading-6 text-app-ink-soft">
+        <p className="text-sm leading-6 text-app-ink-soft">
           {cycleStartDate} đến {cycleEndDate}
         </p>
       </CollapsibleScheduleSection>
 
       {setupGuideSupport && setupGuideTemplate ? (
         <CollapsibleScheduleSection id="schedule-guide-title" title="Gợi ý cho tuần 1">
-          <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
-          <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
+          <p className="mt-2 text-sm font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+          <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
           <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Gợi ý duy trì</p>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1CadenceHint}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Gợi ý duy trì</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1CadenceHint}</p>
           </div>
         </CollapsibleScheduleSection>
       ) : null}
@@ -308,18 +308,18 @@ export function ScheduleStepLab({
         <CollapsibleScheduleSection id="schedule-recommendation-title" title="Ngày xem lại và nhịp tuần gợi ý">
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
-              <p className="mt-2 text-[14px] font-medium text-app-ink">{draft.reviewDay}</p>
-              <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
+              <p className="mt-2 text-sm font-medium text-app-ink">{draft.reviewDay}</p>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                 {setupGuideSupport.recommendedReviewReason}
               </p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>
-              <p className="mt-2 text-[14px] font-medium text-app-ink">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>
+              <p className="mt-2 text-sm font-medium text-app-ink">
                 {getLoadPreferenceLabel(draft.tacticLoadPreference)}
               </p>
-              <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.recommendedLoadReason}</p>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.recommendedLoadReason}</p>
             </div>
           </div>
         </CollapsibleScheduleSection>
@@ -333,10 +333,10 @@ export function ScheduleStepLab({
               { label: "Tuần 8", value: draft.week8Milestone },
             ].map((milestone) => (
               <div key={milestone.label} className="rounded-lg border border-app-line bg-app-surface p-3">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                   {milestone.label}
                 </p>
-                <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{milestone.value}</p>
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">{milestone.value}</p>
               </div>
             ))}
           </div>
@@ -346,7 +346,7 @@ export function ScheduleStepLab({
       <CollapsibleScheduleSection id="schedule-week-one-title" title="Những việc sẽ hiện ở màn Hôm nay">
         <div className="mt-3 space-y-2">
           {weekOneTaskPreview.length === 0 ? (
-            <p className="text-[14px] leading-6 text-app-ink-soft">
+            <p className="text-sm leading-6 text-app-ink-soft">
               Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay. Mục tiêu là làm
               ít nhưng đều.
             </p>
@@ -354,7 +354,7 @@ export function ScheduleStepLab({
             weekOneTaskPreview.map((task) => (
               <div
                 key={task}
-                className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-[14px] text-app-ink-soft"
+                className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-sm text-app-ink-soft"
               >
                 {task}
               </div>
@@ -364,7 +364,7 @@ export function ScheduleStepLab({
         {weekOneTaskWarning ? (
           <p
             role="status"
-            className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
+            className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-[color:var(--color-danger-fg)]"
           >
             <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>

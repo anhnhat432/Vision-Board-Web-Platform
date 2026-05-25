@@ -9,8 +9,8 @@ export function QuoteBlock({
 }: QuoteBlockProps) {
   return (
     <figure className="px-4 text-center">
-      <blockquote className="font-serif text-[15px] italic leading-6 text-app-ink-soft">“{text}”</blockquote>
-      <figcaption className="mt-2 text-[12px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">
+      <blockquote className="font-serif text-sm italic leading-6 text-app-ink-soft">“{text}”</blockquote>
+      <figcaption className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-app-ink-muted">
         {author}
       </figcaption>
     </figure>

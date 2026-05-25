@@ -70,7 +70,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
     <div className={`rounded-card border border-app-line bg-app-surface p-5 md:p-6 ${className}`}>
       <div className="flex items-center gap-2">
         <TrendingUp className="h-4 w-4 text-app-accent" />
-        <h3 className="text-[16px] font-semibold text-app-ink">Đánh giá nhanh kế hoạch</h3>
+        <h3 className="text-base font-semibold text-app-ink">Đánh giá nhanh kế hoạch</h3>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -91,7 +91,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
                   style={{ width: `${(dim.score / dim.maxScore) * 100}%` }}
                 />
               </div>
-              <span className="text-[12px] text-app-ink-muted">
+              <span className="text-xs text-app-ink-muted">
                 {dim.score}/{dim.maxScore}
               </span>
             </div>
@@ -103,7 +103,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
         <div className="mt-4 rounded-lg border border-app-warm/30 bg-app-warm-soft p-3">
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
-            <ul className="space-y-1 text-[14px] leading-6 text-app-warm">
+            <ul className="space-y-1 text-sm leading-6 text-app-warm">
               {quality.warnings.map((warning) => (
                 <li key={warning}>{warning}</li>
               ))}
@@ -116,7 +116,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
         <div className="mt-3 rounded-lg border border-app-line bg-app-bg p-3">
           <div className="flex items-start gap-2">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
-            <ul className="space-y-1 text-[14px] leading-6 text-app-ink-soft">
+            <ul className="space-y-1 text-sm leading-6 text-app-ink-soft">
               {quality.suggestions.map((suggestion) => (
                 <li key={suggestion}>{suggestion}</li>
               ))}
@@ -126,7 +126,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
       )}
 
       <div className="mt-4 rounded-lg border border-app-line p-3">
-        <h4 className="mb-2 text-[14px] font-medium text-app-ink">Chi tiết từng tiêu chí</h4>
+        <h4 className="mb-2 text-sm font-medium text-app-ink">Chi tiết từng tiêu chí</h4>
         <div className="grid grid-cols-2 gap-2 text-xs">
           {quality.dimensions.map((dim) => (
             <div

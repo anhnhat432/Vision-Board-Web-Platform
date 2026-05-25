@@ -128,7 +128,7 @@ export function EmptyState({
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</p>
         ) : null}
         <HeadingTag className={titleSizeClass}>{title}</HeadingTag>
-        {description ? <p className="text-[15px] leading-relaxed text-muted-foreground">{description}</p> : null}
+        {description ? <p className="text-sm leading-relaxed text-muted-foreground">{description}</p> : null}
       </div>
       {children ? <div className={blockAlignClass}>{children}</div> : null}
       {actions ? <div className={actionsLayoutClass}>{actions}</div> : null}

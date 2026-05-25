@@ -46,6 +46,7 @@ import {
   type TwelveWeekImportPayload,
 } from "@/features/plan12week/persistence/twelveWeekImportPayload";
 import { AutoCloudSyncProvider } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
+import { AutoCloudConflictDialog } from "./AutoCloudConflictDialog";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -239,11 +240,24 @@ export function RootLayout() {
     // onboardingCompletedAt nên ta tin nó.
     const hasServerOnboardingFlag = Boolean(userProfile?.onboardingCompletedAt);
 
+    // Nếu user đã có 12-week plan (đồng bộ từ tài khoản hoặc setup trên thiết
+    // bị khác) thì coi như đã qua onboarding — đừng bounce về /onboarding
+    // làm họ confused. Verify 2026-05-24 trên prod với account vqkklr0@: có
+    // plan đầy đủ nhưng cả 2 flag onboardingCompleted đều false → bị bounce.
+    // Dùng cả userData (snapshot ngay) và guideUserData (re-render sau backend
+    // hydrate event) để cover race condition khi plan đến từ cloud sau khi
+    // user vừa login lần đầu.
+    const hasTwelveWeekPlan =
+      userData.goals?.some((goal) => Boolean(goal.twelveWeekSystem)) ||
+      guideUserData.goals?.some((goal) => Boolean(goal.twelveWeekSystem)) ||
+      false;
+
     if (
       !demoMode &&
       user &&
       !userData.onboardingCompleted &&
       !hasServerOnboardingFlag &&
+      !hasTwelveWeekPlan &&
       !onboardingDeferred &&
       location.pathname !== "/onboarding"
     ) {
@@ -251,6 +265,7 @@ export function RootLayout() {
     }
   }, [
     demoMode,
+    guideUserData.goals,
     location.hash,
     location.pathname,
     location.search,
@@ -472,8 +487,8 @@ export function RootLayout() {
                 {accountAvatarLabel}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">Tài khoản</p>
-                <p className="mt-1 truncate text-[15px] font-medium tracking-tight text-app-ink">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-app-ink-muted">Tài khoản</p>
+                <p className="mt-1 truncate text-sm font-medium tracking-tight text-app-ink">
                   {accountEmail || accountLabel}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -875,16 +890,16 @@ export function RootLayout() {
                         className="size-10 rounded-lg object-cover shadow-sm ring-1 ring-app-accent/20"
                       />
                       <div className="min-w-0">
-                        <span className="inline-block text-[15px] font-medium tracking-tight text-app-ink">
+                        <span className="inline-block text-sm font-medium tracking-tight text-app-ink">
                           Dear Our Future
                         </span>
                       </div>
                     </button>
                   </div>
 
-                  <nav className="hidden flex-1 items-center justify-center md:flex">
+                  <nav aria-label="Chính" className="hidden flex-1 items-center justify-center md:flex">
                     {isSignedOutVisitor ? (
-                      <span className="hidden text-[13px] text-app-ink-muted lg:inline">12 tuần sống có chủ đích</span>
+                      <span className="hidden text-xs text-app-ink-muted lg:inline">12 tuần sống có chủ đích</span>
                     ) : (
                       <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
                         {primaryNavItems.map((item) => {
@@ -900,7 +915,7 @@ export function RootLayout() {
                               onPointerEnter={() => handlePrefetch(item.path)}
                               aria-current={active ? "page" : undefined}
                               title={item.label}
-                              className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
+                              className={`h-8 shrink-0 rounded-full px-3 text-sm font-medium tracking-tight transition-colors duration-150 ${
                                 active
                                   ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
                                   : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
@@ -925,7 +940,7 @@ export function RootLayout() {
                                 }
                                 aria-expanded={desktopMoreOpen}
                                 aria-haspopup="menu"
-                                className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
+                                className={`h-8 shrink-0 rounded-full px-3 text-sm font-medium tracking-tight transition-colors duration-150 ${
                                   isDesktopMoreNavActive
                                     ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
                                     : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
@@ -945,7 +960,7 @@ export function RootLayout() {
                                   aria-label="Mục khác"
                                   className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
                                 >
-                                  <div className="px-2.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
+                                  <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
                                     Mục khác
                                   </div>
                                   {secondaryNavItems.map((item) => {
@@ -963,7 +978,7 @@ export function RootLayout() {
                                           setDesktopMoreOpen(false);
                                           navigateAppRoute(item.path);
                                         }}
-                                        className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[14px] font-medium tracking-tight outline-none transition-colors ${
+                                        className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm font-medium tracking-tight outline-none transition-colors ${
                                           active
                                             ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
                                             : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
@@ -993,7 +1008,7 @@ export function RootLayout() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleAuthNavigate("signin")}
-                          className="h-8 rounded-full px-3 text-[14px] text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                          className="h-8 rounded-full px-3 text-sm text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
                         >
                           Đăng nhập
                         </Button>
@@ -1001,7 +1016,7 @@ export function RootLayout() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleAuthNavigate("signup")}
-                          className="h-8 rounded-full bg-app-accent px-3.5 text-[14px] text-white hover:bg-[#284f45] hover:text-white"
+                          className="h-8 rounded-full bg-app-accent px-3.5 text-sm text-white hover:bg-[#284f45] hover:text-white"
                         >
                           Đăng ký
                         </Button>
@@ -1029,7 +1044,7 @@ export function RootLayout() {
                   </div>
 
                   <div className="md:hidden flex min-w-0 items-center gap-1.5">
-                    <span className="hidden max-w-[120px] truncate text-[15px] font-medium tracking-tight text-app-ink sm:inline">
+                    <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-tight text-app-ink sm:inline">
                       {pageMeta.label}
                     </span>
                     <Tooltip>
@@ -1056,7 +1071,7 @@ export function RootLayout() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-10 rounded-lg bg-app-accent px-3 text-[14px] text-white hover:bg-[#284f45] hover:text-white"
+                          className="h-10 rounded-lg bg-app-accent px-3 text-sm text-white hover:bg-[#284f45] hover:text-white"
                           onClick={() => handleAuthNavigate("signup")}
                         >
                           Đăng ký
@@ -1275,23 +1290,23 @@ export function RootLayout() {
               <div className="sticky top-0 z-40 hidden border-b border-app-line bg-app-bg/95 backdrop-blur-sm lg:block">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
                   <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2">
-                    <span className="text-[13px] text-app-ink-muted">Workspace</span>
+                    <span className="text-xs text-app-ink-muted">Workspace</span>
                     <span aria-hidden="true" className="text-app-ink-muted">
                       /
                     </span>
-                    <span className="truncate text-[15px] font-medium text-app-ink">{pageMeta.label}</span>
+                    <span className="truncate text-sm font-medium text-app-ink">{pageMeta.label}</span>
                   </nav>
                   <div className="flex items-center gap-2">
                     {!demoMode && user ? <SyncStatusPill compact /> : null}
                     <button
                       type="button"
                       onClick={() => setCommandPaletteOpen(true)}
-                      className="flex items-center gap-2 rounded-md border border-app-line bg-app-surface px-3 py-1.5 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="flex items-center gap-2 rounded-md border border-app-line bg-app-surface px-3 py-1.5 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                       aria-label="Mở command palette"
                     >
                       <Search className="h-3.5 w-3.5" />
                       <span>Tìm nhanh</span>
-                      <kbd className="ml-1 hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[12px] font-medium text-app-ink-muted xl:inline-block">
+                      <kbd className="ml-1 hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-xs font-medium text-app-ink-muted xl:inline-block">
                         ⌘K
                       </kbd>
                     </button>
@@ -1340,7 +1355,7 @@ export function RootLayout() {
           {!isSignedOutVisitor ? (
             <nav
               className="bottom-nav md:hidden"
-              aria-label="Điều hướng chính"
+              aria-label="Điều hướng dưới"
               style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
             >
               <div className="bottom-nav-inner">
@@ -1422,6 +1437,7 @@ export function RootLayout() {
         </div>
       </AssistantPageContextProvider>
       {!demoMode && user ? <FirstLoginRestoreToast /> : null}
+      {!demoMode && user ? <AutoCloudConflictDialog /> : null}
     </AutoCloudSyncProvider>
   );
 }

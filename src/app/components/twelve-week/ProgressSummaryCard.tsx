@@ -174,12 +174,12 @@ export function ProgressSummaryCard({
         <CardContent className="p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                 <Sparkles className="h-3.5 w-3.5 text-app-accent" />
                 Trạng thái nhịp tuần này
               </p>
               <p className="mt-2 font-serif text-xl font-medium text-app-ink sm:text-2xl">{trend.headline}</p>
-              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">{trend.advice}</p>
+              <p className="mt-1 text-sm leading-6 text-app-ink-soft">{trend.advice}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {trend.weekOverWeekDelta !== null && (
                   <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-xs font-medium text-app-ink-soft">
@@ -197,10 +197,10 @@ export function ProgressSummaryCard({
               </div>
               {nextActionHandler && (
                 <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                     Tiếp theo nên làm
                   </p>
-                  <p className="mt-1 text-[14px] leading-6 text-app-ink">{nextActionSuggestion.label}</p>
+                  <p className="mt-1 text-sm leading-6 text-app-ink">{nextActionSuggestion.label}</p>
                   <Button
                     size="lg"
                     className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto"
@@ -224,13 +224,13 @@ export function ProgressSummaryCard({
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               <CalendarDays className="h-3.5 w-3.5" />
               Tuần đang chạy
             </p>
             <div className="mt-3">
               <p className="font-serif text-2xl font-medium text-app-ink">Tuần {boundedCurrentWeek}</p>
-              <p className="mt-1 text-[14px] text-app-ink-muted">
+              <p className="mt-1 text-sm text-app-ink-muted">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang cập nhật phạm vi tuần"}
@@ -241,18 +241,18 @@ export function ProgressSummaryCard({
 
         <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
               Điểm hiện tại
             </p>
             <p className="mt-3 font-serif text-2xl font-medium text-app-ink">{currentWeekScoreValue}</p>
-            <p className="mt-1 text-[14px] text-app-ink-muted">Trung bình toàn chu kỳ: {averageScore}</p>
+            <p className="mt-1 text-sm text-app-ink-muted">Trung bình toàn chu kỳ: {averageScore}</p>
           </CardContent>
         </Card>
 
         <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               <Flag className="h-3.5 w-3.5 text-app-accent" />
               Review đã khóa
             </p>
@@ -261,7 +261,7 @@ export function ProgressSummaryCard({
                 ? `Tuần ${boundedCurrentWeek}/${boundedTotalWeeks}`
                 : `${reviewDoneCount}/${boundedTotalWeeks}`}
             </p>
-            <p className="mt-1 text-[14px] text-app-ink-muted">
+            <p className="mt-1 text-sm text-app-ink-muted">
               {isEarlyState
                 ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
                 : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
@@ -274,25 +274,25 @@ export function ProgressSummaryCard({
         <CardContent className="stack-stack p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                 <Target className="h-3.5 w-3.5 text-app-accent" />
                 Bản đồ chu kỳ
               </p>
               <p className="mt-2 font-serif text-lg font-medium text-app-ink">Đường chạy {boundedTotalWeeks} tuần</p>
-              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
+              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                 Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <div
                 data-testid="progress-current-milestone"
-                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] text-app-ink-soft"
+                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm text-app-ink-soft"
               >
                 Hiện tại: <span className="font-semibold text-app-ink">{currentPhaseLabel}</span>
               </div>
               <div
                 data-testid="progress-next-milestone"
-                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] text-app-ink-soft"
+                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm text-app-ink-soft"
               >
                 Mốc tiếp theo: <span className="font-semibold text-app-ink">{nextMilestoneLabel}</span>
               </div>
@@ -340,7 +340,7 @@ export function ProgressSummaryCard({
             })}
           </ol>
 
-          <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-[14px] leading-6 text-app-ink-soft">
+          <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
             {reviewDueToday
               ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
               : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}

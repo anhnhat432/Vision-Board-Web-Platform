@@ -83,7 +83,7 @@ export function TwelveWeekCycleSettingsPanel({
           <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-accent">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">
                   Một lần chỉnh cho cả chu kỳ
                 </p>
                 <p className="mt-2 font-serif text-lg font-medium text-app-ink">
@@ -99,11 +99,11 @@ export function TwelveWeekCycleSettingsPanel({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
               <div>
-                <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                   <CalendarDays className="h-3.5 w-3.5" />
                   Ngày review
                 </p>
-                <p className="mt-1 text-[14px] text-app-ink-soft">Ngày bạn muốn khóa tuần và tự đánh giá lại nhịp.</p>
+                <p className="mt-1 text-sm text-app-ink-soft">Ngày bạn muốn khóa tuần và tự đánh giá lại nhịp.</p>
               </div>
               <Select value={system.reviewDay} onValueChange={handleReviewDayChange}>
                 <SelectTrigger id="review-day" aria-label="Chọn ngày review">
@@ -121,11 +121,11 @@ export function TwelveWeekCycleSettingsPanel({
 
             <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
               <div>
-                <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                   <Clock3 className="h-3.5 w-3.5" />
                   Giờ nhắc
                 </p>
-                <p className="mt-1 text-[14px] text-app-ink-soft">
+                <p className="mt-1 text-sm text-app-ink-soft">
                   Khung giờ trên thiết bị để nhắc check-in và review.
                 </p>
               </div>
@@ -140,11 +140,11 @@ export function TwelveWeekCycleSettingsPanel({
 
             <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
               <div>
-                <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                   <ListChecks className="h-3.5 w-3.5" />
                   Nhịp tuần
                 </p>
-                <p className="mt-1 text-[14px] text-app-ink-soft">
+                <p className="mt-1 text-sm text-app-ink-soft">
                   Cho biết tuần này bạn muốn cân bằng, nhẹ hơn hay đẩy mạnh.
                 </p>
               </div>
@@ -164,11 +164,11 @@ export function TwelveWeekCycleSettingsPanel({
 
             <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
               <div>
-                <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                   <Flag className="h-3.5 w-3.5" />
                   Trạng thái
                 </p>
-                <p className="mt-1 text-[14px] text-app-ink-soft">
+                <p className="mt-1 text-sm text-app-ink-soft">
                   Giúp Trang chính và màn Hôm nay biết chu kỳ này đang chạy hay đã kết thúc.
                 </p>
               </div>
@@ -190,10 +190,10 @@ export function TwelveWeekCycleSettingsPanel({
           <div className="rounded-lg border border-app-line bg-app-bg p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                   Thứ tự việc lặp lại
                 </p>
-                <p className="mt-1 text-[14px] text-app-ink-soft">
+                <p className="mt-1 text-sm text-app-ink-soft">
                   Việc cốt lõi được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
                 </p>
               </div>
@@ -225,7 +225,7 @@ export function TwelveWeekCycleSettingsPanel({
                         {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                       </Badge>
                     </div>
-                    <p className="mt-2 text-[14px] text-app-ink-soft">
+                    <p className="mt-2 text-sm text-app-ink-soft">
                       {indicator.target || "1"} {indicator.unit || "lần/tuần"}
                     </p>
                   </div>
@@ -276,15 +276,15 @@ export function TwelveWeekCycleSettingsPanel({
 
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-lg border border-app-ink bg-app-ink p-5 text-white">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-white/70">Bắt đầu</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Bắt đầu</p>
               <p className="mt-2 font-serif text-xl font-medium text-white">{formatCalendarDate(system.startDate)}</p>
             </div>
             <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-5">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-accent">Kết thúc</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Kết thúc</p>
               <p className="mt-2 font-serif text-xl font-medium text-app-ink">{formatCalendarDate(system.endDate)}</p>
             </div>
             <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft p-5">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-warm">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
                 Số lần quay lại nhịp
               </p>
               <p className="mt-2 font-serif text-xl font-medium text-app-ink">{system.reentryCount ?? 0} lần</p>

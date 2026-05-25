@@ -47,7 +47,7 @@ export function DeleteDataConfirmationDialog({
             <Trash2 className="h-7 w-7 text-[color:var(--color-danger-fg)]" />
           </div>
           <AlertDialogTitle className="font-serif text-xl font-medium text-app-ink">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-[14px] leading-6 text-app-ink-soft">
+          <AlertDialogDescription className="text-sm leading-6 text-app-ink-soft">
             {isDemoMode ? (
               <>
                 <span className="rounded-full bg-app-warm-soft px-2 py-0.5 text-xs font-medium text-app-warm">
@@ -70,13 +70,13 @@ export function DeleteDataConfirmationDialog({
         </AlertDialogHeader>
 
         <div className="rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-4 py-3">
-          <p className="text-[14px] font-semibold text-[color:var(--color-danger-fg)]">
+          <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">
             Hành động này không thể hoàn tác.
           </p>
-          <p className="mt-1 text-[14px] font-semibold text-[color:var(--color-danger-fg)]">
+          <p className="mt-1 text-sm font-semibold text-[color:var(--color-danger-fg)]">
             Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
           </p>
-          <ul className="mt-2 space-y-1 text-[14px] text-[color:var(--color-danger-fg)]">
+          <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-danger-fg)]">
             <li>• Mục tiêu và kế hoạch 12 tuần sẽ bị xóa</li>
             <li>• Nhật ký, review và check-in sẽ bị xóa</li>
             {isSignedIn && !isDemoMode && <li>• Dữ liệu tài khoản sẽ bị xóa khỏi hệ thống</li>}

@@ -7,18 +7,18 @@ const LAST_UPDATED = "14/05/2026";
 
 export function PrivacyPage() {
   return (
-    <article className="mx-auto max-w-2xl space-y-8 py-4">
+    <article className="mx-auto max-w-3xl space-y-8 px-4 py-4 sm:px-6">
       <header className="space-y-3">
         <div className="flex items-center gap-2 text-app-accent">
           <Shield className="h-5 w-5" />
-          <span className="text-xs font-semibold uppercase tracking-[0.14em]">Dear Our Future</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em]">Dear Our Future</span>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-app-ink">Chính sách bảo mật</h1>
+        <h1 className="font-serif text-3xl font-medium tracking-tight text-app-ink">Chính sách bảo mật</h1>
         <p className="text-sm text-app-ink-muted">Cập nhật lần cuối: {LAST_UPDATED}</p>
       </header>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">1. Dữ liệu chúng tôi thu thập</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">1. Dữ liệu chúng tôi thu thập</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Khi bạn sử dụng Dear Our Future, chúng tôi có thể thu thập các loại dữ liệu sau:
         </p>
@@ -42,7 +42,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">2. Mục đích sử dụng</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">2. Mục đích sử dụng</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>Cung cấp và duy trì dịch vụ lập kế hoạch 12 tuần.</li>
           <li>Đồng bộ dữ liệu giữa các thiết bị khi bạn đăng nhập.</li>
@@ -52,7 +52,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">3. Chia sẻ với bên thứ ba</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">3. Chia sẻ với bên thứ ba</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Chúng tôi <strong>không bán</strong> dữ liệu cá nhân của bạn. Dữ liệu chỉ được chia sẻ với:
         </p>
@@ -70,7 +70,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">4. Quyền của bạn</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">4. Quyền của bạn</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">Bạn có quyền:</p>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>
@@ -100,7 +100,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">5. Bảo mật dữ liệu</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">5. Bảo mật dữ liệu</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Chúng tôi sử dụng mã hóa SSL/TLS cho mọi kết nối, và dữ liệu được lưu trữ trên hạ tầng đám mây có tiêu chuẩn
           bảo mật cao. Tuy nhiên, không hệ thống nào đảm bảo an toàn tuyệt đối — vui lòng bảo vệ mật khẩu tài khoản của
@@ -109,7 +109,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">6. Liên hệ</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">6. Liên hệ</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Nếu bạn có câu hỏi về chính sách bảo mật, vui lòng liên hệ qua email:{" "}
           <a

@@ -123,12 +123,12 @@ export function PageHero({
             ) : null}
             <Heading
               data-slot="page-hero-title"
-              className="text-[30px] font-bold leading-[1.05] tracking-[-0.022em] text-app-ink sm:text-[38px] lg:text-[44px]"
+              className="text-3xl font-bold leading-[1.05] tracking-[-0.022em] text-app-ink sm:text-4xl lg:text-5xl"
             >
               {title}
             </Heading>
             {description ? (
-              <p className="max-w-prose text-[16px] leading-relaxed tracking-tight text-app-ink-muted sm:text-base">
+              <p className="max-w-prose text-base leading-relaxed tracking-tight text-app-ink-muted sm:text-base">
                 {description}
               </p>
             ) : null}

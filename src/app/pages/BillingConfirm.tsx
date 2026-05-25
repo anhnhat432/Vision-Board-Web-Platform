@@ -167,7 +167,7 @@ export function BillingConfirm() {
   }, [canSubmit, checkoutInfo?.billingCycle, emailVerificationRequired, navigate, paidCheckoutDisabled, receiptEmail, user]);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-6 shadow-sm">
           <div className="flex items-start gap-4">

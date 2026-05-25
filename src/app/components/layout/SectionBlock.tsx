@@ -80,7 +80,7 @@ export function SectionBlock({
           <h2 id={headingId} className="text-xl font-bold leading-tight tracking-[-0.014em] text-app-ink">
             {title}
           </h2>
-          {description && <p className="text-[15px] leading-6 tracking-tight text-app-ink-muted">{description}</p>}
+          {description && <p className="text-sm leading-6 tracking-tight text-app-ink-muted">{description}</p>}
         </div>
         {collapsible && (
           <Button

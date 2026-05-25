@@ -442,7 +442,7 @@ export function OrderStatusPage() {
       <div className="mx-auto max-w-5xl px-4 py-8 lg:py-12">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)]">
           <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
-            <div className="border-b border-app-line p-5 text-center sm:p-7">
+            <div className="border-b border-app-line p-5 text-center sm:p-6">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                 <QrCode className="h-6 w-6" />
               </div>
@@ -451,7 +451,7 @@ export function OrderStatusPage() {
                 Giữ nguyên số tiền và nội dung. Hệ thống thường xác nhận trong 1-2 phút.
               </p>
             </div>
-            <div className="space-y-5 p-5 sm:p-7">
+            <div className="space-y-5 p-5 sm:p-6">
               <div className="rounded-lg border border-app-line bg-app-bg p-4 text-center">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mã đơn hàng</p>
                 <p className="mt-2 select-all break-all font-serif text-3xl font-medium text-app-ink">
@@ -636,7 +636,7 @@ export function OrderStatusPage() {
   if (!order) {
     return (
       <div className="stack-section pb-12">
-        <div className="rounded-card border border-app-line bg-app-surface p-10 text-center lg:p-14">
+        <div className="rounded-card border border-app-line bg-app-surface p-10 text-center lg:p-12">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-app-bg text-app-ink">
             <ClipboardList className="h-10 w-10 text-app-accent" />
           </div>

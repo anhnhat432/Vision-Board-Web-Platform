@@ -28,17 +28,17 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-app-accent">Tin cậy khi thanh toán</p>
-          <h2 id={titleId} className="mt-1 text-[20px] font-medium text-app-ink">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-app-accent">Tin cậy khi thanh toán</p>
+          <h2 id={titleId} className="mt-1 text-xl font-medium text-app-ink">
             Chuyển khoản rõ ràng, hỗ trợ sau thanh toán.
           </h2>
         </div>
         <div
-          className="flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-3 py-2 text-[15px] font-medium text-app-accent"
+          className="flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-3 py-2 text-sm font-medium text-app-accent"
           role="img"
           aria-label="Logo ngân hàng đại diện"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-app-accent text-[13px] text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-app-accent text-xs text-white">
             VN
           </span>
           <span>Bank</span>
@@ -48,17 +48,17 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
       <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-2"}`}>
         <div className={itemClassName}>
           <Banknote className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
-          <p className="text-[15px] leading-6 text-app-ink-soft">
+          <p className="text-sm leading-6 text-app-ink-soft">
             Thanh toán tự động được xác nhận qua nhà cung cấp thanh toán.
           </p>
         </div>
         <div className={itemClassName}>
           <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
-          <p className="text-[15px] leading-6 text-app-ink-soft">Biên nhận điện tử gửi qua email trong 1-2 phút.</p>
+          <p className="text-sm leading-6 text-app-ink-soft">Biên nhận điện tử gửi qua email trong 1-2 phút.</p>
         </div>
         <div className={itemClassName}>
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
-          <p className="text-[15px] leading-6 text-app-ink-soft">
+          <p className="text-sm leading-6 text-app-ink-soft">
             Hoàn tiền linh hoạt theo{" "}
             <Link to="/refund-policy" className="font-medium text-app-accent underline-offset-4 hover:underline">
               chính sách hoàn tiền
@@ -68,7 +68,7 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
         </div>
         <div className={itemClassName}>
           <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
-          <p className="min-w-0 break-words text-[15px] leading-6 text-app-ink-soft">
+          <p className="min-w-0 break-words text-sm leading-6 text-app-ink-soft">
             Liên hệ hỗ trợ:{" "}
             <a
               href={`mailto:${resolvedSupportEmail}`}

@@ -591,7 +591,7 @@ describe("RootLayout onboarding redirect", () => {
     });
   });
 
-  it("does not interrupt signed-in users with the auto cloud conflict dialog", async () => {
+  it("surfaces the auto cloud conflict dialog so signed-in users can pick a version", async () => {
     seedAuthenticatedCompletedWorkspace();
     autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
       loading: false,
@@ -637,9 +637,11 @@ describe("RootLayout onboarding redirect", () => {
     renderAppShell("/goals");
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
-    expect(screen.queryByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Giữ trên thiết bị này" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Lấy bản tài khoản" })).not.toBeInTheDocument();
+    expect(
+      await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Giữ trên thiết bị này" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lấy bản tài khoản" })).toBeInTheDocument();
   });
 
   it("shows the sync status pill in the mobile account dropdown", async () => {

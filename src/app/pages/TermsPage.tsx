@@ -7,18 +7,18 @@ const LAST_UPDATED = "14/05/2026";
 
 export function TermsPage() {
   return (
-    <article className="mx-auto max-w-2xl space-y-8 py-4">
+    <article className="mx-auto max-w-3xl space-y-8 px-4 py-4 sm:px-6">
       <header className="space-y-3">
         <div className="flex items-center gap-2 text-app-accent">
           <FileText className="h-5 w-5" />
-          <span className="text-xs font-semibold uppercase tracking-[0.14em]">Dear Our Future</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em]">Dear Our Future</span>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-app-ink">Điều khoản dịch vụ</h1>
+        <h1 className="font-serif text-3xl font-medium tracking-tight text-app-ink">Điều khoản dịch vụ</h1>
         <p className="text-sm text-app-ink-muted">Cập nhật lần cuối: {LAST_UPDATED}</p>
       </header>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">1. Phạm vi dịch vụ</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">1. Phạm vi dịch vụ</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Dear Our Future cung cấp nền tảng lập kế hoạch 12 tuần và phản tư cá nhân, bao gồm:
         </p>
@@ -32,7 +32,7 @@ export function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">2. Tài khoản và nghĩa vụ người dùng</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">2. Tài khoản và nghĩa vụ người dùng</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>Bạn chịu trách nhiệm bảo mật thông tin đăng nhập tài khoản của mình.</li>
           <li>Không sử dụng dịch vụ cho mục đích bất hợp pháp hoặc gây hại cho người khác.</li>
@@ -42,7 +42,7 @@ export function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">3. Quy tắc thanh toán</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">3. Quy tắc thanh toán</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>
             <strong>Gói Plus:</strong> nâng cấp tính năng cao cấp cho chu kỳ 12 tuần.
@@ -76,7 +76,7 @@ export function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">4. Giới hạn trách nhiệm</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">4. Giới hạn trách nhiệm</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Dear Our Future được cung cấp theo nguyên tắc &ldquo;nguyên trạng&rdquo; (as-is). Chúng tôi nỗ lực duy trì
           dịch vụ ổn định nhưng không đảm bảo dịch vụ hoạt động liên tục không gián đoạn. Chúng tôi không chịu trách
@@ -92,7 +92,7 @@ export function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">5. Thay đổi điều khoản</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">5. Thay đổi điều khoản</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Chúng tôi có quyền cập nhật điều khoản dịch vụ này. Khi có thay đổi quan trọng, bạn sẽ được thông báo qua
           email hoặc thông báo trong ứng dụng. Việc tiếp tục sử dụng dịch vụ sau khi điều khoản được cập nhật đồng nghĩa
@@ -101,7 +101,7 @@ export function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-app-ink">6. Liên hệ</h2>
+        <h2 className="font-serif text-xl font-medium text-app-ink">6. Liên hệ</h2>
         <p className="text-sm leading-relaxed text-app-ink-soft">
           Mọi câu hỏi về điều khoản dịch vụ, vui lòng liên hệ:{" "}
           <a

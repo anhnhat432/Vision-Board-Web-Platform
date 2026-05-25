@@ -141,7 +141,7 @@ export function AssistantMascot({
             className={`relative h-4 w-4 text-white ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
             strokeWidth={2.2}
           />
-          <span className="relative text-[14px] font-semibold tracking-tight">Hỏi AI</span>
+          <span className="relative text-sm font-semibold tracking-tight">Hỏi AI</span>
           {nudge.active ? (
             <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
           ) : null}

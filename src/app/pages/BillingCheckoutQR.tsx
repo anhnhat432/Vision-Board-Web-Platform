@@ -356,14 +356,14 @@ export function BillingCheckoutQR() {
   // ─── Pending — QR checkout ──────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="sr-only" aria-live="polite">
         {copyMessage ||
           `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
       </div>
       <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
-          <section className="border-b border-app-line bg-app-bg p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
+          <section className="border-b border-app-line bg-app-bg p-5 text-center sm:p-6 lg:border-b-0 lg:border-r">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft">
               <QrCode className="h-6 w-6 text-app-accent" />
             </div>
@@ -400,7 +400,7 @@ export function BillingCheckoutQR() {
             </div>
           </section>
 
-          <section className="p-5 sm:p-7">
+          <section className="p-5 sm:p-6">
             <div className="stack-stack">
               <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                 <div>

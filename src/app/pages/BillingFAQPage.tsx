@@ -32,7 +32,7 @@ const FAQ_ITEMS = [
 
 export function BillingFAQPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <Card className="overflow-hidden border-app-line bg-app-surface shadow-sm">
         <CardHeader className="border-b border-app-line bg-app-bg">
           <div className="flex items-start gap-4">
@@ -50,7 +50,7 @@ export function BillingFAQPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 p-5 sm:p-7">
+        <CardContent className="space-y-4 p-5 sm:p-6">
           {FAQ_ITEMS.map((item) => (
             <article key={item.question} className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-5">
               <h2 className="text-lg font-semibold text-app-ink">{item.question}</h2>

@@ -53,7 +53,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
       <section className="overflow-hidden rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Xác nhận kế hoạch</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Xác nhận kế hoạch</p>
             <h3 className="mt-2 text-xl font-semibold text-app-ink">Tóm tắt để rà soát nhanh</h3>
             <p className="mt-1 text-sm leading-6 text-app-ink-soft">
               Sau khi lưu, bạn sẽ tiếp tục vào phần thực thi hằng tuần và màn Hôm nay để bắt đầu việc đầu tiên.

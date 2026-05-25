@@ -537,28 +537,28 @@ export function SMARTGoalSetup() {
             className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
             aria-label="Tầm nhìn dài hạn"
           >
-            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[13px] font-medium text-app-warm">
+            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-warm">
               Tầm nhìn dài hạn
             </span>
             {aspirationalVision ? (
-              <p className="mt-3 font-serif text-[17px] font-medium leading-7 text-app-warm-strong">
+              <p className="mt-3 font-serif text-lg font-medium leading-7 text-app-warm-strong">
                 Mục tiêu này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
               </p>
             ) : (
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[15px] leading-6 text-app-ink-soft">
+                <p className="text-sm leading-6 text-app-ink-soft">
                   Bạn đang đặt mục tiêu 12 tuần. Hãy nghĩ thêm về tầm nhìn 3 năm trước.
                 </p>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     to="/vision"
-                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                   >
                     Điền 2 phút →
                   </Link>
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-[14px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
                     Bỏ qua
@@ -604,17 +604,17 @@ export function SMARTGoalSetup() {
           </SmartGoalStepShell>
 
           <details className="mt-5 rounded-card border border-dashed border-app-line bg-app-bg p-5">
-            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">
+            <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
               Xem lại mục tiêu đang viết
             </summary>
 
             <div className="mt-4 space-y-3">
               {SMART_STEPS.map((step) => (
                 <div key={step.key} className="rounded-lg border border-app-line bg-app-surface p-4">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
                     {step.label}
                   </p>
-                  <p className="mt-2 text-[15px] leading-6 text-app-ink">
+                  <p className="mt-2 text-sm leading-6 text-app-ink">
                     {formatStepDraft(step.key, smartData) || "Chưa có nội dung cho phần này."}
                   </p>
                 </div>

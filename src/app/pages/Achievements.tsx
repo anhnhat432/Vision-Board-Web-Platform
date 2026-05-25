@@ -151,11 +151,11 @@ export function Achievements() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <header>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">THÀNH TỰU</p>
-        <h1 className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">THÀNH TỰU</p>
+        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
           Cột mốc của bạn
         </h1>
-        <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
           Nơi ghi lại những dấu hiệu nhỏ cho thấy bạn đã bắt đầu, duy trì và đi xa hơn hôm qua.
         </p>
       </header>
@@ -167,9 +167,9 @@ export function Achievements() {
           { label: "Hoàn thành", value: `${completionRate}%`, suffix: "bộ sưu tập" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-card border border-app-line bg-app-surface p-5">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{stat.label}</p>
-            <p className="mt-2 text-[28px] font-medium leading-none text-app-ink tabular-nums">{stat.value}</p>
-            <p className="mt-2 text-[13px] text-app-ink-muted">{stat.suffix}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{stat.label}</p>
+            <p className="mt-2 text-3xl font-medium leading-none text-app-ink tabular-nums">{stat.value}</p>
+            <p className="mt-2 text-xs text-app-ink-muted">{stat.suffix}</p>
           </div>
         ))}
       </section>
@@ -183,7 +183,7 @@ export function Achievements() {
             <Award className="h-7 w-7" />
           </div>
           <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">{emptyNarratives.noAchievements.title}</h2>
-          <p className="mx-auto mt-2 max-w-md text-[15px] leading-6 text-app-ink-soft">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-app-ink-soft">
             {emptyNarratives.noAchievements.body}
           </p>
           <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
@@ -201,8 +201,8 @@ export function Achievements() {
 
       <section className="mt-8" aria-label="Danh sách thành tựu">
         <div className="mb-4">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">BỘ HUY HIỆU</p>
-          <h2 className="mt-1 text-[16px] font-semibold text-app-ink">Những cột mốc đang mở dần</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">BỘ HUY HIỆU</p>
+          <h2 className="mt-1 text-base font-semibold text-app-ink">Những cột mốc đang mở dần</h2>
         </div>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {achievementCards.map((achievement) => {
@@ -221,14 +221,14 @@ export function Achievements() {
                 >
                   <Icon className="h-6 w-6" />
                 </div>
-                <h3 className="mt-4 text-[15px] font-medium leading-5 text-app-ink">{achievement.title}</h3>
-                <p className="mt-1 text-[13px] leading-5 text-app-ink-soft">{achievement.description}</p>
+                <h3 className="mt-4 text-sm font-medium leading-5 text-app-ink">{achievement.title}</h3>
+                <p className="mt-1 text-xs leading-5 text-app-ink-soft">{achievement.description}</p>
                 {isUnlocked && achievement.earnedAt ? (
-                  <p className="mt-4 text-[12px] uppercase tracking-[0.14em] text-app-ink-muted">
+                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-app-ink-muted">
                     {formatAchievementDate(achievement.earnedAt)}
                   </p>
                 ) : (
-                  <p className="mt-4 flex items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] text-app-ink-muted">
+                  <p className="mt-4 flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-app-ink-muted">
                     <LockKeyhole className="h-3 w-3" />
                     Đang khóa
                   </p>
