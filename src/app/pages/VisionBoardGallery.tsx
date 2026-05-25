@@ -205,7 +205,7 @@ export function VisionBoardGallery() {
         }
         description="Xem lại các vision board theo từng năm, tiếp tục chỉnh sửa và giữ cảm hứng luôn ở gần mình."
         primaryCta={
-          <Button glow onClick={() => navigate("/vision-board")}>
+          <Button onClick={() => navigate("/vision-board")}>
             <Plus className="h-4 w-4" />
             Tạo bảng mới
           </Button>

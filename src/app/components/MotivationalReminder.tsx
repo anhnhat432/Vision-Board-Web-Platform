@@ -101,7 +101,6 @@ export function MotivationalReminder() {
               </p>
               <Button
                 size="sm"
-                glow
                 className="mt-2 h-10 px-3 text-xs"
                 onClick={() => {
                   setShowReminder(false);

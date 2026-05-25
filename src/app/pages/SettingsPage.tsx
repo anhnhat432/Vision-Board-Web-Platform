@@ -699,7 +699,7 @@ export function SettingsPage() {
             ) : (
               <AlertDialogAction
                 onClick={handleClearAllData}
-                className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+                className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
               >
                 Xóa tất cả dữ liệu
               </AlertDialogAction>

@@ -781,7 +781,7 @@ export function VisionBoardEditor() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button glow onClick={() => setIsAddingItem(true)}>
+                  <Button onClick={() => setIsAddingItem(true)}>
                     <Plus className="h-4 w-4" />
                     Thêm phần tử
                   </Button>
