@@ -26,7 +26,7 @@ export function AssistantActionCard({ action, onExecute, status, errorMessage }:
   };
 
   return (
-    <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div className="mt-2 rounded-lg border border-app-line bg-app-bg p-3">
       <div className="flex items-start gap-2">
         <div className="mt-0.5">{getIconForAction(action.type)}</div>
         <div className="flex-1">

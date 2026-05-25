@@ -568,7 +568,7 @@ export function TwelveWeekWeekTab({
                     )}
                   </div>
                   {onOpenTodayTab && (
-                    <Button variant="outline" className="mt-4 w-full bg-white sm:w-auto" onClick={onOpenTodayTab}>
+                    <Button variant="outline" className="mt-4 w-full bg-app-surface sm:w-auto" onClick={onOpenTodayTab}>
                       Mở Hôm nay để bắt đầu tuần sau
                     </Button>
                   )}

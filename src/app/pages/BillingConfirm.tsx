@@ -281,7 +281,7 @@ export function BillingConfirm() {
                 type="button"
                 onClick={handleSendVerification}
                 disabled={sendingVerification}
-                className="mt-3 rounded-[var(--r-control)] border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-900 disabled:opacity-60"
+                className="mt-3 rounded-[var(--r-control)] border border-amber-300 bg-app-surface px-3 py-2 text-xs font-semibold text-amber-900 disabled:opacity-60"
               >
                 {sendingVerification ? "Đang gửi..." : "Gửi email xác thực"}
               </button>

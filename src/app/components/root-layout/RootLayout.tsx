@@ -1196,7 +1196,7 @@ export function RootLayout() {
                               type="button"
                               onClick={refreshUserProfile}
                               disabled={!canRetryUserProfile}
-                              className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                              className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-app-surface text-slate-600 disabled:opacity-50"
                               aria-label="Kiểm tra lại hồ sơ tài khoản"
                             >
                               <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
@@ -1208,7 +1208,7 @@ export function RootLayout() {
                                 void handleSignOut();
                               }}
                               disabled={isSigningOut}
-                              className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                              className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-app-surface text-slate-600 disabled:opacity-50"
                               aria-label="Đăng xuất"
                             >
                               <LogOut className="h-4 w-4" />

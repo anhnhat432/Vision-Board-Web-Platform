@@ -108,7 +108,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="shrink-0 bg-white"
+                          className="shrink-0 bg-app-surface"
                           onClick={callback}
                           aria-label={`Làm: ${suggestion.title}`}
                         >

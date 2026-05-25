@@ -193,7 +193,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col rounded-t-2xl bg-white shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl"
+        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col rounded-t-2xl bg-app-surface shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl"
         style={{ height: "min(80vh, 720px)" }}
         role="dialog"
         aria-modal="true"
@@ -214,7 +214,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               type="button"
               onClick={handleClearHistory}
               aria-label="Xóa lịch sử chat"
-              className="rounded p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="rounded p-1 text-app-ink-soft transition-colors hover:bg-app-bg hover:text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               <Trash2 size={18} />
             </button>
@@ -223,7 +223,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="rounded p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="rounded p-1 text-app-ink-soft transition-colors hover:bg-app-bg hover:text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <X size={20} />
           </button>
@@ -232,7 +232,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         <div className="flex-1 overflow-y-auto p-4">
           {messages.length === 0 ? (
             <div className="flex flex-col gap-3">
-              <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">
+              <div className="rounded-lg bg-app-bg px-3 py-2 text-sm text-app-ink-soft">
                 Bạn có thể hỏi mình về việc hôm nay, tiến độ tuần này, mục tiêu chính, hoặc reflection.
               </div>
               <div className="flex flex-col gap-2">
@@ -242,7 +242,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     type="button"
                     onClick={() => handleSuggestionClick(suggestion)}
                     disabled={isTyping}
-                    className="rounded-full bg-gray-50 px-3 py-1.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-full bg-app-bg px-3 py-1.5 text-left text-sm text-app-ink-soft transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {suggestion}
                   </button>
@@ -260,7 +260,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     className={`min-w-[8rem] max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                       message.role === "user"
                         ? "rounded-br-sm bg-indigo-100 text-indigo-900"
-                        : "rounded-bl-sm bg-gray-100 text-gray-900"
+                        : "rounded-bl-sm bg-app-bg text-gray-900"
                     }`}
                   >
                     {message.role === "user" ? (
@@ -297,7 +297,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                           className={`rounded p-1 text-xs transition ${
                             messageFeedback[message.id] === "up"
                               ? "bg-green-100 text-green-700"
-                              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                              : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
                           }`}
                           disabled={messageFeedback[message.id] === "up"}
                         >
@@ -310,7 +310,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                           className={`rounded p-1 text-xs transition ${
                             messageFeedback[message.id] === "down"
                               ? "bg-red-100 text-red-700"
-                              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                              : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
                           }`}
                           disabled={messageFeedback[message.id] === "down"}
                         >
@@ -323,7 +323,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               ))}
               {isTyping ? (
                 <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
-                  <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-gray-100 px-3 py-2">
+                  <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-app-bg px-3 py-2">
                     <div className="flex gap-1">
                       <span
                         className="h-2 w-2 animate-bounce rounded-full bg-gray-500"
@@ -365,7 +365,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             {isShowingCommands && (
               <div
                 ref={dropdownRef}
-                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-10"
+                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-lg border border-app-line bg-app-surface shadow-lg z-10"
               >
                 {filteredCommands.map((cmd, idx) => (
                   <button
@@ -374,11 +374,11 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     onClick={() => handleSelectCommand(cmd)}
                     onMouseEnter={() => setSelectedCommandIndex(idx)}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors ${
-                      idx === selectedCommandIndex ? "bg-indigo-50" : "hover:bg-gray-50"
+                      idx === selectedCommandIndex ? "bg-indigo-50" : "hover:bg-app-bg"
                     }`}
                   >
                     <span className="font-mono text-indigo-600 text-xs">{cmd.command}</span>
-                    <span className="text-gray-600 flex-1">{cmd.description}</span>
+                    <span className="text-app-ink-soft flex-1">{cmd.description}</span>
                   </button>
                 ))}
               </div>
@@ -392,7 +392,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 placeholder={isTyping ? "Đợi trợ lý xong rồi gõ nhé..." : "Nhập tin nhắn..."}
                 rows={1}
                 disabled={isTyping}
-                className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+                className="flex-1 resize-none rounded-lg border border-app-line px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-app-bg disabled:text-app-ink-soft"
                 style={{ maxHeight: "72px", minHeight: "36px" }}
               />
               {isTyping ? (

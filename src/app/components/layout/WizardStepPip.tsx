@@ -58,7 +58,7 @@ export function WizardStepPip({
               className={cn(
                 "flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors",
                 isActive && "bg-slate-50 text-slate-900 ring-2 ring-primary/40",
-                isDone && !isActive && "text-slate-600 hover:bg-white",
+                isDone && !isActive && "text-slate-600 hover:bg-app-bg",
                 !isDone && !isActive && "text-slate-400",
                 !canJump && "cursor-default",
               )}
@@ -68,7 +68,7 @@ export function WizardStepPip({
                   "flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold",
                   isActive && "border-primary bg-primary text-white",
                   isDone && !isActive && "border-primary/30 bg-primary/10 text-primary",
-                  !isDone && !isActive && "border-slate-300 bg-white text-slate-400",
+                  !isDone && !isActive && "border-slate-300 bg-app-surface text-slate-400",
                 )}
                 aria-hidden="true"
               >
@@ -99,7 +99,7 @@ export function WizardStepPip({
             aria-valuemin={1}
             aria-valuemax={steps.length}
             aria-valuenow={currentIndex + 1}
-            className="h-2 overflow-hidden rounded-[var(--r-pill)] bg-white ring-1 ring-slate-200"
+            className="h-2 overflow-hidden rounded-[var(--r-pill)] bg-app-surface ring-1 ring-slate-200"
           >
             <div className="h-full rounded-[var(--r-pill)] bg-primary" style={{ width: `${progressPercent}%` }} />
           </div>

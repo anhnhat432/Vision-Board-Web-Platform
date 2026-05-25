@@ -521,7 +521,7 @@ export function TwelveWeekTodayTab({
                 <Button
                   variant="outline"
                   size="lg"
-                  className="bg-white"
+                  className="bg-app-surface"
                   onClick={() => onRescheduleTaskWithinWeek(primaryTask.id)}
                 >
                   <CalendarClock className="h-4 w-4" />
