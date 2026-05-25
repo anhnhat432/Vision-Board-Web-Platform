@@ -381,7 +381,7 @@ export function Onboarding() {
           {draftBanner}
 
           <section
-            className="rounded-card border border-app-line bg-app-surface p-5 md:p-8"
+            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-8"
             aria-labelledby="onboarding-welcome-title"
           >
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -409,7 +409,7 @@ export function Onboarding() {
                 const Icon = item.icon;
 
                 return (
-                  <article key={item.title} className="rounded-card border border-app-line bg-app-surface p-5">
+                  <article key={item.title} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
@@ -461,7 +461,7 @@ export function Onboarding() {
         {draftBanner}
 
         <section
-          className="rounded-card border border-app-line bg-app-surface p-5 md:p-8"
+          className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-8"
           aria-labelledby="onboarding-assessment-title"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
@@ -512,7 +512,7 @@ export function Onboarding() {
             const areaLabel = getLifeAreaLabel(area.name);
 
             return (
-              <article key={area.name} className="rounded-card border border-app-line bg-app-surface p-5">
+              <article key={area.name} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">

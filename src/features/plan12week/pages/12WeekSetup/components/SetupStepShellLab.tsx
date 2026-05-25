@@ -88,7 +88,7 @@ export function SetupStepShellLab({
   return (
     <section
       ref={stepShellRef}
-      className="overflow-hidden rounded-card border border-app-line bg-app-surface p-4 shadow-sm sm:p-5 md:p-6"
+      className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5 md:p-6"
       aria-labelledby="twelve-week-step-title"
     >
       <div>

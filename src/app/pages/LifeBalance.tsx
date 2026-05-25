@@ -238,7 +238,7 @@ export function LifeBalance() {
             </p>
           </header>
 
-          <section className="mt-8 rounded-card border border-app-line bg-app-surface p-10 text-center">
+          <section className="mt-8 surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
             <Compass className="mx-auto h-12 w-12 text-app-accent" aria-hidden="true" />
             <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có dữ liệu bánh xe</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
@@ -267,7 +267,7 @@ export function LifeBalance() {
   return (
     <PageShell maxWidth="xl">
       <AlertDialog open={blocker.state === "blocked"}>
-        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
+        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
           <AlertDialogHeader>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-warm-soft text-app-warm">
               <AlertTriangle className="h-6 w-6" />
@@ -331,14 +331,14 @@ export function LifeBalance() {
         </header>
 
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <article className="rounded-card border border-app-line bg-app-surface p-5">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
           </article>
-          <article className="rounded-card border border-app-line bg-app-surface p-5">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               Lĩnh vực mạnh nhất
             </p>
@@ -348,7 +348,7 @@ export function LifeBalance() {
             </p>
             <p className="mt-1 text-xs text-app-ink-muted">{getLifeAreaLabel(strongestArea.name)}</p>
           </article>
-          <article className="rounded-card border border-app-line bg-app-surface p-5">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               Lĩnh vực cần ưu tiên
             </p>
@@ -370,7 +370,7 @@ export function LifeBalance() {
 
           <TabsContent value="current" className="mt-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+              <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
                 <header>
                   <h2 className="text-base font-semibold text-app-ink">Bánh xe cuộc đời</h2>
                   <p className="text-xs text-app-ink-muted">8 lĩnh vực hiện tại</p>
@@ -385,7 +385,7 @@ export function LifeBalance() {
                 </div>
               </section>
 
-              <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+              <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
                 <header>
                   <h2 className="text-base font-semibold text-app-ink">Cập nhật điểm</h2>
                   <p className="text-xs text-app-ink-muted">Kéo thanh để chấm lại</p>
@@ -440,7 +440,7 @@ export function LifeBalance() {
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
-            <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+            <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
               <header>
                 <h2 className="text-base font-semibold text-app-ink">Diễn biến 6 đợt gần nhất</h2>
                 <p className="text-xs text-app-ink-muted">Mỗi đường là một lĩnh vực; trục đứng là điểm 0–10.</p>

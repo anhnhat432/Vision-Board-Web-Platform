@@ -112,7 +112,7 @@ export function TwelveWeekPlanAccessSection({
   const renewalLabel = subscription?.status === "canceled" ? "Hiệu lực đến" : "Gia hạn / hết hạn";
 
   return (
-    <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+    <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Gói và quyền của bạn</p>

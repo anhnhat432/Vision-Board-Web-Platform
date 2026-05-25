@@ -268,7 +268,7 @@ export function SettingsPage() {
 
       <div className="mt-6 space-y-5">
         {firstRecoverySnapshot ? (
-          <section className="rounded-card border border-app-line bg-app-surface p-5" aria-label="Khôi phục dữ liệu cũ">
+          <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5" aria-label="Khôi phục dữ liệu cũ">
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
@@ -290,7 +290,7 @@ export function SettingsPage() {
         ) : null}
 
         {shouldShowExpiryNotice ? (
-          <section className="rounded-card border border-app-line bg-app-surface p-5" aria-label="Trạng thái gói Plus">
+          <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5" aria-label="Trạng thái gói Plus">
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
@@ -315,7 +315,7 @@ export function SettingsPage() {
           </section>
         ) : null}
 
-        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Tài khoản">
+        <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6" aria-label="Tài khoản">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
               <User2 className="h-5 w-5" />
@@ -390,7 +390,7 @@ export function SettingsPage() {
         </section>
 
         <section
-          className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Tuỳ chọn trải nghiệm"
         >
           <div className="flex items-start gap-3">
@@ -508,7 +508,7 @@ export function SettingsPage() {
           </div>
         </section>
 
-        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Dữ liệu">
+        <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6" aria-label="Dữ liệu">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
               <CloudDownload className="h-5 w-5" />
@@ -627,7 +627,7 @@ export function SettingsPage() {
         </section>
 
         <section
-          className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Thông tin ứng dụng"
         >
           <h2 className="font-serif text-xl font-medium text-app-ink">Thông tin</h2>

@@ -8,7 +8,7 @@ interface ReflectionPromptProps {
 export function ReflectionPrompt({ currentWeek, reviewHref }: ReflectionPromptProps) {
   return (
     <section
-      className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
       aria-labelledby="dashboard-reflection-title"
     >
       <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-xs font-medium text-app-warm ring-1 ring-app-warm-border">

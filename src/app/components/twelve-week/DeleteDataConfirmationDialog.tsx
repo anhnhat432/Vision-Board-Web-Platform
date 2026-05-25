@@ -41,7 +41,7 @@ export function DeleteDataConfirmationDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md rounded-card border border-app-line bg-app-surface">
+      <AlertDialogContent className="max-w-md surface-raised rounded-xl border border-app-line bg-app-surface">
         <AlertDialogHeader className="items-center text-center">
           <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--color-danger-bg)]">
             <Trash2 className="h-7 w-7 text-[color:var(--color-danger-fg)]" />

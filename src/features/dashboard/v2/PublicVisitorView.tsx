@@ -182,7 +182,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </div>
 
         {/* Mockup preview card — desktop only */}
-        <div className="hidden rounded-card border border-app-line bg-app-surface p-5 shadow-sm md:block">
+        <div className="surface-raised hidden rounded-2xl border border-app-line bg-app-surface p-5 md:block">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
@@ -238,7 +238,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
       {hasLocalData ? (
         <section
-          className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+          className="surface-raised rounded-xl border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
           aria-labelledby="dashboard-local-data-title"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -278,7 +278,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
       ) : null}
 
       <section
-        className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
         aria-labelledby="dashboard-how-it-works-title"
       >
         <div className="flex flex-col gap-1">
@@ -292,7 +292,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           {HOW_IT_WORKS_STEPS.map((step) => {
             const Icon = step.icon;
             return (
-              <li key={step.step} className="rounded-card border border-app-line bg-app-bg p-4">
+              <li key={step.step} className="rounded-xl border border-app-line bg-app-bg p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                     <Icon className="h-4 w-4" />
@@ -318,7 +318,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <a
               key={feature.title}
               href={feature.href}
-              className="group rounded-card border border-app-line bg-app-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-app-accent/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="surface-raised surface-clickable-raised group rounded-xl border border-app-line bg-app-surface p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent transition-colors duration-200 group-hover:bg-app-accent group-hover:text-white">
@@ -339,7 +339,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
       </section>
 
       <section
-        className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
         aria-labelledby="dashboard-public-cta-title"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

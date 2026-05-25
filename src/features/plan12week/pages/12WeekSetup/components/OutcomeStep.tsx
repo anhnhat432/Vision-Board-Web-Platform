@@ -45,7 +45,7 @@ interface OutcomeStepProps {
 
 const selectTriggerClass =
   "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
-const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
+const selectContentClass = "surface-elevated rounded-xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]";
 const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const infoBoxClass = "rounded-lg border border-app-line bg-app-bg p-3 text-xs leading-5 text-app-ink-soft";
 const chipClass =
@@ -131,7 +131,7 @@ export function OutcomeStep({
       )}
 
       <section
-        className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6"
+        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6"
         aria-labelledby="outcome-required-title"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -264,7 +264,7 @@ export function OutcomeStep({
 
       {selectedTemplate ? (
         <section
-          className="rounded-card border border-app-line bg-app-surface p-5"
+          className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
           aria-labelledby="template-personalize-title"
         >
           <div>
@@ -388,7 +388,7 @@ export function OutcomeStep({
       ) : null}
 
       <section
-        className="rounded-card border border-app-line bg-app-surface p-5"
+        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
         aria-labelledby="template-picker-title"
       >
         <div className="flex items-start gap-2">
@@ -539,7 +539,7 @@ export function OutcomeStep({
 
       {selectedTemplate ? (
         <section
-          className="rounded-card border border-app-line bg-app-surface p-4"
+          className="surface-raised rounded-xl border border-app-line bg-app-surface p-4"
           aria-labelledby="selected-template-title"
         >
           <div className="flex flex-wrap items-start justify-between gap-3">

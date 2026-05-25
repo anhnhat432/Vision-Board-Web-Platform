@@ -50,7 +50,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <section className="overflow-hidden rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm sm:p-5">
+      <section className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Xác nhận kế hoạch</p>
@@ -113,7 +113,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         </div>
       </section>
 
-      <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm sm:p-5">
+      <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h4 className="text-base font-semibold text-app-ink">2–4 việc lặp lại</h4>
@@ -145,7 +145,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         </div>
       </section>
 
-      <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm sm:p-5">
+      <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5">
         <h4 className="text-base font-semibold text-app-ink">Tuần 1</h4>
         {week1 ? (
           <div className="mt-4 space-y-2 text-sm text-app-ink-soft">

@@ -91,7 +91,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
 
       <section
         data-testid="fresh-workspace-empty-state"
-        className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+        className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-5 md:p-6"
         aria-labelledby="dashboard-new-user-title"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

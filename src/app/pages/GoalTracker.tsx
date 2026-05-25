@@ -419,7 +419,7 @@ function GoalTrackerContent({
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
     return (
-      <div key={goal.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
+      <div key={goal.id} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,1fr)]">
           {/* Cột trái — Goal summary */}
           <div>
@@ -617,7 +617,7 @@ function GoalTrackerContent({
         {overviewItems.map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.title} className="rounded-card border border-app-line bg-app-surface p-4">
+            <div key={item.title} className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{item.title}</p>
@@ -643,7 +643,7 @@ function GoalTrackerContent({
           </div>
         )}
         {!hasGoals ? (
-          <div className="rounded-card border border-app-line bg-app-surface p-10 text-center mt-8">
+          <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center mt-8">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
               <Target className="h-10 w-10" />
             </div>

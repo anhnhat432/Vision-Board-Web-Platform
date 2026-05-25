@@ -397,7 +397,7 @@ export function FeasibilityCheck() {
             Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.
           </p>
 
-          <div className="mt-5 rounded-card border border-app-line bg-app-surface p-4">
+          <div className="mt-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">

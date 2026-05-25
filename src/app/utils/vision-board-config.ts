@@ -129,8 +129,8 @@ export const IMAGE_FRAME_STYLES: ImageFrameStyle[] = [
   {
     id: "shadow",
     label: "Đổ bóng",
-    wrapperClassName: "rounded-[var(--r-card)] border border-white/85 bg-white/90 p-2 shadow-2xl",
-    imageClassName: "rounded-[calc(var(--r-card)-0.35rem)] object-cover",
+    wrapperClassName: "rounded-2xl border border-white/85 bg-white/90 p-2 shadow-[var(--shadow-3)]",
+    imageClassName: "rounded-xl object-cover",
     decorationsLayout: null,
   },
   {

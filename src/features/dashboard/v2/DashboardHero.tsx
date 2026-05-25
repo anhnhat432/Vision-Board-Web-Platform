@@ -47,7 +47,7 @@ export function DashboardHero({
 
       <div
         data-tour-id="dashboard-plan-card"
-        className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block"
+        className="surface-raised hidden rounded-2xl border border-app-line bg-app-surface p-5 md:block"
       >
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Mục tiêu nổi bật</p>
         <p className="mt-2 line-clamp-3 break-words text-sm font-medium leading-5 text-app-ink">

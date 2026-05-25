@@ -45,7 +45,7 @@ interface OutcomeStepLabProps {
 
 const selectTriggerClass =
   "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
-const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
+const selectContentClass = "surface-elevated rounded-xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]";
 const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const infoBoxClass = "rounded-lg border border-app-line bg-app-bg p-3 text-xs leading-5 text-app-ink-soft";
 const chipClass =
@@ -88,7 +88,7 @@ export function OutcomeStepLab({
         </div>
       ) : null}
 
-      <section className="rounded-card border border-app-line bg-app-surface p-4 shadow-sm sm:p-5" aria-labelledby="outcome-required-title">
+      <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="outcome-required-title">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p id="outcome-required-title" className="text-sm font-medium text-app-ink">
@@ -218,7 +218,7 @@ export function OutcomeStepLab({
       </section>
 
       {selectedTemplate ? (
-        <details className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-personalize-title">
+        <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-personalize-title">
           <summary
             id="template-personalize-title"
             className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-accent"
@@ -339,7 +339,7 @@ export function OutcomeStepLab({
         </details>
       ) : null}
 
-      <details className="rounded-card border border-app-line bg-app-surface p-4 shadow-sm sm:p-5" aria-labelledby="template-picker-title">
+      <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5" aria-labelledby="template-picker-title">
         <summary className="flex cursor-pointer list-none items-start gap-2 py-1">
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <span>
@@ -487,7 +487,7 @@ export function OutcomeStepLab({
       </details>
 
       {selectedTemplate ? (
-        <details className="rounded-card border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
+        <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4" aria-labelledby="selected-template-title">
           <summary id="selected-template-title" className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
             Khung đang dùng: {selectedTemplate.name}
           </summary>

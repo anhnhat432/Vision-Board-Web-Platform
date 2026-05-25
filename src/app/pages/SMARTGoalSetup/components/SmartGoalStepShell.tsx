@@ -84,7 +84,7 @@ export function SmartGoalStepShell({
 
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
       aria-labelledby="smart-step-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -166,7 +166,7 @@ export function SmartGoalStepShell({
           </div>
         </div>
 
-        <details className="rounded-card border border-app-line bg-app-surface p-4">
+        <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
           <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-medium text-app-ink">
             <div>
               <p>Độ rõ của mục tiêu</p>

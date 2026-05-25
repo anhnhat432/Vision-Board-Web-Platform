@@ -53,8 +53,8 @@ const eyebrowClass: Record<PrimaryActionCardTone, string> = {
 };
 
 const densityClass: Record<PrimaryActionCardDensity, string> = {
-  compact: "gap-[var(--space-stack)] p-[var(--space-stack)]",
-  default: "gap-[var(--space-stack)] p-[var(--space-loose)]",
+  compact: "gap-4 p-4 sm:p-5",
+  default: "gap-4 p-5 sm:p-6",
 };
 
 /**
@@ -95,10 +95,10 @@ export function PrimaryActionCard({
   return (
     <Card
       className={cn(
-        "rounded-[var(--r-card)] border bg-card shadow-sm",
+        "surface-raised rounded-2xl bg-app-surface",
         toneClass[tone],
         densityClass[density],
-        hero && "shadow-[var(--shadow-3)]",
+        hero && "surface-elevated",
         glow && "brand-glow-pulse",
         appear && "appear-fade-up",
         className,
@@ -118,7 +118,7 @@ export function PrimaryActionCard({
             {eyebrow}
           </p>
         )}
-        <Title data-slot="card-title" className={cn("leading-tight tracking-normal", titleClassName)}>
+        <Title data-slot="card-title" className={cn("font-serif text-lg font-medium leading-tight tracking-normal text-app-ink", titleClassName)}>
           {title}
         </Title>
         {description && <CardDescription className={descriptionClassName}>{description}</CardDescription>}

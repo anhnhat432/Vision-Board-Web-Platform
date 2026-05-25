@@ -280,7 +280,7 @@ export function ReviewStep({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6">
+      <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
@@ -309,7 +309,7 @@ export function ReviewStep({
         </div>
       </div>
 
-      <div className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6">
+      <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6">
         <div className="space-y-5">
           <ReviewSection caption="KẾT QUẢ" title="Kết quả 12 tuần" stepIndex={0}>
             <div className="grid gap-4 md:grid-cols-2">
@@ -580,7 +580,7 @@ export function ReviewStep({
         </div>
       </div>
 
-      <details className="rounded-card border border-app-line bg-app-surface p-4">
+      <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
         <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
           Mở phần nâng cao (tùy chọn)
         </summary>

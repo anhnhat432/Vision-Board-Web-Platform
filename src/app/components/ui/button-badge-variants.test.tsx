@@ -77,7 +77,7 @@ describe("UI primitive visual hierarchy", () => {
     expect(badgeVariants()).toContain("rounded-full");
 
     render(<Card data-testid="card" />);
-    expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-[var(--r-card)]");
+    expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-card");
 
     render(<Input aria-label="Name" />);
     expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-lg");

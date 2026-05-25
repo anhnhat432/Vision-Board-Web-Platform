@@ -903,7 +903,7 @@ export function TwelveWeekSystem() {
       />
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
+        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif text-app-ink">Làm mới chu kỳ 12 tuần?</AlertDialogTitle>
             <AlertDialogDescription className="text-app-ink-soft">
@@ -926,7 +926,7 @@ export function TwelveWeekSystem() {
       </AlertDialog>
 
       <AlertDialog open={isClearLocalDialogOpen} onOpenChange={setIsClearLocalDialogOpen}>
-        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
+        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif text-app-ink">Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
             <AlertDialogDescription className="text-app-ink-soft">
@@ -949,7 +949,7 @@ export function TwelveWeekSystem() {
       </AlertDialog>
 
       <AlertDialog open={isDeleteCloudDialogOpen} onOpenChange={setIsDeleteCloudDialogOpen}>
-        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
+        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif text-app-ink">Xóa dữ liệu 12 tuần đã đồng bộ?</AlertDialogTitle>
             <AlertDialogDescription className="text-app-ink-soft">

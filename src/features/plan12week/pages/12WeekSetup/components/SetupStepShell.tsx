@@ -88,7 +88,7 @@ export function SetupStepShell({
   return (
     <section
       ref={stepShellRef}
-      className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
       aria-labelledby="twelve-week-step-title"
     >
       <div>

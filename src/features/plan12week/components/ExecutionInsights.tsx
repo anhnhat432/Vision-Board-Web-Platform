@@ -38,7 +38,7 @@ export function ExecutionInsights({
   ];
 
   return (
-    <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+    <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
       <h3 className="text-base font-semibold text-app-ink">Góc nhìn thực hiện</h3>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {insights.map((insight) => (

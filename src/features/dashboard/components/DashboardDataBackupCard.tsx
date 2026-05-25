@@ -18,7 +18,7 @@ export function DashboardDataBackupCard({
   onOpenImportPicker,
 }: DashboardDataBackupCardProps) {
   return (
-    <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
+    <Card className="surface-flat rounded-xl shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Sao lưu dữ liệu</CardTitle>
         <CardDescription>

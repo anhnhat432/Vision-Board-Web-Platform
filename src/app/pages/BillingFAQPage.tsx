@@ -33,7 +33,7 @@ const FAQ_ITEMS = [
 export function BillingFAQPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <Card className="overflow-hidden border-app-line bg-app-surface shadow-sm">
+      <Card className="overflow-hidden rounded-2xl border-app-line bg-app-surface">
         <CardHeader className="border-b border-app-line bg-app-bg">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
@@ -52,7 +52,7 @@ export function BillingFAQPage() {
         </CardHeader>
         <CardContent className="space-y-4 p-5 sm:p-6">
           {FAQ_ITEMS.map((item) => (
-            <article key={item.question} className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-5">
+            <article key={item.question} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
               <h2 className="text-lg font-semibold text-app-ink">{item.question}</h2>
               <p className="mt-2 text-sm leading-7 text-app-ink-soft">
                 {item.answer}
@@ -72,7 +72,7 @@ export function BillingFAQPage() {
             </article>
           ))}
 
-          <div className="rounded-[var(--r-card)] border border-app-warm-border bg-app-warm/30 p-5">
+          <div className="rounded-xl border border-app-warm-border bg-app-warm/30 p-5">
             <div className="flex gap-3">
               <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-app-warm-strong" />
               <div>

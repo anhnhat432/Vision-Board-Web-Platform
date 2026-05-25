@@ -68,7 +68,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="rounded-xl border border-app-line bg-app-surface p-5 shadow-2xl backdrop-blur"
+        className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-[var(--shadow-3)]"
         style={{ width: `${width}px` }}
       >
         <div className="flex items-center gap-2 text-app-accent">
@@ -91,7 +91,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="flex items-center justify-center rounded-lg bg-app-accent text-white shadow-2xl"
+        className="flex items-center justify-center rounded-2xl bg-app-accent text-white shadow-[var(--shadow-3)]"
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         <Icon className="h-10 w-10" style={{ width: size * 0.4, height: size * 0.4 }} />

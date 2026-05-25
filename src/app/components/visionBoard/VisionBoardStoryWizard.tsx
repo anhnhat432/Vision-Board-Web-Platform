@@ -267,7 +267,7 @@ export function VisionBoardStoryWizard({
                       disabled={disabled}
                       onClick={() => toggleFocusArea(area.name)}
                       className={cn(
-                        "min-h-32 rounded-[var(--r-card)] border bg-app-surface p-4 text-left shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-45",
+                        "min-h-32 rounded-xl border bg-app-surface p-4 text-left shadow-[var(--shadow-1)] transition-all disabled:cursor-not-allowed disabled:opacity-45",
                         active
                           ? "border-app-accent bg-app-accent-soft ring-2 ring-app-accent/50"
                           : "border-slate-200 hover:border-app-accent/50 hover:bg-app-bg/60",
@@ -310,7 +310,7 @@ export function VisionBoardStoryWizard({
                       key={suggestion}
                       type="button"
                       onClick={() => setCoreQuote(suggestion)}
-                      className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-app-ink-soft shadow-sm transition-colors hover:border-app-accent/50 hover:bg-app-bg"
+                      className="rounded-xl border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-app-ink-soft shadow-[var(--shadow-1)] transition-colors hover:border-app-accent/50 hover:bg-app-bg"
                     >
                       {suggestion}
                     </button>
@@ -340,7 +340,7 @@ export function VisionBoardStoryWizard({
                       aria-pressed={active}
                       onClick={() => setSelectedThemeId(theme.id)}
                       className={cn(
-                        "rounded-[var(--r-card)] border border-app-line bg-app-surface p-3 text-left shadow-sm transition-all hover:border-app-accent/40",
+                        "rounded-xl border border-app-line bg-app-surface p-3 text-left shadow-[var(--shadow-1)] transition-all hover:border-app-accent/40",
                         active && "ring-2 ring-app-accent ring-offset-2",
                       )}
                     >

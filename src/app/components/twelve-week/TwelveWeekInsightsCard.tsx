@@ -88,7 +88,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
     <section
       data-testid="execution-insights-card"
       data-insight-count={insights.length}
-      className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">

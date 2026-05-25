@@ -1170,7 +1170,7 @@ export function TwelveWeekSetupLab() {
           <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
             Bạn đang ở bước tổng “Kế hoạch 12 tuần”. Bên dưới là wizard 4 bước nhỏ để thiết lập: kết quả, việc lặp lại, lịch nhìn lại và rà soát.
           </p>
-          <div className="mt-4 rounded-card border border-app-line bg-app-surface p-4">
+          <div className="mt-4 surface-raised rounded-xl border border-app-line bg-app-surface p-4">
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu hiện tại</p>
             <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-app-ink">
               {smartGoal.specific.trim()}

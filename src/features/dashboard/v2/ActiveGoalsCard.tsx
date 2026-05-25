@@ -41,7 +41,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
       aria-labelledby="dashboard-active-goals-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -65,14 +65,14 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
         </button>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 space-y-3">
         {visibleGoals.length > 0 ? (
           visibleGoals.map((goal) => {
             const progress = clampPercent(getLeadScore(goal));
             const domain = getLifeAreaLabel(goal.focusArea ?? goal.category);
 
             return (
-              <article key={goal.id} className="flex gap-4 border-b border-app-line py-4 last:border-0">
+              <article key={goal.id} className="flex gap-4 rounded-xl border border-app-line bg-app-bg p-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                   <Target className="h-4 w-4" />
                 </div>
@@ -103,7 +103,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
             );
           })
         ) : (
-          <div className="rounded-card border border-dashed border-app-line bg-app-bg p-5 text-sm leading-6 text-app-ink-soft">
+          <div className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-5 text-sm leading-6 text-app-ink-muted">
             Chưa có mục tiêu đang chạy. Bắt đầu bằng Cân bằng cuộc sống để chọn đúng trọng tâm.
           </div>
         )}

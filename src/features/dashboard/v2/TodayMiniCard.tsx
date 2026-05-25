@@ -14,7 +14,7 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
 
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-5"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
       aria-labelledby="dashboard-today-mini-title"
     >
       <div>
@@ -29,7 +29,7 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
       <div className="mt-5 space-y-2">
         {visibleTasks.length > 0 ? (
           visibleTasks.map((task) => (
-            <div key={task.id} className="flex items-start gap-3 rounded-xl px-2 py-2.5">
+            <div key={task.id} className="flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3">
               <span
                 aria-hidden="true"
                 className={`mt-0.5 flex size-[14px] shrink-0 items-center justify-center rounded-[4px] border ${
@@ -44,7 +44,7 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
             </div>
           ))
         ) : (
-          <p className="rounded-xl bg-app-bg px-3 py-3 text-sm leading-5 text-app-ink-muted">
+          <p className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 px-3 py-3 text-sm leading-5 text-app-ink-muted">
             Hôm nay chưa có việc mở. Mở Today để thêm hoặc xem lại tuần.
           </p>
         )}

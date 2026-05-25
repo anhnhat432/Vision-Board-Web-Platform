@@ -441,7 +441,7 @@ export function OrderStatusPage() {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 lg:py-12">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)]">
-          <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
+          <div className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface">
             <div className="border-b border-app-line p-5 text-center sm:p-6">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                 <QrCode className="h-6 w-6" />
@@ -486,7 +486,7 @@ export function OrderStatusPage() {
           </div>
 
           <div className="space-y-5">
-            <div className="rounded-card border border-app-line bg-app-surface p-6">
+            <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-6">
               <h3 className="mb-1 text-lg font-semibold text-app-ink">Thông tin chuyển khoản</h3>
               <p className="text-sm text-app-ink-muted">
                 Nhấn nút sao chép từng dòng để tránh nhập sai. Nội dung chuyển khoản là phần quan trọng nhất.
@@ -636,7 +636,7 @@ export function OrderStatusPage() {
   if (!order) {
     return (
       <div className="stack-section pb-12">
-        <div className="rounded-card border border-app-line bg-app-surface p-10 text-center lg:p-12">
+        <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center lg:p-12">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-app-bg text-app-ink">
             <ClipboardList className="h-10 w-10 text-app-accent" />
           </div>
@@ -730,7 +730,7 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Target className="h-3.5 w-3.5 text-app-accent" />
                     Mục tiêu đang gắn
@@ -745,7 +745,7 @@ export function OrderStatusPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
                     Chi tiết đơn
@@ -811,7 +811,7 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[var(--r-card)] border border-slate-200 bg-app-surface p-4">
+                <div className="rounded-xl border border-slate-200 bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <Mail className="h-3.5 w-3.5" />
                     Người nhận
@@ -824,7 +824,7 @@ export function OrderStatusPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[var(--r-card)] border border-slate-200 bg-app-surface p-4">
+                <div className="rounded-xl border border-slate-200 bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <MapPin className="h-3.5 w-3.5" />
                     Địa chỉ giao
@@ -844,7 +844,7 @@ export function OrderStatusPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                       <Package className="h-3.5 w-3.5" />
                       Ghi chú cho kit
@@ -887,7 +887,7 @@ export function OrderStatusPage() {
                 return (
                   <div
                     key={step.status}
-                    className={`flex items-start gap-4 rounded-[var(--r-card)] border px-4 py-4 ${
+                    className={`flex items-start gap-4 rounded-xl border px-4 py-4 ${
                       isActive ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-app-surface"
                     }`}
                   >
@@ -924,7 +924,7 @@ export function OrderStatusPage() {
               })}
 
               {isCancelled && (
-                <div className="rounded-[var(--r-card)] border border-rose-200 bg-rose-50/80 p-4">
+                <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-4">
                   <p className="text-sm font-semibold text-rose-800">Đơn này đã bị huỷ.</p>
                   <p className="mt-1 text-sm leading-7 text-rose-700/80">
                     Bạn có thể tạo đơn mới nếu vẫn muốn đặt kit.
@@ -941,7 +941,7 @@ export function OrderStatusPage() {
                     <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa kết nối máy chủ.</p>
                   </div>
 
-                  <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -995,7 +995,7 @@ export function OrderStatusPage() {
                 <button
                   key={item.id}
                   type="button"
-                  className={`w-full rounded-[var(--r-card)] border px-4 py-4 text-left transition-colors ${
+                  className={`w-full rounded-xl border px-4 py-4 text-left transition-colors ${
                     item.id === order.id ? "border-sky-200 bg-sky-50" : "border-slate-200 bg-app-surface hover:bg-slate-50"
                   }`}
                   onClick={() => navigate(`/order-status/${item.id}`)}

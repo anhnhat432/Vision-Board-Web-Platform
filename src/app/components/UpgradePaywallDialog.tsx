@@ -289,17 +289,21 @@ export function UpgradePaywallDialog({
                 return (
                   <div
                     key={plan.code}
-                    className={`rounded-card border p-5 ${
-                      isRecommended ? "border-app-accent bg-app-accent-soft" : "border-app-line bg-app-surface"
+                    className={`relative overflow-hidden rounded-2xl border p-5 sm:p-6 ${
+                      isRecommended
+                        ? "border-app-accent/40 bg-app-surface bg-gradient-to-br from-app-accent-soft/30 to-transparent shadow-[var(--shadow-3)]"
+                        : "border-app-line bg-app-surface shadow-[var(--shadow-1)]"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    {isRecommended && (
+                      <span className="absolute right-4 top-4 rounded-full bg-app-accent px-3 py-1 text-xs font-medium text-white">
+                        Phổ biến
+                      </span>
+                    )}
+                    <div className="flex items-start justify-between gap-3 pr-20">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-2xl font-medium text-app-ink">{plan.name}</p>
-                          {isRecommended && (
-                            <Badge className="bg-app-accent text-white hover:bg-app-accent">Khuyên dùng</Badge>
-                          )}
+                          <p className="font-serif text-lg font-medium text-app-ink">{plan.name}</p>
                           {isCurrent && (
                             <Badge variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
                               Gói hiện tại
@@ -317,7 +321,7 @@ export function UpgradePaywallDialog({
                       </div>
                     </div>
 
-                    <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
+                    <div className="mt-5 rounded-xl border border-app-line bg-app-surface px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Giá gói</p>
                       <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
                       <p className="mt-2 flex items-center gap-2 text-sm font-medium text-app-ink-soft">

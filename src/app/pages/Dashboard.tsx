@@ -775,7 +775,7 @@ function DashboardActiveLayout({
 
 function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; limit: number; onUpgrade: () => void }) {
   return (
-    <section className="mb-5 rounded-card border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
+    <section className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-app-ink">
@@ -812,7 +812,7 @@ function TrialCountdownBanner({
 
   return (
     <section
-      className="mb-5 rounded-card border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft"
+      className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft"
       aria-label="Thời hạn Plus"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -845,7 +845,7 @@ function DashboardPlanStateNotice({
 }) {
   if (planLoading && !hasPlan) {
     return (
-      <div className="rounded-card border border-app-line bg-app-surface p-4 text-sm text-app-ink-muted">
+      <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-muted">
         Đang tải dữ liệu Trang chính 12 tuần...
       </div>
     );
@@ -853,7 +853,7 @@ function DashboardPlanStateNotice({
 
   if (planError) {
     return (
-      <div className="rounded-card border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft">
+      <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft">
         {planError.message}
       </div>
     );

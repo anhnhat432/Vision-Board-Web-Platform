@@ -73,9 +73,8 @@ interface EmptyStateProps {
 }
 
 const CARD_CLASSES =
-  "rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.1)] sm:p-7";
-const DASHED_CLASSES =
-  "rounded-[var(--r-soft)] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)] px-6 py-8";
+  "surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6";
+const DASHED_CLASSES = "surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 px-6 py-8";
 
 export function EmptyState({
   icon,
@@ -99,8 +98,8 @@ export function EmptyState({
     align === "center" ? "flex flex-col gap-2 sm:flex-row sm:justify-center" : "flex flex-col gap-2 sm:flex-row";
   const titleSizeClass =
     variant === "card"
-      ? "text-xl font-bold tracking-[-0.014em] text-foreground sm:text-2xl"
-      : "text-base font-semibold tracking-tight text-foreground";
+    ? "font-serif text-lg font-medium tracking-normal text-app-ink"
+    : "text-base font-semibold tracking-normal text-app-ink";
 
   const Wrapper = as;
   const HeadingTag = `h${headingLevel}` as "h2" | "h3" | "h4";
@@ -115,7 +114,7 @@ export function EmptyState({
       {icon ? (
         <div
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] text-foreground",
+            "flex h-12 w-12 items-center justify-center rounded-lg border border-app-line bg-app-bg/50 text-app-ink-muted",
             blockAlignClass,
           )}
           aria-hidden="true"
@@ -125,10 +124,10 @@ export function EmptyState({
       ) : null}
       <div className={cn("space-y-2", blockAlignClass, variant === "card" ? "max-w-2xl" : "max-w-lg")}>
         {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">{eyebrow}</p>
         ) : null}
         <HeadingTag className={titleSizeClass}>{title}</HeadingTag>
-        {description ? <p className="text-sm leading-relaxed text-muted-foreground">{description}</p> : null}
+        {description ? <p className="text-sm leading-relaxed text-app-ink-muted">{description}</p> : null}
       </div>
       {children ? <div className={blockAlignClass}>{children}</div> : null}
       {actions ? <div className={actionsLayoutClass}>{actions}</div> : null}

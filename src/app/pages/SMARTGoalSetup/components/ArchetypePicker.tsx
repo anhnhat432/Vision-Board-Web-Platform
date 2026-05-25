@@ -31,7 +31,7 @@ export function ArchetypePicker({
   onResetToInferred,
 }: ArchetypePickerProps) {
   return (
-    <div className="rounded-card border border-app-line bg-app-surface p-4">
+    <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="mb-1 text-xs font-medium text-app-ink-muted">Chọn loại mục tiêu</p>

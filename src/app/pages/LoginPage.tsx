@@ -230,7 +230,7 @@ export function LoginPage() {
     // Sign-in not configured — show a notice instead of a broken form
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4">
-        <div className="w-full max-w-md rounded-card border border-app-line bg-app-surface p-6">
+        <div className="w-full max-w-md surface-raised rounded-xl border border-app-line bg-app-surface p-6">
           <div className="flex items-center gap-2.5">
             <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
               <Target className="h-5 w-5 text-white" />

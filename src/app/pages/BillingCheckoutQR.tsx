@@ -361,7 +361,7 @@ export function BillingCheckoutQR() {
         {copyMessage ||
           `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
       </div>
-      <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
+      <div className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
           <section className="border-b border-app-line bg-app-bg p-5 text-center sm:p-6 lg:border-b-0 lg:border-r">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft">

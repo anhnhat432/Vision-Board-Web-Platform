@@ -323,7 +323,7 @@ export function TwelveWeekTodayTab({
     <div className="flex min-w-0 flex-col gap-3 sm:gap-5">
       <div
         data-testid="today-mobile-compact-strip"
-        className="order-0 grid grid-cols-3 gap-2 rounded-card border border-app-line bg-app-surface p-2.5 sm:hidden"
+        className="surface-flat order-0 grid grid-cols-3 gap-2 rounded-xl border border-app-line bg-app-surface p-2.5 sm:hidden"
       >
         <div className="min-w-0 rounded-lg bg-app-bg px-2 py-2">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
@@ -348,7 +348,7 @@ export function TwelveWeekTodayTab({
       {upcomingStrategicBlock ? (
         <div
           data-testid="strategic-block-nudge"
-          className="order-1 rounded-card border border-app-accent/20 bg-app-accent-soft p-4 text-app-accent sm:p-5"
+          className="surface-raised order-1 rounded-xl border border-app-accent/20 bg-app-accent-soft p-4 text-app-accent sm:p-5"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -370,7 +370,7 @@ export function TwelveWeekTodayTab({
       <div
         data-testid="today-next-action-panel"
         data-state={nextActionState.key}
-        className="order-1 rounded-card border border-app-line bg-app-surface p-4 sm:p-5"
+        className="surface-raised order-1 rounded-xl border border-app-line bg-app-surface p-4 sm:p-5"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -411,7 +411,7 @@ export function TwelveWeekTodayTab({
           <CardContent className="stack-stack">
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
               <div className="stack-tight">
-                <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                <div className="rounded-xl border border-app-line bg-app-bg p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     Tình trạng hiện tại
                   </p>
@@ -460,7 +460,7 @@ export function TwelveWeekTodayTab({
               </div>
               <div className="grid gap-3">
                 {rescueModes.map((mode) => (
-                  <div key={mode} className="rounded-lg border border-app-line bg-app-surface p-4">
+                  <div key={mode} className="rounded-xl border border-app-line bg-app-surface p-4">
                     <p className="text-sm font-semibold text-app-ink">{getReentryModeLabel(mode)}</p>
                     <p className="mt-2 text-sm leading-7 text-app-ink-soft">
                       {getReentryModeDescription(mode, {
@@ -558,7 +558,7 @@ export function TwelveWeekTodayTab({
           <div className={fadeInClassName}>
             <Card
               data-tour-id="system-today-queue"
-              className="h-full min-w-0 overflow-hidden rounded-card border border-app-line bg-app-surface"
+              className="h-full min-w-0 overflow-hidden rounded-xl border border-app-line bg-app-surface"
             >
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
                 <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -646,7 +646,7 @@ export function TwelveWeekTodayTab({
                       return (
                         <MotionStaggerItem
                           key={task.id}
-                          className={`flex min-w-0 items-start gap-3 rounded-card border p-4 ${
+                          className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 ${
                             isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface"
                           }`}
                         >
@@ -826,7 +826,7 @@ export function TwelveWeekTodayTab({
                       {secondaryPreviewTasks.map((task, index) => (
                         <div
                           key={task.id}
-                          className="flex min-w-0 items-center gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-3"
+                          className="flex min-w-0 items-center gap-3 rounded-xl border border-app-line bg-app-surface px-3 py-3"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent text-xs font-semibold text-white">
                             {index + 2}
@@ -845,7 +845,7 @@ export function TwelveWeekTodayTab({
                     )}
                   </details>
                 )}
-                <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                <div className="rounded-xl border border-app-line bg-app-bg p-4">
                   <div className="flex items-center justify-between text-sm text-app-ink-muted">
                     <span>Tiến độ tuần {currentWeek}</span>
                     <span className="font-semibold text-app-ink-muted">{weekCompletion.percent}%</span>
@@ -864,7 +864,7 @@ export function TwelveWeekTodayTab({
             </Card>
           </div>
           <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
-            <Card className="h-full min-w-0 overflow-hidden rounded-card border border-app-line bg-app-surface">
+            <Card className="h-full min-w-0 overflow-hidden rounded-xl border border-app-line bg-app-surface">
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -975,7 +975,7 @@ export function TwelveWeekTodayTab({
                   {latestCheckIn && (
                     <div
                       aria-live="polite"
-                      className="rounded-lg border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted"
+                      className="rounded-xl border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted"
                     >
                       Check-in gần nhất: {formatCalendarDate(latestCheckIn.date)} • năng lượng{" "}
                       {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
