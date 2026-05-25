@@ -165,7 +165,7 @@
   --chart-4: #e11d48;
   --chart-5: #7c3aed;
   --radius: 0.875rem;
-  --r-card: 22px;
+  --r-card: var(--app-radius-card);
   --r-control: 11px;
   --r-tile: 14px;
   --r-pill: 9999px;
@@ -1092,19 +1092,6 @@
   .card-interactive-base {
     position: relative;
     isolation: isolate;
-    transition:
-      box-shadow var(--duration-fast) var(--ease-emphasized),
-      border-color var(--duration-fast) var(--ease-emphasized),
-      background-color var(--duration-fast) var(--ease-emphasized),
-      transform var(--duration-fast) var(--ease-emphasized);
-  }
-
-  @media (hover: hover) {
-    .card-interactive-base:hover {
-      border-color: rgba(15, 23, 42, 0.1);
-      box-shadow: var(--shadow-3);
-      transform: translateY(-1px);
-    }
   }
 
   .card-interactive-base::before {
@@ -1125,7 +1112,7 @@
     mix-blend-mode: screen;
   }
 
-  .card-interactive-base[data-card-hovering="true"]::after {
+  .card-interactive-base[data-card-hovering="true"]::before {
     opacity: 1;
   }
 
@@ -2796,6 +2783,71 @@
   }
   .elevation-5 {
     box-shadow: var(--shadow-5);
+  }
+
+  .surface-flat {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
+    box-shadow: none;
+  }
+
+  .surface-raised {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
+    box-shadow: var(--shadow-1);
+  }
+
+  .surface-elevated {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
+    box-shadow: var(--shadow-3);
+  }
+
+  .surface-empty {
+    background: color-mix(in srgb, var(--app-bg) 50%, transparent);
+    border: 1px dashed var(--app-line);
+    box-shadow: none;
+    color: var(--app-ink-muted);
+  }
+
+  .surface-clickable-raised,
+  .surface-clickable-elevated {
+    cursor: pointer;
+    transition:
+      transform var(--duration-fast) var(--ease-emphasized),
+      box-shadow var(--duration-fast) var(--ease-emphasized),
+      border-color var(--duration-fast) var(--ease-emphasized),
+      background-color var(--duration-fast) var(--ease-emphasized);
+  }
+
+  @media (hover: hover) {
+    .surface-clickable-raised:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-2);
+    }
+
+    .surface-clickable-elevated:hover {
+      box-shadow: var(--shadow-4);
+    }
+  }
+
+  .surface-clickable-raised:active {
+    transform: translateY(0) scale(0.99);
+    box-shadow: var(--shadow-1);
+  }
+
+  .surface-clickable-elevated:active {
+    transform: translateY(0) scale(0.99);
+    box-shadow: var(--shadow-3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surface-clickable-raised:hover,
+    .surface-clickable-raised:active,
+    .surface-clickable-elevated:hover,
+    .surface-clickable-elevated:active {
+      transform: none;
+    }
   }
 
   .elevation-glow-primary {

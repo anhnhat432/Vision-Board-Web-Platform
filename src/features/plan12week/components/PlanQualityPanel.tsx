@@ -67,7 +67,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
   const quality = evaluateTwelveWeekPlanQuality(input, context);
 
   return (
-    <div className={`rounded-card border border-app-line bg-app-surface p-5 md:p-6 ${className}`}>
+    <div className={`surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6 ${className}`}>
       <div className="flex items-center gap-2">
         <TrendingUp className="h-4 w-4 text-app-accent" />
         <h3 className="text-base font-semibold text-app-ink">Đánh giá nhanh kế hoạch</h3>

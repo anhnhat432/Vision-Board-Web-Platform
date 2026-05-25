@@ -289,7 +289,7 @@ function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
         </h1>
       </div>
 
-      <div className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
+      <div className="surface-raised hidden rounded-2xl border border-app-line bg-app-surface p-5 md:block">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">12-Week Goal</p>
         <p className="mt-2 line-clamp-3 break-words text-sm font-medium leading-5 text-app-ink">
           {viewModel.goalTitle}
@@ -336,7 +336,7 @@ function TodayTasksCard({
 }) {
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
       aria-labelledby="today-v2-tasks-title"
     >
       <div className="flex items-start justify-between gap-4">
@@ -361,7 +361,7 @@ function TodayTasksCard({
         {tasks.map((task) => (
           <div
             key={task.id}
-            className={`flex items-start gap-3 rounded-xl px-2 py-2.5 transition-colors duration-150 hover:bg-app-bg ${
+            className={`flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3 ${
               task.isCurrent ? "bg-app-bg ring-1 ring-app-accent/15" : ""
             }`}
           >
@@ -453,7 +453,7 @@ function WeekProgressCard({
 }) {
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
       aria-labelledby="today-v2-week-title"
     >
       <div>
@@ -477,7 +477,7 @@ function WeekProgressCard({
 function ReflectionPrompt() {
   return (
     <section
-      className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
       aria-labelledby="today-v2-reflection-title"
     >
       <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-xs font-medium text-app-warm ring-1 ring-app-warm-border">
@@ -502,7 +502,7 @@ function ReflectionPrompt() {
 function LifeBalanceCard({ rows }: { rows: LifeBalanceRow[] }) {
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
       aria-labelledby="today-v2-balance-title"
     >
       <div>
@@ -555,7 +555,7 @@ function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-        <section className="rounded-card border border-app-line bg-app-surface p-8 text-center md:p-12">
+        <section className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center md:p-12">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
             <Calendar className="h-7 w-7" />
           </div>

@@ -20,7 +20,7 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
   const prefersReducedMotion = useReducedMotion();
   const cardRef = React.useRef<HTMLDivElement | null>(null);
   const frameRef = React.useRef<number | null>(null);
-  const isInteractive = interactive && !prefersReducedMotion;
+  const isPointerInteractive = interactive && !prefersReducedMotion;
 
   React.useEffect(() => {
     return () => {
@@ -50,7 +50,7 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event);
 
-    if (event.defaultPrevented || !isInteractive || event.pointerType === "touch" || !cardRef.current) {
+    if (event.defaultPrevented || !isPointerInteractive || event.pointerType === "touch" || !cardRef.current) {
       return;
     }
 
@@ -73,7 +73,7 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
   const handlePointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
     onPointerLeave?.(event);
 
-    if (!isInteractive) return;
+    if (!isPointerInteractive) return;
     setCardPointer(0.5, 0.5, false);
   };
 
@@ -83,8 +83,8 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
       data-slot="card"
       data-card-hovering="false"
       className={cn(
-        "glass-surface text-card-foreground flex flex-col gap-6 rounded-[var(--r-card)]",
-        isInteractive && "card-interactive-base tap-scale",
+        "surface-raised flex flex-col gap-5 rounded-card text-card-foreground sm:gap-6",
+        interactive && "surface-clickable-raised card-interactive-base",
         className,
       )}
       style={{ ...DEFAULT_CARD_STYLE, ...style }}
@@ -100,7 +100,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-header"
       className={cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2.5 px-5 pt-5 has-data-[slot=card-action]:grid-cols-[1fr_auto] sm:px-7 sm:pt-7 [.border-b]:pb-5 sm:[.border-b]:pb-7",
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-4 pt-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] sm:px-5 sm:pt-5 [.border-b]:pb-4 sm:[.border-b]:pb-5",
         className,
       )}
       {...props}
@@ -116,7 +116,7 @@ function CardTitle({ className, as: Heading = "h3", ...props }: CardTitleProps) 
   return (
     <Heading
       data-slot="card-title"
-      className={cn("text-lg font-semibold leading-tight tracking-tight text-foreground", className)}
+      className={cn("font-serif text-lg font-medium leading-tight tracking-normal text-app-ink", className)}
       {...props}
     />
   );
@@ -126,7 +126,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <p
       data-slot="card-description"
-      className={cn("text-sm leading-6 text-muted-foreground tracking-tight", className)}
+      className={cn("text-sm leading-6 tracking-normal text-app-ink-soft", className)}
       {...props}
     />
   );
@@ -146,7 +146,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-5 sm:px-7 [&:last-child]:pb-5 sm:[&:last-child]:pb-7", className)}
+      className={cn("px-4 sm:px-5 [&:last-child]:pb-4 sm:[&:last-child]:pb-5", className)}
       {...props}
     />
   );
@@ -156,7 +156,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-5 pb-5 sm:px-7 sm:pb-7 [.border-t]:pt-5 sm:[.border-t]:pt-7", className)}
+      className={cn("flex items-center px-4 pb-4 sm:px-5 sm:pb-5 [.border-t]:pt-4 sm:[.border-t]:pt-5", className)}
       {...props}
     />
   );

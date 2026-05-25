@@ -52,7 +52,7 @@ export function QualityFeedbackPanel({
   const hintItems = [completedMessage, ...warnings, ...suggestions].slice(0, MAX_DISPLAY_ITEMS);
 
   return (
-    <section className="mt-4 rounded-card border border-app-line bg-app-surface p-5" aria-label="Chất lượng mục tiêu">
+    <section className="mt-4 surface-raised rounded-xl border border-app-line bg-app-surface p-5" aria-label="Chất lượng mục tiêu">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-app-ink">Chất lượng mục tiêu</h3>
         <span className={`rounded-full px-3 py-1 text-xs font-medium ${bucket.className}`}>

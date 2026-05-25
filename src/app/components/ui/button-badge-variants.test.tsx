@@ -26,42 +26,40 @@ describe("UI primitive visual hierarchy", () => {
     expect(outline).toContain("text-app-ink");
   });
 
-  it("limits button magnetic motion to the primary hierarchy", () => {
-    const originalMatchMedia = window.matchMedia;
-    Object.defineProperty(window, "matchMedia", {
-      writable: true,
-      configurable: true,
-      value: (query: string): MediaQueryList => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addEventListener: () => {},
-        removeEventListener: () => {},
-        addListener: () => {},
-        removeListener: () => {},
-        dispatchEvent: () => false,
-      }),
-    });
+  it("applies the four-state interaction pattern across button variants", () => {
+    const primary = buttonVariants({ variant: "default" });
+    expect(primary).toContain("hover:bg-app-accent/95");
+    expect(primary).toContain("active:scale-[0.98]");
+    expect(primary).toContain("focus-visible:ring-app-accent/40");
+    expect(primary).toContain("disabled:opacity-50");
 
-    try {
-      render(
-        <>
-          <Button>Primary action</Button>
-          <Button variant="secondary">Secondary action</Button>
-          <Button variant="outline">Outline action</Button>
-        </>,
-      );
+    const ghost = buttonVariants({ variant: "ghost" });
+    expect(ghost).toContain("hover:bg-app-ink/5");
+    expect(ghost).toContain("active:scale-[0.98]");
 
-      expect(document.querySelector("button:nth-of-type(1)")?.className).toContain("button-magnetic");
-      expect(document.querySelector("button:nth-of-type(2)")?.className).not.toContain("button-magnetic");
-      expect(document.querySelector("button:nth-of-type(3)")?.className).not.toContain("button-magnetic");
-    } finally {
-      Object.defineProperty(window, "matchMedia", {
-        writable: true,
-        configurable: true,
-        value: originalMatchMedia,
-      });
-    }
+    const outline = buttonVariants({ variant: "outline" });
+    expect(outline).toContain("hover:border-app-accent/40");
+    expect(outline).toContain("hover:bg-app-accent-soft/30");
+
+    const link = buttonVariants({ variant: "link" });
+    expect(link).toContain("text-app-accent");
+    expect(link).toContain("hover:underline");
+    expect(link).not.toContain("hover:opacity-");
+  });
+
+  it("renders the loading state without changing button width", () => {
+    render(
+      <Button loading aria-label="Saving">
+        Lưu
+      </Button>,
+    );
+
+    const btn = document.querySelector('[data-slot="button"]');
+    expect(btn?.getAttribute("aria-busy")).toBe("true");
+    expect(btn?.getAttribute("data-loading")).toBe("true");
+    expect(btn?.hasAttribute("disabled")).toBe(true);
+    expect(btn?.querySelector(".animate-spin")).toBeTruthy();
+    expect(btn?.querySelector(".opacity-60")?.textContent).toBe("Lưu");
   });
 
   it("maps badge status variants to app tokens", () => {
@@ -79,7 +77,7 @@ describe("UI primitive visual hierarchy", () => {
     expect(badgeVariants()).toContain("rounded-full");
 
     render(<Card data-testid="card" />);
-    expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-[var(--r-card)]");
+    expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-card");
 
     render(<Input aria-label="Name" />);
     expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-lg");

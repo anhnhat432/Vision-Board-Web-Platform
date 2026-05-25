@@ -205,7 +205,7 @@ export function VisionBoardGallery() {
         }
         description="Xem lại các vision board theo từng năm, tiếp tục chỉnh sửa và giữ cảm hứng luôn ở gần mình."
         primaryCta={
-          <Button glow onClick={() => navigate("/vision-board")}>
+          <Button onClick={() => navigate("/vision-board")}>
             <Plus className="h-4 w-4" />
             Tạo bảng mới
           </Button>
@@ -281,7 +281,7 @@ export function VisionBoardGallery() {
 
             return (
               <div key={item.title}>
-                <Card className="relative gap-4 overflow-hidden">
+                <Card className="relative gap-4 overflow-hidden rounded-xl">
                   <div
                     className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
                   />
@@ -307,7 +307,7 @@ export function VisionBoardGallery() {
       )}
 
       {userData.visionBoards.length === 0 ? (
-        <Card className="overflow-hidden">
+        <Card className="surface-empty overflow-hidden rounded-2xl border border-dashed border-app-line bg-app-bg/50">
           <CardContent className="p-10 text-center lg:p-12">
             <VisionMapIllustration className="mx-auto mb-4 w-56 text-app-accent sm:w-64" />
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
@@ -347,13 +347,17 @@ export function VisionBoardGallery() {
                   return (
                     <div key={board.id}>
                       <InteractiveSurface
-                        className="preview-hover-card group rounded-[var(--r-card)]"
+                        className="preview-hover-card group rounded-2xl"
                         intensity={4}
                         translate={8}
                         shine={false}
                       >
                         <Card
-                          className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}
+                          className={
+                            isSpotlight
+                              ? "spotlight-card gap-5 overflow-hidden rounded-2xl"
+                              : "gap-5 overflow-hidden rounded-2xl"
+                          }
                         >
                           <CardHeader className="pb-0">
                             <div className="flex items-start justify-between gap-3">
@@ -384,7 +388,7 @@ export function VisionBoardGallery() {
 
                           <CardContent className="stack-stack pt-0">
                             <div
-                              className="relative overflow-hidden rounded-[var(--r-card)] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
+                              className="relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
                               style={{ aspectRatio: "16/10" }}
                             >
                               <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
@@ -407,7 +411,7 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-[var(--r-card)] border border-white/80 bg-white/88 p-1.5 shadow-sm">
+                                        <div className="rounded-xl border border-white/80 bg-white/88 p-1.5 shadow-[var(--shadow-1)]">
                                           <ImageWithFallback
                                             src={item.content}
                                             alt="Phần tử bảng"

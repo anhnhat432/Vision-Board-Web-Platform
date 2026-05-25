@@ -37,7 +37,7 @@ export function FeasibilityStepShell({
   return (
     <section
       ref={targetRef}
-      className="mt-6 rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      className="mt-6 surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
       aria-labelledby={`feasibility-question-${currentQuestion.id}`}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

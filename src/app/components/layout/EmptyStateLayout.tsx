@@ -37,14 +37,16 @@ export function EmptyStateLayout({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-6 rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-12 text-center",
+        "surface-empty flex flex-col items-center justify-center gap-6 rounded-xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center sm:p-10",
         className,
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-muted">{icon}</div>
+      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-app-surface text-app-ink-muted">
+        {icon}
+      </div>
       <div className="space-y-2 max-w-md">
-        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-serif text-lg font-medium text-app-ink">{title}</h3>
+        <p className="text-sm text-app-ink-muted">{description}</p>
       </div>
       {(primaryAction || secondaryAction) && (
         <div className="flex flex-col gap-3 sm:flex-row">

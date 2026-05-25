@@ -166,7 +166,7 @@ export function Achievements() {
           { label: "Đã mở khóa", value: unlockedCount, suffix: "cột mốc" },
           { label: "Hoàn thành", value: `${completionRate}%`, suffix: "bộ sưu tập" },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-card border border-app-line bg-app-surface p-5">
+          <div key={stat.label} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{stat.label}</p>
             <p className="mt-2 text-3xl font-medium leading-none text-app-ink tabular-nums">{stat.value}</p>
             <p className="mt-2 text-xs text-app-ink-muted">{stat.suffix}</p>
@@ -176,7 +176,7 @@ export function Achievements() {
 
       {unlockedCount === 0 ? (
         <section
-          className="mt-6 rounded-card border border-app-line bg-app-surface p-6 text-center md:p-8"
+          className="mt-6 surface-raised rounded-xl border border-app-line bg-app-surface p-6 text-center md:p-8"
           aria-label="Chưa có thành tựu"
         >
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
@@ -212,7 +212,7 @@ export function Achievements() {
             return (
               <article
                 key={achievement.key}
-                className={`rounded-card border border-app-line bg-app-surface p-5 ${isUnlocked ? "" : "opacity-60"}`}
+                className={`surface-raised rounded-xl border border-app-line bg-app-surface p-5 ${isUnlocked ? "" : "opacity-60"}`}
               >
                 <div
                   className={`flex h-12 w-12 items-center justify-center rounded-lg ${

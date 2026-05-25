@@ -103,7 +103,7 @@ export function CycleReviewPanel({
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded-card border border-app-line bg-app-surface p-4">
+          <div key={label} className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               <Icon className="h-3.5 w-3.5 text-app-accent" />
               {label}

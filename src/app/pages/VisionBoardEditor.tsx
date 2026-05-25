@@ -781,7 +781,7 @@ export function VisionBoardEditor() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button glow onClick={() => setIsAddingItem(true)}>
+                  <Button onClick={() => setIsAddingItem(true)}>
                     <Plus className="h-4 w-4" />
                     Thêm phần tử
                   </Button>
@@ -847,7 +847,7 @@ export function VisionBoardEditor() {
                 </p>
               </div>
 
-              <div className="hidden xl:block rounded-xl border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
+              <div className="surface-raised sticky top-6 hidden rounded-xl border border-app-line bg-app-surface p-5 xl:block">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt bảng</p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -1058,7 +1058,7 @@ export function VisionBoardEditor() {
                       key={font.id}
                       type="button"
                       onClick={() => setSelectedQuoteFont(font.id)}
-                      className={`rounded-[var(--r-card)] border p-3 text-left transition ${
+                      className={`rounded-xl border p-3 text-left transition ${
                         selectedQuoteFont === font.id
                           ? "border-app-accent bg-app-accent-soft"
                           : "border-app-line bg-app-surface hover:border-app-accent/50"
@@ -1087,7 +1087,7 @@ export function VisionBoardEditor() {
 
                 if (goals.length === 0) {
                   return (
-                    <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg p-6 text-center">
+                    <div className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-6 text-center">
                       <Target className="mx-auto h-10 w-10 text-app-ink-muted" />
                       <p className="mt-3 text-base font-semibold text-app-ink">
                         Bạn chưa có mục tiêu nào để ghim lên bảng
@@ -1130,7 +1130,7 @@ export function VisionBoardEditor() {
                             key={goal.id}
                             type="button"
                             onClick={() => setSelectedGoalId(goal.id)}
-                            className={`rounded-[var(--r-card)] border p-3 text-left transition ${
+                            className={`rounded-xl border p-3 text-left transition ${
                               isActive
                                 ? "border-app-accent bg-app-accent-soft ring-1 ring-app-accent/30"
                                 : "border-app-line bg-app-surface hover:bg-app-bg"
@@ -1156,7 +1156,7 @@ export function VisionBoardEditor() {
                         );
                       })}
                       {availableGoals.length === 0 && (
-                        <p className="col-span-full rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
+                        <p className="col-span-full rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
                           Tất cả mục tiêu đã được ghim trên bảng này.
                         </p>
                       )}
@@ -1180,7 +1180,7 @@ export function VisionBoardEditor() {
                       key={item}
                       type="button"
                       onClick={() => setIconName(item)}
-                      className={`rounded-[var(--r-card)] border p-4 transition-colors transition-shadow duration-150 ${
+                      className={`rounded-xl border p-4 transition-colors transition-shadow duration-150 ${
                         isActive
                           ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
                           : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:text-app-accent"
@@ -1222,7 +1222,7 @@ export function VisionBoardEditor() {
       </Dialog>
 
       <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card className="min-w-0 overflow-hidden">
+        <Card className="min-w-0 overflow-hidden rounded-2xl">
           <CardContent className="p-0">
             <VisionBoardCanvas
               items={board.items}
@@ -1238,7 +1238,7 @@ export function VisionBoardEditor() {
               emptyStateSlot={
                 board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="w-full max-w-md rounded-xl border border-app-line bg-app-surface p-6 text-center shadow-sm sm:p-8">
+                    <div className="surface-empty w-full max-w-md rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-6 text-center sm:p-8">
                       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                         <Sparkles className="h-7 w-7" />
                       </div>

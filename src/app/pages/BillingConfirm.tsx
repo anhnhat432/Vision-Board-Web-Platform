@@ -169,7 +169,7 @@ export function BillingConfirm() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-6 shadow-sm">
+        <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
               <ReceiptText className="h-6 w-6" />
@@ -185,7 +185,7 @@ export function BillingConfirm() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 rounded-[var(--r-card)] border border-app-line bg-app-bg p-4">
+          <div className="mt-6 grid gap-4 rounded-xl border border-app-line bg-app-bg p-4">
             <ConfirmRow label="Tên gói" value={planName} />
             <ConfirmRow
               label="Số tiền"
@@ -197,7 +197,7 @@ export function BillingConfirm() {
 
           <BillingTrustSignals className="mt-6" supportEmail={BILLING_SUPPORT_EMAIL} />
 
-          <div className="mt-6 rounded-[var(--r-card)] border border-app-line bg-app-bg p-4">
+          <div className="mt-6 rounded-xl border border-app-line bg-app-bg p-4">
             <label htmlFor="receipt-email" className="flex items-center gap-2 text-sm font-semibold text-app-ink">
               <Mail className="h-4 w-4 text-app-accent" />
               Email sẽ nhận biên nhận
@@ -221,7 +221,7 @@ export function BillingConfirm() {
             )}
           </div>
 
-          <label className="mt-6 flex items-start gap-3 rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft">
+          <label className="mt-6 flex items-start gap-3 surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft">
             <input
               type="checkbox"
               checked={agreed}
@@ -250,7 +250,7 @@ export function BillingConfirm() {
           {paidCheckoutDisabled ? (
             <div
               data-testid="paid-checkout-disabled-banner"
-              className="mt-4 rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong"
+              className="mt-4 rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong"
             >
               <p className="flex items-center gap-2 font-semibold">
                 <LockKeyhole className="h-4 w-4 text-app-warm" />
@@ -271,7 +271,7 @@ export function BillingConfirm() {
           ) : null}
 
           {emailVerificationRequired ? (
-            <div className="mt-4 rounded-[var(--r-card)] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               <p className="font-semibold">Vui lòng xác thực email trước khi thanh toán.</p>
               <p className="mt-1 leading-6">
                 Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực:{" "}
@@ -289,7 +289,7 @@ export function BillingConfirm() {
           ) : null}
 
           {error && (
-            <div className="mt-4 rounded-[var(--r-card)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
@@ -320,7 +320,7 @@ export function BillingConfirm() {
           </div>
         </section>
 
-        <aside className="rounded-[var(--r-card)] border border-app-accent-soft bg-app-accent-soft/40 p-6">
+        <aside className="surface-raised rounded-2xl border border-app-accent-soft bg-app-accent-soft/40 p-5 sm:p-6">
           <BillingPlusIllustration className="mx-auto w-44 text-app-accent opacity-80" />
           <div className="mt-6 space-y-4">
             <div className="flex gap-3">

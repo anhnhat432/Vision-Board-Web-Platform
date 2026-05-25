@@ -107,7 +107,7 @@ export function ScheduleStepLab({
   return (
     <div className="mx-auto max-w-4xl space-y-4 sm:space-y-5">
       <section
-        className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5"
+        className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5"
         aria-labelledby="schedule-main-title"
       >
         <div className="flex items-start gap-2">

@@ -310,7 +310,7 @@ export function ReflectionJournal() {
       </AlertDialog>
 
       {/* Hero Section */}
-      <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8">
+      <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6">
         <div className="flex flex-col gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
           <h1 className="font-serif text-4xl font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
@@ -381,7 +381,7 @@ export function ReflectionJournal() {
 
           <div className="mt-4 grid gap-5">
             {pendingReflectionDraft ? (
-              <div className="rounded-card border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
+              <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p>Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.</p>
                   <div className="flex flex-wrap gap-2">
@@ -416,14 +416,14 @@ export function ReflectionJournal() {
             </div>
 
             {/* New Entry Section - Warm Tone */}
-            <div className="rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8">
+            <div className="surface-raised rounded-xl border border-app-warm-border bg-app-warm-soft p-5 md:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-xs font-medium text-app-warm ring-1 ring-app-warm-border">
                   Phản tư hôm nay
                 </span>
               </div>
 
-              <p className="font-serif text-2xl font-medium leading-7 text-app-warm-strong mb-4">
+              <p className="mb-4 font-serif text-lg font-medium leading-7 text-app-warm-strong">
                 {JOURNAL_PROMPTS[0]}
               </p>
 
@@ -481,7 +481,7 @@ export function ReflectionJournal() {
               </Button>
             </div>
 
-            <div className="rounded-card border border-app-line bg-app-surface p-4">
+            <div className="rounded-xl border border-app-line bg-app-surface p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Gợi ý bắt đầu</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {JOURNAL_PROMPTS.map((prompt) => (
@@ -514,7 +514,7 @@ export function ReflectionJournal() {
             { label: "Tháng này", value: monthlyCount },
             { label: "Review tuần", value: weeklyReviewCount },
           ].map((item) => (
-            <Card key={item.label} className="rounded-card border border-app-line bg-app-surface p-4">
+            <Card key={item.label} className="rounded-xl border border-app-line bg-app-surface p-4">
               <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">{item.label}</p>
               <p className="mt-1 font-serif text-3xl font-medium text-app-ink tabular-nums">
                 <CountUp value={item.value} />
@@ -526,9 +526,9 @@ export function ReflectionJournal() {
 
       {/* Empty State */}
       {sortedReflections.length === 0 ? (
-        <Card className="rounded-card border border-app-line bg-app-surface p-10 text-center">
+        <Card className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-10 text-center">
           <BookOpen className="mx-auto h-12 w-12 text-app-accent" />
-          <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Bắt đầu nhật ký của bạn</h2>
+          <h2 className="mt-4 font-serif text-lg font-medium text-app-ink">Bắt đầu nhật ký của bạn</h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
             Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển.
           </p>
@@ -555,7 +555,7 @@ export function ReflectionJournal() {
               const phaseTone = getJournalPhaseTone();
 
               return (
-                <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+                <Card key={reflection.id} className="rounded-xl border border-app-line bg-app-surface p-4 md:p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -643,7 +643,7 @@ export function ReflectionJournal() {
           </div>
 
           {filteredReflections.length === 0 && sortedReflections.length > 0 && (
-            <Card className="rounded-card border border-app-line border-dashed bg-app-bg p-8 text-center">
+            <Card className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
               <p className="text-sm text-app-ink-muted">Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.</p>
             </Card>
           )}

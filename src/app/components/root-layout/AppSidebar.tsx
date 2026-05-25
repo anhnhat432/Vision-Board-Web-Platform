@@ -73,7 +73,7 @@ export function AppSidebar({
         <button
           type="button"
           onClick={() => onNavigate("/")}
-          className="flex items-center gap-2.5 rounded-lg text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="-mx-1 flex items-center gap-2.5 rounded-lg px-1 py-1 text-left transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-app-ink/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
           aria-label="Về trang chủ Dear Our Future"
         >
           <img

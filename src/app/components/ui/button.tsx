@@ -1,35 +1,65 @@
-import { forwardRef, type ComponentProps, type CSSProperties, type PointerEvent } from "react";
+import { forwardRef, type ComponentProps } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { useReducedMotion } from "./use-reduced-motion";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "./utils";
 
-const DEFAULT_BUTTON_STYLE = {
-  "--button-shift-x": "0px",
-  "--button-shift-y": "0px",
-  "--button-pointer-x": "0.5",
-  "--button-pointer-y": "0.5",
-} as CSSProperties;
-
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight transition-[transform,box-shadow,background-color,color,border-color] duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 active:scale-[0.98]",
+  cn(
+    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight",
+    "shrink-0 [&_svg]:shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+    "transition-[transform,box-shadow,background-color,color,border-color,text-decoration-color] duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+    "active:duration-[120ms]",
+    "outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "motion-reduce:transition-none motion-reduce:transform-none motion-reduce:active:scale-100",
+  ),
   {
     variants: {
       variant: {
-        default: "border border-transparent bg-app-accent text-white shadow-sm hover:bg-[#284f45]",
-        destructive:
-          "border border-transparent bg-destructive text-white shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_-4px_rgba(220,38,38,0.32)] hover:bg-destructive/92 hover:-translate-y-px focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive",
-        outline: "border border-app-line bg-app-surface text-app-ink hover:bg-app-bg",
-        secondary: "border border-transparent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white",
-        ghost: "text-app-ink hover:bg-app-bg",
-        link: "text-primary underline-offset-4 hover:underline px-0",
+        default: cn(
+          "border border-transparent bg-app-accent text-white shadow-[var(--shadow-1)]",
+          "hover:bg-app-accent/95 hover:shadow-[var(--shadow-2)]",
+          "active:scale-[0.98] active:shadow-[var(--shadow-1)]",
+          "focus-visible:ring-app-accent/40",
+        ),
+        destructive: cn(
+          "border border-transparent bg-destructive text-white shadow-[var(--shadow-1)]",
+          "hover:bg-destructive/90 hover:shadow-[var(--shadow-2)]",
+          "active:scale-[0.98] active:shadow-[var(--shadow-1)]",
+          "focus-visible:ring-destructive/40",
+        ),
+        outline: cn(
+          "border border-app-line bg-app-surface text-app-ink",
+          "hover:border-app-accent/40 hover:bg-app-accent-soft/30",
+          "active:scale-[0.98] active:bg-app-accent-soft/50",
+          "focus-visible:ring-app-accent/40",
+        ),
+        secondary: cn(
+          "border border-transparent bg-app-accent-soft text-app-accent",
+          "hover:bg-app-accent-soft/80",
+          "active:scale-[0.98]",
+          "focus-visible:ring-app-accent/40",
+        ),
+        ghost: cn(
+          "bg-transparent text-app-ink",
+          "hover:bg-app-ink/5",
+          "active:scale-[0.98] active:bg-app-ink/[0.08]",
+          "focus-visible:ring-app-accent/40",
+        ),
+        link: cn(
+          "px-0 text-app-accent underline-offset-4",
+          "hover:underline hover:decoration-app-accent/60 hover:decoration-1",
+          "active:text-app-accent/80",
+          "focus-visible:ring-app-accent/40",
+        ),
       },
       size: {
         default: "h-10 px-4 py-2 has-[>svg]:px-3.5",
         sm: "h-9 gap-1.5 px-3.5 text-sm has-[>svg]:px-3",
         lg: "h-12 px-6 text-base has-[>svg]:px-5",
-        icon: "size-10",
+        icon: "size-11 sm:size-9 active:scale-[0.96]",
       },
     },
     defaultVariants: {
@@ -42,75 +72,47 @@ const buttonVariants = cva(
 type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
-    /**
-     * Add an ambient brand glow pulse. Reserve for the single most
-     * important primary CTA on the page (e.g. dashboard hero).
-     * Respects reduced-motion automatically.
-     */
-    glow?: boolean;
+    loading?: boolean;
   };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant, size, asChild = false, glow = false, style, onPointerMove, onPointerLeave, ...props },
+  { className, variant, size, asChild = false, loading = false, disabled, children, ...props },
   ref,
 ) {
-  const prefersReducedMotion = useReducedMotion();
-  const Comp = asChild ? Slot : "button";
-  const isPrimaryVariant = variant === undefined || variant === "default";
-  const magnetic = !prefersReducedMotion && isPrimaryVariant;
-  // Glow is a quiet box-shadow pulse (no movement) so we keep it on even when
-  // the OS asks for reduced motion — it's a low-vestibular visual cue.
-  const showGlow = glow;
+  const classes = cn(buttonVariants({ variant, size, className }));
 
-  const setPointer = (element: HTMLElement, x: number, y: number, hovering: boolean) => {
-    const shiftX = ((x - 0.5) * 5).toFixed(2);
-    const shiftY = ((y - 0.5) * 4).toFixed(2);
-
-    element.style.setProperty("--button-shift-x", `${shiftX}px`);
-    element.style.setProperty("--button-shift-y", `${shiftY}px`);
-    element.style.setProperty("--button-pointer-x", x.toFixed(4));
-    element.style.setProperty("--button-pointer-y", y.toFixed(4));
-    element.dataset.buttonHovering = hovering ? "true" : "false";
-  };
-
-  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
-    onPointerMove?.(event as never);
-
-    if (event.defaultPrevented || !magnetic || event.pointerType === "touch") {
-      return;
-    }
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    if (bounds.width === 0 || bounds.height === 0) return;
-
-    const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
-    const pointerY = Math.min(Math.max((event.clientY - bounds.top) / bounds.height, 0), 1);
-
-    setPointer(event.currentTarget as HTMLElement, pointerX, pointerY, true);
-  };
-
-  const handlePointerLeave = (event: PointerEvent<HTMLElement>) => {
-    onPointerLeave?.(event as never);
-
-    if (!magnetic) return;
-    setPointer(event.currentTarget as HTMLElement, 0.5, 0.5, false);
-  };
+  if (asChild) {
+    return (
+      <Slot ref={ref} data-slot="button" className={classes} {...props}>
+        {children}
+      </Slot>
+    );
+  }
 
   return (
-    <Comp
+    <button
       ref={ref}
       data-slot="button"
-      data-button-hovering="false"
-      className={cn(
-        buttonVariants({ variant, size, className }),
-        magnetic && "button-magnetic",
-        showGlow && "brand-glow-pulse",
-      )}
-      style={{ ...DEFAULT_BUTTON_STYLE, ...style }}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
+      data-loading={loading || undefined}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={classes}
       {...props}
-    />
+    >
+      {loading ? (
+        <>
+          <span
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+            aria-hidden="true"
+          >
+            <Loader2 className="size-4 animate-spin" />
+          </span>
+          <span className="opacity-60">{children}</span>
+        </>
+      ) : (
+        children
+      )}
+    </button>
   );
 });
 

@@ -104,7 +104,7 @@ export function PlanPreview({
   const selectedTimelinePhase = getTimelinePhase(selectedTimelineWeekData?.weekNumber ?? 1);
   const SelectedTimelinePhaseIcon = selectedTimelinePhase.icon;
   const totalWeekOneTasks = week1?.tasks.length ?? 0;
-  const accordionItemClass = "rounded-[var(--r-card)] border border-app-line bg-app-surface px-5 shadow-sm";
+  const accordionItemClass = "surface-raised rounded-xl border border-app-line bg-app-surface px-5";
   const accordionTriggerClass = "text-base font-semibold text-app-ink hover:no-underline";
 
   return (
@@ -117,7 +117,7 @@ export function PlanPreview({
         </p>
       </div>
 
-      <section className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 shadow-sm">
+      <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">

@@ -77,7 +77,7 @@ export function ScheduleStep({
   return (
     <div className="mx-auto max-w-4xl space-y-5">
       <section
-        className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6"
+        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6"
         aria-labelledby="schedule-main-title"
       >
         <div className="flex items-start gap-2">

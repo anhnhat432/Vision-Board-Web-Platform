@@ -55,7 +55,7 @@ function getTokenSyncBadgeClass(syncBadgeClass: string, syncBadgeLabel: string):
 
 export function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-card border border-app-line bg-app-surface p-8 text-center">
+    <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
       <Loader2 className="mx-auto h-5 w-5 animate-spin text-app-accent" aria-hidden="true" />
       <p className="sr-only">{title}</p>
       <p className="mt-3 text-sm text-app-ink-soft">Đang mở tab...</p>
@@ -80,7 +80,7 @@ export function TwelveWeekDashboardState({
   const Icon = kind === "loading" ? Loader2 : Sparkles;
 
   return (
-    <div className="mx-auto mt-12 max-w-2xl rounded-card border border-app-line bg-app-surface p-8 text-center">
+    <div className="mx-auto mt-12 max-w-2xl surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
         <Icon className={`h-5 w-5 ${kind === "loading" ? "animate-spin" : ""}`} aria-hidden="true" />
       </div>
@@ -266,7 +266,7 @@ export function TwelveWeekGoalSwitcher({
         >
           <SelectValue placeholder="Chọn mục tiêu" />
         </SelectTrigger>
-        <SelectContent className="rounded-card border border-app-line bg-app-surface p-1.5 shadow-md backdrop-blur-none">
+        <SelectContent className="surface-raised rounded-xl border border-app-line bg-app-surface p-1.5 shadow-md backdrop-blur-none">
           {allGoals.map((goal) => (
             <SelectItem
               key={goal.id}

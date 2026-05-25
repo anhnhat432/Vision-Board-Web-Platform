@@ -52,7 +52,7 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
 
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
       aria-labelledby="dashboard-trend-title"
     >
       <div>

@@ -787,7 +787,6 @@ export function TwelveWeekWeekTab({
                 </p>
                 <Button
                   size="lg"
-                  glow
                   className="w-full shrink-0 sm:w-auto"
                   onClick={handleSaveReviewClick}
                   disabled={isSavingReview || !canSubmitWeeklyReview}

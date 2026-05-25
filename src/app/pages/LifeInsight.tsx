@@ -210,7 +210,7 @@ export function LifeInsight() {
 
         <div className="space-y-6">
           {/* Hero card */}
-          <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+          <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
             {/* Header section */}
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
@@ -248,7 +248,7 @@ export function LifeInsight() {
             {/* Visualization row */}
             <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
               {/* Radar chart */}
-              <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+              <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-semibold text-app-ink">Bánh xe của bạn</h3>
                   <p className="text-xs text-app-ink-muted">8 lĩnh vực hiện tại</p>
@@ -274,7 +274,7 @@ export function LifeInsight() {
               </div>
 
               {/* Selection summary */}
-              <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+              <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
                 <p className="text-xs text-app-ink-muted">Đang chọn</p>
                 <div className="mt-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
@@ -307,7 +307,7 @@ export function LifeInsight() {
           </div>
 
           {/* Life areas grid */}
-          <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+          <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
             <div>
               <h3 className="text-base font-semibold text-app-ink">Hoặc chọn lĩnh vực khác</h3>
               <p className="mt-1 text-xs text-app-ink-muted">Click để đặt làm trọng tâm</p>
@@ -354,7 +354,7 @@ export function LifeInsight() {
           </div>
 
           {/* Intent options */}
-          <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+          <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
             <div>
               <h3 className="text-base font-semibold text-app-ink">Mục đích chính của bạn với lĩnh vực này</h3>
               <p className="mt-1 text-xs text-app-ink-muted">Chọn 1 — sẽ định hình kiểu mục tiêu SMART</p>
@@ -403,7 +403,7 @@ export function LifeInsight() {
           </div>
 
           {/* CTA card */}
-          <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+          <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking text-app-ink-muted">TIẾP THEO</p>
