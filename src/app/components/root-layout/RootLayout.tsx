@@ -1,6 +1,7 @@
 import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ChevronDown,
+  ChevronRight,
   Compass,
   CreditCard,
   FileText,
@@ -79,7 +80,7 @@ import {
   NAV_ITEMS,
   prefetchRoute,
 } from "./navConfig";
-import { GUIDED_PATHS, getRouteMeta } from "./routeMeta";
+import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
 import {
   buildLoginRedirect,
   isAuthProtectedPath,
@@ -418,6 +419,7 @@ export function RootLayout() {
   );
 
   const pageMeta = getRouteMeta(location.pathname);
+  const breadcrumbTrail = getBreadcrumbTrail(location.pathname);
   const isSignedOutVisitor = isConfigured && !user;
   const { bottomNavItems, mobileMenuNavItems, primaryNavItems, secondaryNavItems } =
     getNavItemsForState(isSignedOutVisitor);
@@ -1290,11 +1292,54 @@ export function RootLayout() {
               <div className="sticky top-0 z-40 hidden border-b border-app-line bg-app-bg/95 backdrop-blur-sm lg:block">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
                   <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2">
-                    <span className="text-xs text-app-ink-muted">Workspace</span>
-                    <span aria-hidden="true" className="text-app-ink-muted">
-                      /
-                    </span>
-                    <span className="truncate text-sm font-medium text-app-ink">{pageMeta.label}</span>
+                    {breadcrumbTrail.length >= 2 ? (
+                      <ol className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <li className="inline-flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => navigateAppRoute("/")}
+                            className="rounded text-xs text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          >
+                            Workspace
+                          </button>
+                          <ChevronRight className="size-3.5 text-app-ink-muted" aria-hidden="true" />
+                        </li>
+                        {breadcrumbTrail.map((crumb, index) => {
+                          const isLast = index === breadcrumbTrail.length - 1;
+                          return (
+                            <li key={crumb.path} className="inline-flex min-w-0 items-center gap-1.5">
+                              {isLast ? (
+                                <span
+                                  aria-current="page"
+                                  className="truncate text-sm font-medium text-app-ink"
+                                >
+                                  {crumb.label}
+                                </span>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => navigateAppRoute(crumb.path)}
+                                    className="truncate rounded text-sm text-app-ink-soft transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                                  >
+                                    {crumb.label}
+                                  </button>
+                                  <ChevronRight className="size-3.5 text-app-ink-muted" aria-hidden="true" />
+                                </>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    ) : (
+                      <>
+                        <span className="text-xs text-app-ink-muted">Workspace</span>
+                        <span aria-hidden="true" className="text-app-ink-muted">
+                          /
+                        </span>
+                        <span className="truncate text-sm font-medium text-app-ink">{pageMeta.label}</span>
+                      </>
+                    )}
                   </nav>
                   <div className="flex items-center gap-2">
                     {!demoMode && user ? <SyncStatusPill compact /> : null}

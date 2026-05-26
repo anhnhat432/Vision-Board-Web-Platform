@@ -322,8 +322,10 @@ export function ReflectionJournal() {
         {/* Toolbar */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative min-w-[200px] flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
             <Input
+              type="search"
+              aria-label="Tìm kiếm nhật ký"
               placeholder="Tìm kiếm nhật ký..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -398,16 +400,18 @@ export function ReflectionJournal() {
 
             <div className="grid gap-5 md:grid-cols-2">
               <div className="stack-tight">
-                <Label>Ngày</Label>
+                <Label htmlFor="reflection-date">Ngày</Label>
                 <Input
+                  id="reflection-date"
                   type="date"
                   value={newReflection.date}
                   onChange={(event) => setNewReflection({ ...newReflection, date: event.target.value })}
                 />
               </div>
               <div className="stack-tight">
-                <Label>Tiêu đề</Label>
+                <Label htmlFor="reflection-title">Tiêu đề</Label>
                 <Input
+                  id="reflection-title"
                   placeholder="Ví dụ: Một ngày tôi lấy lại được nhịp"
                   value={newReflection.title}
                   onChange={(event) => setNewReflection({ ...newReflection, title: event.target.value })}
@@ -428,6 +432,8 @@ export function ReflectionJournal() {
               </p>
 
               <Textarea
+                id="reflection-content"
+                aria-label="Nội dung nhật ký phản tư"
                 placeholder="Viết về trải nghiệm, điều bạn học được, khoảnh khắc đáng nhớ hoặc điều bạn muốn nhắc mình sau này..."
                 value={newReflection.content}
                 onChange={(event) => handleReflectionContentChange(event.target.value)}
@@ -437,7 +443,7 @@ export function ReflectionJournal() {
                     handleAddReflection();
                   }
                 }}
-                className="min-h-[140px] rounded-lg border border-app-warm-border bg-app-surface px-3.5 py-2.5 text-sm text-app-ink focus:border-app-warm focus:ring-app-warm/30"
+                className="min-h-[140px] max-h-[240px] border-app-warm-border focus-visible:border-app-warm focus-visible:ring-app-warm/20"
               />
 
               {/* Mood Selector */}

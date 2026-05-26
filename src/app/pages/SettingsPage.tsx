@@ -345,16 +345,29 @@ export function SettingsPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="settings-display-name" className="mb-2 block text-sm font-medium text-app-ink">
+                <label htmlFor="settings-display-name" className="mb-1.5 block text-sm font-medium leading-5 text-app-ink">
                   Tên hiển thị
                 </label>
-                <input id="settings-display-name" readOnly value={accountLabel} className={`${inputClass} bg-app-bg`} />
+                <input
+                  id="settings-display-name"
+                  readOnly
+                  aria-readonly="true"
+                  value={accountLabel}
+                  className={`${inputClass} bg-app-bg`}
+                />
               </div>
               <div>
-                <label htmlFor="settings-email" className="mb-2 block text-sm font-medium text-app-ink">
+                <label htmlFor="settings-email" className="mb-1.5 block text-sm font-medium leading-5 text-app-ink">
                   Email
                 </label>
-                <input id="settings-email" readOnly value={accountEmail} className={`${inputClass} bg-app-bg`} />
+                <input
+                  id="settings-email"
+                  type="email"
+                  readOnly
+                  aria-readonly="true"
+                  value={accountEmail}
+                  className={`${inputClass} bg-app-bg`}
+                />
               </div>
             </div>
           </div>
