@@ -3290,3 +3290,71 @@ html.dark .bg-app-warm.text-white {
   color: var(--app-bg);
 }
 
+/* ── P2-01 Motion Design System utilities ────────────────────────────
+ * Foundation utility classes for Phase 2 motion work. These wrap the
+ * --duration-* and --ease-* tokens so component code stays declarative.
+ * Each respects prefers-reduced-motion via the rule at the bottom.
+ *
+ * Usage:
+ *  - .motion-reveal       : fade + 8px translateY enter (e.g. section reveal)
+ *  - .motion-reveal-fade  : pure fade enter (e.g. async content)
+ *  - .motion-press        : button/icon press feedback (scale 0.98 on active)
+ *  - .motion-lift         : card hover lift (translateY -1px)
+ * ───────────────────────────────────────────────────────────────────── */
+@keyframes motion-reveal-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes motion-reveal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.motion-reveal {
+  animation: motion-reveal-fade-up var(--duration-medium) var(--ease-decelerate) both;
+}
+.motion-reveal-fade {
+  animation: motion-reveal-fade var(--duration-base) var(--ease-standard) both;
+}
+.motion-press {
+  transition: transform var(--duration-instant) var(--ease-standard);
+}
+.motion-press:active {
+  transform: scale(0.98);
+}
+.motion-lift {
+  transition:
+    transform var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+@media (hover: hover) {
+  .motion-lift:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-reveal,
+  .motion-reveal-fade {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .motion-press:active {
+    transform: none;
+  }
+  .motion-lift:hover {
+    transform: none;
+  }
+}
+
