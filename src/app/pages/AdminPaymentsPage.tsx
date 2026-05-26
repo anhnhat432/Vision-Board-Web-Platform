@@ -257,7 +257,7 @@ export function AdminPaymentsPage() {
                     <TableCell className="font-mono text-xs text-white">
                       <p>{payment.orderId}</p>
                       {payment.cassoTransactionId ? (
-                        <p className="mt-1 truncate text-[11px] text-slate-500">
+                        <p className="mt-1 truncate text-xs text-slate-500">
                           TX: {payment.cassoTransactionId}
                         </p>
                       ) : null}
@@ -277,7 +277,7 @@ export function AdminPaymentsPage() {
                         {PAYMENT_STATUS_LABELS[payment.status]}
                       </AdminStatusBadge>
                       {payment.manualCompletedBy ? (
-                        <p className="mt-2 text-[11px] text-slate-500">Manual: {payment.manualCompletedBy}</p>
+                        <p className="mt-2 text-xs text-slate-500">Manual: {payment.manualCompletedBy}</p>
                       ) : null}
                     </TableCell>
                     <TableCell className="text-xs text-slate-400">

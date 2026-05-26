@@ -20,6 +20,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: R
         nav: "flex items-center gap-1",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
+          // shadcn/react-day-picker primitive: opacity is the default disabled-affordance pattern.
           "size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
         ),
         nav_button_previous: "absolute left-1",

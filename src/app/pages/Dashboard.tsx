@@ -626,7 +626,7 @@ function DashboardContent({
             source="dashboard"
             context="dashboard"
             triggerLabel=""
-            triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface/90 shadow-sm opacity-70 transition-all duration-200 hover:opacity-100 hover:bg-app-surface hover:text-app-ink hover:shadow-md backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface/90 text-app-ink-soft shadow-sm transition-all duration-200 hover:bg-app-surface hover:text-app-ink hover:shadow-md backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           />
         </div>
       </div>

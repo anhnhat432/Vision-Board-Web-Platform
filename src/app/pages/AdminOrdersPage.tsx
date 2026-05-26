@@ -260,7 +260,7 @@ export function AdminOrdersPage() {
               }`}
             >
               <span>{label}</span>
-              <span className="rounded-[var(--r-pill)] bg-white/10 px-1.5 text-[10px] tabular-nums text-slate-200">
+              <span className="rounded-[var(--r-pill)] bg-white/10 px-1.5 text-xs tabular-nums text-slate-200">
                 {counts[status]}
               </span>
             </button>
@@ -269,9 +269,31 @@ export function AdminOrdersPage() {
       </div>
 
       {loading && orders.length === 0 ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-        </div>
+        <ul className="space-y-3" role="status" aria-live="polite" aria-busy="true">
+          <span className="sr-only">Đang tải danh sách đơn in...</span>
+          {[0, 1, 2, 3].map((index) => (
+            <li
+              key={index}
+              className={`${adminSurface.card} animate-pulse space-y-4 p-5 motion-reduce:animate-none motion-reduce:opacity-60`}
+            >
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="space-y-2">
+                  <div className="h-4 w-40 rounded bg-white/10" />
+                  <div className="h-3 w-56 rounded bg-white/10" />
+                </div>
+                <div className="h-6 w-24 rounded bg-white/10" />
+              </div>
+              <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-5">
+                {[0, 1, 2, 3, 4].map((cell) => (
+                  <div key={cell} className="space-y-2">
+                    <div className="h-3 w-16 rounded bg-white/10" />
+                    <div className="h-4 w-24 rounded bg-white/10" />
+                  </div>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : filteredOrders.length === 0 ? (
         <AdminEmptyState
           icon={ClipboardList}

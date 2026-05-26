@@ -749,7 +749,7 @@ export function VisionBoardEditor() {
                 </div>
 
                 <div className="stack-stack">
-                  <h1 className="max-w-3xl text-2xl font-medium leading-[1.1] tracking-[-0.018em] text-app-ink mt-2 sm:text-3xl md:text-4xl">
+                  <h1 className="max-w-3xl text-2xl font-medium tracking-tight text-app-ink mt-2 sm:text-3xl md:text-4xl">
                     {boardName || "Bức tranh tương lai"}
                   </h1>
                   <p className="max-w-2xl text-base leading-7 text-app-ink-soft">

@@ -200,7 +200,7 @@ export function AdminCatalogPage() {
                         className="h-12 w-12 rounded-[var(--r-tile)] border border-white/10 object-cover"
                       />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-white/15 bg-white/5 text-[10px] text-slate-500">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-white/15 bg-white/5 text-xs text-slate-500">
                         no img
                       </div>
                     )}

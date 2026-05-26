@@ -28,6 +28,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Skeleton } from "../components/ui/skeleton";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -280,7 +281,7 @@ export function ReflectionJournal() {
     navigate("/12-week-system");
   };
 
-  if (!userData) return null;
+  if (!userData) return <ReflectionJournalSkeleton />;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
@@ -614,9 +615,10 @@ export function ReflectionJournal() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Mở tuỳ chọn cho nhật ký ${reflection.title || formatCalendarDate(reflection.date)}`}
                           className="h-9 w-9 shrink-0 text-app-ink-soft hover:text-app-ink"
                         >
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -655,6 +657,30 @@ export function ReflectionJournal() {
           )}
         </section>
       )}
+    </div>
+  );
+}
+
+function ReflectionJournalSkeleton() {
+  return (
+    <div
+      className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Đang tải nhật ký...</span>
+      <Skeleton className="h-40 rounded-2xl bg-app-line/60" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {[0, 1, 2].map((index) => (
+          <Skeleton key={index} className="h-20 rounded-xl bg-app-line/60" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {[0, 1, 2, 3, 4].map((index) => (
+          <Skeleton key={index} className="h-24 rounded-xl bg-app-line/60" />
+        ))}
+      </div>
     </div>
   );
 }

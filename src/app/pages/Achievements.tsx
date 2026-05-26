@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
+import { Skeleton } from "../components/ui/skeleton";
 import { emptyNarratives } from "../components/empty-states/narratives";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { celebrateLarge } from "@/lib/effects/celebrate";
@@ -142,7 +143,7 @@ export function Achievements() {
     seenAchievementIdsRef.current = currentIds;
   }, [userData]);
 
-  if (!userData) return null;
+  if (!userData) return <AchievementsSkeleton />;
 
   const totalAchievementCount = achievementCards.length;
   const unlockedCount = achievementCards.filter((achievement) => achievement.unlocked).length;
@@ -247,6 +248,34 @@ export function Achievements() {
         <Button type="button" variant="outline" onClick={() => navigate("/gallery")}>
           Mở thư viện vision board
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function AchievementsSkeleton() {
+  return (
+    <div
+      className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Đang tải thành tựu...</span>
+      <div className="space-y-3">
+        <Skeleton className="h-3 w-24 rounded bg-app-line/60" />
+        <Skeleton className="h-9 w-2/3 max-w-md rounded bg-app-line/60" />
+        <Skeleton className="h-4 w-3/4 max-w-lg rounded bg-app-line/60" />
+      </div>
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[0, 1, 2, 3].map((index) => (
+          <Skeleton key={index} className="h-20 rounded-xl bg-app-line/60" />
+        ))}
+      </div>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((index) => (
+          <Skeleton key={index} className="h-40 rounded-xl bg-app-line/60" />
+        ))}
       </div>
     </div>
   );

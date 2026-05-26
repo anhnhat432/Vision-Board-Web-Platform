@@ -35,6 +35,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
+import { Skeleton } from "../components/ui/skeleton";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { deleteVisionBoard, getUserData, saveUserData, type VisionBoard } from "../utils/storage";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -161,7 +162,7 @@ export function VisionBoardGallery() {
     [boardsByYear],
   );
 
-  if (!userData) return null;
+  if (!userData) return <VisionBoardGallerySkeleton />;
 
   const totalItems = userData.visionBoards.reduce((sum, board) => sum + board.items.length, 0);
   const latestBoard = userData.visionBoards[userData.visionBoards.length - 1];
@@ -498,6 +499,25 @@ export function VisionBoardGallery() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function VisionBoardGallerySkeleton() {
+  return (
+    <div
+      className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Đang tải bộ sưu tập tầm nhìn...</span>
+      <Skeleton className="h-44 rounded-2xl bg-app-line/60" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((index) => (
+          <Skeleton key={index} className="aspect-[4/5] rounded-xl bg-app-line/60" />
+        ))}
+      </div>
     </div>
   );
 }
