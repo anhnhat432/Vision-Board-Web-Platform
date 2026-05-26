@@ -6,3 +6,4 @@ export { MotionParallaxLayer } from "./MotionParallaxLayer";
 export { MotionStaggerItem } from "./MotionStaggerItem";
 export { MotionStaggerList } from "./MotionStaggerList";
 export { MotionTilt } from "./MotionTilt";
+export { RevealOnScroll } from "./RevealOnScroll";
