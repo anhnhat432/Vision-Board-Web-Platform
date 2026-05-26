@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   CalendarRange,
-  Check,
   Compass,
   HardDrive,
   Lock,
@@ -14,6 +13,8 @@ import {
 } from "lucide-react";
 
 import { RevealOnScroll } from "@/app/components/motion";
+
+import { HeroMockupAnimated } from "./HeroMockupAnimated";
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -189,60 +190,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </div>
 
         {/* Mockup preview card */}
-        <div className="appear-fade-up mx-auto w-full max-w-[360px] lg:mx-0 lg:max-w-none lg:[animation-delay:120ms]">
-          <div className="surface-elevated rounded-2xl border border-app-line bg-app-surface p-5 lg:rotate-1">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
-                <Target className="h-3.5 w-3.5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mục tiêu</p>
-                <p className="truncate text-xs font-medium text-app-ink">Đọc 12 cuốn sách trong năm</p>
-              </div>
-            </div>
-            <span className="shrink-0 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-xs font-semibold text-app-accent">
-              Tuần 4/12
-            </span>
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs text-app-ink-soft">
-              <span>Tiến độ chu kỳ</span>
-              <span className="font-semibold tabular-nums text-app-accent">42%</span>
-            </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-app-bg">
-              <div className="h-full rounded-full bg-app-accent" style={{ width: "42%" }} />
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              Việc hôm nay · 7/14
-            </p>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] bg-app-accent text-white">
-                  <Check className="h-2.5 w-2.5" />
-                </span>
-                <span className="text-xs text-app-ink-muted line-through">Đọc 30 trang "Atomic Habits"</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-4 w-4 shrink-0 rounded-[4px] border border-app-line" aria-hidden="true" />
-                <span className="text-xs text-app-ink">Ghi 3 dòng phản tư</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-4 w-4 shrink-0 rounded-[4px] border border-app-line" aria-hidden="true" />
-                <span className="text-xs text-app-ink">Review tuần lúc 21h</span>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-4 border-t border-app-line pt-3 text-xs italic text-app-ink-muted">
-            Ảnh chụp giao diện · dữ liệu mô phỏng
-          </p>
-        </div>
-        </div>
+        <HeroMockupAnimated />
         </div>
       </section>
 
