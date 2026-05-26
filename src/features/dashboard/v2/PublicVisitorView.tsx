@@ -12,6 +12,8 @@ import {
   UserPlus,
 } from "lucide-react";
 
+import { RevealOnScroll } from "@/app/components/motion";
+
 import { HeroMockupAnimated } from "./HeroMockupAnimated";
 
 interface PublicVisitorViewProps {
@@ -233,7 +235,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </section>
       ) : null}
 
-      <section
+      <RevealOnScroll
+        as="section"
         className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
         aria-labelledby="dashboard-how-it-works-title"
       >
@@ -264,9 +267,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             );
           })}
         </ol>
-      </section>
+      </RevealOnScroll>
 
-      <section className="grid gap-4 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
+      <RevealOnScroll as="section" className="grid gap-4 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
         {FEATURE_ROWS.map((feature) => {
           const Icon = feature.icon;
 
@@ -292,9 +295,10 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             </a>
           );
         })}
-      </section>
+      </RevealOnScroll>
 
-      <section
+      <RevealOnScroll
+        as="section"
         className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
         aria-labelledby="dashboard-public-cta-title"
       >
@@ -324,7 +328,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             </button>
           </div>
         </div>
-      </section>
+      </RevealOnScroll>
     </div>
   );
 }
