@@ -205,7 +205,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
         <Button
           size="icon"
           variant="destructive"
-          className="absolute -right-2 -top-2 h-8 w-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute -right-2 -top-2 h-8 w-8 rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
           onClick={() => onDelete(item.id)}
           aria-label="Xóa phần tử"
           data-export-skip="true"

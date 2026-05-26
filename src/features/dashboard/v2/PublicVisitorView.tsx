@@ -92,13 +92,18 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)] md:items-center md:gap-10">
-        <div>
+      <section className="relative -mx-4 overflow-hidden bg-app-bg px-4 pb-2 pt-6 sm:-mx-6 sm:px-6 md:pt-12 lg:min-h-[80vh] lg:items-center lg:py-16">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-2/3 bg-gradient-to-b from-transparent to-app-warm-soft/30"
+        />
+        <div className="relative z-10 grid gap-10 lg:grid-cols-[55fr_45fr] lg:items-center lg:gap-12">
+        <div className="appear-fade-up">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">
               Dear Our Future · App lập kế hoạch cá nhân
             </p>
-            <h1 className="mt-4 max-w-3xl font-serif text-4xl font-medium leading-[1.12] text-app-ink sm:text-5xl">
+            <h1 className="mt-4 max-w-[18ch] font-serif text-4xl font-medium leading-[1.12] tracking-tight text-app-ink md:text-display">
               App biến mục tiêu lớn thành{" "}
               <span className="relative inline-block">
                 <span className="relative z-10">kế hoạch 12 tuần</span>
@@ -119,7 +124,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               </span>{" "}
               và việc hôm nay.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-app-ink-soft">
+            <p className="mt-4 max-w-[60ch] text-base leading-7 text-app-ink-soft md:text-lg">
               Dear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính
               khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.
             </p>
@@ -150,7 +155,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={onStart}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_8px_24px_-12px_rgba(47,93,80,0.55)] transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
               >
                 {heroStartLabel}
                 <ArrowRight className="h-4 w-4" />
@@ -158,7 +163,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={scrollToHowItWorks}
-                className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:border-app-accent/40 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-colors duration-150 hover:border-app-accent/40 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
               >
                 Xem cách app hoạt động
               </button>
@@ -181,8 +186,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           </div>
         </div>
 
-        {/* Mockup preview card — desktop only */}
-        <div className="surface-raised hidden rounded-2xl border border-app-line bg-app-surface p-5 md:block">
+        {/* Mockup preview card */}
+        <div className="appear-fade-up mx-auto w-full max-w-[360px] lg:mx-0 lg:max-w-none lg:[animation-delay:120ms]">
+          <div className="surface-elevated rounded-2xl border border-app-line bg-app-surface p-5 lg:rotate-1">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
@@ -233,6 +239,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           <p className="mt-4 border-t border-app-line pt-3 text-xs italic text-app-ink-muted">
             Ảnh chụp giao diện · dữ liệu mô phỏng
           </p>
+        </div>
+        </div>
         </div>
       </section>
 

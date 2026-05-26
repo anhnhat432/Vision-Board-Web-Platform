@@ -24,7 +24,7 @@ import { Button } from "../components/ui/button";
 import { CountUp } from "../components/ui/count-up";
 import { getGoalArchetypeIcon } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { Skeleton } from "../components/ui/skeleton";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -56,11 +56,7 @@ export function GoalTracker() {
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
 
   if (!userData) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
+    return <GoalTrackerSkeleton />;
   }
 
   return (
@@ -712,6 +708,30 @@ function GoalTrackerContent({
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function GoalTrackerSkeleton() {
+  return (
+    <div
+      className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Đang tải danh sách mục tiêu...</span>
+      <Skeleton className="h-40 rounded-2xl bg-app-line/60" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[0, 1, 2, 3].map((index) => (
+          <Skeleton key={index} className="h-20 rounded-xl bg-app-line/60" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {[0, 1, 2].map((index) => (
+          <Skeleton key={index} className="h-32 rounded-xl bg-app-line/60" />
+        ))}
       </div>
     </div>
   );

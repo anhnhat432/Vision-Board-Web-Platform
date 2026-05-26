@@ -417,12 +417,14 @@ export function LoginPage() {
                         id="login-email"
                         type="email"
                         autoComplete="email"
+                        autoFocus
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={submitting || authLoading}
                         className={inputClass}
                         required
+                        aria-required="true"
                         aria-invalid={displayError ? true : undefined}
                         aria-describedby={displayError ? "login-form-error" : undefined}
                       />
@@ -460,6 +462,7 @@ export function LoginPage() {
                           disabled={submitting || authLoading}
                           className={`${inputClass} pr-11`}
                           required
+                          aria-required="true"
                           aria-invalid={displayError ? true : undefined}
                           aria-describedby={displayError ? "login-form-error" : undefined}
                         />
@@ -492,6 +495,7 @@ export function LoginPage() {
                             disabled={submitting || authLoading}
                             className={`${inputClass} pr-11`}
                             required
+                            aria-required="true"
                             aria-invalid={displayError ? true : undefined}
                             aria-describedby={displayError ? "login-form-error" : undefined}
                           />

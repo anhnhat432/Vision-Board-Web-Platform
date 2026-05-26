@@ -174,6 +174,36 @@ export function getRouteMeta(pathname: string): RouteMeta {
   return ROUTE_META.find((item) => item.match(pathname)) ?? ROUTE_META[0];
 }
 
+export interface BreadcrumbCrumb {
+  label: string;
+  path: string;
+  isCurrent: boolean;
+}
+
+export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length < 3) return [];
+
+  const rootMeta = ROUTE_META[0];
+  const crumbs: BreadcrumbCrumb[] = [];
+  let acc = "";
+  for (let i = 0; i < segments.length; i++) {
+    acc += `/${segments[i]}`;
+    const meta = ROUTE_META.find((item) => item.match(acc));
+    if (!meta || meta === rootMeta) continue;
+    const last = crumbs[crumbs.length - 1];
+    if (last && last.label === meta.label) {
+      last.path = acc;
+      continue;
+    }
+    crumbs.push({ label: meta.label, path: acc, isCurrent: false });
+  }
+
+  if (crumbs.length === 0) return [];
+  crumbs[crumbs.length - 1].isCurrent = true;
+  return crumbs;
+}
+
 export function getRouteTone(pathname: string): string {
   if (pathname.startsWith("/journal")) return "journal";
   if (pathname.startsWith("/achievements")) return "achievements";

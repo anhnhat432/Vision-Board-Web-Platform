@@ -92,7 +92,7 @@ export function MockBillingCheckout() {
               Mở Plus demo
             </div>
             <div>
-              <h1 className="text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 Xác nhận mở gói <span className="text-gradient-vibrant">{plan.name}</span>
               </h1>
               <p className="mt-[var(--space-inline)] max-w-2xl text-base leading-7 text-muted-foreground">

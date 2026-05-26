@@ -85,7 +85,7 @@ export function WizardHero({
             ) : null}
             <h1
               data-slot="wizard-hero-title"
-              className="text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl"
+              className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl"
             >
               {title}
             </h1>

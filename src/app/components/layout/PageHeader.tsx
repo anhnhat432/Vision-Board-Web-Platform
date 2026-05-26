@@ -33,7 +33,7 @@ export function PageHeader({ eyebrow, title, description, level = 2, className }
           {eyebrow}
         </p>
       )}
-      <HeadingTag className="text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl">
+      <HeadingTag className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
         {title}
       </HeadingTag>
       {description && (

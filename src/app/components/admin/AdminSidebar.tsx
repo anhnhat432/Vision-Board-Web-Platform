@@ -70,7 +70,7 @@ export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: Adm
               <item.icon className="h-4 w-4 shrink-0" />
               <span className="flex-1 truncate">{item.label}</span>
               {typeof badge === "number" && badge > 0 ? (
-                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-[var(--r-pill)] bg-cyan-500/20 px-1.5 text-[11px] font-semibold text-cyan-200">
+                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-[var(--r-pill)] bg-cyan-500/20 px-1.5 text-xs font-semibold text-cyan-200">
                   {badge}
                 </span>
               ) : null}

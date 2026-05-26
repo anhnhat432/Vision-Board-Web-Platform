@@ -28,6 +28,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Skeleton } from "../components/ui/skeleton";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -280,7 +281,7 @@ export function ReflectionJournal() {
     navigate("/12-week-system");
   };
 
-  if (!userData) return null;
+  if (!userData) return <ReflectionJournalSkeleton />;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
@@ -322,8 +323,10 @@ export function ReflectionJournal() {
         {/* Toolbar */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative min-w-[200px] flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
             <Input
+              type="search"
+              aria-label="Tìm kiếm nhật ký"
               placeholder="Tìm kiếm nhật ký..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -398,16 +401,18 @@ export function ReflectionJournal() {
 
             <div className="grid gap-5 md:grid-cols-2">
               <div className="stack-tight">
-                <Label>Ngày</Label>
+                <Label htmlFor="reflection-date">Ngày</Label>
                 <Input
+                  id="reflection-date"
                   type="date"
                   value={newReflection.date}
                   onChange={(event) => setNewReflection({ ...newReflection, date: event.target.value })}
                 />
               </div>
               <div className="stack-tight">
-                <Label>Tiêu đề</Label>
+                <Label htmlFor="reflection-title">Tiêu đề</Label>
                 <Input
+                  id="reflection-title"
                   placeholder="Ví dụ: Một ngày tôi lấy lại được nhịp"
                   value={newReflection.title}
                   onChange={(event) => setNewReflection({ ...newReflection, title: event.target.value })}
@@ -428,6 +433,8 @@ export function ReflectionJournal() {
               </p>
 
               <Textarea
+                id="reflection-content"
+                aria-label="Nội dung nhật ký phản tư"
                 placeholder="Viết về trải nghiệm, điều bạn học được, khoảnh khắc đáng nhớ hoặc điều bạn muốn nhắc mình sau này..."
                 value={newReflection.content}
                 onChange={(event) => handleReflectionContentChange(event.target.value)}
@@ -437,7 +444,7 @@ export function ReflectionJournal() {
                     handleAddReflection();
                   }
                 }}
-                className="min-h-[140px] rounded-lg border border-app-warm-border bg-app-surface px-3.5 py-2.5 text-sm text-app-ink focus:border-app-warm focus:ring-app-warm/30"
+                className="min-h-[140px] max-h-[240px] border-app-warm-border focus-visible:border-app-warm focus-visible:ring-app-warm/20"
               />
 
               {/* Mood Selector */}
@@ -608,9 +615,10 @@ export function ReflectionJournal() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Mở tuỳ chọn cho nhật ký ${reflection.title || formatCalendarDate(reflection.date)}`}
                           className="h-9 w-9 shrink-0 text-app-ink-soft hover:text-app-ink"
                         >
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -649,6 +657,30 @@ export function ReflectionJournal() {
           )}
         </section>
       )}
+    </div>
+  );
+}
+
+function ReflectionJournalSkeleton() {
+  return (
+    <div
+      className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Đang tải nhật ký...</span>
+      <Skeleton className="h-40 rounded-2xl bg-app-line/60" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {[0, 1, 2].map((index) => (
+          <Skeleton key={index} className="h-20 rounded-xl bg-app-line/60" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {[0, 1, 2, 3, 4].map((index) => (
+          <Skeleton key={index} className="h-24 rounded-xl bg-app-line/60" />
+        ))}
+      </div>
     </div>
   );
 }

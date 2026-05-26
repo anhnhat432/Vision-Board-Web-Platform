@@ -54,7 +54,7 @@ export function AppErrorBoundary() {
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-app-ink sm:text-4xl lg:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-app-ink sm:text-4xl lg:text-5xl">
                     Trang này vừa gặp lỗi, nhưng mình vẫn có thể{" "}
                     <span className="text-app-accent">quay lại flow chính</span> ngay.
                   </h1>
