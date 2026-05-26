@@ -1,5 +1,6 @@
 import { CalendarDays, Flame, TrendingUp, Zap } from "lucide-react";
 
+import { CountUp } from "@/app/components/ui/count-up";
 import {
   formatDateInputValue,
   getTwelveWeekTasksForWeek,
@@ -149,7 +150,19 @@ export function WeekRhythmCard({
 }: WeekRhythmCardProps) {
   const days = buildWeekDays(system, currentWeek, today);
   const safeWeek = currentWeek ?? "--";
-  const stats = [
+  const wheelScoreReady = Number.isFinite(wheelScore) && wheelScore > 0;
+  const stats: Array<{
+    icon: typeof CalendarDays;
+    caption: string;
+    /** When set, render `value` static (e.g. composite strings like "5/12"). */
+    value?: string;
+    /** When set, render an animated CountUp that respects reduced-motion. */
+    numericValue?: number;
+    /** Display formatter for numericValue. */
+    suffix?: string;
+    precision?: number;
+    subLine: string;
+  }> = [
     {
       icon: CalendarDays,
       caption: "Tuần",
@@ -159,19 +172,22 @@ export function WeekRhythmCard({
     {
       icon: TrendingUp,
       caption: "Tỷ lệ lead",
-      value: `${clampPercent(leadAverage)}%`,
+      numericValue: clampPercent(leadAverage),
+      suffix: "%",
       subLine: "hoàn thành tuần",
     },
     {
       icon: Zap,
       caption: "Nhịp",
-      value: Number.isFinite(wheelScore) && wheelScore > 0 ? wheelScore.toFixed(1) : "--",
+      ...(wheelScoreReady
+        ? { numericValue: wheelScore, precision: 1 }
+        : { value: "--" }),
       subLine: "điểm cuộc sống",
     },
     {
       icon: Flame,
       caption: "Chuỗi",
-      value: String(streak),
+      numericValue: streak,
       subLine: "tuần giữ nhịp",
     },
   ];
@@ -202,7 +218,15 @@ export function WeekRhythmCard({
                 {item.caption}
               </p>
               <p className="mt-1 font-serif text-3xl font-medium leading-none text-app-ink sm:text-3xl">
-                {item.value}
+                {item.numericValue !== undefined ? (
+                  <CountUp
+                    value={item.numericValue}
+                    suffix={item.suffix ?? ""}
+                    precision={item.precision ?? 0}
+                  />
+                ) : (
+                  item.value
+                )}
               </p>
               <p className="mt-2 text-xs text-app-ink-muted">{item.subLine}</p>
             </div>

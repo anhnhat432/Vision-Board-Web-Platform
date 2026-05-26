@@ -88,7 +88,7 @@ export function CountUp({
   }, [duration, isInView, shouldReduceMotion, value]);
 
   const defaultFormatter = useMemo(() => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("vi-VN", {
       minimumFractionDigits: precision,
       maximumFractionDigits: precision,
     });
