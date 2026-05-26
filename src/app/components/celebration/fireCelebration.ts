@@ -9,7 +9,23 @@ interface CelebrationOrigin {
   y?: number;
 }
 
-const CELEBRATION_PALETTE = ["#2F5D50", "#D97757", "#5BA590", "#E89878", "#F3D9CC"] as const;
+/** Which design surface the celebration belongs to.
+ *
+ * Project design philosophy reserves the terracotta family for
+ * Reflection-only surfaces. Productivity wins (goal/week complete,
+ * todo cleared) live in the forest-green family. Pick the right
+ * palette for the moment so the confetti doesn't bleed warm into
+ * non-reflective contexts.
+ */
+export type CelebrationPalette = "accent" | "warm";
+
+const ACCENT_PALETTE = ["#2F5D50", "#5BA590", "#7DBFA9", "#E8F0EC", "#FFFFFF"] as const;
+const WARM_PALETTE = ["#D97757", "#E89878", "#F0B091", "#F3D9CC", "#FCEDE5"] as const;
+
+interface FireCelebrationOptions extends CelebrationOrigin {
+  /** Defaults to "accent" (productivity tone). */
+  palette?: CelebrationPalette;
+}
 
 /**
  * P2-10 Celebration Moments.
@@ -22,10 +38,12 @@ const CELEBRATION_PALETTE = ["#2F5D50", "#D97757", "#5BA590", "#E89878", "#F3D9C
  * one-off triggers (e.g. inside an onSubmit handler that already has
  * the click coordinate).
  */
-export function fireCelebration(origin?: CelebrationOrigin): void {
+export function fireCelebration(options?: FireCelebrationOptions): void {
   if (typeof window === "undefined") return;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) return;
+
+  const palette = options?.palette === "warm" ? WARM_PALETTE : ACCENT_PALETTE;
 
   void confetti({
     particleCount: 25,
@@ -34,16 +52,16 @@ export function fireCelebration(origin?: CelebrationOrigin): void {
     gravity: 0.8,
     ticks: 80,
     scalar: 0.8,
-    colors: CELEBRATION_PALETTE as unknown as string[],
-    origin: { x: origin?.x ?? 0.5, y: origin?.y ?? 0.55 },
+    colors: palette as unknown as string[],
+    origin: { x: options?.x ?? 0.5, y: options?.y ?? 0.55 },
   });
 }
 
 /** React-friendly wrapper that no-ops when the user prefers reduced motion. */
-export function useFireCelebration(): (origin?: CelebrationOrigin) => void {
+export function useFireCelebration(): (options?: FireCelebrationOptions) => void {
   const reduce = useReducedMotion();
-  return (origin) => {
+  return (options) => {
     if (reduce) return;
-    fireCelebration(origin);
+    fireCelebration(options);
   };
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Flame, Target } from "lucide-react";
+import { Check, Sparkles, Target } from "lucide-react";
 
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 
@@ -59,14 +59,17 @@ export function HeroMockupAnimated() {
   return (
     <div className="appear-fade-up mx-auto w-full max-w-[360px] lg:mx-0 lg:max-w-none lg:[animation-delay:120ms]">
       <div className="surface-elevated relative rounded-2xl border border-app-line bg-app-surface p-5 lg:rotate-1">
-        {/* Streak badge — slides in from right around phase 3 */}
+        {/* Streak badge — slides in from right around phase 3.
+         * Uses accent palette (NOT warm) to keep the hero on a single
+         * forest-green tone — the project design philosophy reserves
+         * terracotta exclusively for reflection surfaces. */}
         <div
           aria-hidden="true"
-          className={`absolute -top-2 right-3 inline-flex items-center gap-1 rounded-full bg-app-warm-soft px-2.5 py-1 text-xs font-medium text-app-warm-strong shadow-[0_4px_12px_-4px_rgba(15,23,42,0.18)] transition-all duration-medium ease-emphasized ${
+          className={`absolute -top-2 right-3 inline-flex items-center gap-1 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent shadow-[0_4px_12px_-4px_rgba(47,93,80,0.22)] transition-all duration-medium ease-emphasized ${
             badgeVisible ? "translate-x-0 scale-100 opacity-100" : "translate-x-3 scale-95 opacity-0"
           }`}
         >
-          <Flame className="size-3" />
+          <Sparkles className="size-3" />
           Streak +1
         </div>
 
