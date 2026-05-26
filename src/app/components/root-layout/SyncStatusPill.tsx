@@ -75,6 +75,23 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     return null;
   }
 
+  // Demo workaround (verify probe 2026-05-26): nếu state="conflict" do legacy
+  // data thiếu clientXxxId (missingClientIdCount > 0) chứ không phải user
+  // value-diff conflict thật, ẩn pill khỏi header. User vẫn có thể vào
+  // /settings#account-sync để xem chi tiết. Tracked riêng:
+  // docs/superpowers/prompts/2026-05-26-b2-missing-client-id-backfill.md
+  if (state === "conflict") {
+    const lastResult = syncState.lastResult;
+    const summary = lastResult?.mergeReport?.summary;
+    const isLegacyMissingClientId =
+      summary != null &&
+      (summary.missingClientIdCount ?? 0) > 0 &&
+      summary.conflictCount === 0;
+    if (isLegacyMissingClientId) {
+      return null;
+    }
+  }
+
   const tooltip = getTooltip(state, relativeTime, syncState.pendingCount);
   const baseClass =
     "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
