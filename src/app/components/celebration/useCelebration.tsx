@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 
-import { fireCelebration } from "./fireCelebration";
+import { type CelebrationPalette, fireCelebration } from "./fireCelebration";
 import { MilestoneToast, type MilestoneKind } from "./MilestoneToast";
 
 interface CelebrationPayload {
@@ -15,6 +15,8 @@ interface CelebrationPayload {
   withConfetti?: boolean;
   /** Click origin for the confetti burst, viewport-relative (0..1). */
   origin?: { x?: number; y?: number };
+  /** Override the palette inferred from `kind`. */
+  palette?: CelebrationPalette;
 }
 
 const SESSION_KEY_PREFIX = "vb-celebrate:";
@@ -26,6 +28,19 @@ const BIG_MILESTONE_KINDS: ReadonlySet<MilestoneKind> = new Set<MilestoneKind>([
   "achievement",
 ]);
 
+/** Project design philosophy: warm (terracotta) is reserved for reflection
+ * surfaces. Streak + achievement carry a reflective tone — the user is
+ * reviewing time spent, not racking a productivity win — so they get the
+ * warm palette. Goal completion, week wrap-up, and "all today's tasks done"
+ * stay on the productivity (accent / forest green) palette. */
+const PALETTE_BY_KIND: Record<MilestoneKind, CelebrationPalette> = {
+  "today-complete": "accent",
+  goal: "accent",
+  week: "accent",
+  streak: "warm",
+  achievement: "warm",
+};
+
 /**
  * P2-10 Celebration Moments — orchestrator.
  *
@@ -34,7 +49,9 @@ const BIG_MILESTONE_KINDS: ReadonlySet<MilestoneKind> = new Set<MilestoneKind>([
  *     reload won't celebrate the same milestone twice.
  *  2. Fires a sonner toast rendered by `<MilestoneToast />`.
  *  3. Fires confetti for "big" milestones (goal, week, achievement) or
- *     anything where `payload.withConfetti === true`.
+ *     anything where `payload.withConfetti === true`. Palette is picked
+ *     by `kind` (accent for productivity, warm for reflection) unless
+ *     `payload.palette` overrides it.
  *
  * Caller-side check (cooldown / streak math) lives in domain hooks. This
  * hook is intentionally dumb: it just orchestrates the visual side.
@@ -65,7 +82,12 @@ export function useCelebration() {
       }
 
       const shouldFireConfetti = payload.withConfetti ?? BIG_MILESTONE_KINDS.has(kind);
-      if (shouldFireConfetti) fireCelebration(payload.origin);
+      if (shouldFireConfetti) {
+        fireCelebration({
+          ...payload.origin,
+          palette: payload.palette ?? PALETTE_BY_KIND[kind],
+        });
+      }
 
       toast.custom(() => <MilestoneToast kind={kind} title={payload.title} description={payload.description} />, {
         duration: 4000,
