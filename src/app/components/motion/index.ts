@@ -1,5 +1,6 @@
 export { MotionCountUp } from "./MotionCountUp";
 export { MotionFadeIn } from "./MotionFadeIn";
+export { MotionListItem } from "./MotionListItem";
 export { MotionPageTransition } from "./MotionPageTransition";
 export { MotionParallaxLayer } from "./MotionParallaxLayer";
 export { MotionStaggerItem } from "./MotionStaggerItem";
