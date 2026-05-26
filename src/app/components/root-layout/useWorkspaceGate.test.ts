@@ -90,4 +90,39 @@ describe("resolveWorkspaceGateState", () => {
     expect(state.shouldRedirectToLogin).toBe(false);
     expect(state.shouldWaitForWorkspace).toBe(false);
   });
+
+  it("waits for backend plan hydration when profile is missing onboardingCompletedAt (B1 follow-up)", () => {
+    // P1 audit verify 2026-05-26: backend trả profile với onboardingCompletedAt=null
+    // dù user đã có 12-week plan. Phải gate bounce /onboarding cho đến khi
+    // useBackendPlanHydration fetch /api/plans xong, để guard có chance đọc
+    // userData.goals[].twelveWeekSystem từ localStorage đã hydrate.
+    const state = resolveWorkspaceGateState({
+      ...baseInput,
+      userProfile: { id: "profile_1", onboardingCompletedAt: null },
+      backendHydrationLoading: true,
+    });
+
+    expect(state.shouldWaitForWorkspace).toBe(true);
+    expect(state.shouldShowWorkspaceGate).toBe(true);
+  });
+
+  it("does NOT wait for backend hydration when profile already has onboardingCompletedAt", () => {
+    const state = resolveWorkspaceGateState({
+      ...baseInput,
+      userProfile: { id: "profile_1", onboardingCompletedAt: "2026-04-25T08:20:19.406Z" },
+      backendHydrationLoading: true,
+    });
+
+    expect(state.shouldWaitForWorkspace).toBe(false);
+  });
+
+  it("does NOT wait for backend hydration when hydration is already done", () => {
+    const state = resolveWorkspaceGateState({
+      ...baseInput,
+      userProfile: { id: "profile_1", onboardingCompletedAt: null },
+      backendHydrationLoading: false,
+    });
+
+    expect(state.shouldWaitForWorkspace).toBe(false);
+  });
 });
