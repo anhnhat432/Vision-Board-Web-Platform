@@ -322,6 +322,63 @@ export async function runTwelveWeekManualCloudSync(
       };
     }
 
+    // B2 follow-up policy (verify probe 2026-05-26): when local already has
+    // hydrated data (NOT untouched seed) but there are no real conflicts —
+    // i.e. no pending mutations, no value-diff conflicts, only localOnlyChanges
+    // (typically: entities created by useBackendPlanHydration that haven't yet
+    // been pushed back as mutations) AND no missingClientIds / unsupportedFields
+    // (which would indicate genuinely unsupported data) — auto-apply the cloud
+    // snapshot. This eliminates the "Cần chọn bản dữ liệu" banner on routes
+    // outside the 12-week flow (e.g. /billing/plan) for users who have already
+    // converged with cloud data.
+    const hasNoRealConflicts = mergeReport.conflicts.length === 0;
+    const isMergeReportClean =
+      mergeReport.missingClientIds.length === 0 && mergeReport.unsupportedFields.length === 0;
+    if (
+      !mergeReport.safeToApply &&
+      hasNoRealConflicts &&
+      isMergeReportClean &&
+      unresolvedLocalMutations.length === 0 &&
+      mergeReport.localOnlyChanges.length > 0
+    ) {
+      const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+      const didWrite = (options.writeUserData ?? saveUserData)(nextData);
+      if (!didWrite) {
+        const recordErrorFn =
+          options.recordErrorFn ??
+          ((uid: string) => recordErrorPull(uid, { now: options.now, storage: options.storage }));
+        recordErrorFn(ownerUid);
+        return {
+          status: "error",
+          message: "Không thể lưu bản gộp vào thiết bị này. Dữ liệu cũ trên thiết bị vẫn được giữ.",
+          drainResult,
+          pullResponse,
+          mergeReport,
+        };
+      }
+
+      const writeCursorFn =
+        options.writeCursor ??
+        ((uid: string, cursor: string | null) =>
+          recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
+      writeCursorFn(ownerUid, pullResponse.nextCursor);
+
+      console.info("[auto-sync] auto-applied cloud snapshot over local-only diffs", {
+        ownerUid,
+        localOnlyCount: mergeReport.localOnlyChanges.length,
+        cloudOnlyCount: mergeReport.summary.cloudOnlyCount,
+      });
+
+      return {
+        status: "applied",
+        message: "Đã tự đồng bộ dữ liệu tài khoản (không có xung đột thực).",
+        drainResult,
+        pullResponse,
+        mergeReport,
+        appliedGoalCount: nextData.goals.length,
+      };
+    }
+
     // Auto-resolve conflicts using Last-Write-Wins if autoResolvable
     if (mergeReport.conflicts.length > 0 || mergeReport.localOnlyChanges.length > 0) {
       if (mergeReport.autoResolvable) {
