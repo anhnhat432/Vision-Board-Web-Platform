@@ -17,10 +17,55 @@ function getStoredTheme(): Theme {
   return "system";
 }
 
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+const THEME_TRANSITION_MS = 300;
+let transitionTimer: number | null = null;
+
+/** Apply the resolved theme + animate the swap.
+ *
+ * Strategy (P2-09):
+ *   1. If browser supports View Transitions API (Chrome / Edge), use it for
+ *      the smoothest cross-fade. Auto-falls back to CSS transition.
+ *   2. Otherwise add `theme-transitioning` to <html> for ~300ms so the
+ *      global color transition rule in theme.css kicks in just for this
+ *      swap, then remove it (avoids constant transitions on every paint).
+ *   3. If the user prefers reduced motion, swap instantly. */
 function applyTheme(theme: Theme) {
   const resolved = theme === "system" ? getSystemPreference() : theme;
-  document.documentElement.classList.toggle("dark", resolved === "dark");
-  document.documentElement.style.colorScheme = resolved;
+  const html = document.documentElement;
+  const reduced = prefersReducedMotion();
+
+  const swap = () => {
+    html.classList.toggle("dark", resolved === "dark");
+    html.style.colorScheme = resolved;
+  };
+
+  if (reduced) {
+    swap();
+    return;
+  }
+
+  // The View Transitions API is shipped in Chrome/Edge but not yet typed in
+  // every TS lib version this project targets — feature-detect at runtime.
+  const startViewTransition = (document as { startViewTransition?: (cb: () => void) => unknown })
+    .startViewTransition;
+  if (typeof startViewTransition === "function") {
+    startViewTransition.call(document, swap);
+    return;
+  }
+
+  // Fallback path: short-lived class enables global color transition.
+  html.classList.add("theme-transitioning");
+  swap();
+  if (transitionTimer !== null) window.clearTimeout(transitionTimer);
+  transitionTimer = window.setTimeout(() => {
+    html.classList.remove("theme-transitioning");
+    transitionTimer = null;
+  }, THEME_TRANSITION_MS);
 }
 
 // Tiny external store for cross-component sync

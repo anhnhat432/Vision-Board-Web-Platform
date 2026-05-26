@@ -3290,6 +3290,46 @@ html.dark .bg-app-warm.text-white {
   color: var(--app-bg);
 }
 
+/* ── P2-09 Theme toggle smooth transition ─────────────────────────────
+ * `useTheme.applyTheme` adds `theme-transitioning` to <html> for ~300ms
+ * around the swap (only when View Transitions API isn't available and
+ * the user has not opted out of motion). Color-only transitions to keep
+ * mobile GPU happy — no layout / shadow / image animation.
+ *
+ * View Transitions API path (Chromium): auto-cross-fades the root,
+ * we just tune duration so it matches the manual fallback.
+ * ─────────────────────────────────────────────────────────────────────── */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard),
+    fill var(--duration-base) var(--ease-standard),
+    stroke var(--duration-base) var(--ease-standard) !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-medium);
+  animation-timing-function: var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition: none !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 /* ── P2-01 Motion Design System utilities ────────────────────────────
  * Foundation utility classes for Phase 2 motion work. These wrap the
  * --duration-* and --ease-* tokens so component code stays declarative.
