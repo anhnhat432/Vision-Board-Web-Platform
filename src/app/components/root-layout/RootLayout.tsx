@@ -203,6 +203,11 @@ export function RootLayout() {
     setGuideUserData(userData);
   }, []);
 
+  // location.hash and location.search are intentionally omitted from deps. They are only
+  // read inside buildLoginRedirect() which already runs when shouldRedirectToLogin /
+  // pathname change. Including them caused the effect (and its synchronous getUserData())
+  // to fire on every hash / query-string change inside the same page.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see comment above
   useEffect(() => {
     if (userProfile?.role === "admin") {
       if (!location.pathname.startsWith("/admin/")) {
@@ -267,9 +272,7 @@ export function RootLayout() {
   }, [
     demoMode,
     guideUserData.goals,
-    location.hash,
     location.pathname,
-    location.search,
     navigate,
     shouldRedirectToLogin,
     shouldWaitForWorkspace,
@@ -282,7 +285,9 @@ export function RootLayout() {
     if (location.pathname) {
       setMobileMenuOpen(false);
       setDesktopMoreOpen(false);
-      setGuideUserData(getUserData());
+      // Note: guideUserData is refreshed by the USER_DATA_UPDATED_EVENT_NAME +
+      // BACKEND_PLAN_HYDRATION_EVENT_NAME listeners below. Re-reading on every navigate is
+      // redundant and adds a synchronous localStorage parse to each route change.
       document.title = getRouteMeta(location.pathname).title ?? "Dear Our Future";
     }
   }, [location.pathname]);

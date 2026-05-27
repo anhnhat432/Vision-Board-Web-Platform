@@ -170,8 +170,18 @@ export const ROUTE_META: RouteMeta[] = [
   },
 ];
 
+// Cache results by pathname so each route change reuses the same RouteMeta /
+// BreadcrumbCrumb[] reference across renders. ROUTE_META is module-static, so cache stays
+// valid for the lifetime of the page.
+const routeMetaCache = new Map<string, RouteMeta>();
+const breadcrumbCache = new Map<string, BreadcrumbCrumb[]>();
+
 export function getRouteMeta(pathname: string): RouteMeta {
-  return ROUTE_META.find((item) => item.match(pathname)) ?? ROUTE_META[0];
+  const cached = routeMetaCache.get(pathname);
+  if (cached) return cached;
+  const result = ROUTE_META.find((item) => item.match(pathname)) ?? ROUTE_META[0];
+  routeMetaCache.set(pathname, result);
+  return result;
 }
 
 export interface BreadcrumbCrumb {
@@ -181,8 +191,14 @@ export interface BreadcrumbCrumb {
 }
 
 export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
+  const cached = breadcrumbCache.get(pathname);
+  if (cached) return cached;
+
   const segments = pathname.split("/").filter(Boolean);
-  if (segments.length < 3) return [];
+  if (segments.length < 3) {
+    breadcrumbCache.set(pathname, []);
+    return [];
+  }
 
   const rootMeta = ROUTE_META[0];
   const crumbs: BreadcrumbCrumb[] = [];
@@ -199,8 +215,12 @@ export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
     crumbs.push({ label: meta.label, path: acc, isCurrent: false });
   }
 
-  if (crumbs.length === 0) return [];
+  if (crumbs.length === 0) {
+    breadcrumbCache.set(pathname, []);
+    return [];
+  }
   crumbs[crumbs.length - 1].isCurrent = true;
+  breadcrumbCache.set(pathname, crumbs);
   return crumbs;
 }
 
