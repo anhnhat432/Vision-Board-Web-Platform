@@ -1,6 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getUserData, USER_DATA_STORAGE_KEY, USER_DATA_UPDATED_EVENT_NAME, type UserData } from "../utils/storage";
+
+// Coalesce bursts of storage events (same-tab saves, cross-tab broadcasts, focus + visibility
+// changes that fire together when switching back to the app) so listeners parse + normalize
+// localStorage at most once per window. 50ms is short enough to feel instant but long enough
+// to absorb the typical event burst.
+const RELOAD_DEBOUNCE_MS = 50;
 
 function isUserDataStorageEventKey(key: string | null): boolean {
   return key === null || key === USER_DATA_STORAGE_KEY || key.startsWith(`${USER_DATA_STORAGE_KEY}:auth:`);
@@ -14,12 +20,30 @@ export function useSyncedUserData(): {
     typeof window === "undefined" ? null : getUserData(),
   );
 
-  const reloadUserData = useCallback(() => {
+  const reloadUserDataImmediate = useCallback(() => {
     setUserData(getUserData());
   }, []);
 
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const reloadUserData = useCallback(() => {
+    if (typeof window === "undefined") {
+      reloadUserDataImmediate();
+      return;
+    }
+
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      reloadUserDataImmediate();
+    }, RELOAD_DEBOUNCE_MS);
+  }, [reloadUserDataImmediate]);
+
   useEffect(() => {
-    reloadUserData();
+    reloadUserDataImmediate();
 
     const handleStorage = (event: StorageEvent) => {
       if (isUserDataStorageEventKey(event.key)) {
@@ -43,8 +67,13 @@ export function useSyncedUserData(): {
       window.removeEventListener("focus", reloadUserData);
       window.removeEventListener(USER_DATA_UPDATED_EVENT_NAME, reloadUserData);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
     };
-  }, [reloadUserData]);
+  }, [reloadUserData, reloadUserDataImmediate]);
 
   return { userData, reloadUserData };
 }

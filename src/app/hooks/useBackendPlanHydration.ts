@@ -657,7 +657,12 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     });
   }
 
-  const [apiGoals, plans] = await Promise.all([getGoals().catch(() => [] as ApiGoal[]), getPlans()]);
+  // Fire getGoals() and getPlans() in parallel, then start getPlan(id) details requests as
+  // soon as plans resolve — without waiting for getGoals() to settle. apiGoals is only needed
+  // later in the forEach loop, so its tail latency overlaps with details fetching instead of
+  // serializing in front of it.
+  const apiGoalsPromise = getGoals().catch(() => [] as ApiGoal[]);
+  const plans = await getPlans();
 
   if (plans.length === 0) {
     return createHydrationResult({
@@ -672,7 +677,8 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
   }
 
   const plansByRecency = sortPlansByRecency(plans);
-  const detailsResults = await Promise.allSettled(plansByRecency.map((plan) => getPlan(plan.id)));
+  const detailsPromise = Promise.allSettled(plansByRecency.map((plan) => getPlan(plan.id)));
+  const [apiGoals, detailsResults] = await Promise.all([apiGoalsPromise, detailsPromise]);
   const data = getUserData();
   const knownGoalIds = new Set(data.goals.map((goal) => goal.id));
   let hydratedCount = 0;

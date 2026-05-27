@@ -660,8 +660,16 @@ export function persistActiveAuthenticatedUserData(): void {
   persistActiveAuthenticatedUserDataInStorage();
 }
 
-export function getUserData(): UserData {
+let _migrationBackupsCleaned = false;
+
+function ensureMigrationBackupsCleaned(): void {
+  if (_migrationBackupsCleaned) return;
+  _migrationBackupsCleaned = true;
   cleanupExpiredMigrationBackups();
+}
+
+export function getUserData(): UserData {
+  ensureMigrationBackupsCleaned();
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return initializeUserData();
 
