@@ -25,16 +25,20 @@ function prefersReducedMotion(): boolean {
 const THEME_TRANSITION_MS = 300;
 let transitionTimer: number | null = null;
 
-/** Apply the resolved theme + animate the swap.
+/** Apply the resolved theme + optionally animate the swap.
  *
  * Strategy (P2-09):
- *   1. If browser supports View Transitions API (Chrome / Edge), use it for
- *      the smoothest cross-fade. Auto-falls back to CSS transition.
- *   2. Otherwise add `theme-transitioning` to <html> for ~300ms so the
- *      global color transition rule in theme.css kicks in just for this
- *      swap, then remove it (avoids constant transitions on every paint).
- *   3. If the user prefers reduced motion, swap instantly. */
-function applyTheme(theme: Theme) {
+ *   1. On the initial mount we just sync the DOM to the saved theme — no
+ *      animation needed (and using View Transitions here triggers
+ *      "Transition was skipped" warnings in the console).
+ *   2. When the user actually toggles the theme:
+ *      - If browser supports View Transitions API (Chrome / Edge), use it for
+ *        the smoothest cross-fade.
+ *      - Otherwise add `theme-transitioning` to <html> for ~300ms so the
+ *        global color transition rule in theme.css kicks in just for this
+ *        swap, then remove it (avoids constant transitions on every paint).
+ *      - If the user prefers reduced motion, swap instantly. */
+function applyTheme(theme: Theme, animate = false) {
   const resolved = theme === "system" ? getSystemPreference() : theme;
   const html = document.documentElement;
   const reduced = prefersReducedMotion();
@@ -44,17 +48,34 @@ function applyTheme(theme: Theme) {
     html.style.colorScheme = resolved;
   };
 
-  if (reduced) {
+  if (!animate || reduced) {
     swap();
     return;
   }
 
   // The View Transitions API is shipped in Chrome/Edge but not yet typed in
   // every TS lib version this project targets — feature-detect at runtime.
-  const startViewTransition = (document as { startViewTransition?: (cb: () => void) => unknown })
-    .startViewTransition;
+  const startViewTransition = (
+    document as {
+      startViewTransition?: (cb: () => void) => {
+        finished?: Promise<void>;
+        ready?: Promise<void>;
+        updateCallbackDone?: Promise<void>;
+      };
+    }
+  ).startViewTransition;
   if (typeof startViewTransition === "function") {
-    startViewTransition.call(document, swap);
+    const transition = startViewTransition.call(document, swap);
+    // .finished/.ready/.updateCallbackDone reject with "Transition was skipped"
+    // when a new transition starts before the previous one finishes (or when
+    // the page is hidden). That's expected; swallow the rejections so they
+    // don't pollute the console.
+    const swallow = () => {
+      /* skipped transitions are expected */
+    };
+    transition?.finished?.catch(swallow);
+    transition?.ready?.catch(swallow);
+    transition?.updateCallbackDone?.catch(swallow);
     return;
   }
 
@@ -90,7 +111,7 @@ export function useTheme() {
     } catch {
       /* ignore */
     }
-    applyTheme(next);
+    applyTheme(next, true);
     for (const cb of listeners) cb();
   }, []);
 
@@ -102,7 +123,7 @@ export function useTheme() {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
       if (currentTheme === "system") {
-        applyTheme("system");
+        applyTheme("system", true);
         for (const cb of listeners) cb();
       }
     };

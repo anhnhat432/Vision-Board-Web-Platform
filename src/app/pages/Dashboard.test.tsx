@@ -71,7 +71,7 @@ describe("Dashboard public visitor state", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: /App biến mục tiêu lớn thành.*kế hoạch 12 tuần.*việc hôm nay/i,
+        name: /Biến mục tiêu lớn thành.*kế hoạch 12 tuần.*việc hôm nay/i,
       }),
     ).toBeInTheDocument();
 

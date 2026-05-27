@@ -73,7 +73,7 @@ const FEATURE_ROWS = [
   {
     tag: "Đúng thứ tự",
     title: "Không phải trang trắng như Notion",
-    description: "App dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.",
+    description: "Dear Our Future dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.",
     href: "/12-week-setup",
     icon: Compass,
   },
@@ -104,10 +104,10 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         <div className="appear-fade-up">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">
-              Dear Our Future · App lập kế hoạch cá nhân
+              Dear Our Future · Lập kế hoạch cá nhân 12 tuần
             </p>
             <h1 className="mt-4 max-w-[18ch] font-serif text-4xl font-medium leading-[1.12] tracking-tight text-app-ink md:text-display">
-              App biến mục tiêu lớn thành{" "}
+              Biến mục tiêu lớn thành{" "}
               <span className="relative inline-block">
                 <span className="relative z-10">kế hoạch 12 tuần</span>
                 <svg
@@ -132,15 +132,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.
             </p>
 
-            <div className="mt-5 border-l-2 border-app-accent pl-4">
-              <p className="text-sm font-semibold text-app-ink">Nói ngắn gọn</p>
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-app-ink-muted">
-                Đây không phải trang ghi chú tự do. App là lộ trình từng bước để biến một mong muốn lớn thành kế hoạch
-                có thể làm thật.
-              </p>
-            </div>
-
-            <ol className="mt-5 grid grid-cols-2 gap-2">
+            <ol className="mt-6 grid grid-cols-2 gap-2">
               {FIRST_RUN_FLOW.map((step, index) => (
                 <li
                   key={step}
@@ -168,7 +160,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                 onClick={scrollToHowItWorks}
                 className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-colors duration-150 hover:border-app-accent/40 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
               >
-                Xem cách app hoạt động
+                Xem cách hoạt động
               </button>
             </div>
 

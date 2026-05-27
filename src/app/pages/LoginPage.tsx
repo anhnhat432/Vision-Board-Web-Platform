@@ -268,11 +268,14 @@ export function LoginPage() {
       </a>
       {/* Top bar */}
       <header className="flex w-full items-center justify-center px-4 py-6">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
-            <Target className="h-5 w-5 text-white" />
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
+              <Target className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-semibold tracking-tight text-app-ink">Dear Our Future</span>
           </div>
-          <span className="text-base font-semibold tracking-tight text-app-ink">Vision Board</span>
+          <p className="text-xs text-app-ink-soft">Nhật ký 12 tuần để sống có chủ đích hơn</p>
         </div>
       </header>
 
