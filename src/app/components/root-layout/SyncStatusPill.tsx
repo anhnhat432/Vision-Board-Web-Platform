@@ -44,15 +44,17 @@ function getSyncState(input: {
 }
 
 function getPendingCopy(count: number): string {
-  return count > 0 ? `${count} thay đổi đã lưu, chờ sao lưu vào tài khoản` : "không có thay đổi chờ đồng bộ";
+  return count > 0 ? `${count} thay đổi chưa sao lưu` : "không có thay đổi chờ đồng bộ";
 }
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
   if (state === "conflict") return "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Bấm để chọn phiên bản an toàn.";
-  if (state === "syncing") return `Đã lưu trên thiết bị. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
+  if (state === "syncing") return `Đã lưu trên thiết bị này. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
   if (state === "offline")
-    return `Đã lưu trên thiết bị. Sẽ sao lưu vào tài khoản khi có mạng; ${getPendingCopy(pendingCount)}.`;
-  if (state === "pending") return `Đã lưu trên thiết bị. ${getPendingCopy(pendingCount)}.`;
+    return `Đã lưu trên thiết bị này. Chưa sao lưu. Sẽ sao lưu vào tài khoản khi có mạng; ${getPendingCopy(
+      pendingCount,
+    )}.`;
+  if (state === "pending") return `Đã lưu trên thiết bị này. Chưa sao lưu. Bấm để sao lưu ngay; ${getPendingCopy(pendingCount)}.`;
 
   const timeCopy = relativeTime ? `Đã sao lưu ${relativeTime}` : "Chưa có lần sao lưu";
   return `${timeCopy}; ${getPendingCopy(pendingCount)}.`;
@@ -113,13 +115,13 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     offline: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <WifiOff className="h-3 w-3" />,
-      label: "Đã lưu trên thiết bị",
+      label: "Đã lưu trên thiết bị này. Chưa sao lưu",
       tone: "border-app-line bg-app-surface text-app-ink-soft",
     },
     pending: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
-      label: `${syncState.pendingCount} chờ sao lưu`,
+      label: "Đã lưu trên thiết bị này. Chưa sao lưu",
       tone: "border-app-warm-border bg-app-warm-soft text-app-warm",
     },
     ok: {
@@ -141,6 +143,10 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
       return;
     }
+    if (state === "pending" && syncState.online) {
+      void syncState.triggerSyncNow();
+      return;
+    }
     navigate("/settings#account-sync");
   };
 
@@ -155,6 +161,11 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       {config[state].dot}
       {config[state].icon}
       <span className="truncate">{config[state].label}</span>
+      {state === "pending" && syncState.pendingCount > 0 ? (
+        <span className="ml-1 rounded-full bg-app-surface/80 px-1.5 py-0.5 text-[11px] font-semibold text-app-warm">
+          Sao lưu ngay
+        </span>
+      ) : null}
     </button>
   );
 }

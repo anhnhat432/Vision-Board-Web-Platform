@@ -48,8 +48,8 @@ describe("SyncStatusPill", () => {
   it.each([
     ["conflict", createSyncState({ conflictPending: true }), "Cần chọn bản dữ liệu"],
     ["syncing", createSyncState({ syncing: true, loading: true }), "Đang sao lưu"],
-    ["offline", createSyncState({ online: false }), "Đã lưu trên thiết bị"],
-    ["pending", createSyncState({ pendingCount: 3 }), "3 chờ sao lưu"],
+    ["offline", createSyncState({ online: false }), "Đã lưu trên thiết bị này. Chưa sao lưu"],
+    ["pending", createSyncState({ pendingCount: 3 }), "Đã lưu trên thiết bị này. Chưa sao lưu"],
   ])("renders the %s state", (_stateName, state, text) => {
     renderPill(state);
 
@@ -71,10 +71,23 @@ describe("SyncStatusPill", () => {
   it("uses a compact tooltip without promising multi-device sync", () => {
     renderPill(createSyncState({ lastSyncedAt: "2026-05-10T09:00:00.000Z", pendingCount: 2 }));
 
-    const pill = screen.getByText("2 chờ sao lưu").closest("button");
+    const pill = screen.getByRole("button", { name: "Đã lưu trên thiết bị này. Chưa sao lưu" });
 
-    expect(pill).toHaveAttribute("title", "Đã lưu trên thiết bị. 2 thay đổi đã lưu, chờ sao lưu vào tài khoản.");
-    expect(pill?.getAttribute("title")).not.toMatch(/đa thiết bị|tự đồng bộ/i);
+    expect(pill).toHaveAttribute(
+      "title",
+      "Đã lưu trên thiết bị này. Chưa sao lưu. Bấm để sao lưu ngay; 2 thay đổi chưa sao lưu.",
+    );
+    expect(screen.getByText("Sao lưu ngay")).toBeInTheDocument();
+    expect(pill.getAttribute("title")).not.toMatch(/đa thiết bị|tự đồng bộ/i);
+  });
+
+  it("runs manual backup when pending changes are online", () => {
+    const triggerSyncNow = vi.fn();
+    renderPill(createSyncState({ pendingCount: 1, triggerSyncNow }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Đã lưu trên thiết bị này. Chưa sao lưu" }));
+
+    expect(triggerSyncNow).toHaveBeenCalledTimes(1);
   });
 
   it("opens conflict resolution when cloud and device versions diverge", () => {

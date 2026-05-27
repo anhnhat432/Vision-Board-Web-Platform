@@ -1,6 +1,7 @@
 ﻿import { useEffect, useRef, type ReactNode } from "react";
 import { AlertTriangle, Award, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
 
+import { InlineGoalTitleEdit } from "@/app/components/twelve-week/InlineGoalTitleEdit";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { getReviewDayLabel } from "@/app/utils/storage";
 import type {
@@ -151,6 +152,7 @@ interface TwelveWeekDashboardHeaderProps {
   firstPriorityTask: TwelveWeekTaskInstance | null;
   onOpenFocusTab: () => void;
   onOpenGoals: () => void;
+  onRenameGoal?: (title: string) => void | Promise<void>;
 }
 
 export function TwelveWeekDashboardHeader({
@@ -168,6 +170,7 @@ export function TwelveWeekDashboardHeader({
   firstPriorityTask,
   onOpenFocusTab,
   onOpenGoals,
+  onRenameGoal,
 }: TwelveWeekDashboardHeaderProps) {
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
   const PhaseIcon = phaseInfo.icon;
@@ -185,9 +188,14 @@ export function TwelveWeekDashboardHeader({
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">HỆ THỐNG 12 TUẦN</p>
           <span className="sr-only">Nhịp 12 tuần</span>
-          <h1 className="mt-2 break-words font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink">
-            {activeGoal.title || "Kế hoạch hiện tại"}
-          </h1>
+          <InlineGoalTitleEdit
+            title={activeGoal.title}
+            fallbackTitle="Kế hoạch hiện tại"
+            onSave={onRenameGoal}
+            headingLevel={1}
+            titleClassName="mt-2 break-words font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink"
+            inputClassName="mt-2 h-auto rounded-xl px-3 py-2 font-serif text-2xl font-medium leading-tight tracking-tight text-app-ink sm:text-3xl"
+          />
           <p data-testid="twelve-week-header-description" className="mt-1 text-sm leading-6 text-app-ink-soft">
             Tuần {currentWeek} / {system.totalWeeks}
             {domainLabel ? ` · ${domainLabel}` : ""}

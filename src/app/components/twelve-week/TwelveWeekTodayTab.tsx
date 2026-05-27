@@ -6,6 +6,7 @@ import {
   CalendarPlus,
   Check,
   CheckCircle2,
+  ChevronDown,
   Crown,
   Gauge,
   Inbox,
@@ -197,6 +198,10 @@ export function TwelveWeekTodayTab({
   const fadeInClassName = "min-w-0";
   const loadingIconClassName = prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin";
 
+  const canUseOverdueTaskActions = Boolean(
+    onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek || onSkipNonCoreTask,
+  );
+
   useEffect(() => {
     setOptimisticTaskCompletionById((current) => {
       let changed = false;
@@ -319,6 +324,36 @@ export function TwelveWeekTodayTab({
     };
   })();
 
+  const reviewDuePrompt = reviewDueToday ? (
+    <div
+      data-testid="today-review-due-prompt"
+      className="surface-raised order-2 rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-app-warm sm:p-5"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-warm">
+            <CalendarClock className="h-3.5 w-3.5" />
+            Review tuần đang chờ
+          </p>
+          <p className="mt-2 text-base font-semibold leading-6 text-app-ink">Chốt tuần trước khi mở thêm việc mới.</p>
+          <p className="mt-1 text-sm leading-6 text-app-ink-soft">
+            Lưu bài học, điểm tuần và ưu tiên tuần sau để hệ 12 tuần không bị đứt nhịp.
+          </p>
+        </div>
+        {onOpenWeekTab ? (
+          <Button
+            variant="outline"
+            className="w-full border-app-warm-border bg-app-surface text-app-warm hover:bg-app-bg sm:w-auto"
+            onClick={onOpenWeekTab}
+          >
+            Mở review tuần
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className="flex min-w-0 flex-col gap-3 sm:gap-5">
       <div
@@ -390,6 +425,8 @@ export function TwelveWeekTodayTab({
         </div>
       </div>
 
+      {reviewDuePrompt}
+
       {missedTasks.length > 0 && (
         <Card data-testid="today-overdue-recovery" className="order-4 border border-app-line bg-app-surface">
           <CardHeader>
@@ -458,28 +495,50 @@ export function TwelveWeekTodayTab({
                   )}
                 </div>
               </div>
-              <div className="grid gap-3">
-                {rescueModes.map((mode) => (
-                  <div key={mode} className="rounded-xl border border-app-line bg-app-surface p-4">
-                    <p className="text-sm font-semibold text-app-ink">{getReentryModeLabel(mode)}</p>
-                    <p className="mt-2 text-sm leading-7 text-app-ink-soft">
-                      {getReentryModeDescription(mode, {
-                        overdueOpenCount,
-                        optionalOpenThisWeekCount,
-                        currentWeekOpenCount: currentWeekTasksCount,
-                      })}
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="mt-3 w-full justify-between bg-app-surface"
-                      onClick={() => onReentry(mode)}
-                      aria-label={`Áp dụng ${getReentryModeLabel(mode)}`}
-                    >
-                      Áp dụng cách này
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
+              <div className="rounded-xl border border-app-line bg-app-surface p-4">
+                <p className="text-sm font-semibold text-app-ink">Đề xuất nhanh</p>
+                <p className="mt-2 text-sm leading-7 text-app-ink-soft">
+                  Gom việc trễ sang một nhịp dễ làm hơn trước. Hai lựa chọn còn lại nằm trong phần mở rộng để tránh quá tải.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-3 w-full justify-between bg-app-surface"
+                  onClick={() => onReentry("push")}
+                  aria-label="Áp dụng dời việc trễ sang tuần sau"
+                >
+                  Dời việc trễ sang tuần sau
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <details className="group mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-app-ink">
+                    Lựa chọn khác
+                    <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-3 grid gap-2">
+                    {rescueModes
+                      .filter((mode) => mode !== "push")
+                      .map((mode) => (
+                        <Button
+                          key={mode}
+                          variant="ghost"
+                          className="h-auto justify-start whitespace-normal px-3 py-2 text-left text-app-ink-soft hover:text-app-ink"
+                          onClick={() => onReentry(mode)}
+                          aria-label={`Áp dụng ${getReentryModeLabel(mode)}`}
+                        >
+                          <span>
+                            <span className="block text-sm font-semibold text-app-ink">{getReentryModeLabel(mode)}</span>
+                            <span className="mt-0.5 block text-xs leading-5 text-app-ink-muted">
+                              {getReentryModeDescription(mode, {
+                                overdueOpenCount,
+                                optionalOpenThisWeekCount,
+                                currentWeekOpenCount: currentWeekTasksCount,
+                              })}
+                            </span>
+                          </span>
+                        </Button>
+                      ))}
                   </div>
-                ))}
+                </details>
               </div>
             </div>
           </CardContent>
@@ -653,11 +712,12 @@ export function TwelveWeekTodayTab({
                           <Checkbox
                             aria-label={`Hoàn thành việc: ${task.title}`}
                             checked={taskCompleted}
-                            className={`-m-2 mt-0 h-11 w-11 rounded-full ${
+                            className="-m-2 mt-0"
+                            controlClassName={
                               isPrimaryTask
-                                ? "border-white/30 bg-white/10 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-app-ink"
-                                : "border-app-line bg-app-surface"
-                            }`}
+                                ? "border-white/40 bg-white/10 text-white group-data-[state=checked]/checkbox:border-white group-data-[state=checked]/checkbox:bg-white group-data-[state=checked]/checkbox:text-app-ink"
+                                : undefined
+                            }
                             onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
                           />
                           <div className="min-w-0 flex-1">
@@ -740,73 +800,84 @@ export function TwelveWeekTodayTab({
                                 {statusLabel}
                               </Badge>
                             </div>
-                            {isOverdue &&
-                              (onRescheduleTaskWithinWeek ||
-                                onRescheduleTaskToNextWeek ||
-                                (onSkipNonCoreTask && !task.isCore)) && (
-                                <div
-                                  data-testid={`overdue-actions-${task.id}`}
-                                  className="mt-3 flex flex-wrap items-center gap-2"
-                                >
-                                  {onRescheduleTaskWithinWeek && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className={
-                                        isPrimaryTask
-                                          ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                                          : "bg-app-surface"
-                                      }
-                                      onClick={() => onRescheduleTaskWithinWeek(task.id)}
-                                      data-action="reschedule-within-week"
-                                      aria-label={`Dời ${task.title} sang ngày khác trong tuần`}
-                                    >
+                            {isOverdue && canUseOverdueTaskActions ? (
+                              <div data-testid={`overdue-actions-${task.id}`} className="mt-3 space-y-2">
+                                {onRescheduleTaskWithinWeek ? (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className={
+                                      isPrimaryTask
+                                        ? "w-full justify-between border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto"
+                                        : "w-full justify-between bg-app-surface sm:w-auto"
+                                    }
+                                    onClick={() => onRescheduleTaskWithinWeek(task.id)}
+                                    data-action="reschedule-within-week"
+                                    aria-label={`Đẩy ${task.title} sang ngày mai`}
+                                  >
+                                    <span className="inline-flex items-center">
                                       <CalendarClock className="mr-1 h-3.5 w-3.5" />
-                                      Dời trong tuần
-                                    </Button>
-                                  )}
-                                  {onRescheduleTaskToNextWeek && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className={
-                                        isPrimaryTask
-                                          ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                                          : "bg-app-surface"
-                                      }
-                                      onClick={() => onRescheduleTaskToNextWeek(task.id)}
-                                      data-action="reschedule-next-week"
-                                      aria-label={`Dời ${task.title} sang tuần sau`}
-                                    >
-                                      <CalendarPlus className="mr-1 h-3.5 w-3.5" />
-                                      Sang tuần sau
-                                    </Button>
-                                  )}
-                                  {onSkipNonCoreTask && !task.isCore && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className={
-                                        isPrimaryTask ? "text-white/80 hover:bg-white/10" : "text-app-ink-muted"
-                                      }
-                                      onClick={() => onSkipNonCoreTask(task.id)}
-                                      data-action="skip-non-core"
-                                      aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
-                                    >
-                                      <X className="mr-1 h-3.5 w-3.5" />
-                                      Bỏ qua
-                                    </Button>
-                                  )}
-                                  {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) && (
-                                    <span
-                                      data-testid={`overdue-core-note-${task.id}`}
-                                      className={`text-xs ${isPrimaryTask ? "text-white/60" : "text-app-ink-muted"}`}
-                                    >
-                                      Việc cốt lõi không thể bỏ — chỉ dời lịch.
+                                      Đẩy sang ngày mai
                                     </span>
-                                  )}
-                                </div>
-                              )}
+                                    <ArrowRight className="h-3.5 w-3.5" />
+                                  </Button>
+                                ) : null}
+                                {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
+                                  <details className="group rounded-lg border border-app-line/70 bg-app-bg/70 px-3 py-2">
+                                    <summary
+                                      className={`flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium ${
+                                        isPrimaryTask ? "text-white/75" : "text-app-ink-muted"
+                                      }`}
+                                    >
+                                      Lựa chọn khác
+                                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                                    </summary>
+                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                      {onRescheduleTaskToNextWeek ? (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className={
+                                            isPrimaryTask
+                                              ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                                              : "bg-app-surface"
+                                          }
+                                          onClick={() => onRescheduleTaskToNextWeek(task.id)}
+                                          data-action="reschedule-next-week"
+                                          aria-label={`Dời ${task.title} sang tuần sau`}
+                                        >
+                                          <CalendarPlus className="mr-1 h-3.5 w-3.5" />
+                                          Sang tuần sau
+                                        </Button>
+                                      ) : null}
+                                      {onSkipNonCoreTask && !task.isCore ? (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className={
+                                            isPrimaryTask ? "text-white/80 hover:bg-white/10" : "text-app-ink-muted"
+                                          }
+                                          onClick={() => onSkipNonCoreTask(task.id)}
+                                          data-action="skip-non-core"
+                                          aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
+                                        >
+                                          <X className="mr-1 h-3.5 w-3.5" />
+                                          Bỏ qua
+                                        </Button>
+                                      ) : null}
+                                    </div>
+                                  </details>
+                                ) : null}
+                                {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) ? (
+                                  <span
+                                    data-testid={`overdue-core-note-${task.id}`}
+                                    className={`block text-xs ${isPrimaryTask ? "text-white/60" : "text-app-ink-muted"}`}
+                                  >
+                                    Việc cốt lõi không thể bỏ — chỉ dời lịch.
+                                  </span>
+                                ) : null}
+                              </div>
+                            ) : null}
                           </div>
                         </MotionStaggerItem>
                       );

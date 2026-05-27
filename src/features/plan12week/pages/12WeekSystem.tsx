@@ -404,6 +404,17 @@ export function TwelveWeekSystem() {
     return normalizedNextSystem;
   };
 
+  const handleRenameActiveGoal = (title: string) => {
+    if (!activeGoal) return;
+    const nextTitle = title.trim();
+    if (!nextTitle || nextTitle === activeGoal.title.trim()) return;
+
+    updateGoal(activeGoal.id, { title: nextTitle });
+    loadGoalData(activeGoal.id);
+    refreshSnapshotMeta();
+    toast.success("Đã đổi tên mục tiêu.");
+  };
+
   const markWeeklyReviewCompleted = () => {
     if (!system) return;
 
@@ -997,6 +1008,7 @@ export function TwelveWeekSystem() {
           firstPriorityTask={firstPriorityTask}
           onOpenFocusTab={() => handleTabChange(reviewDueToday ? "week" : "today")}
           onOpenGoals={() => navigate("/goals")}
+          onRenameGoal={handleRenameActiveGoal}
         />
 
         <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
@@ -1294,6 +1306,7 @@ export function TwelveWeekSystem() {
                   </div>
                   <PlanOverview
                     system={system}
+                    goalTitle={activeGoal.title}
                     currentWeek={currentWeek}
                     currentWeekRange={currentWeekRange}
                     currentWeekScoreValue={currentWeekScoreValue}
@@ -1306,6 +1319,7 @@ export function TwelveWeekSystem() {
                     weeklyTrend={weeklyTrend}
                     tacticBreakdown={tacticBreakdown}
                     reviewDueToday={reviewDueToday}
+                    onRenameGoal={handleRenameActiveGoal}
                     onOpenTodayTab={() => setActiveTab("today")}
                     onOpenWeekTab={() => setActiveTab("week")}
                     onOpenSettingsTab={() => setActiveTab("settings")}

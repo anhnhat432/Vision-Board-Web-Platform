@@ -13,6 +13,7 @@
   TrendingUp,
 } from "lucide-react";
 
+import { InlineGoalTitleEdit } from "./InlineGoalTitleEdit";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -61,7 +62,9 @@ interface TwelveWeekProgressTabProps {
   executionHeatmap: HeatmapCell[];
   weeklyTrend: WeekTrendPoint[];
   tacticBreakdown: TacticBreakdownItem[];
+  goalTitle?: string;
   reviewDueToday?: boolean;
+  onRenameGoal?: (title: string) => void | Promise<void>;
   onOpenTodayTab?: () => void;
   onOpenWeekTab?: () => void;
   onOpenSettingsTab?: () => void;
@@ -212,7 +215,9 @@ export function TwelveWeekProgressTab({
   executionHeatmap,
   weeklyTrend,
   tacticBreakdown,
+  goalTitle,
   reviewDueToday = false,
+  onRenameGoal,
   onOpenTodayTab,
   onOpenWeekTab,
   onOpenSettingsTab,
@@ -314,6 +319,20 @@ export function TwelveWeekProgressTab({
           )}
         </div>
       </PrimaryActionCard>
+
+      {goalTitle ? (
+        <div className="rounded-xl border border-app-line bg-app-surface p-4 sm:p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu đang theo dõi</p>
+          <InlineGoalTitleEdit
+            title={goalTitle}
+            fallbackTitle="Kế hoạch hiện tại"
+            onSave={onRenameGoal}
+            headingLevel={2}
+            titleClassName="mt-1 break-words text-base font-semibold leading-6 text-app-ink sm:text-lg"
+            inputClassName="mt-1 h-11 text-base font-semibold text-app-ink"
+          />
+        </div>
+      ) : null}
 
       {executionInsights && executionInsights.length > 0 && (
         <TwelveWeekInsightsCard

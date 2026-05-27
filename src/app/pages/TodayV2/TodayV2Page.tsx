@@ -1,8 +1,9 @@
 import { Calendar, Check, Plus } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { Button } from "../../components/ui/button";
+import { Skeleton } from "../../components/ui/skeleton";
 import { useSyncedUserData } from "../../hooks/useSyncedUserData";
 import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
 import {
@@ -430,7 +431,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   })();
 
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
+    <div className="flex snap-start flex-col items-center gap-2 text-center">
       <span className="text-xs font-medium text-app-ink-muted">{day.label}</span>
       {barContent}
       <span className="text-xs tabular-nums text-app-ink-muted">
@@ -465,10 +466,12 @@ function WeekProgressCard({
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-7 gap-2">
-        {days.map((day) => (
-          <WeekProgressDay key={day.key} day={day} />
-        ))}
+      <div className="-mx-1 mt-5 overflow-x-auto pb-2">
+        <div className="grid min-w-[420px] snap-x grid-cols-7 gap-2 px-1 max-[374px]:min-w-0 max-[374px]:grid-cols-4">
+          {days.map((day) => (
+            <WeekProgressDay key={day.key} day={day} />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -576,9 +579,74 @@ function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void 
   );
 }
 
+export function TodaySkeleton() {
+  return (
+    <div className="min-h-screen bg-app-bg text-app-ink" aria-busy="true">
+      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_260px] md:items-end">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Skeleton className="h-4 w-36 rounded-full" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+            <Skeleton className="mt-5 h-12 w-full max-w-3xl rounded-xl sm:h-16" />
+            <Skeleton className="mt-3 h-12 w-4/5 max-w-2xl rounded-xl sm:h-16" />
+          </div>
+          <div className="surface-raised hidden rounded-2xl border border-app-line bg-app-surface p-5 md:block">
+            <Skeleton className="h-4 w-28 rounded-full" />
+            <Skeleton className="mt-3 h-14 w-full rounded-xl" />
+            <Skeleton className="mt-5 h-2 w-full rounded-full" />
+          </div>
+        </section>
+
+        <div className="mt-8 grid gap-5 lg:grid-cols-3">
+          <div className="space-y-5 lg:col-span-2">
+            <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <Skeleton className="h-7 w-44 rounded-lg" />
+                  <Skeleton className="mt-2 h-4 w-32 rounded-full" />
+                </div>
+                <Skeleton className="h-7 w-20 rounded-full" />
+              </div>
+              <div className="mt-5 space-y-3">
+                {[0, 1, 2].map((item) => (
+                  <div key={item} className="rounded-xl border border-app-line bg-app-bg p-4">
+                    <div className="flex gap-3">
+                      <Skeleton className="size-11 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-4/5 rounded-lg" />
+                        <Skeleton className="h-4 w-2/5 rounded-full" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
+              <Skeleton className="h-7 w-40 rounded-lg" />
+              <div className="mt-5 grid min-w-[420px] grid-cols-7 gap-2 overflow-hidden max-[374px]:min-w-0 max-[374px]:grid-cols-4">
+                {["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map((dayKey) => (
+                  <Skeleton key={dayKey} className="h-24 rounded-xl" />
+                ))}
+              </div>
+            </section>
+          </div>
+          <aside className="space-y-5">
+            <Skeleton className="h-44 rounded-xl" />
+            <Skeleton className="h-52 rounded-xl" />
+            <Skeleton className="h-24 rounded-xl" />
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TodayV2Page() {
   const navigate = useNavigate();
   const { userData, reloadUserData } = useSyncedUserData();
+  const [isHydrating, setIsHydrating] = useState(true);
   const today = useMemo(() => new Date(), []);
   const viewModel = useMemo(() => buildTodayV2ViewModel(userData, today), [userData, today]);
   const hasRealSystem = Boolean(viewModel.activeGoalId);
@@ -588,11 +656,20 @@ export function TodayV2Page() {
     hint: "Đang xem task hôm nay",
   });
 
+  useEffect(() => {
+    const timerId = window.setTimeout(() => setIsHydrating(false), 80);
+    return () => window.clearTimeout(timerId);
+  }, []);
+
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     if (!viewModel.activeGoalId) return;
     toggleTwelveWeekTask(viewModel.activeGoalId, taskId, completed);
     reloadUserData();
   };
+
+  if (isHydrating) {
+    return <TodaySkeleton />;
+  }
 
   if (!hasRealSystem) {
     return <TodayV2EmptyState onNavigate={navigate} />;
