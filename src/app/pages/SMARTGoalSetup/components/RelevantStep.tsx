@@ -1,10 +1,10 @@
-﻿import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
-import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
+import { helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface RelevantStepProps {
   smartData: SMARTData;

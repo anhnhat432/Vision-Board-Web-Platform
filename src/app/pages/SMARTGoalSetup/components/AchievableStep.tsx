@@ -1,4 +1,4 @@
-﻿import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { parseNumberInput } from "@/lib/smart-goal";
 import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
@@ -8,7 +8,7 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
-import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
+import { helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface AchievableStepProps {
   smartData: SMARTData;

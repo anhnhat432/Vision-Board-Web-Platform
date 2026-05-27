@@ -1,4 +1,4 @@
-﻿import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { parseNumberInput } from "@/lib/smart-goal";
 
@@ -6,7 +6,7 @@ import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { DEFAULT_TARGET_WEEKS } from "../constants";
 import type { SMARTData } from "../types";
-import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
+import { helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
 
 interface TimeBoundStepProps {
   smartData: SMARTData;

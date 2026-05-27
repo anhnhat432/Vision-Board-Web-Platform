@@ -1,4 +1,4 @@
-﻿import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { Lightbulb } from "lucide-react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
@@ -9,7 +9,7 @@ import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
-import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
+import { helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
 
 interface MeasurableStepProps {
   smartData: SMARTData;

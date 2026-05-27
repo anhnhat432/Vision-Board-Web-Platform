@@ -1,4 +1,4 @@
-﻿import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 
@@ -8,7 +8,7 @@ import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
-import { errorTextClass, helperTextClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
+import { helperTextClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface SpecificStepProps {
   smartData: SMARTData;
