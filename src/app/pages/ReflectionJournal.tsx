@@ -14,6 +14,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { EmptyState } from "@/app/components/states/EmptyState";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -144,6 +146,14 @@ function getJournalPhaseTone() {
 }
 
 export function ReflectionJournal() {
+  return (
+    <TabErrorBoundary fallbackTitle="Trang Nhật ký phản tư gặp lỗi">
+      <ReflectionJournalContent />
+    </TabErrorBoundary>
+  );
+}
+
+function ReflectionJournalContent() {
   const navigate = useNavigate();
   const { userData, reloadUserData } = useSyncedUserData();
   const { clearDraft, loadDraft, saveDraft } = useReflectionDraft();
@@ -533,20 +543,21 @@ export function ReflectionJournal() {
 
       {/* Empty State */}
       {sortedReflections.length === 0 ? (
-        <Card className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-10 text-center">
-          <BookOpen className="mx-auto h-12 w-12 text-app-accent" />
-          <h2 className="mt-4 font-serif text-lg font-medium text-app-ink">Bắt đầu nhật ký của bạn</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
-            Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển.
-          </p>
-          <Button
-            onClick={() => setIsAddingReflection(true)}
-            className="mt-5 bg-app-warm text-white hover:bg-[#c56b4e]"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Viết entry đầu tiên
-          </Button>
-        </Card>
+        <EmptyState
+          variant="card"
+          icon={<BookOpen className="h-12 w-12 text-app-accent" />}
+          title="Bắt đầu nhật ký của bạn"
+          description="Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển."
+          actions={
+            <Button
+              onClick={() => setIsAddingReflection(true)}
+              className="bg-app-warm text-white hover:bg-[#c56b4e]"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Viết entry đầu tiên
+            </Button>
+          }
+        />
       ) : (
         /* Past Entries List */
         <section>
@@ -651,9 +662,11 @@ export function ReflectionJournal() {
           </div>
 
           {filteredReflections.length === 0 && sortedReflections.length > 0 && (
-            <Card className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
-              <p className="text-sm text-app-ink-muted">Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.</p>
-            </Card>
+            <EmptyState
+              variant="dashed"
+              title="Không tìm thấy kết quả"
+              description="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để tìm lại những ghi chép của bạn."
+            />
           )}
         </section>
       )}

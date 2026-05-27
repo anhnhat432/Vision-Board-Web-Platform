@@ -13,6 +13,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { EmptyState } from "@/app/components/states/EmptyState";
 import { Button } from "../components/ui/button";
 import { Skeleton } from "../components/ui/skeleton";
 import { emptyNarratives } from "../components/empty-states/narratives";
@@ -91,6 +93,14 @@ function formatAchievementDate(value: string): string {
 }
 
 export function Achievements() {
+  return (
+    <TabErrorBoundary fallbackTitle="Trang Thành tựu gặp lỗi">
+      <AchievementsContent />
+    </TabErrorBoundary>
+  );
+}
+
+function AchievementsContent() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
   const seenAchievementIdsRef = useRef<Set<string> | null>(null);
@@ -175,30 +185,27 @@ export function Achievements() {
         ))}
       </section>
 
-      {unlockedCount === 0 ? (
-        <section
-          className="mt-6 surface-raised rounded-xl border border-app-line bg-app-surface p-6 text-center md:p-8"
-          aria-label="Chưa có thành tựu"
-        >
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-            <Award className="h-7 w-7" />
-          </div>
-          <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">{emptyNarratives.noAchievements.title}</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-app-ink-soft">
-            {emptyNarratives.noAchievements.body}
-          </p>
-          <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button type="button" onClick={() => navigate("/goals")}>
-              <Target className="h-4 w-4" />
-              Tạo mục tiêu
-            </Button>
-            <Button type="button" variant="outline" onClick={() => navigate("/journal")}>
-              <BookOpen className="h-4 w-4" />
-              Viết nhật ký
-            </Button>
-          </div>
-        </section>
-      ) : null}
+      {unlockedCount === 0 && (
+        <EmptyState
+          className="mt-6"
+          as="section"
+          icon={<Award className="h-7 w-7" />}
+          title={emptyNarratives.noAchievements.title}
+          description={emptyNarratives.noAchievements.body}
+          actions={
+            <>
+              <Button type="button" onClick={() => navigate("/goals")}>
+                <Target className="h-4 w-4" />
+                Tạo mục tiêu
+              </Button>
+              <Button type="button" variant="outline" onClick={() => navigate("/journal")}>
+                <BookOpen className="h-4 w-4" />
+                Viết nhật ký
+              </Button>
+            </>
+          }
+        />
+      )}
 
       <section className="mt-8" aria-label="Danh sách thành tựu">
         <div className="mb-4">

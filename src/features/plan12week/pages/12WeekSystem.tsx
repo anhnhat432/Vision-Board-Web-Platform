@@ -1,7 +1,7 @@
 import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
+import { toastSuccess } from "@/app/utils/toast";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
@@ -412,7 +412,7 @@ export function TwelveWeekSystem() {
     updateGoal(activeGoal.id, { title: nextTitle });
     loadGoalData(activeGoal.id);
     refreshSnapshotMeta();
-    toast.success("Đã đổi tên mục tiêu.");
+    toastSuccess("Đã đổi tên mục tiêu.");
   };
 
   const markWeeklyReviewCompleted = () => {
@@ -501,7 +501,7 @@ export function TwelveWeekSystem() {
     if (claimCelebrationOnce(getCycleCelebrationStorageKey(cycleId))) {
       celebrateLarge();
     }
-    toast.success("Báo cáo cycle đã được lưu.");
+    toastSuccess("Báo cáo cycle đã được lưu.");
   };
 
   const handleStartNewCycle = (input: { lessons: string[]; summary: CycleSummary }) => {
@@ -615,7 +615,7 @@ export function TwelveWeekSystem() {
     }
     refreshSnapshotMeta();
     loadGoalData(activeGoal.id);
-    toast.success("Cycle mới đã sẵn sàng.", {
+    toastSuccess("Cycle mới đã sẵn sàng.", {
       description: "Mục tiêu cũ được giữ nguyên, nhịp tuần đã reset về tuần 1 và Setup đã có pre-fill từ cycle trước.",
     });
     navigate("/12-week-setup");
