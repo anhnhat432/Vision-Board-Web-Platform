@@ -20,6 +20,7 @@ import {
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { VisionMapIllustration } from "../components/illustrations";
+import { EmptyState } from "@/app/components/states/EmptyState";
 import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
@@ -308,22 +309,18 @@ export function VisionBoardGallery() {
       )}
 
       {userData.visionBoards.length === 0 ? (
-        <Card className="surface-empty overflow-hidden rounded-2xl border border-dashed border-app-line bg-app-bg/50">
-          <CardContent className="p-10 text-center lg:p-12">
-            <VisionMapIllustration className="mx-auto mb-4 w-56 text-app-accent sm:w-64" />
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
-              <Images className="h-10 w-10" />
-            </div>
-            <h2 className="mt-6 text-3xl font-semibold text-app-ink">Thư viện của bạn vẫn còn trống</h2>
-            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-app-ink-soft">
-              Hãy tạo vision board đầu tiên để biến những hình dung trong đầu thành một không gian trực quan thật sự.
-            </p>
-            <Button className="mt-8" onClick={() => navigate("/vision-board")}>
+        <EmptyState
+          illustration={<VisionMapIllustration className="w-56 text-app-accent sm:w-64" />}
+          icon={<Images className="h-10 w-10" />}
+          title="Thư viện của bạn vẫn còn trống"
+          description="Hãy tạo vision board đầu tiên để biến những hình dung trong đầu thành một không gian trực quan thật sự."
+          actions={
+            <Button onClick={() => navigate("/vision-board")}>
               <Plus className="h-4 w-4" />
               Tạo vision board đầu tiên
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <div className="stack-section">
           {years.map((year) => (

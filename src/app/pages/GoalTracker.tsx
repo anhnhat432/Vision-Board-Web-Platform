@@ -23,6 +23,7 @@ import {
 import { Button } from "../components/ui/button";
 import { CountUp } from "../components/ui/count-up";
 import { getGoalArchetypeIcon } from "../components/illustrations";
+import { EmptyState } from "@/app/components/states/EmptyState";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Skeleton } from "../components/ui/skeleton";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
@@ -639,27 +640,26 @@ function GoalTrackerContent({
           </div>
         )}
         {!hasGoals ? (
-          <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center mt-8">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
-              <Target className="h-10 w-10" />
-            </div>
-            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có mục tiêu</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
-              Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng.
-            </p>
-            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Button className="bg-app-accent text-white hover:bg-[#284f45]" onClick={handleStartGuidedGoalFlow}>
-                Bắt đầu chu kỳ 12 tuần →
-              </Button>
-              <Button
-                variant="outline"
-                className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                onClick={handleStartGuidedGoalFlow}
-              >
-                Tạo mục tiêu thường
-              </Button>
-            </div>
-          </div>
+          <EmptyState
+            variant="card"
+            icon={<Target className="h-10 w-10" />}
+            title="Chưa có mục tiêu"
+            description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
+            actions={
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                <Button className="bg-app-accent text-white hover:bg-[#284f45]" onClick={handleStartGuidedGoalFlow}>
+                  Bắt đầu chu kỳ 12 tuần →
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                  onClick={handleStartGuidedGoalFlow}
+                >
+                  Tạo mục tiêu thường
+                </Button>
+              </div>
+            }
+          />
         ) : (
           <div className="stack-section mt-8">
             {filteredTwelveWeekGoals.length > 0 && (
@@ -702,9 +702,11 @@ function GoalTrackerContent({
             )}
 
             {searchQuery.trim() && filteredTwelveWeekGoals.length === 0 && filteredStandardGoals.length === 0 && (
-              <p className="py-12 text-center text-sm text-app-ink-muted">
-                Không tìm thấy mục tiêu nào khớp với "{searchQuery}"
-              </p>
+              <EmptyState
+                variant="dashed"
+                title="Không tìm thấy mục tiêu"
+                description={`Không tìm thấy mục tiêu nào khớp với "${searchQuery}"`}
+              />
             )}
           </div>
         )}
