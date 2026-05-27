@@ -66,6 +66,7 @@ import {
   type CloudImportDryRunResult,
   type CloudImportResult,
 } from "./LocalDataMigrationPrompt";
+import { OfflineBanner } from "../states/OfflineBanner";
 import { GracePeriodBanner } from "../billing/GracePeriodBanner";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, type CommandPaletteGoal } from "./CommandPalette";
@@ -802,6 +803,7 @@ export function RootLayout() {
       <AutoCloudSyncProvider>
         <AssistantPageContextProvider>
           <div className="app-shell min-h-screen bg-app-bg" data-route-tone={routeTone}>
+            <OfflineBanner />
             <a href="#main-content" className="skip-to-content">
               Bỏ qua điều hướng
             </a>
@@ -834,6 +836,7 @@ export function RootLayout() {
     <AutoCloudSyncProvider>
       <AssistantPageContextProvider>
         <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+          <OfflineBanner />
           <a href="#main-content" className="skip-to-content">
             Bỏ qua điều hướng
           </a>
