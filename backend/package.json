@@ -27,7 +27,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.1",
-    "firebase-admin": "^13.1.0",
+    "firebase-admin": "^13.10.0",
     "helmet": "^8.1.0",
     "mongoose": "^8.9.5",
     "multer": "^2.1.1",
@@ -45,6 +45,7 @@
   },
   "overrides": {
     "@tootallnate/once": "^3.0.1",
-    "protobufjs": "7.5.8"
+    "protobufjs": "7.5.8",
+    "uuid": "^11.1.1"
   }
 }
