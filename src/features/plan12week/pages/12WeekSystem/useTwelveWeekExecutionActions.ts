@@ -271,6 +271,23 @@ export function useTwelveWeekExecutionActions({
         );
       }
 
+      // Fire feel-good feedback (haptic, sound, confetti, toast) NGAY sau khi local commit
+      // thành công, không đợi backend sync. Nếu sync fail bên dưới, ta sẽ rollback state +
+      // hiện toast error đè lên — user vẫn thấy click có phản hồi tức thì như khi local-only.
+      if (taskCompletedFromIncomplete) {
+        const nextTodayQueue = getTodayQueueForSystem(savedSystem);
+        const allTodayTasksCompleted = nextTodayQueue.length > 0 && nextTodayQueue.every((task) => task.completed);
+        hapticMedium();
+        if (allTodayTasksCompleted) {
+          hapticSuccess();
+          playAllCompleteSound();
+        } else {
+          playTaskCompleteSound();
+        }
+        triggerTaskCompletionConfetti(allTodayTasksCompleted);
+      }
+      toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
+
       const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
       if (!synced) {
         const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
@@ -317,20 +334,6 @@ export function useTwelveWeekExecutionActions({
         return;
       }
 
-      if (taskCompletedFromIncomplete) {
-        const nextTodayQueue = getTodayQueueForSystem(savedSystem);
-        const allTodayTasksCompleted = nextTodayQueue.length > 0 && nextTodayQueue.every((task) => task.completed);
-        hapticMedium();
-        if (allTodayTasksCompleted) {
-          hapticSuccess();
-          playAllCompleteSound();
-        } else {
-          playTaskCompleteSound();
-        }
-        triggerTaskCompletionConfetti(allTodayTasksCompleted);
-      }
-
-      toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
       if (activeGoalIdRef.current === actionGoalId) {
         refreshBackendProgressOverlay();
         refreshSnapshotMeta();
@@ -395,6 +398,11 @@ export function useTwelveWeekExecutionActions({
       completedTasks: String(completedTodayCount),
     });
 
+    // Toast + haptic NGAY sau local commit, không đợi backend. Sync chạy ngầm; nếu fail
+    // ta đè toast.info "đã lưu trên thiết bị" để báo user biết status thật.
+    hapticLight();
+    toast.success("Check-in hôm nay đã được lưu.");
+
     const synced = await executionSyncActions.syncDailyCheckIn({
       weekNumber: syncWeekNumber,
       date: todayKey,
@@ -402,8 +410,6 @@ export function useTwelveWeekExecutionActions({
     });
 
     if (synced) {
-      hapticLight();
-      toast.success("Check-in hôm nay đã được lưu.");
       if (activeGoalIdRef.current === actionGoalId) {
         refreshBackendProgressOverlay();
       }
@@ -570,6 +576,20 @@ export function useTwelveWeekExecutionActions({
       },
     );
 
+    // Feedback NGAY sau local commit: toast success + haptic + confetti. Sync chạy ngầm.
+    // Nếu sync fail bên dưới, ta hiện toast.info đè để user biết "đã lưu local" và sẽ
+    // auto-sync sau.
+    toast.success("Review tuần đã được chốt.", {
+      description:
+        hasPremiumReviewInsights &&
+        weeklyForm.nextWeekCommitments.length === 0 &&
+        weeklyForm.nextWeekPriority.trim().length === 0
+          ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
+          : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
+    });
+    hapticSuccess();
+    triggerWeeklyReviewConfetti();
+
     const synced = await executionSyncActions.syncWeeklyReview({
       weekNumber: reviewWeekNumber,
       executionScore: reviewExecutionScore,
@@ -585,16 +605,6 @@ export function useTwelveWeekExecutionActions({
       return;
     }
 
-    toast.success("Review tuần đã được chốt.", {
-      description:
-        hasPremiumReviewInsights &&
-        weeklyForm.nextWeekCommitments.length === 0 &&
-        weeklyForm.nextWeekPriority.trim().length === 0
-          ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
-          : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
-    });
-    hapticSuccess();
-    triggerWeeklyReviewConfetti();
     if (activeGoalIdRef.current === actionGoalId) {
       refreshBackendProgressOverlay();
       refreshSnapshotMeta();
