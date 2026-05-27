@@ -167,34 +167,43 @@ export function AutoCloudConflictDialog() {
           <ExternalLink className="h-3.5 w-3.5" />
         </button>
 
-        <DialogFooter className="gap-2 sm:justify-between">
-          <Button type="button" variant="outline" onClick={handlePostpone}>
-            Để sau
-          </Button>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row">
-            <Button type="button" variant="destructive" onClick={handleKeepLocal} disabled={Boolean(resolvingAction)}>
-              {resolvingAction === "keepLocal" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Monitor className="h-4 w-4" />
-              )}
-              Giữ trên thiết bị này
-            </Button>
-            {showUseCloudConfirm ? (
-              <Button type="button" onClick={handleUseCloud} disabled={Boolean(resolvingAction)}>
-                {resolvingAction === "useCloud" ? (
+        {/* Footer actions: keep/use are primary; postpone is secondary */}
+        <DialogFooter className="gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+              <Button type="button" variant="outline" onClick={handleKeepLocal} disabled={Boolean(resolvingAction)}>
+                {resolvingAction === "keepLocal" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Download className="h-4 w-4" />
+                  <Monitor className="h-4 w-4" />
                 )}
-                Tải backup và lấy bản tài khoản
+                Giữ trên thiết bị này
               </Button>
-            ) : (
-              <Button type="button" onClick={() => setShowUseCloudConfirm(true)} disabled={Boolean(resolvingAction)}>
-                <RotateCcw className="h-4 w-4" />
-                Lấy bản tài khoản
-              </Button>
-            )}
+
+              {showUseCloudConfirm ? (
+                <Button type="button" disabled={Boolean(resolvingAction)} onClick={handleUseCloud}>
+                  {resolvingAction === "useCloud" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  Tải backup và lấy bản tài khoản
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => setShowUseCloudConfirm(true)}
+                  disabled={Boolean(resolvingAction)}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Lấy bản tài khoản
+                </Button>
+              )}
+            </div>
+
+            <Button type="button" variant="outline" onClick={handlePostpone} className="sm:mt-0">
+              Để sau
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
