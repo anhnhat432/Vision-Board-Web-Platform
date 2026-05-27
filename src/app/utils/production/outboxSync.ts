@@ -101,49 +101,53 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
     return snapshot;
   }
 
+  // Send all pending items in parallel (Promise.allSettled), then mutate state once.
+  // Sequential awaits previously made N items take N * latency; this collapses to roughly
+  // single-request latency.
+  const results = await Promise.allSettled(
+    pendingItems.map((item) =>
+      apiClient
+        .post<unknown, typeof item>(OUTBOX_SYNC_ENDPOINT, item, { keepalive: true })
+        .then(() => item),
+    ),
+  );
+
   let syncedCount = 0;
 
-  for (const item of pendingItems) {
-    try {
-      await apiClient.post<unknown, typeof item>(OUTBOX_SYNC_ENDPOINT, item, {
-        keepalive: true,
-      });
+  results.forEach((result, index) => {
+    const item = pendingItems[index];
+    const itemIndex = data.syncOutbox.findIndex((entry) => entry.id === item.id);
+    if (itemIndex === -1) return;
 
-      const itemIndex = data.syncOutbox.findIndex((entry) => entry.id === item.id);
-      if (itemIndex !== -1) {
-        data.syncOutbox[itemIndex] = {
-          ...data.syncOutbox[itemIndex],
-          status: "sent",
-        };
-      }
-
+    if (result.status === "fulfilled") {
+      data.syncOutbox[itemIndex] = {
+        ...data.syncOutbox[itemIndex],
+        status: "sent",
+      };
       syncedCount += 1;
-    } catch {
-      // Apply exponential backoff retry model
-      const currentRetryCount = (item.retryCount ?? 0) + 1;
-      const itemIndex = data.syncOutbox.findIndex((entry) => entry.id === item.id);
-
-      if (itemIndex !== -1) {
-        if (currentRetryCount >= MAX_RETRIES) {
-          data.syncOutbox[itemIndex] = {
-            ...data.syncOutbox[itemIndex],
-            status: "failed",
-            retryCount: currentRetryCount,
-            failedAt: now.toISOString(),
-          };
-        } else {
-          const backoffHours = RETRY_BACKOFF_HOURS[currentRetryCount - 1] ?? 24;
-          const nextRetryAt = new Date(now.getTime() + backoffHours * 60 * 60 * 1000).toISOString();
-          data.syncOutbox[itemIndex] = {
-            ...data.syncOutbox[itemIndex],
-            status: "pending",
-            retryCount: currentRetryCount,
-            retryAt: nextRetryAt,
-          };
-        }
-      }
+      return;
     }
-  }
+
+    // Apply exponential backoff retry model
+    const currentRetryCount = (item.retryCount ?? 0) + 1;
+    if (currentRetryCount >= MAX_RETRIES) {
+      data.syncOutbox[itemIndex] = {
+        ...data.syncOutbox[itemIndex],
+        status: "failed",
+        retryCount: currentRetryCount,
+        failedAt: now.toISOString(),
+      };
+    } else {
+      const backoffHours = RETRY_BACKOFF_HOURS[currentRetryCount - 1] ?? 24;
+      const nextRetryAt = new Date(now.getTime() + backoffHours * 60 * 60 * 1000).toISOString();
+      data.syncOutbox[itemIndex] = {
+        ...data.syncOutbox[itemIndex],
+        status: "pending",
+        retryCount: currentRetryCount,
+        retryAt: nextRetryAt,
+      };
+    }
+  });
 
   saveUserData(data);
 

@@ -683,8 +683,7 @@ export function getUserData(): UserData {
 }
 
 export function saveUserData(data: UserData): boolean {
-  const normalized = normalizeUserData(data);
-  const normalizedLatest = normalizeUserData(mergeUserDataTaskMutations(getLatestStoredUserDataForMerge(), normalized));
+  const normalizedLatest = normalizeUserData(mergeUserDataTaskMutations(getLatestStoredUserDataForMerge(), data));
   const serialized = JSON.stringify(normalizedLatest);
 
   // Keep previous cache for rollback in case of quota failure
