@@ -1,4 +1,5 @@
 import * as React from "react";
+import { AlertCircle } from "lucide-react";
 
 import { cn } from "./utils";
 
@@ -23,4 +24,19 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
 );
 Input.displayName = "Input";
 
-export { Input };
+function FieldError({ id, message, className }: { id?: string; message?: string | null; className?: string }) {
+  if (!message) return null;
+
+  return (
+    <p
+      id={id}
+      role="alert"
+      className={cn("mt-2 flex items-start gap-2 text-sm leading-6 text-[color:var(--color-danger-fg)]", className)}
+    >
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      <span>{message}</span>
+    </p>
+  );
+}
+
+export { Input, FieldError };

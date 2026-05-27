@@ -2,6 +2,7 @@
 
 import { parseNumberInput } from "@/lib/smart-goal";
 
+import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { DEFAULT_TARGET_WEEKS } from "../constants";
 import type { SMARTData } from "../types";
@@ -100,9 +101,7 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
           />
           <p className={helperTextClass}>12 tuần phù hợp nhất với bước lập kế hoạch tiếp theo.</p>
           {showTargetWeeksError ? (
-            <p id="smart-target-weeks-error" className={errorTextClass} role="alert">
-              Nhập số tuần mục tiêu lớn hơn 0.
-            </p>
+            <FieldError id="smart-target-weeks-error" message="Nhập số tuần mục tiêu lớn hơn 0." role="alert" />
           ) : null}
         </div>
       ) : (
@@ -132,9 +131,7 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
           />
           <p className={helperTextClass}>Chọn ngày đủ rõ để nhìn lại tiến độ.</p>
           {showTargetDateError ? (
-            <p id="smart-target-date-error" className={errorTextClass} role="alert">
-              Chọn ngày mục tiêu cho kế hoạch này.
-            </p>
+            <FieldError id="smart-target-date-error" message="Chọn ngày mục tiêu cho kế hoạch này." role="alert" />
           ) : null}
         </div>
       )}

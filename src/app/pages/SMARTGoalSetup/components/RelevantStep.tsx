@@ -1,5 +1,6 @@
 ﻿import { useState, type Dispatch, type SetStateAction } from "react";
 
+import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
@@ -45,9 +46,7 @@ export function RelevantStep({ smartData, setSmartData, placeholder, currentStep
         />
         <p className={helperTextClass}>Viết đủ cụ thể để khi mệt vẫn nhớ vì sao mục tiêu này đáng giữ.</p>
         {showMotivationError ? (
-          <p id="smart-relevant-reason-error" className={errorTextClass} role="alert">
-            Viết ít nhất 15 ký tự để lý do đủ rõ.
-          </p>
+          <FieldError id="smart-relevant-reason-error" message="Viết ít nhất 15 ký tự để lý do đủ rõ." role="alert" />
         ) : null}
       </div>
       <div>

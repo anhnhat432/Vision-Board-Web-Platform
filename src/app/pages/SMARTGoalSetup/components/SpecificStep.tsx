@@ -2,6 +2,7 @@
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 
+import { FieldError } from "../../../components/ui/field-error";
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
@@ -84,9 +85,7 @@ export function SpecificStep({
           </p>
         </div>
         {showInlineError ? (
-          <p id="smart-specific-error" className={errorTextClass} role="alert">
-            Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa.
-          </p>
+          <FieldError id="smart-specific-error" message="Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa." role="alert" />
         ) : null}
       </div>
 

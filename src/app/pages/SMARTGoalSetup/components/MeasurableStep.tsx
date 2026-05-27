@@ -5,6 +5,7 @@ import type { GoalArchetype } from "@/lib/smart-goal";
 import { parseNumberInput } from "@/lib/smart-goal";
 
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
+import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
@@ -106,9 +107,7 @@ export function MeasurableStep({
           </div>
         )}
         {showMetricNameError ? (
-          <p id="smart-metric-name-error" className={errorTextClass} role="alert">
-            Chọn một chỉ số để theo dõi tiến độ.
-          </p>
+          <FieldError id="smart-metric-name-error" message="Chọn một chỉ số để theo dõi tiến độ." role="alert" />
         ) : null}
       </div>
 
@@ -138,9 +137,7 @@ export function MeasurableStep({
             aria-describedby={baselineInvalid ? "smart-baseline-error" : undefined}
           />
           {baselineInvalid ? (
-            <p id="smart-baseline-error" className={errorTextClass}>
-              Nhập một con số hợp lệ.
-            </p>
+            <FieldError id="smart-baseline-error" message="Nhập một con số hợp lệ." />
           ) : null}
         </div>
         <div>
@@ -171,14 +168,10 @@ export function MeasurableStep({
             aria-describedby={targetDescribedBy || undefined}
           />
           {targetNotAboveBaseline ? (
-            <p id="smart-target-error" className={errorTextClass} role="alert">
-              Mục tiêu cần lớn hơn mốc hiện tại
-            </p>
+            <FieldError id="smart-target-error" message="Mục tiêu cần lớn hơn mốc hiện tại" role="alert" />
           ) : null}
           {showTargetError && !targetNotAboveBaseline ? (
-            <p id="smart-target-required-error" className={errorTextClass} role="alert">
-              Nhập mốc mục tiêu hợp lệ.
-            </p>
+            <FieldError id="smart-target-required-error" message="Nhập mốc mục tiêu hợp lệ." role="alert" />
           ) : null}
         </div>
       </div>

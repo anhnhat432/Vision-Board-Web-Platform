@@ -3,6 +3,7 @@
 import { parseNumberInput } from "@/lib/smart-goal";
 import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 
+import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
@@ -58,9 +59,7 @@ export function AchievableStep({
         />
         <p className={helperTextClass}>Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
         {showWeeklyHoursError ? (
-          <p id="smart-weekly-hours-error" className={errorTextClass} role="alert">
-            Nhập số giờ mỗi tuần lớn hơn 0.
-          </p>
+          <FieldError id="smart-weekly-hours-error" message="Nhập số giờ mỗi tuần lớn hơn 0." role="alert" />
         ) : null}
       </div>
 
