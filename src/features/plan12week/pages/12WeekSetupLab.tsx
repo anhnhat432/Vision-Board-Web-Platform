@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
 import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { PageShell } from "@/app/components/PageShell";
+import { FormSkeleton } from "@/app/components/ui/skeleton";
 import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
@@ -495,25 +496,19 @@ export function TwelveWeekSetupLab() {
 
   if (isRealMode() && auth.authLoading) {
     return (
-      <CoreFlowGateState
-        currentStepId="twelve_week_setup"
-        eyebrow="Thiết lập 12 tuần"
-        title="Đang kiểm tra tài khoản"
-        description="Phiên bản đầy đủ cần xác nhận đăng nhập trước khi bắt đầu kế hoạch 12 tuần."
-        loading
-      />
+      <PageShell maxWidth="xl">
+        <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
+        <FormSkeleton className="mt-6" aria-label="Đang kiểm tra tài khoản" />
+      </PageShell>
     );
   }
 
   if (isLoading) {
     return (
-      <CoreFlowGateState
-        currentStepId="twelve_week_setup"
-        eyebrow="Thiết lập 12 tuần"
-        title="Đang chuẩn bị dữ liệu thiết lập 12 tuần"
-        description="Đang lấy lại mục tiêu, kết quả kiểm tra và bản nháp gần nhất."
-        loading
-      />
+      <PageShell maxWidth="xl">
+        <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
+        <FormSkeleton className="mt-6" aria-label="Đang chuẩn bị dữ liệu thiết lập 12 tuần" />
+      </PageShell>
     );
   }
 

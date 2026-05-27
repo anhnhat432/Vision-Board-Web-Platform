@@ -1,4 +1,4 @@
-﻿import type { Dispatch, SetStateAction } from "react";
+﻿import { useState, type Dispatch, type SetStateAction } from "react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 
@@ -7,7 +7,7 @@ import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
-import { helperTextClass, labelClass, textareaClass } from "./formStyles";
+import { errorTextClass, helperTextClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface SpecificStepProps {
   smartData: SMARTData;
@@ -40,8 +40,14 @@ export function SpecificStep({
   onArchetypeResetToInferred,
   intentArchetype,
 }: SpecificStepProps) {
+  const [hasBlurredGoalStatement, setHasBlurredGoalStatement] = useState(false);
   const specificLength = smartData.specific.goal_statement.trim().length;
   const activeArchetype = archetype ?? intentArchetype ?? "other";
+  const goalStatementInvalid = specificLength < 10;
+  const showInlineError = goalStatementInvalid && (hasBlurredGoalStatement || showError);
+  const specificDescribedBy = ["smart-specific-hint", "smart-specific-counter", showInlineError ? "smart-specific-error" : null]
+    .filter(Boolean)
+    .join(" ");
   const activeInferredArchetype = inferredArchetype ?? activeArchetype;
 
   return (
@@ -49,6 +55,8 @@ export function SpecificStep({
       <div>
         <label htmlFor="smart-specific" className={labelClass}>
           Câu trả lời của bạn
+          <span className={requiredMarkerClass} aria-hidden="true">*</span>
+          <span className="sr-only"> bắt buộc</span>
         </label>
         <Textarea
           id="smart-specific"
@@ -62,9 +70,10 @@ export function SpecificStep({
               },
             }))
           }
+          onBlur={() => setHasBlurredGoalStatement(true)}
           className={`${textareaClass} min-h-[180px]`}
-          aria-invalid={showError}
-          aria-describedby="smart-specific-hint smart-specific-counter"
+          aria-invalid={showInlineError}
+          aria-describedby={specificDescribedBy}
         />
         <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
           <p id="smart-specific-hint" className={helperTextClass}>
@@ -74,6 +83,11 @@ export function SpecificStep({
             {specificLength}/10 ký tự tối thiểu
           </p>
         </div>
+        {showInlineError ? (
+          <p id="smart-specific-error" className={errorTextClass} role="alert">
+            Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa.
+          </p>
+        ) : null}
       </div>
 
       <ArchetypePicker

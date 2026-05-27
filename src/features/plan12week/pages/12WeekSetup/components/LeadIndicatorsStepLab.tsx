@@ -128,7 +128,10 @@ export function LeadIndicatorsStepLab({
     return getArchetypeForIntent(intent);
   }, []);
 
-  const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>({});
+  const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>(() => {
+    const firstIndicatorId = draft.leadIndicators[0]?.id;
+    return firstIndicatorId ? { [firstIndicatorId]: true } : {};
+  });
   const canAddIndicator = draft.leadIndicators.length < 4;
 
   const shouldShowFieldError = (fieldId: string) => {
@@ -165,7 +168,7 @@ export function LeadIndicatorsStepLab({
             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Thêm việc lặp lại
+            Thêm chỉ số dẫn dắt
           </button>
         </div>
       </section>
@@ -424,25 +427,26 @@ export function LeadIndicatorsStepLab({
                         </div>
                       </div>
 
-                      <div>
-                        <label htmlFor={`tactic-commitment-want-${index}`} className={labelClass}>
-                          Cam kết với chính mình
-                        </label>
-                        <Textarea
-                          id={`tactic-commitment-want-${index}`}
-                          rows={3}
-                          value={indicator.commitment?.want ?? ""}
-                          onChange={(event) =>
-                            onIndicatorChange(
-                              index,
-                              "commitment",
-                              normalizeCommitmentChange(indicator.commitment, "want", event.target.value),
-                            )
-                          }
-                          placeholder="Vì sao việc này quan trọng với bạn?"
-                          className={textareaClass}
-                        />
-                      </div>
+                      {COMMITMENT_FIELDS.map((field) => (
+                        <div key={field.key}>
+                          <label htmlFor={`tactic-commitment-${field.key}-${index}`} className={labelClass}>
+                            {field.label}
+                          </label>
+                          <Textarea
+                            id={`tactic-commitment-${field.key}-${index}`}
+                            rows={3}
+                            value={indicator.commitment?.[field.key] ?? ""}
+                            onChange={(event) =>
+                              onIndicatorChange(
+                                index,
+                                "commitment",
+                                normalizeCommitmentChange(indicator.commitment, field.key, event.target.value),
+                              )
+                            }
+                            className={textareaClass}
+                          />
+                        </div>
+                      ))}
                     </div>
                   ) : null}
                 </div>

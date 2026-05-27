@@ -2,9 +2,15 @@
 
 import { spawn } from "node:child_process";
 
-const BASE_URL = (process.env.MVP1_SMOKE_URL ?? "http://localhost:5173").replace(/\/$/, "");
-const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
-const SESSION = process.env.MVP1_SMOKE_SESSION ?? `mvp1-local-demo-${TIMESTAMP}`;
+const BASE_URL = (
+  process.env.MVP1_SMOKE_URL ?? "http://localhost:5173"
+).replace(/\/$/, "");
+const TIMESTAMP = new Date()
+  .toISOString()
+  .replace(/[-:.TZ]/g, "")
+  .slice(0, 14);
+const SESSION =
+  process.env.MVP1_SMOKE_SESSION ?? `mvp1-local-demo-${TIMESTAMP}`;
 const RUN_FULL_UI_FLOW = process.env.MVP1_SMOKE_FULL_UI === "true";
 const GOAL_TITLE = `MVP1 local demo smoke ${TIMESTAMP}`;
 const TACTIC_ONE = `Smoke today task ${TIMESTAMP}`;
@@ -79,7 +85,12 @@ function runAgentBrowser(args, { input, timeoutMs = 60_000 } = {}) {
 
     const timeout = setTimeout(() => {
       killProcessTree(child);
-      settle(reject, new Error(`agent-browser ${args.join(" ")} timed out after ${timeoutMs}ms`));
+      settle(
+        reject,
+        new Error(
+          `agent-browser ${args.join(" ")} timed out after ${timeoutMs}ms`,
+        ),
+      );
     }, timeoutMs);
 
     child.stdout.on("data", (chunk) => {
@@ -94,7 +105,12 @@ function runAgentBrowser(args, { input, timeoutMs = 60_000 } = {}) {
 
     const finish = (code) => {
       if (code !== 0) {
-        settle(reject, new Error(`agent-browser ${args.join(" ")} failed with code ${code}\n${stderr || stdout}`));
+        settle(
+          reject,
+          new Error(
+            `agent-browser ${args.join(" ")} failed with code ${code}\n${stderr || stdout}`,
+          ),
+        );
         return;
       }
       settle(resolve, { stdout, stderr });
@@ -132,10 +148,14 @@ async function browserEval(source, options) {
 }
 
 async function openPage(pathOrUrl) {
-  const url = pathOrUrl.startsWith("http") ? pathOrUrl : `${BASE_URL}${pathOrUrl}`;
+  const url = pathOrUrl.startsWith("http")
+    ? pathOrUrl
+    : `${BASE_URL}${pathOrUrl}`;
   log(`Opening ${url}`);
   await runAgentBrowser(["open", url], { timeoutMs: 90_000 });
-  await runAgentBrowser(["wait", "--load", "networkidle"], { timeoutMs: 90_000 });
+  await runAgentBrowser(["wait", "--load", "networkidle"], {
+    timeoutMs: 90_000,
+  });
   await recordApiResources();
 }
 
@@ -159,7 +179,11 @@ function bodyIncludes(text) {
   return `${normalizedTextExpression("document.body.innerText")}.includes(${JSON.stringify(text)})`;
 }
 
-async function waitFor(description, source, { timeoutMs = 45_000, intervalMs = 700 } = {}) {
+async function waitFor(
+  description,
+  source,
+  { timeoutMs = 45_000, intervalMs = 700 } = {},
+) {
   log(`Waiting for ${description}`);
   const startedAt = Date.now();
   let lastValue = null;
@@ -305,6 +329,22 @@ async function pageAction(source) {
         element.scrollIntoView({ block: "center" });
         element.click();
       };
+      const clickLastButtonByText = (texts) => {
+        const candidates = Array.isArray(texts) ? texts : [texts];
+        const normalizedCandidates = candidates.map(normalize);
+        const elements = Array.from(document.querySelectorAll("button, [role='button'], a"));
+        const matches = elements.filter((item) => {
+          const text = normalize(item.innerText || item.textContent || item.getAttribute("aria-label"));
+          return normalizedCandidates.some((candidate) => text.includes(candidate));
+        });
+        const element = matches.at(-1);
+        if (!element) throw new Error("Could not find button/link: " + candidates.join(" | "));
+        if (element.disabled || element.getAttribute("aria-disabled") === "true") {
+          throw new Error("Button/link is disabled: " + (element.innerText || element.textContent || ""));
+        }
+        element.scrollIntoView({ block: "center" });
+        element.click();
+      };
       const clickRadioValue = (value) => {
         const radio =
           document.getElementById(value) ||
@@ -341,6 +381,40 @@ async function clickButton(texts) {
   await pageAction(`clickButtonByText(${JSON.stringify(texts)});`);
 }
 
+async function clickLastButton(texts) {
+  log(`Clicking last ${Array.isArray(texts) ? texts.join(" | ") : texts}`);
+  await pageAction(`clickLastButtonByText(${JSON.stringify(texts)});`);
+}
+
+async function clickButtonIfPresent(texts) {
+  log(
+    `Clicking if present ${Array.isArray(texts) ? texts.join(" | ") : texts}`,
+  );
+  return browserEval(`
+    (() => {
+      const normalize = (value) =>
+        String(value ?? "")
+          .normalize("NFD")
+          .replace(/[\\u0300-\\u036f]/g, "")
+          .replace(/[đĐ]/g, (match) => (match === "đ" ? "d" : "D"))
+          .replace(/\\s+/g, " ")
+          .trim()
+          .toLowerCase();
+      const candidates = ${JSON.stringify(Array.isArray(texts) ? texts : [texts])};
+      const normalizedCandidates = candidates.map(normalize);
+      const elements = Array.from(document.querySelectorAll("button, [role='button'], a"));
+      const element = elements.find((item) => {
+        const text = normalize(item.innerText || item.textContent || item.getAttribute("aria-label"));
+        return normalizedCandidates.some((candidate) => text.includes(candidate));
+      });
+      if (!element || element.disabled || element.getAttribute("aria-disabled") === "true") return false;
+      element.scrollIntoView({ block: "center" });
+      element.click();
+      return true;
+    })()
+  `);
+}
+
 async function clickTab(text) {
   log(`Opening tab ${text}`);
   await pageAction(`clickTabByText(${JSON.stringify(text)});`);
@@ -348,7 +422,9 @@ async function clickTab(text) {
 
 async function fill(selector, value) {
   log(`Filling ${selector}`);
-  await pageAction(`fillSelector(${JSON.stringify(selector)}, ${JSON.stringify(value)});`);
+  await pageAction(
+    `fillSelector(${JSON.stringify(selector)}, ${JSON.stringify(value)});`,
+  );
 }
 
 async function pressKey(selector, key) {
@@ -378,7 +454,9 @@ async function clickRadio(value) {
 }
 
 function assertTextIncludesAny(state, expectedTexts, context) {
-  const found = expectedTexts.find((expected) => state.normalizedText.includes(expected));
+  const found = expectedTexts.find((expected) =>
+    state.normalizedText.includes(expected),
+  );
   if (found) return;
 
   throw new Error(
@@ -388,10 +466,14 @@ function assertTextIncludesAny(state, expectedTexts, context) {
 }
 
 function assertTextExcludes(state, forbiddenTexts, context) {
-  const found = forbiddenTexts.find((forbidden) => state.normalizedText.includes(forbidden));
+  const found = forbiddenTexts.find((forbidden) =>
+    state.normalizedText.includes(forbidden),
+  );
   if (!found) return;
 
-  throw new Error(`${context} includes forbidden text: ${found}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
+  throw new Error(
+    `${context} includes forbidden text: ${found}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`,
+  );
 }
 
 async function assertSignedOutHome() {
@@ -402,12 +484,20 @@ async function assertSignedOutHome() {
 
   const state = await getPageState();
   if (state.path === "/login") {
-    throw new Error(`Fresh signed-out demo visitor was redirected to login: ${state.url}`);
+    throw new Error(
+      `Fresh signed-out demo visitor was redirected to login: ${state.url}`,
+    );
   }
 
   assertTextIncludesAny(
     state,
-    ["trai nghiem demo mien phi", "dung thu mien phi", "dung duoc ngay khong can dang nhap"],
+    [
+      "trai nghiem demo mien phi",
+      "dung thu mien phi",
+      "dung duoc ngay khong can dang nhap",
+      "dung thu lo trinh 4 buoc",
+      "bien muc tieu lon thanh ke hoach 12 tuan",
+    ],
     "signed-out dashboard",
   );
   assertTextIncludesAny(
@@ -415,18 +505,30 @@ async function assertSignedOutHome() {
     [
       "bat dau demo ngay tren trinh duyet nay",
       "dang ky khi ban muon gan tien do voi tai khoan",
+      "mo trang la dung duoc khong can email",
+      "dong bo khi san sang",
     ],
     "signed-out dashboard demo disclosure",
   );
   assertTextExcludes(
     state,
-    ["ra mat portfolio", "duy tri thoi quen", "di bo 8.000", "private stale goal"],
+    [
+      "ra mat portfolio",
+      "duy tri thoi quen",
+      "di bo 8.000",
+      "private stale goal",
+    ],
     "signed-out dashboard",
   );
 }
 
 async function startDemoFlowFromDashboard() {
-  await clickButton(["trai nghiem demo mien phi", "dung thu mien phi", "bat dau life balance"]);
+  await clickButton([
+    "trai nghiem demo mien phi",
+    "dung thu mien phi",
+    "dung thu lo trinh 4 buoc",
+    "bat dau life balance",
+  ]);
   await waitFor(
     "local-first core flow route",
     'location.pathname === "/onboarding" || location.pathname === "/life-balance"',
@@ -440,78 +542,156 @@ async function startDemoFlowFromDashboard() {
 }
 
 async function completeOnboarding() {
-  await waitFor("onboarding start", `${bodyIncludes("cham life balance")} || ${bodyIncludes("bat dau danh gia")}`);
-  await clickButton(["cham life balance", "bat dau danh gia"]);
-  await waitFor("life balance assessment", `${bodyIncludes("cham diem hien tai")} || ${bodyIncludes("hoan thanh danh gia")}`);
-  await clickButton("hoan thanh danh gia");
-  await waitFor("life insight route", 'location.pathname === "/life-insight"', { timeoutMs: 45_000 });
+  await waitFor(
+    "onboarding start",
+    `${bodyIncludes("cham life balance")} || ${bodyIncludes("bat dau danh gia")} || ${bodyIncludes("bat dau cham diem")}`,
+  );
+  await clickButton([
+    "cham life balance",
+    "bat dau danh gia",
+    "bat dau cham diem",
+  ]);
+  await waitFor(
+    "life balance assessment",
+    `${bodyIncludes("cham diem hien tai")} || ${bodyIncludes("cham 8 linh vuc")}`,
+  );
+  await clickLastButton([
+    "hoan thanh danh gia",
+    "tiep chon trong tam",
+    "de sau",
+  ]);
+  await waitFor("life insight route", 'location.pathname === "/life-insight"', {
+    timeoutMs: 45_000,
+  });
 }
 
 async function completeLifeInsight() {
-  await waitFor("life insight CTA", `${bodyIncludes("tao muc tieu voi")} || ${bodyIncludes("life insight")}`);
+  await waitFor(
+    "life insight CTA",
+    `${bodyIncludes("tao muc tieu voi")} || ${bodyIncludes("life insight")}`,
+  );
   await clickButton("tao muc tieu voi");
-  await waitFor("SMART goal route", 'location.pathname === "/smart-goal-setup"', { timeoutMs: 45_000 });
+  await waitFor(
+    "SMART goal route",
+    'location.pathname === "/smart-goal-setup"',
+    { timeoutMs: 45_000 },
+  );
 }
 
 async function completeSmartGoal() {
-  await waitFor("SMART specific step", 'document.querySelector("#smart-specific")');
+  await waitFor(
+    "SMART specific step",
+    'document.querySelector("#smart-specific")',
+  );
   await fill("#smart-specific", GOAL_TITLE);
   await clickButton("tiep theo");
 
-  await waitFor("SMART measurable step", 'document.querySelector("#smart-metric-name")');
+  await waitFor(
+    "SMART measurable step",
+    'document.querySelector("#smart-metric-name")',
+  );
   await fill("#smart-metric-name", "completed smoke weeks");
   await fill("#smart-baseline", "0");
   await fill("#smart-target", "12");
   await clickButton("tiep theo");
 
-  await waitFor("SMART achievable step", 'document.querySelector("#smart-weekly-hours")');
+  await waitFor(
+    "SMART achievable step",
+    'document.querySelector("#smart-weekly-hours")',
+  );
   await fill("#smart-weekly-hours", "4");
   await fill("#smart-required-skills", "weekly planning\\nshort review");
   await fill("#smart-support-resources", "local browser and MVP1 dashboard");
   await clickButton("tiep theo");
 
-  await waitFor("SMART relevant step", 'document.querySelector("#smart-relevant-reason")');
-  await fill("#smart-relevant-reason", "This smoke test proves the local-first MVP1 execution loop works without login.");
+  await waitFor(
+    "SMART relevant step",
+    'document.querySelector("#smart-relevant-reason")',
+  );
+  await fill(
+    "#smart-relevant-reason",
+    "This smoke test proves the local-first MVP1 execution loop works without login.",
+  );
   await fill("#smart-life-alignment", "Career");
   await clickButton("tiep theo");
 
-  await waitFor("SMART deadline step", 'document.querySelector("#smart-target-weeks")');
+  await waitFor(
+    "SMART deadline step",
+    'document.querySelector("#smart-target-weeks")',
+  );
   await clickButton("kiem tra tinh thuc te");
-  await waitFor("feasibility route", 'location.pathname === "/feasibility"', { timeoutMs: 45_000 });
+  await waitFor("feasibility route", 'location.pathname === "/feasibility"', {
+    timeoutMs: 45_000,
+  });
 }
 
 async function completeFeasibility() {
-  const answers = ["gt5", "energy_high", "resources_ready", "very_realistic", "none", "always", "committed"];
+  const answers = [
+    "gt5",
+    "energy_high",
+    "resources_ready",
+    "very_realistic",
+    "none",
+    "always",
+    "committed",
+  ];
 
   for (const [index, answer] of answers.entries()) {
     await clickRadio(answer);
-    await clickButton(index === answers.length - 1 ? "hoan thanh danh gia" : "tiep theo");
+    await clickButton(
+      index === answers.length - 1 ? "hoan thanh danh gia" : "tiep theo",
+    );
   }
 
-  await waitFor("feasibility result", `${bodyIncludes("tao ke hoach 12 tuan")}`);
+  await waitFor(
+    "feasibility result",
+    `${bodyIncludes("tao ke hoach 12 tuan")}`,
+  );
   await clickButton("tao ke hoach 12 tuan");
-  await waitFor("12-week setup route", 'location.pathname === "/12-week-setup"', { timeoutMs: 45_000 });
+  await waitFor(
+    "12-week setup route",
+    'location.pathname === "/12-week-setup"',
+    { timeoutMs: 45_000 },
+  );
 }
 
 async function completeTwelveWeekSetup() {
-  await waitFor("12-week setup goal step", `${bodyIncludes("muc tieu 12 tuan")} || document.querySelector("#tactic-name-0")`);
-  if (!(await browserEval('Boolean(document.querySelector("#tactic-name-0"))'))) {
+  await waitFor(
+    "12-week setup goal step",
+    `${bodyIncludes("muc tieu 12 tuan")} || document.querySelector("#tactic-name-0")`,
+  );
+  if (
+    !(await browserEval('Boolean(document.querySelector("#tactic-name-0"))'))
+  ) {
     await clickButton("tiep tuc");
   }
 
-  await waitFor("12-week tactic step", 'document.querySelector("#tactic-name-0") && document.querySelector("#tactic-name-1")');
+  await waitFor(
+    "12-week tactic step",
+    'document.querySelector("#tactic-name-0") && document.querySelector("#tactic-name-1")',
+  );
   await fill("#tactic-name-0", TACTIC_ONE);
   await fill("#tactic-name-1", TACTIC_TWO);
   await clickButton("tiep tuc");
 
-  await waitFor("12-week metric step", 'document.querySelector("#lag-metric-target")');
+  await waitFor(
+    "12-week metric step",
+    'document.querySelector("#lag-metric-target")',
+  );
   await fill("#lag-metric-target", "12");
   await fill("#lag-metric-unit", "weeks");
   await clickButton("tiep tuc");
 
-  await waitFor("12-week final step", `${bodyIncludes("chot ke hoach")} || ${bodyIncludes("tao ke hoach 12 tuan")}`);
+  await waitFor(
+    "12-week final step",
+    `${bodyIncludes("chot ke hoach")} || ${bodyIncludes("tao ke hoach 12 tuan")}`,
+  );
   await clickButton("tao ke hoach 12 tuan");
-  await waitFor("12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
+  await waitFor(
+    "12-week system route",
+    'location.pathname === "/12-week-system"',
+    { timeoutMs: 75_000 },
+  );
 }
 
 async function completeUiCoreFlow() {
@@ -697,11 +877,17 @@ async function seedLocalTwelveWeekSystem() {
   `);
 
   if (!result?.ok) {
-    throw new Error(`Could not seed local 12-week system: ${JSON.stringify(result)}`);
+    throw new Error(
+      `Could not seed local 12-week system: ${JSON.stringify(result)}`,
+    );
   }
 
   await openPage("/12-week-system");
-  await waitFor("seeded 12-week system", 'location.pathname === "/12-week-system"', { timeoutMs: 45_000 });
+  await waitFor(
+    "seeded 12-week system",
+    'location.pathname === "/12-week-system"',
+    { timeoutMs: 45_000 },
+  );
 }
 
 async function completeCoreFlowWithFallback() {
@@ -717,7 +903,9 @@ async function completeCoreFlowWithFallback() {
     await completeUiCoreFlow();
     return "ui";
   } catch (error) {
-    log(`UI core flow did not complete; using controlled localStorage seed. Reason: ${error.message}`);
+    log(
+      `UI core flow did not complete; using controlled localStorage seed. Reason: ${error.message}`,
+    );
     await clearBrowserStorage();
     await seedLocalTwelveWeekSystem();
     return "seeded";
@@ -764,7 +952,11 @@ async function getSmokeGoalSnapshot() {
   `);
 }
 
-async function waitForGoalSnapshot(description, predicate, { timeoutMs = 45_000, intervalMs = 700 } = {}) {
+async function waitForGoalSnapshot(
+  description,
+  predicate,
+  { timeoutMs = 45_000, intervalMs = 700 } = {},
+) {
   log(`Waiting for ${description}`);
   const startedAt = Date.now();
   let lastSnapshot = null;
@@ -812,11 +1004,15 @@ async function ensureTodayTaskAvailable() {
   `);
 
   if (!result?.ok) {
-    throw new Error(`Could not ensure a Today task is available: ${JSON.stringify(result)}`);
+    throw new Error(
+      `Could not ensure a Today task is available: ${JSON.stringify(result)}`,
+    );
   }
 
   if (result.changed) {
-    log("Moved one local task into today's queue for a deterministic smoke toggle");
+    log(
+      "Moved one local task into today's queue for a deterministic smoke toggle",
+    );
     await openPage("/12-week-system");
   }
 }
@@ -838,38 +1034,62 @@ async function clickFirstTodayTaskCheckbox() {
 }
 
 async function assertTwelveWeekSystemReady() {
-  await waitFor("12-week system page", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
-  await waitFor("Today tab useful content", `${bodyIncludes("hang viec hom nay")} && ${bodyIncludes("check-in 30 giay")}`, {
-    timeoutMs: 75_000,
-  });
+  await waitFor(
+    "12-week system page",
+    'location.pathname === "/12-week-system"',
+    { timeoutMs: 75_000 },
+  );
+  await waitFor(
+    "Today tab useful content",
+    `${bodyIncludes("hang viec hom nay")} && ${bodyIncludes("check-in 30 giay")}`,
+    {
+      timeoutMs: 75_000,
+    },
+  );
 
-  await waitForGoalSnapshot("local 12-week system in storage", (snapshot) => snapshot.found && snapshot.taskCount > 0);
+  await waitForGoalSnapshot(
+    "local 12-week system in storage",
+    (snapshot) => snapshot.found && snapshot.taskCount > 0,
+  );
 }
 
 async function exerciseTodayAndReviewTabs() {
   await clickTab("hom nay").catch(() => undefined);
   await ensureTodayTaskAvailable();
-  await waitFor("Today queue", 'document.querySelector("[data-tour-id=\\"system-today-queue\\"]")');
+  await waitFor(
+    "Today queue",
+    'document.querySelector("[data-tour-id=\\"system-today-queue\\"]")',
+  );
   await clickFirstTodayTaskCheckbox();
-  await waitForGoalSnapshot("Today task toggle persisted", (snapshot) => snapshot.completedTaskCount >= 1);
+  await waitForGoalSnapshot(
+    "Today task toggle persisted",
+    (snapshot) => snapshot.completedTaskCount >= 1,
+  );
 
-  const hasDailyNote = await browserEval('Boolean(document.querySelector("#daily-note"))');
+  const hasDailyNote = await browserEval(
+    'Boolean(document.querySelector("#daily-note"))',
+  );
   if (hasDailyNote) {
     await fill("#daily-note", DAILY_CHECKIN_NOTE);
     await clickButton("luu check-in hom nay");
     await waitForGoalSnapshot(
       "daily check-in persisted",
       (snapshot) =>
-        snapshot.dailyCheckInCount >= 1 && snapshot.latestDailyCheckIn?.optionalNote === DAILY_CHECKIN_NOTE,
+        snapshot.dailyCheckInCount >= 1 &&
+        snapshot.latestDailyCheckIn?.optionalNote === DAILY_CHECKIN_NOTE,
     );
   } else {
     log("Daily check-in UI was not present; skipping check-in save");
   }
 
   await clickTab("tuan");
-  await waitFor("Week tab", `document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`, {
-    timeoutMs: 8_000,
-  }).catch(async () => {
+  await waitFor(
+    "Week tab",
+    `document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`,
+    {
+      timeoutMs: 8_000,
+    },
+  ).catch(async () => {
     log("Tab click did not switch to Week; opening the Week tab URL directly");
     await openPage("/12-week-system?tab=week");
     await waitFor(
@@ -884,25 +1104,40 @@ async function exerciseTodayAndReviewTabs() {
   if (hasWeeklyReviewForm) {
     await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
     await addNextWeekCommitment(WEEKLY_REVIEW_PRIORITY);
-    await browserEval("window.__smokeOriginalWeeklyReviewConfirm = window.confirm; window.confirm = () => true;");
+    await browserEval(
+      "window.__smokeOriginalWeeklyReviewConfirm = window.confirm; window.confirm = () => true;",
+    );
     await clickButton("chot review tuan nay");
+    await sleep(350);
+    await clickButtonIfPresent("van luu som");
     await waitForGoalSnapshot(
       "weekly review persisted",
       (snapshot) =>
         snapshot.weeklyReviewCount >= 1 &&
         snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OBSTACLE &&
-        snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY),
+        snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(
+          WEEKLY_REVIEW_PRIORITY,
+        ),
       { timeoutMs: 75_000 },
     );
   }
 
   await clickTab("tien do");
-  await waitFor("Progress tab", `${bodyIncludes("bang diem 12 tuan")} || ${bodyIncludes("tuan dang chay")}`, {
-    timeoutMs: 8_000,
-  }).catch(async () => {
-    log("Tab click did not switch to Progress; opening the Progress tab URL directly");
+  await waitFor(
+    "Progress tab",
+    `${bodyIncludes("bang diem 12 tuan")} || ${bodyIncludes("tuan dang chay")}`,
+    {
+      timeoutMs: 8_000,
+    },
+  ).catch(async () => {
+    log(
+      "Tab click did not switch to Progress; opening the Progress tab URL directly",
+    );
     await openPage("/12-week-system?tab=progress");
-    await waitFor("Progress tab URL", `${bodyIncludes("bang diem 12 tuan")} || ${bodyIncludes("tuan dang chay")}`);
+    await waitFor(
+      "Progress tab URL",
+      `${bodyIncludes("bang diem 12 tuan")} || ${bodyIncludes("tuan dang chay")}`,
+    );
   });
 }
 
@@ -961,14 +1196,25 @@ async function main() {
 
   try {
     await runStep("Resetting browser session", async () => {
-      await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(() => undefined);
+      await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(
+        () => undefined,
+      );
     });
     await runStep("Signed-out local-first dashboard", assertSignedOutHome);
-    await runStep("Dashboard CTA starts the demo flow", startDemoFlowFromDashboard);
-    const flowMode = await runStep("Core flow to 12-week system", completeCoreFlowWithFallback);
+    await runStep(
+      "Dashboard CTA starts the demo flow",
+      startDemoFlowFromDashboard,
+    );
+    const flowMode = await runStep(
+      "Core flow to 12-week system",
+      completeCoreFlowWithFallback,
+    );
     log(`Core flow mode: ${flowMode}`);
     await runStep("12-week system loaded", assertTwelveWeekSystemReady);
-    await runStep("Today task, check-in, Week/Progress tabs", exerciseTodayAndReviewTabs);
+    await runStep(
+      "Today task, check-in, Week/Progress tabs",
+      exerciseTodayAndReviewTabs,
+    );
     await runStep("Browser error scan", assertNoBrowserErrors);
     await runStep("Protected API request scan", async () => {
       assertNoProtectedApiRequestSpam();
@@ -976,11 +1222,15 @@ async function main() {
     log("MVP1 local-first demo smoke passed");
   } finally {
     await clearBrowserStorage().catch(() => undefined);
-    await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(() => undefined);
+    await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(
+      () => undefined,
+    );
   }
 }
 
 main().catch((error) => {
-  console.error(`[mvp1-smoke] FAILED: ${error instanceof Error ? error.message : String(error)}`);
+  console.error(
+    `[mvp1-smoke] FAILED: ${error instanceof Error ? error.message : String(error)}`,
+  );
   process.exitCode = 1;
 });

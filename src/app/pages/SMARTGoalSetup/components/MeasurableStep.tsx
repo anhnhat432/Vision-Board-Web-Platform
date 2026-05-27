@@ -1,4 +1,4 @@
-﻿import type { Dispatch, SetStateAction } from "react";
+﻿import { useState, type Dispatch, type SetStateAction } from "react";
 import { Lightbulb } from "lucide-react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
@@ -8,7 +8,7 @@ import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples
 import { Input } from "../../../components/ui/input";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
-import { errorTextClass, helperTextClass, inputClass, labelClass } from "./formStyles";
+import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
 
 interface MeasurableStepProps {
   smartData: SMARTData;
@@ -38,6 +38,7 @@ export function MeasurableStep({
   intentArchetype,
   archetype,
 }: MeasurableStepProps) {
+  const [blurredFields, setBlurredFields] = useState({ metricName: false, targetValue: false });
   const activeArchetype = archetype ?? intentArchetype ?? "other";
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
@@ -46,12 +47,29 @@ export function MeasurableStep({
   const targetNotAboveBaseline =
     parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue;
   const targetInvalid = parsedTargetValue === undefined || targetNotAboveBaseline;
+  const showMetricNameError = metricNameMissing && (blurredFields.metricName || currentStepHasDraftContent);
+  const showTargetError = targetInvalid && (blurredFields.targetValue || currentStepHasDraftContent);
+  const metricNameDescribedBy = [
+    "smart-metric-name-hint",
+    intentMetricHint ? "smart-metric-intent-hint" : null,
+    showMetricNameError ? "smart-metric-name-error" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const targetDescribedBy = [
+    targetNotAboveBaseline ? "smart-target-error" : null,
+    showTargetError && !targetNotAboveBaseline ? "smart-target-required-error" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="space-y-5">
       <div>
         <label htmlFor="smart-metric-name" className={labelClass}>
           Con số hoặc dấu hiệu theo dõi
+          <span className={requiredMarkerClass} aria-hidden="true">*</span>
+          <span className="sr-only"> bắt buộc</span>
         </label>
         <Input
           id="smart-metric-name"
@@ -66,11 +84,10 @@ export function MeasurableStep({
               },
             }))
           }
+          onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
           className={inputClass}
-          aria-invalid={metricNameMissing && currentStepHasDraftContent}
-          aria-describedby={
-            intentMetricHint ? "smart-metric-name-hint smart-metric-intent-hint" : "smart-metric-name-hint"
-          }
+          aria-invalid={showMetricNameError}
+          aria-describedby={metricNameDescribedBy}
         />
         <p id="smart-metric-name-hint" className={helperTextClass}>
           Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.
@@ -88,6 +105,11 @@ export function MeasurableStep({
             </span>
           </div>
         )}
+        {showMetricNameError ? (
+          <p id="smart-metric-name-error" className={errorTextClass} role="alert">
+            Chọn một chỉ số để theo dõi tiến độ.
+          </p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px]">
@@ -124,6 +146,8 @@ export function MeasurableStep({
         <div>
           <label htmlFor="smart-target" className={labelClass}>
             Mốc mục tiêu
+            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className="sr-only"> bắt buộc</span>
           </label>
           <Input
             id="smart-target"
@@ -141,13 +165,19 @@ export function MeasurableStep({
                 },
               }))
             }
+            onBlur={() => setBlurredFields((previous) => ({ ...previous, targetValue: true }))}
             className={inputClass}
-            aria-invalid={targetInvalid && currentStepHasDraftContent}
-            aria-describedby={targetNotAboveBaseline ? "smart-target-error" : undefined}
+            aria-invalid={showTargetError}
+            aria-describedby={targetDescribedBy || undefined}
           />
           {targetNotAboveBaseline ? (
-            <p id="smart-target-error" className={errorTextClass}>
+            <p id="smart-target-error" className={errorTextClass} role="alert">
               Mục tiêu cần lớn hơn mốc hiện tại
+            </p>
+          ) : null}
+          {showTargetError && !targetNotAboveBaseline ? (
+            <p id="smart-target-required-error" className={errorTextClass} role="alert">
+              Nhập mốc mục tiêu hợp lệ.
             </p>
           ) : null}
         </div>

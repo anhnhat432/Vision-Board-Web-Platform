@@ -326,7 +326,7 @@ export function LifeBalance() {
                 {historyCount} lần ghi nhận
               </span>
             ) : null}
-            <AutoSaveIndicator status={autoSaveStatus} lastSavedAt={lastSavedAt} />
+            <AutoSaveIndicator status={autoSaveStatus} lastSavedAt={lastSavedAt} variant="prominent" />
           </div>
         </header>
 

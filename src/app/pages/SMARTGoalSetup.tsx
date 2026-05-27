@@ -6,6 +6,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { FormSkeleton } from "../components/ui/skeleton";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
@@ -469,7 +470,13 @@ export function SMARTGoalSetup() {
           />
         );
       case "timeBound":
-        return <TimeBoundStep smartData={smartData} setSmartData={setSmartData} />;
+        return (
+          <TimeBoundStep
+            smartData={smartData}
+            setSmartData={setSmartData}
+            currentStepHasDraftContent={currentStepHasDraftContent}
+          />
+        );
       default:
         return null;
     }
@@ -477,13 +484,12 @@ export function SMARTGoalSetup() {
 
   if (setupState === "checking") {
     return (
-      <CoreFlowGateState
-        currentStepId="smart_goal"
-        eyebrow="Viết mục tiêu"
-        loading
-        title="Đang chuẩn bị bước viết mục tiêu"
-        description="Đang kiểm tra dữ liệu cân bằng và trọng tâm trước khi mở phần viết mục tiêu."
-      />
+      <PageShell maxWidth="md">
+        <div className="space-y-6">
+          <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
+          <FormSkeleton aria-label="Đang chuẩn bị bước viết mục tiêu" />
+        </div>
+      </PageShell>
     );
   }
 
@@ -527,8 +533,8 @@ export function SMARTGoalSetup() {
       <div className="space-y-6">
         <div>
           <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
-          <div className="flex justify-end">
-            <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
+          <div className="sticky top-2 z-20 flex justify-end">
+            <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} variant="prominent" />
           </div>
         </div>
 

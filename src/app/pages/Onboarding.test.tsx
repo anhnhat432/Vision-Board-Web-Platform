@@ -202,4 +202,43 @@ describe("Onboarding", () => {
     expect(summary).toHaveTextContent(/Điểm trung bình/i);
     expect(summary).toHaveTextContent(/Ưu tiên/i);
   });
+
+  it("allows skipping an individual area without changing its score", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    const summary = await screen.findByTestId("onboarding-assessment-summary");
+    expect(summary).toHaveTextContent("0/8");
+
+    const skipButtons = screen.getAllByRole("button", { name: "Để sau" });
+    await user.click(skipButtons[0]);
+
+    expect(summary).toHaveTextContent("1/8");
+    expect(screen.getByText("Đã rà")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Để sau" })).toHaveLength(8);
+  });
+
+  it("lets users continue from assessment with default scores when areas remain unreviewed", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    const continueButtons = screen.getAllByRole("button", { name: "Để sau" });
+    await user.click(continueButtons[continueButtons.length - 1]);
+
+    const data = getUserData();
+    expect(data.onboardingCompleted).toBe(true);
+    expect(data.currentWheelOfLife.every((area) => area.score === 5)).toBe(true);
+  });
 });

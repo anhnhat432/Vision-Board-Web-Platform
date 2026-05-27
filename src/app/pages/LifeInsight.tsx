@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
+import { FormSkeleton } from "../components/ui/skeleton";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -123,13 +124,10 @@ export function LifeInsight() {
 
   if (!userData) {
     return (
-      <CoreFlowGateState
-        currentStepId="life_insight"
-        eyebrow="Góc nhìn cuộc sống"
-        title="Đang tải dữ liệu góc nhìn"
-        description="Mình đang đọc dữ liệu bánh xe cuộc sống để gợi ý lĩnh vực bạn nên ưu tiên tiếp theo."
-        loading
-      />
+      <PageShell maxWidth="xl">
+        <CoreFlowProgress currentStepId="life_insight" onExit={() => navigate("/")} />
+        <FormSkeleton className="mt-6" aria-label="Đang tải dữ liệu góc nhìn" />
+      </PageShell>
     );
   }
 

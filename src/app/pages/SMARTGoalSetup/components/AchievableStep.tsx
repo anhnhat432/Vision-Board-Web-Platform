@@ -1,4 +1,4 @@
-﻿import type { Dispatch, SetStateAction } from "react";
+﻿import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { parseNumberInput } from "@/lib/smart-goal";
 import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
@@ -7,7 +7,7 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
-import { helperTextClass, inputClass, labelClass, textareaClass } from "./formStyles";
+import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface AchievableStepProps {
   smartData: SMARTData;
@@ -22,14 +22,18 @@ export function AchievableStep({
   currentStepHasDraftContent,
   archetype,
 }: AchievableStepProps) {
+  const [hasBlurredWeeklyHours, setHasBlurredWeeklyHours] = useState(false);
   const parsedWeeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
   const weeklyHoursInvalid = parsedWeeklyHours === undefined || parsedWeeklyHours <= 0;
+  const showWeeklyHoursError = weeklyHoursInvalid && (hasBlurredWeeklyHours || currentStepHasDraftContent);
 
   return (
     <div className="space-y-5">
       <div>
         <label htmlFor="smart-weekly-hours" className={labelClass}>
           Thời gian mỗi tuần
+          <span className={requiredMarkerClass} aria-hidden="true">*</span>
+          <span className="sr-only"> bắt buộc</span>
         </label>
         <Input
           id="smart-weekly-hours"
@@ -47,10 +51,17 @@ export function AchievableStep({
               },
             }))
           }
+          onBlur={() => setHasBlurredWeeklyHours(true)}
           className={inputClass}
-          aria-invalid={weeklyHoursInvalid && currentStepHasDraftContent}
+          aria-invalid={showWeeklyHoursError}
+          aria-describedby={showWeeklyHoursError ? "smart-weekly-hours-error" : undefined}
         />
         <p className={helperTextClass}>Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
+        {showWeeklyHoursError ? (
+          <p id="smart-weekly-hours-error" className={errorTextClass} role="alert">
+            Nhập số giờ mỗi tuần lớn hơn 0.
+          </p>
+        ) : null}
       </div>
 
       <div>

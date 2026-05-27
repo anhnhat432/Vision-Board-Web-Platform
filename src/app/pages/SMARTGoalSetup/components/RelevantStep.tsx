@@ -1,9 +1,9 @@
-﻿import type { Dispatch, SetStateAction } from "react";
+﻿import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
-import { helperTextClass, inputClass, labelClass, textareaClass } from "./formStyles";
+import { errorTextClass, helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface RelevantStepProps {
   smartData: SMARTData;
@@ -13,13 +13,17 @@ interface RelevantStepProps {
 }
 
 export function RelevantStep({ smartData, setSmartData, placeholder, currentStepHasDraftContent }: RelevantStepProps) {
+  const [hasBlurredMotivation, setHasBlurredMotivation] = useState(false);
   const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
+  const showMotivationError = motivationInvalid && (hasBlurredMotivation || currentStepHasDraftContent);
 
   return (
     <div className="space-y-5">
       <div>
         <label htmlFor="smart-relevant-reason" className={labelClass}>
           Lý do bạn thật sự muốn theo đuổi
+          <span className={requiredMarkerClass} aria-hidden="true">*</span>
+          <span className="sr-only"> bắt buộc</span>
         </label>
         <Textarea
           id="smart-relevant-reason"
@@ -34,10 +38,17 @@ export function RelevantStep({ smartData, setSmartData, placeholder, currentStep
               },
             }))
           }
+          onBlur={() => setHasBlurredMotivation(true)}
           className={`${textareaClass} min-h-[160px]`}
-          aria-invalid={motivationInvalid && currentStepHasDraftContent}
+          aria-invalid={showMotivationError}
+          aria-describedby={showMotivationError ? "smart-relevant-reason-error" : undefined}
         />
         <p className={helperTextClass}>Viết đủ cụ thể để khi mệt vẫn nhớ vì sao mục tiêu này đáng giữ.</p>
+        {showMotivationError ? (
+          <p id="smart-relevant-reason-error" className={errorTextClass} role="alert">
+            Viết ít nhất 15 ký tự để lý do đủ rõ.
+          </p>
+        ) : null}
       </div>
       <div>
         <label htmlFor="smart-life-alignment" className={labelClass}>

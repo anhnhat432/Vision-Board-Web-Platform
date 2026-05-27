@@ -4,7 +4,7 @@ import { cn } from "@/app/components/ui/utils";
 
 export type EmptyStateVariant = "card" | "dashed";
 export type EmptyStateAlign = "left" | "center";
-export type EmptyStateHeadingLevel = 2 | 3 | 4;
+export type EmptyStateHeadingLevel = 1 | 2 | 3 | 4;
 
 interface EmptyStateProps {
   /**
@@ -102,7 +102,7 @@ export function EmptyState({
     : "text-base font-semibold tracking-normal text-app-ink";
 
   const Wrapper = as;
-  const HeadingTag = `h${headingLevel}` as "h2" | "h3" | "h4";
+  const HeadingTag = `h${headingLevel}` as "h1" | "h2" | "h3" | "h4";
 
   return (
     <Wrapper data-testid={testId} className={cn("space-y-4", variantClass, alignClass, className)}>
