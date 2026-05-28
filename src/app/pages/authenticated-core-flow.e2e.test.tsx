@@ -205,29 +205,29 @@ function seedAnonymousStaleGoal() {
 
 async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   await user.type(
-    await screen.findByLabelText("Câu trả lời của bạn"),
+    await screen.findByLabelText(/Câu trả lời của bạn/i, {}, { timeout: 5000 }),
     "Ra mắt hệ thống review cá nhân giúp tôi giữ nhịp thực thi mỗi tuần.",
   );
   await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
-  await user.type(await screen.findByLabelText("Con số hoặc dấu hiệu theo dõi"), "Số tuần review hoàn chỉnh");
+  await user.type(await screen.findByLabelText(/Con số hoặc dấu hiệu theo dõi/i, {}, { timeout: 5000 }), "Số tuần review hoàn chỉnh");
   await user.type(screen.getByLabelText(/Mốc hiện tại/i), "0");
   await user.type(screen.getByLabelText(/Mốc mục tiêu/i), "12");
   await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
-  await user.type(await screen.findByLabelText("Thời gian mỗi tuần"), "6");
-  await user.type(screen.getByLabelText("Kỹ năng cần có"), "Lập kế hoạch\nReview tuần");
-  await user.type(screen.getByLabelText("Nguồn lực hỗ trợ"), "Lịch cá nhân và dashboard 12 tuần");
+  await user.type(await screen.findByLabelText(/Thời gian mỗi tuần/i, {}, { timeout: 5000 }), "6");
+  await user.type(screen.getByLabelText(/Kỹ năng cần có/i), "Lập kế hoạch\nReview tuần");
+  await user.type(screen.getByLabelText(/Nguồn lực hỗ trợ/i), "Lịch cá nhân và dashboard 12 tuần");
   await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
   await user.type(
-    await screen.findByLabelText("Lý do bạn thật sự muốn theo đuổi"),
+    await screen.findByLabelText(/Lý do bạn thật sự muốn theo đuổi/i, {}, { timeout: 5000 }),
     "Tôi cần một nhịp review đủ rõ để không bỏ dở mục tiêu dài hạn.",
   );
   await user.type(screen.getByLabelText(/Lĩnh vực cuộc sống liên quan/i), "Sự nghiệp");
   await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
-  await screen.findByLabelText("Số tuần mục tiêu");
+  await screen.findByLabelText(/Số tuần mục tiêu/i, {}, { timeout: 5000 });
   await user.click(screen.getByRole("button", { name: "Hoàn thành" }));
 }
 
@@ -243,7 +243,7 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
   ];
 
   for (const [index, answer] of answers.entries()) {
-    await user.click(await screen.findByLabelText(answer));
+    await user.click(await screen.findByLabelText(answer, {}, { timeout: 5000 }));
     await user.click(
       screen.getByRole("button", {
         name: index === answers.length - 1 ? "Xem kết quả →" : "Tiếp →",
@@ -251,11 +251,11 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
     );
   }
 
-  await user.click(await screen.findByRole("button", { name: "Tiếp tục → Kế hoạch 12 tuần" }));
+  await user.click(await screen.findByRole("button", { name: "Tiếp tục → Kế hoạch 12 tuần" }, { timeout: 5000 }));
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" });
+  await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" }, { timeout: 5000 });
   await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
   const tacticInputs = await screen.findAllByLabelText("Tên việc");

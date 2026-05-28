@@ -674,7 +674,9 @@ describe("RootLayout onboarding redirect", () => {
 
     const menu = await screen.findByRole("menu");
     expect(menu).toBeInTheDocument();
-    expect(within(menu).getByText(/^2 /)).toBeInTheDocument();
+    const pill = within(menu).getByRole("button", { name: "Đã lưu trên thiết bị này. Chưa sao lưu" });
+    expect(pill).toBeInTheDocument();
+    expect(pill.getAttribute("title")).toContain("2 thay đổi");
   });
 
   it("does not render the sync status pill in demo mode", async () => {

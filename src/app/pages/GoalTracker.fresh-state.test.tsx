@@ -162,7 +162,7 @@ function renderGoalTracker() {
 
 async function findEmptyGoalState(): Promise<HTMLElement> {
   const emptyHeading = await screen.findByRole("heading", { name: "Chưa có mục tiêu" });
-  const emptyState = emptyHeading.closest("div");
+  const emptyState = emptyHeading.closest(".surface-raised") as HTMLElement;
   if (!emptyState) {
     throw new Error("Missing empty goal state container");
   }

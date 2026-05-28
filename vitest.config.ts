@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "jsdom",
+    environment: "./src/test/custom-jsdom-env.ts",
     globals: true,
     setupFiles: "./src/test/setup.ts",
     css: true,

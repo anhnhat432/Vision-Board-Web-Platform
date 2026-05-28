@@ -902,7 +902,7 @@ describe("data mutation queue", () => {
     ];
 
     const consoleSpy = vi.spyOn(console, "info").mockImplementation(() => {});
-    writeMutationQueueStore(store, { storage: localStorage });
+    writeMutationQueueStore(store, { storage: localStorage, now: today });
     consoleSpy.mockRestore();
 
     const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
@@ -953,7 +953,7 @@ describe("data mutation queue", () => {
       },
     ];
 
-    writeMutationQueueStore(store, { storage: localStorage });
+    writeMutationQueueStore(store, { storage: localStorage, now: today });
 
     const stored = JSON.parse(localStorage.getItem(getMutationQueueStorageKey("user_a"))!);
     expect(stored.items).toHaveLength(1);
@@ -1073,7 +1073,7 @@ describe("data mutation queue", () => {
     ];
 
     const consoleSpy = vi.spyOn(console, "info").mockImplementation(() => {});
-    writeMutationQueueStore(store, { storage: localStorage });
+    writeMutationQueueStore(store, { storage: localStorage, now: today });
     const firstCallCount = consoleSpy.mock.calls.length;
     consoleSpy.mockRestore();
 
@@ -1083,7 +1083,7 @@ describe("data mutation queue", () => {
     const storedItems = stored.items;
 
     const consoleSpy2 = vi.spyOn(console, "info").mockImplementation(() => {});
-    writeMutationQueueStore({ ...store, items: storedItems }, { storage: localStorage });
+    writeMutationQueueStore({ ...store, items: storedItems }, { storage: localStorage, now: today });
     const secondCallCount = consoleSpy2.mock.calls.length;
     consoleSpy2.mockRestore();
 
