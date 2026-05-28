@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { CheckCircle2, ClipboardCheck, Layers, Loader2 } from "lucide-react";
+import {
+  BookmarkCheck,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardCheck,
+  Layers,
+  Lightbulb,
+  Loader2,
+  Rocket,
+  Target,
+} from "lucide-react";
 
 import {
   AlertDialog,
@@ -14,6 +24,7 @@ import {
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
@@ -182,10 +193,22 @@ function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boole
   return status === "kept" || status === "missed" || status === "not_set";
 }
 
-function getCommitmentButtonClass(isActive: boolean): string {
-  return isActive
-    ? "border-app-ink bg-app-ink text-white hover:bg-app-ink/90"
-    : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg";
+function getCommitmentButtonClass(status: WeeklyCommitmentStatus, currentStatus: WeeklyCommitmentStatus): string {
+  const isActive = status === currentStatus;
+  if (!isActive) {
+    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg motion-safe:transition-all duration-200";
+  }
+
+  switch (status) {
+    case "kept":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80 dark:bg-emerald-950/30 dark:text-emerald-400 font-semibold shadow-sm scale-105 motion-safe:transition-all duration-200";
+    case "missed":
+      return "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100/80 dark:bg-rose-950/30 dark:text-rose-400 font-semibold shadow-sm scale-105 motion-safe:transition-all duration-200";
+    case "not_set":
+      return "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100/80 dark:bg-slate-800/50 dark:text-slate-300 font-semibold shadow-sm scale-105 motion-safe:transition-all duration-200";
+    default:
+      return "border-app-ink bg-app-ink text-white hover:bg-app-ink/90 font-semibold shadow-sm scale-105 motion-safe:transition-all duration-200";
+  }
 }
 
 export function TwelveWeekWeekTab({
@@ -259,6 +282,7 @@ export function TwelveWeekWeekTab({
   const [isSavingReview, setIsSavingReview] = useState(false);
   const [showEarlyReviewConfirm, setShowEarlyReviewConfirm] = useState(false);
   const [isEditingReview, setIsEditingReview] = useState(false);
+  const [isWorkloadOpen, setIsWorkloadOpen] = useState(false);
   const showForm = !reviewIsCompleted || isEditingReview;
   const reviewReadinessItems = [
     {
@@ -342,104 +366,127 @@ export function TwelveWeekWeekTab({
       )}
       <SectionBlock title="Review và cam kết tuần" headerVisuallyHidden>
         <div className="grid gap-5">
-          <Card className="border border-app-line bg-app-surface">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-app-ink">
-                <Layers className="h-5 w-5 text-app-accent" />
-                Tuần này chỉ cần giữ 2 lớp việc
-              </CardTitle>
-              <CardDescription className="text-app-ink-soft">
-                {currentWeekRange
-                  ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-                  : "Chu kỳ hiện tại"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="stack-stack">
-              <div className="rounded-lg border border-app-line bg-app-bg p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Ưu tiên tuần</p>
-                <p className="mt-2 text-lg font-semibold text-app-ink">{currentPlanFocus}</p>
-                {currentPlanMilestone && (
-                  <p className="mt-3 text-sm text-app-ink-soft">Cột mốc đang nhắm tới: {currentPlanMilestone}</p>
-                )}
-              </div>
-              <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Cốt lõi trước</p>
-                      <p className="mt-2 text-lg font-semibold text-app-ink">
-                        {coreIndicators.length} việc lặp lại chính
-                      </p>
-                    </div>
-                    <Badge className="bg-app-accent text-white hover:bg-app-accent">{coreIndicators.length}</Badge>
+          <Collapsible
+            open={isWorkloadOpen}
+            onOpenChange={setIsWorkloadOpen}
+            className="border border-app-line bg-app-surface rounded-xl overflow-hidden"
+          >
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex w-full items-center justify-between text-left p-5 hover:bg-app-bg/50 transition-colors"
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-base font-semibold text-app-ink">
+                    <Layers className="h-5 w-5 text-app-accent" />
+                    Tuần này chỉ cần giữ 2 lớp việc
                   </div>
-                  <div className="mt-4 stack-tight">
-                    {coreIndicators.length === 0 ? (
-                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 text-sm leading-6 text-app-ink-muted">
-                        Chưa có việc cốt lõi. Khi việc lặp lại được thêm, phần này sẽ cho bạn biết việc nào cần làm
-                        trước.
-                      </div>
-                    ) : (
-                      coreIndicators.map((indicator) => (
-                        <div
-                          key={indicator.id || indicator.name}
-                          className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
-                        >
-                          <p className="flex items-center gap-2 font-medium text-app-ink">
-                            <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-accent" />
-                            {indicator.name}
-                          </p>
-                          <p className="mt-1 text-sm text-app-ink-muted">
-                            {indicator.target || "1"} {indicator.unit || "lần/tuần"}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                  <span className="text-xs text-app-ink-soft">
+                    {currentWeekRange
+                      ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                      : "Chu kỳ hiện tại"}
+                  </span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-app-accent/20 bg-app-accent-soft text-app-accent hidden sm:inline-flex">
+                    {coreIndicators.length} việc cốt lõi | {optionalIndicators.length} tùy chọn
+                  </Badge>
+                  <ChevronDown
+                    className={`h-5 w-5 text-app-ink-muted transition-transform duration-200 ${
+                      isWorkloadOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="stack-stack pt-0 border-t border-app-line/50">
+                <div className="rounded-lg border border-app-line bg-app-bg p-5 mt-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Ưu tiên tuần</p>
+                  <p className="mt-2 text-lg font-semibold text-app-ink">{currentPlanFocus}</p>
+                  {currentPlanMilestone && (
+                    <p className="mt-3 text-sm text-app-ink-soft">Cột mốc đang nhắm tới: {currentPlanMilestone}</p>
+                  )}
+                </div>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Cốt lõi trước</p>
+                        <p className="mt-2 text-lg font-semibold text-app-ink">
+                          {coreIndicators.length} việc lặp lại chính
+                        </p>
+                      </div>
+                      <Badge className="bg-app-accent text-white hover:bg-app-accent">{coreIndicators.length}</Badge>
+                    </div>
+                    <div className="mt-4 stack-tight">
+                      {coreIndicators.length === 0 ? (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 text-sm leading-6 text-app-ink-muted">
+                          Chưa có việc cốt lõi. Khi việc lặp lại được thêm, phần này sẽ cho bạn biết việc nào cần làm
+                          trước.
+                        </div>
+                      ) : (
+                        coreIndicators.map((indicator) => (
+                          <div
+                            key={indicator.id || indicator.name}
+                            className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
+                          >
+                            <p className="flex items-center gap-2 font-medium text-app-ink">
+                              <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-accent" />
+                              {indicator.name}
+                            </p>
+                            <p className="mt-1 text-sm text-app-ink-muted">
+                              {indicator.target || "1"} {indicator.unit || "lần/tuần"}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
 
-                <div className="rounded-lg border border-app-line bg-app-surface p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
-                        Tùy chọn nếu còn sức
-                      </p>
-                      <p className="mt-2 text-lg font-semibold text-app-ink">
-                        {optionalIndicators.length > 0
-                          ? `${optionalIndicators.length} việc bổ sung`
-                          : "Không có việc tùy chọn"}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink-soft">
-                      {optionalIndicators.length}
-                    </Badge>
-                  </div>
-                  <div className="mt-4 stack-tight">
-                    {optionalIndicators.length === 0 ? (
-                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 text-sm text-app-ink-muted">
-                        Tuần này bạn chỉ cần giữ các việc cốt lõi là đủ.
+                  <div className="rounded-lg border border-app-line bg-app-surface p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
+                          Tùy chọn nếu còn sức
+                        </p>
+                        <p className="mt-2 text-lg font-semibold text-app-ink">
+                          {optionalIndicators.length > 0
+                            ? `${optionalIndicators.length} việc bổ sung`
+                            : "Không có việc tùy chọn"}
+                        </p>
                       </div>
-                    ) : (
-                      optionalIndicators.map((indicator) => (
-                        <div
-                          key={indicator.id || indicator.name}
-                          className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
-                        >
-                          <p className="flex items-center gap-2 font-medium text-app-ink">
-                            <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-ink-muted" />
-                            {indicator.name}
-                          </p>
-                          <p className="mt-1 text-sm text-app-ink-muted">
-                            {indicator.target || "1"} {indicator.unit || "lần/tuần"}
-                          </p>
+                      <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink-soft">
+                        {optionalIndicators.length}
+                      </Badge>
+                    </div>
+                    <div className="mt-4 stack-tight">
+                      {optionalIndicators.length === 0 ? (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 text-sm text-app-ink-muted">
+                          Tuần này bạn chỉ cần giữ các việc cốt lõi là đủ.
                         </div>
-                      ))
-                    )}
+                      ) : (
+                        optionalIndicators.map((indicator) => (
+                          <div
+                            key={indicator.id || indicator.name}
+                            className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
+                          >
+                            <p className="flex items-center gap-2 font-medium text-app-ink">
+                              <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-ink-muted" />
+                              {indicator.name}
+                            </p>
+                            <p className="mt-1 text-sm text-app-ink-muted">
+                              {indicator.target || "1"} {indicator.unit || "lần/tuần"}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
 
           <Card data-tour-id="system-week-review" className="border border-app-line bg-app-surface">
             <CardHeader>
@@ -641,47 +688,70 @@ export function TwelveWeekWeekTab({
               )}
               {showForm && (
                 <>
-                  <div className="rounded-lg border border-app-line bg-app-bg p-4">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-lg border border-app-line bg-app-surface px-3 py-3">
+                  <div
+                    data-testid="wam-section-score"
+                    className="rounded-lg border border-app-line bg-app-bg p-5"
+                  >
+                    <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                      <Target className="h-5 w-5 text-app-accent" />
+                      1. Kết quả thực thi tuần qua (Hệ thống tự tính)
+                    </div>
+                    
+                    <div className="grid gap-4 sm:grid-cols-2 mt-4">
+                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4">
                         <div className="flex items-center justify-between text-sm text-app-ink-muted">
-                          <span>Điểm việc lặp lại</span>
+                          <span className="font-medium text-app-ink">Điểm việc lặp lại</span>
                           <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
                         </div>
                         {weekCompletion.isEmpty ? (
-                          <p className="mt-2 text-sm font-semibold text-app-ink-soft">Chưa có dữ liệu</p>
+                          <p className="mt-2 text-sm font-semibold text-app-ink-soft">Chưa có việc trong tuần này</p>
                         ) : (
-                          <p data-testid="weekly-lead-score-detail" className="mt-2 text-2xl font-bold text-app-ink">
+                          <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-app-ink">
                             {leadScoreValue}%
                           </p>
                         )}
                         <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="mt-3 h-2.5" />
+                        <p className="mt-2 text-xs text-app-ink-soft">
+                          {weekCompletion.isEmpty
+                            ? "Điểm sẽ tự tính khi tuần có việc lặp lại được cam kết."
+                            : `Tự tính: ${weekCompletion.completed}/${weekCompletion.total} việc hoàn thành.`}
+                        </p>
                       </div>
-                      {lagScoreValue !== null && (
-                        <div className="rounded-lg border border-app-line bg-app-surface px-3 py-3">
+                      
+                      {lagScoreValue !== null ? (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4">
                           <div className="flex items-center justify-between text-sm text-app-ink-muted">
-                            <span>Điểm kết quả cuối</span>
-                            <span>{system.lagMetric.name}</span>
+                            <span className="font-medium text-app-ink">Điểm kết quả cuối ({system.lagMetric.name})</span>
+                            <span data-testid="weekly-lag-score" className="font-bold text-app-ink">{lagScoreValue}%</span>
                           </div>
-                          <p data-testid="weekly-lag-score" className="mt-2 text-2xl font-bold text-app-ink">
-                            {lagScoreValue}%
-                          </p>
                           <Progress value={lagScoreValue} className="mt-3 h-2.5" />
+                          <p className="mt-2 text-xs text-app-ink-soft">
+                            Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 flex flex-col justify-between">
+                          <div>
+                            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Kết quả cuối (Lag Metric)</span>
+                            <p className="mt-2 text-sm text-app-ink-soft">Không yêu cầu đo lường kết quả cuối trong chu kỳ này.</p>
+                          </div>
+                          <p className="text-xs text-app-ink-muted">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
                         </div>
                       )}
                     </div>
+                    
                     <div
                       data-testid="weekly-score-interpretation"
-                      className={`mt-3 rounded-lg border px-3 py-2 ${scoreTone.panel}`}
+                      className={`mt-4 rounded-lg border px-4 py-3 ${scoreTone.panel}`}
                     >
                       <p className={`flex items-center gap-2 text-sm font-semibold ${scoreTone.text}`}>
                         <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
                         {scoreInterpretation.headline}
                       </p>
-                      <p className="mt-1 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
+                      <p className="mt-1.5 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
                     </div>
-                    <p className="mt-3 text-sm text-app-ink-muted">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
                   </div>
+                  
                   <TwelveWeekPremiumInsightSection
                     currentPlanCode={currentPlanCode}
                     hasPremiumInsights={hasPremiumInsights}
@@ -690,93 +760,81 @@ export function TwelveWeekWeekTab({
                     onApplySuggestedPlan={onApplySuggestedPlan}
                     onOpenPremiumInsights={onOpenPremiumInsights}
                   />
-                  <div className="grid gap-5 lg:grid-cols-2">
-                    <div
-                      data-testid="wam-section-score"
-                      className="rounded-lg border border-app-warm-border bg-app-warm-soft px-4 py-4"
-                    >
-                      <Label className="text-sm font-semibold text-app-ink">1. Điểm tuần qua bao nhiêu %?</Label>
-                      <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-app-ink">
-                        {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                        {weekCompletion.isEmpty
-                          ? "Điểm sẽ tự tính khi tuần có việc lặp lại được cam kết."
-                          : `Tự tính từ việc lặp lại: ${weekCompletion.completed}/${weekCompletion.total} việc đã hoàn thành.`}
-                      </p>
-                    </div>
+                  
+                  <div
+                    data-testid="wam-section-commitments"
+                    className="rounded-lg border border-app-line bg-app-surface p-5"
+                  >
+                    <Label className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                      <BookmarkCheck className="h-5 w-5 text-app-warm" />
+                      2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
+                    </Label>
+                    {previousCommitments.length === 0 ? (
+                      <div className="mt-3 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
+                        Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
+                      </div>
+                    ) : (
+                      <div className="mt-3 stack-tight">
+                        {previousCommitments.map((commitment) => {
+                          const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
+                          const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
+                          const setStatus = (status: WeeklyCommitmentStatus) =>
+                            onWeeklyFormChange("commitmentStatuses", {
+                              ...weeklyForm.commitmentStatuses,
+                              [commitment]: status,
+                            });
 
-                    <div
-                      data-testid="wam-section-commitments"
-                      className="rounded-lg border border-app-line bg-app-surface px-4 py-4"
-                    >
-                      <Label className="text-sm font-semibold text-app-ink">
-                        2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
-                      </Label>
-                      {previousCommitments.length === 0 ? (
-                        <div className="mt-3 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
-                          Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
-                        </div>
-                      ) : (
-                        <div className="mt-3 stack-tight">
-                          {previousCommitments.map((commitment) => {
-                            const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
-                            const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
-                            const setStatus = (status: WeeklyCommitmentStatus) =>
-                              onWeeklyFormChange("commitmentStatuses", {
-                                ...weeklyForm.commitmentStatuses,
-                                [commitment]: status,
-                              });
-
-                            return (
-                              <div key={commitment} className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
-                                <p className="text-sm font-medium text-app-ink">{commitment}</p>
-                                {commitmentQuote ? (
-                                  <p className="mt-1 text-xs italic leading-5 text-app-ink-muted">{commitmentQuote}</p>
-                                ) : null}
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className={getCommitmentButtonClass(currentStatus === "kept")}
-                                    onClick={() => setStatus("kept")}
-                                  >
-                                    Đã giữ
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className={getCommitmentButtonClass(currentStatus === "missed")}
-                                    onClick={() => setStatus("missed")}
-                                  >
-                                    Bỏ lỡ
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className={getCommitmentButtonClass(currentStatus === "not_set")}
-                                    onClick={() => setStatus("not_set")}
-                                  >
-                                    Không đặt
-                                  </Button>
-                                </div>
+                          return (
+                            <div key={commitment} className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+                              <p className="text-sm font-medium text-app-ink">{commitment}</p>
+                              {commitmentQuote ? (
+                                <p className="mt-1 text-xs italic leading-5 text-app-ink-muted">{commitmentQuote}</p>
+                              ) : null}
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className={getCommitmentButtonClass("kept", currentStatus)}
+                                  onClick={() => setStatus("kept")}
+                                >
+                                  Đã giữ
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className={getCommitmentButtonClass("missed", currentStatus)}
+                                  onClick={() => setStatus("missed")}
+                                >
+                                  Bỏ lỡ
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className={getCommitmentButtonClass("not_set", currentStatus)}
+                                  onClick={() => setStatus("not_set")}
+                                >
+                                  Không đặt
+                                </Button>
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="grid gap-5 lg:grid-cols-2 mt-2">
                     <div
                       data-testid="wam-section-insights"
-                      className="rounded-lg border border-app-line bg-app-surface px-4 py-4"
+                      className="rounded-lg border border-app-line bg-app-surface p-5"
                     >
-                      <Label htmlFor="weekly-insights">3. Góc nhìn/điều học được nào cần áp dụng tuần sau?</Label>
+                      <Label htmlFor="weekly-insights" className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                        <Lightbulb className="h-5 w-5 text-yellow-500 animate-[pulse_3s_infinite]" />
+                        3. Góc nhìn/điều học được nào cần áp dụng tuần sau?
+                      </Label>
                       <Textarea
                         id="weekly-insights"
                         rows={3}
@@ -789,9 +847,12 @@ export function TwelveWeekWeekTab({
 
                     <div
                       data-testid="wam-section-next-commitments"
-                      className="rounded-lg border border-app-warm-border bg-app-warm-soft/50 px-4 py-4"
+                      className="rounded-lg border border-app-warm-border bg-app-warm-soft/30 p-5"
                     >
-                      <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
+                      <Label htmlFor="weekly-next-commitments" className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                        <Rocket className="h-5 w-5 text-app-accent animate-[bounce_3s_infinite]" />
+                        4. Cam kết của tuần tới là gì?
+                      </Label>
                       <NextWeekCommitmentsEditor
                         value={nextWeekCommitments}
                         onChange={(next) => onWeeklyFormChange("nextWeekCommitments", next)}
