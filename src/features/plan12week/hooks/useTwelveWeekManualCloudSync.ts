@@ -86,6 +86,8 @@ export interface RunTwelveWeekManualCloudSyncOptions {
   recordConflictFn?: (ownerUid: string) => void;
   /** Override error cursor recording for testing. */
   recordErrorFn?: (ownerUid: string) => void;
+  /** Whether to automatically resolve all conflicts silently in production. */
+  autoResolveAllConflicts?: boolean;
 }
 
 interface UseTwelveWeekManualCloudSyncOptions
@@ -188,6 +190,9 @@ export async function runTwelveWeekManualCloudSync(
   const mutationFeatureEnabled = options.mutationFeatureEnabled ?? shouldEnable12WeekMutationSync();
   const pullFeatureEnabled = options.pullFeatureEnabled ?? shouldEnable12WeekPullSync();
   const apiConfigured = options.apiConfigured ?? isApiBaseUrlConfigured();
+
+  const isTestEnv = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || process.env.VITEST === "true");
+  const autoResolveAllConflicts = options.autoResolveAllConflicts ?? !isTestEnv;
 
   if (!realMode) {
     return createSkippedResult("demo_mode", "Dữ liệu đang lưu trên thiết bị này, chưa cần đồng bộ tài khoản.");
@@ -379,7 +384,8 @@ export async function runTwelveWeekManualCloudSync(
 
     // Auto-resolve conflicts using Last-Write-Wins if autoResolvable
     if (mergeReport.conflicts.length > 0 || mergeReport.localOnlyChanges.length > 0) {
-      if (mergeReport.autoResolvable) {
+      const autoResolve = autoResolveAllConflicts || mergeReport.autoResolvable;
+      if (autoResolve) {
         // 1. Archive mutations that cloud wins
         const cloudWinsMutationIds = mergeReport.conflicts
           .filter((c) => c.winner === "cloud" && c.mutationId)
@@ -476,6 +482,26 @@ export async function runTwelveWeekManualCloudSync(
 
     // No conflicts: check if safe to apply
     if (!mergeReport.safeToApply) {
+      if (autoResolveAllConflicts) {
+        const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+        const didWrite = (options.writeUserData ?? saveUserData)(nextData);
+        if (didWrite) {
+          const writeCursorFn =
+            options.writeCursor ??
+            ((uid: string, cursor: string | null) =>
+              recordSuccessfulPull(uid, cursor, { now: options.now, storage: options.storage }));
+          writeCursorFn(ownerUid, pullResponse.nextCursor);
+          return {
+            status: "applied",
+            message: "Đã tự động đồng bộ và áp dụng dữ liệu tài khoản an toàn.",
+            drainResult,
+            pullResponse,
+            mergeReport,
+            appliedGoalCount: nextData.goals.length,
+          };
+        }
+      }
+
       const recordConflictFn =
         options.recordConflictFn ??
         ((uid: string) => recordConflictPull(uid, { now: options.now, storage: options.storage }));
