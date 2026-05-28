@@ -258,6 +258,8 @@ export function TwelveWeekWeekTab({
   const summaryNextWeekCommitments = getReviewNextWeekCommitments(summaryReview);
   const [isSavingReview, setIsSavingReview] = useState(false);
   const [showEarlyReviewConfirm, setShowEarlyReviewConfirm] = useState(false);
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const showForm = !reviewIsCompleted || isEditingReview;
   const reviewReadinessItems = [
     {
       key: "score",
@@ -450,132 +452,182 @@ export function TwelveWeekWeekTab({
               </CardDescription>
             </CardHeader>
             <CardContent className="stack-stack">
-              <div
-                className={`rounded-lg border p-4 ${reviewDueToday ? "border-app-warm-border bg-app-warm-soft" : "border-app-line bg-app-bg"}`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-app-ink">
-                      {reviewDueToday
-                        ? "Hôm nay là ngày chốt review tuần."
-                        : `Review chính thức vào ${getReviewDayLabel(system.reviewDay)}.`}
-                    </p>
-                    <p className="mt-1 text-sm text-app-ink-soft">
-                      {reviewDueToday
-                        ? "Chốt ngay hôm nay để tuần sau bắt đầu nhẹ đầu hơn."
-                        : "Bạn vẫn có thể ghi trước phần nhìn lại để đến ngày review chỉ cần chốt lại."}
-                    </p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={
-                      reviewDueToday
-                        ? "border-app-warm-border bg-app-surface text-app-warm"
-                        : "border-app-line bg-app-surface text-app-ink-soft"
-                    }
+              {showForm && (
+                <>
+                  <div
+                    className={`rounded-lg border p-4 ${reviewDueToday ? "border-app-warm-border bg-app-warm-soft" : "border-app-line bg-app-bg"}`}
                   >
-                    {reviewDueToday ? "Nên chốt hôm nay" : "Chưa đến hạn"}
-                  </Badge>
-                </div>
-              </div>
-              <div data-testid="weekly-review-flow" className="grid gap-2 sm:grid-cols-4">
-                {reviewReadinessItems.map((item, index) => {
-                  const TaskStateIcon = item.done ? TaskDoneIcon : TaskInProgressIcon;
-
-                  return (
-                    <div
-                      key={item.key}
-                      data-testid={`weekly-review-step-${item.key}`}
-                      data-done={item.done ? "true" : "false"}
-                      className={`rounded-lg border px-3 py-3 text-sm ${
-                        item.done
-                          ? "border-app-warm/20 bg-app-warm-soft text-app-warm"
-                          : "border-app-line bg-app-bg text-app-ink-soft"
-                      }`}
-                    >
-                      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
-                        <TaskStateIcon className="h-4 w-4 shrink-0" />
-                        {index + 1}. {item.label}
-                      </p>
-                      <p className="mt-1 font-medium">{item.done ? "Đã có" : "Đang mở"}</p>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-app-ink">
+                          {reviewDueToday
+                            ? "Hôm nay là ngày chốt review tuần."
+                            : `Review chính thức vào ${getReviewDayLabel(system.reviewDay)}.`}
+                        </p>
+                        <p className="mt-1 text-sm text-app-ink-soft">
+                          {reviewDueToday
+                            ? "Chốt ngay hôm nay để tuần sau bắt đầu nhẹ đầu hơn."
+                            : "Bạn vẫn có thể ghi trước phần nhìn lại để đến ngày review chỉ cần chốt lại."}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={
+                          reviewDueToday
+                            ? "border-app-warm-border bg-app-surface text-app-warm"
+                            : "border-app-line bg-app-surface text-app-ink-soft"
+                        }
+                      >
+                        {reviewDueToday ? "Nên chốt hôm nay" : "Chưa đến hạn"}
+                      </Badge>
                     </div>
-                  );
-                })}
-              </div>
-              {summaryReview && (
+                  </div>
+                  <div data-testid="weekly-review-flow" className="grid gap-2 sm:grid-cols-4">
+                    {reviewReadinessItems.map((item, index) => {
+                      const TaskStateIcon = item.done ? TaskDoneIcon : TaskInProgressIcon;
+
+                      return (
+                        <div
+                          key={item.key}
+                          data-testid={`weekly-review-step-${item.key}`}
+                          data-done={item.done ? "true" : "false"}
+                          className={`rounded-lg border px-3 py-3 text-sm ${
+                            item.done
+                              ? "border-app-warm/20 bg-app-warm-soft text-app-warm"
+                              : "border-app-line bg-app-bg text-app-ink-soft"
+                          }`}
+                        >
+                          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
+                            <TaskStateIcon className="h-4 w-4 shrink-0" />
+                            {index + 1}. {item.label}
+                          </p>
+                          <p className="mt-1 font-medium">{item.done ? "Đã có" : "Đang mở"}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+              {!showForm && summaryReview && (
                 <div
                   data-testid="weekly-review-summary"
-                  className="rounded-lg border border-app-warm-border bg-app-warm-soft p-4"
+                  className="stack-stack"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Tuần {summaryReview.weekNumber} đã chốt
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-app-ink">{scoreInterpretation.headline}</p>
-                      <p className="mt-1 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
-                    </div>
-                    <Badge variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
-                      {getWorkloadDecisionLabel(summaryReview.workloadDecision)}
-                    </Badge>
+                  {/* Banner chúc mừng */}
+                  <div className="flex flex-col items-center text-center p-6 bg-app-accent-soft rounded-xl border border-app-accent/20">
+                    <CheckCircle2 className="h-12 w-12 text-app-accent animate-[bounce_2s_infinite]" />
+                    <h3 className="mt-3 text-lg font-bold text-app-ink">Đã hoàn thành đánh giá Tuần {summaryReview.weekNumber}!</h3>
+                    <p className="mt-1 text-sm text-app-ink-soft max-w-md">
+                      Tuyệt vời! Bạn đã chốt WAM 4 câu cho tuần này. Hãy xem các phân tích và chuẩn bị cho tuần tiếp theo.
+                    </p>
                   </div>
-                  <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Điểm</p>
-                      <p className="mt-1 text-sm leading-5 text-app-ink-soft">
-                        {summaryReview.leadCompletionPercent}% điểm việc lặp lại
+
+                  {/* Bố cục Grid 2 cột */}
+                  <div className="grid gap-4 md:grid-cols-2 mt-2">
+                    {/* Cột trái: Thành quả */}
+                    <div className="rounded-lg border border-app-line bg-app-bg p-5 stack-tight">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
+                        Kết quả thực thi <span className="sr-only">Score</span>
                       </p>
-                    </div>
-                    <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-warm">
-                        Cam kết tuần qua
-                      </p>
-                      <p className="mt-1 text-sm leading-5 text-app-ink-soft">
-                        Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
-                      </p>
-                    </div>
-                    {summaryInsights && (
-                      <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2 md:col-span-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-                          Góc nhìn tuần sau
-                        </p>
-                        <p className="mt-1 text-sm leading-5 text-app-ink-soft">{summaryInsights}</p>
-                      </div>
-                    )}
-                    {summaryNextWeekCommitments.length > 0 && (
-                      <div className="rounded-lg border border-app-warm-border/60 bg-app-surface px-3 py-2 md:col-span-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-warm">
-                          Cam kết tuần tới
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {summaryNextWeekCommitments.map((commitment) => (
-                            <span
-                              key={commitment}
-                              className="rounded-full border border-app-line bg-app-warm-soft px-3 py-1 text-xs font-semibold text-app-warm"
-                            >
-                              {commitment}
-                            </span>
-                          ))}
+                      
+                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3 mt-2">
+                        <div className="flex items-center justify-between text-sm text-app-ink-muted">
+                          <span className="font-medium text-app-ink">Điểm việc lặp lại</span>
+                          <span className="font-bold text-app-accent">{summaryReview.leadCompletionPercent}%</span>
                         </div>
+                        <Progress value={summaryReview.leadCompletionPercent} className="mt-2 h-2" />
+                        <p className="mt-2 text-xs text-app-ink-soft">{scoreInterpretation.headline}</p>
                       </div>
-                    )}
+
+                      {lagScoreValue !== null && (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
+                          <div className="flex items-center justify-between text-sm text-app-ink-muted">
+                            <span className="font-medium text-app-ink">Điểm kết quả cuối ({system.lagMetric.name})</span>
+                            <span className="font-bold text-app-ink">{lagScoreValue}%</span>
+                          </div>
+                          <Progress value={lagScoreValue} className="mt-2 h-2" />
+                        </div>
+                      )}
+
+                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
+                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-app-warm">Cam kết tuần qua</span>
+                        <p className="mt-1 text-sm font-semibold text-app-ink">
+                          Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
+                        </p>
+                        {summaryCommitmentsKept.length > 0 && (
+                          <p className="mt-1 text-xs text-app-ink-soft">
+                            Giữ vững: {summaryCommitmentsKept.join(", ")}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Cột phải: Bài học & Tuần tới */}
+                    <div className="rounded-lg border border-app-line bg-app-bg p-5 stack-tight">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">Góc nhìn & Kế hoạch mới</p>
+                      
+                      {summaryInsights && (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3 mt-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Bài học rút ra</span>
+                          <p className="mt-1 text-sm text-app-ink leading-relaxed">{summaryInsights}</p>
+                        </div>
+                      )}
+
+                      {summaryNextWeekCommitments.length > 0 && (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
+                          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-app-warm">Cam kết cho tuần tới</span>
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {summaryNextWeekCommitments.map((commitment) => (
+                              <span
+                                key={commitment}
+                                className="rounded-full border border-app-warm-border/60 bg-app-warm-soft px-2.5 py-0.5 text-xs font-medium text-app-warm"
+                              >
+                                {commitment}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
+                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Quyết định tải việc</span>
+                        <p className="mt-1 text-sm font-semibold text-app-ink">
+                          {getWorkloadDecisionLabel(summaryReview.workloadDecision)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  {onOpenTodayTab && (
-                    <Button variant="outline" className="mt-4 w-full bg-app-surface sm:w-auto" onClick={onOpenTodayTab}>
-                      Mở Hôm nay để bắt đầu tuần sau
+
+                  {/* Nút hành động */}
+                  <div className="flex flex-wrap items-center gap-3 mt-4">
+                    {onOpenTodayTab && (
+                      <Button
+                        type="button"
+                        className="bg-app-accent hover:bg-app-accent/90 text-white font-medium"
+                        onClick={onOpenTodayTab}
+                      >
+                        Bắt đầu tuần mới ngay ở Hôm nay
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
+                      onClick={() => setIsEditingReview(true)}
+                    >
+                      Chỉnh sửa đánh giá
                     </Button>
-                  )}
+                  </div>
                 </div>
               )}
-              {summaryReview && nextWeekRecommendation && (
+              {!showForm && summaryReview && nextWeekRecommendation && (
                 <TwelveWeekNextWeekRecommendationCard
                   recommendation={nextWeekRecommendation}
                   onAcceptRecommendation={onAcceptNextWeekRecommendation}
                   onOpenTodayTab={onOpenTodayTab}
                 />
               )}
-              {summaryReview && weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
+              {!showForm && summaryReview && weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
                 <TwelveWeekInsightsCard
                   insights={weeklyReflectionInsights}
                   title="Đáng giữ và đáng điều chỉnh tuần sau"
@@ -587,239 +639,257 @@ export function TwelveWeekWeekTab({
                   onCelebrate={onOpenTodayTab}
                 />
               )}
-              <div className="rounded-lg border border-app-line bg-app-bg p-4">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-lg border border-app-line bg-app-surface px-3 py-3">
-                    <div className="flex items-center justify-between text-sm text-app-ink-muted">
-                      <span>Điểm việc lặp lại</span>
-                      <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
-                    </div>
-                    {weekCompletion.isEmpty ? (
-                      <p className="mt-2 text-sm font-semibold text-app-ink-soft">Chưa có dữ liệu</p>
-                    ) : (
-                      <p data-testid="weekly-lead-score-detail" className="mt-2 text-2xl font-bold text-app-ink">
-                        {leadScoreValue}%
-                      </p>
-                    )}
-                    <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="mt-3 h-2.5" />
-                  </div>
-                  {lagScoreValue !== null && (
-                    <div className="rounded-lg border border-app-line bg-app-surface px-3 py-3">
-                      <div className="flex items-center justify-between text-sm text-app-ink-muted">
-                        <span>Điểm kết quả cuối</span>
-                        <span>{system.lagMetric.name}</span>
+              {showForm && (
+                <>
+                  <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-lg border border-app-line bg-app-surface px-3 py-3">
+                        <div className="flex items-center justify-between text-sm text-app-ink-muted">
+                          <span>Điểm việc lặp lại</span>
+                          <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                        </div>
+                        {weekCompletion.isEmpty ? (
+                          <p className="mt-2 text-sm font-semibold text-app-ink-soft">Chưa có dữ liệu</p>
+                        ) : (
+                          <p data-testid="weekly-lead-score-detail" className="mt-2 text-2xl font-bold text-app-ink">
+                            {leadScoreValue}%
+                          </p>
+                        )}
+                        <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="mt-3 h-2.5" />
                       </div>
-                      <p data-testid="weekly-lag-score" className="mt-2 text-2xl font-bold text-app-ink">
-                        {lagScoreValue}%
-                      </p>
-                      <Progress value={lagScoreValue} className="mt-3 h-2.5" />
-                    </div>
-                  )}
-                </div>
-                <div
-                  data-testid="weekly-score-interpretation"
-                  className={`mt-3 rounded-lg border px-3 py-2 ${scoreTone.panel}`}
-                >
-                  <p className={`flex items-center gap-2 text-sm font-semibold ${scoreTone.text}`}>
-                    <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
-                    {scoreInterpretation.headline}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
-                </div>
-                <p className="mt-3 text-sm text-app-ink-muted">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
-              </div>
-              <TwelveWeekPremiumInsightSection
-                currentPlanCode={currentPlanCode}
-                hasPremiumInsights={hasPremiumInsights}
-                premiumInsight={premiumInsight}
-                suggestedNextWeekPlan={suggestedNextWeekPlan}
-                onApplySuggestedPlan={onApplySuggestedPlan}
-                onOpenPremiumInsights={onOpenPremiumInsights}
-              />
-              <div className="grid gap-5 lg:grid-cols-2">
-                <div
-                  data-testid="wam-section-score"
-                  className="rounded-lg border border-app-warm-border bg-app-warm-soft px-4 py-4"
-                >
-                  <Label className="text-sm font-semibold text-app-ink">1. Điểm tuần qua bao nhiêu %?</Label>
-                  <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-app-ink">
-                    {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                    {weekCompletion.isEmpty
-                      ? "Điểm sẽ tự tính khi tuần có việc lặp lại được cam kết."
-                      : `Tự tính từ việc lặp lại: ${weekCompletion.completed}/${weekCompletion.total} việc đã hoàn thành.`}
-                  </p>
-                </div>
-
-                <div
-                  data-testid="wam-section-commitments"
-                  className="rounded-lg border border-app-line bg-app-surface px-4 py-4"
-                >
-                  <Label className="text-sm font-semibold text-app-ink">
-                    2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
-                  </Label>
-                  {previousCommitments.length === 0 ? (
-                    <div className="mt-3 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
-                      Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
-                    </div>
-                  ) : (
-                    <div className="mt-3 stack-tight">
-                      {previousCommitments.map((commitment) => {
-                        const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
-                        const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
-                        const setStatus = (status: WeeklyCommitmentStatus) =>
-                          onWeeklyFormChange("commitmentStatuses", {
-                            ...weeklyForm.commitmentStatuses,
-                            [commitment]: status,
-                          });
-
-                        return (
-                          <div key={commitment} className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
-                            <p className="text-sm font-medium text-app-ink">{commitment}</p>
-                            {commitmentQuote ? (
-                              <p className="mt-1 text-xs italic leading-5 text-app-ink-muted">{commitmentQuote}</p>
-                            ) : null}
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className={getCommitmentButtonClass(currentStatus === "kept")}
-                                onClick={() => setStatus("kept")}
-                              >
-                                Đã giữ
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className={getCommitmentButtonClass(currentStatus === "missed")}
-                                onClick={() => setStatus("missed")}
-                              >
-                                Bỏ lỡ
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className={getCommitmentButtonClass(currentStatus === "not_set")}
-                                onClick={() => setStatus("not_set")}
-                              >
-                                Không đặt
-                              </Button>
-                            </div>
+                      {lagScoreValue !== null && (
+                        <div className="rounded-lg border border-app-line bg-app-surface px-3 py-3">
+                          <div className="flex items-center justify-between text-sm text-app-ink-muted">
+                            <span>Điểm kết quả cuối</span>
+                            <span>{system.lagMetric.name}</span>
                           </div>
-                        );
-                      })}
+                          <p data-testid="weekly-lag-score" className="mt-2 text-2xl font-bold text-app-ink">
+                            {lagScoreValue}%
+                          </p>
+                          <Progress value={lagScoreValue} className="mt-3 h-2.5" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid gap-5 lg:grid-cols-2">
-                <div
-                  data-testid="wam-section-insights"
-                  className="rounded-lg border border-app-line bg-app-surface px-4 py-4"
-                >
-                  <Label htmlFor="weekly-insights">3. Góc nhìn/điều học được nào cần áp dụng tuần sau?</Label>
-                  <Textarea
-                    id="weekly-insights"
-                    rows={3}
-                    className="mt-2"
-                    value={weeklyForm.insights}
-                    placeholder="Ví dụ: chỉ giữ 1 khung làm sâu trước khi thêm việc phụ."
-                    onChange={(event) => onWeeklyFormChange("insights", event.target.value)}
+                    <div
+                      data-testid="weekly-score-interpretation"
+                      className={`mt-3 rounded-lg border px-3 py-2 ${scoreTone.panel}`}
+                    >
+                      <p className={`flex items-center gap-2 text-sm font-semibold ${scoreTone.text}`}>
+                        <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                        {scoreInterpretation.headline}
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
+                    </div>
+                    <p className="mt-3 text-sm text-app-ink-muted">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
+                  </div>
+                  <TwelveWeekPremiumInsightSection
+                    currentPlanCode={currentPlanCode}
+                    hasPremiumInsights={hasPremiumInsights}
+                    premiumInsight={premiumInsight}
+                    suggestedNextWeekPlan={suggestedNextWeekPlan}
+                    onApplySuggestedPlan={onApplySuggestedPlan}
+                    onOpenPremiumInsights={onOpenPremiumInsights}
                   />
-                </div>
+                  <div className="grid gap-5 lg:grid-cols-2">
+                    <div
+                      data-testid="wam-section-score"
+                      className="rounded-lg border border-app-warm-border bg-app-warm-soft px-4 py-4"
+                    >
+                      <Label className="text-sm font-semibold text-app-ink">1. Điểm tuần qua bao nhiêu %?</Label>
+                      <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-app-ink">
+                        {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-app-ink-soft">
+                        {weekCompletion.isEmpty
+                          ? "Điểm sẽ tự tính khi tuần có việc lặp lại được cam kết."
+                          : `Tự tính từ việc lặp lại: ${weekCompletion.completed}/${weekCompletion.total} việc đã hoàn thành.`}
+                      </p>
+                    </div>
 
-                <div
-                  data-testid="wam-section-next-commitments"
-                  className="rounded-lg border border-app-warm-border bg-app-warm-soft/50 px-4 py-4"
-                >
-                  <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
-                  <NextWeekCommitmentsEditor
-                    value={nextWeekCommitments}
-                    onChange={(next) => onWeeklyFormChange("nextWeekCommitments", next)}
-                  />
-                  {hasPremiumInsights && nextWeekCommitments.length === 0 && (
-                    <p className="mt-2 text-xs leading-5 text-app-ink-muted">
-                      Gợi ý Plus: {suggestedNextWeekPlan?.focus ?? ""}
+                    <div
+                      data-testid="wam-section-commitments"
+                      className="rounded-lg border border-app-line bg-app-surface px-4 py-4"
+                    >
+                      <Label className="text-sm font-semibold text-app-ink">
+                        2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
+                      </Label>
+                      {previousCommitments.length === 0 ? (
+                        <div className="mt-3 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
+                          Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
+                        </div>
+                      ) : (
+                        <div className="mt-3 stack-tight">
+                          {previousCommitments.map((commitment) => {
+                            const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
+                            const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
+                            const setStatus = (status: WeeklyCommitmentStatus) =>
+                              onWeeklyFormChange("commitmentStatuses", {
+                                ...weeklyForm.commitmentStatuses,
+                                [commitment]: status,
+                              });
+
+                            return (
+                              <div key={commitment} className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+                                <p className="text-sm font-medium text-app-ink">{commitment}</p>
+                                {commitmentQuote ? (
+                                  <p className="mt-1 text-xs italic leading-5 text-app-ink-muted">{commitmentQuote}</p>
+                                ) : null}
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className={getCommitmentButtonClass(currentStatus === "kept")}
+                                    onClick={() => setStatus("kept")}
+                                  >
+                                    Đã giữ
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className={getCommitmentButtonClass(currentStatus === "missed")}
+                                    onClick={() => setStatus("missed")}
+                                  >
+                                    Bỏ lỡ
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className={getCommitmentButtonClass(currentStatus === "not_set")}
+                                    onClick={() => setStatus("not_set")}
+                                  >
+                                    Không đặt
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-5 lg:grid-cols-2">
+                    <div
+                      data-testid="wam-section-insights"
+                      className="rounded-lg border border-app-line bg-app-surface px-4 py-4"
+                    >
+                      <Label htmlFor="weekly-insights">3. Góc nhìn/điều học được nào cần áp dụng tuần sau?</Label>
+                      <Textarea
+                        id="weekly-insights"
+                        rows={3}
+                        className="mt-2"
+                        value={weeklyForm.insights}
+                        placeholder="Ví dụ: chỉ giữ 1 khung làm sâu trước khi thêm việc phụ."
+                        onChange={(event) => onWeeklyFormChange("insights", event.target.value)}
+                      />
+                    </div>
+
+                    <div
+                      data-testid="wam-section-next-commitments"
+                      className="rounded-lg border border-app-warm-border bg-app-warm-soft/50 px-4 py-4"
+                    >
+                      <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
+                      <NextWeekCommitmentsEditor
+                        value={nextWeekCommitments}
+                        onChange={(next) => onWeeklyFormChange("nextWeekCommitments", next)}
+                      />
+                      {hasPremiumInsights && nextWeekCommitments.length === 0 && (
+                        <p className="mt-2 text-xs leading-5 text-app-ink-muted">
+                          Gợi ý Plus: {suggestedNextWeekPlan?.focus ?? ""}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Review CTA */}
+                  <div
+                    data-testid="weekly-review-readiness"
+                    className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-sm text-app-ink-soft"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold text-app-ink">Mức sẵn sàng review</p>
+                      <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs font-semibold text-app-ink-soft">
+                        {reviewReadyCount}/4
+                      </span>
+                    </div>
+                    <p className="mt-1 leading-6">
+                      {isFutureReviewWeek
+                        ? "Không thể chốt tuần tương lai. Hãy quay lại tuần hiện tại trước khi lưu review."
+                        : shouldConfirmEarlyReview
+                          ? "Tuần chưa tới ngày review chính thức. Khi lưu sớm, bạn sẽ cần xác nhận thêm một lần."
+                          : "Chốt đủ WAM 4 câu trước khi đóng review tuần."}
                     </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Review CTA */}
-              <div
-                data-testid="weekly-review-readiness"
-                className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-sm text-app-ink-soft"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-semibold text-app-ink">Mức sẵn sàng review</p>
-                  <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs font-semibold text-app-ink-soft">
-                    {reviewReadyCount}/4
-                  </span>
-                </div>
-                <p className="mt-1 leading-6">
-                  {isFutureReviewWeek
-                    ? "Không thể chốt tuần tương lai. Hãy quay lại tuần hiện tại trước khi lưu review."
-                    : shouldConfirmEarlyReview
-                      ? "Tuần chưa tới ngày review chính thức. Khi lưu sớm, bạn sẽ cần xác nhận thêm một lần."
-                      : "Chốt đủ WAM 4 câu trước khi đóng review tuần."}
-                </p>
-              </div>
-              <div
-                className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
-                  reviewDueToday ? "border-app-warm-border bg-app-warm-soft" : "border-app-line bg-app-bg"
-                }`}
-              >
-                <p className="text-sm leading-6 text-app-ink-soft">
-                  {reviewDueToday
-                    ? "Sẵn sàng chốt review tuần này. Tuần sẽ được khóa và tạo gợi ý cho tuần sau."
-                    : "Có thể chốt sớm — bạn vẫn được phép sửa đến ngày review chính thức."}
-                </p>
-                <Button
-                  size="lg"
-                  className="w-full shrink-0 sm:w-auto bg-app-warm text-white hover:bg-app-warm"
-                  onClick={handleSaveReviewClick}
-                  disabled={isSavingReview || !canSubmitWeeklyReview}
-                  aria-busy={isSavingReview}
-                >
-                  {isSavingReview ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <ClipboardCheck className="h-4 w-4" />
-                  )}
-                  {isSavingReview ? "Đang chốt review..." : "Chốt review tuần này"}
-                </Button>
-              </div>
+                  </div>
+                  <div
+                    className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
+                      reviewDueToday ? "border-app-warm-border bg-app-warm-soft" : "border-app-line bg-app-bg"
+                    }`}
+                  >
+                    <p className="text-sm leading-6 text-app-ink-soft">
+                      {reviewDueToday
+                        ? "Sẵn sàng chốt review tuần này. Tuần sẽ được khóa và tạo gợi ý cho tuần sau."
+                        : "Có thể chốt sớm — bạn vẫn được phép sửa đến ngày review chính thức."}
+                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row w-full sm:w-auto shrink-0">
+                      {isEditingReview && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
+                          onClick={() => setIsEditingReview(false)}
+                        >
+                          Hủy chỉnh sửa
+                        </Button>
+                      )}
+                      <Button
+                        size="lg"
+                        className="w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm"
+                        onClick={handleSaveReviewClick}
+                        disabled={isSavingReview || !canSubmitWeeklyReview}
+                        aria-busy={isSavingReview}
+                      >
+                        {isSavingReview ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <ClipboardCheck className="h-4 w-4" />
+                        )}
+                        {isSavingReview ? "Đang chốt review..." : "Chốt review tuần này"}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
       </SectionBlock>
       {/* Sticky review CTA is shared by mobile and desktop; keep the test id stable for existing coverage. */}
-      <div
-        data-testid="weekly-review-mobile-sticky-cta"
-        className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-lg md:border md:shadow-lg"
-      >
-        <Button
-          size="lg"
-          className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm"
-          onClick={handleSaveReviewClick}
-          disabled={isSavingReview || !canSubmitWeeklyReview}
-          aria-busy={isSavingReview}
+      {showForm && (
+        <div
+          data-testid="weekly-review-mobile-sticky-cta"
+          className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-lg md:border md:shadow-lg"
         >
-          {isSavingReview ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              Đang chốt review...
-            </>
-          ) : (
-            "Chốt review tuần này"
-          )}
-        </Button>
-      </div>
+          <Button
+            size="lg"
+            className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm"
+            onClick={handleSaveReviewClick}
+            disabled={isSavingReview || !canSubmitWeeklyReview}
+            aria-busy={isSavingReview}
+          >
+            {isSavingReview ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Đang chốt review...
+              </>
+            ) : (
+              "Chốt review tuần này"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
