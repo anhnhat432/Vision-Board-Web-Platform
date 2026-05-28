@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { Skeleton } from "../../components/ui/skeleton";
 import { useSyncedUserData } from "../../hooks/useSyncedUserData";
+import { soundService } from "../../services/soundService";
 import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
 import {
   formatDateInputValue,
@@ -664,6 +665,9 @@ export function TodayV2Page() {
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     if (!viewModel.activeGoalId) return;
     toggleTwelveWeekTask(viewModel.activeGoalId, taskId, completed);
+    if (completed) {
+      soundService.click();
+    }
     reloadUserData();
   };
 

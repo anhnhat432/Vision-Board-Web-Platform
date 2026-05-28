@@ -3414,3 +3414,140 @@ html.theme-transitioning *::after {
     transform: none !important;
   }
 }
+
+/* ── Phase 4 Immersive UI & Sound Visualizations ── */
+
+/* 1. Audio Visualizer Waves Keyframes */
+@keyframes audio-wave-height-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 12px; }
+}
+@keyframes audio-wave-height-2 {
+  0%, 100% { height: 6px; }
+  50% { height: 10px; }
+}
+@keyframes audio-wave-height-3 {
+  0%, 100% { height: 3px; }
+  50% { height: 11px; }
+}
+
+.animate-audio-wave-1 {
+  animation: audio-wave-height-1 0.8s ease-in-out infinite;
+}
+.animate-audio-wave-2 {
+  animation: audio-wave-height-2 0.6s ease-in-out infinite;
+}
+.animate-audio-wave-3 {
+  animation: audio-wave-height-3 0.7s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 2. Real-time Adaptive Aurora Background */
+@keyframes auroraFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.dynamic-aurora-bg {
+  position: relative;
+  background-size: cover;
+  transition: background 3s ease-in-out;
+}
+
+/* Aurora Palette Configurations */
+:root {
+  --aurora-1: rgba(255, 243, 224, 0.35); /* Morning Warm Amber */
+  --aurora-2: rgba(232, 245, 233, 0.35); /* Morning Soft Mint */
+  --aurora-3: rgba(224, 247, 250, 0.35); /* Morning Calm Teal */
+}
+
+.dynamic-aurora-bg.morning {
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #fafafa;
+}
+
+.dynamic-aurora-bg.afternoon {
+  --aurora-1: rgba(232, 245, 233, 0.35);
+  --aurora-2: rgba(224, 247, 250, 0.4);
+  --aurora-3: rgba(243, 229, 245, 0.35); /* Afternoon Pastel Lavender */
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #fafafa;
+}
+
+.dynamic-aurora-bg.evening {
+  --aurora-1: rgba(255, 235, 238, 0.4);  /* Evening Rose Glow */
+  --aurora-2: rgba(237, 231, 246, 0.4);  /* Evening Soft Purple */
+  --aurora-3: rgba(225, 245, 254, 0.35); /* Evening Calm Sky Blue */
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #fafafa;
+}
+
+.dynamic-aurora-bg.night {
+  --aurora-1: rgba(13, 12, 29, 0.98);    /* Deep Midnight Navy */
+  --aurora-2: rgba(3, 0, 30, 0.98);      /* Rich Deep Purple */
+  --aurora-3: rgba(18, 1, 54, 0.96);     /* Royal Indigo */
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%);
+  color: #fafafa;
+}
+
+/* Dark Mode Aurora overrides */
+html.dark .dynamic-aurora-bg {
+  background-size: 200% 200%;
+}
+
+html.dark .dynamic-aurora-bg.morning {
+  --aurora-1: rgba(42, 27, 10, 0.25);
+  --aurora-2: rgba(10, 31, 17, 0.25);
+  --aurora-3: rgba(5, 29, 32, 0.25);
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #0a0a0a;
+}
+
+html.dark .dynamic-aurora-bg.afternoon {
+  --aurora-1: rgba(10, 31, 17, 0.25);
+  --aurora-2: rgba(5, 29, 32, 0.3);
+  --aurora-3: rgba(30, 10, 35, 0.25);
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #0a0a0a;
+}
+
+html.dark .dynamic-aurora-bg.evening {
+  --aurora-1: rgba(35, 10, 15, 0.3);
+  --aurora-2: rgba(22, 12, 35, 0.3);
+  --aurora-3: rgba(10, 25, 35, 0.25);
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #0a0a0a;
+}
+
+html.dark .dynamic-aurora-bg.night {
+  --aurora-1: rgba(5, 5, 15, 0.4);
+  --aurora-2: rgba(2, 0, 10, 0.4);
+  --aurora-3: rgba(8, 0, 20, 0.35);
+  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%), #0a0a0a;
+}
+
+/* Reduced motion fallback for Aurora Background */
+@media (prefers-reduced-motion: reduce) {
+  .dynamic-aurora-bg {
+    animation: none;
+    background-size: cover;
+  }
+}
+
+/* 3. Frosted Glassmorphism Premium Card styles */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 
+    0 10px 30px -10px rgba(0, 0, 0, 0.04), 
+    0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+html.dark .glass-premium {
+  background: rgba(17, 17, 20, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 
+    0 10px 30px -10px rgba(0, 0, 0, 0.3), 
+    0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+

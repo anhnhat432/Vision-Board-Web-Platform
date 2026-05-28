@@ -59,6 +59,8 @@ import {
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../../hooks/useBackendPlanHydration";
 import { useTheme } from "../../hooks/useTheme";
 import { MotionPageTransition } from "../motion";
+import { MindfulPlayer } from "../ui/mindful-player";
+import { GlitterCanvas } from "../ui/glitter-canvas";
 import { MotivationalReminder } from "../MotivationalReminder";
 import { NewUserGuideDialog } from "../NewUserGuide";
 import {
@@ -151,6 +153,25 @@ export function RootLayout() {
   });
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<"morning" | "afternoon" | "evening" | "night">("morning");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const hours = new Date().getHours();
+      if (hours >= 5 && hours < 12) {
+        setTimeOfDay("morning");
+      } else if (hours >= 12 && hours < 17) {
+        setTimeOfDay("afternoon");
+      } else if (hours >= 17 && hours < 21) {
+        setTimeOfDay("evening");
+      } else {
+        setTimeOfDay("night");
+      }
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -802,7 +823,7 @@ export function RootLayout() {
     return (
       <AutoCloudSyncProvider>
         <AssistantPageContextProvider>
-          <div className="app-shell min-h-screen bg-app-bg" data-route-tone={routeTone}>
+          <div className={`app-shell min-h-screen dynamic-aurora-bg ${timeOfDay}`} data-route-tone={routeTone}>
             <OfflineBanner />
             <a href="#main-content" className="skip-to-content">
               Bỏ qua điều hướng
@@ -821,6 +842,7 @@ export function RootLayout() {
             <main id="main-content" className="relative" aria-label="Nội dung trang">
               {pageTransitionContent}
               {localDataMigrationPrompt}
+              <GlitterCanvas />
               <Toaster />
             </main>
             {showAssistant && user && <AIAssistant />}
@@ -835,7 +857,7 @@ export function RootLayout() {
   return (
     <AutoCloudSyncProvider>
       <AssistantPageContextProvider>
-        <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+        <div className={`app-shell min-h-screen dynamic-aurora-bg ${timeOfDay}`} data-route-tone={routeTone}>
           <OfflineBanner />
           <a href="#main-content" className="skip-to-content">
             Bỏ qua điều hướng
@@ -1032,6 +1054,7 @@ export function RootLayout() {
                         </Button>
                       </>
                     ) : null}
+                    <MindfulPlayer />
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -1054,6 +1077,7 @@ export function RootLayout() {
                   </div>
 
                   <div className="md:hidden flex min-w-0 items-center gap-1.5">
+                    <MindfulPlayer />
                     <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-tight text-app-ink sm:inline">
                       {pageMeta.label}
                     </span>
@@ -1485,6 +1509,7 @@ export function RootLayout() {
           ) : null}
           <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
           {localDataMigrationPrompt}
+          <GlitterCanvas />
           <Toaster />
           {showAssistant && user && <AIAssistant />}
         </div>

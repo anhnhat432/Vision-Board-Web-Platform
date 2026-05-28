@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
@@ -25,6 +25,8 @@ import { CountUp } from "../components/ui/count-up";
 import { getGoalArchetypeIcon } from "../components/illustrations";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { SpotlightCard } from "../components/ui/spotlight-card";
+import { soundService } from "../services/soundService";
 import { Skeleton } from "../components/ui/skeleton";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
@@ -242,8 +244,10 @@ function GoalTrackerContent({
       if (nextCompleted) {
         if (justCompletedGoal) {
           celebrateSpotlight({ x: 0.82, y: 0.14 });
+          soundService.success();
         } else {
           celebrateSpark({ x: 0.82, y: 0.14 });
+          soundService.click();
         }
         toast.success(justCompletedGoal ? "Mục tiêu vừa chạm mốc 100%." : "Đã chốt thêm một bước nhỏ.");
       }
@@ -286,8 +290,10 @@ function GoalTrackerContent({
     if (!taskWasCompleted) {
       if (justCompletedGoal) {
         celebrateSpotlight({ x: 0.82, y: 0.14 });
+        soundService.success();
       } else {
         celebrateSpark({ x: 0.82, y: 0.14 });
+        soundService.click();
       }
       toast.success(justCompletedGoal ? "Mục tiêu vừa chạm mốc 100%." : "Đã chốt thêm một bước nhỏ.");
     }
@@ -416,7 +422,7 @@ function GoalTrackerContent({
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
     return (
-      <div key={goal.id} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
+      <SpotlightCard key={goal.id} className="surface-raised rounded-xl p-5 md:p-6 overflow-hidden">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,1fr)]">
           {/* Cột trái — Goal summary */}
           <div>
@@ -538,7 +544,7 @@ function GoalTrackerContent({
             )}
           </div>
         </div>
-      </div>
+      </SpotlightCard>
     );
   };
 

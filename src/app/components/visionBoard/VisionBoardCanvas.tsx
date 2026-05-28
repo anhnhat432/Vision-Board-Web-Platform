@@ -3,6 +3,7 @@ import type React from "react";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
+import { ParallaxCard } from "@/app/components/ui/parallax-card";
 import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem, VisionBoardThemeId } from "@/app/utils/storage-types";
 import { VISION_BOARD_THEMES } from "@/app/utils/vision-board-config";
@@ -201,7 +202,9 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
       }}
     >
       <div className="group relative">
-        <VisionBoardItemRenderer item={item} goalsById={goalsById} />
+        <ParallaxCard maxTilt={5}>
+          <VisionBoardItemRenderer item={item} goalsById={goalsById} />
+        </ParallaxCard>
         <Button
           size="icon"
           variant="destructive"

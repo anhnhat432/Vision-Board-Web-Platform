@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { soundService } from "../../services/soundService";
 
 import { type CelebrationPalette, fireCelebration } from "./fireCelebration";
 import { MilestoneToast, type MilestoneKind } from "./MilestoneToast";
@@ -87,6 +88,19 @@ export function useCelebration() {
           ...payload.origin,
           palette: payload.palette ?? PALETTE_BY_KIND[kind],
         });
+        soundService.success();
+
+        // Zen Sparkles: Trigger elegant sparkling stardust trail
+        window.dispatchEvent(
+          new CustomEvent("trigger-glitter", {
+            detail: {
+              x: payload.origin?.x !== undefined ? payload.origin.x * window.innerWidth : undefined,
+              y: payload.origin?.y !== undefined ? payload.origin.y * window.innerHeight : undefined,
+            },
+          })
+        );
+      } else {
+        soundService.click();
       }
 
       toast.custom(() => <MilestoneToast kind={kind} title={payload.title} description={payload.description} />, {
