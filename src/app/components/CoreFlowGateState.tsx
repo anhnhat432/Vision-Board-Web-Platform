@@ -52,7 +52,7 @@ export function CoreFlowGateState({
               {actionLabel && onAction ? (
                 <button
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
                   onClick={onAction}
                 >
                   {actionLabel}

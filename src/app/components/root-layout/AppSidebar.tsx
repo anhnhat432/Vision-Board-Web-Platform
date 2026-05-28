@@ -273,7 +273,7 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 w-full rounded-lg bg-app-accent text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="h-10 w-full rounded-lg bg-app-accent text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               onClick={() => onAuthNavigate("signup")}
             >
               Đăng ký

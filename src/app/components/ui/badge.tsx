@@ -9,8 +9,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-app-accent text-white [a&]:hover:bg-app-accent-hover",
-        brand: "border-transparent bg-app-accent text-white [a&]:hover:bg-app-accent-hover",
+        default: "border-transparent bg-app-accent text-white [a&]:hover:bg-app-accent",
+        brand: "border-transparent bg-app-accent text-white [a&]:hover:bg-app-accent",
         secondary: "border-transparent bg-app-accent-soft text-app-accent [a&]:hover:bg-app-accent-soft",
         neutral: "border-app-line bg-app-bg text-app-ink-soft [a&]:hover:bg-app-bg",
         destructive:

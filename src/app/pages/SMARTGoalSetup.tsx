@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
@@ -160,7 +160,7 @@ export function SMARTGoalSetup() {
 
   const firstStepData = SMART_STEPS[0];
   if (!firstStepData) {
-    throw new Error("C�c bu?c m?c ti�u SMART chua du?c c?u h�nh.");
+    throw new Error("Các bước mục tiêu SMART chưa được cấu hình.");
   }
 
   const currentStepData = SMART_STEPS[currentStep] ?? firstStepData;
@@ -171,15 +171,15 @@ export function SMARTGoalSetup() {
     currentStep: currentStepKey,
     hint:
       currentStepKey === "specific"
-        ? "�ang vi?t m?c ti�u c? th?, c� th? h�nh dung du?c"
+        ? "Đang viết mục tiêu cụ thể, có thể hình dung được"
         : currentStepKey === "measurable"
-          ? "�ang d?t thu?c do d?nh lu?ng cho m?c ti�u"
+          ? "Đang đặt thước đo định lượng cho mục tiêu"
           : currentStepKey === "achievable"
-            ? "�ang ki?m tra m?c ti�u c� l�m du?c trong di?u ki?n hi?n t?i"
+            ? "Đang kiểm tra mục tiêu có làm được trong điều kiện hiện tại"
             : currentStepKey === "relevant"
-              ? "�ang x�c d?nh l� do m?c ti�u n�y quan tr?ng"
+              ? "Đang xác định lý do mục tiêu này quan trọng"
               : currentStepKey === "timeBound"
-                ? "�ang ch?t deadline v� timeline"
+                ? "Đang chốt deadline và timeline"
                 : undefined,
   });
 
@@ -220,7 +220,7 @@ export function SMARTGoalSetup() {
       SMART_STEPS.map((step) => ({
         key: step.key,
         label: step.label,
-        value: formatStepDraft(step.key, smartData) || "Chua c� n?i dung cho ph?n n�y.",
+        value: formatStepDraft(step.key, smartData) || "Chưa có nội dung cho phần này.",
       })),
     [smartData],
   );
@@ -487,7 +487,7 @@ export function SMARTGoalSetup() {
       <PageShell maxWidth="md">
         <div className="space-y-6">
           <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
-          <FormSkeleton aria-label="�ang chu?n b? bu?c vi?t m?c ti�u" />
+          <FormSkeleton aria-label="Đang chuẩn bị bước viết mục tiêu" />
         </div>
       </PageShell>
     );
@@ -497,10 +497,10 @@ export function SMARTGoalSetup() {
     return (
       <CoreFlowGateState
         currentStepId="life_balance"
-        eyebrow="Vi?t m?c ti�u"
-        title="Ho�n th�nh bu?c c�n b?ng tru?c"
-        description="Ch?m di?m c�c linh v?c cu?c s?ng tru?c d? m?c ti�u d?a tr�n d? li?u th?t, kh�ng ph?i s? m?c d?nh."
-        actionLabel="B?t d?u c�n b?ng"
+        eyebrow="Viết mục tiêu"
+        title="Hoàn thành bước cân bằng trước"
+        description="Chấm điểm các lĩnh vực cuộc sống trước để mục tiêu dựa trên dữ liệu thật, không phải số mặc định."
+        actionLabel="Bắt đầu cân bằng"
         onAction={() => navigate("/onboarding")}
       />
     );
@@ -510,10 +510,10 @@ export function SMARTGoalSetup() {
     return (
       <CoreFlowGateState
         currentStepId="life_insight"
-        eyebrow="Vi?t m?c ti�u"
-        title="Ch?n tr?ng t�m tru?c"
-        description="�� c� d? li?u c�n b?ng nhung chua ch?n tr?ng t�m. Ch?n m?t linh v?c r?i quay l?i vi?t m?c ti�u."
-        actionLabel="M? bu?c ch?n tr?ng t�m"
+        eyebrow="Viết mục tiêu"
+        title="Chọn trọng tâm trước"
+        description="Đã có dữ liệu cân bằng nhưng chưa chọn trọng tâm. Chọn một lĩnh vực rồi quay lại viết mục tiêu."
+        actionLabel="Mở bước chọn trọng tâm"
         onAction={() => navigate("/life-insight")}
       />
     );
@@ -526,8 +526,8 @@ export function SMARTGoalSetup() {
         onOpenChange={setIsGoalLimitPaywallOpen}
         context="plan"
         currentPlan={getCurrentPlan(getUserData())}
-        title="B?n d� c� 3 m?c ti�u"
-        description="N�ng c?p Plus d? t?o th�m m?c ti�u. D? li?u hi?n c� v?n du?c gi? nguy�n."
+        title="Bạn đã có 3 mục tiêu"
+        description="Nâng cấp Plus để tạo thêm mục tiêu. Dữ liệu hiện có vẫn được giữ nguyên."
         source="paywall_dialog"
       />
       <div className="space-y-6">
@@ -541,33 +541,33 @@ export function SMARTGoalSetup() {
         {!isVisionPromptDismissed ? (
           <section
             className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
-            aria-label="T?m nh�n d�i h?n"
+            aria-label="Tầm nhìn dài hạn"
           >
             <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-warm">
-              T?m nh�n d�i h?n
+              Tầm nhìn dài hạn
             </span>
             {aspirationalVision ? (
               <p className="mt-3 font-serif text-lg font-medium leading-7 text-app-warm-strong">
-                M?c ti�u n�y ph?c v? t?m nh�n 3 nam: {aspirationalVision.summary}
+                Mục tiêu này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
               </p>
             ) : (
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-app-ink-soft">
-                  B?n dang d?t m?c ti�u 12 tu?n. H�y nghi th�m v? t?m nh�n 3 nam tru?c.
+                  Bạn đang đặt mục tiêu 12 tuần. Hãy nghĩ thêm về tầm nhìn 3 năm trước.
                 </p>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     to="/vision"
-                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                   >
-                    �i?n 2 ph�t ?
+                    Điền 2 phút →
                   </Link>
                   <button
                     type="button"
                     className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
-                    B? qua
+                    Bỏ qua
                   </button>
                 </div>
               </div>
@@ -611,7 +611,7 @@ export function SMARTGoalSetup() {
 
           <details className="mt-5 rounded-card border border-dashed border-app-line bg-app-bg p-5">
             <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-              Xem l?i m?c ti�u dang vi?t
+              Xem lại mục tiêu đang viết
             </summary>
 
             <div className="mt-4 space-y-3">
@@ -621,7 +621,7 @@ export function SMARTGoalSetup() {
                     {step.label}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-app-ink">
-                    {formatStepDraft(step.key, smartData) || "Chua c� n?i dung cho ph?n n�y."}
+                    {formatStepDraft(step.key, smartData) || "Chưa có nội dung cho phần này."}
                   </p>
                 </div>
               ))}

@@ -352,7 +352,7 @@ function TodayTasksCard({
         </div>
         <Link
           to="/12-week-system?tab=week"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           <Plus className="h-3.5 w-3.5" />
           Thêm việc
@@ -495,7 +495,7 @@ function ReflectionPrompt() {
       </h2>
       <Link
         to="/journal"
-        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
       >
         Viết phản tư →
       </Link>

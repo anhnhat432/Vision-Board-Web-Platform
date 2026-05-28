@@ -605,7 +605,7 @@ function GoalTrackerContent({
               />
             </div>
             <Button
-              className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent-hover inline-flex items-center gap-2"
+              className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent inline-flex items-center gap-2"
               onClick={handleStartGuidedGoalFlow}
               disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
             >
@@ -653,7 +653,7 @@ function GoalTrackerContent({
             description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
             actions={
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Button className="bg-app-accent text-white hover:bg-app-accent-hover" onClick={handleStartGuidedGoalFlow}>
+                <Button className="bg-app-accent text-white hover:bg-app-accent" onClick={handleStartGuidedGoalFlow}>
                   Bắt đầu chu kỳ 12 tuần →
                 </Button>
                 <Button

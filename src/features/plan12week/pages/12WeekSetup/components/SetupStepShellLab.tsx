@@ -244,12 +244,12 @@ export function SetupStepShellLab({
             Quay lại
           </button>
           {isLastStep ? (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
+            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
               {isSubmitting ? <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
               {isSubmitting ? "Đang lưu..." : "Lưu kế hoạch"}
             </button>
           ) : (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
+            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
               Tiếp →
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>

@@ -459,7 +459,7 @@ export function LifeInsight() {
               </div>
               <Button
                 onClick={handleStartGoalSetup}
-                className="group inline-flex items-center gap-2 bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-app-accent-hover shadow-md shadow-app-accent/15"
+                className="group inline-flex items-center gap-2 bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-app-accent shadow-md shadow-app-accent/15"
               >
                 Tiếp → Viết mục tiêu
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />

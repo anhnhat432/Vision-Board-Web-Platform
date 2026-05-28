@@ -781,7 +781,7 @@ export function TwelveWeekWeekTab({
                 </p>
                 <Button
                   size="lg"
-                  className="w-full shrink-0 sm:w-auto bg-app-warm text-white hover:bg-app-warm-hover"
+                  className="w-full shrink-0 sm:w-auto bg-app-warm text-white hover:bg-app-warm"
                   onClick={handleSaveReviewClick}
                   disabled={isSavingReview || !canSubmitWeeklyReview}
                   aria-busy={isSavingReview}
@@ -805,7 +805,7 @@ export function TwelveWeekWeekTab({
       >
         <Button
           size="lg"
-          className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm-hover"
+          className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm"
           onClick={handleSaveReviewClick}
           disabled={isSavingReview || !canSubmitWeeklyReview}
           aria-busy={isSavingReview}

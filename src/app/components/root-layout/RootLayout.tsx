@@ -476,7 +476,7 @@ export function RootLayout() {
             className={
               isMobile
                 ? "flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                : "flex h-8 w-8 items-center justify-center rounded-full bg-app-accent text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                : "flex h-8 w-8 items-center justify-center rounded-full bg-app-accent text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             }
             aria-label={triggerLabel}
             title={accountEmail || accountLabel}
@@ -1035,7 +1035,7 @@ export function RootLayout() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleAuthNavigate("signup")}
-                          className="h-8 rounded-full bg-app-accent px-3.5 text-sm text-white hover:bg-app-accent-hover hover:text-white"
+                          className="h-8 rounded-full bg-app-accent px-3.5 text-sm text-white hover:bg-app-accent hover:text-white"
                         >
                           Đăng ký
                         </Button>
@@ -1092,7 +1092,7 @@ export function RootLayout() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-10 rounded-lg bg-app-accent px-3 text-sm text-white hover:bg-app-accent-hover hover:text-white"
+                          className="h-10 rounded-lg bg-app-accent px-3 text-sm text-white hover:bg-app-accent hover:text-white"
                           onClick={() => handleAuthNavigate("signup")}
                         >
                           Đăng ký
@@ -1254,7 +1254,7 @@ export function RootLayout() {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="w-full bg-app-accent text-white hover:bg-app-accent-hover hover:text-white"
+                            className="w-full bg-app-accent text-white hover:bg-app-accent hover:text-white"
                             onClick={() => {
                               setMobileMenuOpen(false);
                               handleAuthNavigate("signup");
