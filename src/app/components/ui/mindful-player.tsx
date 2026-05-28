@@ -69,14 +69,7 @@ export function MindfulPlayer() {
               {mode !== "none" ? getModeLabel(mode) : "Âm thanh tập trung"}
             </span>
 
-            {/* Micro Audio Visualizer Wave */}
-            {mode !== "none" && !isReduced && (
-              <div className="flex items-end gap-[2px] h-3 w-4 px-[1px]">
-                <div className="w-[2px] bg-app-accent rounded-full animate-audio-wave-1 h-3" />
-                <div className="w-[2px] bg-app-accent rounded-full animate-audio-wave-2 h-2" />
-                <div className="w-[2px] bg-app-accent rounded-full animate-audio-wave-3 h-3" />
-              </div>
-            )}
+
           </div>
         </Button>
       </PopoverTrigger>

@@ -60,7 +60,7 @@ import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../.
 import { useTheme } from "../../hooks/useTheme";
 import { MotionPageTransition } from "../motion";
 import { MindfulPlayer } from "../ui/mindful-player";
-import { GlitterCanvas } from "../ui/glitter-canvas";
+
 import { MotivationalReminder } from "../MotivationalReminder";
 import { NewUserGuideDialog } from "../NewUserGuide";
 import {
@@ -823,7 +823,7 @@ export function RootLayout() {
             <main id="main-content" className="relative" aria-label="Nội dung trang">
               {pageTransitionContent}
               {localDataMigrationPrompt}
-              <GlitterCanvas />
+
               <Toaster />
             </main>
             {showAssistant && user && <AIAssistant />}
@@ -1490,7 +1490,7 @@ export function RootLayout() {
           ) : null}
           <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
           {localDataMigrationPrompt}
-          <GlitterCanvas />
+
           <Toaster />
           {showAssistant && user && <AIAssistant />}
         </div>

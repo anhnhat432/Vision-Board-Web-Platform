@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { CheckCircle2, ClipboardCheck, Layers, Loader2 } from "lucide-react";
 
 import {
@@ -396,10 +396,10 @@ export function TwelveWeekWeekTab({
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-app-warm-border/60 bg-app-warm-soft/70 p-5">
+                <div className="rounded-lg border border-app-line bg-app-surface p-5">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
                         Tùy chọn nếu còn sức
                       </p>
                       <p className="mt-2 text-lg font-semibold text-app-ink">
@@ -408,7 +408,7 @@ export function TwelveWeekWeekTab({
                           : "Không có việc tùy chọn"}
                       </p>
                     </div>
-                    <Badge variant="outline" className="border-app-warm-border bg-app-surface text-app-warm">
+                    <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink-soft">
                       {optionalIndicators.length}
                     </Badge>
                   </div>
@@ -424,7 +424,7 @@ export function TwelveWeekWeekTab({
                           className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
                         >
                           <p className="flex items-center gap-2 font-medium text-app-ink">
-                            <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-warm" />
+                            <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-ink-muted" />
                             {indicator.name}
                           </p>
                           <p className="mt-1 text-sm text-app-ink-muted">
@@ -442,7 +442,7 @@ export function TwelveWeekWeekTab({
           <Card data-tour-id="system-week-review" className="border border-app-line bg-app-surface">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-app-ink">
-                <ClipboardCheck className="h-5 w-5 text-app-accent" />
+                <ClipboardCheck className="h-5 w-5 text-app-warm" />
                 Review tuần
               </CardTitle>
               <CardDescription className="text-app-ink-soft">
@@ -489,7 +489,7 @@ export function TwelveWeekWeekTab({
                       data-done={item.done ? "true" : "false"}
                       className={`rounded-lg border px-3 py-3 text-sm ${
                         item.done
-                          ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                          ? "border-app-warm/20 bg-app-warm-soft text-app-warm"
                           : "border-app-line bg-app-bg text-app-ink-soft"
                       }`}
                     >
@@ -505,17 +505,11 @@ export function TwelveWeekWeekTab({
               {summaryReview && (
                 <div
                   data-testid="weekly-review-summary"
-                  className={`rounded-lg border p-4 ${
-                    scoreInterpretation.level === "strong"
-                      ? "border-app-accent/20 bg-app-accent-soft"
-                      : scoreInterpretation.level === "okay"
-                        ? "border-app-accent/20 bg-app-accent-soft"
-                        : "border-app-warm-border bg-app-warm-soft"
-                  }`}
+                  className="rounded-lg border border-app-warm-border bg-app-warm-soft p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         Tuần {summaryReview.weekNumber} đã chốt
                       </p>
@@ -534,7 +528,7 @@ export function TwelveWeekWeekTab({
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-warm">
                         Cam kết tuần qua
                       </p>
                       <p className="mt-1 text-sm leading-5 text-app-ink-soft">
@@ -550,15 +544,15 @@ export function TwelveWeekWeekTab({
                       </div>
                     )}
                     {summaryNextWeekCommitments.length > 0 && (
-                      <div className="rounded-lg border border-app-accent/20 bg-app-surface px-3 py-2 md:col-span-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
+                      <div className="rounded-lg border border-app-warm-border/60 bg-app-surface px-3 py-2 md:col-span-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-warm">
                           Cam kết tuần tới
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {summaryNextWeekCommitments.map((commitment) => (
                             <span
                               key={commitment}
-                              className="rounded-full border border-app-line bg-app-accent-soft px-3 py-1 text-xs font-semibold text-app-accent"
+                              className="rounded-full border border-app-line bg-app-warm-soft px-3 py-1 text-xs font-semibold text-app-warm"
                             >
                               {commitment}
                             </span>
@@ -645,7 +639,7 @@ export function TwelveWeekWeekTab({
               <div className="grid gap-5 lg:grid-cols-2">
                 <div
                   data-testid="wam-section-score"
-                  className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-4"
+                  className="rounded-lg border border-app-warm-border bg-app-warm-soft px-4 py-4"
                 >
                   <Label className="text-sm font-semibold text-app-ink">1. Điểm tuần qua bao nhiêu %?</Label>
                   <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-app-ink">
@@ -741,7 +735,7 @@ export function TwelveWeekWeekTab({
 
                 <div
                   data-testid="wam-section-next-commitments"
-                  className="rounded-lg border border-app-accent/20 bg-app-accent-soft/50 px-4 py-4"
+                  className="rounded-lg border border-app-warm-border bg-app-warm-soft/50 px-4 py-4"
                 >
                   <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
                   <NextWeekCommitmentsEditor
@@ -787,7 +781,7 @@ export function TwelveWeekWeekTab({
                 </p>
                 <Button
                   size="lg"
-                  className="w-full shrink-0 sm:w-auto"
+                  className="w-full shrink-0 sm:w-auto bg-app-warm text-white hover:bg-[#c56b4e]"
                   onClick={handleSaveReviewClick}
                   disabled={isSavingReview || !canSubmitWeeklyReview}
                   aria-busy={isSavingReview}
@@ -811,7 +805,7 @@ export function TwelveWeekWeekTab({
       >
         <Button
           size="lg"
-          className="w-full bg-app-accent text-white shadow-lg hover:bg-app-accent/90"
+          className="w-full bg-app-warm text-white shadow-lg hover:bg-[#c56b4e]"
           onClick={handleSaveReviewClick}
           disabled={isSavingReview || !canSubmitWeeklyReview}
           aria-busy={isSavingReview}

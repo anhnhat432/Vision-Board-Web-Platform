@@ -90,15 +90,7 @@ export function useCelebration() {
         });
         soundService.success();
 
-        // Zen Sparkles: Trigger elegant sparkling stardust trail
-        window.dispatchEvent(
-          new CustomEvent("trigger-glitter", {
-            detail: {
-              x: payload.origin?.x !== undefined ? payload.origin.x * window.innerWidth : undefined,
-              y: payload.origin?.y !== undefined ? payload.origin.y * window.innerHeight : undefined,
-            },
-          })
-        );
+
       } else {
         soundService.click();
       }

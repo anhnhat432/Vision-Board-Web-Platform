@@ -112,9 +112,9 @@ function getMoodConfig(mood?: string) {
   switch (mood) {
     case "happy":
       return {
-        icon: <Smile className="h-5 w-5 text-app-accent" />,
+        icon: <Smile className="h-5 w-5 text-app-warm" />,
         label: "Vui vẻ",
-        badge: "border-app-accent bg-app-accent-soft text-app-accent",
+        badge: "border-app-warm bg-app-warm-soft text-app-warm",
       };
     case "neutral":
       return {
@@ -321,13 +321,24 @@ function ReflectionJournalContent() {
       </AlertDialog>
 
       {/* Hero Section */}
-      <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6">
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
-          <h1 className="font-serif text-4xl font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
-          <p className="max-w-2xl text-sm leading-6 text-app-ink-soft">
-            Ghi lại điều bạn học được, biết ơn, và muốn cải thiện.
-          </p>
+      <section className="surface-raised rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
+            <h1 className="font-serif text-4xl font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
+            <p className="max-w-2xl text-sm leading-6 text-app-ink-soft">
+              Ghi lại điều bạn học được, biết ơn, và muốn cải thiện.
+            </p>
+          </div>
+          {hasReflections && (
+            <Button
+              onClick={() => setIsAddingReflection(true)}
+              className="bg-app-warm text-white hover:bg-[#c56b4e] shrink-0 self-start sm:self-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Viết nhật ký mới
+            </Button>
+          )}
         </div>
 
         {/* Toolbar */}
@@ -351,7 +362,7 @@ function ReflectionJournalContent() {
                 onClick={() => setFilterType(type)}
                 className={cn(
                   "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-colors",
-                  filterType === type ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
+                  filterType === type ? "bg-app-warm-soft text-app-warm" : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
                 {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
@@ -372,7 +383,7 @@ function ReflectionJournalContent() {
                   onClick={() => setFilterMood(mood)}
                   className={cn(
                     "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-colors",
-                    filterMood === mood ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
+                    filterMood === mood ? "bg-app-warm-soft text-app-warm" : "text-app-ink-soft hover:bg-app-bg",
                   )}
                 >
                   {labels[mood]}
@@ -531,7 +542,7 @@ function ReflectionJournalContent() {
             { label: "Tháng này", value: monthlyCount },
             { label: "Review tuần", value: weeklyReviewCount },
           ].map((item) => (
-            <Card key={item.label} className="rounded-xl border border-app-line bg-app-surface p-4">
+            <Card key={item.label} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
               <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">{item.label}</p>
               <p className="mt-1 font-serif text-3xl font-medium text-app-ink tabular-nums">
                 <CountUp value={item.value} />
@@ -545,7 +556,7 @@ function ReflectionJournalContent() {
       {sortedReflections.length === 0 ? (
         <EmptyState
           variant="card"
-          icon={<BookOpen className="h-12 w-12 text-app-accent" />}
+          icon={<BookOpen className="h-12 w-12 text-app-warm" />}
           title="Bắt đầu nhật ký của bạn"
           description="Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển."
           actions={
@@ -573,7 +584,7 @@ function ReflectionJournalContent() {
               const phaseTone = getJournalPhaseTone();
 
               return (
-                <Card key={reflection.id} className="rounded-xl border border-app-line bg-app-surface p-4 md:p-5">
+                <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
