@@ -1,0 +1,438 @@
+{
+  "generatedAt": "2026-05-26T01:35:00.103Z",
+  "results": [
+    {
+      "route": "/",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future 12 tuần sống có chủ đích Đăng nhập Đăng ký Trang chính DEAR OUR FUTURE · APP LẬP KẾ HOẠCH CÁ NHÂN App biến mục tiêu lớn thành kế hoạch 12 tuần và việc hôm nay. Dear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu c",
+      "bottomNavVisible": false,
+      "focusables": 23,
+      "h1": [
+        {
+          "cls": "mt-4 max-w-[18ch] font-serif text-4xl font-medium leading-[1.12] tracking-tight text-app-ink md:text-display",
+          "text": "App biến mục tiêu lớn thành kế hoạch 12 tuần và việc hôm nay."
+        }
+      ],
+      "headerHeight": 73,
+      "height": 900,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/",
+      "scrollHeight": 2174,
+      "scrollWidth": 1440,
+      "skipLink": true,
+      "title": "Trang chính – Dear Our Future",
+      "url": "http://127.0.0.1:5173/",
+      "width": 1440
+    },
+    {
+      "route": "/login",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Vision Board CHÀO BẠN QUAY LẠI Quay lại với 12 tuần của bạn Đăng nhập để tiếp tục theo dõi tiến độ và đồng bộ giữa các thiết bị. Mục tiêu rõ Theo dõi tiến độ 12 tuần Lộ trình có hướng Từ onboarding đến phản tư Dữ liệu an toàn Local-first, không bị mất \"Kỷ luật l",
+      "bottomNavVisible": false,
+      "focusables": 9,
+      "h1": [
+        {
+          "cls": "mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink max-w-md",
+          "text": "Quay lại với 12 tuần của bạn"
+        },
+        {
+          "cls": "mt-2 font-serif text-2xl font-medium leading-tight text-app-ink",
+          "text": "Quay lại với 12 tuần của bạn"
+        }
+      ],
+      "headerHeight": 84,
+      "height": 900,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": false,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/login",
+      "scrollHeight": 900,
+      "scrollWidth": 1440,
+      "skipLink": false,
+      "title": "Dear Our Future",
+      "url": "http://127.0.0.1:5173/login",
+      "width": 1440
+    },
+    {
+      "route": "/billing/plan",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future 12 tuần sống có chủ đích Đăng nhập Đăng ký Gói & thanh toán DEAR OUR FUTURE Đang mở trang... Dear Our Future Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày. SẢN PHẨM Trang chính Tính năng Gói & thanh toá",
+      "bottomNavVisible": false,
+      "focusables": 16,
+      "h1": [],
+      "headerHeight": 73,
+      "height": 900,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/billing/plan",
+      "scrollHeight": 900,
+      "scrollWidth": 1440,
+      "skipLink": true,
+      "title": "Gói & thanh toán – Dear Our Future",
+      "url": "http://127.0.0.1:5173/billing/plan",
+      "width": 1440
+    },
+    {
+      "route": "/today-v2",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Bản demo · Dữ liệu lưu trên trình duyệt này. THỨ BA · NGÀY 26 THÁNG 5 Tuần 4 / 12 Hôm nay là một ngày bình tĩnh để tiến từng bước. 12-WEEK GOAL Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng 0% Việc hôm nay 0 trong 3 việc đã xong Thêm việc Hoàn thiện ca",
+      "bottomNavVisible": false,
+      "focusables": 6,
+      "h1": [
+        {
+          "cls": "mt-4 max-w-3xl font-serif text-4xl font-medium tracking-tight text-app-ink sm:text-5xl",
+          "text": "Hôm nay là một ngày bình tĩnh để tiến từng bước."
+        }
+      ],
+      "headerHeight": null,
+      "height": 900,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/today-v2",
+      "scrollHeight": 1017,
+      "scrollWidth": 1440,
+      "skipLink": true,
+      "title": "Today preview – Dear Our Future",
+      "url": "http://127.0.0.1:5173/today-v2",
+      "width": 1440
+    },
+    {
+      "route": "/goals",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future 12 tuần sống có chủ đích Đăng nhập Đăng ký Mục tiêu MỤC TIÊU Mục tiêu của bạn Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ. Mục tiêu mới MỤC TIÊU 0 1 đã hoàn thành VIỆC 5/90 6% đã chốt 12 TUẦN 0 chu kỳ đang chạy CẦN CHÚ Ý 0 review, quá hạn, sắ",
+      "bottomNavVisible": false,
+      "focusables": 28,
+      "h1": [
+        {
+          "cls": "mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink",
+          "text": "Mục tiêu của bạn"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 900,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/goals",
+      "scrollHeight": 1905,
+      "scrollWidth": 1440,
+      "skipLink": true,
+      "title": "Mục tiêu – Dear Our Future",
+      "url": "http://127.0.0.1:5173/goals",
+      "width": 1440
+    },
+    {
+      "route": "/journal",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future 12 tuần sống có chủ đích Đăng nhập Đăng ký Nhật ký PHẢN TƯ Nhật ký phản tư Ghi lại điều bạn học được, biết ơn, và muốn cải thiện. Mọi loại Review tuần Tự do Mọi tâm trạng Vui vẻ Bình thường Suy tư TỔNG SỐ 2 THÁNG NÀY 2 REVIEW TUẦN 0 GHI CHÉP CŨ 2",
+      "bottomNavVisible": false,
+      "focusables": 26,
+      "h1": [
+        {
+          "cls": "font-serif text-4xl font-medium leading-tight text-app-ink",
+          "text": "Nhật ký phản tư"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 900,
+      "iconButtonsMissingLabel": 2,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/journal",
+      "scrollHeight": 1355,
+      "scrollWidth": 1440,
+      "skipLink": true,
+      "title": "Nhật ký – Dear Our Future",
+      "url": "http://127.0.0.1:5173/journal",
+      "width": 1440
+    },
+    {
+      "route": "/settings",
+      "viewport": "desktop",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future 12 tuần sống có chủ đích Đăng nhập Đăng ký Cài đặt CÀI ĐẶT Tuỳ chỉnh tài khoản Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn. Tài khoản Thông tin đăng nhập hiện tại của không gian làm việc này. K",
+      "bottomNavVisible": false,
+      "focusables": 34,
+      "h1": [
+        {
+          "cls": "mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink",
+          "text": "Tuỳ chỉnh tài khoản"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 900,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/settings",
+      "scrollHeight": 2300,
+      "scrollWidth": 1440,
+      "skipLink": true,
+      "title": "Cài đặt – Dear Our Future",
+      "url": "http://127.0.0.1:5173/settings",
+      "width": 1440
+    },
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future Đăng ký Trang chính DEAR OUR FUTURE · APP LẬP KẾ HOẠCH CÁ NHÂN App biến mục tiêu lớn thành kế hoạch 12 tuần và việc hôm nay. Dear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính khả thi, rồi ch",
+      "bottomNavVisible": false,
+      "focusables": 22,
+      "h1": [
+        {
+          "cls": "mt-4 max-w-[18ch] font-serif text-4xl font-medium leading-[1.12] tracking-tight text-app-ink md:text-display",
+          "text": "App biến mục tiêu lớn thành kế hoạch 12 tuần và việc hôm nay."
+        }
+      ],
+      "headerHeight": 73,
+      "height": 844,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/",
+      "scrollHeight": 4183,
+      "scrollWidth": 390,
+      "skipLink": true,
+      "title": "Trang chính – Dear Our Future",
+      "url": "http://127.0.0.1:5173/",
+      "width": 390
+    },
+    {
+      "route": "/login",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Vision Board CHÀO BẠN QUAY LẠI Quay lại với 12 tuần của bạn Mục tiêu rõ Lộ trình có hướng Dữ liệu an toàn Đăng nhập Tiếp tục hành trình bạn đã bắt đầu. Đăng nhập Đăng ký Tiếp tục với Google hoặc dùng email Email Mật khẩu Quên mật khẩu? Đăng nhập Nếu trước đây bạ",
+      "bottomNavVisible": false,
+      "focusables": 9,
+      "h1": [
+        {
+          "cls": "mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink max-w-md",
+          "text": "Quay lại với 12 tuần của bạn"
+        },
+        {
+          "cls": "mt-2 font-serif text-2xl font-medium leading-tight text-app-ink",
+          "text": "Quay lại với 12 tuần của bạn"
+        }
+      ],
+      "headerHeight": 84,
+      "height": 844,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": false,
+      "overflow": [
+        {
+          "cls": "w-full",
+          "left": 16,
+          "right": 440,
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "width": 424
+        },
+        {
+          "cls": "w-full max-w-md mx-auto lg:mx-0",
+          "left": 16,
+          "right": 440,
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "width": 424
+        },
+        {
+          "cls": "lg:hidden mb-6",
+          "left": 16,
+          "right": 440,
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "width": 424
+        },
+        {
+          "cls": "text-center",
+          "left": 16,
+          "right": 440,
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạn",
+          "width": 424
+        },
+        {
+          "cls": "text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted",
+          "left": 16,
+          "right": 440,
+          "tag": "p",
+          "text": "CHÀO BẠN QUAY LẠI",
+          "width": 424
+        },
+        {
+          "cls": "mt-2 font-serif text-2xl font-medium leading-tight text-app-ink",
+          "left": 16,
+          "right": 440,
+          "tag": "h1",
+          "text": "Quay lại với 12 tuần của bạn",
+          "width": 424
+        },
+        {
+          "cls": "mt-5 -mx-4 px-4 overflow-x-auto",
+          "left": 0,
+          "right": 456,
+          "tag": "div",
+          "text": "Mục tiêu rõLộ trình có hướngDữ liệu an toàn",
+          "width": 456
+        },
+        {
+          "cls": "flex gap-2 w-max",
+          "left": 16,
+          "right": 440,
+          "tag": "ul",
+          "text": "Mục tiêu rõLộ trình có hướngDữ liệu an toàn",
+          "width": 424
+        }
+      ],
+      "overflowX": 0,
+      "path": "/login",
+      "scrollHeight": 864,
+      "scrollWidth": 390,
+      "skipLink": false,
+      "title": "Dear Our Future",
+      "url": "http://127.0.0.1:5173/login",
+      "width": 390
+    },
+    {
+      "route": "/billing/plan",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future Đăng ký Gói & thanh toán GÓI & THANH TOÁN Chọn gói phù hợp với bạn Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch. TIN CẬY KHI THANH TOÁN Chuyển khoản rõ ràng, hỗ trợ s",
+      "bottomNavVisible": false,
+      "focusables": 23,
+      "h1": [
+        {
+          "cls": "text-3xl font-bold leading-[1.05] tracking-[-0.022em] text-app-ink sm:text-4xl lg:text-5xl",
+          "text": "Chọn gói phù hợp với bạn"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 844,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/billing/plan",
+      "scrollHeight": 3990,
+      "scrollWidth": 390,
+      "skipLink": true,
+      "title": "Gói & thanh toán – Dear Our Future",
+      "url": "http://127.0.0.1:5173/billing/plan",
+      "width": 390
+    },
+    {
+      "route": "/today-v2",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Bản demo · Dữ liệu lưu trên trình duyệt này. THỨ BA · NGÀY 26 THÁNG 5 Tuần 4 / 12 Hôm nay là một ngày bình tĩnh để tiến từng bước. Việc hôm nay 0 trong 3 việc đã xong Thêm việc Hoàn thiện case study portfolio 1 Hoàn thiện case study portfolio · Cốt lõi · Hôm nay",
+      "bottomNavVisible": false,
+      "focusables": 6,
+      "h1": [
+        {
+          "cls": "mt-4 max-w-3xl font-serif text-4xl font-medium tracking-tight text-app-ink sm:text-5xl",
+          "text": "Hôm nay là một ngày bình tĩnh để tiến từng bước."
+        }
+      ],
+      "headerHeight": null,
+      "height": 844,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/today-v2",
+      "scrollHeight": 1691,
+      "scrollWidth": 390,
+      "skipLink": true,
+      "title": "Today preview – Dear Our Future",
+      "url": "http://127.0.0.1:5173/today-v2",
+      "width": 390
+    },
+    {
+      "route": "/goals",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future Đăng ký Mục tiêu MỤC TIÊU Mục tiêu của bạn Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ. Mục tiêu mới MỤC TIÊU 3 1 đã hoàn thành VIỆC 5/90 6% đã chốt 12 TUẦN 1 chu kỳ đang chạy CẦN CHÚ Ý 0 review, quá hạn, sắp hạn DANH SÁCH Mục tiêu của bạn CH",
+      "bottomNavVisible": false,
+      "focusables": 27,
+      "h1": [
+        {
+          "cls": "mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink",
+          "text": "Mục tiêu của bạn"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 844,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/goals",
+      "scrollHeight": 2991,
+      "scrollWidth": 390,
+      "skipLink": true,
+      "title": "Mục tiêu – Dear Our Future",
+      "url": "http://127.0.0.1:5173/goals",
+      "width": 390
+    },
+    {
+      "route": "/journal",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future Đăng ký Nhật ký PHẢN TƯ Nhật ký phản tư Ghi lại điều bạn học được, biết ơn, và muốn cải thiện. Mọi loại Review tuần Tự do Mọi tâm trạng Vui vẻ Bình thường Suy tư TỔNG SỐ 2 THÁNG NÀY 2 REVIEW TUẦN 0 GHI CHÉP CŨ 2 bài viết THỨ 2, 25 THG 5 Vui vẻ Mộ",
+      "bottomNavVisible": false,
+      "focusables": 25,
+      "h1": [
+        {
+          "cls": "font-serif text-4xl font-medium leading-tight text-app-ink",
+          "text": "Nhật ký phản tư"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 844,
+      "iconButtonsMissingLabel": 2,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/journal",
+      "scrollHeight": 2256,
+      "scrollWidth": 390,
+      "skipLink": true,
+      "title": "Nhật ký – Dear Our Future",
+      "url": "http://127.0.0.1:5173/journal",
+      "width": 390
+    },
+    {
+      "route": "/settings",
+      "viewport": "mobile",
+      "bodyTextSample": "Bỏ qua điều hướng Dear Our Future Đăng ký Cài đặt CÀI ĐẶT Tuỳ chỉnh tài khoản Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn. Tài khoản Thông tin đăng nhập hiện tại của không gian làm việc này. K Ảnh đại diện Đồng bộ từ tài khoản ",
+      "bottomNavVisible": false,
+      "focusables": 31,
+      "h1": [
+        {
+          "cls": "mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink",
+          "text": "Tuỳ chỉnh tài khoản"
+        }
+      ],
+      "headerHeight": 73,
+      "height": 844,
+      "iconButtonsMissingLabel": 0,
+      "mainContent": true,
+      "overflow": [],
+      "overflowX": 0,
+      "path": "/settings",
+      "scrollHeight": 3904,
+      "scrollWidth": 390,
+      "skipLink": true,
+      "title": "Cài đặt – Dear Our Future",
+      "url": "http://127.0.0.1:5173/settings",
+      "width": 390
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,33 @@
+{
+  "startedAt": "2026-05-24T10:53:40.601Z",
+  "prodUrl": "https://dearourfuture.io.vn",
+  "public": [
+    {
+      "viewport": "1280",
+      "status": 200,
+      "loadMs": 2625,
+      "file": "public-1280.png",
+      "snippet": "Bỏ qua điều hướng\nDear Our Future\n12 tuần sống có chủ đích\nĐăng nhập\nĐăng ký\nTrang chính\n\nDEAR OUR FUTURE · APP LẬP KẾ HOẠCH CÁ NHÂN\n\nApp biến mục tiêu lớn thành kế hoạch 12 tuần\n và việc hôm nay.\n\nDear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.\n\nNói ngắn gọn\n\nĐây không phải trang ghi chú tự do. App là lộ trình từng bước để biến một mong muốn lớn thành kế hoạch có thể làm thật.\n"
+    },
+    {
+      "viewport": "768",
+      "status": 200,
+      "loadMs": 1387,
+      "file": "public-768.png",
+      "snippet": "Bỏ qua điều hướng\nDear Our Future\nĐăng nhập\nĐăng ký\nTrang chính\n\nDEAR OUR FUTURE · APP LẬP KẾ HOẠCH CÁ NHÂN\n\nApp biến mục tiêu lớn thành kế hoạch 12 tuần\n và việc hôm nay.\n\nDear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.\n\nNói ngắn gọn\n\nĐây không phải trang ghi chú tự do. App là lộ trình từng bước để biến một mong muốn lớn thành kế hoạch có thể làm thật.\n\n1\nChấm điểm cuộc sống\n2\n"
+    },
+    {
+      "viewport": "375",
+      "status": 200,
+      "loadMs": 1254,
+      "file": "public-375.png",
+      "snippet": "Bỏ qua điều hướng\nDear Our Future\nĐăng ký\nTrang chính\n\nDEAR OUR FUTURE · APP LẬP KẾ HOẠCH CÁ NHÂN\n\nApp biến mục tiêu lớn thành kế hoạch 12 tuần\n và việc hôm nay.\n\nDear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.\n\nNói ngắn gọn\n\nĐây không phải trang ghi chú tự do. App là lộ trình từng bước để biến một mong muốn lớn thành kế hoạch có thể làm thật.\n\n1\nChấm điểm cuộc sống\n2\nChọn mục t"
+    }
+  ],
+  "auth": {
+    "skipped": true,
+    "reason": "no credentials in env"
+  },
+  "errors": [],
+  "finishedAt": "2026-05-24T10:53:49.061Z"
+}

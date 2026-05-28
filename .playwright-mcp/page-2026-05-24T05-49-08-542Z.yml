@@ -1,0 +1,166 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - note [ref=e5]:
+    - img [ref=e6]
+    - text: Bản demo · Dữ liệu lưu trên trình duyệt này.
+  - main "Nội dung trang" [ref=e8]:
+    - generic [ref=e281]:
+      - region "Tiến độ đường chính" [ref=e282]:
+        - generic [ref=e283]:
+          - paragraph [ref=e284]: Bước 2 / 6 · TRỌNG TÂM
+          - button "Quay lại Trang chính — tiến độ đã nhập tự lưu trên thiết bị này" [ref=e285] [cursor=pointer]: Thoát →
+        - 'progressbar "Tiến độ đường chính: bước 2 trên 6" [ref=e286]'
+        - paragraph [ref=e293]: Chọn một lĩnh vực đủ quan trọng để hành động.
+      - generic [ref=e294]:
+        - generic [ref=e295]:
+          - generic [ref=e296]:
+            - paragraph [ref=e297]: BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
+            - heading "Chọn nơi đáng ưu tiên trong 12 tuần tới." [level=1] [ref=e298]
+            - paragraph [ref=e299]: Dữ liệu cân bằng cho thấy đâu là điểm mỏng và mạnh nhất. Chọn 1 lĩnh vực để biến thành mục tiêu SMART.
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - img [ref=e302]
+              - text: "Đề xuất ưu tiên: Sức khỏe"
+            - generic [ref=e306]:
+              - img [ref=e307]
+              - text: Đang chọn tự động
+          - generic [ref=e310]:
+            - generic [ref=e311]:
+              - generic [ref=e312]:
+                - heading "Bánh xe của bạn" [level=3] [ref=e313]
+                - paragraph [ref=e314]: 8 lĩnh vực hiện tại
+              - img "Biểu đồ radar tổng quan" [ref=e317]:
+                - generic [ref=e336]:
+                  - generic [ref=e337]: Sự nghiệp
+                  - generic [ref=e338]: 7/10
+                - generic [ref=e339]:
+                  - generic [ref=e340]: Tài chính
+                  - generic [ref=e341]: 6/10
+                - generic [ref=e342]:
+                  - generic [ref=e343]: Sức khỏe
+                  - generic [ref=e344]: 5/10
+                - generic [ref=e345]:
+                  - generic [ref=e346]: Học tập
+                  - generic [ref=e347]: 8/10
+                - generic [ref=e348]:
+                  - generic [ref=e349]: Mối quanhệ
+                  - generic [ref=e350]: 7/10
+                - generic [ref=e351]:
+                  - generic [ref=e352]: Gia đình
+                  - generic [ref=e353]: 8/10
+                - generic [ref=e354]:
+                  - generic [ref=e355]: Phát triểnbản thân
+                  - generic [ref=e356]: 6/10
+                - generic [ref=e357]:
+                  - generic [ref=e358]: Giải trí
+                  - generic [ref=e359]: 5/10
+              - button "Chấm lại điểm →" [ref=e361] [cursor=pointer]
+            - generic [ref=e362]:
+              - paragraph [ref=e363]: Đang chọn
+              - generic [ref=e364]:
+                - img [ref=e366]
+                - heading "Sức khỏe" [level=2] [ref=e369]
+                - paragraph [ref=e370]:
+                  - generic [ref=e371]:
+                    - img [ref=e372]
+                    - text: "Điểm hiện tại: 5/10"
+                - paragraph [ref=e375]: Tôi muốn mục tiêu này vì sức khỏe tốt hơn sẽ giúp tôi có năng lượng ổn định hơn cho công việc, gia đình và các mục tiêu dài hạn.
+                - generic [ref=e510]: Cải thiện sức khỏe
+        - generic [ref=e376]:
+          - generic [ref=e377]:
+            - heading "Hoặc chọn lĩnh vực khác" [level=3] [ref=e378]
+            - paragraph [ref=e379]: Click để đặt làm trọng tâm
+          - generic [ref=e380]:
+            - button "Sự nghiệp 7/10" [ref=e381] [cursor=pointer]:
+              - generic [ref=e382]:
+                - img [ref=e384]
+                - generic [ref=e388]:
+                  - paragraph [ref=e389]: Sự nghiệp
+                  - paragraph [ref=e390]: 7/10
+            - button "Tài chính 6/10" [ref=e391] [cursor=pointer]:
+              - generic [ref=e392]:
+                - img [ref=e394]
+                - generic [ref=e398]:
+                  - paragraph [ref=e399]: Tài chính
+                  - paragraph [ref=e400]: 6/10
+            - button "Sức khỏe 5/10" [ref=e401] [cursor=pointer]:
+              - generic [ref=e402]:
+                - img [ref=e404]
+                - generic [ref=e407]:
+                  - paragraph [ref=e408]: Sức khỏe
+                  - paragraph [ref=e409]: 5/10
+                - img [ref=e410]
+            - button "Học tập 8/10" [ref=e412] [cursor=pointer]:
+              - generic [ref=e413]:
+                - img [ref=e415]
+                - generic [ref=e418]:
+                  - paragraph [ref=e419]: Học tập
+                  - paragraph [ref=e420]: 8/10
+            - button "Mối quan hệ 7/10" [ref=e421] [cursor=pointer]:
+              - generic [ref=e422]:
+                - img [ref=e424]
+                - generic [ref=e429]:
+                  - paragraph [ref=e430]: Mối quan hệ
+                  - paragraph [ref=e431]: 7/10
+            - button "Gia đình 8/10" [ref=e432] [cursor=pointer]:
+              - generic [ref=e433]:
+                - img [ref=e435]
+                - generic [ref=e441]:
+                  - paragraph [ref=e442]: Gia đình
+                  - paragraph [ref=e443]: 8/10
+            - button "Phát triển bản thân 6/10" [ref=e444] [cursor=pointer]:
+              - generic [ref=e445]:
+                - img [ref=e447]
+                - generic [ref=e452]:
+                  - paragraph [ref=e453]: Phát triển bản thân
+                  - paragraph [ref=e454]: 6/10
+            - button "Giải trí 5/10" [ref=e455] [cursor=pointer]:
+              - generic [ref=e456]:
+                - img [ref=e458]
+                - generic [ref=e462]:
+                  - paragraph [ref=e463]: Giải trí
+                  - paragraph [ref=e464]: 5/10
+        - generic [ref=e465]:
+          - generic [ref=e466]:
+            - heading "Mục đích chính của bạn với lĩnh vực này" [level=3] [ref=e467]
+            - paragraph [ref=e468]: Chọn 1 — sẽ định hình kiểu mục tiêu SMART
+          - generic [ref=e469]:
+            - button "Hoàn thành một dự án Bạn đang có một việc lớn cần đẩy về đích trong 3 tháng tới." [ref=e470] [cursor=pointer]:
+              - generic [ref=e472]: Hoàn thành một dự án
+              - paragraph [ref=e473]: Bạn đang có một việc lớn cần đẩy về đích trong 3 tháng tới.
+            - button "Xây một thói quen Bạn muốn một việc nhỏ lặp lại đều đặn cho đến khi thành nếp." [ref=e474] [cursor=pointer]:
+              - generic [ref=e476]: Xây một thói quen
+              - paragraph [ref=e477]: Bạn muốn một việc nhỏ lặp lại đều đặn cho đến khi thành nếp.
+            - button "Học một kỹ năng Bạn muốn luyện đều tay và có kết quả cụ thể để kiểm chứng." [ref=e478] [cursor=pointer]:
+              - generic [ref=e480]: Học một kỹ năng
+              - paragraph [ref=e481]: Bạn muốn luyện đều tay và có kết quả cụ thể để kiểm chứng.
+            - button "Cải thiện sức khỏe Bạn muốn tập, vận động hoặc điều chỉnh lối sống một cách bền." [active] [ref=e482] [cursor=pointer]:
+              - generic [ref=e483]:
+                - generic [ref=e484]: Cải thiện sức khỏe
+                - img [ref=e511]
+              - paragraph [ref=e485]: Bạn muốn tập, vận động hoặc điều chỉnh lối sống một cách bền.
+            - button "Chuẩn bị thi hoặc chứng chỉ Bạn có mốc thi rõ và cần một lộ trình giữ nhịp học đến ngày thi." [ref=e486] [cursor=pointer]:
+              - generic [ref=e488]: Chuẩn bị thi hoặc chứng chỉ
+              - paragraph [ref=e489]: Bạn có mốc thi rõ và cần một lộ trình giữ nhịp học đến ngày thi.
+            - button "Tăng thu nhập hoặc tiết kiệm Bạn muốn cải thiện một con số tài chính cụ thể trong chu kỳ." [ref=e490] [cursor=pointer]:
+              - generic [ref=e492]: Tăng thu nhập hoặc tiết kiệm
+              - paragraph [ref=e493]: Bạn muốn cải thiện một con số tài chính cụ thể trong chu kỳ.
+            - button "Tìm lại định hướng Bạn chưa chắc chắn, muốn thử để thấy rõ hơn cần ưu tiên gì." [ref=e494] [cursor=pointer]:
+              - generic [ref=e496]: Tìm lại định hướng
+              - paragraph [ref=e497]: Bạn chưa chắc chắn, muốn thử để thấy rõ hơn cần ưu tiên gì.
+            - button "Chưa chắc, cứ đi tiếp Không cần chọn ngay — bạn có thể quay lại chỉnh sau." [ref=e498] [cursor=pointer]:
+              - generic [ref=e500]: Chưa chắc, cứ đi tiếp
+              - paragraph [ref=e501]: Không cần chọn ngay — bạn có thể quay lại chỉnh sau.
+          - generic [ref=e513]:
+            - paragraph [ref=e514]: Lựa chọn này được lưu trên thiết bị này để gợi ý bước SMART và kế hoạch 12 tuần.
+            - button "Bỏ chọn" [ref=e515] [cursor=pointer]
+        - generic [ref=e503]:
+          - generic [ref=e504]:
+            - paragraph [ref=e505]: TIẾP THEO
+            - heading "Biến trọng tâm này thành mục tiêu SMART" [level=3] [ref=e506]
+            - paragraph [ref=e507]: Khoảng 4 phút
+          - button "Tiếp → Viết mục tiêu" [ref=e508] [cursor=pointer]:
+            - text: Tiếp → Viết mục tiêu
+            - img
+    - region "Notifications alt+T"

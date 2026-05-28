@@ -1,0 +1,73 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e8]:
+        - button "Về trang chủ Dear Our Future" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - generic [ref=e13]: Dear Our Future
+        - navigation [ref=e14]:
+          - button "Trang chính" [ref=e16] [cursor=pointer]:
+            - img
+            - generic [ref=e17]: Trang chính
+        - generic [ref=e18]:
+          - button "Đăng nhập" [ref=e19] [cursor=pointer]
+          - button "Đăng ký" [ref=e20] [cursor=pointer]
+          - button "Chuyển sang chế độ tối" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+    - main "Nội dung trang" [ref=e24]:
+      - status [ref=e25]: Trang chính
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - paragraph [ref=e32]: Xin chào, đây là Vision Board
+              - heading "Một chỗ tĩnh để bạn nhìn lại tuần sống của mình." [level=1] [ref=e33]
+              - paragraph [ref=e34]: Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.
+            - generic [ref=e35]:
+              - paragraph [ref=e36]: Nhịp sản phẩm
+              - paragraph [ref=e37]: Local-first. Lưu trước trên thiết bị, đồng bộ khi bạn đăng nhập và kết nối sẵn sàng.
+          - region "Điểm nổi bật" [ref=e38]:
+            - article [ref=e39]:
+              - generic [ref=e40]:
+                - img [ref=e42]
+                - generic [ref=e45]:
+                  - heading "Cân bằng trước mục tiêu" [level=2] [ref=e46]
+                  - paragraph [ref=e47]: Chấm nhanh các lĩnh vực sống để biết nên bắt đầu ở đâu.
+                  - link "Khám phá →" [ref=e48] [cursor=pointer]:
+                    - /url: /life-balance
+            - article [ref=e49]:
+              - generic [ref=e50]:
+                - img [ref=e52]
+                - generic [ref=e56]:
+                  - heading "SMART Goal có nhịp" [level=2] [ref=e57]
+                  - paragraph [ref=e58]: Biến mong muốn thành mục tiêu đo được, rồi nối vào chu kỳ 12 tuần.
+                  - link "Khám phá →" [ref=e59] [cursor=pointer]:
+                    - /url: /smart-goal-setup
+            - article [ref=e60]:
+              - generic [ref=e61]:
+                - img [ref=e63]
+                - generic [ref=e65]:
+                  - heading "Review để không trôi" [level=2] [ref=e66]
+                  - paragraph [ref=e67]: Mỗi tuần có một điểm dừng ngắn để nhìn lại và chỉnh tải.
+                  - link "Khám phá →" [ref=e68] [cursor=pointer]:
+                    - /url: /journal
+          - region "Đăng nhập để bắt đầu" [ref=e69]:
+            - generic [ref=e70]:
+              - generic [ref=e71]:
+                - paragraph [ref=e72]: Bắt đầu đúng thứ tự
+                - heading "Đăng nhập để bắt đầu" [level=2] [ref=e73]
+                - paragraph [ref=e74]: Tạo không gian 12 tuần đầu tiên, rồi quay lại Trang chính để theo dõi nhịp tuần.
+              - generic [ref=e75]:
+                - button "Đăng nhập để bắt đầu" [ref=e76] [cursor=pointer]:
+                  - img [ref=e77]
+                  - text: Đăng nhập để bắt đầu
+                - button "Đăng nhập" [ref=e80] [cursor=pointer]
+        - generic [ref=e82]:
+          - generic [ref=e83]: Đã lưu cục bộ · vừa xong
+          - generic [ref=e84]: Trang chính · 12-Week Year
+        - button "Góp ý" [ref=e86] [cursor=pointer]:
+          - img
+          - text: Góp ý
+  - region "Notifications alt+T"

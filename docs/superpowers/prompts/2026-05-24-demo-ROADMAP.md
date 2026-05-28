@@ -31,8 +31,8 @@ P4 smoke + go/no-go
 | B1 rate-limit + 429 fallback | [2026-05-24-demo-blocker-b1-rate-limit.md](2026-05-24-demo-blocker-b1-rate-limit.md) | ✅ DONE — commits `f5f9f473` (BE) + `4e554625` (FE), đã merge main | Backend + Frontend | done |
 | B2 sync conflict banner | [2026-05-24-demo-blocker-b2-sync-conflict-banner.md](2026-05-24-demo-blocker-b2-sync-conflict-banner.md) | ✅ DONE — commit `0b6e6dc0`, đã merge main | Frontend dev | done |
 | B3 billing disabled copy | [2026-05-24-demo-blocker-b3-billing-disabled-copy.md](2026-05-24-demo-blocker-b3-billing-disabled-copy.md) | ✅ DONE (Option C) — commit `ecb599a2`, đã merge main. **PayOS đã cấu hình backend nhưng giữ tắt cho pilot — không gắn với deadline demo.** | Frontend dev | done |
-| P2 polish copy | [2026-05-24-demo-p2-polish-copy.md](2026-05-24-demo-p2-polish-copy.md) | ✅ DONE — commit `f9208fa4` | Frontend dev | 2h |
-| P3 demo account + script | [2026-05-24-demo-p3-demo-account-script.md](2026-05-24-demo-p3-demo-account-script.md) | ✅ DONE — commit `56ae5514`. **Đã viết xong Kịch bản & Checklist.** | Bạn (manual) + AI viết docs | 2h |
+| P2 polish copy | [2026-05-24-demo-p2-polish-copy.md](2026-05-24-demo-p2-polish-copy.md) | ⏳ chờ chạy | Frontend dev | 2h |
+| P3 demo account + script | [2026-05-24-demo-p3-demo-account-script.md](2026-05-24-demo-p3-demo-account-script.md) | ⏳ chờ chạy. **Đã update Q&A monetization phản ánh PayOS configured-but-disabled.** | Bạn (manual) + AI viết docs | 2h |
 | P4 smoke + go/no-go | [2026-05-24-demo-p4-smoke-final.md](2026-05-24-demo-p4-smoke-final.md) | ⏳ chờ chạy (sau khi merge B1/B2/B3 deploy production xong) | AI agent | 3h |
 
 ## Lịch đề xuất 7 ngày

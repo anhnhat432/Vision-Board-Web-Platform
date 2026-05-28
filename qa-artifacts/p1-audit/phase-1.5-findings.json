@@ -1,0 +1,90 @@
+{
+  "label": "1.5 Sync Multi-context",
+  "startedAt": "2026-05-24T06:14:37.339Z",
+  "finishedAt": "2026-05-24T06:14:52.038Z",
+  "steps": [
+    {
+      "label": "login in context A",
+      "ok": true,
+      "ms": 2477
+    },
+    {
+      "label": "login in context B",
+      "ok": true,
+      "ms": 2467
+    },
+    {
+      "label": "both navigate to /12-week-system",
+      "ok": true,
+      "ms": 9343
+    },
+    {
+      "label": "snapshot body texts (truncated) for diff",
+      "ok": true,
+      "ms": 24
+    }
+  ],
+  "consoleEntries": [
+    {
+      "ts": "2026-05-24T06:14:37.687Z",
+      "type": "error",
+      "text": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://apis.google.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+      "url": "https://dearourfuture.io.vn/login"
+    },
+    {
+      "ts": "2026-05-24T06:14:40.144Z",
+      "type": "error",
+      "text": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://apis.google.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+      "url": "https://dearourfuture.io.vn/login"
+    },
+    {
+      "ts": "2026-05-24T06:14:41.022Z",
+      "type": "warning",
+      "text": "[auto-sync] finished with attention needed {status: unsafe, message: Có dữ liệu chưa thể gộp tự động. Chưa ghi đè bản trên thiết bị.}",
+      "url": "https://dearourfuture.io.vn/assets/index-mPgpOS4i.js"
+    },
+    {
+      "ts": "2026-05-24T06:14:44.011Z",
+      "type": "warning",
+      "text": "[auto-sync] finished with attention needed {status: unsafe, message: Có dữ liệu chưa thể gộp tự động. Chưa ghi đè bản trên thiết bị.}",
+      "url": "https://dearourfuture.io.vn/assets/index-mPgpOS4i.js"
+    },
+    {
+      "ts": "2026-05-24T06:14:44.108Z",
+      "type": "warning",
+      "text": "[auto-sync] finished with attention needed {status: conflict, message: Có xung đột dữ liệu không thể tự động giải quyết. Vui lòng chọn phiên bản cần giữ.}",
+      "url": "https://dearourfuture.io.vn/assets/index-mPgpOS4i.js"
+    },
+    {
+      "ts": "2026-05-24T06:14:46.411Z",
+      "type": "warning",
+      "text": "[auto-sync] finished with attention needed {status: conflict, message: Có xung đột dữ liệu không thể tự động giải quyết. Vui lòng chọn phiên bản cần giữ.}",
+      "url": "https://dearourfuture.io.vn/assets/index-mPgpOS4i.js"
+    }
+  ],
+  "networkEntries": [
+    {
+      "ts": "2026-05-24T06:14:37.688Z",
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447",
+      "failure": "csp"
+    },
+    {
+      "ts": "2026-05-24T06:14:40.156Z",
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447",
+      "failure": "csp"
+    }
+  ],
+  "screenshots": [
+    "c:/Users/admin/Downloads/Vision Board Web Platform/qa-artifacts/p1-audit/sync-ctxA-initial-1280.png",
+    "c:/Users/admin/Downloads/Vision Board Web Platform/qa-artifacts/p1-audit/sync-ctxB-initial-1280.png"
+  ],
+  "notes": [
+    "ctxA body slice: Bỏ qua điều hướng Dear Our Future 12-tuần · Vision ĐI NHANH Trang chính Mục tiêu Hệ thống 12 tuần Vision board THÊM Thư viện Cân bằng cuộc sống Thành tựu Nhật ký Đặt kit Gói & thanh toán Tối N nhật Plus Workspace / Hệ 12 tuần Cần chọn bản dữ liệu Tìm nhanh ⌘K Hệ 12 tuần HỆ THỐNG 12 TUẦN Nhịp 12 tuần Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp. Tuần 1 / 12 · Career Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần. Xem việc hôm nay Mở mục tiêu Tuần 1 / 12 Khởi động Đã lưu & đồng bộ Gói Plus Còn 0 hôm nay · 2/2 việc tuần Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp. Hôm nay Tuần Tiến độ Cài đặt BƯỚC TIẾP THEO Chốt ngày hôm nay bằng check-in ngắn Việc chính đã đi qua. Lưu năng lượng và một ghi chú ngắn để ngày mai tiếp tục nhanh hơn. Lưu check-in Hàng việc và check-in hôm nay Hàng việc hôm nay Làm việc đầu tiên trước, phần còn lại để sau. 2/2 xong viết 3 bài 1 Cốt lõi viết 3 bài Đã chốt tập 2 buổi 1 Cốt lõi tập 2 buổi Đã chốt Tiến độ tuần 1 100% Check-in 30 giây Chọn năng lượng và ghi 1 ý ngắn nếu cần. 2/2 Năng lượng hôm nay Thấp Ngày hơi chậm Ổn định Giữ nhịp đều Cao Có thể đẩy thêm Note tùy chọn Lưu check-in hôm nay Lịch sử check-in Xem thêm + CỨU NHỊP NHẸ Có một vài tín hiệu nhỏ — chỉ cần một bước nhẹ là đủ. Chưa có check-in nào — chỉ cần 30 giây để giữ nhịp ghi nhớ. Check-in 30 giây Chọn năng lượng + 1 dòng note. Không cần kết quả, ",
+    "ctxB body slice: Bỏ qua điều hướng Dear Our Future 12-tuần · Vision ĐI NHANH Trang chính Mục tiêu Hệ thống 12 tuần Vision board THÊM Thư viện Cân bằng cuộc sống Thành tựu Nhật ký Đặt kit Gói & thanh toán Tối N nhật Plus Workspace / Hệ 12 tuần Cần chọn bản dữ liệu Tìm nhanh ⌘K Hệ 12 tuần HỆ THỐNG 12 TUẦN Nhịp 12 tuần Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp. Tuần 1 / 12 · Career Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần. Xem việc hôm nay Mở mục tiêu Tuần 1 / 12 Khởi động Đã lưu & đồng bộ Gói Plus Còn 0 hôm nay · 2/2 việc tuần Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp. Hôm nay Tuần Tiến độ Cài đặt BƯỚC TIẾP THEO Chốt ngày hôm nay bằng check-in ngắn Việc chính đã đi qua. Lưu năng lượng và một ghi chú ngắn để ngày mai tiếp tục nhanh hơn. Lưu check-in Hàng việc và check-in hôm nay Hàng việc hôm nay Làm việc đầu tiên trước, phần còn lại để sau. 2/2 xong viết 3 bài 1 Cốt lõi viết 3 bài Đã chốt tập 2 buổi 1 Cốt lõi tập 2 buổi Đã chốt Tiến độ tuần 1 100% Check-in 30 giây Chọn năng lượng và ghi 1 ý ngắn nếu cần. 2/2 Năng lượng hôm nay Thấp Ngày hơi chậm Ổn định Giữ nhịp đều Cao Có thể đẩy thêm Note tùy chọn Lưu check-in hôm nay Lịch sử check-in Xem thêm + CỨU NHỊP NHẸ Có một vài tín hiệu nhỏ — chỉ cần một bước nhẹ là đủ. Chưa có check-in nào — chỉ cần 30 giây để giữ nhịp ghi nhớ. Check-in 30 giây Chọn năng lượng + 1 dòng note. Không cần kết quả, ",
+    "MUTATION SKIPPED: audit did not toggle tasks across contexts to avoid altering production user data. Sync latency therefore not measured by mutation; only verified that 2 concurrent sessions can read the same plan."
+  ]
+}

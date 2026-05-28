@@ -1,0 +1,72 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e8]:
+        - button "Về trang chủ Dear Our Future" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - generic [ref=e13]: Dear Our Future
+        - generic [ref=e14]:
+          - button "Đăng ký" [ref=e15] [cursor=pointer]
+          - button "Mở menu" [ref=e16] [cursor=pointer]:
+            - img [ref=e17]
+    - main "Nội dung trang" [ref=e18]:
+      - status [ref=e19]: Trang chính
+      - status [ref=e21]:
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: Dear Our Future
+          - paragraph [ref=e24]: Đang mở trang...
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - link "Dear Our Future" [ref=e29] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e30]: Dear Our Future
+            - paragraph [ref=e31]: Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
+            - link "Facebook" [ref=e33] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61589773962146
+              - img [ref=e34]
+          - generic [ref=e36]:
+            - heading "Sản phẩm" [level=3] [ref=e37]
+            - list [ref=e38]:
+              - listitem [ref=e39]:
+                - link "Trang chính" [ref=e40] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e41]:
+                - link "Tính năng" [ref=e42] [cursor=pointer]:
+                  - /url: /#features
+              - listitem [ref=e43]:
+                - link "Gói & thanh toán" [ref=e44] [cursor=pointer]:
+                  - /url: /billing/plan
+              - listitem [ref=e45]:
+                - link "Hỏi đáp thanh toán" [ref=e46] [cursor=pointer]:
+                  - /url: /billing/faq
+          - generic [ref=e47]:
+            - heading "Công ty" [level=3] [ref=e48]
+            - list [ref=e49]:
+              - listitem [ref=e50]:
+                - link "Về Dear Our Future" [ref=e51] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e52]:
+                - link "Liên hệ" [ref=e53] [cursor=pointer]:
+                  - /url: mailto:dearourfuture123@gmail.com
+          - generic [ref=e54]:
+            - heading "Pháp lý" [level=3] [ref=e55]
+            - list [ref=e56]:
+              - listitem [ref=e57]:
+                - link "Điều khoản dịch vụ" [ref=e58] [cursor=pointer]:
+                  - /url: /terms
+              - listitem [ref=e59]:
+                - link "Chính sách bảo mật" [ref=e60] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e61]:
+                - link "Chính sách hoàn tiền" [ref=e62] [cursor=pointer]:
+                  - /url: /refund-policy
+        - generic [ref=e63]:
+          - paragraph [ref=e64]:
+            - text: © 2026 Dear Our Future. Made with ❤️
+            - generic [ref=e65]: tình yêu
+            - text: ở Việt Nam.
+          - paragraph [ref=e66]: Local-first · Hoạt động trên mọi thiết bị
+  - region "Notifications alt+T"

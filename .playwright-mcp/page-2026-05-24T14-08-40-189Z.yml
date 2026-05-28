@@ -1,0 +1,26 @@
+- main [ref=e4]:
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - img [ref=e10]
+        - text: Dear Our Future
+      - generic [ref=e12]:
+        - heading "Trang này vừa gặp lỗi, nhưng mình vẫn có thể quay lại flow chính ngay." [level=1] [ref=e13]
+        - paragraph [ref=e14]: Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang hoặc quay về Trang chính rồi tiếp tục từ đó.
+      - generic [ref=e15]:
+        - button "Về Trang chính" [ref=e16] [cursor=pointer]:
+          - img
+          - text: Về Trang chính
+        - button "Tải lại trang" [ref=e17] [cursor=pointer]:
+          - img
+          - text: Tải lại trang
+    - generic [ref=e18]:
+      - img [ref=e19]
+      - generic [ref=e27]:
+        - img [ref=e29]
+        - generic [ref=e31]:
+          - paragraph [ref=e32]: Trạng thái
+          - paragraph [ref=e33]: Lỗi 404
+      - generic [ref=e34]:
+        - paragraph [ref=e35]: Mô tả
+        - paragraph [ref=e36]: "Error: No route matches URL \"/aspirational-vision\""

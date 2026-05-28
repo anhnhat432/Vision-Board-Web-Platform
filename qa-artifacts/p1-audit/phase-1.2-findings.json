@@ -1,0 +1,82 @@
+{
+  "label": "1.2 Auth Flow",
+  "startedAt": "2026-05-24T06:12:37.527Z",
+  "finishedAt": "2026-05-24T06:12:42.819Z",
+  "steps": [
+    {
+      "label": "goto /login",
+      "ok": true,
+      "ms": 1071
+    },
+    {
+      "label": "fill email + password",
+      "ok": true,
+      "ms": 95
+    },
+    {
+      "label": "submit login form",
+      "ok": true,
+      "ms": 77
+    },
+    {
+      "label": "wait for redirect away from /login",
+      "ok": true,
+      "ms": 1409
+    },
+    {
+      "label": "verify post-login route is plausible",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "label": "logout to test Google OAuth button",
+      "ok": true,
+      "ms": 2265
+    },
+    {
+      "label": "click Google OAuth button (verify popup opens, do not complete)",
+      "ok": true,
+      "ms": 14
+    }
+  ],
+  "consoleEntries": [
+    {
+      "ts": "2026-05-24T06:12:37.812Z",
+      "type": "error",
+      "text": "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://apis.google.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+      "url": "https://dearourfuture.io.vn/login"
+    },
+    {
+      "ts": "2026-05-24T06:12:41.760Z",
+      "type": "warning",
+      "text": "[auto-sync] finished with attention needed {status: unsafe, message: Có dữ liệu chưa thể gộp tự động. Chưa ghi đè bản trên thiết bị.}",
+      "url": "https://dearourfuture.io.vn/assets/index-mPgpOS4i.js"
+    }
+  ],
+  "networkEntries": [
+    {
+      "ts": "2026-05-24T06:12:37.813Z",
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447",
+      "failure": "csp"
+    },
+    {
+      "ts": "2026-05-24T06:12:40.497Z",
+      "kind": "requestfailed",
+      "method": "POST",
+      "url": "https://api.dearourfuture.io.vn/api/auth/profile",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "screenshots": [
+    "c:/Users/admin/Downloads/Vision Board Web Platform/qa-artifacts/p1-audit/post-login-1280.png",
+    "c:/Users/admin/Downloads/Vision Board Web Platform/qa-artifacts/p1-audit/auth-google-popup-test-1280.png"
+  ],
+  "notes": [
+    "SIGNUP SKIPPED — user did not provide a fresh email for account #2. Signup redirect path NOT verified by this audit.",
+    "post-login URL: https://dearourfuture.io.vn/",
+    "landed at /",
+    "Google OAuth button NOT FOUND on /login"
+  ]
+}

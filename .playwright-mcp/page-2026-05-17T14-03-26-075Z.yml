@@ -1,0 +1,209 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary "Điều hướng chính" [ref=e5]:
+    - button "Về trang chủ Dear Our Future" [ref=e7] [cursor=pointer]:
+      - img [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]: Dear Our Future
+        - generic [ref=e11]: 12-tuần · Vision
+    - navigation "Mục điều hướng" [ref=e12]:
+      - paragraph [ref=e13]: Đi nhanh
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - button "Trang chính" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+            - generic [ref=e23]: Trang chính
+        - listitem [ref=e24]:
+          - button "Mục tiêu" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+            - generic [ref=e31]: Mục tiêu
+        - listitem [ref=e32]:
+          - button "Hệ thống 12 tuần" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]
+            - generic [ref=e37]: Hệ thống 12 tuần
+        - listitem [ref=e38]:
+          - button "Vision board" [ref=e40] [cursor=pointer]:
+            - img [ref=e41]
+            - generic [ref=e43]: Vision board
+      - paragraph [ref=e44]: Thêm
+      - list [ref=e45]:
+        - listitem [ref=e46]:
+          - button "Thư viện" [ref=e48] [cursor=pointer]:
+            - img [ref=e49]
+            - generic [ref=e54]: Thư viện
+        - listitem [ref=e55]:
+          - button "Cân bằng cuộc sống" [ref=e57] [cursor=pointer]:
+            - img [ref=e58]
+            - generic [ref=e61]: Cân bằng cuộc sống
+        - listitem [ref=e62]:
+          - button "Thành tựu" [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+            - generic [ref=e68]: Thành tựu
+        - listitem [ref=e69]:
+          - button "Nhật ký" [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+            - generic [ref=e74]: Nhật ký
+        - listitem [ref=e75]:
+          - button "Gói & thanh toán" [ref=e77] [cursor=pointer]:
+            - img [ref=e78]
+            - generic [ref=e80]: Gói & thanh toán
+        - listitem [ref=e81]:
+          - button "Đơn hàng" [ref=e83] [cursor=pointer]:
+            - img [ref=e84]
+            - generic [ref=e88]: Đơn hàng
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - button "Chuyển sang chế độ tối" [ref=e91] [cursor=pointer]:
+          - img [ref=e92]
+          - text: Tối
+        - button "Mở hướng dẫn sử dụng" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+      - generic [ref=e98]:
+        - button "Đăng ký" [ref=e99] [cursor=pointer]
+        - button "Đăng nhập" [ref=e100] [cursor=pointer]
+  - generic [ref=e101]:
+    - generic [ref=e103]:
+      - navigation "Vị trí trang" [ref=e104]:
+        - generic [ref=e105]: Workspace
+        - generic [ref=e106]: /
+        - generic [ref=e107]: Mục tiêu
+      - button "Mở command palette" [ref=e109] [cursor=pointer]:
+        - img [ref=e110]
+        - generic [ref=e113]: Tìm nhanh
+    - main "Nội dung trang" [ref=e114]:
+      - status [ref=e115]: Mục tiêu
+      - generic [ref=e117]:
+        - generic [ref=e119]:
+          - paragraph [ref=e120]: MỤC TIÊU
+          - heading "Mục tiêu của bạn" [level=1] [ref=e121]
+          - paragraph [ref=e122]: Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - img
+              - searchbox "Tìm theo tên hoặc mô tả..." [ref=e125]
+            - button "Mục tiêu mới" [disabled]:
+              - img
+              - text: Mục tiêu mới
+        - generic [ref=e128]:
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: Mục tiêu
+              - paragraph [ref=e133]:
+                - generic [ref=e134]: "1"
+              - paragraph [ref=e135]: 1 đã hoàn thành
+            - img [ref=e137]
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - paragraph [ref=e144]: Việc
+              - paragraph [ref=e145]: 5/90
+              - paragraph [ref=e146]: 6% đã chốt
+            - img [ref=e148]
+          - generic [ref=e152]:
+            - generic [ref=e153]:
+              - paragraph [ref=e154]: 12 tuần
+              - paragraph [ref=e155]:
+                - generic [ref=e156]: "0"
+              - paragraph [ref=e157]: chu kỳ đang chạy
+            - img [ref=e159]
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - paragraph [ref=e164]: Cần chú ý
+              - paragraph [ref=e165]:
+                - generic [ref=e166]: "0"
+              - paragraph [ref=e167]: review, quá hạn, sắp hạn
+            - img [ref=e169]
+        - generic [ref=e171]:
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - img
+              - searchbox "Tìm theo tên hoặc mô tả..." [ref=e174]
+            - generic [ref=e175]:
+              - paragraph [ref=e176]: Danh sách
+              - heading "Mục tiêu của bạn" [level=2] [ref=e177]
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e181]:
+                - paragraph [ref=e182]: CHU KỲ 12 TUẦN
+                - heading "Mục tiêu đang chạy" [level=2] [ref=e183]
+                - paragraph [ref=e184]: 1 mục tiêu
+              - generic [ref=e188]:
+                - generic [ref=e189]:
+                  - generic [ref=e190]:
+                    - generic [ref=e191]:
+                      - img [ref=e193]
+                      - generic [ref=e196]:
+                        - heading "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng" [level=3] [ref=e197]
+                        - paragraph [ref=e198]: Tu 4/12 · Sự nghiệp
+                    - button "Xóa mục tiêu Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng" [ref=e199] [cursor=pointer]:
+                      - img
+                  - generic [ref=e200]:
+                    - generic [ref=e201]: Sự nghiệp
+                    - generic [ref=e202]: Miễn phí
+                  - generic [ref=e204]:
+                    - generic [ref=e205]: Tiến độ
+                    - generic [ref=e207]: 0%
+                  - generic [ref=e209]:
+                    - button "Mở kế hoạch" [ref=e210] [cursor=pointer]
+                    - button "Xóa" [ref=e211] [cursor=pointer]
+                - generic [ref=e212]:
+                  - generic [ref=e213]:
+                    - paragraph [ref=e214]: VIỆC HÔM NAY
+                    - generic [ref=e215]: 7/7
+                  - generic [ref=e216]:
+                    - generic [ref=e217]:
+                      - checkbox [ref=e218]
+                      - generic [ref=e219]: Hoàn thiện case study portfolio 1
+                    - generic [ref=e220]:
+                      - checkbox [ref=e221]
+                      - generic [ref=e222]: Hoàn thiện case study portfolio 2
+                    - generic [ref=e223]:
+                      - checkbox [ref=e224]
+                      - generic [ref=e225]: Kết nối hoặc chủ động liên hệ 1
+                  - button "Xem tất cả →" [ref=e226] [cursor=pointer]
+            - generic [ref=e227]:
+              - generic [ref=e229]:
+                - paragraph [ref=e230]: MỤC TIÊU THƯỜNG
+                - heading "2 mục tiêu" [level=2] [ref=e231]
+              - generic [ref=e232]:
+                - generic [ref=e235]:
+                  - generic [ref=e236]:
+                    - generic [ref=e237]:
+                      - generic [ref=e238]:
+                        - img [ref=e240]
+                        - generic [ref=e243]:
+                          - heading "Duy trì thói quen đọc và ghi chú 20 phút mỗi ngày" [level=3] [ref=e244]
+                          - paragraph [ref=e245]: Tu -/12 · Phát triển bản thân
+                      - button "Xóa mục tiêu Duy trì thói quen đọc và ghi chú 20 phút mỗi ngày" [ref=e246] [cursor=pointer]:
+                        - img
+                    - generic [ref=e248]: Phát triển bản thân
+                    - generic [ref=e250]:
+                      - generic [ref=e251]: Tiến độ
+                      - generic [ref=e253]: 0%
+                    - button "Xóa" [ref=e257] [cursor=pointer]
+                  - generic [ref=e258]:
+                    - generic [ref=e259]:
+                      - paragraph [ref=e260]: VIỆC HÔM NAY
+                      - generic [ref=e261]: 0/0
+                    - paragraph [ref=e263]: Không có việc nào hôm nay
+                - generic [ref=e266]:
+                  - generic [ref=e267]:
+                    - generic [ref=e268]:
+                      - generic [ref=e269]:
+                        - img [ref=e271]
+                        - generic [ref=e273]:
+                          - heading "Đi bộ 8.000 bước mỗi ngày trong 30 ngày" [level=3] [ref=e274]
+                          - paragraph [ref=e275]: Tu -/12 · Sức khỏe
+                      - button "Xóa mục tiêu Đi bộ 8.000 bước mỗi ngày trong 30 ngày" [ref=e276] [cursor=pointer]:
+                        - img
+                    - generic [ref=e278]: Sức khỏe
+                    - generic [ref=e280]:
+                      - generic [ref=e281]: Tiến độ
+                      - generic [ref=e283]: 0%
+                    - button "Xóa" [ref=e287] [cursor=pointer]
+                  - generic [ref=e288]:
+                    - generic [ref=e289]:
+                      - paragraph [ref=e290]: VIỆC HÔM NAY
+                      - generic [ref=e291]: 0/0
+                    - paragraph [ref=e293]: Không có việc nào hôm nay
+  - region "Notifications alt+T"

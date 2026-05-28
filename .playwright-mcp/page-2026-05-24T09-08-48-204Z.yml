@@ -1,0 +1,206 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e8]:
+        - button "Về trang chủ Dear Our Future" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - generic [ref=e13]: Dear Our Future
+        - navigation
+        - generic [ref=e14]:
+          - button "Đăng nhập" [ref=e15] [cursor=pointer]
+          - button "Đăng ký" [ref=e16] [cursor=pointer]
+          - button "Chuyển sang chế độ tối" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+    - main "Nội dung trang" [ref=e20]:
+      - status [ref=e21]: Trang chính
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: Dear Our Future · App lập kế hoạch cá nhân
+              - heading "App biến mục tiêu lớn thành kế hoạch 12 tuần và việc hôm nay." [level=1] [ref=e76]:
+                - text: App biến mục tiêu lớn thành
+                - generic [ref=e77]:
+                  - text: kế hoạch 12 tuần
+                  - img [ref=e78]
+                - text: và việc hôm nay.
+              - paragraph [ref=e80]: "Dear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính khả thi, rồi chia thành việc cần làm theo tuần và theo ngày."
+              - generic [ref=e81]:
+                - paragraph [ref=e82]: Nói ngắn gọn
+                - paragraph [ref=e83]: Đây không phải trang ghi chú tự do. App là lộ trình từng bước để biến một mong muốn lớn thành kế hoạch có thể làm thật.
+              - list [ref=e84]:
+                - listitem [ref=e85]:
+                  - generic [ref=e86]: "1"
+                  - generic [ref=e87]: Chấm điểm cuộc sống
+                - listitem [ref=e88]:
+                  - generic [ref=e89]: "2"
+                  - generic [ref=e90]: Chọn mục tiêu chính
+                - listitem [ref=e91]:
+                  - generic [ref=e92]: "3"
+                  - generic [ref=e93]: Chia kế hoạch 12 tuần
+                - listitem [ref=e94]:
+                  - generic [ref=e95]: "4"
+                  - generic [ref=e96]: Mở Today để làm việc hôm nay
+              - generic [ref=e97]:
+                - button "Dùng thử lộ trình 4 bước" [ref=e98] [cursor=pointer]:
+                  - text: Dùng thử lộ trình 4 bước
+                  - img [ref=e99]
+                - button "Xem cách app hoạt động" [ref=e101] [cursor=pointer]
+              - list [ref=e102]:
+                - listitem [ref=e103]:
+                  - img [ref=e104]
+                  - text: Mở trang là dùng được, không cần email
+                - listitem [ref=e107]:
+                  - img [ref=e108]
+                  - text: Đồng bộ khi sẵn sàng
+                - listitem [ref=e113]:
+                  - img [ref=e114]
+                  - text: Hoạt động trên mobile
+            - generic [ref=e116]:
+              - generic [ref=e117]:
+                - generic [ref=e118]:
+                  - img [ref=e120]
+                  - generic [ref=e124]:
+                    - paragraph [ref=e125]: Mục tiêu
+                    - paragraph [ref=e126]: Đọc 12 cuốn sách trong năm
+                - generic [ref=e127]: Tuần 4/12
+              - generic [ref=e129]:
+                - generic [ref=e130]: Tiến độ chu kỳ
+                - generic [ref=e131]: 42%
+              - generic [ref=e134]:
+                - paragraph [ref=e135]: Việc hôm nay · 7/14
+                - generic [ref=e136]:
+                  - generic [ref=e137]:
+                    - img [ref=e139]
+                    - generic [ref=e141]: Đọc 30 trang "Atomic Habits"
+                  - generic [ref=e144]: Ghi 3 dòng phản tư
+                  - generic [ref=e147]: Review tuần lúc 21h
+              - paragraph [ref=e148]: Ảnh chụp giao diện · dữ liệu mô phỏng
+          - region "Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước." [ref=e149]:
+            - generic [ref=e150]:
+              - paragraph [ref=e151]: Cách hoạt động
+              - heading "Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước." [level=2] [ref=e152]
+            - list [ref=e153]:
+              - listitem [ref=e154]:
+                - generic [ref=e155]:
+                  - img [ref=e157]
+                  - generic [ref=e160]: Bước 01
+                - heading "Chấm điểm hiện tại" [level=3] [ref=e161]
+                - paragraph [ref=e162]: Nhìn nhanh các lĩnh vực sống để biết điểm nào đang kéo bạn xuống.
+                - paragraph [ref=e163]: ≈3 phút
+              - listitem [ref=e164]:
+                - generic [ref=e165]:
+                  - img [ref=e167]
+                  - generic [ref=e171]: Bước 02
+                - heading "Chọn một mục tiêu đáng làm" [level=3] [ref=e172]
+                - paragraph [ref=e173]: Viết mục tiêu đo được, có hạn rõ ràng, rồi kiểm tra tính khả thi.
+                - paragraph [ref=e174]: ≈5 phút
+              - listitem [ref=e175]:
+                - generic [ref=e176]:
+                  - img [ref=e178]
+                  - generic [ref=e180]: Bước 03
+                - heading "Dựng chu kỳ 12 tuần" [level=3] [ref=e181]
+                - paragraph [ref=e182]: Chia mục tiêu thành 2-4 thói quen tuần và cột mốc tuần 4/8/12.
+                - paragraph [ref=e183]: ≈10 phút
+              - listitem [ref=e184]:
+                - generic [ref=e185]:
+                  - img [ref=e187]
+                  - generic [ref=e193]: Bước 04
+                - heading "Today + Review tuần" [level=3] [ref=e194]
+                - paragraph [ref=e195]: Mở Today biết việc hôm nay, cuối tuần review để chỉnh tải.
+                - paragraph [ref=e196]: Mỗi ngày 1-2 phút
+          - region "Vì sao chọn Dear Our Future" [ref=e197]:
+            - link "Miễn phí Bắt đầu không tốn xu nào Dữ liệu lưu trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập. Tìm hiểu →" [ref=e198] [cursor=pointer]:
+              - /url: /life-balance
+              - generic [ref=e199]:
+                - img [ref=e201]
+                - generic [ref=e204]:
+                  - paragraph [ref=e205]: Miễn phí
+                  - heading "Bắt đầu không tốn xu nào" [level=2] [ref=e206]
+                  - paragraph [ref=e207]: Dữ liệu lưu trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập.
+                  - generic [ref=e208]: Tìm hiểu →
+            - link "Đúng thứ tự Không phải trang trắng như Notion App dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu. Tìm hiểu →" [ref=e209] [cursor=pointer]:
+              - /url: /12-week-setup
+              - generic [ref=e210]:
+                - img [ref=e212]
+                - generic [ref=e215]:
+                  - paragraph [ref=e216]: Đúng thứ tự
+                  - heading "Không phải trang trắng như Notion" [level=2] [ref=e217]
+                  - paragraph [ref=e218]: App dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.
+                  - generic [ref=e219]: Tìm hiểu →
+            - link "Mobile-ready Đủ nhẹ cho buổi sáng vội Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng. Tìm hiểu →" [ref=e220] [cursor=pointer]:
+              - /url: /today-v2
+              - generic [ref=e221]:
+                - img [ref=e223]
+                - generic [ref=e225]:
+                  - paragraph [ref=e226]: Mobile-ready
+                  - heading "Đủ nhẹ cho buổi sáng vội" [level=2] [ref=e227]
+                  - paragraph [ref=e228]: Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng.
+                  - generic [ref=e229]: Tìm hiểu →
+          - region "Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?" [ref=e230]:
+            - generic [ref=e231]:
+              - generic [ref=e232]:
+                - paragraph [ref=e233]: Bắt đầu đúng thứ tự
+                - heading "Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?" [level=2] [ref=e234]
+                - paragraph [ref=e235]: Đăng ký miễn phí trong 30 giây. Dữ liệu của bạn tự đồng bộ giữa điện thoại và máy tính.
+              - button "Đăng ký miễn phí" [ref=e237] [cursor=pointer]:
+                - img [ref=e238]
+                - text: Đăng ký miễn phí
+        - button "Góp ý" [ref=e242] [cursor=pointer]:
+          - img
+          - generic [ref=e243]: Góp ý
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - link "Dear Our Future" [ref=e31] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e32]: Dear Our Future
+            - paragraph [ref=e33]: Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
+            - link "Facebook" [ref=e35] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61589773962146
+              - img [ref=e36]
+          - generic [ref=e38]:
+            - heading "Sản phẩm" [level=4] [ref=e39]
+            - list [ref=e40]:
+              - listitem [ref=e41]:
+                - link "Trang chính" [ref=e42] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e43]:
+                - link "Tính năng" [ref=e44] [cursor=pointer]:
+                  - /url: /#features
+              - listitem [ref=e45]:
+                - link "Gói & thanh toán" [ref=e46] [cursor=pointer]:
+                  - /url: /billing/plan
+              - listitem [ref=e47]:
+                - link "Hỏi đáp thanh toán" [ref=e48] [cursor=pointer]:
+                  - /url: /billing/faq
+          - generic [ref=e49]:
+            - heading "Công ty" [level=4] [ref=e50]
+            - list [ref=e51]:
+              - listitem [ref=e52]:
+                - link "Về Dear Our Future" [ref=e53] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e54]:
+                - link "Liên hệ" [ref=e55] [cursor=pointer]:
+                  - /url: mailto:dearourfuture123@gmail.com
+          - generic [ref=e56]:
+            - heading "Pháp lý" [level=4] [ref=e57]
+            - list [ref=e58]:
+              - listitem [ref=e59]:
+                - link "Điều khoản dịch vụ" [ref=e60] [cursor=pointer]:
+                  - /url: /terms
+              - listitem [ref=e61]:
+                - link "Chính sách bảo mật" [ref=e62] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e63]:
+                - link "Chính sách hoàn tiền" [ref=e64] [cursor=pointer]:
+                  - /url: /refund-policy
+        - generic [ref=e65]:
+          - paragraph [ref=e66]:
+            - text: © 2026 Dear Our Future. Made with ❤️
+            - generic [ref=e67]: tình yêu
+            - text: ở Việt Nam.
+          - paragraph [ref=e68]: Local-first · Hoạt động trên mọi thiết bị
+  - region "Notifications alt+T"

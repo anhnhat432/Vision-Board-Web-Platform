@@ -1,0 +1,147 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary "Điều hướng chính" [ref=e5]:
+    - button "Về trang chủ Dear Our Future" [ref=e7] [cursor=pointer]:
+      - img [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]: Dear Our Future
+        - generic [ref=e11]: 12-tuần · Vision
+    - navigation "Mục điều hướng" [ref=e12]:
+      - paragraph [ref=e13]: Đi nhanh
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - button "Trang chính" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+            - generic [ref=e23]: Trang chính
+        - listitem [ref=e24]:
+          - button "Mục tiêu" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+            - generic [ref=e31]: Mục tiêu
+        - listitem [ref=e32]:
+          - button "Hệ thống 12 tuần" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]
+            - generic [ref=e37]: Hệ thống 12 tuần
+        - listitem [ref=e38]:
+          - button "Vision board" [ref=e40] [cursor=pointer]:
+            - img [ref=e41]
+            - generic [ref=e43]: Vision board
+      - paragraph [ref=e44]: Thêm
+      - list [ref=e45]:
+        - listitem [ref=e46]:
+          - button "Thư viện" [ref=e48] [cursor=pointer]:
+            - img [ref=e49]
+            - generic [ref=e54]: Thư viện
+        - listitem [ref=e55]:
+          - button "Cân bằng cuộc sống" [ref=e57] [cursor=pointer]:
+            - img [ref=e58]
+            - generic [ref=e61]: Cân bằng cuộc sống
+        - listitem [ref=e62]:
+          - button "Thành tựu" [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+            - generic [ref=e68]: Thành tựu
+        - listitem [ref=e69]:
+          - button "Nhật ký" [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+            - generic [ref=e74]: Nhật ký
+        - listitem [ref=e75]:
+          - button "Gói & thanh toán" [ref=e77] [cursor=pointer]:
+            - img [ref=e78]
+            - generic [ref=e80]: Gói & thanh toán
+        - listitem [ref=e81]:
+          - button "Đơn hàng" [ref=e83] [cursor=pointer]:
+            - img [ref=e84]
+            - generic [ref=e88]: Đơn hàng
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - button "Chuyển sang chế độ tối" [ref=e91] [cursor=pointer]:
+          - img [ref=e92]
+          - text: Tối
+        - button "Mở hướng dẫn sử dụng" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+      - generic [ref=e98]:
+        - button "Đăng ký" [ref=e99] [cursor=pointer]
+        - button "Đăng nhập" [ref=e100] [cursor=pointer]
+  - generic [ref=e101]:
+    - generic [ref=e103]:
+      - navigation "Vị trí trang" [ref=e104]:
+        - generic [ref=e105]: Workspace
+        - generic [ref=e106]: /
+        - generic [ref=e107]: Thành tựu
+      - button "Mở command palette" [ref=e109] [cursor=pointer]:
+        - img [ref=e110]
+        - generic [ref=e113]: Tìm nhanh
+    - main "Nội dung trang" [ref=e114]:
+      - status [ref=e115]: Thành tựu
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - paragraph [ref=e119]: THÀNH TỰU
+          - heading "Cột mốc của bạn" [level=1] [ref=e120]
+          - paragraph [ref=e121]: Nơi ghi lại những dấu hiệu nhỏ cho thấy bạn đã bắt đầu, duy trì và đi xa hơn hôm qua.
+        - region "Tổng quan thành tựu" [ref=e122]:
+          - generic [ref=e123]:
+            - paragraph [ref=e124]: Tổng thành tựu
+            - paragraph [ref=e125]: "7"
+            - paragraph [ref=e126]: huy hiệu
+          - generic [ref=e127]:
+            - paragraph [ref=e128]: Đã mở khóa
+            - paragraph [ref=e129]: "3"
+            - paragraph [ref=e130]: cột mốc
+          - generic [ref=e131]:
+            - paragraph [ref=e132]: Hoàn thành
+            - paragraph [ref=e133]: 43%
+            - paragraph [ref=e134]: bộ sưu tập
+        - region "Danh sách thành tựu" [ref=e135]:
+          - generic [ref=e136]:
+            - paragraph [ref=e137]: BỘ HUY HIỆU
+            - heading "Những cột mốc đang mở dần" [level=2] [ref=e138]
+          - generic [ref=e139]:
+            - article [ref=e140]:
+              - img [ref=e142]
+              - heading "Bước đầu tiên" [level=3] [ref=e146]
+              - paragraph [ref=e147]: Tạo mục tiêu đầu tiên của bạn.
+              - paragraph [ref=e148]: 17/4/2026
+            - article [ref=e149]:
+              - img [ref=e151]
+              - heading "Người đặt mục tiêu" [level=3] [ref=e157]
+              - paragraph [ref=e158]: Tạo 5 mục tiêu trong hành trình của bạn.
+              - paragraph [ref=e159]:
+                - img [ref=e160]
+                - text: Đang khóa
+            - article [ref=e164]:
+              - img [ref=e166]
+              - heading "Người hoàn thành" [level=3] [ref=e169]
+              - paragraph [ref=e170]: Hoàn thành mục tiêu đầu tiên của bạn.
+              - paragraph [ref=e171]:
+                - img [ref=e172]
+                - text: Đang khóa
+            - article [ref=e176]:
+              - img [ref=e178]
+              - heading "Bậc thầy hoàn thành" [level=3] [ref=e180]
+              - paragraph [ref=e181]: Hoàn thành 5 mục tiêu và giữ vững đà phát triển.
+              - paragraph [ref=e182]:
+                - img [ref=e183]
+                - text: Đang khóa
+            - article [ref=e187]:
+              - img [ref=e189]
+              - heading "Người có tầm nhìn" [level=3] [ref=e191]
+              - paragraph [ref=e192]: Tạo vision board đầu tiên của bạn.
+              - paragraph [ref=e193]: 7/5/2026
+            - article [ref=e194]:
+              - img [ref=e196]
+              - heading "Người hay nhìn lại" [level=3] [ref=e198]
+              - paragraph [ref=e199]: Viết bài nhật ký nhìn lại đầu tiên.
+              - paragraph [ref=e200]: 12/5/2026
+            - article [ref=e201]:
+              - img [ref=e203]
+              - heading "Bền Bỉ" [level=3] [ref=e205]
+              - paragraph [ref=e206]: Duy trì 30 ngày viết nhật ký nhìn lại.
+              - paragraph [ref=e207]:
+                - img [ref=e208]
+                - text: Đang khóa
+        - generic [ref=e212]:
+          - button "Tiếp tục mục tiêu" [ref=e213] [cursor=pointer]:
+            - text: Tiếp tục mục tiêu
+            - img
+          - button "Mở thư viện vision board" [ref=e214] [cursor=pointer]
+  - region "Notifications alt+T"

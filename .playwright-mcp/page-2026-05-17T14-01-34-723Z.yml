@@ -1,0 +1,68 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e8]:
+        - button "Về trang chủ Dear Our Future" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - generic [ref=e13]: Dear Our Future
+        - navigation [ref=e14]:
+          - button "Trang chính" [ref=e16] [cursor=pointer]:
+            - img
+            - generic [ref=e17]: Trang chính
+        - generic [ref=e18]:
+          - button "Đăng nhập" [ref=e19] [cursor=pointer]
+          - button "Đăng ký" [ref=e20] [cursor=pointer]
+          - button "Chuyển sang chế độ tối" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+    - main "Nội dung trang" [ref=e24]:
+      - status [ref=e25]: Mục tiêu
+      - generic [ref=e27]:
+        - generic [ref=e29]:
+          - paragraph [ref=e30]: MỤC TIÊU
+          - heading "Mục tiêu của bạn" [level=1] [ref=e31]
+          - paragraph [ref=e32]: Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - img
+              - searchbox "Tìm theo tên hoặc mô tả..." [ref=e35]
+            - button "Mục tiêu mới" [ref=e36] [cursor=pointer]:
+              - img
+              - text: Mục tiêu mới
+        - generic [ref=e39]:
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - paragraph [ref=e43]: Mục tiêu
+              - paragraph [ref=e44]:
+                - generic [ref=e45]: "0"
+              - paragraph [ref=e46]: 0 đã hoàn thành
+            - img [ref=e48]
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - paragraph [ref=e55]: Việc
+              - paragraph [ref=e56]: 0/0
+              - paragraph [ref=e57]: 0% đã chốt
+            - img [ref=e59]
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - paragraph [ref=e65]: 12 tuần
+              - paragraph [ref=e66]:
+                - generic [ref=e67]: "0"
+              - paragraph [ref=e68]: chu kỳ đang chạy
+            - img [ref=e70]
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: Cần chú ý
+              - paragraph [ref=e76]:
+                - generic [ref=e77]: "0"
+              - paragraph [ref=e78]: review, quá hạn, sắp hạn
+            - img [ref=e80]
+        - generic [ref=e83]:
+          - img [ref=e85]
+          - heading "Chưa có mục tiêu" [level=2] [ref=e89]
+          - paragraph [ref=e90]: Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng.
+          - generic [ref=e91]:
+            - button "Bắt đầu chu kỳ 12 tuần →" [ref=e92] [cursor=pointer]
+            - button "Tạo mục tiêu thường" [ref=e93] [cursor=pointer]
+  - region "Notifications alt+T"

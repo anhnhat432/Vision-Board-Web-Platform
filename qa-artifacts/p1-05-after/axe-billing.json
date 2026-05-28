@@ -1,0 +1,1 @@
+{"requestedRoute":"/billing/plan","finalRoute":"/login","note":"unauth visitor redirected to /login by paywall gating; axe runs on the rendered shell","violations":[]}

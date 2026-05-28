@@ -1,0 +1,204 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary "Điều hướng chính" [ref=e5]:
+    - button "Về trang chủ Dear Our Future" [ref=e7] [cursor=pointer]:
+      - img [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]: Dear Our Future
+        - generic [ref=e11]: 12-tuần · Vision
+    - navigation "Mục điều hướng" [ref=e12]:
+      - paragraph [ref=e13]: Đi nhanh
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - button "Trang chính" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+            - generic [ref=e23]: Trang chính
+        - listitem [ref=e24]:
+          - button "Mục tiêu" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+            - generic [ref=e31]: Mục tiêu
+        - listitem [ref=e32]:
+          - button "Hệ thống 12 tuần" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]
+            - generic [ref=e37]: Hệ thống 12 tuần
+        - listitem [ref=e38]:
+          - button "Vision board" [ref=e40] [cursor=pointer]:
+            - img [ref=e41]
+            - generic [ref=e43]: Vision board
+      - paragraph [ref=e44]: Thêm
+      - list [ref=e45]:
+        - listitem [ref=e46]:
+          - button "Thư viện" [ref=e48] [cursor=pointer]:
+            - img [ref=e49]
+            - generic [ref=e54]: Thư viện
+        - listitem [ref=e55]:
+          - button "Cân bằng cuộc sống" [ref=e57] [cursor=pointer]:
+            - img [ref=e58]
+            - generic [ref=e61]: Cân bằng cuộc sống
+        - listitem [ref=e62]:
+          - button "Thành tựu" [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+            - generic [ref=e68]: Thành tựu
+        - listitem [ref=e69]:
+          - button "Nhật ký" [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+            - generic [ref=e74]: Nhật ký
+        - listitem [ref=e75]:
+          - button "Gói & thanh toán" [ref=e77] [cursor=pointer]:
+            - img [ref=e78]
+            - generic [ref=e80]: Gói & thanh toán
+        - listitem [ref=e81]:
+          - button "Đơn hàng" [ref=e83] [cursor=pointer]:
+            - img [ref=e84]
+            - generic [ref=e88]: Đơn hàng
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - button "Chuyển sang chế độ tối" [ref=e91] [cursor=pointer]:
+          - img [ref=e92]
+          - text: Tối
+        - button "Mở hướng dẫn sử dụng" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+      - generic [ref=e98]:
+        - button "Đăng ký" [ref=e99] [cursor=pointer]
+        - button "Đăng nhập" [ref=e100] [cursor=pointer]
+  - generic [ref=e101]:
+    - generic [ref=e103]:
+      - navigation "Vị trí trang" [ref=e104]:
+        - generic [ref=e105]: Workspace
+        - generic [ref=e106]: /
+        - generic [ref=e107]: Gói & thanh toán
+      - button "Mở command palette" [ref=e109] [cursor=pointer]:
+        - img [ref=e110]
+        - generic [ref=e113]: Tìm nhanh
+    - main "Nội dung trang" [ref=e114]:
+      - status [ref=e115]: Gói & thanh toán
+      - generic [ref=e117]:
+        - generic [ref=e121]:
+          - paragraph [ref=e122]: GÓI & THANH TOÁN
+          - heading "Chọn gói phù hợp với bạn" [level=1] [ref=e124]
+          - paragraph [ref=e125]: Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch.
+        - region "Chuyển khoản rõ ràng, hỗ trợ sau thanh toán." [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]:
+              - paragraph [ref=e129]: Tin cậy khi thanh toán
+              - heading "Chuyển khoản rõ ràng, hỗ trợ sau thanh toán." [level=2] [ref=e130]
+            - img "Logo ngân hàng đại diện" [ref=e131]:
+              - generic [ref=e132]: VN
+              - generic [ref=e133]: Bank
+          - generic [ref=e134]:
+            - generic [ref=e135]:
+              - img [ref=e136]
+              - paragraph [ref=e139]: Thanh toán qua chuyển khoản ngân hàng VN (Casso xác thực).
+            - generic [ref=e140]:
+              - img [ref=e141]
+              - paragraph [ref=e145]: Biên nhận điện tử gửi qua email trong 1-2 phút.
+            - generic [ref=e146]:
+              - img [ref=e147]
+              - paragraph [ref=e150]:
+                - text: Hoàn tiền linh hoạt theo
+                - link "chính sách hoàn tiền" [ref=e151] [cursor=pointer]:
+                  - /url: /refund-policy
+                - text: .
+            - generic [ref=e152]:
+              - img [ref=e153]
+              - paragraph [ref=e160]:
+                - text: "Liên hệ hỗ trợ:"
+                - link "support@dearourfuture.com" [ref=e161] [cursor=pointer]:
+                  - /url: mailto:support@dearourfuture.com
+                - text: — phản hồi trong 24h.
+        - region "Khu vực gói đang dùng" [ref=e162]:
+          - heading "Khu vực gói đang dùng" [level=2] [ref=e165]
+          - generic [ref=e167]:
+            - generic [ref=e168]:
+              - paragraph [ref=e169]:
+                - img [ref=e170]
+                - text: Tài khoản
+              - heading "Gói hiện tại" [level=2] [ref=e172]
+              - paragraph [ref=e173]: Bạn đang dùng gói miễn phí.
+            - generic [ref=e175]:
+              - generic [ref=e176]: Miễn phí
+              - generic [ref=e177]: 0đ
+            - button "Nâng cấp Plus" [ref=e179] [cursor=pointer]:
+              - img
+              - text: Nâng cấp Plus
+        - region "Khu vực quyền truy cập" [ref=e180]:
+          - heading "Khu vực quyền truy cập" [level=2] [ref=e183]
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - img [ref=e187]
+              - heading "Quyền truy cập" [level=2] [ref=e189]
+            - paragraph [ref=e190]: Các quyền Plus đang mở trên trình duyệt này.
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - generic [ref=e194]: —
+                - generic [ref=e195]:
+                  - paragraph [ref=e196]: Mẫu nâng cao
+                  - paragraph [ref=e197]: Chưa mở
+              - generic [ref=e198]:
+                - generic [ref=e200]: —
+                - generic [ref=e201]:
+                  - paragraph [ref=e202]: Phân tích review nâng cao
+                  - paragraph [ref=e203]: Chưa mở
+              - generic [ref=e204]:
+                - generic [ref=e206]: —
+                - generic [ref=e207]:
+                  - paragraph [ref=e208]: Nhắc việc ưu tiên
+                  - paragraph [ref=e209]: Chưa mở
+              - generic [ref=e210]:
+                - generic [ref=e212]: —
+                - generic [ref=e213]:
+                  - paragraph [ref=e214]: Thống kê nâng cao
+                  - paragraph [ref=e215]: Chưa mở
+        - region "Khu vực thao tác gói" [ref=e216]:
+          - heading "Khu vực thao tác gói" [level=2] [ref=e219]
+          - generic [ref=e221]:
+            - heading "Thao tác" [level=2] [ref=e222]
+            - paragraph [ref=e223]: Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.
+            - generic [ref=e224]:
+              - button "Kiểm tra quyền nâng cao" [ref=e225] [cursor=pointer]:
+                - img
+                - text: Kiểm tra quyền nâng cao
+              - button "Khôi phục quyền đã mua" [ref=e226] [cursor=pointer]
+              - button "Quay lại Trang chính" [ref=e227] [cursor=pointer]
+        - region "Khu vực so sánh gói" [ref=e228]:
+          - heading "Khu vực so sánh gói" [level=2] [ref=e231]
+          - generic [ref=e233]:
+            - heading "So sánh các gói" [level=2] [ref=e234]
+            - paragraph [ref=e235]: Chọn gói phù hợp với nhu cầu của bạn.
+            - generic [ref=e236]:
+              - generic [ref=e237]:
+                - generic [ref=e238]:
+                  - generic [ref=e239]: Miễn phí
+                  - heading "Miễn phí" [level=3] [ref=e240]
+                  - paragraph [ref=e241]: 0đ
+                  - paragraph [ref=e242]: Đủ để bạn chạy một chu kỳ 12 tuần hoàn chỉnh và biết hôm nay cần làm gì.
+                - list [ref=e243]:
+                  - listitem [ref=e244]:
+                    - img [ref=e245]
+                    - generic [ref=e247]: 1 chu kỳ 12 tuần
+                  - listitem [ref=e248]:
+                    - img [ref=e249]
+                    - generic [ref=e251]: Danh sách Hôm nay + check-in
+                  - listitem [ref=e252]:
+                    - img [ref=e253]
+                    - generic [ref=e255]: Review tuần cơ bản
+                - button "Gói hiện tại" [ref=e256] [cursor=pointer]
+              - generic [ref=e257]:
+                - generic [ref=e258]:
+                  - generic [ref=e259]: Plus
+                  - heading "Plus" [level=3] [ref=e260]
+                  - paragraph [ref=e261]: 99.000 ₫ / tháng
+                  - paragraph [ref=e262]: Lớp Plus cho người muốn setup nhanh, giữ nhịp đều và có gợi ý review tuần sau.
+                - list [ref=e263]:
+                  - listitem [ref=e264]:
+                    - img [ref=e265]
+                    - generic [ref=e267]: Khung gợi ý thích nghi theo kiểu mục tiêu
+                  - listitem [ref=e268]:
+                    - img [ref=e269]
+                    - generic [ref=e271]: Review Plus với gợi ý tuần sau
+                  - listitem [ref=e272]:
+                    - img [ref=e273]
+                    - generic [ref=e275]: Nhắc việc ưu tiên + phân tích nâng cao
+                - button "Nâng cấp Plus" [ref=e276] [cursor=pointer]
+  - region "Notifications alt+T"

@@ -1,51 +1,82 @@
-# Pre-flight checklist sáng demo
+# Pre-flight checklist sáng demo — Lớp Công nghệ phần mềm
 
-Sử dụng bảng checklist dưới đây để chuẩn bị kỹ lưỡng trước khi bắt đầu thuyết trình nhằm tránh mọi rủi ro về mặt kỹ thuật, kết nối và hiển thị.
-
----
-
-## 📅 Tối hôm trước ngày Demo
-- [ ] **Kiểm tra Live URL**: Truy cập https://dearourfuture.io.vn/ trên cả máy tính lẫn điện thoại để đảm bảo server hoạt động tốt, không bị lỗi 502/504.
-- [ ] **Xác thực tài khoản**: Đăng nhập tài khoản demo và verify các chỉ số:
-  - Tiến độ chu kỳ 12 tuần đạt khoảng **25% - 35%**.
-  - Có 2-3 tactics trong hôm nay để chuẩn bị thao tác click.
-  - Có ít nhất một bản ghi Weekly Review hoàn thành ở tuần trước.
-- [ ] **Chuẩn bị phần cứng**:
-  - Sạc đầy pin laptop lên 100%.
-  - Bỏ sạc laptop vào balo.
-  - Chuẩn bị cổng chuyển đổi HDMI/VGA sang Type-C/Mini-DisplayPort phòng khi máy chiếu ở lớp dùng chuẩn cũ.
-- [ ] **Phương án dự phòng (Offline Backup)**:
-  - Copy thư mục source code chạy mượt mà ở máy local (kiểm tra file `.env.development.local` đã bật `VITE_APP_MODE=demo`).
-  - Chuẩn bị sẵn file video demo đã quay trước (`qa-artifacts/demo-record.mp4` nếu có) để phát thay thế nếu phòng học hoàn toàn không có WiFi.
-  - In sẵn 1 tờ giấy A4 có in mã QR dẫn đến trang đăng ký tài khoản `https://dearourfuture.io.vn/login?mode=signup` để truyền tay hoặc dán lên bảng phòng khi slide bị lỗi.
+> Demo dự kiến: cuối tuần này (Thứ Bảy 30/05/2026 hoặc Chủ Nhật 31/05/2026 — chốt cụ thể với thầy)
+> URL: <https://dearourfuture.io.vn/>
+> Demo account: `demo+thuyettrinh@gmail.com` (password lưu riêng, KHÔNG ghi vào file này)
+> Đi kèm: [`2026-05-24-demo-script-lop.md`](2026-05-24-demo-script-lop.md:1)
 
 ---
 
-## ⏱️ Sáng ngày Demo (30 phút trước giờ thuyết trình)
-- [ ] **Đến lớp sớm** để ổn định chỗ ngồi và kiểm tra dây cáp máy chiếu của phòng học.
-- [ ] **Kết nối mạng**: Kết nối máy tính với WiFi lớp học hoặc phát mạng 4G/5G từ điện thoại di động (được khuyến nghị vì WiFi trường học thường chập chờn khi đông người).
-- [ ] **Khởi động Trình duyệt**:
-  - Mở một cửa sổ ẩn danh mới (New Incognito Window) của Chrome.
-  - Truy cập https://dearourfuture.io.vn/ và đăng nhập tài khoản demo.
-  - Chuẩn bị sẵn 2 tab: Tab 1 hiển thị trang chủ giới thiệu, Tab 2 hiển thị màn hình `/12-week-system`.
-- [ ] **Cân chỉnh Hiển thị**:
-  - Nhấn `Ctrl + Plus` 1-2 lần để zoom giao diện lên khoảng 110% - 120%, đảm bảo người ngồi bàn cuối cùng của lớp học vẫn nhìn rõ chữ.
-  - Cuộn thử trang chủ lên đầu trang để sẵn sàng thuyết trình.
-- [ ] **Tắt thông báo phiền toái**:
-  - Bật chế độ **Focus Assist** (Windows) hoặc **Do Not Disturb** (macOS).
-  - Tắt hoàn toàn các ứng dụng chat chạy ngầm như Zalo, Telegram, Discord, Messenger, Skype, Slack để tránh hiển thị tin nhắn pop-up nhạy cảm khi đang chiếu màn hình.
-- [ ] **Chuẩn bị cá nhân**: Uống một ngụm nước ấm, hít thở sâu để giữ nhịp độ nói calm, chậm rãi và tự tin.
+## Tối hôm trước
+
+- [ ] Verify URL <https://dearourfuture.io.vn/> load được trên cả mobile + laptop.
+- [ ] Login demo account, verify data 12-tuần vẫn đầy đủ:
+  - [ ] Tab Hôm nay: có 2–3 task hiển thị
+  - [ ] Tab Tiến độ: tổng completion ở khoảng 25–35%
+  - [ ] Tab Tuần: có ít nhất 1 weekly review đã viết
+  - [ ] `/journal`: có reflection auto-sinh từ weekly review
+- [ ] Verify `/billing/plan` hiển thị copy production: _"Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới"_ (không thấy copy mock).
+- [ ] Charge laptop **100%**.
+- [ ] Sạc dự phòng + cáp USB-C / HDMI adapter cho vào balo.
+- [ ] Test máy chiếu (nếu được phép mượn trước).
+- [ ] In sẵn 1 trang giấy có **QR code dẫn về signup** (`https://dearourfuture.io.vn/login?mode=signup`) — phòng khi WiFi/projector hỏng.
+- [ ] Chuẩn bị slide QR code + 1 slide kiến trúc (Frontend / Backend / Auth / Payment / Deploy) cho Phần 4 của script.
+- [ ] Đọc lại 1 lượt script `2026-05-24-demo-script-lop.md`, gạch chân các câu nhấn mạnh.
+- [ ] (Tuỳ chọn) Record 1 video demo backup, lưu vào `qa-artifacts/demo-record.mp4`.
+
+## Sáng demo, 30 phút trước
+
+- [ ] Đến phòng sớm.
+- [ ] Kiểm tra cáp / cổng / độ phân giải máy chiếu.
+- [ ] Mở **incognito Chrome** trên laptop (không nhầm với profile cá nhân).
+- [ ] Login demo account `demo+thuyettrinh@gmail.com`.
+- [ ] Mở 3 tab theo thứ tự bên trái → phải:
+  1. `https://dearourfuture.io.vn/` (PublicVisitorView)
+  2. `https://dearourfuture.io.vn/12-week-system`
+  3. `https://dearourfuture.io.vn/journal`
+- [ ] Set font size browser readable từ cuối lớp (Ctrl/Cmd + dấu cộng 1–2 lần, target zoom 110–125%).
+- [ ] Tắt notification toàn hệ thống:
+  - [ ] Windows: Focus Assist → "Alarms only"
+  - [ ] macOS: Do Not Disturb → On
+- [ ] Đóng Slack, Discord, Outlook/email, Telegram.
+- [ ] Verify mic + audio (nếu có demo video backup).
+- [ ] Lấy 1 ngụm nước, hít thở sâu 3 nhịp.
+
+## Ngay trước khi nói
+
+- [ ] Tab 1 (`/`) đang ở vị trí scroll đầu trang, zoom level OK.
+- [ ] Verify mạng còn: chạy `ping dearourfuture.io.vn` trong terminal — nhìn thấy reply là OK.
+- [ ] Để điện thoại ở chế độ im lặng, mở app Đồng hồ làm timer 7 phút.
+- [ ] Đặt slide QR code mời đăng ký mở sẵn ở cửa sổ riêng (Window 2 hoặc 1 tab thứ 4).
+- [ ] Hít thở. Mỉm cười. Bắt đầu Phần 1.
+
+## Sau demo
+
+- [ ] Cảm ơn thầy + lớp.
+- [ ] Hiện QR code trong 30s cuối, đọc rõ địa chỉ web nếu QR không quét được.
+- [ ] Thu thập feedback ngay tại lớp (1–2 câu hỏi mở: "thầy/bạn thấy phần nào nhớ nhất?", "có chỗ nào confusing không?").
+- [ ] Note feedback vào notebook hoặc app ngay khi vừa rời bục.
+- [ ] **Logout demo account** khỏi máy phòng (nếu dùng máy chung của trường).
+- [ ] (Tuỳ chọn) Gửi email/Zalo cho lớp link signup + slide kiến trúc trong vòng 24h.
 
 ---
 
-## 🚨 Ngay trước khi bước lên thuyết trình
-- [ ] **Kiểm tra ping**: Mở terminal gõ nhanh lệnh `ping dearourfuture.io.vn` để đảm bảo kết nối mạng vẫn thông suốt.
-- [ ] **Đặt bộ đếm giờ**: Để điện thoại bên cạnh laptop và đặt bộ đếm ngược 6 phút để kiểm soát thời gian nói chính xác.
-- [ ] **Sắp xếp slide**: Đặt slide giới thiệu mở sẵn ở một cửa sổ riêng, sẵn sàng chuyển đổi nhanh với trình duyệt bằng phím tắt (`Alt + Tab` hoặc `Cmd + Tab`).
+## Quick reference khi gặp sự cố
+
+| Sự cố                       | Hành động                                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Mạng chập chờn              | Switch sang hotspot điện thoại; nếu vẫn fail → mở video backup                                                            |
+| Vercel/domain down          | Chạy local: `npm run dev`, mở `http://localhost:5173`                                                                     |
+| Projector không nhận laptop | Đổi cổng / restart laptop / nhờ bạn cầm điện thoại quay lại màn hình laptop                                               |
+| Quên mật khẩu demo          | Reset qua "Quên mật khẩu" — cần truy cập inbox `demo+thuyettrinh@gmail.com`                                               |
+| Lỡ tick task / tick nhầm    | Bình tĩnh, untick lại; coi như "demo cũng có thể quay lại như user thật"                                                  |
+| Hết 7 phút mà chưa xong     | Bỏ Phần 4 (kiến trúc), chuyển thẳng Phần 5 — kiến trúc trả lời ở Q&A                                                      |
+| Lớp im lặng không hỏi       | Chủ động gợi: "Nếu thầy hoặc bạn nào quan tâm phần kỹ thuật, em sẵn sàng nói thêm về local-first sync hoặc Firebase Auth" |
 
 ---
 
-## 🎤 Sau khi hoàn thành bài Demo
-- [ ] **Cảm ơn hội đồng**: Gửi lời cảm ơn thầy cô và các bạn đã dành thời gian theo dõi.
-- [ ] **Ghi nhận phản hồi**: Note nhanh lại các câu hỏi hoặc góp ý từ thầy cô vào sổ tay hoặc điện thoại ngay sau khi thuyết trình xong để tiến hành tinh chỉnh sản phẩm ở các giai đoạn sau.
-- [ ] **Đăng xuất an toàn**: Đăng xuất tài khoản demo khỏi máy tính phòng học (nếu bạn sử dụng máy chiếu dùng chung của lớp thay vì laptop cá nhân).
+## Thông tin liên hệ khẩn
+
+- Support email production: `support@dearourfuture.com`
+- Repo: local trên laptop (`C:\Users\admin\Downloads\Vision Board Web Platform\`)
+- Backend health check: `https://<render-backend-url>/health` (nhớ địa chỉ thật trước demo)

@@ -1,0 +1,12 @@
+- generic [ref=e3]:
+  - link "Bỏ qua điều hướng" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - note [ref=e5]:
+    - img [ref=e6]
+    - text: Bản demo · Dữ liệu lưu trên trình duyệt này.
+  - main "Nội dung trang" [ref=e8]:
+    - status [ref=e10]:
+      - generic [ref=e11]:
+        - paragraph [ref=e12]: Dear Our Future
+        - paragraph [ref=e13]: Đang mở trang...
+    - region "Notifications alt+T"
