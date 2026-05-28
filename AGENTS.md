@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Communication Language
+
+- Always reply to the user in Vietnamese by default.
+- If the user writes in English or another language, still respond in Vietnamese unless the user explicitly asks for another response language.
+- Keep file names, variable names, function names, commands, package names, APIs, routes, env vars, code snippets, terminal output, and error messages in their original language.
+- Explain code, implementation decisions, verification results, risks, and next steps in concise, natural Vietnamese.
+- Do not translate identifiers or source code into Vietnamese.
+
 ## Project Overview
 
 Vision Board Web Platform is a local-first **production web app** with a full-stack backend. The product turns a life vision into SMART goals, feasibility checks, 12-week execution plans, weekly action, and reflection.
