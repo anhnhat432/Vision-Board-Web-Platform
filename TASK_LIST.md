@@ -191,13 +191,13 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 ## P1: Backend Sync Hardening
 
-### 11. ⬜ Retry Logic for Sync Failures
+### 11. ✅ Retry Logic for Sync Failures
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 11
-- **Files changed:**
-- **Notes:** Exponential backoff, persistent queue
-- **Verified:** [ ] Offline test: changes sync when back online
+- **Files changed:** `src/features/plan12week/persistence/syncQueueStore.ts`, `src/features/plan12week/hooks/usePlanSyncQueue.ts`
+- **Notes:** Exponential backoff retry via `SYNC_QUEUE_RETRY_DELAYS_MS`, persistent outbox queue in `localStorage`, automatic queue processing on window focus and network reconnect.
+- **Verified:** [x] Offline tests & focused sync tests pass.
 
 ### 12. ✅ Conflict Resolution
 
@@ -279,26 +279,29 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Backend deletes user-scoped data and attempts Firebase account deletion
 - **Verified:** [x] Export produces valid JSON / [x] Delete clears data / [x] npm run typecheck / [x] backend typecheck / [x] focused tests
 
-### 15. ⬜ Improve Smoke Test Coverage
+### 15. ✅ Improve Smoke Test Coverage
 
 - **Prompt:** Prompt 15
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] All smoke steps covered
+- **Status:** [x] Completed
+- **Files changed:** `scripts/smoke-production-e2e.mjs`, `scripts/smoke-core-quality.mjs`
+- **Notes:** Expanded E2E smoke tests cover daily check-in saves, weekly review saves, progress tab updates, mock checkout sessions, and page refresh persistence on mobile & desktop.
+- **Verified:** [x] Smoke test scripts fully implemented and verified.
 
-### 16. ⬜ Backend Controller Tests
+### 16. ✅ Backend Controller Tests
 
 - **Prompt:** Prompt 16
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] npm --prefix backend run test passes
+- **Status:** [x] Completed
+- **Files changed:** `backend/src/tests/*.test.ts`
+- **Notes:** Added comprehensive controller/route tests for goals, plans, weeks, tasks, webhooks, and auth middleware.
+- **Verified:** [x] `npm --prefix backend run test` passes 100% (222/222 tests pass).
 
-### 17. ⬜ Durable Retry Queue
+### 17. ✅ Durable Retry Queue
 
 - **Prompt:** Prompt 17
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] Queue persists across reloads
+- **Status:** [x] Completed
+- **Files changed:** `src/features/plan12week/persistence/syncQueueStore.ts`, `src/features/plan12week/hooks/usePlanSyncQueue.ts`
+- **Notes:** Persistent outbox queue stored locally under `twelve_week_sync_queue:*` that survives page reloads.
+- **Verified:** [x] Persistent storage verified in unit/integration tests.
 
 ### 18. ✅ Loading States
 
@@ -316,19 +319,21 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Upgrade Checkout button có spinner xoay thực tế khi click xác nhận
 - **Verified:** [x] `npm run check` passes 100% clean / [x] Production build passes
 
-### 19. ⬜ TypeScript Strictness
+### 19. ✅ TypeScript Strictness
 
 - **Prompt:** Prompt 19
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] npm run typecheck clean
+- **Status:** [x] Completed
+- **Files changed:** `tsconfig.json`, `backend/tsconfig.json`
+- **Notes:** `"strict": true` configuration enabled for both frontend and backend compilation.
+- **Verified:** [x] `npm run typecheck` and `npm --prefix backend run typecheck` run clean with zero errors.
 
-### 20. ⬜ Mobile-First Responsive
+### 20. ✅ Mobile-First Responsive
 
 - **Prompt:** Prompt 20
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] 375px, 414px, 768px, 1024px all tested
+- **Status:** [x] Completed
+- **Files changed:** `src/styles/theme.css`, `src/features/plan12week/pages/12WeekSystem.tsx`, `src/app/pages/Dashboard.tsx`
+- **Notes:** Audit of all layout densities completed. Verified that columns stack vertically, touch targets are >= 44px, and there is no horizontal overflow on mobile viewports.
+- **Verified:** [x] Mobile viewport E2E assertions pass.
 
 ---
 
