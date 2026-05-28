@@ -153,25 +153,6 @@ export function RootLayout() {
   });
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [timeOfDay, setTimeOfDay] = useState<"morning" | "afternoon" | "evening" | "night">("morning");
-
-  useEffect(() => {
-    const updateTime = () => {
-      const hours = new Date().getHours();
-      if (hours >= 5 && hours < 12) {
-        setTimeOfDay("morning");
-      } else if (hours >= 12 && hours < 17) {
-        setTimeOfDay("afternoon");
-      } else if (hours >= 17 && hours < 21) {
-        setTimeOfDay("evening");
-      } else {
-        setTimeOfDay("night");
-      }
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 60000);
-    return () => clearInterval(interval);
-  }, []);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -823,7 +804,7 @@ export function RootLayout() {
     return (
       <AutoCloudSyncProvider>
         <AssistantPageContextProvider>
-          <div className={`app-shell min-h-screen dynamic-aurora-bg ${timeOfDay}`} data-route-tone={routeTone}>
+          <div className="app-shell min-h-screen bg-app-bg" data-route-tone={routeTone}>
             <OfflineBanner />
             <a href="#main-content" className="skip-to-content">
               Bỏ qua điều hướng
@@ -857,7 +838,7 @@ export function RootLayout() {
   return (
     <AutoCloudSyncProvider>
       <AssistantPageContextProvider>
-        <div className={`app-shell min-h-screen dynamic-aurora-bg ${timeOfDay}`} data-route-tone={routeTone}>
+        <div className="app-shell min-h-screen" data-route-tone={routeTone}>
           <OfflineBanner />
           <a href="#main-content" className="skip-to-content">
             Bỏ qua điều hướng

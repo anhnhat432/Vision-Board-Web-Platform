@@ -74,7 +74,7 @@ export function GlitterCanvas() {
         ctx.globalAlpha = p.alpha;
         
         // Draw elegant four-point sparkling star shape
-        ctx.fillStyle = p.color + p.alpha + ")";
+        ctx.fillStyle = `${p.color}${p.alpha})`;
         ctx.beginPath();
         const r = p.size;
         ctx.moveTo(0, -r);
@@ -86,7 +86,7 @@ export function GlitterCanvas() {
         ctx.fill();
 
         // Optional micro core glow for a magical feel
-        ctx.fillStyle = "rgba(255, 255, 255, " + p.alpha + ")";
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
         ctx.beginPath();
         ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
         ctx.fill();
