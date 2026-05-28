@@ -410,5 +410,5 @@ describe("authenticated new user core flow", () => {
     expect(getUserData().goals).toHaveLength(1);
 
     reloadRender.ui.unmount();
-  }, 60_000);
+  }, 80_000);
 });

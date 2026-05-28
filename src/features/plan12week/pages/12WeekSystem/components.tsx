@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { AlertTriangle, Award, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
 
 import { InlineGoalTitleEdit } from "@/app/components/twelve-week/InlineGoalTitleEdit";
@@ -233,7 +233,11 @@ export function TwelveWeekDashboardHeader({
         <span
           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${tokenSyncBadgeClass}`}
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
+          {syncBadgeLabel === "Đang đồng bộ" ? (
+            <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+          ) : (
+            <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
+          )}
           {syncBadgeLabel}
         </span>
         <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">

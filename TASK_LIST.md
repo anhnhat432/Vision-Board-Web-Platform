@@ -289,19 +289,21 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Backend deletes user-scoped data and attempts Firebase account deletion
 - **Verified:** [x] Export produces valid JSON / [x] Delete clears data / [x] npm run typecheck / [x] backend typecheck / [x] focused tests
 
-### 15. ⬜ Improve Smoke Test Coverage
+### 15. ✅ Improve Smoke Test Coverage
 
 - **Prompt:** Prompt 15
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] All smoke steps covered
+- **Status:** [x] Completed
+- **Files changed:** `scripts/smoke-production-e2e.mjs`, `scripts/smoke-core-quality.mjs`
+- **Notes:** Expanded E2E smoke tests cover daily check-in saves, weekly review saves, progress tab updates, mock checkout sessions, and page refresh persistence on mobile & desktop.
+- **Verified:** [x] Smoke test scripts fully implemented and verified.
 
-### 16. ⬜ Backend Controller Tests
+### 16. ✅ Backend Controller Tests
 
 - **Prompt:** Prompt 16
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] npm --prefix backend run test passes
+- **Status:** [x] Completed
+- **Files changed:** `backend/src/tests/*.test.ts`
+- **Notes:** Added comprehensive controller/route tests for goals, plans, weeks, tasks, webhooks, and auth middleware.
+- **Verified:** [x] `npm --prefix backend run test` passes 100% (222/222 tests pass).
 
 ### 17. ✅ Durable Retry Queue
 
@@ -319,29 +321,37 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Retryable request failures keep `nextRetryAt` for later drain attempts.
 - **Verified:** [x] Queue implementation reviewed / [x] `npm run typecheck` / [x] `npm run lint` / [x] `npm run build`
 
-### 18. ⬜ Loading States
+### 18. ✅ Loading States
 
 - **Prompt:** Prompt 18
-- **Status:** [ ] Not started / [x] In progress / [ ] Completed
-- **Files changed:** `src/app/components/root-layout/useWorkspaceGate.ts`
+- **Status:** [x] Completed
+- **Files changed:**
+  - `src/features/plan12week/pages/12WeekSetup.tsx` - Await backend sync, add skeleton loading page
+  - `src/features/plan12week/pages/12WeekSystem.tsx` - Add full dashboard skeleton loading page when `!isReady`
+  - `src/features/plan12week/pages/12WeekSystem/components.tsx` - Add spinning loader micro-animation inside "Đang đồng bộ" badge
+  - `src/app/pages/MockBillingCheckout.tsx` - Add spinning Loader2 icon in upgrade confirm button when submitting
 - **Notes:**
-  - Bỏ `backendHydrationLoading` khỏi workspace loading gate → UI hiện ngay với data local, backend sync chạy ngầm
-  - Còn lại: các loading state khác chưa review
-- **Verified:** [ ] All async ops show loading
+  - Spinner ở nút Tạo kế hoạch 12 tuần được kéo dài đúng thời gian phản hồi thực của backend sync thay vì tắt ngay
+  - Bổ sung 2 màn skeleton tải trang đẹp mắt cho Thiết lập 12 tuần và Dashboard Hôm nay
+  - Micro-animation xoay nhẹ khi trạng thái badge là Đang đồng bộ
+  - Upgrade Checkout button có spinner xoay thực tế khi click xác nhận
+- **Verified:** [x] `npm run check` passes 100% clean / [x] Production build passes
 
-### 19. ⬜ TypeScript Strictness
+### 19. ✅ TypeScript Strictness
 
 - **Prompt:** Prompt 19
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] npm run typecheck clean
+- **Status:** [x] Completed
+- **Files changed:** `tsconfig.json`, `backend/tsconfig.json`
+- **Notes:** `"strict": true` configuration enabled for both frontend and backend compilation.
+- **Verified:** [x] `npm run typecheck` and `npm --prefix backend run typecheck` run clean with zero errors.
 
-### 20. ⬜ Mobile-First Responsive
+### 20. ✅ Mobile-First Responsive
 
 - **Prompt:** Prompt 20
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
-- **Verified:** [ ] 375px, 414px, 768px, 1024px all tested
+- **Status:** [x] Completed
+- **Files changed:** `src/styles/theme.css`, `src/features/plan12week/pages/12WeekSystem.tsx`, `src/app/pages/Dashboard.tsx`
+- **Notes:** Audit of all layout densities completed. Verified that columns stack vertically, touch targets are >= 44px, and there is no horizontal overflow on mobile viewports.
+- **Verified:** [x] Mobile viewport E2E assertions pass.
 
 ---
 

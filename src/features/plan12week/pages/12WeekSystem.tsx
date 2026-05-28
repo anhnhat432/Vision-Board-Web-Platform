@@ -7,6 +7,7 @@ import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel"
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
 import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
+import { Skeleton } from "@/app/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -846,12 +847,89 @@ export function TwelveWeekSystem() {
 
   if (!isReady) {
     return (
-      <TwelveWeekDashboardState
-        kind="loading"
-        eyebrow="Đang chuẩn bị Trang chính"
-        title="Đang tải hệ thống 12 tuần"
-        description="Mình đang đọc dữ liệu trên thiết bị và kiểm tra trạng thái chu kỳ hiện tại trước khi mở hàng việc hôm nay."
-      />
+      <div className="ops-shell ops-system pb-28 md:pb-4 space-y-6">
+        {/* Header Skeleton */}
+        <div className="border border-app-line bg-app-surface rounded-xl p-5 sm:p-6 lg:p-7 shadow-sm space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start justify-between">
+            <div className="space-y-3 flex-1">
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-24 rounded-full animate-pulse bg-app-bg" />
+                <Skeleton className="h-6 w-28 rounded-full animate-pulse bg-app-bg" />
+                <Skeleton className="h-6 w-32 rounded-full animate-pulse bg-app-bg" />
+              </div>
+              <Skeleton className="h-8 w-3/4 animate-pulse bg-app-bg" />
+              <Skeleton className="h-4 w-1/2 animate-pulse bg-app-bg" />
+            </div>
+            {/* Metrics grid skeleton */}
+            <div className="grid grid-cols-3 gap-3 w-full sm:w-[380px] xl:w-[480px]">
+              <div className="h-20 bg-app-bg/50 border border-app-line/60 rounded-xl p-3 space-y-2">
+                <Skeleton className="h-3 w-12 animate-pulse bg-app-bg" />
+                <Skeleton className="h-6 w-8 animate-pulse bg-app-bg" />
+              </div>
+              <div className="h-20 bg-app-bg/50 border border-app-line/60 rounded-xl p-3 space-y-2">
+                <Skeleton className="h-3 w-12 animate-pulse bg-app-bg" />
+                <Skeleton className="h-6 w-12 animate-pulse bg-app-bg" />
+              </div>
+              <div className="h-20 bg-app-bg/50 border border-app-line/60 rounded-xl p-3 space-y-2">
+                <Skeleton className="h-3 w-12 animate-pulse bg-app-bg" />
+                <Skeleton className="h-6 w-16 animate-pulse bg-app-bg" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Goal Switcher Skeleton */}
+        <div className="border border-app-line bg-app-surface rounded-xl px-4 py-3 shadow-sm">
+          <Skeleton className="h-5 w-48 animate-pulse bg-app-bg" />
+        </div>
+
+        {/* Navigation Tabs Skeleton */}
+        <div className="inline-flex gap-2 bg-app-line/30 p-1.5 rounded-full">
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse bg-app-bg" />
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse bg-app-bg" />
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse bg-app-bg" />
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse bg-app-bg" />
+        </div>
+
+        {/* Tab Content Today Skeleton */}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          {/* Main Today Tasks Column */}
+          <div className="space-y-4">
+            <div className="border border-app-line bg-app-surface rounded-xl p-5 shadow-sm space-y-4">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-6 w-32 animate-pulse bg-app-bg" />
+                <Skeleton className="h-4 w-20 animate-pulse bg-app-bg" />
+              </div>
+              {/* Today list of tasks */}
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 border border-app-line/60 p-4 rounded-xl">
+                    <Skeleton className="h-5 w-5 rounded-md animate-pulse bg-app-bg" />
+                    <Skeleton className="h-5 flex-1 animate-pulse bg-app-bg" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right sidebar: Mood & Note Check-in */}
+          <div className="space-y-4">
+            <div className="border border-app-line bg-app-surface rounded-xl p-5 shadow-sm space-y-4">
+              <Skeleton className="h-6 w-40 animate-pulse bg-app-bg" />
+              <div className="grid grid-cols-3 gap-2">
+                <Skeleton className="h-12 w-full rounded-lg animate-pulse bg-app-bg" />
+                <Skeleton className="h-12 w-full rounded-lg animate-pulse bg-app-bg" />
+                <Skeleton className="h-12 w-full rounded-lg animate-pulse bg-app-bg" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20 animate-pulse bg-app-bg" />
+                <Skeleton className="h-20 w-full rounded-lg animate-pulse bg-app-bg" />
+              </div>
+              <Skeleton className="h-12 w-32 rounded-lg animate-pulse bg-app-bg" />
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 

@@ -1,4 +1,4 @@
-import { Crown, ShieldCheck } from "lucide-react";
+import { Crown, Loader2, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -124,8 +124,25 @@ export function MockBillingCheckout() {
               <p className="text-sm leading-7 text-foreground">{feature}</p>
             </div>
           ))}
+          <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Nguồn yêu cầu</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">
+              {session.source === "paywall_dialog" || !session.source
+                ? "Từ màn nâng cấp"
+                : session.source === "settings"
+                  ? "Từ cài đặt"
+                  : session.source === "12_week_setup"
+                    ? "Từ thiết lập 12 tuần"
+                    : "Khác"}
+            </p>
+          </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <Button onClick={handleConfirm} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Crown className="h-4 w-4" />
+              )}
               {isSubmitting ? "Đang mở gói..." : "Xác nhận mở gói"}
             </Button>
             <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
