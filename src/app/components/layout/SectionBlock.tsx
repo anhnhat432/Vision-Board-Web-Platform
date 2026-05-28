@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 
 interface SectionBlockProps extends Omit<React.HTMLAttributes<HTMLElement>, "title" | "onToggle"> {
-  title: string;
+  title: React.ReactNode;
   eyebrow?: string;
   description?: React.ReactNode;
   children: React.ReactNode;
