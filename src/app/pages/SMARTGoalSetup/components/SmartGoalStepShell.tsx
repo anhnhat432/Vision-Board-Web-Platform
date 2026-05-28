@@ -1,5 +1,6 @@
-﻿import type { ReactNode, RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { ArrowLeft, ArrowRight, Check, Circle, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
@@ -121,10 +122,10 @@ export function SmartGoalStepShell({
                 onClick={() => handleWizardJump(index)}
                 className={
                   isActive
-                    ? "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-accent bg-app-accent-soft px-2 py-2 text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    ? "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-accent bg-app-accent-soft px-2 py-2 text-app-accent shadow-[0_2px_8px_rgba(40,79,69,0.08)] transition-all duration-200 transform hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     : isDone
-                      ? "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-accent bg-app-accent px-2 py-2 text-white transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                      : "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-line bg-app-bg px-2 py-2 text-app-ink-muted transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-default disabled:hover:bg-app-bg disabled:hover:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      ? "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-accent bg-app-accent px-2 py-2 text-white shadow-sm transition-all duration-200 transform hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      : "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-line bg-app-bg px-2 py-2 text-app-ink-muted transition-all duration-200 hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-default disabled:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 }
               >
                 <span className="text-sm font-semibold" aria-hidden="true">
@@ -140,7 +141,15 @@ export function SmartGoalStepShell({
 
       <div className="my-6 h-px bg-app-line" aria-hidden="true" />
 
-      <div className="space-y-5">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={stepIndex}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+          className="space-y-5"
+        >
         {children}
 
         <div className="rounded-card border border-app-line bg-app-bg p-4">
@@ -249,7 +258,8 @@ export function SmartGoalStepShell({
             </div>
           </div>
         ) : null}
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
       <div className="mt-6 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
         <button

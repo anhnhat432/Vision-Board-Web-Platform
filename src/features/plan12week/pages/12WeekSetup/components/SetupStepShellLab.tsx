@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -150,15 +151,25 @@ export function SetupStepShellLab({
       </div>
 
       <div className="mt-6">
-        {children}
-        {stepError ? (
-          <div role="alert" className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-[color:var(--color-danger-fg)]">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <p className="text-sm font-medium leading-5">{stepError}</p>
-            </div>
-          </div>
-        ) : null}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+          >
+            {children}
+            {stepError ? (
+              <div role="alert" className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-[color:var(--color-danger-fg)]">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <p className="text-sm font-medium leading-5">{stepError}</p>
+                </div>
+              </div>
+            ) : null}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">

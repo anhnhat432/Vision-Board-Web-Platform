@@ -1,5 +1,6 @@
-﻿import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { Ref } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 import { helperTextClass } from "../../SMARTGoalSetup/components/formStyles";
 import { Label } from "../../../components/ui/label";
@@ -40,73 +41,88 @@ export function FeasibilityStepShell({
       className="mt-6 surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
       aria-labelledby={`feasibility-question-${currentQuestion.id}`}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
-            Câu {currentStep + 1} / {totalSteps}
-          </p>
-          <h2
-            ref={headingRef}
-            id={`feasibility-question-${currentQuestion.id}`}
-            tabIndex={-1}
-            className="mt-2 font-serif text-2xl font-medium leading-7 text-app-ink focus:outline-none"
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentQuestion.id}
+          initial={{ opacity: 0, x: 12 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -12 }}
+          transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+          className="space-y-6"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
+                Câu {currentStep + 1} / {totalSteps}
+              </p>
+              <h2
+                ref={headingRef}
+                id={`feasibility-question-${currentQuestion.id}`}
+                tabIndex={-1}
+                className="mt-2 font-serif text-2xl font-medium leading-7 text-app-ink focus:outline-none"
+              >
+                {currentQuestion.question}
+              </h2>
+              <p
+                id={`feasibility-question-${currentQuestion.id}-helper`}
+                className="mt-2 text-sm leading-6 text-app-ink-soft"
+              >
+                {currentQuestion.helper}
+              </p>
+            </div>
+            <span className="inline-flex w-fit rounded-full bg-app-accent-soft px-3 py-1 text-xs font-medium text-app-accent">
+              {answeredQuestionCount}/{totalSteps}
+            </span>
+          </div>
+
+          <RadioGroup
+            value={selectedAnswer}
+            onValueChange={onAnswerChange}
+            aria-labelledby={`feasibility-question-${currentQuestion.id}`}
+            aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
+            className="grid gap-3 sm:grid-cols-2"
           >
-            {currentQuestion.question}
-          </h2>
-          <p
-            id={`feasibility-question-${currentQuestion.id}-helper`}
-            className="mt-2 text-sm leading-6 text-app-ink-soft"
-          >
-            {currentQuestion.helper}
-          </p>
-        </div>
-        <span className="inline-flex w-fit rounded-full bg-app-accent-soft px-3 py-1 text-xs font-medium text-app-accent">
-          {answeredQuestionCount}/{totalSteps}
-        </span>
-      </div>
+            {currentQuestion.options.map((option, index) => {
+              const isSelected = selectedAnswer === option.value;
 
-      <RadioGroup
-        value={selectedAnswer}
-        onValueChange={onAnswerChange}
-        aria-labelledby={`feasibility-question-${currentQuestion.id}`}
-        aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
-        className="mt-6 grid gap-2 sm:grid-cols-2"
-      >
-        {currentQuestion.options.map((option, index) => {
-          const isSelected = selectedAnswer === option.value;
+              return (
+                <div
+                  key={option.value}
+                  className="flex w-full transition-all duration-200 transform hover:scale-[1.02] hover:-translate-y-0.5 active:scale-[0.98]"
+                >
+                  <Label
+                    htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
+                    className={
+                      isSelected
+                        ? "flex w-full min-h-20 cursor-pointer flex-col gap-2 rounded-lg border border-app-accent bg-app-accent-soft px-3 py-3 text-sm font-medium text-app-accent shadow-[0_2px_8px_rgba(40,79,69,0.06)] transition-all duration-150 focus-within:ring-2 focus-within:ring-app-accent/30"
+                        : "flex w-full min-h-20 cursor-pointer flex-col gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-3 text-sm font-medium text-app-ink-soft transition-all duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-within:ring-2 focus-within:ring-app-accent/30"
+                    }
+                  >
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-current text-xs">
+                        {index + 1}
+                      </span>
+                      <RadioGroupItem
+                        value={option.value}
+                        id={`feasibility-${currentQuestion.id}-${option.value}`}
+                        className="sr-only"
+                      />
+                      {isSelected ? <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}
+                    </span>
+                    <span className="leading-5">{option.label}</span>
+                  </Label>
+                </div>
+              );
+            })}
+          </RadioGroup>
 
-          return (
-            <Label
-              key={option.value}
-              htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
-              className={
-                isSelected
-                  ? "flex min-h-20 cursor-pointer flex-col gap-2 rounded-lg border border-app-accent bg-app-accent-soft px-3 py-3 text-sm font-medium text-app-accent transition-colors duration-150 focus-within:ring-2 focus-within:ring-app-accent/30"
-                  : "flex min-h-20 cursor-pointer flex-col gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-3 text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-within:ring-2 focus-within:ring-app-accent/30"
-              }
-            >
-              <span className="flex items-center justify-between gap-3">
-                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-current text-xs">
-                  {index + 1}
-                </span>
-                <RadioGroupItem
-                  value={option.value}
-                  id={`feasibility-${currentQuestion.id}-${option.value}`}
-                  className="sr-only"
-                />
-                {isSelected ? <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}
-              </span>
-              <span className="leading-5">{option.label}</span>
-            </Label>
-          );
-        })}
-      </RadioGroup>
-
-      {!selectedAnswer ? (
-        <p id={`feasibility-question-${currentQuestion.id}-next-hint`} role="status" className={helperTextClass}>
-          Chọn một lựa chọn phù hợp để tiếp tục.
-        </p>
-      ) : null}
+          {!selectedAnswer ? (
+            <p id={`feasibility-question-${currentQuestion.id}-next-hint`} role="status" className={helperTextClass}>
+              Chọn một lựa chọn phù hợp để tiếp tục.
+            </p>
+          ) : null}
+        </motion.div>
+      </AnimatePresence>
 
       <div className="mt-6 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-app-ink-muted">
