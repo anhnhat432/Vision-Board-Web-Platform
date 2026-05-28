@@ -372,8 +372,14 @@ export function RootLayout() {
       return;
     }
 
-    setLocalDataMigrationCandidate(candidate);
-    setIsLocalDataMigrationPromptOpen(true);
+    // Tự động import — không hiện dialog cho người dùng
+    const result = importAnonymousLocalDataToAccountScope(user.uid, candidate.fingerprint);
+    markLocalDataMigrationPromptSkipped(user.uid, candidate.fingerprint);
+    if (result.status === "imported" || result.status === "merged") {
+      setGuideUserData(getUserData());
+    }
+    setLocalDataMigrationCandidate(null);
+    setIsLocalDataMigrationPromptOpen(false);
   }, [demoMode, shouldShowWorkspaceGate, user]);
 
   useEffect(() => {

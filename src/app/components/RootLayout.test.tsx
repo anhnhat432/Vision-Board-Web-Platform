@@ -763,7 +763,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
   });
 
-  it("shows the local data migration prompt when signed-in account has meaningful anonymous data", async () => {
+  it("does not show the local data migration prompt and instead auto-imports when signed-in account has meaningful anonymous data", async () => {
     seedMeaningfulAnonymousData();
     setAuthContext({
       user: { uid: "user_test", email: "test@example.com" },
@@ -772,13 +772,11 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Nhập dữ liệu" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Xem dữ liệu" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Để sau" })).toBeInTheDocument();
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
   });
 
-  it("imports meaningful anonymous data into a fresh signed-in account scope", async () => {
+  it("automatically imports meaningful anonymous data into a fresh signed-in account scope on mount", async () => {
     const anonymousData = seedMeaningfulAnonymousData();
     const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
     activateAuthenticatedUserData("user_test");
@@ -789,117 +787,25 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
 
-    expect(await screen.findByText(/Đã chuyển dữ liệu vào tài khoản/)).toBeInTheDocument();
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
     expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAnonymousData);
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
   });
 
-  it("validates account-scope 12-week data with the cloud import dry-run endpoint after local import", async () => {
-    seedMeaningfulAnonymousTwelveWeekData();
-    activateAuthenticatedUserData("user_test");
-    setAuthContext({
-      user: { uid: "user_test", email: "test@example.com" },
-      userProfile: { id: "profile_test", email: "test@example.com" },
-    });
-    window.dataLayer = [];
-    window.gtag = vi.fn();
-
-    renderAppShell("/");
-
-    expect(await screen.findByText(/Chuyển dữ liệu cũ vào tài khoản/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Kiểm tra dữ liệu" })).toBeDisabled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
-    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra dữ liệu" }));
-
-    await waitFor(() => {
-      expect(syncServiceMock.post12WeekImportValidation).toHaveBeenCalledTimes(1);
-    });
-    expect(syncServiceMock.post12WeekImportValidation).toHaveBeenCalledWith(
-      expect.objectContaining({
-        source: "account_scope_import_dry_run",
-        mode: "validate_only",
-        workspace: {
-          goals: [
-            expect.objectContaining({
-              clientGoalId: "goal_real_1",
-              plan: expect.objectContaining({
-                clientPlanId: "goal_real_1:12-week-system",
-              }),
-            }),
-          ],
-        },
-      }),
-    );
-    expect(await screen.findByText(/Dữ liệu hợp lệ để đồng bộ lên tài khoản/i)).toBeInTheDocument();
-    expect(window.dataLayer).toEqual([]);
-    expect(window.gtag).not.toHaveBeenCalled();
-  });
-
-  it("shows account validation errors without deleting browser data", async () => {
-    const anonymousData = seedMeaningfulAnonymousTwelveWeekData();
-    const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
-    activateAuthenticatedUserData("user_test");
-    syncServiceMock.post12WeekImportValidation.mockRejectedValueOnce({
-      message: "12-week import payload validation failed.",
-      details: {
-        details: {
-          status: "invalid",
-          mode: "validate_only",
-          dryRun: true,
-          acceptedEntityCounts: {
-            goals: 1,
-            plans: 1,
-            weeks: 0,
-            tasks: 0,
-            leadIndicators: 0,
-            leadMetrics: 0,
-            dailyCheckIns: 0,
-            weeklyReviews: 0,
-          },
-          warnings: [],
-          errors: [
-            {
-              path: "workspace.goals[0].plan.weeks",
-              code: "required",
-              message: "workspace.goals[0].plan.weeks is required.",
-            },
-          ],
-          normalizedClientIdsCount: 2,
-        },
-      },
-    });
-    setAuthContext({
-      user: { uid: "user_test", email: "test@example.com" },
-      userProfile: { id: "profile_test", email: "test@example.com" },
-    });
-
-    renderAppShell("/");
-
-    expect(await screen.findByText(/Chuyển dữ liệu cũ vào tài khoản/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
-    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra dữ liệu" }));
-
-    expect(await screen.findByText(/Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản/i)).toBeInTheDocument();
-    expect(screen.getByText(/workspace.goals\[0\]\.plan\.weeks is required/i)).toBeInTheDocument();
-    expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
-    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
-  });
-
-  it("blocks browser import when the signed-in account already has meaningful data", async () => {
+  it("automatically merges browser data when the signed-in account already has meaningful data", async () => {
     activateAuthenticatedUserData("user_test");
     saveUserData(createFreshUserData());
     const accountData = createFreshUserData();
     accountData.goals.push(createRealGoal({ id: "goal_account_1", title: "Existing account goal" }));
     saveUserData(accountData);
-    const rawAccountData = localStorage.getItem(getScopedUserDataStorageKey("user_test"));
+
     const anonymousData = createFreshUserData();
     anonymousData.goals.push(createRealGoal({ id: "goal_anonymous_1", title: "Anonymous local goal" }));
     seedAnonymousData(anonymousData);
+
     setAuthContext({
       user: { uid: "user_test", email: "test@example.com" },
       userProfile: { id: "profile_test", email: "test@example.com" },
@@ -907,32 +813,13 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
 
-    expect(await screen.findByText(/không ghi đè tự động/)).toBeInTheDocument();
-    expect(getUserData().goals.map((goal) => goal.title)).toEqual(["Existing account goal"]);
-    expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAccountData);
-    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toContain("Anonymous local goal");
-  });
-
-  it("lets the user skip browser data migration without deleting anonymous data", async () => {
-    seedMeaningfulAnonymousData();
-    const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
-    setAuthContext({
-      user: { uid: "user_test", email: "test@example.com" },
-      userProfile: { id: "profile_test", email: "test@example.com" },
-    });
-
-    renderAppShell("/");
-
-    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Để sau" }));
-
-    await waitFor(() => {
-      expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
-    });
-    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
+    const mergedGoals = getUserData().goals;
+    const titles = mergedGoals.map((goal) => goal.title);
+    expect(titles).toContain("Existing account goal");
+    expect(titles).toContain("Anonymous local goal");
   });
 
   it("does not show the local data migration prompt in demo mode", async () => {

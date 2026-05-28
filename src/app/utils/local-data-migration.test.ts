@@ -241,9 +241,9 @@ describe("anonymous local data migration candidate", () => {
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(anonymousRaw);
   });
 
-  it("does not silently overwrite an account scope with existing meaningful data", () => {
+  it("automatically merges rather than blocking when account scope has existing meaningful data", () => {
     const anonymousData = createFreshUserData();
-    anonymousData.goals.push(createRealGoal({ title: "Anonymous goal" }));
+    anonymousData.goals.push(createRealGoal({ id: "goal_anonymous_1", title: "Anonymous goal" }));
     const anonymousRaw = JSON.stringify(anonymousData);
     const accountData = createFreshUserData();
     accountData.goals.push(createRealGoal({ id: "goal_account_1", title: "Existing account goal" }));
@@ -258,10 +258,17 @@ describe("anonymous local data migration candidate", () => {
 
     const result = importAnonymousLocalDataToAccountScope("auth_user_1", candidate.fingerprint);
 
-    expect(result.status).toBe("blocked_existing_account_data");
+    expect(result.status).toBe("merged");
     expect(result.accountSummary?.goalCount).toBe(1);
-    expect(localStorage.getItem(STORAGE_KEY)).toBe(accountRaw);
-    expect(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1"))).toBe(accountRaw);
+
+    // Retrieve merged goals
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const storedScoped = JSON.parse(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1")) || "{}");
+    const titles = stored.goals.map((goal: any) => goal.title);
+
+    expect(titles).toContain("Existing account goal");
+    expect(titles).toContain("Anonymous goal");
+    expect(stored).toEqual(storedScoped);
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(anonymousRaw);
   });
 

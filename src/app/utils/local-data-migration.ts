@@ -43,6 +43,7 @@ export interface LocalDataMigrationCandidate {
 
 export type LocalDataAccountImportStatus =
   | "imported"
+  | "merged"
   | "blocked_existing_account_data"
   | "inactive_auth_scope"
   | "missing_candidate"
@@ -497,6 +498,105 @@ export function getAnonymousLocalDataMigrationCandidate(): LocalDataMigrationCan
   };
 }
 
+function mergeById<T extends { id: string }>(
+  accountList: T[],
+  anonymousList: T[],
+  dateField: keyof T
+): T[] {
+  const mergedMap = new Map<string, T>();
+  for (const item of anonymousList) {
+    mergedMap.set(item.id, item);
+  }
+  for (const accItem of accountList) {
+    const anonItem = mergedMap.get(accItem.id);
+    if (!anonItem) {
+      mergedMap.set(accItem.id, accItem);
+    } else {
+      const accDate = accItem[dateField];
+      const anonDate = anonItem[dateField];
+
+      const accTime = typeof accDate === "string" ? new Date(accDate).getTime() : 0;
+      const anonTime = typeof anonDate === "string" ? new Date(anonDate).getTime() : 0;
+
+      if (!isNaN(accTime) && !isNaN(anonTime)) {
+        if (accTime >= anonTime) {
+          mergedMap.set(accItem.id, accItem);
+        } else {
+          mergedMap.set(accItem.id, anonItem);
+        }
+      } else {
+        mergedMap.set(accItem.id, accItem);
+      }
+    }
+  }
+  return Array.from(mergedMap.values());
+}
+
+function mergeWheelHistory(
+  accountList: WheelOfLifeRecord[],
+  anonymousList: WheelOfLifeRecord[]
+): WheelOfLifeRecord[] {
+  const mergedMap = new Map<string, WheelOfLifeRecord>();
+  for (const item of anonymousList) {
+    if (item.date) {
+      mergedMap.set(item.date, item);
+    }
+  }
+  for (const accItem of accountList) {
+    if (accItem.date) {
+      const anonItem = mergedMap.get(accItem.date);
+      if (!anonItem) {
+        mergedMap.set(accItem.date, accItem);
+      } else {
+        mergedMap.set(accItem.date, accItem);
+      }
+    }
+  }
+  return Array.from(mergedMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function pickNewer<T extends { updatedAt?: string; createdAt?: string }>(
+  accountVal: T | undefined,
+  anonVal: T | undefined
+): T | undefined {
+  if (!accountVal) return anonVal;
+  if (!anonVal) return accountVal;
+
+  const accDate = accountVal.updatedAt || accountVal.createdAt;
+  const anonDate = anonVal.updatedAt || anonVal.createdAt;
+
+  const accTime = accDate ? new Date(accDate).getTime() : 0;
+  const anonTime = anonDate ? new Date(anonDate).getTime() : 0;
+
+  if (!isNaN(accTime) && !isNaN(anonTime)) {
+    if (accTime >= anonTime) {
+      return accountVal;
+    } else {
+      return anonVal;
+    }
+  }
+  return accountVal;
+}
+
+function mergeUserData(accountData: UserData, anonymousData: UserData): UserData {
+  const accHasScores = accountData.currentWheelOfLife?.some(a => a.score > 0);
+  const anonHasScores = anonymousData.currentWheelOfLife?.some(a => a.score > 0);
+  const currentWheelOfLife = accHasScores ? accountData.currentWheelOfLife : (anonHasScores ? anonymousData.currentWheelOfLife : accountData.currentWheelOfLife);
+
+  return {
+    ...accountData,
+    goals: mergeById(accountData.goals || [], anonymousData.goals || [], "createdAt"),
+    visionBoards: mergeById(accountData.visionBoards || [], anonymousData.visionBoards || [], "createdAt"),
+    reflections: mergeById(accountData.reflections || [], anonymousData.reflections || [], "date"),
+    wheelOfLifeHistory: mergeWheelHistory(accountData.wheelOfLifeHistory || [], anonymousData.wheelOfLifeHistory || []),
+    aspirationalVision: pickNewer(accountData.aspirationalVision, anonymousData.aspirationalVision),
+    currentWheelOfLife: currentWheelOfLife || [],
+    onboardingCompleted: accountData.onboardingCompleted || anonymousData.onboardingCompleted,
+    achievements: mergeById(accountData.achievements || [], anonymousData.achievements || [], "earnedAt"),
+    eventLog: mergeById(accountData.eventLog || [], anonymousData.eventLog || [], "createdAt").sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+  };
+}
+
 export function importAnonymousLocalDataToAccountScope(
   authUid: string | null | undefined,
   expectedSnapshotFingerprint: string | null | undefined,
@@ -523,12 +623,54 @@ export function importAnonymousLocalDataToAccountScope(
   const activeRaw = window.localStorage.getItem(STORAGE_KEY);
   const scopedRaw = window.localStorage.getItem(scopedKey);
   const existingAccountData = findMeaningfulAccountData([activeRaw, scopedRaw]);
+
   if (existingAccountData) {
-    return {
-      status: "blocked_existing_account_data",
-      summary: createLocalDataMigrationSummary(anonymousData),
-      accountSummary: createLocalDataMigrationSummary(existingAccountData),
+    // Merge instead of block
+    const mergedData = mergeUserData(existingAccountData, anonymousData);
+    const mergedRaw = JSON.stringify(mergedData);
+
+    const backupKey = createImportBackupKey(normalizedAuthUid, actualFingerprint);
+    let snapshotKey: string | undefined;
+    const backupPayload = {
+      authUid: normalizedAuthUid,
+      createdAt: new Date().toISOString(),
+      source: "anonymous_local_merge_phase_1",
+      snapshotFingerprint: actualFingerprint,
+      activeOwnerUid: window.localStorage.getItem(AUTH_OWNER_STORAGE_KEY),
+      activeBeforeImportRaw: activeRaw,
+      scopedBeforeImportRaw: scopedRaw,
     };
+
+    try {
+      snapshotKey = writeMigrationBackupSnapshot(existingAccountData); // backup existing account data
+      window.localStorage.setItem(backupKey, JSON.stringify(backupPayload));
+      window.localStorage.setItem(scopedKey, mergedRaw);
+      window.localStorage.setItem(STORAGE_KEY, mergedRaw);
+      window.localStorage.removeItem(snapshotKey);
+      notifyUserDataUpdated();
+
+      return {
+        status: "merged",
+        summary: createLocalDataMigrationSummary(anonymousData),
+        accountSummary: createLocalDataMigrationSummary(existingAccountData),
+        backupKey,
+        snapshotKey,
+      };
+    } catch {
+      try {
+        restoreStorageItem(scopedKey, scopedRaw);
+        restoreStorageItem(STORAGE_KEY, activeRaw);
+      } catch {
+        // Best-effort rollback only
+      }
+
+      return {
+        status: "write_failed",
+        summary: createLocalDataMigrationSummary(anonymousData),
+        backupKey,
+        snapshotKey,
+      };
+    }
   }
 
   const backupKey = createImportBackupKey(normalizedAuthUid, actualFingerprint);
