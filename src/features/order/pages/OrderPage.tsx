@@ -334,14 +334,14 @@ export function OrderPage() {
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--order-border)] bg-[var(--order-bg)]/95 px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.04)] backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-6xl items-center gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] uppercase tracking-wide text-[var(--order-text-muted)]">
+              <div className="text-xs uppercase tracking-wide text-[var(--order-text-muted)]">
                 Tổng đơn
               </div>
               <div className="truncate text-base font-semibold tabular-nums text-[var(--order-accent)]">
                 {formatVnd(total)}
               </div>
               {!validation.ok && missingFields.length > 0 && (
-                <div className="truncate text-[11px] text-[var(--order-text-muted)]">
+                <div className="truncate text-xs text-[var(--order-text-muted)]">
                   Còn thiếu: {missingFields.slice(0, 2).join(", ")}
                   {missingFields.length > 2
                     ? `, +${missingFields.length - 2}`

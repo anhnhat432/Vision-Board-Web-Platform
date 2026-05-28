@@ -241,4 +241,26 @@ describe("app routes", () => {
     expect(await screen.findByRole("heading", { level: 1, name: /Tu. ch.nh t.i kho.n/i })).toBeInTheDocument();
     await route.dispose();
   });
+
+  it("resolves /vision through the app route table", async () => {
+    authContextMock.useAuthContext.mockReturnValue({
+      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
+      userProfile: { email: "test@example.com", id: "test-user", role: "user" },
+      userProfileLoading: false,
+      userProfileError: null,
+      authLoading: false,
+      error: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refreshUserProfile: vi.fn(),
+      isConfigured: true,
+    });
+    const userData = initializeUserData();
+    saveUserData({ ...userData, onboardingCompleted: true });
+
+    const route = renderRoute("/vision");
+
+    expect(await screen.findByRole("heading", { level: 1, name: /Tầm nhìn 3 năm của bạn/i })).toBeInTheDocument();
+    await route.dispose();
+  });
 });

@@ -84,7 +84,7 @@ export function MindfulPlayer() {
               <Music className="h-4 w-4 text-app-accent" />
               Âm Thanh Chánh Niệm
             </h4>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-app-accent bg-app-accent/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs uppercase font-bold tracking-widest text-app-accent bg-app-accent/10 px-2 py-0.5 rounded-full">
               Zen Mode
             </span>
           </div>
@@ -111,7 +111,7 @@ export function MindfulPlayer() {
                   <span className={`mb-1.5 p-1.5 rounded-lg ${active ? "bg-app-accent/15 text-app-accent" : "bg-app-muted/10 text-app-muted"}`}>
                     {getModeIcon(m)}
                   </span>
-                  <span className="text-[11px] font-medium leading-tight">
+                  <span className="text-xs font-medium leading-tight">
                     {m === "none" ? "Im lặng" : m === "rain" ? "Mưa rơi" : m === "ocean" ? "Sóng biển" : "Sóng não"}
                   </span>
                 </button>

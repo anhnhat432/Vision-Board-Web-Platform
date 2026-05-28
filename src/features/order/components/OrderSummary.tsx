@@ -144,7 +144,7 @@ export function OrderSummary({
               {formatVnd(totalVnd)}
             </span>
           </div>
-          <p className="pt-1 text-[11px] text-[var(--order-text-muted)]">
+          <p className="pt-1 text-xs text-[var(--order-text-muted)]">
             Tổng đơn cuối cùng = tạm tính + phí ship. Shop sẽ chốt phí ship qua
             email/điện thoại trước khi gửi kit.
           </p>

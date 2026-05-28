@@ -106,6 +106,10 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
       },
       {
+        path: "vision",
+        ...lazyRoute(() => import("./pages/AspirationalVision"), "AspirationalVision"),
+      },
+      {
         path: "12-week-setup",
         ...lazyRoute(() => import("./pages/12WeekSetupLab"), "TwelveWeekSetupLab"),
       },

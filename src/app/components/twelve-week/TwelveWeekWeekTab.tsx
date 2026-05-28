@@ -624,7 +624,7 @@ export function TwelveWeekWeekTab({
                     <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
                     {scoreInterpretation.headline}
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-app-ink-soft">{scoreInterpretation.advice}</p>
+                  <p className="mt-1 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
                 </div>
                 <p className="mt-3 text-sm text-app-ink-muted">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
               </div>

@@ -162,7 +162,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       {config[state].icon}
       <span className="truncate">{config[state].label}</span>
       {state === "pending" && syncState.pendingCount > 0 ? (
-        <span className="ml-1 rounded-full bg-app-surface/80 px-1.5 py-0.5 text-[11px] font-semibold text-app-warm">
+        <span className="ml-1 rounded-full bg-app-surface/80 px-1.5 py-0.5 text-xs font-semibold text-app-warm">
           Sao lưu ngay
         </span>
       ) : null}

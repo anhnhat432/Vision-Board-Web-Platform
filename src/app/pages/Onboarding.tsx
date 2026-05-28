@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   ArrowLeft,
@@ -533,7 +533,7 @@ export function Onboarding() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="text-sm font-medium text-app-ink">{areaLabel}</h2>
                         {isAreaReviewed ? (
-                          <span className="rounded-full bg-app-accent-soft px-2 py-0.5 text-[11px] font-medium text-app-accent">
+                          <span className="rounded-full bg-app-accent-soft px-2 py-0.5 text-xs font-medium text-app-accent">
                             Đã rà
                           </span>
                         ) : null}

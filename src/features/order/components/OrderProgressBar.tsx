@@ -57,7 +57,7 @@ export function OrderProgressBar({
                 <div className="flex items-center gap-1.5 text-xs">
                   <span
                     className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
+                      "flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold",
                       status === "done" &&
                         "bg-[var(--order-accent)] text-white",
                       status === "current" &&

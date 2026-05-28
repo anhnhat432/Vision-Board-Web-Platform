@@ -523,7 +523,7 @@ function ReflectionJournalContent() {
                         return getReflectionInputForContent(content, prev);
                       });
                     }}
-                    className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 text-xs text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm transition-colors text-left"
+                    className="rounded-full border border-app-line bg-app-bg px-3.5 py-2 text-sm text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm transition-colors text-left"
                   >
                     {prompt}
                   </button>

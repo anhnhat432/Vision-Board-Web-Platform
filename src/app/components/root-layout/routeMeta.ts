@@ -30,6 +30,12 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Tạo điểm bắt đầu đủ rõ trước khi chọn trọng tâm và viết mục tiêu.",
   },
   {
+    match: (pathname: string) => pathname === "/vision",
+    label: "Tầm nhìn 3 năm",
+    title: "Tầm nhìn 3 năm – Dear Our Future",
+    tagline: "Định hình bức tranh dài hạn để mỗi chu kỳ 12 tuần đều phục vụ điều này.",
+  },
+  {
     match: (pathname: string) => pathname === "/life-insight",
     label: "Góc nhìn cuộc sống",
     title: "Góc nhìn cuộc sống – Dear Our Future",
@@ -238,6 +244,6 @@ export function getRouteTone(pathname: string): string {
   if (pathname.startsWith("/today-v2")) return "system";
   if (pathname.startsWith("/goals")) return "system";
   if (pathname.startsWith("/12-week")) return "system";
-  if (pathname.startsWith("/vision-board") || pathname.startsWith("/gallery")) return "vision";
+  if (pathname.startsWith("/vision") || pathname.startsWith("/gallery")) return "vision";
   return "default";
 }
