@@ -273,7 +273,8 @@ export function useTwelveWeekExecutionActions({
       }
 
       // Fire feel-good feedback (haptic, sound, confetti, toast) DEFERRED.
-      // We wrap it in a setTimeout(..., 0) to allow style/layout/paint of the checked state first.
+      // We wrap it in a setTimeout(..., 260) to allow style/layout/paint and transition of the checked state first.
+      // This eliminates the jank/lag caused by heavy canvas-confetti render happening simultaneously with React state update.
       if (taskCompletedFromIncomplete) {
         const nextTodayQueue = getTodayQueueForSystem(savedSystem);
         const allTodayTasksCompleted = nextTodayQueue.length > 0 && nextTodayQueue.every((task) => task.completed);
@@ -286,11 +287,11 @@ export function useTwelveWeekExecutionActions({
             playTaskCompleteSound();
           }
           triggerTaskCompletionConfetti(allTodayTasksCompleted);
-        }, 0);
+        }, 260);
       }
       window.setTimeout(() => {
         toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-      }, 0);
+      }, 160);
 
       // Under the mutation sync queue architecture, if mutation queue is active, we don't
       // block the user thread or rollback the local state upon REST sync failures.
