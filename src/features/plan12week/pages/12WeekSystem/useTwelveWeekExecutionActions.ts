@@ -69,7 +69,7 @@ interface UseTwelveWeekExecutionActionsOptions {
   weeklyForm: WeeklyReviewForm;
   setWeeklyForm: Dispatch<SetStateAction<WeeklyReviewForm>>;
   hasPremiumReviewInsights: boolean;
-  suggestedNextWeekPlan: SuggestedNextWeekPlan;
+  suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
   rescuePlanSummary: RescuePlanSummary | null;
   executionSyncActions: ExecutionSyncActions;
   commitSystemUpdate: (nextSystem: TwelveWeekSystem) => TwelveWeekSystem;
@@ -498,7 +498,7 @@ export function useTwelveWeekExecutionActions({
       weeklyForm.insights.trim() || weeklyForm.mainObstacle.trim() || weeklyForm.biggestOutputThisWeek.trim();
     const nextWeekPriorityValue = nextWeekCommitments[0] ?? "";
     const workloadDecisionValue =
-      weeklyForm.workloadDecision || (hasPremiumReviewInsights ? suggestedNextWeekPlan.workloadDecision : "keep same");
+      weeklyForm.workloadDecision || (hasPremiumReviewInsights && suggestedNextWeekPlan ? suggestedNextWeekPlan.workloadDecision : "keep same");
     const keepTacticTrimmed = weeklyForm.keepTactic.trim();
     const reduceTacticTrimmed = weeklyForm.reduceTactic.trim();
     const nextReview: UniversalWeeklyReview = {
@@ -554,7 +554,7 @@ export function useTwelveWeekExecutionActions({
         `Insight tuần sau: ${insightsValue || "--"}`,
         `Cam kết tuần tới: ${nextWeekCommitments.join(", ")}`,
         `Quyết định: ${getWorkloadDecisionLabel(workloadDecisionValue)}`,
-        hasPremiumReviewInsights ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
+        hasPremiumReviewInsights && suggestedNextWeekPlan ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
       ]
         .filter(Boolean)
         .join("\n\n"),
@@ -709,7 +709,7 @@ export function useTwelveWeekExecutionActions({
   }, [activeGoal, system, rescuePlanSummary, handleReentry]);
 
   const handleApplySuggestedPlan = useCallback(() => {
-    if (!activeGoal || !system) return;
+    if (!activeGoal || !system || !suggestedNextWeekPlan) return;
     const suggestedWeekNumber = getTwelveWeekCurrentWeek(system);
     setWeeklyForm((previousForm) => ({
       ...previousForm,

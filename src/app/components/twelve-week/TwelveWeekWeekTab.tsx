@@ -79,8 +79,8 @@ interface TwelveWeekWeekTabProps {
   optionalIndicators: LeadIndicator[];
   currentPlanCode: PricingPlanCode;
   hasPremiumInsights: boolean;
-  premiumInsight: WeeklyReviewPremiumInsight;
-  suggestedNextWeekPlan: SuggestedNextWeekPlan;
+  premiumInsight: WeeklyReviewPremiumInsight | null;
+  suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
   weeklyForm: TwelveWeekWeeklyReviewForm;
   currentReview?: UniversalWeeklyReview | null;
   onWeeklyFormChange: <K extends keyof TwelveWeekWeeklyReviewForm>(
@@ -744,7 +744,7 @@ export function TwelveWeekWeekTab({
                   />
                   {hasPremiumInsights && nextWeekCommitments.length === 0 && (
                     <p className="mt-2 text-xs leading-5 text-app-ink-muted">
-                      Gợi ý Plus: {suggestedNextWeekPlan.focus}
+                      Gợi ý Plus: {suggestedNextWeekPlan?.focus ?? ""}
                     </p>
                   )}
                 </div>

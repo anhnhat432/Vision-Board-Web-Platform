@@ -670,12 +670,11 @@ function ensureMigrationBackupsCleaned(): void {
 
 export function getUserData(): UserData {
   ensureMigrationBackupsCleaned();
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return initializeUserData();
-
-  if (_cachedUserData && _cachedRawHash === raw) {
+  if (_cachedUserData) {
     return _cachedUserData;
   }
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return initializeUserData();
 
   const parsedData = parseStoredUserData(raw);
   if (!parsedData) return initializeUserData();

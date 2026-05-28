@@ -375,16 +375,20 @@ export function useTwelveWeekSystemSnapshot() {
 
   const premiumReviewInsight = useMemo(
     () =>
-      buildWeeklyReviewPremiumInsight({
-        weekCompletionPercent: weekCompletion.percent,
-        currentScore: currentWeekScoreValue,
-        currentLagMetricValue,
-        missedTasksCount: overdueOpenCount,
-        coreTacticCount,
-        optionalTacticCount,
-        reviewDueToday,
-      }),
+      effectiveSystem && activeTab === "week"
+        ? buildWeeklyReviewPremiumInsight({
+            weekCompletionPercent: weekCompletion.percent,
+            currentScore: currentWeekScoreValue,
+            currentLagMetricValue,
+            missedTasksCount: overdueOpenCount,
+            coreTacticCount,
+            optionalTacticCount,
+            reviewDueToday,
+          })
+        : null,
     [
+      effectiveSystem,
+      activeTab,
       weekCompletion.percent,
       currentWeekScoreValue,
       currentLagMetricValue,
@@ -397,17 +401,21 @@ export function useTwelveWeekSystemSnapshot() {
 
   const suggestedNextWeekPlan = useMemo(
     () =>
-      buildSuggestedNextWeekPlan({
-        insight: premiumReviewInsight,
-        currentPlanFocus,
-        currentPlanMilestone,
-        weekCompletionPercent: weekCompletion.percent,
-        currentScore: currentWeekScoreValue,
-        missedTasksCount: overdueOpenCount,
-        coreIndicators,
-        optionalIndicators,
-      }),
+      effectiveSystem && activeTab === "week"
+        ? buildSuggestedNextWeekPlan({
+            insight: premiumReviewInsight!,
+            currentPlanFocus,
+            currentPlanMilestone,
+            weekCompletionPercent: weekCompletion.percent,
+            currentScore: currentWeekScoreValue,
+            missedTasksCount: overdueOpenCount,
+            coreIndicators,
+            optionalIndicators,
+          })
+        : null,
     [
+      effectiveSystem,
+      activeTab,
       premiumReviewInsight,
       currentPlanFocus,
       currentPlanMilestone,
@@ -421,16 +429,16 @@ export function useTwelveWeekSystemSnapshot() {
 
   const hasAdvancedAnalytics = useMemo(() => hasEntitlement("advanced_analytics"), []);
   const executionHeatmap = useMemo(
-    () => (effectiveSystem && hasAdvancedAnalytics ? buildExecutionHeatmap(effectiveSystem) : []),
-    [effectiveSystem, hasAdvancedAnalytics],
+    () => (effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildExecutionHeatmap(effectiveSystem) : []),
+    [effectiveSystem, hasAdvancedAnalytics, activeTab],
   );
   const weeklyTrend = useMemo(
-    () => (effectiveSystem && hasAdvancedAnalytics ? buildWeeklyTrend(effectiveSystem) : []),
-    [effectiveSystem, hasAdvancedAnalytics],
+    () => (effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildWeeklyTrend(effectiveSystem) : []),
+    [effectiveSystem, hasAdvancedAnalytics, activeTab],
   );
   const tacticBreakdown = useMemo(
-    () => (effectiveSystem && hasAdvancedAnalytics ? buildTacticBreakdown(effectiveSystem, currentWeek) : []),
-    [effectiveSystem, hasAdvancedAnalytics, currentWeek],
+    () => (effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildTacticBreakdown(effectiveSystem, currentWeek) : []),
+    [effectiveSystem, hasAdvancedAnalytics, currentWeek, activeTab],
   );
   const rescueStatus: RescueModeStatus = useMemo(() => {
     if (!effectiveSystem) {
@@ -466,7 +474,7 @@ export function useTwelveWeekSystemSnapshot() {
   ]);
 
   const nextWeekRecommendation: NextWeekRecommendation | null = useMemo(() => {
-    if (!effectiveSystem || !currentReview?.reviewCompleted) return null;
+    if (!effectiveSystem || !currentReview?.reviewCompleted || activeTab !== "week") return null;
 
     // Daily check-in consistency this week: # of check-ins logged in current week range
     // divided by days elapsed (capped at 7).
@@ -506,22 +514,23 @@ export function useTwelveWeekSystemSnapshot() {
     currentWeekRange,
     rescueStatus.severity,
     rescueStatus.triggers,
+    activeTab,
   ]);
 
   const executionInsights: ExecutionInsight[] = useMemo(() => {
-    if (!effectiveSystem) return [];
+    if (!effectiveSystem || activeTab !== "progress") return [];
     return getExecutionInsights(effectiveSystem, {
       todayDateKey: formatDateInputValue(new Date()),
       weekNumber: currentWeek,
     });
-  }, [effectiveSystem, currentWeek]);
+  }, [effectiveSystem, currentWeek, activeTab]);
 
   const weeklyReflectionInsights: ExecutionInsight[] = useMemo(() => {
-    if (!effectiveSystem) return [];
+    if (!effectiveSystem || activeTab !== "week") return [];
     return getWeeklyReflectionInsights(effectiveSystem, currentWeek, {
       todayDateKey: formatDateInputValue(new Date()),
     });
-  }, [effectiveSystem, currentWeek]);
+  }, [effectiveSystem, currentWeek, activeTab]);
 
   const milestoneItems = useMemo(
     () => [

@@ -15,8 +15,8 @@ import { getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
 interface TwelveWeekPremiumInsightSectionProps {
   currentPlanCode: PricingPlanCode;
   hasPremiumInsights: boolean;
-  premiumInsight: WeeklyReviewPremiumInsight;
-  suggestedNextWeekPlan: SuggestedNextWeekPlan;
+  premiumInsight: WeeklyReviewPremiumInsight | null;
+  suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
 }
@@ -30,6 +30,8 @@ export function TwelveWeekPremiumInsightSection({
   onOpenPremiumInsights,
 }: TwelveWeekPremiumInsightSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  if (!premiumInsight) return null;
 
   return (
     <Collapsible
@@ -96,18 +98,18 @@ export function TwelveWeekPremiumInsightSection({
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     Kế hoạch gợi ý cho tuần sau
                   </p>
-                  <p className="mt-2 text-base font-semibold leading-7 text-app-ink">{suggestedNextWeekPlan.focus}</p>
-                  <p className="mt-2 text-sm leading-7 text-app-ink-soft">{suggestedNextWeekPlan.rationale}</p>
+                  <p className="mt-2 text-base font-semibold leading-7 text-app-ink">{suggestedNextWeekPlan?.focus}</p>
+                  <p className="mt-2 text-sm leading-7 text-app-ink-soft">{suggestedNextWeekPlan?.rationale}</p>
                 </div>
                 <Badge className="bg-app-accent text-white hover:bg-app-accent">
-                  {getWorkloadDecisionLabel(suggestedNextWeekPlan.workloadDecision)}
+                  {getWorkloadDecisionLabel(suggestedNextWeekPlan?.workloadDecision ?? "keep same")}
                 </Badge>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <div className="rounded-lg border border-app-line bg-app-bg p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Giữ chắc</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {suggestedNextWeekPlan.protectTactics.map((item) => (
+                    {(suggestedNextWeekPlan?.protectTactics ?? []).map((item) => (
                       <Badge key={item} variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
                         {item}
                       </Badge>
@@ -116,10 +118,10 @@ export function TwelveWeekPremiumInsightSection({
                 </div>
                 <div className="rounded-lg border border-app-line bg-app-bg p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-                    {suggestedNextWeekPlan.secondaryTrackLabel}
+                    {suggestedNextWeekPlan?.secondaryTrackLabel}
                   </p>
                   <div className="mt-2 stack-tight">
-                    {suggestedNextWeekPlan.secondaryTrackItems.map((item) => (
+                    {(suggestedNextWeekPlan?.secondaryTrackItems ?? []).map((item) => (
                       <p key={item} className="text-sm leading-6 text-app-ink-soft">
                         {item}
                       </p>
@@ -128,7 +130,7 @@ export function TwelveWeekPremiumInsightSection({
                 </div>
               </div>
               <p className="mt-4 text-sm leading-7 text-app-ink-soft">
-                Bước đầu tuần nên làm: {suggestedNextWeekPlan.firstMove}
+                Bước đầu tuần nên làm: {suggestedNextWeekPlan?.firstMove}
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button className="w-full sm:w-auto" onClick={onApplySuggestedPlan}>
