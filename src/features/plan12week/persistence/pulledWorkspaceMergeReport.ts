@@ -860,17 +860,17 @@ export function createPulledWorkspaceMergeReport(
     conflicts.every((c) => {
       // If missing_timestamp and cloud wins, we cannot auto-resolve safely
       if (c.winnerSource === "missing_timestamp" && c.winner === "cloud") return false;
+      // If there is a pending local mutation and the cloud wins, we cannot auto-resolve safely
+      if (c.reason === "pending_local_mutation_cloud_newer" && c.winner === "cloud") return false;
       return true;
     }) &&
-    missingClientIds.length === 0 &&
-    unsupportedFields.length === 0;
+    missingClientIds.length === 0;
 
   return {
     safeToApply:
       conflicts.length === 0 &&
       localOnlyChanges.length === 0 &&
-      missingClientIds.length === 0 &&
-      unsupportedFields.length === 0,
+      missingClientIds.length === 0,
     localOnlyChanges,
     cloudOnlyChanges,
     conflicts,

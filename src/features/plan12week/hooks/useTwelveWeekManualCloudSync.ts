@@ -332,12 +332,10 @@ export async function runTwelveWeekManualCloudSync(
     // outside the 12-week flow (e.g. /billing/plan) for users who have already
     // converged with cloud data.
     const hasNoRealConflicts = mergeReport.conflicts.length === 0;
-    const isMergeReportClean =
-      mergeReport.missingClientIds.length === 0 && mergeReport.unsupportedFields.length === 0;
     if (
       !mergeReport.safeToApply &&
       hasNoRealConflicts &&
-      isMergeReportClean &&
+      mergeReport.missingClientIds.length === 0 &&
       unresolvedLocalMutations.length === 0 &&
       mergeReport.localOnlyChanges.length > 0
     ) {

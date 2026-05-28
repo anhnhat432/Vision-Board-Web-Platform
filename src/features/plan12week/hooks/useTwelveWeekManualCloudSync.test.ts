@@ -220,6 +220,22 @@ function createLocalDataWithDifferentTask(): UserData {
   ]);
 }
 
+function createCloudWorkspaceWithMissingClientIds(): TwelveWeekPulledWorkspace {
+  // Cloud has a legacy goal without clientGoalId → mergeReport.missingClientIds > 0
+  // → safeToApply=false, autoResolvable=false → would fall back to "unsafe" status.
+  return createEmptyWorkspace({
+    goals: [
+      {
+        id: "backend_goal_legacy",
+        title: "Legacy goal",
+        category: "Career",
+        description: "Legacy",
+        status: "active",
+      } as TwelveWeekPulledWorkspace["goals"][number],
+    ],
+  });
+}
+
 function baseOptions() {
   return {
     ownerUid: "user_1",
@@ -382,6 +398,32 @@ describe("runTwelveWeekManualCloudSync", () => {
   });
 
   it("does not overwrite local data when pull merge reports a conflict", async () => {
+    // Cloud timestamp is newer than mutation timestamp
+    const atCloudNewer = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    enqueueStoredMutation(
+      {
+        kind: "task_completed_changed",
+        goalId: "goal_1",
+        payload: {
+          taskId: "tw_task_1_tactic_write_0",
+          clientTaskId: "tw_task_1_tactic_write_0",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
+          weekNumber: 1,
+          completed: false, // different from cloud
+          scheduledDate: "2026-04-27",
+        },
+      },
+      {
+        ownerUid: "user_1",
+        storage: localStorage,
+        deviceId: "device_1",
+        now: at(1), // mutation at T+1
+        createId: () => "mutation_pending",
+      },
+    );
+
     const writeUserData = vi.fn(() => true);
 
     const result = await runTwelveWeekManualCloudSync({
@@ -395,8 +437,12 @@ describe("runTwelveWeekManualCloudSync", () => {
         failedCount: 0,
         pendingCount: 0,
       })),
-      pullWorkspace: vi.fn(async () => createPullResponse(createSafeCloudWorkspace())),
-      readUserData: () => createLocalDataWithDifferentTask(),
+      pullWorkspace: vi.fn(async () => {
+        const workspace = createSafeCloudWorkspace();
+        workspace.tasks[0].syncUpdatedAt = atCloudNewer(1); // T+1 day
+        return createPullResponse(workspace);
+      }),
+      readUserData: () => createUserData(),
       writeUserData,
     });
 
@@ -536,11 +582,10 @@ describe("runTwelveWeekManualCloudSync", () => {
       writeUserData,
     });
 
-    // Cloud wins because it's newer - auto-resolve applied
-    expect(result.status).toBe("applied");
-    expect(result.autoResolved).toBeDefined();
-    expect(result.autoResolved?.cloudWinsCount).toBe(1);
-    expect(writeUserData).toHaveBeenCalled();
+    // Cloud is newer but we must NOT auto-overwrite local pending mutations
+    expect(result.status).toBe("conflict");
+    expect(result.autoResolved).toBeUndefined();
+    expect(writeUserData).not.toHaveBeenCalled();
   });
 
   it("saves the nextCursor after a successful pull+apply", async () => {
@@ -775,6 +820,32 @@ describe("runTwelveWeekManualCloudSync", () => {
   });
 
   it("does not update cursor on conflict", async () => {
+    // Cloud timestamp is newer than mutation timestamp
+    const atCloudNewer = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    enqueueStoredMutation(
+      {
+        kind: "task_completed_changed",
+        goalId: "goal_1",
+        payload: {
+          taskId: "tw_task_1_tactic_write_0",
+          clientTaskId: "tw_task_1_tactic_write_0",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
+          weekNumber: 1,
+          completed: false, // different from cloud
+          scheduledDate: "2026-04-27",
+        },
+      },
+      {
+        ownerUid: "user_1",
+        storage: localStorage,
+        deviceId: "device_1",
+        now: at(1), // mutation at T+1
+        createId: () => "mutation_pending",
+      },
+    );
+
     const writeCursor = vi.fn();
     const recordConflictFn = vi.fn();
 
@@ -789,8 +860,12 @@ describe("runTwelveWeekManualCloudSync", () => {
         failedCount: 0,
         pendingCount: 0,
       })),
-      pullWorkspace: vi.fn(async () => createPullResponse(createSafeCloudWorkspace())),
-      readUserData: () => createLocalDataWithDifferentTask(),
+      pullWorkspace: vi.fn(async () => {
+        const workspace = createSafeCloudWorkspace();
+        workspace.tasks[0].syncUpdatedAt = atCloudNewer(1); // T+1 day
+        return createPullResponse(workspace);
+      }),
+      readUserData: () => createUserData(),
       writeUserData: vi.fn(() => true),
       readCursor: () => "existing_cursor",
       writeCursor,
@@ -861,22 +936,6 @@ describe("runTwelveWeekManualCloudSync", () => {
   });
 
   describe("untouched seed policy (B2)", () => {
-    function createCloudWorkspaceWithMissingClientIds(): TwelveWeekPulledWorkspace {
-      // Cloud has a legacy goal without clientGoalId → mergeReport.missingClientIds > 0
-      // → safeToApply=false, autoResolvable=false → would fall back to "unsafe" status.
-      return createEmptyWorkspace({
-        goals: [
-          {
-            id: "backend_goal_legacy",
-            title: "Legacy goal",
-            category: "Career",
-            description: "Legacy",
-            status: "active",
-          } as TwelveWeekPulledWorkspace["goals"][number],
-        ],
-      });
-    }
-
     it("auto-overwrites untouched local seed with cloud snapshot instead of returning unsafe", async () => {
       const writeUserData = vi.fn(() => true);
       const writeCursor = vi.fn();
