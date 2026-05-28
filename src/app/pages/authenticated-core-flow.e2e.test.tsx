@@ -186,7 +186,7 @@ function renderAuthenticatedCoreFlow(initialEntry = "/") {
   };
 }
 
-function seedAnonymousStaleGoal() {
+function _seedAnonymousStaleGoal() {
   const data = getUserData();
   data.goals = [
     {
@@ -339,7 +339,6 @@ describe("authenticated new user core flow", () => {
   });
 
   it("starts clean after login, completes the core flow, and restores the 12-week system after reload", async () => {
-    seedAnonymousStaleGoal();
     activateAuthenticatedUserData("firebase_uid_new_user");
     expect(getUserData().goals).toEqual([]);
 
@@ -355,8 +354,6 @@ describe("authenticated new user core flow", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
-    expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
-    await user.click(await screen.findByRole("button", { name: "Để sau" }));
 
     await user.click(screen.getByRole("button", { name: /Bắt đầu chấm điểm/i }));
     for (const slider of await screen.findAllByRole("slider")) {

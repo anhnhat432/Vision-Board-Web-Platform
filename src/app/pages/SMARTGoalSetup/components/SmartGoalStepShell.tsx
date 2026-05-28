@@ -1,8 +1,22 @@
 import type { ReactNode, RefObject } from "react";
-import { ArrowLeft, ArrowRight, Check, Circle, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleAlert,
+  Lightbulb,
+  Sparkles,
+  ChevronDown,
+  Target,
+  BarChart3,
+  ShieldCheck,
+  Heart,
+  Clock,
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
+import { cn } from "@/app/components/ui/utils";
 
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
@@ -53,6 +67,14 @@ const STEP_LETTERS: Record<SmartStepKey, string> = {
   achievable: "A",
   relevant: "R",
   timeBound: "T",
+};
+
+const STEP_ICONS: Record<SmartStepKey, typeof Target> = {
+  specific: Target,
+  measurable: BarChart3,
+  achievable: ShieldCheck,
+  relevant: Heart,
+  timeBound: Clock,
 };
 
 export function SmartGoalStepShell({
@@ -113,6 +135,7 @@ export function SmartGoalStepShell({
           const isActive = index === stepIndex;
           const isDone = index < stepIndex;
           const canJump = index <= stepIndex;
+          const StepIcon = STEP_ICONS[smartStep.key];
 
           return (
             <li key={smartStep.key} aria-current={isActive ? "step" : undefined}>
@@ -120,18 +143,27 @@ export function SmartGoalStepShell({
                 type="button"
                 disabled={!canJump}
                 onClick={() => handleWizardJump(index)}
-                className={
+                className={cn(
+                  "flex h-full w-full flex-col items-center gap-1.5 rounded-xl border p-2.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                   isActive
-                    ? "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-accent bg-app-accent-soft px-2 py-2 text-app-accent shadow-[0_2px_8px_rgba(40,79,69,0.08)] transition-all duration-200 transform hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    ? "border-app-accent bg-app-accent-soft text-app-accent shadow-[0_4px_12px_rgba(47,93,80,0.12)] scale-105"
                     : isDone
-                      ? "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-accent bg-app-accent px-2 py-2 text-white shadow-sm transition-all duration-200 transform hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                      : "flex h-full w-full flex-col items-center gap-1 rounded-lg border border-app-line bg-app-bg px-2 py-2 text-app-ink-muted transition-all duration-200 hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-default disabled:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                }
+                      ? "border-app-accent/30 bg-app-accent text-white hover:bg-[#284f45]"
+                      : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent disabled:cursor-default"
+                )}
               >
-                <span className="text-sm font-semibold" aria-hidden="true">
-                  {STEP_LETTERS[smartStep.key]}
+                <span className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-200",
+                  isActive
+                    ? "bg-app-accent text-white shadow-sm"
+                    : isDone
+                      ? "bg-white/20 text-white"
+                      : "bg-app-surface text-app-ink-muted border border-app-line"
+                )}>
+                  <StepIcon className="h-4 w-4" />
                 </span>
-                <span className="hidden truncate text-xs font-medium sm:block">{STEP_NAMES[smartStep.key]}</span>
+                <span className="text-[10px] font-bold tracking-widest uppercase">{STEP_LETTERS[smartStep.key]}</span>
+                <span className="hidden truncate text-xs font-semibold sm:block">{STEP_NAMES[smartStep.key]}</span>
                 {isDone ? <span className="sr-only">đã hoàn thành</span> : null}
               </button>
             </li>
@@ -152,61 +184,75 @@ export function SmartGoalStepShell({
         >
         {children}
 
-        <div className="rounded-card border border-app-line bg-app-bg p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-sm font-medium text-app-accent">
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                Gợi ý điền nhanh
+        <div className="relative overflow-hidden rounded-xl border border-app-accent/15 bg-gradient-to-br from-app-accent-soft/60 to-app-surface/40 p-5 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md">
+          <div className="absolute right-0 top-0 -mr-6 -mt-6 h-20 w-20 rounded-full bg-app-accent/5 blur-xl pointer-events-none" />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-accent">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-app-accent/10">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                </div>
+                Ý tưởng gợi ý
               </div>
-              <p className="mt-2 text-sm leading-6 text-app-ink">{starterPreview}</p>
-              <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                Dùng làm bản nháp rồi sửa cho đúng đời sống bạn.
+              <p className="text-sm font-medium leading-relaxed text-app-ink/90 italic">“{starterPreview}”</p>
+              <p className="text-xs text-app-ink-muted">
+                Dùng làm bản nháp rồi sửa lại cho phù hợp với mục tiêu của bạn.
               </p>
             </div>
             <button
               type="button"
-              className="inline-flex w-full shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+              className="inline-flex w-full shrink-0 items-center justify-center gap-1.5 rounded-full border border-app-accent/30 bg-app-surface px-4 py-2 text-xs font-semibold text-app-accent shadow-sm transition-all duration-200 transform hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] hover:bg-app-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
               onClick={onApplyStarter}
               aria-label={`Dùng gợi ý cho bước ${step.label}`}
             >
-              Dùng gợi ý
+              <Sparkles className="h-3 w-3" />
+              Sử dụng gợi ý này
             </button>
           </div>
         </div>
 
-        <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
-          <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-medium text-app-ink">
-            <div>
-              <p>Độ rõ của mục tiêu</p>
-              <p className="mt-1 text-xs font-normal text-app-ink-muted">
-                {clarityDoneCount}/{clarityItems.length} bước đã hoàn thành
+        <details className="group surface-raised rounded-xl border border-app-line bg-app-surface p-4 transition-all duration-200">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-app-ink focus:outline-none [&::-webkit-details-marker]:hidden">
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 font-semibold">
+                Kiểm tra độ rõ của mục tiêu (Clarity)
+                <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+              </p>
+              <p className="text-xs font-normal text-app-ink-muted">
+                {clarityDoneCount}/{clarityItems.length} tiêu chí đã hoàn thành
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-1.5 w-32 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
-                <div className="h-full rounded-full bg-app-accent" style={{ width: `${clarityProgress}%` }} />
+              <div className="h-2 w-28 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
+                <div className="h-full rounded-full bg-gradient-to-r from-app-accent/70 to-app-accent transition-all duration-300" style={{ width: `${clarityProgress}%` }} />
               </div>
+              <span className="text-xs font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
             </div>
           </summary>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div className="mt-4 grid gap-2.5 border-t border-app-line pt-4 sm:grid-cols-2">
             {clarityItems.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => onJumpToStep(item.stepKey)}
-                className="rounded-lg border border-app-line bg-app-bg px-3 py-3 text-left transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className={cn(
+                  "group/btn flex items-start gap-3 rounded-lg border px-3.5 py-3 text-left transition-all duration-200",
+                  item.done
+                    ? "border-app-accent/20 bg-app-accent-soft/30 hover:border-app-accent hover:bg-app-accent-soft/60"
+                    : "border-app-line bg-app-bg hover:border-app-ink-muted hover:bg-app-surface"
+                )}
               >
-                <div className="flex items-start gap-2">
-                  {item.done ? (
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-                  ) : (
-                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
-                  )}
-                  <span>
-                    <span className="block text-sm font-medium text-app-ink">{item.label}</span>
-                    <span className="mt-1 block text-xs leading-5 text-app-ink-soft">{item.detail}</span>
-                  </span>
+                <div className={cn(
+                  "mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border transition-all duration-200",
+                  item.done
+                    ? "border-app-accent bg-app-accent text-white"
+                    : "border-app-ink-muted/30 text-transparent group-hover/btn:border-app-ink-muted"
+                )}>
+                  {item.done ? <Check className="h-3 w-3" /> : <div className="h-1.5 w-1.5 rounded-full bg-app-ink-muted/30" />}
+                </div>
+                <div className="space-y-0.5">
+                  <span className="block text-sm font-semibold text-app-ink group-hover/btn:text-app-accent transition-colors duration-150">{item.label}</span>
+                  <span className="block text-xs leading-normal text-app-ink-soft">{item.detail}</span>
                 </div>
               </button>
             ))}

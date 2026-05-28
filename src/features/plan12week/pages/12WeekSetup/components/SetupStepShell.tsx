@@ -1,4 +1,5 @@
-﻿import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -88,7 +89,7 @@ export function SetupStepShell({
   return (
     <section
       ref={stepShellRef}
-      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm"
       aria-labelledby="twelve-week-step-title"
     >
       <div>
@@ -108,59 +109,110 @@ export function SetupStepShell({
         </h2>
         <div className="mt-2 text-sm leading-6 text-app-ink-soft">{description}</div>
 
-        <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="mt-6 flex gap-1.5">
-          {stepDefinitions.map((step, index) => {
-            const isActive = index === currentStep;
-            const isCompleted = index < currentStep;
-            const canJump = Boolean(onJumpToStep && isCompleted);
+        {/* Connected stepper timeline */}
+        <div className="relative my-8 flex items-center justify-between px-2">
+          {/* Stepper background track line */}
+          <div className="absolute left-4 right-4 top-1/2 h-0.5 -translate-y-1/2 bg-app-line/60" aria-hidden="true" />
+          
+          {/* Stepper active track line */}
+          <div
+            className="absolute left-4 top-1/2 h-0.5 -translate-y-1/2 bg-app-accent transition-all duration-300"
+            style={{ width: `calc(${(currentStep / (stepCount - 1)) * 100}% - ${currentStep === stepCount - 1 ? '32px' : '16px'})` }}
+            aria-hidden="true"
+          />
 
-            return (
-              <li key={step.id} aria-current={isActive ? "step" : undefined}>
-                <button
-                  type="button"
-                  className={cn(
-                    "h-1.5 w-6 rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
-                    isActive && "bg-app-accent",
-                    isCompleted && !isActive && "bg-app-accent/40",
-                    !isActive && !isCompleted && "bg-app-line",
-                    canJump ? "cursor-pointer hover:bg-app-accent/60" : "cursor-default",
-                  )}
-                  disabled={!canJump}
-                  onClick={() => {
-                    if (canJump) onJumpToStep?.(index);
-                  }}
-                  aria-label={`Đi tới bước ${index + 1}: ${step.label}`}
+          <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="relative flex w-full justify-between">
+            {stepDefinitions.map((step, index) => {
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              const canJump = Boolean(onJumpToStep && isCompleted);
+              const StepMetaIcon = STEP_META[index]?.icon ?? Target;
+
+              return (
+                <li
+                  key={step.id}
+                  className="flex flex-col items-center"
+                  aria-current={isActive ? "step" : undefined}
                 >
-                  <span className="sr-only">
-                    Bước {index + 1}: {step.label}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-        <p className="mt-2 text-sm leading-5 text-app-ink-muted">{stepMeta.caption}</p>
+                  <button
+                    type="button"
+                    className={cn(
+                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold shadow-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                      isActive
+                        ? "border-app-accent bg-app-accent text-white scale-110 ring-4 ring-app-accent-soft"
+                        : isCompleted
+                        ? "border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white"
+                        : "border-app-line bg-app-surface text-app-ink-muted",
+                      canJump ? "cursor-pointer" : "cursor-default",
+                    )}
+                    disabled={!canJump}
+                    onClick={() => {
+                      if (canJump) onJumpToStep?.(index);
+                    }}
+                    aria-label={`Đi tới bước ${index + 1}: ${step.label}`}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <StepMetaIcon className="h-4.5 w-4.5" aria-hidden="true" />
+                    )}
+                    
+                    {/* Step label for desktop */}
+                    <span className={cn(
+                      "absolute -bottom-7 hidden whitespace-nowrap text-xs font-semibold sm:block transition-colors duration-200",
+                      isActive ? "text-app-accent font-bold" : isCompleted ? "text-app-ink" : "text-app-ink-muted"
+                    )}>
+                      {step.label}
+                    </span>
+
+                    <span className="sr-only">
+                      Bước {index + 1}: {step.label}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <p className="mt-4 text-xs font-medium leading-relaxed text-app-ink-muted/90 sm:mt-6 bg-app-bg px-3.5 py-2 rounded-lg border border-app-line/40 italic">
+          💡 Ý nghĩa: {stepMeta.caption}
+        </p>
 
         {whyThisMatters ? (
-          <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
+          <div className="mt-5 overflow-hidden rounded-xl border border-app-accent/20 bg-gradient-to-br from-app-accent-soft/20 to-app-accent-soft/5 transition-all duration-200">
             <button
               type="button"
-              className="flex items-center gap-2 text-left text-xs font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="flex w-full items-center justify-between gap-3 p-4 text-left text-xs font-semibold text-app-accent transition-colors duration-150 hover:bg-app-accent-soft/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               onClick={() => setIsWhyOpen((isOpen) => !isOpen)}
               aria-expanded={isWhyOpen}
               aria-controls="twelve-week-step-why"
             >
-              <span>Tại sao bước này quan trọng?</span>
+              <span className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-app-accent/10">
+                  <span className="text-xs">💡</span>
+                </span>
+                Tại sao bước này quan trọng?
+              </span>
               <ChevronDown
-                className={cn("h-4 w-4 transition-transform duration-150", isWhyOpen && "rotate-180")}
+                className={cn("h-4 w-4 text-app-accent transition-transform duration-200", isWhyOpen && "rotate-180")}
                 aria-hidden="true"
               />
             </button>
-            {isWhyOpen ? (
-              <div id="twelve-week-step-why" className="mt-2 text-sm leading-6 text-app-ink-soft">
-                {whyThisMatters}
-              </div>
-            ) : null}
+            <AnimatePresence>
+              {isWhyOpen && (
+                <motion.div
+                  id="twelve-week-step-why"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="border-t border-app-accent/10 bg-app-surface/50 p-4 text-sm leading-relaxed text-app-ink-soft"
+                >
+                  {whyThisMatters}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ) : null}
       </div>
