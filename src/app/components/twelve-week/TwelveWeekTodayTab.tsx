@@ -207,7 +207,6 @@ export function TwelveWeekTodayTab({
   const isFirstWeek = currentWeek === 1;
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
   const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
-  const deferredToggleTimersRef = useRef<number[]>([]);
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
@@ -234,15 +233,6 @@ export function TwelveWeekTodayTab({
     });
   }, [todayQueue]);
 
-  useEffect(() => {
-    return () => {
-      deferredToggleTimersRef.current.forEach((timerId) => {
-        window.clearTimeout(timerId);
-      });
-      deferredToggleTimersRef.current = [];
-    };
-  }, []);
-
   const handleSaveCheckInClick = async () => {
     if (isSavingCheckIn) return;
     setIsSavingCheckIn(true);
@@ -254,26 +244,24 @@ export function TwelveWeekTodayTab({
   };
 
   const handleTaskCompletionChange = (taskId: string, completed: boolean) => {
+    // Ngăn chặn click trùng lặp khi task đang trong trạng thái xử lý optimistic
+    if (taskId in optimisticTaskCompletionById) {
+      return;
+    }
+
     hapticLight();
     setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
 
-    const isTest = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || import.meta.env.MODE === "test");
-    const delay = isTest ? 0 : 80;
-
-    const timerId = window.setTimeout(() => {
-      deferredToggleTimersRef.current = deferredToggleTimersRef.current.filter((item) => item !== timerId);
-      Promise.resolve(onToggleTask(taskId, completed)).catch((error) => {
-        // Chỉ hoàn tác trạng thái optimistic khi xảy ra lỗi thực tế
-        setOptimisticTaskCompletionById((current) => {
-          if (!(taskId in current)) return current;
-          const next = { ...current };
-          delete next[taskId];
-          return next;
-        });
-        console.error("Failed to toggle task:", error);
+    Promise.resolve(onToggleTask(taskId, completed)).catch((error) => {
+      // Chỉ hoàn tác trạng thái optimistic khi xảy ra lỗi thực tế
+      setOptimisticTaskCompletionById((current) => {
+        if (!(taskId in current)) return current;
+        const next = { ...current };
+        delete next[taskId];
+        return next;
       });
-    }, delay);
-    deferredToggleTimersRef.current.push(timerId);
+      console.error("Failed to toggle task:", error);
+    });
   };
 
   const todayCheckIn = latestCheckIn?.date === todayDateKey ? latestCheckIn : null;
