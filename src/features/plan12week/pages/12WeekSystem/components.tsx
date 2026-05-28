@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, Loader2, Sparkles, Target } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
@@ -165,8 +165,11 @@ export function TwelveWeekDashboardHeader({
                 <Target className="mr-1 h-3.5 w-3.5" />
                 Tuần {currentWeek}/{system.totalWeeks}
               </Badge>
-              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${syncBadgeClass}`}>
-                {syncBadgeLabel}
+              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 inline-flex items-center gap-1.5 ${syncBadgeClass}`}>
+                {syncBadgeLabel === "Đang đồng bộ" && (
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                )}
+                <span>{syncBadgeLabel}</span>
               </Badge>
               {reviewDueToday && (
                 <Badge variant="outline" className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800">

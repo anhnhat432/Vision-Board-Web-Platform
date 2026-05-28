@@ -300,15 +300,21 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Files changed:**
 - **Verified:** [ ] Queue persists across reloads
 
-### 18. ⬜ Loading States
+### 18. ✅ Loading States
 
 - **Prompt:** Prompt 18
-- **Status:** [ ] Not started / [x] In progress / [ ] Completed
-- **Files changed:** `src/app/components/root-layout/useWorkspaceGate.ts`
+- **Status:** [x] Completed
+- **Files changed:**
+  - `src/features/plan12week/pages/12WeekSetup.tsx` - Await backend sync, add skeleton loading page
+  - `src/features/plan12week/pages/12WeekSystem.tsx` - Add full dashboard skeleton loading page when `!isReady`
+  - `src/features/plan12week/pages/12WeekSystem/components.tsx` - Add spinning loader micro-animation inside "Đang đồng bộ" badge
+  - `src/app/pages/MockBillingCheckout.tsx` - Add spinning Loader2 icon in upgrade confirm button when submitting
 - **Notes:**
-  - Bỏ `backendHydrationLoading` khỏi workspace loading gate → UI hiện ngay với data local, backend sync chạy ngầm
-  - Còn lại: các loading state khác chưa review
-- **Verified:** [ ] All async ops show loading
+  - Spinner ở nút Tạo kế hoạch 12 tuần được kéo dài đúng thời gian phản hồi thực của backend sync thay vì tắt ngay
+  - Bổ sung 2 màn skeleton tải trang đẹp mắt cho Thiết lập 12 tuần và Dashboard Hôm nay
+  - Micro-animation xoay nhẹ khi trạng thái badge là Đang đồng bộ
+  - Upgrade Checkout button có spinner xoay thực tế khi click xác nhận
+- **Verified:** [x] `npm run check` passes 100% clean / [x] Production build passes
 
 ### 19. ⬜ TypeScript Strictness
 

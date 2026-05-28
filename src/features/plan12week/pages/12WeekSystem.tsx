@@ -10,6 +10,7 @@ import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
+import { Skeleton } from "@/app/components/ui/skeleton";
 import { trackAnalyticsEvent } from '@/app/utils/analytics';
 import {
   isDemoMode,
@@ -710,12 +711,89 @@ export function TwelveWeekSystem() {
 
   if (!isReady) {
     return (
-      <TwelveWeekDashboardState
-        kind="loading"
-        eyebrow="Đang chuẩn bị dashboard"
-        title="Đang tải hệ thống 12 tuần"
-        description="Mình đang đọc dữ liệu local và kiểm tra trạng thái chu kỳ hiện tại trước khi mở hàng việc hôm nay."
-      />
+      <div className="ops-shell ops-system pb-28 md:pb-4 space-y-6">
+        {/* Header Skeleton */}
+        <div className="border border-slate-200 bg-white rounded-xl p-5 sm:p-6 lg:p-7 shadow-sm space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start justify-between">
+            <div className="space-y-3 flex-1">
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-24 rounded-full animate-pulse" />
+                <Skeleton className="h-6 w-28 rounded-full animate-pulse" />
+                <Skeleton className="h-6 w-32 rounded-full animate-pulse" />
+              </div>
+              <Skeleton className="h-8 w-3/4 animate-pulse" />
+              <Skeleton className="h-4 w-1/2 animate-pulse" />
+            </div>
+            {/* Metrics grid skeleton */}
+            <div className="grid grid-cols-3 gap-3 w-full sm:w-[380px] xl:w-[480px]">
+              <div className="h-20 bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
+                <Skeleton className="h-3 w-12 animate-pulse" />
+                <Skeleton className="h-6 w-8 animate-pulse" />
+              </div>
+              <div className="h-20 bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
+                <Skeleton className="h-3 w-12 animate-pulse" />
+                <Skeleton className="h-6 w-12 animate-pulse" />
+              </div>
+              <div className="h-20 bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
+                <Skeleton className="h-3 w-12 animate-pulse" />
+                <Skeleton className="h-6 w-16 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Goal Switcher Skeleton */}
+        <div className="border border-slate-200 bg-white rounded-xl px-4 py-3 shadow-sm">
+          <Skeleton className="h-5 w-48 animate-pulse" />
+        </div>
+
+        {/* Navigation Tabs Skeleton */}
+        <div className="inline-flex gap-2 bg-slate-100/80 p-1.5 rounded-full">
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse" />
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse" />
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse" />
+          <Skeleton className="h-10 w-24 rounded-full animate-pulse" />
+        </div>
+
+        {/* Tab Content Today Skeleton */}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          {/* Main Today Tasks Column */}
+          <div className="space-y-4">
+            <div className="border border-slate-200 bg-white rounded-xl p-5 shadow-sm space-y-4">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-6 w-32 animate-pulse" />
+                <Skeleton className="h-4 w-20 animate-pulse" />
+              </div>
+              {/* Today list of tasks */}
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 border border-slate-100 p-4 rounded-xl">
+                    <Skeleton className="h-5 w-5 rounded-md animate-pulse" />
+                    <Skeleton className="h-5 flex-1 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right sidebar: Mood & Note Check-in */}
+          <div className="space-y-4">
+            <div className="border border-slate-200 bg-white rounded-xl p-5 shadow-sm space-y-4">
+              <Skeleton className="h-6 w-40 animate-pulse" />
+              <div className="grid grid-cols-3 gap-2">
+                <Skeleton className="h-12 w-full rounded-lg animate-pulse" />
+                <Skeleton className="h-12 w-full rounded-lg animate-pulse" />
+                <Skeleton className="h-12 w-full rounded-lg animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20 animate-pulse" />
+                <Skeleton className="h-20 w-full rounded-lg animate-pulse" />
+              </div>
+              <Skeleton className="h-12 w-32 rounded-lg animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 

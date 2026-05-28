@@ -1,4 +1,4 @@
-﻿import { CreditCard, Crown, ShieldCheck } from "lucide-react";
+import { CreditCard, Crown, Loader2, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -209,7 +209,11 @@ export function MockBillingCheckout() {
             </div>
             <div className="grid gap-2">
               <Button className="w-full" onClick={handleConfirm} disabled={isSubmitting}>
-                <Crown className="h-4 w-4" />
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Crown className="h-4 w-4" />
+                )}
                 {isSubmitting ? "Đang mở gói..." : "Xác nhận mở gói"}
               </Button>
               <Button variant="outline" className="w-full" onClick={handleCancel} disabled={isSubmitting}>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useCallback, useRef, useState } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
+import { Skeleton } from "@/app/components/ui/skeleton";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import {
   APP_STORAGE_KEYS,
@@ -469,13 +470,60 @@ export function TwelveWeekSetup() {
 
   if (isLoading) {
     return (
-      <CoreFlowGateState
-        currentStepId="twelve_week_setup"
-        eyebrow="Thiết lập 12 tuần"
-        title="Đang chuẩn bị dữ liệu thiết lập 12 tuần"
-        description="Đang lấy lại mục tiêu, kết quả kiểm tra và bản nháp gần nhất."
-        loading
-      />
+      <PageShell maxWidth="hero" className="stack-section sm:stack-section">
+        {/* CoreFlowProgress skeleton */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <Skeleton className="h-6 w-32" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        </div>
+
+        {/* Hero Card Skeleton */}
+        <div className="rounded-xl bg-slate-100/60 p-6 space-y-4">
+          <Skeleton className="h-6 w-24 animate-pulse" />
+          <Skeleton className="h-10 w-3/4 animate-pulse" />
+          <Skeleton className="h-6 w-1/2 animate-pulse" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-32 rounded-full animate-pulse" />
+            <Skeleton className="h-8 w-32 rounded-full animate-pulse" />
+          </div>
+        </div>
+
+        {/* SetupStepShell Skeleton */}
+        <div className="border border-slate-200/80 bg-white rounded-xl p-6 space-y-6 shadow-sm">
+          {/* Progress bar skeleton */}
+          <div className="flex justify-between items-center gap-2">
+            <Skeleton className="h-2 flex-1 rounded-full animate-pulse" />
+            <Skeleton className="h-2 flex-1 rounded-full animate-pulse" />
+            <Skeleton className="h-2 flex-1 rounded-full animate-pulse" />
+            <Skeleton className="h-2 flex-1 rounded-full animate-pulse" />
+          </div>
+
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-20 animate-pulse" />
+            <Skeleton className="h-8 w-2/3 animate-pulse" />
+            <Skeleton className="h-4 w-full animate-pulse" />
+          </div>
+
+          {/* Form Content Skeleton */}
+          <div className="space-y-4 py-4">
+            <Skeleton className="h-12 w-full animate-pulse" />
+            <Skeleton className="h-24 w-full animate-pulse" />
+            <div className="grid grid-cols-2 gap-4">
+              <Skeleton className="h-12 w-full animate-pulse" />
+              <Skeleton className="h-12 w-full animate-pulse" />
+            </div>
+          </div>
+
+          {/* Footer buttons skeleton */}
+          <div className="flex justify-between pt-4 border-t border-slate-100">
+            <Skeleton className="h-10 w-24 animate-pulse" />
+            <Skeleton className="h-10 w-28 animate-pulse" />
+          </div>
+        </div>
+      </PageShell>
     );
   }
 
@@ -992,7 +1040,7 @@ export function TwelveWeekSetup() {
     } satisfies Parameters<typeof createGoal>[0];
 
     if (canRunBackendSync) {
-      void (async () => {
+      try {
         let backendGoalId: string | null = null;
 
         try {
@@ -1013,19 +1061,16 @@ export function TwelveWeekSetup() {
 
         if (!backendPlanId) {
           console.warn("Backend plan sync did not return a plan id; skipping backend goal plan link.");
-          return;
+        } else if (backendGoalId) {
+          try {
+            await updateGoal(backendGoalId, { planId: backendPlanId });
+          } catch (linkError) {
+            console.warn("Failed to link backend goal to plan.", linkError);
+          }
         }
-
-        if (!backendGoalId) {
-          return;
-        }
-
-        try {
-          await updateGoal(backendGoalId, { planId: backendPlanId });
-        } catch (linkError) {
-          console.warn("Failed to link backend goal to plan.", linkError);
-        }
-      })();
+      } catch (syncError) {
+        console.warn("Backend synchronization encountered an unexpected error, continuing local-first.", syncError);
+      }
     }
 
     toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {
