@@ -139,6 +139,21 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
   return want ? `« ${truncateCommitmentReminder(want)} »` : null;
 }
 
+function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
+  if (!isActive) {
+    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:border-app-line-strong transition-all duration-200 rounded-xl shadow-sm";
+  }
+  switch (value) {
+    case "low":
+      return "border-indigo-300 bg-indigo-50/50 text-indigo-900 dark:border-indigo-950/40 dark:bg-indigo-950/30 dark:text-indigo-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
+    case "high":
+      return "border-amber-300 bg-amber-50/50 text-amber-900 dark:border-amber-950/40 dark:bg-amber-950/30 dark:text-amber-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
+    case "steady":
+    default:
+      return "border-emerald-300 bg-emerald-50/50 text-emerald-900 dark:border-emerald-950/40 dark:bg-emerald-950/30 dark:text-emerald-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
+  }
+}
+
 export function TwelveWeekTodayTab({
   system,
   currentWeek,
@@ -708,8 +723,8 @@ export function TwelveWeekTodayTab({
                       return (
                         <MotionStaggerItem
                           key={task.id}
-                          className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 ${
-                            isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface"
+                          className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 transition-all duration-200 hover:translate-x-0.5 hover:shadow-sm ${
+                            isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface hover:border-app-line-strong"
                           }`}
                         >
                           <Checkbox
@@ -978,31 +993,36 @@ export function TwelveWeekTodayTab({
                     aria-labelledby="daily-mood-label"
                     className="grid grid-cols-3 gap-2 lg:grid-cols-1 2xl:grid-cols-3"
                   >
-                    {MOOD_OPTIONS.map((option) => (
-                      <Button
-                        key={option.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={dailyMood === option.value}
-                        aria-label={`${option.label}: ${option.hint}`}
-                        variant="outline"
-                        className={
-                          dailyMood === option.value
-                            ? "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-app-accent bg-app-accent px-2 py-2 text-center text-white hover:bg-app-accent sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
-                            : "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-app-line bg-app-surface px-2 py-2 text-center text-app-ink-soft hover:bg-app-bg sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
-                        }
-                        onClick={() => onDailyMoodChange(option.value)}
-                      >
-                        <span className="min-w-0 text-left">
-                          <span className="block text-center text-sm font-semibold sm:text-left">{option.label}</span>
-                          <span
-                            className={`hidden break-words text-xs leading-5 sm:block ${dailyMood === option.value ? "text-white/72" : "text-app-ink-muted"}`}
-                          >
-                            {option.hint}
+                    {MOOD_OPTIONS.map((option) => {
+                      const isActive = dailyMood === option.value;
+                      const moodStyle = getMoodOptionStyle(option.value, isActive);
+                      const emoji = option.value === "low" ? "🧘‍♂️" : option.value === "high" ? "🔥" : "🌱";
+                      
+                      return (
+                        <Button
+                          key={option.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={isActive}
+                          aria-label={`${option.label}: ${option.hint}`}
+                          variant="outline"
+                          className={`h-auto min-h-11 min-w-0 justify-center whitespace-normal px-2 py-2 text-center sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left ${moodStyle}`}
+                          onClick={() => onDailyMoodChange(option.value)}
+                        >
+                          <span className="flex items-center gap-2 min-w-0 text-left">
+                            <span className="text-xl sm:text-2xl shrink-0">{emoji}</span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold">{option.label}</span>
+                              <span
+                                className={`hidden break-words text-[11px] leading-4 sm:block ${isActive ? "text-app-ink-soft font-normal" : "text-app-ink-muted"}`}
+                              >
+                                {option.hint}
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </Button>
-                    ))}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="stack-tight">
