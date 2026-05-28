@@ -228,7 +228,7 @@ function notifyUserDataUpdated(): void {
   window.setTimeout(emit, 0);
 }
 
-function resetUserDataCache(): void {
+export function resetUserDataCache(): void {
   _cachedUserData = null;
   _cachedRawHash = null;
 }

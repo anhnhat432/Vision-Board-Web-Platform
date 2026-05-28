@@ -47,7 +47,7 @@ export function GoalArchetypeExamples({
       data-variant={variant}
       data-archetype={archetype}
       className={cn(
-        "group overflow-hidden rounded-xl border border-app-accent/20 bg-gradient-to-br from-app-accent-soft/20 to-app-accent-soft/5 transition-all duration-200 text-left shadow-sm",
+        "group overflow-hidden rounded-[14px] border border-app-line bg-app-surface transition-all duration-200 text-left",
         className
       )}
     >
@@ -73,17 +73,17 @@ export function GoalArchetypeExamples({
                 key={`${variant}-${entry.tone}`}
                 data-tone={entry.tone}
                 className={cn(
-                  "rounded-xl border p-4 text-sm leading-relaxed transition-all duration-200",
+                  "rounded-[14px] border p-4 text-sm leading-relaxed transition-all duration-200",
                   isStrong
-                    ? "border-emerald-300/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300 shadow-[0_2px_8px_rgba(16,185,129,0.04)]"
-                    : "border-rose-300/40 bg-rose-500/5 text-rose-800 dark:text-rose-300"
+                    ? "border-app-accent/30 bg-app-accent-soft/30 text-app-accent"
+                    : "border-app-line bg-app-surface text-app-ink-soft"
                 )}
               >
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
                   {isStrong ? (
-                    <Sparkles className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                    <Sparkles className="h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
                   ) : (
-                    <CircleAlert className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
+                    <CircleAlert className="h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
                   )}
                   <span>{entry.label}</span>
                 </div>
@@ -96,7 +96,7 @@ export function GoalArchetypeExamples({
         {variant === "lead_indicator" ? (
           <div
             data-testid="goal-archetype-week1-starter"
-            className="rounded-xl border border-app-line bg-app-surface/80 p-4 text-sm leading-relaxed text-app-ink-soft shadow-sm"
+            className="rounded-[14px] border border-app-line bg-app-surface/80 p-4 text-sm leading-relaxed text-app-ink-soft"
           >
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-app-accent">
               <Sparkles className="h-3.5 w-3.5 animate-pulse" />

@@ -422,7 +422,7 @@ function GoalTrackerContent({
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
     return (
-      <SpotlightCard key={goal.id} className="surface-raised rounded-xl p-5 md:p-6 overflow-hidden">
+      <SpotlightCard key={goal.id} className="rounded-[14px] border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,1fr)]">
           {/* Cột trái — Goal summary */}
           <div>
@@ -620,7 +620,7 @@ function GoalTrackerContent({
         {overviewItems.map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.title} className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
+            <div key={item.title} className="rounded-[14px] border border-app-line bg-app-surface p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{item.title}</p>
@@ -730,15 +730,15 @@ function GoalTrackerSkeleton() {
       aria-busy="true"
     >
       <span className="sr-only">Đang tải danh sách mục tiêu...</span>
-      <Skeleton className="h-40 rounded-2xl bg-app-line/60" />
+      <Skeleton className="h-40 rounded-[14px] bg-app-line/60" />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[0, 1, 2, 3].map((index) => (
-          <Skeleton key={index} className="h-20 rounded-xl bg-app-line/60" />
+          <Skeleton key={index} className="h-20 rounded-[14px] bg-app-line/60" />
         ))}
       </div>
       <div className="space-y-3">
         {[0, 1, 2].map((index) => (
-          <Skeleton key={index} className="h-32 rounded-xl bg-app-line/60" />
+          <Skeleton key={index} className="h-32 rounded-[14px] bg-app-line/60" />
         ))}
       </div>
     </div>

@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
@@ -540,7 +540,7 @@ export function SMARTGoalSetup() {
 
         {!isVisionPromptDismissed ? (
           <section
-            className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+            className="rounded-[14px] border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
             aria-label="Tầm nhìn dài hạn"
           >
             <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-warm">
@@ -609,7 +609,7 @@ export function SMARTGoalSetup() {
             {renderCurrentStepFields()}
           </SmartGoalStepShell>
 
-          <details className="mt-5 rounded-card border border-dashed border-app-line bg-app-bg p-5">
+          <details className="mt-5 rounded-[14px] border border-dashed border-app-line bg-app-bg p-5">
             <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
               Xem lại mục tiêu đang viết
             </summary>

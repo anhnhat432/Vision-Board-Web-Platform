@@ -58,12 +58,12 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
       role="note"
       aria-label={`${VARIANT_TITLE[variant]} (${archetypeLabel})`}
       className={cn(
-        "rounded-xl border p-4 shadow-sm transition-all duration-200 hover:scale-[1.005] hover:shadow-md",
+        "rounded-[14px] border p-4 transition-all duration-200",
         variant === "antiPattern"
           ? "border-amber-300/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
           : variant === "metric"
-          ? "border-emerald-300/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
-          : "border-sky-300/40 bg-sky-500/5 text-sky-800 dark:text-sky-300"
+          ? "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
+          : "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
       )}
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
@@ -79,8 +79,8 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
           variant === "antiPattern"
             ? "border-amber-400/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
             : variant === "metric"
-            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            : "border-sky-400/30 bg-sky-500/10 text-sky-600 dark:text-sky-400"
+            ? "border-app-accent/30 bg-app-accent-soft text-app-accent"
+            : "border-app-accent/30 bg-app-accent-soft text-app-accent"
         )}>
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>

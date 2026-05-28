@@ -45,7 +45,7 @@ export function ArchetypePicker({
   onResetToInferred,
 }: ArchetypePickerProps) {
   return (
-    <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+    <div className="rounded-[14px] border border-app-line bg-app-surface p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Chọn loại mục tiêu</p>
@@ -76,9 +76,9 @@ export function ArchetypePicker({
               key={option.value}
               type="button"
               className={cn(
-                "group flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+                "group flex flex-col items-start gap-1.5 rounded-[14px] border p-3.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                 active
-                  ? "border-app-accent bg-gradient-to-br from-app-accent-soft/40 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold"
+                  ? "border-app-accent bg-app-accent-soft/30 text-app-accent font-semibold"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-accent-soft/5 hover:text-app-accent"
               )}
               onClick={() => onChange(option.value)}

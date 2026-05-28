@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { getUserData, saveUserData } from "../utils/storage";
+import { getUserData, resetUserDataCache, saveUserData } from "../utils/storage";
 import { SMARTGoalSetup } from "./SMARTGoalSetup";
 
 function seedReadySmartSetup(withVision: boolean) {
@@ -42,6 +42,7 @@ function renderSmartSetup() {
 
 beforeEach(() => {
   localStorage.clear();
+  resetUserDataCache();
 });
 
 describe("SMARTGoalSetup aspirational vision banner", () => {

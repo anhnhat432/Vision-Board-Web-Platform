@@ -12,7 +12,7 @@ interface ReviewStepProps {
 export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, onJumpToStep }: ReviewStepProps) {
   return (
     <section
-      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+      className="rounded-[14px] border border-app-line bg-app-surface p-5 sm:p-6"
       aria-labelledby="smart-review-title"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -39,7 +39,7 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
               </div>
               <button
                 type="button"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                 onClick={() => onJumpToStep(row.key)}
                 aria-label={`Sửa phần ${row.label}`}
               >

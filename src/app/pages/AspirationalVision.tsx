@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -134,7 +134,7 @@ export function AspirationalVision() {
       </header>
 
       <section
-        className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8"
+        className="mt-6 rounded-[14px] border border-app-warm-border bg-app-warm-soft p-6 md:p-8"
         aria-label="Biểu mẫu tầm nhìn"
       >
         <div className="max-w-3xl">
@@ -254,14 +254,14 @@ export function AspirationalVision() {
             <h2 className="mt-1 text-base font-semibold text-app-ink">Bản tóm tắt gần nhất</h2>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:col-span-2">
+            <article className="rounded-[14px] border border-app-line bg-app-surface p-5 md:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 CẬP NHẬT {formatVisionDate(storedVision.updatedAt)}
               </p>
               <p className="mt-3 font-serif text-sm italic leading-7 text-app-ink">"{storedVision.summary}"</p>
             </article>
             {storedVision.lifeAreas.map((item) => (
-              <article key={item.area} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+              <article key={item.area} className="rounded-[14px] border border-app-line bg-app-surface p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                   {getAreaLabel(item.area)}
                 </p>
