@@ -1,4 +1,4 @@
-import { CartesianGrid, Area, AreaChart, ReferenceDot, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ReferenceDot, Tooltip, XAxis, YAxis } from "recharts";
 import { TrendingUp } from "lucide-react";
 
 import type { WeeklyProgressPoint } from "@/features/dashboard/helpers/dashboardInsights";
@@ -53,25 +53,19 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
 
   return (
     <section
-      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
+      className="rounded-[14px] border border-app-line bg-app-surface p-5 md:p-6"
       aria-labelledby="dashboard-trend-title"
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
         <h2 id="dashboard-trend-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-emerald-500 animate-pulse" />
+          <TrendingUp className="h-5 w-5 text-app-accent" />
           Đường 12 tuần
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">Tiến độ % thực thi theo từng tuần</p>
       </div>
 
       <div className="mt-5 h-[180px] overflow-hidden">
-        <AreaChart data={data} width={chartWidth} height={180} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-          <defs>
-            <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--app-accent)" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="var(--app-accent)" stopOpacity={0.0} />
-            </linearGradient>
-          </defs>
+        <LineChart data={data} width={chartWidth} height={180} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--app-line)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="week"
@@ -88,7 +82,7 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
               borderRadius: "14px",
               color: "var(--app-ink)",
               fontSize: "12px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              boxShadow: "none",
             }}
             labelFormatter={(label) => `Tuần ${label}`}
             formatter={(value, name, item) => {
@@ -98,13 +92,12 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
               return [`${progress}${details}`, name === "percent" ? "Tiến độ" : name];
             }}
           />
-          <Area
+          <Line
             type="monotone"
             dataKey="percent"
             stroke="var(--app-accent)"
             strokeWidth={2.5}
-            fillOpacity={1}
-            fill="url(#trendGradient)"
+            dot={false}
             activeDot={{ r: 4, fill: "var(--app-accent)" }}
           />
           {activePoint ? (
@@ -116,7 +109,7 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
               fill="var(--app-accent)"
             />
           ) : null}
-        </AreaChart>
+        </LineChart>
       </div>
     </section>
   );

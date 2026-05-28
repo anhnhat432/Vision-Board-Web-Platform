@@ -10,9 +10,9 @@ export function QuoteBlock({
   author = "Vision Board",
 }: QuoteBlockProps) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-amber-300/30 bg-gradient-to-br from-amber-500/5 via-yellow-500/5 to-transparent backdrop-blur-sm p-6 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="relative overflow-hidden rounded-[14px] border border-app-line bg-app-surface p-6">
       {/* Background Decorative Quote Icon */}
-      <div className="absolute -right-3 -top-3 text-amber-500/10 pointer-events-none transform rotate-180">
+      <div className="absolute -right-3 -top-3 text-app-accent-soft/40 pointer-events-none transform rotate-180">
         <Quote className="h-16 w-16" />
       </div>
 
@@ -21,11 +21,11 @@ export function QuoteBlock({
           “{text}”
         </blockquote>
         <div className="mt-4 flex items-center justify-center gap-2">
-          <div className="h-px w-6 bg-amber-300/50" />
-          <figcaption className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+          <div className="h-px w-6 bg-app-line" />
+          <figcaption className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
             {author}
           </figcaption>
-          <div className="h-px w-6 bg-amber-300/50" />
+          <div className="h-px w-6 bg-app-line" />
         </div>
       </figure>
     </div>

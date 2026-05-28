@@ -69,23 +69,21 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
   return (
     <div className="space-y-6">
       {/* Greeting Banner */}
-      <section className="relative overflow-hidden rounded-2xl border border-emerald-300/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent backdrop-blur-md p-6 md:p-8 shadow-md">
-        <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
-        
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Không gian mới</p>
-        <h1 className="mt-4 max-w-3xl font-serif text-3xl font-bold leading-[1.2] tracking-tight text-app-ink sm:text-4xl">
+      <section className="relative overflow-hidden rounded-[14px] border border-app-line bg-app-accent-soft p-6 md:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">Không gian mới</p>
+        <h1 className="mt-4 max-w-3xl font-serif text-3xl font-medium leading-[1.2] tracking-tight text-app-ink sm:text-4xl">
           Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu chu kỳ 12 tuần đầu tiên.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-ink-soft">
           Trang chính sẽ sáng rõ và đầy ắp số liệu trực quan sau khi bạn hoàn thành một mục tiêu thật, một lịch biểu tuần và vài việc hôm nay.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-300/50 bg-app-surface/80 px-3.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 shadow-sm">
-          <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-bold text-app-accent">
+          <Sparkles className="h-3.5 w-3.5 text-app-accent" />
           <span>Cần hướng dẫn 6 bước chi tiết?</span>
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
-            className="ml-1 font-extrabold underline underline-offset-2 hover:text-emerald-600 transition-colors"
+            className="ml-1 font-extrabold underline underline-offset-2 hover:underline transition-colors"
           >
             Mở ngay →
           </button>
@@ -95,13 +93,13 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
       {/* Setup Steps Panel V2 */}
       <section
         data-testid="fresh-workspace-empty-state"
-        className="surface-empty rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
+        className="surface-empty rounded-[14px] border border-app-line bg-app-surface p-5 md:p-6"
         aria-labelledby="dashboard-new-user-title"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-app-line pb-4 mb-6">
           <div>
             <h2 id="dashboard-new-user-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-emerald-500" />
+              <BookOpen className="h-5 w-5 text-app-accent" />
               Thiết lập chu kỳ đầu tiên
             </h2>
             <p className="text-xs font-semibold text-app-ink-muted mt-0.5">
@@ -111,7 +109,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           <button
             type="button"
             onClick={() => onContinue(nextStep.href)}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-app-accent/90 shadow-md hover:-translate-y-0.5"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-app-accent px-5 py-2 text-xs font-bold text-white transition-colors duration-150 hover:bg-app-accent/90"
           >
             Tiếp tục thiết lập →
           </button>
@@ -123,12 +121,12 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
               key={step.title}
               type="button"
               onClick={() => onContinue(step.href)}
-              className="flex text-left gap-4 rounded-xl border border-app-line bg-app-bg/50 p-4 hover:bg-app-bg hover:shadow-md hover:border-app-line-strong hover:-translate-y-0.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30"
+              className="flex text-left gap-4 rounded-[14px] border border-app-line bg-app-surface p-4 hover:bg-app-accent-soft transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-sm ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${
                   step.completed
-                    ? "bg-gradient-to-br from-emerald-500 to-teal-400 text-white"
+                    ? "bg-app-accent text-white"
                     : "bg-app-surface border border-app-line text-app-ink-muted"
                 }`}
               >

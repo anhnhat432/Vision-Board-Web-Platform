@@ -15,16 +15,16 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
 
   return (
     <section
-      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 shadow-sm hover:shadow-md transition-shadow duration-300"
+      className="rounded-[14px] border border-app-line bg-app-surface p-5"
       aria-labelledby="dashboard-today-mini-title"
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-4">
         <h2 id="dashboard-today-mini-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <ListTodo className="h-5 w-5 text-emerald-500" />
+          <ListTodo className="h-5 w-5 text-app-accent" />
           {title}
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
-          Đã chốt <span className="text-emerald-500 font-extrabold">{completedCount}</span> trên tổng số <span className="text-app-ink font-extrabold">{totalCount}</span> việc
+          Đã chốt <span className="text-app-accent font-extrabold">{completedCount}</span> trên tổng số <span className="text-app-ink font-extrabold">{totalCount}</span> việc
         </p>
       </div>
 
@@ -33,10 +33,10 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
           visibleTasks.map((task) => (
             <div
               key={task.id}
-              className="flex items-center gap-3 rounded-xl border border-app-line bg-app-bg/50 px-4 py-3 hover:-translate-x-0.5 hover:shadow-sm hover:border-app-line-strong transition-all duration-200"
+              className="flex items-center gap-3 rounded-[14px] border border-app-line bg-app-surface px-4 py-3 hover:bg-app-accent-soft transition-colors duration-150"
             >
               {task.completed ? (
-                <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="h-4.5 w-4.5 text-app-accent shrink-0" />
               ) : (
                 <Circle className="h-4.5 w-4.5 text-app-ink-muted hover:text-app-accent transition-colors duration-200 shrink-0" />
               )}
@@ -48,7 +48,7 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
             </div>
           ))
         ) : (
-          <div className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-6 text-sm leading-relaxed text-app-ink-muted text-center italic">
+          <div className="surface-empty rounded-[14px] border border-dashed border-app-line bg-app-bg/50 p-6 text-sm leading-relaxed text-app-ink-muted text-center italic">
             Hôm nay chưa có việc mở. Mở Today để thêm hoặc xem lại tuần.
           </div>
         )}
@@ -57,7 +57,7 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
       <div className="mt-5 pt-3 border-t border-app-line flex justify-end">
         <Link
           to="/today-v2"
-          className="inline-flex items-center gap-1 text-xs font-bold text-app-accent hover:text-emerald-600 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex items-center gap-1 text-xs font-bold text-app-accent hover:underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Mở Today
           <ArrowRight className="h-3.5 w-3.5" />
