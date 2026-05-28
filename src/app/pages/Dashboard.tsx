@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
@@ -65,29 +65,29 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
     id: "start",
     targetId: "dashboard-start-card",
-    title: "Bắt đầu từ khối này",
+    title: "B?t d?u t? kh?i n�y",
     description:
-      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng luồng: góc nhìn, mục tiêu SMART, kiểm tra tính thực tế rồi mới vào 12 tuần.",
+      "N?u chua c� chu k?, h�y nh�n kh?i n�y tru?c. ��y l� noi d?n b?n qua d�ng lu?ng: g�c nh�n, m?c ti�u SMART, ki?m tra t�nh th?c t? r?i m?i v�o 12 tu?n.",
   },
   {
     id: "attention",
     targetId: "dashboard-next-card",
-    title: "Nhìn khối này trước khi quét cả màn",
-    description: "Phần đầu Trang chính gom ba tín hiệu quan trọng nhất để bạn biết nên mở vào đâu tiếp theo.",
+    title: "Nh�n kh?i n�y tru?c khi qu�t c? m�n",
+    description: "Ph?n d?u Trang ch�nh gom ba t�n hi?u quan tr?ng nh?t d? b?n bi?t n�n m? v�o d�u ti?p theo.",
   },
   {
     id: "plan",
     targetId: "dashboard-plan-card",
-    title: "Phân biệt Free và Plus ở đây",
-    description: "Khối này cho biết bạn đang ở gói nào, quyền nào đã mở và chỗ để quản lý hoặc khôi phục lại nếu cần.",
+    title: "Ph�n bi?t Free v� Plus ? d�y",
+    description: "Kh?i n�y cho bi?t b?n dang ? g�i n�o, quy?n n�o d� m? v� ch? d? qu?n l� ho?c kh�i ph?c l?i n?u c?n.",
   },
 ];
 
 const LIFE_BALANCE_ROWS = [
-  { label: "Sức khoẻ", aliases: ["Health"], fallbackScore: 7 },
-  { label: "Sự nghiệp", aliases: ["Career", "Education"], fallbackScore: 6 },
-  { label: "Mối quan hệ", aliases: ["Relationships", "Family"], fallbackScore: 8 },
-  { label: "Tinh thần", aliases: ["Personal Growth", "Leisure"], fallbackScore: 5 },
+  { label: "S?c kho?", aliases: ["Health"], fallbackScore: 7 },
+  { label: "S? nghi?p", aliases: ["Career", "Education"], fallbackScore: 6 },
+  { label: "M?i quan h?", aliases: ["Relationships", "Family"], fallbackScore: 8 },
+  { label: "Tinh th?n", aliases: ["Personal Growth", "Leisure"], fallbackScore: 5 },
 ] as const;
 
 interface LifeBalanceRow {
@@ -102,9 +102,9 @@ function clamp(value: number, min: number, max: number): number {
 function getDashboardGreeting(now = new Date()): string {
   const hour = now.getHours();
 
-  if (hour >= 5 && hour <= 11) return "Chào buổi sáng";
-  if (hour >= 12 && hour <= 17) return "Chào buổi chiều";
-  return "Chào buổi tối";
+  if (hour >= 5 && hour <= 11) return "Ch�o bu?i s�ng";
+  if (hour >= 12 && hour <= 17) return "Ch�o bu?i chi?u";
+  return "Ch�o bu?i t?i";
 }
 
 function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]): string {
@@ -112,12 +112,12 @@ function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]
   if (displayName) return displayName.split(/\s+/)[0];
 
   const emailName = user?.email?.split("@")[0]?.trim();
-  return emailName || "bạn";
+  return emailName || "b?n";
 }
 
 function formatDashboardDateCaption(date: Date, greeting: string): string {
   const weekday = new Intl.DateTimeFormat("vi-VN", { weekday: "long" }).format(date);
-  return `${greeting} · ${weekday}, ngày ${date.getDate()} tháng ${date.getMonth() + 1}`.toLocaleUpperCase("vi-VN");
+  return `${greeting} � ${weekday}, ng�y ${date.getDate()} th�ng ${date.getMonth() + 1}`.toLocaleUpperCase("vi-VN");
 }
 
 function getLifeBalanceRows(areas: LifeArea[]): LifeBalanceRow[] {
@@ -140,16 +140,16 @@ function getLastSavedLabel(userData: UserData, tasks: TwelveWeekTaskInstance[]):
     ...userData.reflections.map((reflection) => Date.parse(reflection.date)),
   ].filter((value) => Number.isFinite(value) && value > 0);
 
-  if (timestamps.length === 0) return "vừa xong";
+  if (timestamps.length === 0) return "v?a xong";
 
   const minutes = Math.max(0, Math.round((Date.now() - Math.max(...timestamps)) / 60000));
-  if (minutes < 1) return "vừa xong";
-  if (minutes < 60) return `${minutes} phút trước`;
+  if (minutes < 1) return "v?a xong";
+  if (minutes < 60) return `${minutes} ph�t tru?c`;
 
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 24) return `${hours} gi? tru?c`;
 
-  return `${Math.round(hours / 24)} ngày trước`;
+  return `${Math.round(hours / 24)} ng�y tru?c`;
 }
 
 function buildSystemWeeklyProgressPoints(system: TwelveWeekSystem | null): WeeklyProgressPoint[] {
@@ -178,7 +178,7 @@ export function Dashboard() {
 
   useSetAssistantPageContext({
     pageType: "dashboard",
-    hint: "Đang xem tổng quan mục tiêu và hệ thống 12 tuần",
+    hint: "�ang xem t?ng quan m?c ti�u v� h? th?ng 12 tu?n",
   });
 
   if (!userData) {
@@ -234,7 +234,7 @@ function useDashboardDerivedData({
 }) {
   const recentGoals = visibleGoals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(visibleReflections).slice(0, 2);
-  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
+  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "M?c ti�u hi?n t?i";
   const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
   const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
   const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
@@ -289,9 +289,9 @@ function useDashboardDerivedData({
       : [];
   const activeSystemWeekOpenTasks = activeSystemWeekTasks.filter((task) => !task.completed);
 
-  // Preview ưu tiên task hôm nay; nếu trống thì fallback sang task tuần này
-  // chưa hoàn thành. Khi fallback, counter cũng đổi sang nguồn tuần để
-  // "0/0 việc" không hiện sai cùng 3 task render từ tuần.
+  // Preview uu ti�n task h�m nay; n?u tr?ng th� fallback sang task tu?n n�y
+  // chua ho�n th�nh. Khi fallback, counter cung d?i sang ngu?n tu?n d?
+  // "0/0 vi?c" kh�ng hi?n sai c�ng 3 task render t? tu?n.
   const todayPreviewUsesToday = activeSystemTodayOpenTasks.length > 0;
   const activeSystemTaskPreview =
     effectiveSystem && activeSystemWeek
@@ -301,7 +301,7 @@ function useDashboardDerivedData({
   const todayPreviewCompleted = todayPreviewUsesToday
     ? activeSystemTodayCompletedCount
     : activeSystemWeekTasks.length - activeSystemWeekOpenTasks.length;
-  const todayPreviewTitle = todayPreviewUsesToday ? "Việc hôm nay" : "Việc tuần này";
+  const todayPreviewTitle = todayPreviewUsesToday ? "Vi?c h�m nay" : "Vi?c tu?n n�y";
   const hasReviewedCurrentWeek = Boolean(
     effectiveSystem &&
       activeSystemWeek &&
@@ -615,7 +615,7 @@ function DashboardContent({
           <FeedbackDialog
             source="dashboard"
             context="dashboard"
-            triggerLabel="Góp ý"
+            triggerLabel="G�p �"
             triggerClassName="border-app-line bg-app-surface text-app-ink-muted hover:bg-app-bg"
           />
         </div>
@@ -638,7 +638,7 @@ function DashboardContent({
             className="w-full rounded-lg border border-app-line bg-app-surface px-4 py-3 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={() => navigate("/today-v2")}
           >
-            Mở Today - {dashboardData.dashboardOpenTaskCount} việc
+            M? Today - {dashboardData.dashboardOpenTaskCount} vi?c
           </button>
         </div>
       ) : null}
@@ -656,8 +656,8 @@ function DashboardContent({
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
-        title="Tour Trang chính"
-        description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
+        title="Tour Trang ch�nh"
+        description="Ba di?m ch�nh d? ngu?i m?i m? v�o l� bi?t n�n b?t d?u t? d�u."
         steps={dashboardTourSteps}
       />
     </div>
@@ -716,7 +716,7 @@ function DashboardActiveLayout({
       {topTrigger ? (
         <RescueAlert
           trigger={topTrigger}
-          ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
+          ctaLabel={topTrigger.kind === "trial_ending" ? "M? Plus" : "Xem ngay"}
           onAction={onTriggerAction}
           onDismiss={onTriggerDismiss}
         />
@@ -775,14 +775,14 @@ function DashboardActiveLayout({
 
 function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; limit: number; onUpgrade: () => void }) {
   return (
-    <section className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
+    <section className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4" aria-label="Gi?i h?n g�i Free">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-app-ink">
-            Gói Free: {current}/{limit} mục tiêu
+            G�i Free: {current}/{limit} m?c ti�u
           </p>
           <p className="mt-1 text-sm leading-6 text-app-ink-muted">
-            Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.
+            N�ng c?p Plus khi b?n c?n t?o th�m m?c ti�u m?i. D? li?u cu v?n du?c gi? nguy�n.
           </p>
         </div>
         <button
@@ -790,7 +790,7 @@ function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; lim
           onClick={onUpgrade}
           className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
-          Mở Plus
+          M? Plus
         </button>
       </div>
     </section>
@@ -813,21 +813,21 @@ function TrialCountdownBanner({
   return (
     <section
       className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft"
-      aria-label="Thời hạn Plus"
+      aria-label="Th?i h?n Plus"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <span>
           <span className="font-semibold text-app-ink">
-            {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
+            {demoMode ? "Plus d�ng th?:" : "Plus dang trong th?i gian uu d�i:"}
           </span>{" "}
-          còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
+          c�n {daysLeft} ng�y {demoMode ? "tr�n tr�nh duy?t n�y" : "tr�n t�i kho?n n�y"}.
         </span>
         <button
           type="button"
           onClick={onOpenPlan}
           className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:ml-auto"
         >
-          Chi tiết
+          Chi ti?t
         </button>
       </div>
     </section>
@@ -846,7 +846,7 @@ function DashboardPlanStateNotice({
   if (planLoading && !hasPlan) {
     return (
       <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-muted">
-        Đang tải dữ liệu Trang chính 12 tuần...
+        �ang t?i d? li?u Trang ch�nh 12 tu?n...
       </div>
     );
   }
@@ -864,20 +864,20 @@ function DashboardPlanStateNotice({
 
 function DemoDataNotice({ onOpenLifeBalance }: { onOpenLifeBalance: () => void }) {
   return (
-    <section className="mt-6 rounded-card border border-app-line bg-app-accent-soft p-5" aria-label="Dữ liệu mẫu">
+    <section className="mt-6 rounded-card border border-app-line bg-app-accent-soft p-5" aria-label="D? li?u m?u">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-app-accent">Dữ liệu đang hiển thị là ví dụ mẫu</p>
+          <p className="text-sm font-semibold text-app-accent">D? li?u dang hi?n th? l� v� d? m?u</p>
           <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-            Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
+            C?p nh?t b�nh xe cu?c s?ng c?a b?n d? thay d? li?u m?u b?ng th�ng tin th?t.
           </p>
         </div>
         <button
           type="button"
           onClick={onOpenLifeBalance}
-          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
-          Cập nhật ngay
+          C?p nh?t ngay
         </button>
       </div>
     </section>

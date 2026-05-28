@@ -428,7 +428,7 @@ export function OutcomeStep({
                 "mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                 selectedTemplate?.id === recommendedTemplate.id
                   ? "border border-app-accent bg-app-accent-soft text-app-accent"
-                  : "bg-app-accent text-white hover:bg-[#284f45]",
+                  : "bg-app-accent text-white hover:bg-app-accent-hover",
               )}
               onClick={() => onTemplateSelect(recommendedTemplate)}
             >

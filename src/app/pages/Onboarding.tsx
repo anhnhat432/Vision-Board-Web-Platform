@@ -373,7 +373,7 @@ export function Onboarding() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={handleResumeDraft}
           >
             Tiếp tục
@@ -416,7 +416,7 @@ export function Onboarding() {
               <>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                   onClick={handleStartAssessment}
                 >
                   Bắt đầu chấm điểm
@@ -597,7 +597,7 @@ export function Onboarding() {
             </button>
             <button
               type="button"
-              className="order-1 inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:order-2"
+              className="order-1 inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:order-2"
               onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
             >
               {canCompleteAssessment ? "Tiếp → Chọn trọng tâm" : "Để sau"}

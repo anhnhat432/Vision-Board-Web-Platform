@@ -22,7 +22,7 @@ export function ReflectionPrompt({ currentWeek, reviewHref }: ReflectionPromptPr
       </h2>
       <Link
         to={reviewHref}
-        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
       >
         Mở review →
       </Link>

@@ -148,7 +148,7 @@ export function SmartGoalStepShell({
                   isActive
                     ? "border-app-accent bg-app-accent-soft text-app-accent shadow-[0_4px_12px_rgba(47,93,80,0.12)] scale-105"
                     : isDone
-                      ? "border-app-accent/30 bg-app-accent text-white hover:bg-[#284f45]"
+                      ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent-hover"
                       : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent disabled:cursor-default"
                 )}
               >
@@ -318,7 +318,7 @@ export function SmartGoalStepShell({
         </button>
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           onClick={onNext}
           disabled={!isCurrentStepValid}
         >

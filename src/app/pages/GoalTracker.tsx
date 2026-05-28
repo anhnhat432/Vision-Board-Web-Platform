@@ -520,7 +520,7 @@ function GoalTrackerContent({
                     type="checkbox"
                     checked={task.completed || false}
                     onChange={() => handleToggleTask(goal.id, task.id)}
-                    className="size-4 rounded border-[1.5px] border-[#C8C2B6] bg-app-surface data-[state=checked]:bg-app-accent data-[state=checked]:border-app-accent"
+                    className="size-4 rounded border-[1.5px] border-app-line-strong bg-app-surface data-[state=checked]:bg-app-accent data-[state=checked]:border-app-accent"
                   />
                   <span
                     className={`text-sm line-clamp-1 ${task.completed ? "line-through text-app-ink-muted" : "text-app-ink"}`}
@@ -605,7 +605,7 @@ function GoalTrackerContent({
               />
             </div>
             <Button
-              className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#284f45] inline-flex items-center gap-2"
+              className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent-hover inline-flex items-center gap-2"
               onClick={handleStartGuidedGoalFlow}
               disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
             >
@@ -653,7 +653,7 @@ function GoalTrackerContent({
             description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
             actions={
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Button className="bg-app-accent text-white hover:bg-[#284f45]" onClick={handleStartGuidedGoalFlow}>
+                <Button className="bg-app-accent text-white hover:bg-app-accent-hover" onClick={handleStartGuidedGoalFlow}>
                   Bắt đầu chu kỳ 12 tuần →
                 </Button>
                 <Button

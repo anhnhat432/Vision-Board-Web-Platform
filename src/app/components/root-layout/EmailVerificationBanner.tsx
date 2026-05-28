@@ -143,7 +143,7 @@ export function EmailVerificationBanner() {
               <HardDrive className="h-4 w-4 flex-none" />
               Email chưa xác thực: <span className="break-all">{pendingEmail || "chưa có email"}</span>
             </p>
-            <p className="mt-1 text-xs leading-5 text-[#6F493A]">
+            <p className="mt-1 text-xs leading-5 text-app-warm-strong">
               Xác thực giúp chúng tôi gửi biên nhận, hỗ trợ hoàn tiền và bảo vệ tài khoản khi dùng tính năng trả phí
               hoặc đồng bộ cloud.
               {lastSentLabel ? ` Gần nhất đã gửi: ${lastSentLabel}.` : ""}

@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker } from "react-router";
 import { AlertTriangle, ArrowRight, Compass, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -217,8 +217,8 @@ export function LifeBalance() {
 
   const handleSave = () => {
     saveLifeBalance();
-    toast.success("Đã cập nhật Cân bằng cuộc sống", {
-      description: "Điểm mới đã được lưu vào bánh xe cuộc sống của bạn.",
+    toast.success("�� c?p nh?t C�n b?ng cu?c s?ng", {
+      description: "�i?m m?i d� du?c luu v�o b�nh xe cu?c s?ng c?a b?n.",
     });
   };
 
@@ -228,27 +228,27 @@ export function LifeBalance() {
         <div ref={pageTopRef} className="pb-12">
           <header>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              Bánh xe cuộc sống
+              B�nh xe cu?c s?ng
             </p>
             <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
-              Bức tranh hiện tại của bạn
+              B?c tranh hi?n t?i c?a b?n
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-app-ink-soft">
-              Nhìn 8 lĩnh vực để biết bạn đang mạnh ở đâu, mỏng ở đâu.
+              Nh�n 8 linh v?c d? bi?t b?n dang m?nh ? d�u, m?ng ? d�u.
             </p>
           </header>
 
           <section className="mt-8 surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
             <Compass className="mx-auto h-12 w-12 text-app-accent" aria-hidden="true" />
-            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có dữ liệu bánh xe</h2>
+            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chua c� d? li?u b�nh xe</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
-              Bắt đầu bằng cách chấm điểm 8 lĩnh vực để xem bức tranh.
+              B?t d?u b?ng c�ch ch?m di?m 8 linh v?c d? xem b?c tranh.
             </p>
             <Link
               to="/onboarding"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-[#284f45]"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-app-accent-hover"
             >
-              Bắt đầu chấm điểm
+              B?t d?u ch?m di?m
               <ArrowRight className="h-4 w-4" />
             </Link>
           </section>
@@ -272,35 +272,35 @@ export function LifeBalance() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-warm-soft text-app-warm">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <AlertDialogTitle className="font-serif text-app-ink">Bạn có thay đổi chưa lưu</AlertDialogTitle>
+            <AlertDialogTitle className="font-serif text-app-ink">B?n c� thay d?i chua luu</AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-app-ink-soft">
-              Nếu rời khỏi trang này, hệ thống sẽ cố lưu điểm vừa chỉnh trước khi đóng trang.
+              N?u r?i kh?i trang n�y, h? th?ng s? c? luu di?m v?a ch?nh tru?c khi d�ng trang.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-3 sm:flex-col sm:items-stretch sm:justify-start">
             <AlertDialogAction
               onClick={() => {
                 saveLifeBalance();
-                toast.success("Đã lưu trước khi rời trang.");
+                toast.success("�� luu tru?c khi r?i trang.");
                 blocker.proceed?.();
               }}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2 text-sm font-medium text-white hover:bg-[#284f45]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2 text-sm font-medium text-white hover:bg-app-accent-hover"
             >
               <Save className="h-4 w-4" />
-              Lưu rồi rời trang
+              Luu r?i r?i trang
             </AlertDialogAction>
             <button
               type="button"
               onClick={() => blocker.proceed?.()}
               className="rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
             >
-              Rời trang
+              R?i trang
             </button>
             <AlertDialogCancel
               onClick={() => blocker.reset?.()}
               className="rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
             >
-              Ở lại trang này
+              ? l?i trang n�y
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -308,22 +308,22 @@ export function LifeBalance() {
 
       <div ref={pageTopRef} className="pb-12">
         <header className="page-enter">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Bánh xe cuộc sống</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">B�nh xe cu?c s?ng</p>
           <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
-            Bức tranh hiện tại của bạn
+            B?c tranh hi?n t?i c?a b?n
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-app-ink-soft">
-            Nhìn 8 lĩnh vực để biết bạn đang mạnh ở đâu, mỏng ở đâu.
+            Nh�n 8 linh v?c d? bi?t b?n dang m?nh ? d�u, m?ng ? d�u.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {formattedLastSaved ? (
               <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">
-                Cập nhật lần cuối: {formattedLastSaved}
+                C?p nh?t l?n cu?i: {formattedLastSaved}
               </span>
             ) : null}
             {historyCount > 0 ? (
               <span className="inline-flex items-center rounded-full bg-app-accent-soft px-3 py-1 text-xs text-app-accent">
-                {historyCount} lần ghi nhận
+                {historyCount} l?n ghi nh?n
               </span>
             ) : null}
             <AutoSaveIndicator status={autoSaveStatus} lastSavedAt={lastSavedAt} variant="prominent" />
@@ -332,7 +332,7 @@ export function LifeBalance() {
 
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung b�nh</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
@@ -340,7 +340,7 @@ export function LifeBalance() {
           </article>
           <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              Lĩnh vực mạnh nhất
+              Linh v?c m?nh nh?t
             </p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={strongestArea.score} />
@@ -350,7 +350,7 @@ export function LifeBalance() {
           </article>
           <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              Lĩnh vực cần ưu tiên
+              Linh v?c c?n uu ti�n
             </p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
@@ -362,9 +362,9 @@ export function LifeBalance() {
 
         <Tabs defaultValue="current" className="mt-8">
           <TabsList>
-            <TabsTrigger value="current">Hiện tại</TabsTrigger>
+            <TabsTrigger value="current">Hi?n t?i</TabsTrigger>
             <TabsTrigger value="history" disabled={historicalData.length === 0}>
-              Lịch sử
+              L?ch s?
             </TabsTrigger>
           </TabsList>
 
@@ -372,23 +372,23 @@ export function LifeBalance() {
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
                 <header>
-                  <h2 className="text-base font-semibold text-app-ink">Bánh xe cuộc đời</h2>
-                  <p className="text-xs text-app-ink-muted">8 lĩnh vực hiện tại</p>
+                  <h2 className="text-base font-semibold text-app-ink">B�nh xe cu?c d?i</h2>
+                  <p className="text-xs text-app-ink-muted">8 linh v?c hi?n t?i</p>
                 </header>
                 <div className="mt-4">
                   <SimpleRadarChart className="mx-auto max-w-[600px]" data={radarData} height={460} />
                 </div>
                 <div className="mt-3 text-right">
                   <Link to="/onboarding" className="text-sm text-app-accent hover:underline">
-                    Chấm lại điểm →
+                    Ch?m l?i di?m ?
                   </Link>
                 </div>
               </section>
 
               <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
                 <header>
-                  <h2 className="text-base font-semibold text-app-ink">Cập nhật điểm</h2>
-                  <p className="text-xs text-app-ink-muted">Kéo thanh để chấm lại</p>
+                  <h2 className="text-base font-semibold text-app-ink">C?p nh?t di?m</h2>
+                  <p className="text-xs text-app-ink-muted">K�o thanh d? ch?m l?i</p>
                 </header>
                 <ul className="mt-5">
                   {lifeAreas.map((area, index) => {
@@ -414,7 +414,7 @@ export function LifeBalance() {
                           min={1}
                           max={10}
                           step={1}
-                          aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
+                          aria-label={`�i?m ${getLifeAreaLabel(area.name)}`}
                         />
                       </li>
                     );
@@ -427,12 +427,12 @@ export function LifeBalance() {
                     disabled={!hasChanges}
                     className={
                       hasChanges
-                        ? "inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#284f45]"
+                        ? "inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-app-accent-hover"
                         : "inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-app-ink-muted px-5 py-2.5 text-sm font-medium text-white"
                     }
                   >
                     <Save className="h-4 w-4" />
-                    Lưu thay đổi
+                    Luu thay d?i
                   </button>
                 </div>
               </section>
@@ -442,15 +442,15 @@ export function LifeBalance() {
           <TabsContent value="history" className="mt-6">
             <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
               <header>
-                <h2 className="text-base font-semibold text-app-ink">Diễn biến 6 đợt gần nhất</h2>
-                <p className="text-xs text-app-ink-muted">Mỗi đường là một lĩnh vực; trục đứng là điểm 0–10.</p>
+                <h2 className="text-base font-semibold text-app-ink">Di?n bi?n 6 d?t g?n nh?t</h2>
+                <p className="text-xs text-app-ink-muted">M?i du?ng l� m?t linh v?c; tr?c d?ng l� di?m 0�10.</p>
               </header>
               <div className="mt-4">
                 {historicalData.length > 0 ? (
                   <Suspense
                     fallback={
                       <div className="rounded-card border border-dashed border-app-line p-8 text-center text-sm text-app-ink-muted">
-                        Đang mở biểu đồ lịch sử...
+                        �ang m? bi?u d? l?ch s?...
                       </div>
                     }
                   >
@@ -458,7 +458,7 @@ export function LifeBalance() {
                   </Suspense>
                 ) : (
                   <div className="rounded-card border border-dashed border-app-line p-8 text-center">
-                    <p className="text-sm text-app-ink-soft">Chưa có lịch sử. Hãy lưu thay đổi để xem diễn biến.</p>
+                    <p className="text-sm text-app-ink-soft">Chua c� l?ch s?. H�y luu thay d?i d? xem di?n bi?n.</p>
                   </div>
                 )}
               </div>

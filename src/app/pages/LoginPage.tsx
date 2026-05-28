@@ -240,7 +240,7 @@ export function LoginPage() {
           <h2 className="mt-4 font-serif text-xl font-medium text-app-ink">Chưa cấu hình xác thực</h2>
           <p className="mt-1 text-sm text-app-ink-muted">Xác thực chưa được thiết lập trong môi trường này.</p>
           <Button
-            className="mt-5 w-full bg-app-accent text-white hover:bg-[#284f45]"
+            className="mt-5 w-full bg-app-accent text-white hover:bg-app-accent-hover"
             onClick={() => navigate("/", { replace: true })}
           >
             Quay về trang chủ
@@ -552,7 +552,7 @@ export function LoginPage() {
                     {/* Submit button */}
                     <Button
                       type="submit"
-                      className="w-full bg-app-accent text-white py-2.5 text-sm font-medium hover:bg-[#284f45] transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
+                      className="w-full bg-app-accent text-white py-2.5 text-sm font-medium hover:bg-app-accent-hover transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
                       disabled={submitting || authLoading || !email || !password || !canSubmitSignup}
                     >
                       {submitting ? (
@@ -648,7 +648,7 @@ export function LoginPage() {
                         <div className="flex gap-2">
                           <Button
                             type="submit"
-                            className="bg-app-accent text-white hover:bg-[#284f45]"
+                            className="bg-app-accent text-white hover:bg-app-accent-hover"
                             disabled={resetSubmitting || !resetEmail.trim()}
                           >
                             {resetSubmitting ? (

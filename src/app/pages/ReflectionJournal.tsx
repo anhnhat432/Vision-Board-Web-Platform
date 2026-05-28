@@ -333,7 +333,7 @@ function ReflectionJournalContent() {
           {hasReflections && (
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-[#c56b4e] shrink-0 self-start sm:self-center"
+              className="bg-app-warm text-white hover:bg-app-warm-hover shrink-0 self-start sm:self-center"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết nhật ký mới
@@ -503,7 +503,7 @@ function ReflectionJournalContent() {
               <Button
                 onClick={handleAddReflection}
                 disabled={!newReflection.title || !newReflection.content}
-                className="mt-6 w-full bg-app-warm text-white hover:bg-[#c56b4e]"
+                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm-hover"
               >
                 Lưu nhật ký
               </Button>
@@ -562,7 +562,7 @@ function ReflectionJournalContent() {
           actions={
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-[#c56b4e]"
+              className="bg-app-warm text-white hover:bg-app-warm-hover"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết entry đầu tiên

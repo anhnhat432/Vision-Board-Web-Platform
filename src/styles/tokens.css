@@ -1,67 +1,312 @@
+/* ============================================================
+ * DESIGN TOKENS — Vision Board Platform
+ * 3-layer system: Primitive → Semantic → Component
+ *
+ * QUYỀN TẮC:
+ *   1. Không dùng Primitive token trực tiếp trong component.
+ *   2. Luôn dùng Semantic hoặc Component token.
+ *   3. warm/* tokens CHỈ dùng trong Reflection context.
+ *   4. Không trộn accent và warm trong cùng 1 component.
+ * ============================================================ */
+
+/* ─────────────────────────────────────────────────────────────
+ * LAYER 1: Primitive Tokens
+ * Nguồn gốc màu sắc. Không dùng trực tiếp trong JSX/CSS component.
+ * ───────────────────────────────────────────────────────────── */
 :root {
-  --app-bg: #FAF8F5;
-  --app-surface: #FFFFFF;
-  --app-ink: #1A1A1A;
-  --app-ink-soft: #4A4A4A;
-  /* Darkened from #8A8A8A to #6B6B6B so the muted token reaches WCAG AA
-   * 4.5:1 contrast on both #FAF8F5 (4.69) and #FFFFFF (5.74). Lighthouse
-   * a11y audit flagged 5 places that broke before. */
-  --app-ink-muted: #6B6B6B;
-  --app-line: #ECE8E1;
-  --app-accent: #2F5D50;
-  --app-accent-soft: #E8F0EC;
-  --app-warm: #D97757;
-  --app-warm-soft: #FCEDE5;
-  --app-warm-strong: #5C3A2E;
-  --app-warm-border: #F3D9CC;
-  --app-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system,
-    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Green palette */
+  --green-950: #152B25;
+  --green-900: #1E3D35;
+  --green-800: #264E43;
+  --green-700: #2F5D50;   /* accent base */
+  --green-600: #3A7261;
+  --green-100: #E8F0EC;   /* accent-soft base */
+  --green-050: #F2F7F4;   /* accent-subtle base */
+
+  /* Terracotta palette */
+  --terra-800: #A8522F;
+  --terra-700: #C96843;
+  --terra-600: #D97757;   /* warm base */
+  --terra-100: #FCEDE5;   /* warm-soft base */
+  --terra-050: #FEF6F1;   /* warm-subtle base */
+
+  /* Neutral palette */
+  --neutral-950: #1A1A1A;
+  --neutral-700: #4A4A4A;
+  --neutral-500: #6B6B6B;
+  --neutral-400: #8A8A8A;
+  --neutral-300: #B8B2AA;
+  --neutral-200: #D4CFC8;
+  --neutral-150: #ECE8E1;
+  --neutral-050: #FAF8F5;
+  --neutral-000: #FFFFFF;
+
+  /* Status palette */
+  --status-green:  #3A7D5E;
+  --status-amber:  #C4841A;
+  --status-red:    #B84040;
+  --status-blue:   #3A6B9E;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * LAYER 2: Semantic Tokens — Light Mode
+ * Dùng trong mọi component. Đây là nguồn duy nhất khi code UI.
+ * ───────────────────────────────────────────────────────────── */
+:root {
+  /* — Font families — */
+  --app-font-sans: "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --app-font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia,
     Cambria, "Times New Roman", Times, serif;
+
+  /* — Spacing & shape — */
   --app-radius-card: 14px;
+  --app-radius-pill: 9999px;
+  --app-radius-input: 10px;
+  --app-radius-control: 11px;
   --app-section-gap: 24px;
   --app-section-gap-compact: 20px;
   --app-card-padding: 24px;
   --app-card-padding-mobile: 20px;
+
+  /* — Background — */
+  --app-bg:          var(--neutral-050);  /* nền trang chính */
+  --app-bg-subtle:   #F5F2EE;             /* section lồng trong card */
+  --app-surface:     var(--neutral-000);  /* card, panel, modal */
+  --app-overlay:     rgba(26, 26, 26, 0.40); /* modal backdrop */
+
+  /* — Text — */
+  --app-ink:         var(--neutral-950);  /* body, label chính */
+  --app-ink-soft:    var(--neutral-700);  /* description, sub-label */
+  --app-ink-muted:   var(--neutral-500);  /* placeholder, caption (AA contrast) */
+  --app-ink-disabled: var(--neutral-300); /* input/button disabled */
+  --app-ink-on-accent: var(--neutral-000); /* text trên nền accent */
+  --app-ink-on-warm:  var(--neutral-000); /* text trên nền warm */
+  --app-ink-link:    var(--green-700);    /* link inline */
+
+  /* — Border / Divider — */
+  --app-line:        var(--neutral-150);  /* border mặc định */
+  --app-line-strong: var(--neutral-200);  /* border emphasized */
+
+  /* — Accent (Forest Green) — Execution / Action / Progress — */
+  --app-accent:        var(--green-700);
+  --app-accent-hover:  var(--green-800);
+  --app-accent-active: var(--green-900);
+  --app-accent-soft:   var(--green-100);   /* pill bg, tag bg */
+  --app-accent-subtle: var(--green-050);   /* row hover, selected row bg */
+
+  /* — Warm (Terracotta) — CHỈNH DÙNG TRONG REFLECTION CONTEXT — */
+  --app-warm:          var(--terra-600);
+  --app-warm-hover:    var(--terra-700);
+  --app-warm-active:   var(--terra-800);
+  --app-warm-soft:     var(--terra-100);   /* pill bg trong reflection */
+  --app-warm-subtle:   var(--terra-050);   /* background nhẹ trong reflection */
+  --app-warm-strong:   #5C3A2E;            /* dark text trong warm context */
+  --app-warm-border:   #F3D9CC;            /* border warm-tinted */
+
+  /* — Status — */
+  --app-status-success: var(--status-green);
+  --app-status-warning: var(--status-amber);
+  --app-status-error:   var(--status-red);
+  --app-status-info:    var(--status-blue);
+
+  /* — Focus Ring — */
+  --app-focus-ring: 0 0 0 3px rgba(47, 93, 80, 0.20);
+  --app-focus-ring-warm: 0 0 0 3px rgba(217, 119, 87, 0.20);
+
+  /* — Elevation / Shadow — */
+  /* Neutral shadows, không màu accent/warm — giữ calm feel */
+  --app-shadow-sm:
+    0 1px 3px rgba(26, 26, 26, 0.06),
+    0 1px 2px rgba(26, 26, 26, 0.04);
+  --app-shadow-md:
+    0 4px 12px rgba(26, 26, 26, 0.08),
+    0 2px 4px rgba(26, 26, 26, 0.04);
+  --app-shadow-lg:
+    0 8px 24px rgba(26, 26, 26, 0.10),
+    0 4px 8px rgba(26, 26, 26, 0.06);
+  --app-shadow-xl:
+    0 16px 40px rgba(26, 26, 26, 0.12),
+    0 8px 16px rgba(26, 26, 26, 0.06);
 }
 
+/* — Dark Mode Overrides — */
 html.dark {
-  /* Dark mode overrides — keep the calm forest tone but invert levels.
-   * Warm near-black background instead of pure #000 so the eye stays
-   * relaxed, with ink/surface/line lifted just enough for cards to
-   * read clearly. Accent stays forest green (slightly lightened for
-   * contrast against the dark surface). Warm stays terracotta.
-   */
-  --app-bg: #1C1A15;
-  --app-surface: #26231D;
-  --app-ink: #F2EDE5;
-  --app-ink-soft: #C8C2B5;
-  /* Brighten in dark mode (#8A8273 → #A39B8C) so muted text on #1C1A15 keeps
-   * AA contrast (~6.9:1) — Lighthouse a11y baseline. */
-  --app-ink-muted: #A39B8C;
-  --app-line: #3A342B;
-  --app-accent: #5BA590;
-  --app-accent-soft: #1F3A33;
-  --app-warm: #E89878;
-  --app-warm-soft: #3A2820;
-  --app-warm-strong: #F8D5C2;
-  --app-warm-border: #5C3A2E;
+  /* Warm near-black — không pure #000 để mắt không mỏi.
+   * Accent sáng hơn để đủ contrast trên nền tối.
+   * Warm giữ terracotta, sáng hơn nhẹ. */
+
+  --app-bg:          #1C1A15;
+  --app-bg-subtle:   #211F1A;
+  --app-surface:     #26231D;
+  --app-overlay:     rgba(0, 0, 0, 0.60);
+
+  --app-ink:         #F2EDE5;
+  --app-ink-soft:    #C8C2B5;
+  --app-ink-muted:   #A39B8C;  /* AA contrast ~6.9:1 trên #1C1A15 */
+  --app-ink-disabled: #6B6358;
+  --app-ink-on-accent: #FFFFFF;
+  --app-ink-on-warm:  #FFFFFF;
+  --app-ink-link:    #5BA590;
+
+  --app-line:        #3A342B;
+  --app-line-strong: #4A4239;
+
+  --app-accent:        #5BA590;
+  --app-accent-hover:  #4D9480;
+  --app-accent-active: #3E7A68;
+  --app-accent-soft:   #1F3A33;
+  --app-accent-subtle: #192E28;
+
+  --app-warm:          #E89878;
+  --app-warm-hover:    #D98060;
+  --app-warm-active:   #C96843;
+  --app-warm-soft:     #3A2820;
+  --app-warm-subtle:   #2E201A;
+  --app-warm-strong:   #F8D5C2;
+  --app-warm-border:   #5C3A2E;
+
+  --app-shadow-sm:
+    0 1px 3px rgba(0, 0, 0, 0.20),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+  --app-shadow-md:
+    0 4px 12px rgba(0, 0, 0, 0.28),
+    0 2px 4px rgba(0, 0, 0, 0.16);
+  --app-shadow-lg:
+    0 8px 24px rgba(0, 0, 0, 0.36),
+    0 4px 8px rgba(0, 0, 0, 0.20);
+  --app-shadow-xl:
+    0 16px 40px rgba(0, 0, 0, 0.44),
+    0 8px 16px rgba(0, 0, 0, 0.24);
 }
 
+/* ─────────────────────────────────────────────────────────────
+ * LAYER 3: Component Tokens
+ * Đặt giá trị cho các component pattern tái sử dụng nhiều nhất.
+ * Dùng trong component CSS hoặc inline style reference.
+ * ───────────────────────────────────────────────────────────── */
+:root {
+  /* — Button: Primary (Accent) — */
+  --btn-primary-bg:          var(--app-accent);
+  --btn-primary-bg-hover:    var(--app-accent-hover);
+  --btn-primary-bg-active:   var(--app-accent-active);
+  --btn-primary-bg-disabled: var(--app-ink-disabled);
+  --btn-primary-text:        var(--app-ink-on-accent);
+  --btn-primary-shadow:      var(--app-shadow-sm);
+
+  /* — Button: Ghost — */
+  --btn-ghost-bg:            transparent;
+  --btn-ghost-bg-hover:      var(--app-accent-subtle);
+  --btn-ghost-bg-active:     var(--app-accent-soft);
+  --btn-ghost-text:          var(--app-accent);
+  --btn-ghost-border:        var(--app-line);
+
+  /* — Button: Outline — */
+  --btn-outline-bg:          var(--app-surface);
+  --btn-outline-bg-hover:    var(--app-accent-subtle);
+  --btn-outline-border:      var(--app-line-strong);
+  --btn-outline-text:        var(--app-ink);
+
+  /* — Button: Destructive — */
+  --btn-danger-bg:           var(--app-status-error);
+  --btn-danger-bg-hover:     #A03636;
+  --btn-danger-text:         #FFFFFF;
+
+  /* — Input — */
+  --input-bg:                var(--app-surface);
+  --input-border:            var(--app-line);
+  --input-border-focus:      var(--app-accent);
+  --input-border-error:      var(--app-status-error);
+  --input-text:              var(--app-ink);
+  --input-placeholder:       var(--app-ink-muted);
+  --input-bg-disabled:       var(--app-bg-subtle);
+  --input-text-disabled:     var(--app-ink-disabled);
+  --input-focus-ring:        var(--app-focus-ring);
+
+  /* — Card — */
+  --card-bg:                 var(--app-surface);
+  --card-border:             var(--app-line);
+  --card-shadow:             var(--app-shadow-sm);
+  --card-radius:             var(--app-radius-card);
+  --card-padding:            var(--app-card-padding);
+
+  /* — Progress — */
+  --progress-track:          var(--app-accent-soft);
+  --progress-fill:           var(--app-accent);
+  --progress-label:          var(--app-ink-soft);
+
+  /* — Tag / Pill — */
+  --tag-accent-bg:           var(--app-accent-soft);
+  --tag-accent-text:         var(--app-accent);
+  --tag-neutral-bg:          var(--app-bg-subtle);
+  --tag-neutral-text:        var(--app-ink-soft);
+
+  /* — Reflection Card (Warm Context) —
+   * Chỉ dùng những token này trong Reflection/Review screens.
+   * Tuyệt đối không dùng trong Execution/Goal/Plan screens. */
+  --reflection-bg:           var(--app-surface);
+  --reflection-border:       var(--app-warm-border);
+  --reflection-accent-bg:    var(--app-warm-soft);
+  --reflection-prompt-text:  var(--app-warm);
+  --reflection-prompt-font:  var(--app-font-serif);
+  --reflection-btn-bg:       var(--app-warm);
+  --reflection-btn-hover:    var(--app-warm-hover);
+  --reflection-btn-active:   var(--app-warm-active);
+  --reflection-btn-text:     var(--app-ink-on-warm);
+  --reflection-tag-bg:       var(--app-warm-soft);
+  --reflection-tag-text:     var(--app-warm-strong);
+  --reflection-focus-ring:   var(--app-focus-ring-warm);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Tailwind v4 @theme bridge
+ * Đồng bộ CSS vars sang Tailwind color utilities.
+ * ───────────────────────────────────────────────────────────── */
 @theme inline {
-  --color-app-bg: var(--app-bg);
-  --color-app-surface: var(--app-surface);
-  --color-app-ink: var(--app-ink);
-  --color-app-ink-soft: var(--app-ink-soft);
-  --color-app-ink-muted: var(--app-ink-muted);
-  --color-app-line: var(--app-line);
-  --color-app-accent: var(--app-accent);
-  --color-app-accent-soft: var(--app-accent-soft);
-  --color-app-warm: var(--app-warm);
-  --color-app-warm-soft: var(--app-warm-soft);
-  --color-app-warm-strong: var(--app-warm-strong);
-  --color-app-warm-border: var(--app-warm-border);
-  --font-sans: var(--app-font-sans);
+  /* — App brand colors — */
+  --color-app-bg:            var(--app-bg);
+  --color-app-bg-subtle:     var(--app-bg-subtle);
+  --color-app-surface:       var(--app-surface);
+
+  --color-app-ink:           var(--app-ink);
+  --color-app-ink-soft:      var(--app-ink-soft);
+  --color-app-ink-muted:     var(--app-ink-muted);
+  --color-app-ink-disabled:  var(--app-ink-disabled);
+  --color-app-ink-link:      var(--app-ink-link);
+
+  --color-app-line:          var(--app-line);
+  --color-app-line-strong:   var(--app-line-strong);
+
+  --color-app-accent:        var(--app-accent);
+  --color-app-accent-hover:  var(--app-accent-hover);
+  --color-app-accent-soft:   var(--app-accent-soft);
+  --color-app-accent-subtle: var(--app-accent-subtle);
+
+  --color-app-warm:          var(--app-warm);
+  --color-app-warm-hover:    var(--app-warm-hover);
+  --color-app-warm-soft:     var(--app-warm-soft);
+  --color-app-warm-subtle:   var(--app-warm-subtle);
+  --color-app-warm-strong:   var(--app-warm-strong);
+  --color-app-warm-border:   var(--app-warm-border);
+
+  --color-app-status-success: var(--app-status-success);
+  --color-app-status-warning: var(--app-status-warning);
+  --color-app-status-error:   var(--app-status-error);
+  --color-app-status-info:    var(--app-status-info);
+
+  /* — Font — */
+  --font-sans:  var(--app-font-sans);
   --font-serif: var(--app-font-serif);
-  --radius-card: var(--app-radius-card);
+
+  /* — Shape — */
+  --radius-card:    var(--app-radius-card);
+  --radius-pill:    var(--app-radius-pill);
+  --radius-input:   var(--app-radius-input);
+  --radius-control: var(--app-radius-control);
+
+  /* — Shadow — */
+  --shadow-app-sm: var(--app-shadow-sm);
+  --shadow-app-md: var(--app-shadow-md);
+  --shadow-app-lg: var(--app-shadow-lg);
+  --shadow-app-xl: var(--app-shadow-xl);
 }

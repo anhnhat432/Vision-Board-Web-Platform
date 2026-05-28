@@ -35,7 +35,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
                 <span className="text-sm font-medium text-app-ink-soft">{row.label}</span>
                 <span className="text-xs tabular-nums text-app-ink-muted">{score}/10</span>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-[#EFEAE2]" aria-hidden="true">
+              <div className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle" aria-hidden="true">
                 <div className="h-full rounded-full bg-app-accent" style={{ width: `${score * 10}%` }} />
               </div>
             </div>

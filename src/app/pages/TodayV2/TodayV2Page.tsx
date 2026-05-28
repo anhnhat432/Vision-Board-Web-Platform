@@ -315,7 +315,7 @@ function TaskCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () =>
       aria-pressed={checked}
       onClick={onToggle}
       className={`mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
-        checked ? "border border-app-accent bg-app-accent text-white" : "border-[1.5px] border-[#C8C2B6] bg-app-surface"
+        checked ? "border border-app-accent bg-app-accent text-white" : "border-[1.5px] border-app-line-strong bg-app-surface"
       }`}
     >
       {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
@@ -352,7 +352,7 @@ function TodayTasksCard({
         </div>
         <Link
           to="/12-week-system?tab=week"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           <Plus className="h-3.5 w-3.5" />
           Thêm việc
@@ -495,7 +495,7 @@ function ReflectionPrompt() {
       </h2>
       <Link
         to="/journal"
-        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
       >
         Viết phản tư →
       </Link>
@@ -523,7 +523,7 @@ function LifeBalanceCard({ rows }: { rows: LifeBalanceRow[] }) {
               <span className="text-sm font-medium text-app-ink-soft">{row.label}</span>
               <span className="text-xs tabular-nums text-app-ink-muted">{row.score}/10</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-[#EFEAE2]" aria-hidden="true">
+            <div className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle" aria-hidden="true">
               <div className="h-full rounded-full bg-app-accent" style={{ width: `${row.score * 10}%` }} />
             </div>
           </div>

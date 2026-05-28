@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
 
@@ -10,7 +10,7 @@ import { formatVndAmount } from "../utils/billing-pricing";
 import { syncEntitlementsWithProvider } from "../utils/production";
 import { upgradePlanLocally } from "../utils/storage";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// --- Types ------------------------------------------------------------------
 
 interface OrderStatusResponse {
   orderId: string;
@@ -30,7 +30,7 @@ type EntitlementSyncStatus = "idle" | "syncing" | "synced" | "failed";
 
 const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// --- Helpers ----------------------------------------------------------------
 
 function formatCountdown(ms: number): string {
   if (ms <= 0) return "00:00";
@@ -40,7 +40,7 @@ function formatCountdown(ms: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
+// --- Component --------------------------------------------------------------
 
 export function BillingCheckoutQR() {
   const { orderId: paramOrderId } = useParams<{ orderId?: string }>();
@@ -81,10 +81,10 @@ export function BillingCheckoutQR() {
         if (
           toastBillingNetworkError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid })
         ) {
-          setError("Mạng có vấn đề, vui lòng thử lại");
+          setError("M?ng c� v?n d?, vui l�ng th? l?i");
         } else {
           logBillingUiError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid });
-          const msg = err instanceof Error ? err.message : "Lỗi khi kiểm tra đơn hàng";
+          const msg = err instanceof Error ? err.message : "L?i khi ki?m tra don h�ng";
           setError(msg);
         }
       } finally {
@@ -131,14 +131,14 @@ export function BillingCheckoutQR() {
       .writeText(text)
       .then(() => {
         setCopied(label);
-        setCopyMessage(`Đã sao chép ${displayLabel}.`);
+        setCopyMessage(`�� sao ch�p ${displayLabel}.`);
         setTimeout(() => {
           setCopied(null);
           setCopyMessage("");
         }, 2000);
       })
       .catch(() => {
-        setCopyMessage(`Không thể tự sao chép ${displayLabel}. Bạn có thể chọn và sao chép thủ công.`);
+        setCopyMessage(`Kh�ng th? t? sao ch�p ${displayLabel}. B?n c� th? ch?n v� sao ch�p th? c�ng.`);
       });
   }, []);
 
@@ -151,7 +151,7 @@ export function BillingCheckoutQR() {
     if (!user) {
       const planCode = upgradePlanLocally("PLUS");
       setEntitlementSyncStatus("synced");
-      setEntitlementSyncMessage(`Đã mở gói ${planCode} trên thiết bị này.`);
+      setEntitlementSyncMessage(`�� m? g�i ${planCode} tr�n thi?t b? n�y.`);
       return true;
     }
 
@@ -165,7 +165,7 @@ export function BillingCheckoutQR() {
 
       setEntitlementSyncStatus("failed");
       setEntitlementSyncMessage(
-        result.message || "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
+        result.message || "�� nh?n thanh to�n nhung chua c?p nh?t du?c quy?n Plus tr�n thi?t b? n�y. Vui l�ng th? l?i.",
       );
       return false;
     } catch (error: unknown) {
@@ -178,7 +178,7 @@ export function BillingCheckoutQR() {
           status: order.status,
         })
       ) {
-        setEntitlementSyncMessage("Mạng có vấn đề, vui lòng thử lại");
+        setEntitlementSyncMessage("M?ng c� v?n d?, vui l�ng th? l?i");
       } else {
         logBillingUiError(error, {
           surface: "BillingCheckoutQR",
@@ -188,7 +188,7 @@ export function BillingCheckoutQR() {
           status: order.status,
         });
         setEntitlementSyncMessage(
-          "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
+          "�� nh?n thanh to�n nhung chua c?p nh?t du?c quy?n Plus tr�n thi?t b? n�y. Vui l�ng th? l?i.",
         );
       }
       setEntitlementSyncStatus("failed");
@@ -213,7 +213,7 @@ export function BillingCheckoutQR() {
     navigate("/12-week-system");
   }, [entitlementSyncStatus, navigate, syncCompletedOrderAccess]);
 
-  // ─── Success state ──────────────────────────────────────────────────────
+  // --- Success state ------------------------------------------------------
 
   if (order?.status === "completed") {
     const isSyncingEntitlement = entitlementSyncStatus === "syncing";
@@ -225,13 +225,13 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-accent">
             <CheckCircle2 className="h-8 w-8 text-white" />
           </div>
-          <h2 className="font-serif text-xl font-medium text-app-ink">Thanh toán thành công!</h2>
+          <h2 className="font-serif text-xl font-medium text-app-ink">Thanh to�n th�nh c�ng!</h2>
           <p className="mt-2 text-sm text-app-ink-soft">
             {isSyncingEntitlement
-              ? "Đã nhận thanh toán. Đang cập nhật quyền Plus trên tài khoản của bạn..."
+              ? "�� nh?n thanh to�n. �ang c?p nh?t quy?n Plus tr�n t�i kho?n c?a b?n..."
               : syncFailed
-                ? "Đã nhận thanh toán, nhưng thiết bị này chưa lấy được quyền Plus từ tài khoản."
-                : "Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!"}
+                ? "�� nh?n thanh to�n, nhung thi?t b? n�y chua l?y du?c quy?n Plus t? t�i kho?n."
+                : "G�i Plus d� du?c k�ch ho?t. Ch�c b?n c� 12 tu?n hi?u qu?!"}
           </p>
           {entitlementSyncMessage && (
             <p className={`mt-2 text-xs leading-5 ${syncFailed ? "text-app-warm" : "text-app-accent"}`}>
@@ -242,17 +242,17 @@ export function BillingCheckoutQR() {
             type="button"
             onClick={handleCompletedOrderContinue}
             disabled={isSyncingEntitlement}
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSyncingEntitlement && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isSyncingEntitlement ? "Đang cập nhật..." : syncFailed ? "Đồng bộ lại quyền Plus" : "Bắt đầu ngay"}
+            {isSyncingEntitlement ? "�ang c?p nh?t..." : syncFailed ? "�?ng b? l?i quy?n Plus" : "B?t d?u ngay"}
           </button>
         </div>
       </div>
     );
   }
 
-  // ─── Expired state ──────────────────────────────────────────────────────
+  // --- Expired state ------------------------------------------------------
 
   if (order?.status === "expired" || (order?.status === "pending" && timeLeft <= 0 && order?.expiresAt)) {
     return (
@@ -261,11 +261,11 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-warm">
             <Clock className="h-8 w-8 text-white" />
           </div>
-          <h2 className="font-serif text-xl font-medium text-app-ink">Hết thời gian thanh toán</h2>
+          <h2 className="font-serif text-xl font-medium text-app-ink">H?t th?i gian thanh to�n</h2>
           <p className="mt-2 text-sm text-app-ink-soft">
             {paidCheckoutDisabled
-              ? "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng."
-              : "Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục."}
+              ? "�ang ho�n t?t t�ch h?p h? th?ng thanh to�n m?i � s?n s�ng trong tu?n t?i. Quy?n hi?n c� kh�ng b? ?nh hu?ng."
+              : "�on h�ng d� h?t h?n. B?n c� th? t?o don m?i d? ti?p t?c."}
           </p>
           <button
             type="button"
@@ -276,17 +276,17 @@ export function BillingCheckoutQR() {
               }
               navigate("/billing/confirm");
             }}
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-app-accent-hover"
           >
             <RefreshCw className="h-4 w-4" />
-            {paidCheckoutDisabled ? "Quay lại trang gói" : "Tạo đơn mới"}
+            {paidCheckoutDisabled ? "Quay l?i trang g�i" : "T?o don m?i"}
           </button>
         </div>
       </div>
     );
   }
 
-  // ─── Error state ────────────────────────────────────────────────────────
+  // --- Error state --------------------------------------------------------
 
   if (error && !order) {
     return (
@@ -295,28 +295,28 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
             <XCircle className="h-8 w-8 text-[color:var(--color-danger-fg)]" />
           </div>
-          <h2 className="font-serif text-lg font-medium text-app-ink">Có lỗi xảy ra</h2>
+          <h2 className="font-serif text-lg font-medium text-app-ink">C� l?i x?y ra</h2>
           <p className="mt-2 text-sm text-app-ink-soft">{error}</p>
           <button
             type="button"
             onClick={() => navigate("/billing/plan")}
-            className="mt-6 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
+            className="mt-6 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-app-accent-hover"
           >
-            Quay lại
+            Quay l?i
           </button>
         </div>
       </div>
     );
   }
 
-  // ─── Loading state ──────────────────────────────────────────────────────
+  // --- Loading state ------------------------------------------------------
 
   if (loading || !order) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-app-accent" />
-          <p className="text-sm text-app-ink-muted">Đang tải...</p>
+          <p className="text-sm text-app-ink-muted">�ang t?i...</p>
         </div>
       </div>
     );
@@ -332,34 +332,34 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-warm">
             <LockKeyhole className="h-8 w-8 text-white" />
           </div>
-          <h2 className="font-serif text-xl font-medium text-app-ink">Thanh toán đang tạm khóa</h2>
+          <h2 className="font-serif text-xl font-medium text-app-ink">Thanh to�n dang t?m kh�a</h2>
           <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-            Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
-            hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
+            �ang ho�n t?t t�ch h?p h? th?ng thanh to�n m?i � s?n s�ng trong tu?n t?i. Quy?n hi?n c� kh�ng b? ?nh
+            hu?ng. N?u b?n mu?n n�ng c?p ngay, li�n h? {" "}
             <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="font-medium text-app-ink underline-offset-4 hover:underline">
               {BILLING_SUPPORT_EMAIL}
             </a>
-            {" "}để mở Plus thủ công.
+            {" "}d? m? Plus th? c�ng.
           </p>
           <button
             type="button"
             onClick={() => navigate("/billing/plan")}
-            className="mt-6 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
+            className="mt-6 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-app-accent-hover"
           >
-            Quay lại trang gói
+            Quay l?i trang g�i
           </button>
         </div>
       </div>
     );
   }
 
-  // ─── Pending — QR checkout ──────────────────────────────────────────────
+  // --- Pending � QR checkout ----------------------------------------------
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="sr-only" aria-live="polite">
         {copyMessage ||
-          `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
+          `Tr?ng th�i don h�ng: ${order.status}. ${timeLeft > 0 ? `C�n ${formatCountdown(timeLeft)} d? thanh to�n.` : ""}`}
       </div>
       <div className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
@@ -367,18 +367,18 @@ export function BillingCheckoutQR() {
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft">
               <QrCode className="h-6 w-6 text-app-accent" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán tự động</p>
-            <h1 className="font-serif text-2xl font-medium text-app-ink mt-2">Nâng cấp gói Plus</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Thanh to�n t? d?ng</p>
+            <h1 className="font-serif text-2xl font-medium text-app-ink mt-2">N�ng c?p g�i Plus</h1>
             <p className="mt-2 text-3xl font-medium text-app-accent">
               {formatVndAmount(order.amount)}
-              <span className="ml-1 text-sm font-normal text-app-ink-muted">/ chu kỳ 12 tuần</span>
+              <span className="ml-1 text-sm font-normal text-app-ink-muted">/ chu k? 12 tu?n</span>
             </p>
 
             <div className="mt-6 flex justify-center">
               <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
                 <img
                   src={order.qrDataUrl}
-                  alt="Mã thanh toán tự động"
+                  alt="M� thanh to�n t? d?ng"
                   className="h-56 w-56 object-contain sm:h-64 sm:w-64"
                   loading="eager"
                 />
@@ -392,10 +392,10 @@ export function BillingCheckoutQR() {
                 aria-live="polite"
               >
                 <Loader2 className="h-4 w-4 animate-spin text-app-warm" />
-                <span className="text-sm font-medium text-app-ink">Đang chờ xác nhận...</span>
+                <span className="text-sm font-medium text-app-ink">�ang ch? x�c nh?n...</span>
               </div>
               {timeLeft > 0 && (
-                <p className="mt-2 text-xs text-app-ink-muted">Còn {formatCountdown(timeLeft)} để thanh toán</p>
+                <p className="mt-2 text-xs text-app-ink-muted">C�n {formatCountdown(timeLeft)} d? thanh to�n</p>
               )}
             </div>
           </section>
@@ -404,42 +404,42 @@ export function BillingCheckoutQR() {
             <div className="stack-stack">
               <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                 <div>
-                  <h2 className="text-base font-semibold text-app-ink">Thông tin chuyển khoản</h2>
+                  <h2 className="text-base font-semibold text-app-ink">Th�ng tin chuy?n kho?n</h2>
                   <p className="mt-1 text-sm leading-6 text-app-ink-muted">
-                    Chuyển đúng số tiền và giữ nguyên nội dung để hệ thống tự kích hoạt Plus sau khi nhận giao dịch.
+                    Chuy?n d�ng s? ti?n v� gi? nguy�n n?i dung d? h? th?ng t? k�ch ho?t Plus sau khi nh?n giao d?ch.
                   </p>
                 </div>
               </div>
 
               <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
                 <InfoRow
-                  label="Ngân hàng"
+                  label="Ng�n h�ng"
                   value={order.bankName}
-                  onCopy={() => copyToClipboard(order.bankName, "bank", "ngân hàng")}
+                  onCopy={() => copyToClipboard(order.bankName, "bank", "ng�n h�ng")}
                   isCopied={copied === "bank"}
                 />
                 <InfoRow
-                  label="Số tài khoản"
+                  label="S? t�i kho?n"
                   value={order.bankAccount}
-                  onCopy={() => copyToClipboard(order.bankAccount, "account", "số tài khoản")}
+                  onCopy={() => copyToClipboard(order.bankAccount, "account", "s? t�i kho?n")}
                   isCopied={copied === "account"}
                 />
                 <InfoRow
-                  label="Chủ tài khoản"
+                  label="Ch? t�i kho?n"
                   value={order.accountName}
-                  onCopy={() => copyToClipboard(order.accountName, "name", "chủ tài khoản")}
+                  onCopy={() => copyToClipboard(order.accountName, "name", "ch? t�i kho?n")}
                   isCopied={copied === "name"}
                 />
                 <InfoRow
-                  label="Số tiền"
+                  label="S? ti?n"
                   value={formatVndAmount(order.amount)}
-                  onCopy={() => copyToClipboard(String(order.amount), "amount", "số tiền")}
+                  onCopy={() => copyToClipboard(String(order.amount), "amount", "s? ti?n")}
                   isCopied={copied === "amount"}
                 />
                 <InfoRow
-                  label="Nội dung CK"
+                  label="N?i dung CK"
                   value={order.orderId}
-                  onCopy={() => copyToClipboard(order.orderId, "desc", "nội dung chuyển khoản")}
+                  onCopy={() => copyToClipboard(order.orderId, "desc", "n?i dung chuy?n kho?n")}
                   isCopied={copied === "desc"}
                   highlight
                 />
@@ -452,20 +452,20 @@ export function BillingCheckoutQR() {
 
               <div className="rounded-lg border border-app-line bg-app-warm-soft px-4 py-3">
                 <p className="text-xs font-medium leading-5 text-app-ink">
-                  Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Nếu nội dung khác mã đơn, giao
-                  dịch có thể cần kiểm tra thủ công.
+                  Quan tr?ng: Vui l�ng <strong>kh�ng s?a n?i dung chuy?n kho?n</strong>. N?u n?i dung kh�c m� don, giao
+                  d?ch c� th? c?n ki?m tra th? c�ng.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-app-ink">Cách thanh toán</h3>
+                <h3 className="text-sm font-semibold text-app-ink">C�ch thanh to�n</h3>
                 <ol className="grid gap-2 text-sm text-app-ink-soft">
                   {[
-                    "Mở ứng dụng thanh toán hoặc ngân hàng trên điện thoại.",
-                    "Làm theo hướng dẫn từ cổng thanh toán mới.",
-                    "Kiểm tra số tiền và nội dung thanh toán.",
-                    "Xác nhận giao dịch và giữ trang này mở.",
-                    "Plus sẽ được kích hoạt sau khi hệ thống xác nhận giao dịch.",
+                    "M? ?ng d?ng thanh to�n ho?c ng�n h�ng tr�n di?n tho?i.",
+                    "L�m theo hu?ng d?n t? c?ng thanh to�n m?i.",
+                    "Ki?m tra s? ti?n v� n?i dung thanh to�n.",
+                    "X�c nh?n giao d?ch v� gi? trang n�y m?.",
+                    "Plus s? du?c k�ch ho?t sau khi h? th?ng x�c nh?n giao d?ch.",
                   ].map((step, index) => (
                     <li key={step} className="flex gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-2">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-app-accent text-xs font-semibold text-white">
@@ -482,7 +482,7 @@ export function BillingCheckoutQR() {
                 onClick={() => navigate("/billing/plan")}
                 className="text-sm font-medium text-app-ink-muted underline decoration-app-line transition hover:text-app-ink"
               >
-                Hủy thanh toán
+                H?y thanh to�n
               </button>
             </div>
           </section>
@@ -492,7 +492,7 @@ export function BillingCheckoutQR() {
   );
 }
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
+// --- Sub-components ---------------------------------------------------------
 
 function InfoRow({
   label,
@@ -522,8 +522,8 @@ function InfoRow({
           type="button"
           onClick={onCopy}
           className="rounded-full p-1 text-app-ink-muted transition hover:bg-app-bg hover:text-app-ink"
-          title={`Sao chép ${label}`}
-          aria-label={`Sao chép ${label}`}
+          title={`Sao ch�p ${label}`}
+          aria-label={`Sao ch�p ${label}`}
         >
           {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-app-accent" /> : <Copy className="h-3.5 w-3.5" />}
         </button>

@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -12,38 +12,38 @@ import type { AspirationalVisionArea } from "../utils/storage-types";
 const LIFE_AREA_FIELDS: Array<{ area: AspirationalVisionArea; label: string; placeholder: string }> = [
   {
     area: "health",
-    label: "Sức khoẻ",
-    placeholder: "Ví dụ: Tôi có sức bền tốt, ngủ đủ và duy trì vận động đều.",
+    label: "S?c kho?",
+    placeholder: "V� d?: T�i c� s?c b?n t?t, ng? d? v� duy tr� v?n d?ng d?u.",
   },
   {
     area: "career",
-    label: "Sự nghiệp",
-    placeholder: "Ví dụ: Tôi làm việc sâu, tạo ra sản phẩm có giá trị và giữ nhịp học hỏi.",
+    label: "S? nghi?p",
+    placeholder: "V� d?: T�i l�m vi?c s�u, t?o ra s?n ph?m c� gi� tr? v� gi? nh?p h?c h?i.",
   },
   {
     area: "relationships",
-    label: "Mối quan hệ",
-    placeholder: "Ví dụ: Tôi hiện diện hơn với những người quan trọng.",
+    label: "M?i quan h?",
+    placeholder: "V� d?: T�i hi?n di?n hon v?i nh?ng ngu?i quan tr?ng.",
   },
   {
     area: "finance",
-    label: "Tài chính",
-    placeholder: "Ví dụ: Tôi có quỹ dự phòng và dòng tiền ổn định hơn.",
+    label: "T�i ch�nh",
+    placeholder: "V� d?: T�i c� qu? d? ph�ng v� d�ng ti?n ?n d?nh hon.",
   },
   {
     area: "personal",
-    label: "Phát triển cá nhân",
-    placeholder: "Ví dụ: Tôi đọc, viết và luyện kỹ năng đều đặn.",
+    label: "Ph�t tri?n c� nh�n",
+    placeholder: "V� d?: T�i d?c, vi?t v� luy?n k? nang d?u d?n.",
   },
   {
     area: "family",
-    label: "Gia đình",
-    placeholder: "Ví dụ: Tôi có nhịp sống gia đình ấm và bền hơn.",
+    label: "Gia d�nh",
+    placeholder: "V� d?: T�i c� nh?p s?ng gia d�nh ?m v� b?n hon.",
   },
   {
     area: "other",
-    label: "Khác",
-    placeholder: "Một mảng quan trọng khác trong 3 năm tới.",
+    label: "Kh�c",
+    placeholder: "M?t m?ng quan tr?ng kh�c trong 3 nam t?i.",
   },
 ];
 
@@ -58,12 +58,12 @@ function createVisionId(): string {
 
 function formatVisionDate(value: string): string {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "CHƯA RÕ NGÀY";
+  if (Number.isNaN(date.getTime())) return "CHUA R� NG�Y";
   return date.toLocaleDateString("vi-VN").toLocaleUpperCase("vi-VN");
 }
 
 function getAreaLabel(area: AspirationalVisionArea): string {
-  return LIFE_AREA_FIELDS.find((field) => field.area === area)?.label ?? "Khác";
+  return LIFE_AREA_FIELDS.find((field) => field.area === area)?.label ?? "Kh�c";
 }
 
 export function AspirationalVision() {
@@ -115,8 +115,8 @@ export function AspirationalVision() {
       updatedAt: now,
     };
     saveUserData(data);
-    toast.success(`Đã lưu tầm nhìn ${horizonYears} năm`, {
-      description: "Bạn có thể quay lại sửa bất cứ lúc nào từ Trang chính.",
+    toast.success(`�� luu t?m nh�n ${horizonYears} nam`, {
+      description: "B?n c� th? quay l?i s?a b?t c? l�c n�o t? Trang ch�nh.",
     });
     navigate("/");
   };
@@ -124,54 +124,54 @@ export function AspirationalVision() {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">TẦM NHÌN</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">T?M NH�N</p>
         <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
-          Tầm nhìn 3 năm của bạn
+          T?m nh�n 3 nam c?a b?n
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
-          Định hình bức tranh dài hạn để mỗi chu kỳ 12 tuần đều phục vụ điều này.
+          �?nh h�nh b?c tranh d�i h?n d? m?i chu k? 12 tu?n d?u ph?c v? di?u n�y.
         </p>
       </header>
 
       <section
         className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8"
-        aria-label="Biểu mẫu tầm nhìn"
+        aria-label="Bi?u m?u t?m nh�n"
       >
         <div className="max-w-3xl">
           <p className="font-serif text-xl font-medium leading-7 text-app-warm-strong">
-            Trong 3 năm tới, bạn muốn cuộc sống mình trông như thế nào?
+            Trong 3 nam t?i, b?n mu?n cu?c s?ng m�nh tr�ng nhu th? n�o?
           </p>
-          <p className="mt-2 text-sm leading-6 text-[#6F4A3C]">
-            Viết chậm, cụ thể vừa đủ. Tầm nhìn này là điểm neo, không phải cam kết phải hoàn hảo.
+          <p className="mt-2 text-sm leading-6 text-app-warm-strong">
+            Vi?t ch?m, c? th? v?a d?. T?m nh�n n�y l� di?m neo, kh�ng ph?i cam k?t ph?i ho�n h?o.
           </p>
         </div>
 
         <div className="mt-6 space-y-5">
           <div>
             <label htmlFor="aspirational-summary" className={labelClass}>
-              Tóm tắt tầm nhìn {horizonYears} năm
+              T�m t?t t?m nh�n {horizonYears} nam
             </label>
             <Textarea
               id="aspirational-summary"
               rows={4}
               value={summary}
               onChange={(event) => setSummary(event.target.value)}
-              placeholder="Viết 2-4 câu về con người, công việc và nhịp sống bạn muốn có trong 3 năm tới."
+              placeholder="Vi?t 2-4 c�u v? con ngu?i, c�ng vi?c v� nh?p s?ng b?n mu?n c� trong 3 nam t?i."
               aria-invalid={showError && trimmedSummary.length < 20}
               aria-describedby={showError && trimmedSummary.length < 20 ? "aspirational-summary-error" : undefined}
               className={warmTextareaClass}
             />
             {showError && trimmedSummary.length < 20 ? (
               <p id="aspirational-summary-error" role="alert" className={errorTextClass}>
-                Viết tóm tắt tầm nhìn rõ hơn trước khi lưu.
+                Vi?t t�m t?t t?m nh�n r� hon tru?c khi luu.
               </p>
             ) : (
-              <p className={helperTextClass}>Tối thiểu 20 ký tự để phần này đủ rõ khi quay lại lập kế hoạch.</p>
+              <p className={helperTextClass}>T?i thi?u 20 k� t? d? ph?n n�y d? r� khi quay l?i l?p k? ho?ch.</p>
             )}
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-app-ink">Khoảng thời gian</p>
+            <p className="mb-2 text-sm font-medium text-app-ink">Kho?ng th?i gian</p>
             <div className="flex flex-wrap gap-2">
               {[3, 5].map((year) => {
                 const selected = horizonYears === year;
@@ -187,7 +187,7 @@ export function AspirationalVision() {
                         : "border-app-warm-border bg-app-surface text-app-warm-strong hover:border-app-warm"
                     }`}
                   >
-                    {year} năm
+                    {year} nam
                   </button>
                 );
               })}
@@ -196,9 +196,9 @@ export function AspirationalVision() {
 
           <div>
             <div>
-              <h2 className="text-base font-semibold text-app-ink">Các mảng đời sống</h2>
-              <p className="mt-1 text-sm leading-6 text-[#6F4A3C]">
-                Điền ít nhất một mảng. Các mảng còn lại có thể để trống.
+              <h2 className="text-base font-semibold text-app-ink">C�c m?ng d?i s?ng</h2>
+              <p className="mt-1 text-sm leading-6 text-app-warm-strong">
+                �i?n �t nh?t m?t m?ng. C�c m?ng c�n l?i c� th? d? tr?ng.
               </p>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -220,7 +220,7 @@ export function AspirationalVision() {
             </div>
             {showError && lifeAreas.length === 0 ? (
               <p role="alert" className={errorTextClass}>
-                Điền ít nhất một mảng đời sống để tầm nhìn có điểm neo.
+                �i?n �t nh?t m?t m?ng d?i s?ng d? t?m nh�n c� di?m neo.
               </p>
             ) : null}
           </div>
@@ -228,11 +228,11 @@ export function AspirationalVision() {
           <div className="flex flex-col gap-3 border-t border-app-warm-border pt-5 sm:flex-row">
             <Button
               type="button"
-              className="w-full bg-app-warm text-white hover:bg-[#C76548] focus-visible:ring-app-warm/30 sm:w-auto"
+              className="w-full bg-app-warm text-white hover:bg-app-warm-hover focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={handleSubmit}
             >
               <Save className="h-4 w-4" />
-              Lưu tầm nhìn
+              Luu t?m nh�n
             </Button>
             <Button
               type="button"
@@ -241,22 +241,22 @@ export function AspirationalVision() {
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4" />
-              Bỏ qua
+              B? qua
             </Button>
           </div>
         </div>
       </section>
 
       {storedVision ? (
-        <section className="mt-8" aria-label="Tầm nhìn đã lưu trước đó">
+        <section className="mt-8" aria-label="T?m nh�n d� luu tru?c d�">
           <div className="mb-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">ĐÃ LƯU TRƯỚC</p>
-            <h2 className="mt-1 text-base font-semibold text-app-ink">Bản tóm tắt gần nhất</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">�� LUU TRU?C</p>
+            <h2 className="mt-1 text-base font-semibold text-app-ink">B?n t�m t?t g?n nh?t</h2>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-                CẬP NHẬT {formatVisionDate(storedVision.updatedAt)}
+                C?P NH?T {formatVisionDate(storedVision.updatedAt)}
               </p>
               <p className="mt-3 font-serif text-sm italic leading-7 text-app-ink">"{storedVision.summary}"</p>
             </article>

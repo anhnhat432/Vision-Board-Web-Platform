@@ -65,7 +65,7 @@ export function AppErrorBoundary() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button className="bg-app-accent text-white hover:bg-[#284f45]" onClick={() => navigate("/")}>
+                  <Button className="bg-app-accent text-white hover:bg-app-accent-hover" onClick={() => navigate("/")}>
                     <Home className="h-4 w-4" />
                     Về Trang chính
                   </Button>

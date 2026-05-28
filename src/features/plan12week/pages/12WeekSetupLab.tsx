@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useCallback, useRef, useState } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -247,7 +247,7 @@ export function TwelveWeekSetupLab() {
     if (prerequisites.status === "gate") {
       if (prerequisites.clearPendingFeasibility) {
         localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
-        toast.error("Kết quả kiểm tra tính khả thi cũ không đọc được, làm lại nhanh");
+        toast.error("K?t qu? ki?m tra t�nh kh? thi cu kh�ng d?c du?c, l�m l?i nhanh");
         navigate("/feasibility");
       }
       setSetupGate(prerequisites.gate);
@@ -256,13 +256,13 @@ export function TwelveWeekSetupLab() {
     }
 
     if (prerequisites.staleFeasibility) {
-      toast.warning("Kết quả kiểm tra tính khả thi hơi cũ, làm lại để dữ liệu chính xác?", {
+      toast.warning("K?t qu? ki?m tra t�nh kh? thi hoi cu, l�m l?i d? d? li?u ch�nh x�c?", {
         action: {
-          label: "Làm lại",
+          label: "L�m l?i",
           onClick: () => navigate("/feasibility"),
         },
         cancel: {
-          label: "Dùng tạm",
+          label: "D�ng t?m",
           onClick: () => undefined,
         },
       });
@@ -278,7 +278,7 @@ export function TwelveWeekSetupLab() {
         ...previousDraft,
         vision12Week:
           previousDraft.vision12Week ||
-          `Trong 12 tuần tới, tôi muốn biến mục tiêu "${prerequisites.parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
+          `Trong 12 tu?n t?i, t�i mu?n bi?n m?c ti�u "${prerequisites.parsedSmartGoal.specific}" th�nh m?t nh?p th?c thi r� r�ng.`,
         week12Outcome:
           previousDraft.week12Outcome ||
           prerequisites.parsedSmartGoal.measurable ||
@@ -287,7 +287,7 @@ export function TwelveWeekSetupLab() {
           previousDraft.lagMetricName ||
           prerequisites.smartGoalMetricName ||
           prerequisites.parsedSmartGoal.measurable ||
-          "Chỉ số kết quả chính",
+          "Ch? s? k?t qu? ch�nh",
         lagMetricUnit: previousDraft.lagMetricUnit || prerequisites.smartGoalMetricUnit,
         tacticLoadPreference:
           previousDraft.tacticLoadPreference === "balanced"
@@ -332,7 +332,7 @@ export function TwelveWeekSetupLab() {
                   id: typeof indicator?.id === "string" && indicator.id ? indicator.id : createIndicatorId(),
                   name: indicator?.name ?? "",
                   target: indicator?.target ?? "1",
-                  unit: indicator?.unit ?? "lần/tuần",
+                  unit: indicator?.unit ?? "l?n/tu?n",
                   type: indicator?.type === "optional" ? "optional" : "core",
                   cadence:
                     indicator?.cadence === "frontload" || indicator?.cadence === "backload"
@@ -479,26 +479,26 @@ export function TwelveWeekSetupLab() {
     Boolean(auth.userProfile);
   const currentStepDescription =
     currentStep === 0
-      ? "Làm rõ trạng thái bạn muốn đạt được khi 12 tuần kết thúc."
+      ? "L�m r� tr?ng th�i b?n mu?n d?t du?c khi 12 tu?n k?t th�c."
       : currentStep === 1
-        ? "Chọn 2-4 việc bạn kiểm soát được và lặp lại được mỗi tuần."
+        ? "Ch?n 2-4 vi?c b?n ki?m so�t du?c v� l?p l?i du?c m?i tu?n."
         : currentStep === 2
-          ? "Chốt ngày bắt đầu, ngày xem lại tuần và chỉ số kết quả."
-          : "Xem trước kế hoạch tự động, chỉnh sửa nếu cần và xác nhận.";
+          ? "Ch?t ng�y b?t d?u, ng�y xem l?i tu?n v� ch? s? k?t qu?."
+          : "Xem tru?c k? ho?ch t? d?ng, ch?nh s?a n?u c?n v� x�c nh?n.";
   const currentStepWhy =
     currentStep === 0
-      ? "Kết quả rõ giúp biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
+      ? "K?t qu? r� gi�p bi?t khi n�o v? d�ch � v� tr�nh d?i d�ch gi?a chu k? v� c?m x�c."
       : currentStep === 1
-        ? "Việc lặp lại là việc bạn chủ động làm đều. Chỉ số kết quả là con số xem lại sau để biết việc đó có tạo tiến bộ không."
+        ? "Vi?c l?p l?i l� vi?c b?n ch? d?ng l�m d?u. Ch? s? k?t qu? l� con s? xem l?i sau d? bi?t vi?c d� c� t?o ti?n b? kh�ng."
         : currentStep === 2
-          ? "Một ngày xem lại cố định giúp bạn biết tuần vừa rồi có lệch không và tuần tới cần chỉnh gì."
-          : "Kế hoạch được tạo tự động từ mục tiêu và việc lặp lại. Sau khi lưu, bạn sẽ vào phần thực thi hằng tuần và màn Hôm nay để bắt đầu.";
+          ? "M?t ng�y xem l?i c? d?nh gi�p b?n bi?t tu?n v?a r?i c� l?ch kh�ng v� tu?n t?i c?n ch?nh g�."
+          : "K? ho?ch du?c t?o t? d?ng t? m?c ti�u v� vi?c l?p l?i. Sau khi luu, b?n s? v�o ph?n th?c thi h?ng tu?n v� m�n H�m nay d? b?t d?u.";
 
   if (isRealMode() && auth.authLoading) {
     return (
       <PageShell maxWidth="xl">
         <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
-        <FormSkeleton className="mt-6" aria-label="Đang kiểm tra tài khoản" />
+        <FormSkeleton className="mt-6" aria-label="�ang ki?m tra t�i kho?n" />
       </PageShell>
     );
   }
@@ -507,7 +507,7 @@ export function TwelveWeekSetupLab() {
     return (
       <PageShell maxWidth="xl">
         <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
-        <FormSkeleton className="mt-6" aria-label="Đang chuẩn bị dữ liệu thiết lập 12 tuần" />
+        <FormSkeleton className="mt-6" aria-label="�ang chu?n b? d? li?u thi?t l?p 12 tu?n" />
       </PageShell>
     );
   }
@@ -516,12 +516,12 @@ export function TwelveWeekSetupLab() {
     return (
       <CoreFlowGateState
         currentStepId="life_balance"
-        eyebrow="Thiết lập 12 tuần"
-        title="Hoàn thành Cân bằng cuộc sống trước khi tạo kế hoạch 12 tuần"
-        description="Kế hoạch 12 tuần cần điểm cân bằng thật để biết mục tiêu đang gắn với lĩnh vực nào. Hãy bắt đầu từ đánh giá cân bằng rồi quay lại flow chính."
-        actionLabel="Bắt đầu Cân bằng cuộc sống"
+        eyebrow="Thi?t l?p 12 tu?n"
+        title="Ho�n th�nh C�n b?ng cu?c s?ng tru?c khi t?o k? ho?ch 12 tu?n"
+        description="K? ho?ch 12 tu?n c?n di?m c�n b?ng th?t d? bi?t m?c ti�u dang g?n v?i linh v?c n�o. H�y b?t d?u t? d�nh gi� c�n b?ng r?i quay l?i flow ch�nh."
+        actionLabel="B?t d?u C�n b?ng cu?c s?ng"
         onAction={() => navigate("/onboarding")}
-        secondaryActionLabel="Về bảng điều khiển"
+        secondaryActionLabel="V? b?ng di?u khi?n"
         onSecondaryAction={() => navigate("/")}
       />
     );
@@ -531,12 +531,12 @@ export function TwelveWeekSetupLab() {
     return (
       <CoreFlowGateState
         currentStepId="life_insight"
-        eyebrow="Thiết lập 12 tuần"
-        title="Chọn trọng tâm trước khi tạo kế hoạch 12 tuần"
-        description="Bạn cần một trọng tâm hợp lệ từ Góc nhìn cuộc sống để kế hoạch 12 tuần không bị quá rộng hoặc lệch khỏi dữ liệu cân bằng."
-        actionLabel="Mở Góc nhìn cuộc sống"
+        eyebrow="Thi?t l?p 12 tu?n"
+        title="Ch?n tr?ng t�m tru?c khi t?o k? ho?ch 12 tu?n"
+        description="B?n c?n m?t tr?ng t�m h?p l? t? G�c nh�n cu?c s?ng d? k? ho?ch 12 tu?n kh�ng b? qu� r?ng ho?c l?ch kh?i d? li?u c�n b?ng."
+        actionLabel="M? G�c nh�n cu?c s?ng"
         onAction={() => navigate("/life-insight")}
-        secondaryActionLabel="Bắt đầu Cân bằng cuộc sống"
+        secondaryActionLabel="B?t d?u C�n b?ng cu?c s?ng"
         onSecondaryAction={() => navigate("/onboarding")}
       />
     );
@@ -546,12 +546,12 @@ export function TwelveWeekSetupLab() {
     return (
       <CoreFlowGateState
         currentStepId="smart_goal"
-        eyebrow="Thiết lập 12 tuần"
-        title="Viết mục tiêu SMART trước khi tạo kế hoạch 12 tuần"
-        description="Kế hoạch cần mục tiêu đủ rõ về kết quả, chỉ số và thời hạn. Hoàn thiện mục tiêu SMART trước, sau đó kiểm tra tính khả thi và quay lại thiết lập."
-        actionLabel="Quay lại viết mục tiêu"
+        eyebrow="Thi?t l?p 12 tu?n"
+        title="Vi?t m?c ti�u SMART tru?c khi t?o k? ho?ch 12 tu?n"
+        description="K? ho?ch c?n m?c ti�u d? r� v? k?t qu?, ch? s? v� th?i h?n. Ho�n thi?n m?c ti�u SMART tru?c, sau d� ki?m tra t�nh kh? thi v� quay l?i thi?t l?p."
+        actionLabel="Quay l?i vi?t m?c ti�u"
         onAction={() => navigate("/smart-goal-setup")}
-        secondaryActionLabel="Mở Góc nhìn cuộc sống"
+        secondaryActionLabel="M? G�c nh�n cu?c s?ng"
         onSecondaryAction={() => navigate("/life-insight")}
       />
     );
@@ -561,12 +561,12 @@ export function TwelveWeekSetupLab() {
     return (
       <CoreFlowGateState
         currentStepId="feasibility"
-        eyebrow="Thiết lập 12 tuần"
-        title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
-        description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
-        actionLabel="Mở kiểm tra tính khả thi"
+        eyebrow="Thi?t l?p 12 tu?n"
+        title="Ki?m tra t�nh kh? thi tru?c khi t?o k? ho?ch 12 tu?n"
+        description="B?n d� c� m?c ti�u, nhung c?n k?t qu? ki?m tra d? ch?n t?i vi?c, l?ch review v� m?c cam k?t ph� h?p cho 12 tu?n d?u."
+        actionLabel="M? ki?m tra t�nh kh? thi"
         onAction={() => navigate("/feasibility")}
-        secondaryActionLabel="Quay lại viết mục tiêu"
+        secondaryActionLabel="Quay l?i vi?t m?c ti�u"
         onSecondaryAction={() => navigate("/smart-goal-setup")}
       />
     );
@@ -576,12 +576,12 @@ export function TwelveWeekSetupLab() {
     return (
       <CoreFlowGateState
         currentStepId="feasibility"
-        eyebrow="Thiết lập 12 tuần"
-        title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
-        description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
-        actionLabel="Mở kiểm tra tính khả thi"
+        eyebrow="Thi?t l?p 12 tu?n"
+        title="Ki?m tra t�nh kh? thi tru?c khi t?o k? ho?ch 12 tu?n"
+        description="B?n d� c� m?c ti�u, nhung c?n k?t qu? ki?m tra d? ch?n t?i vi?c, l?ch review v� m?c cam k?t ph� h?p cho 12 tu?n d?u."
+        actionLabel="M? ki?m tra t�nh kh? thi"
         onAction={() => navigate("/feasibility")}
-        secondaryActionLabel="Quay lại viết mục tiêu"
+        secondaryActionLabel="Quay l?i vi?t m?c ti�u"
         onSecondaryAction={() => navigate("/smart-goal-setup")}
       />
     );
@@ -611,39 +611,39 @@ export function TwelveWeekSetupLab() {
   });
   const rawCurrentStepValidationError = (() => {
     if (currentStep === 0) {
-      if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
+      if (!draft.goalType || !draft.vision12Week.trim()) return "L�m r� k?t qu? 12 tu?n tru?c.";
       return milestoneError;
     }
 
     if (currentStep === 1) {
       if (draft.leadIndicators.length < 2 || draft.leadIndicators.length > 4) {
-        return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
+        return "Gi? t? 2 d?n 4 vi?c l?p l?i d? bu?c n�y g?n v� d? gi? nh?p.";
       }
       if (draft.leadIndicators.some((indicator) => !indicator.name.trim())) {
-        return "Cần đặt tên cho từng việc lặp lại trước khi tiếp tục.";
+        return "C?n d?t t�n cho t?ng vi?c l?p l?i tru?c khi ti?p t?c.";
       }
       return invalidTargetError ?? invalidUnitError;
     }
 
     if (currentStep === 2) {
       if (!draft.lagMetricName.trim() || !cycleStartDate || !draft.reviewDay) {
-        return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
+        return "Ch?t ch? s? ch�nh, ng�y b?t d?u v� ng�y nh�n l?i.";
       }
-      if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Chọn ngày nhìn lại hợp lệ.";
+      if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Ch?n ng�y nh�n l?i h?p l?.";
       return startDateValidation.error;
     }
 
-    if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
+    if (!draft.goalType || !draft.vision12Week.trim()) return "L�m r� k?t qu? 12 tu?n tru?c.";
     if (draft.leadIndicators.length < 2 || draft.leadIndicators.length > 4) {
-      return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
+      return "Gi? t? 2 d?n 4 vi?c l?p l?i d? bu?c n�y g?n v� d? gi? nh?p.";
     }
     if (draft.leadIndicators.some((indicator) => !indicator.name.trim())) {
-      return "Cần đặt tên cho từng việc lặp lại trước khi tiếp tục.";
+      return "C?n d?t t�n cho t?ng vi?c l?p l?i tru?c khi ti?p t?c.";
     }
     if (!draft.lagMetricName.trim() || !cycleStartDate || !draft.reviewDay) {
-      return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
+      return "Ch?t ch? s? ch�nh, ng�y b?t d?u v� ng�y nh�n l?i.";
     }
-    if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Chọn ngày nhìn lại hợp lệ.";
+    if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Ch?n ng�y nh�n l?i h?p l?.";
     return invalidTargetError ?? invalidUnitError ?? startDateValidation.error ?? milestoneError;
   })();
 
@@ -723,8 +723,8 @@ export function TwelveWeekSetupLab() {
     });
 
     if (announce) {
-      toast.success(`Đã áp dụng khung "${template.name}".`, {
-        description: "Bạn vẫn có thể sửa mọi việc lặp lại và cột mốc ngay trong bước này.",
+      toast.success(`�� �p d?ng khung "${template.name}".`, {
+        description: "B?n v?n c� th? s?a m?i vi?c l?p l?i v� c?t m?c ngay trong bu?c n�y.",
       });
     }
   };
@@ -771,7 +771,7 @@ export function TwelveWeekSetupLab() {
     }
 
     if (unlockedTemplate) {
-      toast.info(`Khung "${unlockedTemplate.name}" vẫn cần gói ${unlockedTemplate.requiredPlan}.`);
+      toast.info(`Khung "${unlockedTemplate.name}" v?n c?n g�i ${unlockedTemplate.requiredPlan}.`);
     }
   };
 
@@ -859,7 +859,7 @@ export function TwelveWeekSetupLab() {
       } else if (
         currentStep !== 2 &&
         (rawCurrentStepValidationError === startDateValidation.error ||
-          rawCurrentStepValidationError === "Chọn ngày nhìn lại hợp lệ.")
+          rawCurrentStepValidationError === "Ch?n ng�y nh�n l?i h?p l?.")
       ) {
         setCurrentStep(2);
       } else if (currentStep !== 0 && rawCurrentStepValidationError === milestoneError) {
@@ -1083,8 +1083,8 @@ export function TwelveWeekSetupLab() {
       })();
     }
 
-    toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {
-      description: "Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
+    toast.success("K? ho?ch 12 tu?n d� s?n s�ng.", {
+      description: "V�o ngay m�n H�m nay d? b?t d?u tu?n d?u ti�n.",
     });
 
     navigate("/12-week-system");
@@ -1100,11 +1100,11 @@ export function TwelveWeekSetupLab() {
           currentPlan={currentPlan}
           recommendedPlan={pendingTemplate?.requiredPlan ?? "PLUS"}
           source="12_week_setup"
-          title={paywallReason === "cycle_limit" ? "Bạn đã có 1 chu kỳ đang chạy" : "Mở Plus để thiết lập nhanh hơn"}
+          title={paywallReason === "cycle_limit" ? "B?n d� c� 1 chu k? dang ch?y" : "M? Plus d? thi?t l?p nhanh hon"}
           description={
             paywallReason === "cycle_limit"
-              ? "Nâng cấp Plus để tạo thêm chu kỳ 12 tuần. Dữ liệu hiện có vẫn được giữ nguyên."
-              : "Khung này phù hợp với kiểu mục tiêu và mức sẵn sàng của bạn. Mở Plus để dùng ngay."
+              ? "N�ng c?p Plus d? t?o th�m chu k? 12 tu?n. D? li?u hi?n c� v?n du?c gi? nguy�n."
+              : "Khung n�y ph� h?p v?i ki?u m?c ti�u v� m?c s?n s�ng c?a b?n. M? Plus d? d�ng ngay."
           }
           onCheckoutComplete={handleCheckoutComplete}
         />
@@ -1118,33 +1118,33 @@ export function TwelveWeekSetupLab() {
         {!isVisionPromptDismissed ? (
           <section
             className="rounded-card border border-app-warm-border bg-app-warm-soft p-4 sm:p-5 md:p-6"
-            aria-label="Tầm nhìn dài hạn"
+            aria-label="T?m nh�n d�i h?n"
           >
             <span className="inline-flex min-h-10 items-center rounded-full bg-app-surface px-3 py-2 text-xs font-medium text-app-warm">
-              Tầm nhìn dài hạn
+              T?m nh�n d�i h?n
             </span>
             {aspirationalVision ? (
               <p className="mt-3 font-serif text-lg font-medium leading-7 text-app-warm-strong">
-                Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
+                K? ho?ch 12 tu?n n�y ph?c v? t?m nh�n 3 nam: {aspirationalVision.summary}
               </p>
             ) : (
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-app-ink-soft">
-                  Đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
+                  �?t m?c ti�u 12 tu?n. Phuong ph�p g?c khuy�n g?n v?i t?m nh�n 3 nam.
                 </p>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     to="/vision"
-                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-app-warm px-3.5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-app-warm px-3.5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                   >
-                    Điền 2 phút →
+                    �i?n 2 ph�t ?
                   </Link>
                   <button
                     type="button"
                     className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-3 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
-                    Bỏ qua
+                    B? qua
                   </button>
                 </div>
               </div>
@@ -1154,36 +1154,36 @@ export function TwelveWeekSetupLab() {
 
         <section aria-labelledby="twelve-week-setup-title">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-            {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
+            {getLifeAreaLabel(focusArea)} � Thi?t l?p k? ho?ch 12 tu?n
           </p>
           <h1
             id="twelve-week-setup-title"
             className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
           >
-            Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
+            T?o k? ho?ch 12 tu?n cho {smartGoal.specific.trim() || "m?c ti�u c?a b?n"}.
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
-            Bạn đang ở bước tổng “Kế hoạch 12 tuần”. Bên dưới là wizard 4 bước nhỏ để thiết lập: kết quả, việc lặp lại, lịch nhìn lại và rà soát.
+            B?n dang ? bu?c t?ng �K? ho?ch 12 tu?n�. B�n du?i l� wizard 4 bu?c nh? d? thi?t l?p: k?t qu?, vi?c l?p l?i, l?ch nh�n l?i v� r� so�t.
           </p>
           <div className="mt-4 surface-raised rounded-xl border border-app-line bg-app-surface p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu hiện tại</p>
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-app-ink-muted">M?c ti�u hi?n t?i</p>
             <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-app-ink">
               {smartGoal.specific.trim()}
             </p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-app-ink-muted">
               <span className="rounded-full bg-app-accent-soft px-2.5 py-1 font-medium text-app-accent">
-                Sẵn sàng {feasibility.adjustedScore}/20
+                S?n s�ng {feasibility.adjustedScore}/20
               </span>
               {feasibility.bottleneck ? (
                 <span className="rounded-full border border-app-line bg-app-bg px-2.5 py-1">
-                  Cần chú ý: {feasibility.bottleneck.label}
+                  C?n ch� �: {feasibility.bottleneck.label}
                 </span>
               ) : null}
               <Link
                 to="/smart-goal-setup"
                 className="inline-flex min-h-10 items-center rounded-full border border-app-line bg-app-surface px-3 py-2 font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
-                Sửa mục tiêu
+                S?a m?c ti�u
               </Link>
             </div>
           </div>

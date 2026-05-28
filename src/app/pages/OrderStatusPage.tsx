@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
   ClipboardList,
@@ -43,8 +43,8 @@ import { getBackendOrderId } from "@/lib/api/orderLinkStore";
 import { INCLUDED_DOCS } from "@/features/order/catalog/included";
 import { formatVnd } from "@/features/order/lib/pricing";
 
-const UNLINKED_GOAL_TITLE = "Chưa gắn mục tiêu cụ thể";
-const DEFAULT_FOCUS_AREA = "Chưa chọn trọng tâm";
+const UNLINKED_GOAL_TITLE = "Chua g?n m?c ti�u c? th?";
+const DEFAULT_FOCUS_AREA = "Chua ch?n tr?ng t�m";
 const PAYMENT_ORDER_ID_PREFIX = "VB";
 const PAYMENT_POLL_INTERVAL_MS = 5_000;
 const PAYMENT_TIMEOUT_MS = 15 * 60 * 1000;
@@ -99,14 +99,14 @@ function getPaymentExpiresAt(order: PaymentOrderStatusResponse | null): number |
 }
 
 function createSupportMailto(orderId: string): string {
-  const subject = encodeURIComponent(`Hỗ trợ thanh toán đơn ${orderId}`);
+  const subject = encodeURIComponent(`H? tr? thanh to�n don ${orderId}`);
   const body = encodeURIComponent(
-    `Chào đội hỗ trợ,\n\nTôi đã chuyển khoản cho đơn ${orderId} nhưng chưa nhận quyền Plus. Nhờ đội kiểm tra giúp.\n`,
+    `Ch�o d?i h? tr?,\n\nT�i d� chuy?n kho?n cho don ${orderId} nhung chua nh?n quy?n Plus. Nh? d?i ki?m tra gi�p.\n`,
   );
   return `mailto:${getSupportEmail()}?subject=${subject}&body=${body}`;
 }
 
-/** Map backend status → local display status. Backend has "confirmed"/"cancelled" which local doesn't. */
+/** Map backend status ? local display status. Backend has "confirmed"/"cancelled" which local doesn't. */
 function normalizeBackendStatus(status: string): OrderStatus {
   switch (status) {
     case "printing":
@@ -155,22 +155,22 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
 }> = [
   {
     status: "pending",
-    description: "Đơn đã được ghi nhận trên thiết bị này và chờ xác nhận.",
+    description: "�on d� du?c ghi nh?n tr�n thi?t b? n�y v� ch? x�c nh?n.",
     icon: ClipboardList,
   },
   {
     status: "printing",
-    description: "Kit đang được chuẩn bị nội dung và xử lý ở bước in.",
+    description: "Kit dang du?c chu?n b? n?i dung v� x? l� ? bu?c in.",
     icon: Package,
   },
   {
     status: "shipping",
-    description: "Kit đã sẵn sàng đi giao trong luồng đơn hiện tại.",
+    description: "Kit d� s?n s�ng di giao trong lu?ng don hi?n t?i.",
     icon: Truck,
   },
   {
     status: "delivered",
-    description: "Đơn đã được đánh dấu giao thành công trong luồng trên thiết bị này.",
+    description: "�on d� du?c d�nh d?u giao th�nh c�ng trong lu?ng tr�n thi?t b? n�y.",
     icon: CheckCircle2,
   },
 ];
@@ -205,15 +205,15 @@ export function OrderStatusPage() {
         if (data.status === "completed" && !paymentRedirectedRef.current) {
           paymentRedirectedRef.current = true;
           setSuccessRedirecting(true);
-          toast.success("Plus đã kích hoạt!");
+          toast.success("Plus d� k�ch ho?t!");
           window.setTimeout(() => navigate("/billing/plan", { replace: true }), REDIRECT_AFTER_SUCCESS_MS);
         }
       } catch (error: unknown) {
         if (toastBillingNetworkError(error, { surface: "OrderStatusPage", action: "fetch_payment_order", orderId })) {
-          setPaymentError("Mạng có vấn đề, vui lòng thử lại");
+          setPaymentError("M?ng c� v?n d?, vui l�ng th? l?i");
         } else {
           logBillingUiError(error, { surface: "OrderStatusPage", action: "fetch_payment_order", orderId });
-          setPaymentError(error instanceof Error ? error.message : "Không tải được trạng thái thanh toán.");
+          setPaymentError(error instanceof Error ? error.message : "Kh�ng t?i du?c tr?ng th�i thanh to�n.");
         }
       } finally {
         setPaymentLoading(false);
@@ -268,7 +268,7 @@ export function OrderStatusPage() {
         setCopiedPaymentField(key);
         window.setTimeout(() => setCopiedPaymentField((current) => (current === key ? null : current)), 1600);
       })
-      .catch(() => setPaymentError("Không sao chép được. Bạn có thể chọn và sao chép thủ công."));
+      .catch(() => setPaymentError("Kh�ng sao ch�p du?c. B?n c� th? ch?n v� sao ch�p th? c�ng."));
   }, []);
 
   const handleUserConfirmedTransfer = useCallback(async () => {
@@ -290,7 +290,7 @@ export function OrderStatusPage() {
           status: paymentOrder.status,
         })
       ) {
-        setPaymentError("Mạng có vấn đề, vui lòng thử lại");
+        setPaymentError("M?ng c� v?n d?, vui l�ng th? l?i");
       } else {
         logBillingUiError(error, {
           surface: "OrderStatusPage",
@@ -299,7 +299,7 @@ export function OrderStatusPage() {
           amount: paymentOrder.amount,
           status: paymentOrder.status,
         });
-        setPaymentError(error instanceof Error ? error.message : "Không ghi nhận được xác nhận chuyển khoản.");
+        setPaymentError(error instanceof Error ? error.message : "Kh�ng ghi nh?n du?c x�c nh?n chuy?n kho?n.");
       }
     } finally {
       setConfirmingTransfer(false);
@@ -333,7 +333,7 @@ export function OrderStatusPage() {
     setOrder(matchedOrder);
     setIsBackendBacked(false);
     setBackendRawStatus(null);
-    document.title = "Trạng thái đơn kit - Dear Our Future";
+    document.title = "Tr?ng th�i don kit - Dear Our Future";
 
     // If authenticated and we have a backend link for this order, fetch backend status
     if (user && matchedOrder) {
@@ -346,7 +346,7 @@ export function OrderStatusPage() {
             setBackendRawStatus(backendOrder.status);
           })
           .catch(() => {
-            // Backend fetch failed — keep showing local order data
+            // Backend fetch failed � keep showing local order data
           });
       }
     }
@@ -358,7 +358,7 @@ export function OrderStatusPage() {
         <div className="flex min-h-[50vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-app-accent" />
-            <p className="text-sm text-app-ink-muted">Đang tải trạng thái thanh toán...</p>
+            <p className="text-sm text-app-ink-muted">�ang t?i tr?ng th�i thanh to�n...</p>
           </div>
         </div>
       );
@@ -368,15 +368,15 @@ export function OrderStatusPage() {
       return (
         <div className="mx-auto max-w-md px-4 py-12">
           <div className="rounded-card border border-app-line bg-[color:var(--color-danger-bg)] p-8 text-center">
-            <h1 className="font-serif text-xl font-medium text-app-ink">Không tải được đơn thanh toán</h1>
+            <h1 className="font-serif text-xl font-medium text-app-ink">Kh�ng t?i du?c don thanh to�n</h1>
             <p className="mt-2 text-sm leading-6 text-app-ink-soft">{paymentError}</p>
             <Button
               type="button"
-              className="mt-6 bg-app-accent text-white hover:bg-[#284f45]"
+              className="mt-6 bg-app-accent text-white hover:bg-app-accent-hover"
               onClick={() => params.orderId && void fetchPaymentOrder(params.orderId)}
             >
               <RefreshCw className="h-4 w-4" />
-              Tải lại trang
+              T?i l?i trang
             </Button>
           </div>
         </div>
@@ -392,9 +392,9 @@ export function OrderStatusPage() {
             <div className="mx-auto flex h-20 w-20 animate-bounce items-center justify-center rounded-full bg-app-accent text-white">
               <CheckCircle2 className="h-10 w-10" />
             </div>
-            <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Plus đã kích hoạt!</h1>
+            <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Plus d� k�ch ho?t!</h1>
             <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-              Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus.
+              �ang chuy?n b?n v? trang g�i d? ti?p t?c s? d?ng Plus.
             </p>
           </div>
         </div>
@@ -408,20 +408,20 @@ export function OrderStatusPage() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-app-warm text-white">
               <Clock className="h-8 w-8" />
             </div>
-            <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Đơn hàng đã huỷ</h1>
+            <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">�on h�ng d� hu?</h1>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-app-ink-soft">
-              Đơn hàng đã huỷ, không nhận được chuyển khoản. Nếu bạn đã chuyển khoản, liên hệ {getSupportEmail()} để đội
-              hỗ trợ kiểm tra.
+              �on h�ng d� hu?, kh�ng nh?n du?c chuy?n kho?n. N?u b?n d� chuy?n kho?n, li�n h? {getSupportEmail()} d? d?i
+              h? tr? ki?m tra.
             </p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button type="button" asChild className="bg-app-accent text-white hover:bg-[#284f45]">
+              <Button type="button" asChild className="bg-app-accent text-white hover:bg-app-accent-hover">
                 <a href={createSupportMailto(paymentOrder.orderId)}>
                   <Mail className="h-4 w-4" />
-                  Liên hệ hỗ trợ
+                  Li�n h? h? tr?
                 </a>
               </Button>
               <Button type="button" variant="outline" asChild className="border-app-line text-app-ink hover:bg-app-bg">
-                <Link to="/billing/faq">Xem FAQ thanh toán</Link>
+                <Link to="/billing/faq">Xem FAQ thanh to�n</Link>
               </Button>
               <Button
                 type="button"
@@ -430,7 +430,7 @@ export function OrderStatusPage() {
                 className="border-app-line text-app-ink hover:bg-app-bg"
               >
                 <RefreshCw className="h-4 w-4" />
-                Tải lại trang
+                T?i l?i trang
               </Button>
             </div>
           </div>
@@ -446,14 +446,14 @@ export function OrderStatusPage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                 <QrCode className="h-6 w-6" />
               </div>
-              <h2 className="font-serif text-2xl font-medium text-app-ink">Quét QR để chuyển khoản</h2>
+              <h2 className="font-serif text-2xl font-medium text-app-ink">Qu�t QR d? chuy?n kho?n</h2>
               <p className="mt-1 text-sm text-app-ink-muted">
-                Giữ nguyên số tiền và nội dung. Hệ thống thường xác nhận trong 1-2 phút.
+                Gi? nguy�n s? ti?n v� n?i dung. H? th?ng thu?ng x�c nh?n trong 1-2 ph�t.
               </p>
             </div>
             <div className="space-y-5 p-5 sm:p-6">
               <div className="rounded-lg border border-app-line bg-app-bg p-4 text-center">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mã đơn hàng</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">M� don h�ng</p>
                 <p className="mt-2 select-all break-all font-serif text-3xl font-medium text-app-ink">
                   {paymentOrder.orderId}
                 </p>
@@ -463,7 +463,7 @@ export function OrderStatusPage() {
                 {paymentOrder.qrDataUrl ? (
                   <img
                     src={paymentOrder.qrDataUrl}
-                    alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`}
+                    alt={`QR chuy?n kho?n don ${paymentOrder.orderId}`}
                     className="mx-auto aspect-square w-full max-w-[360px] rounded-lg bg-app-surface p-3"
                   />
                 ) : (
@@ -476,10 +476,10 @@ export function OrderStatusPage() {
               <div className="text-center" role="status" aria-live="polite">
                 <div className="inline-flex items-center gap-2 rounded-full bg-app-warm-soft px-4 py-2">
                   <Loader2 className="h-4 w-4 animate-spin text-app-warm" />
-                  <span className="text-sm font-semibold text-app-ink">Đang chờ xác nhận chuyển khoản</span>
+                  <span className="text-sm font-semibold text-app-ink">�ang ch? x�c nh?n chuy?n kho?n</span>
                 </div>
                 <p className="mt-2 text-sm font-medium text-app-ink-muted">
-                  Đơn hàng sẽ huỷ trong {formatCountdown(paymentTimeLeftMs)}
+                  �on h�ng s? hu? trong {formatCountdown(paymentTimeLeftMs)}
                 </p>
               </div>
             </div>
@@ -487,13 +487,13 @@ export function OrderStatusPage() {
 
           <div className="space-y-5">
             <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-6">
-              <h3 className="mb-1 text-lg font-semibold text-app-ink">Thông tin chuyển khoản</h3>
+              <h3 className="mb-1 text-lg font-semibold text-app-ink">Th�ng tin chuy?n kho?n</h3>
               <p className="text-sm text-app-ink-muted">
-                Nhấn nút sao chép từng dòng để tránh nhập sai. Nội dung chuyển khoản là phần quan trọng nhất.
+                Nh?n n�t sao ch�p t?ng d�ng d? tr�nh nh?p sai. N?i dung chuy?n kho?n l� ph?n quan tr?ng nh?t.
               </p>
               <div className="mt-4 space-y-3">
                 <PaymentInfoRow
-                  label="Số tiền"
+                  label="S? ti?n"
                   value={`${formatVndAmount(paymentOrder.amount)} ${paymentOrder.currency}`}
                   copyValue={String(paymentOrder.amount)}
                   copyKey="amount"
@@ -502,7 +502,7 @@ export function OrderStatusPage() {
                   highlight
                 />
                 <PaymentInfoRow
-                  label="Ngân hàng nhận"
+                  label="Ng�n h�ng nh?n"
                   value={paymentOrder.bankName}
                   copyValue={paymentOrder.bankName}
                   copyKey="bank"
@@ -510,7 +510,7 @@ export function OrderStatusPage() {
                   onCopy={copyPaymentValue}
                 />
                 <PaymentInfoRow
-                  label="STK ngân hàng nhận"
+                  label="STK ng�n h�ng nh?n"
                   value={paymentOrder.bankAccount}
                   copyValue={paymentOrder.bankAccount}
                   copyKey="account"
@@ -519,7 +519,7 @@ export function OrderStatusPage() {
                   highlight
                 />
                 <PaymentInfoRow
-                  label="Chủ tài khoản"
+                  label="Ch? t�i kho?n"
                   value={paymentOrder.accountName}
                   copyValue={paymentOrder.accountName}
                   copyKey="name"
@@ -527,7 +527,7 @@ export function OrderStatusPage() {
                   onCopy={copyPaymentValue}
                 />
                 <PaymentInfoRow
-                  label="Nội dung chuyển khoản"
+                  label="N?i dung chuy?n kho?n"
                   value={transferDescription}
                   copyValue={transferDescription}
                   copyKey="description"
@@ -547,7 +547,7 @@ export function OrderStatusPage() {
             <div className="rounded-card border border-app-line bg-app-bg p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-app-ink">
-                  Cần biết cách xác nhận thanh toán, nhận Plus hoặc xử lý chuyển khoản sai?
+                  C?n bi?t c�ch x�c nh?n thanh to�n, nh?n Plus ho?c x? l� chuy?n kho?n sai?
                 </p>
                 <Button
                   type="button"
@@ -555,7 +555,7 @@ export function OrderStatusPage() {
                   asChild
                   className="border-app-line text-app-ink hover:bg-app-bg"
                 >
-                  <Link to="/billing/faq">Xem FAQ thanh toán</Link>
+                  <Link to="/billing/faq">Xem FAQ thanh to�n</Link>
                 </Button>
               </div>
             </div>
@@ -564,20 +564,20 @@ export function OrderStatusPage() {
               <div className="rounded-card border border-app-line bg-app-accent-soft p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm leading-6 text-app-ink">
-                    Đã chuyển khoản? Bấm để đội hỗ trợ thấy bạn đã xác nhận khi cần kiểm tra.
+                    �� chuy?n kho?n? B?m d? d?i h? tr? th?y b?n d� x�c nh?n khi c?n ki?m tra.
                   </p>
                   <Button
                     type="button"
                     onClick={handleUserConfirmedTransfer}
                     disabled={confirmingTransfer}
-                    className="bg-app-accent text-white hover:bg-[#284f45]"
+                    className="bg-app-accent text-white hover:bg-app-accent-hover"
                   >
                     {confirmingTransfer ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <CheckCircle2 className="h-4 w-4" />
                     )}
-                    Tôi đã chuyển khoản xong
+                    T�i d� chuy?n kho?n xong
                   </Button>
                 </div>
               </div>
@@ -585,15 +585,15 @@ export function OrderStatusPage() {
 
             {transferConfirmedByUser && (
               <div className="rounded-lg border border-app-line bg-app-accent-soft p-4 text-sm font-medium leading-6 text-app-accent">
-                Cảm ơn bạn! Chúng tôi đang xác nhận giao dịch (thường 1-2 phút).
+                C?m on b?n! Ch�ng t�i dang x�c nh?n giao d?ch (thu?ng 1-2 ph�t).
               </div>
             )}
 
             {showSlowPaymentHelp && (
               <div className="rounded-card border border-app-line bg-app-warm-soft p-6">
-                <h3 className="font-serif text-base font-medium text-app-ink">Quá lâu chưa thấy phản hồi?</h3>
+                <h3 className="font-serif text-base font-medium text-app-ink">Qu� l�u chua th?y ph?n h?i?</h3>
                 <p className="mt-1 text-sm text-app-ink-muted">
-                  Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút chưa nhận quyền:
+                  Ng�n h�ng d�i khi ch?m 3-5 ph�t. N?u b?n d� chuy?n v� qu� 10 ph�t chua nh?n quy?n:
                 </p>
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                   <Button
@@ -604,7 +604,7 @@ export function OrderStatusPage() {
                   >
                     <a href={createSupportMailto(paymentOrder.orderId)}>
                       <Mail className="h-4 w-4" />
-                      Liên hệ hỗ trợ
+                      Li�n h? h? tr?
                     </a>
                   </Button>
                   <Button
@@ -613,7 +613,7 @@ export function OrderStatusPage() {
                     asChild
                     className="border-app-line text-app-ink hover:bg-app-bg"
                   >
-                    <Link to="/billing/faq">Xem FAQ thanh toán</Link>
+                    <Link to="/billing/faq">Xem FAQ thanh to�n</Link>
                   </Button>
                   <Button
                     type="button"
@@ -622,7 +622,7 @@ export function OrderStatusPage() {
                     className="border-app-line text-app-ink hover:bg-app-bg"
                   >
                     <RefreshCw className="h-4 w-4" />
-                    Tải lại trang
+                    T?i l?i trang
                   </Button>
                 </div>
               </div>
@@ -641,23 +641,23 @@ export function OrderStatusPage() {
             <ClipboardList className="h-10 w-10 text-app-accent" />
           </div>
           <h1 className="font-serif text-3xl font-medium text-app-ink mt-6">
-            Chưa có đơn nào trong không gian làm việc của bạn
+            Chua c� don n�o trong kh�ng gian l�m vi?c c?a b?n
           </h1>
           <p className="mx-auto mt-2 max-w-2xl text-base text-app-ink-muted">
-            Hiện chưa tìm thấy đơn theo mã đang mở. Bạn có thể tạo đơn mới hoặc quay lại luồng mục tiêu để chọn hướng đi
-            tiếp theo.
+            Hi?n chua t�m th?y don theo m� dang m?. B?n c� th? t?o don m?i ho?c quay l?i lu?ng m?c ti�u d? ch?n hu?ng di
+            ti?p theo.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button onClick={() => navigate("/order")} className="bg-app-accent text-white hover:bg-[#284f45]">
+            <Button onClick={() => navigate("/order")} className="bg-app-accent text-white hover:bg-app-accent-hover">
               <Package className="h-4 w-4" />
-              Tạo đơn kit
+              T?o don kit
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate("/goals")}
               className="border-app-line text-app-ink hover:bg-app-bg"
             >
-              Quay lại luồng mục tiêu
+              Quay l?i lu?ng m?c ti�u
             </Button>
           </div>
         </div>
@@ -700,12 +700,12 @@ export function OrderStatusPage() {
     <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <PageHero
         className="page-enter"
-        eyebrow="THEO DÕI ĐƠN HÀNG"
-        title="Theo dõi trạng thái đơn kit hiện tại"
+        eyebrow="THEO D�I �ON H�NG"
+        title="Theo d�i tr?ng th�i don kit hi?n t?i"
         description={
           hasGoalLink
-            ? `Đơn này đang bám theo mục tiêu "${order.goalTitle}" trong nhóm ${order.focusArea}.`
-            : "Đơn này chưa gắn với mục tiêu cụ thể, nhưng vẫn có thể theo dõi đầy đủ như một kit độc lập."
+            ? `�on n�y dang b�m theo m?c ti�u "${order.goalTitle}" trong nh�m ${order.focusArea}.`
+            : "�on n�y chua g?n v?i m?c ti�u c? th?, nhung v?n c� th? theo d�i d?y d? nhu m?t kit d?c l?p."
         }
       />
 
@@ -713,19 +713,19 @@ export function OrderStatusPage() {
         <div className="stack-section">
           <Card className="border-0 shadow-lg">
             <CardHeader>
-              <CardTitle>Chi tiết đơn</CardTitle>
+              <CardTitle>Chi ti?t don</CardTitle>
               <CardDescription>
-                Những thông tin chính của đơn, người nhận và kit được gom lại để dễ quét nhanh.
+                Nh?ng th�ng tin ch�nh c?a don, ngu?i nh?n v� kit du?c gom l?i d? d? qu�t nhanh.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="stack-section">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Mục tiêu & kit
+                  M?c ti�u & kit
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Giữ phần định hướng và cấu hình kit ở cùng một cụm để quét nhanh hơn.
+                  Gi? ph?n d?nh hu?ng v� c?u h�nh kit ? c�ng m?t c?m d? qu�t nhanh hon.
                 </p>
               </div>
 
@@ -733,22 +733,22 @@ export function OrderStatusPage() {
                 <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Target className="h-3.5 w-3.5 text-app-accent" />
-                    Mục tiêu đang gắn
+                    M?c ti�u dang g?n
                   </div>
                   <p className="mt-[var(--space-inline)] text-base font-semibold text-foreground">
-                    {hasGoalLink ? order.goalTitle : "Đơn này chưa gắn mục tiêu"}
+                    {hasGoalLink ? order.goalTitle : "�on n�y chua g?n m?c ti�u"}
                   </p>
                   <p className="mt-1 text-sm leading-7 text-muted-foreground">
                     {hasGoalLink
-                      ? `Kit đang bám theo nhóm ${order.focusArea}.`
-                      : "Bạn vẫn có thể theo dõi đơn như một kit độc lập trong flow hiện tại."}
+                      ? `Kit dang b�m theo nh�m ${order.focusArea}.`
+                      : "B?n v?n c� th? theo d�i don nhu m?t kit d?c l?p trong flow hi?n t?i."}
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
-                    Chi tiết đơn
+                    Chi ti?t don
                   </div>
                   {order.lines && order.lines.length > 0 ? (
                     <ul className="mt-[var(--space-inline)] space-y-2 text-sm">
@@ -759,7 +759,7 @@ export function OrderStatusPage() {
                         >
                           <span className="text-slate-900">
                             {line.label}
-                            {line.qty > 1 ? ` × ${line.qty}` : ""}
+                            {line.qty > 1 ? ` � ${line.qty}` : ""}
                           </span>
                           <span className="shrink-0 tabular-nums text-slate-700">
                             {formatVnd(line.lineTotalVnd)}
@@ -772,41 +772,41 @@ export function OrderStatusPage() {
                           className="flex items-start justify-between gap-2 text-muted-foreground"
                         >
                           <span>{doc.label}</span>
-                          <span className="shrink-0">Tặng kèm — 0đ</span>
+                          <span className="shrink-0">T?ng k�m � 0d</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
                     <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
-                      Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết.
+                      �on n�y du?c t?o t? phi�n b?n tru?c. Vui l�ng li�n h? shop d? x�c nh?n chi ti?t.
                     </p>
                   )}
                   {typeof order.totalVnd === "number" && order.totalVnd > 0 && (
                     <div className="mt-3 flex items-center justify-between border-t border-[color:var(--border)] pt-3 text-sm font-semibold">
-                      <span>Tổng đơn</span>
+                      <span>T?ng don</span>
                       <span className="tabular-nums">{formatVnd(order.totalVnd)}</span>
                     </div>
                   )}
                   <p className="mt-2 text-xs text-slate-500">
                     {hasKeywords
-                      ? `${order.keywords.length} từ khóa đã được lưu cùng đơn này.`
-                      : "Chưa có từ khóa cụ thể cho kit."}
+                      ? `${order.keywords.length} t? kh�a d� du?c luu c�ng don n�y.`
+                      : "Chua c� t? kh�a c? th? cho kit."}
                   </p>
                 </div>
               </div>
 
               {(!order.lines || order.lines.length === 0) && (
                 <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết và giá.
+                  �on n�y du?c t?o t? phi�n b?n tru?c. Vui l�ng li�n h? shop d? x�c nh?n chi ti?t v� gi�.
                 </div>
               )}
 
               <div className="space-y-1 border-t border-slate-100 pt-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Người nhận & giao hàng
+                  Ngu?i nh?n & giao h�ng
                 </p>
                 <p className="text-sm text-slate-600">
-                  Thông tin liên hệ và địa chỉ được tách riêng để hạn chế phải dò lại trong card.
+                  Th�ng tin li�n h? v� d?a ch? du?c t�ch ri�ng d? h?n ch? ph?i d� l?i trong card.
                 </p>
               </div>
 
@@ -814,20 +814,20 @@ export function OrderStatusPage() {
                 <div className="rounded-xl border border-slate-200 bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <Mail className="h-3.5 w-3.5" />
-                    Người nhận
+                    Ngu?i nh?n
                   </div>
                   <p className="mt-[var(--space-inline)] text-sm font-semibold text-slate-900">{order.fullName}</p>
                   <p className="mt-1 text-sm text-slate-600">{order.email}</p>
                   <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
                     <Phone className="h-3.5 w-3.5" />
-                    {order.phone || "Chưa bổ sung số điện thoại"}
+                    {order.phone || "Chua b? sung s? di?n tho?i"}
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-slate-200 bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <MapPin className="h-3.5 w-3.5" />
-                    Địa chỉ giao
+                    �?a ch? giao
                   </div>
                   <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{order.shippingAddress}</p>
                 </div>
@@ -837,17 +837,17 @@ export function OrderStatusPage() {
                 <div className="stack-stack border-t border-slate-100 pt-5">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Từ khóa & ghi chú
+                      T? kh�a & ghi ch�
                     </p>
                     <p className="text-sm text-slate-600">
-                      Những thông tin tinh chỉnh cho kit được gom riêng để đỡ lẫn với thông tin giao hàng.
+                      Nh?ng th�ng tin tinh ch?nh cho kit du?c gom ri�ng d? d? l?n v?i th�ng tin giao h�ng.
                     </p>
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                       <Package className="h-3.5 w-3.5" />
-                      Ghi chú cho kit
+                      Ghi ch� cho kit
                     </div>
 
                     {hasKeywords && (
@@ -871,9 +871,9 @@ export function OrderStatusPage() {
 
           <Card className="border-0 shadow-lg">
             <CardHeader>
-              <CardTitle>Tiến trình đơn</CardTitle>
+              <CardTitle>Ti?n tr�nh don</CardTitle>
               <CardDescription>
-                Dòng thời gian nhỏ cho luồng đơn hiện tại, gồm đủ 4 bước từ chờ xác nhận đến đã giao.
+                D�ng th?i gian nh? cho lu?ng don hi?n t?i, g?m d? 4 bu?c t? ch? x�c nh?n d?n d� giao.
               </CardDescription>
             </CardHeader>
 
@@ -906,12 +906,12 @@ export function OrderStatusPage() {
                         </p>
                         {isCurrent && (
                           <Badge variant="outline" className="border-emerald-200 bg-app-surface text-emerald-800">
-                            Trạng thái hiện tại
+                            Tr?ng th�i hi?n t?i
                           </Badge>
                         )}
                         {!isCurrent && isCompleted && (
                           <Badge variant="outline" className="border-emerald-200 bg-app-surface text-emerald-800">
-                            Đã hoàn thành
+                            �� ho�n th�nh
                           </Badge>
                         )}
                       </div>
@@ -925,9 +925,9 @@ export function OrderStatusPage() {
 
               {isCancelled && (
                 <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-4">
-                  <p className="text-sm font-semibold text-rose-800">Đơn này đã bị huỷ.</p>
+                  <p className="text-sm font-semibold text-rose-800">�on n�y d� b? hu?.</p>
                   <p className="mt-1 text-sm leading-7 text-rose-700/80">
-                    Bạn có thể tạo đơn mới nếu vẫn muốn đặt kit.
+                    B?n c� th? t?o don m?i n?u v?n mu?n d?t kit.
                   </p>
                 </div>
               )}
@@ -936,23 +936,23 @@ export function OrderStatusPage() {
                 <div className="stack-stack border-t border-slate-100 pt-5">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Điều khiển trạng thái
+                      �i?u khi?n tr?ng th�i
                     </p>
-                    <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa kết nối máy chủ.</p>
+                    <p className="text-sm text-slate-600">Ph?n n�y ch? xu?t hi?n khi don chua k?t n?i m�y ch?.</p>
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          Cập nhật trạng thái
+                          C?p nh?t tr?ng th�i
                         </p>
                         <p className="mt-2 text-sm leading-7 text-slate-600">
-                          Dùng để cập nhật đơn lưu trên thiết bị khi chưa có dữ liệu từ máy chủ.
+                          D�ng d? c?p nh?t don luu tr�n thi?t b? khi chua c� d? li?u t? m�y ch?.
                         </p>
                       </div>
                       <Badge variant="outline" className="border-slate-200 bg-app-surface text-slate-700">
-                        Trên thiết bị
+                        Tr�n thi?t b?
                       </Badge>
                     </div>
 
@@ -960,18 +960,18 @@ export function OrderStatusPage() {
                       {nextStatus ? (
                         <>
                           <p className="text-sm text-slate-600">
-                            Bước tiếp theo:{" "}
+                            Bu?c ti?p theo:{" "}
                             <span className="font-medium text-slate-900">{getOrderStatusLabel(nextStatus)}</span>
                           </p>
                           <Button type="button" size="sm" variant="outline" onClick={handleAdvanceStatus}>
-                            Chuyển sang bước tiếp theo
+                            Chuy?n sang bu?c ti?p theo
                           </Button>
                         </>
                       ) : (
                         <>
-                          <p className="text-sm text-slate-600">Đơn đã ở bước cuối cùng trên thiết bị này.</p>
+                          <p className="text-sm text-slate-600">�on d� ? bu?c cu?i c�ng tr�n thi?t b? n�y.</p>
                           <Button type="button" size="sm" variant="outline" disabled>
-                            Đã hoàn tất
+                            �� ho�n t?t
                           </Button>
                         </>
                       )}
@@ -986,8 +986,8 @@ export function OrderStatusPage() {
         <div className="stack-section">
           <Card className="border-0 shadow-lg">
             <CardHeader>
-              <CardTitle>Đơn gần đây</CardTitle>
-              <CardDescription>Giữ luồng đơn gọn và cho phép mở nhanh lại các đơn vừa tạo.</CardDescription>
+              <CardTitle>�on g?n d�y</CardTitle>
+              <CardDescription>Gi? lu?ng don g?n v� cho ph�p m? nhanh l?i c�c don v?a t?o.</CardDescription>
             </CardHeader>
 
             <CardContent className="stack-tight">
@@ -1006,7 +1006,7 @@ export function OrderStatusPage() {
                       <p className="mt-1 text-xs text-slate-500">
                         {getOrderStatusLabel(item.status)}
                         {typeof item.totalVnd === "number" && item.totalVnd > 0
-                          ? ` · ${formatVnd(item.totalVnd)}`
+                          ? ` � ${formatVnd(item.totalVnd)}`
                           : ""}
                       </p>
                       <p className="mt-1 text-xs text-slate-400">
@@ -1020,7 +1020,7 @@ export function OrderStatusPage() {
 
                     {item.id === order.id && (
                       <Badge variant="outline" className="border-sky-200 bg-app-surface text-sky-700">
-                        Đang xem
+                        �ang xem
                       </Badge>
                     )}
                   </div>
@@ -1032,10 +1032,10 @@ export function OrderStatusPage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button className="w-full sm:w-auto" onClick={handleCreateAnotherOrder}>
               <Package className="h-4 w-4" />
-              {hasGoalLink ? "Tạo thêm kit từ mục tiêu này" : "Tạo đơn mới"}
+              {hasGoalLink ? "T?o th�m kit t? m?c ti�u n�y" : "T?o don m?i"}
             </Button>
             <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate("/goals")}>
-              {hasGoalLink ? "Quay lại danh sách mục tiêu" : "Quay lại mục tiêu"}
+              {hasGoalLink ? "Quay l?i danh s�ch m?c ti�u" : "Quay l?i m?c ti�u"}
             </Button>
           </div>
         </div>
@@ -1081,11 +1081,11 @@ function PaymentInfoRow({
           size="sm"
           variant="outline"
           onClick={() => onCopy(copyValue, copyKey)}
-          aria-label={`Sao chép ${label}`}
+          aria-label={`Sao ch�p ${label}`}
           className="border-app-line text-app-ink-muted hover:bg-app-bg"
         >
           {copied ? <CheckCircle2 className="h-4 w-4 text-app-accent" /> : <Copy className="h-4 w-4" />}
-          {copied ? "Đã copy" : "Copy"}
+          {copied ? "�� copy" : "Copy"}
         </Button>
       </div>
     </div>

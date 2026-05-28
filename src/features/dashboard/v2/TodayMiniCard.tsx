@@ -33,7 +33,7 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
               <span
                 aria-hidden="true"
                 className={`mt-0.5 flex size-[14px] shrink-0 items-center justify-center rounded-[4px] border ${
-                  task.completed ? "border-app-accent bg-app-accent" : "border-[#C8C2B6] bg-app-surface"
+                  task.completed ? "border-app-accent bg-app-accent" : "border-app-line-strong bg-app-surface"
                 }`}
               />
               <p
