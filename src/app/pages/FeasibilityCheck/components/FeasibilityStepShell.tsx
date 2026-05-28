@@ -39,7 +39,7 @@ export function FeasibilityStepShell({
   return (
     <section
       ref={targetRef}
-      className="mt-6 surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm transition-all duration-300"
+      className="mt-6 rounded-[14px] border border-app-line bg-app-surface p-5 sm:p-6 transition-all duration-300"
       aria-labelledby={`feasibility-question-${currentQuestion.id}`}
     >
       <AnimatePresence mode="wait">
@@ -79,7 +79,7 @@ export function FeasibilityStepShell({
           {/* Question progress line */}
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-app-line/60" aria-hidden="true">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-app-accent/40 via-app-accent/80 to-app-accent transition-all duration-300"
+              className="h-full rounded-full bg-app-accent transition-all duration-300"
               style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
             />
           </div>
@@ -97,14 +97,14 @@ export function FeasibilityStepShell({
               return (
                 <div
                   key={option.value}
-                  className="group flex w-full transition-all duration-200 transform hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.99]"
+                  className="group flex w-full transition-all duration-200"
                 >
                   <Label
                     htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
                     className={cn(
-                      "flex w-full min-h-[5.5rem] cursor-pointer flex-col justify-between rounded-xl border p-4 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30",
-                      isSelected
-                        ? "border-app-accent bg-gradient-to-br from-app-accent-soft/40 to-app-accent-soft/10 text-app-accent shadow-[0_4px_12px_rgba(40,79,69,0.06)]"
+                      "flex w-full min-h-[5.5rem] cursor-pointer flex-col justify-between rounded-[14px] border p-4 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30",
+                    isSelected
+                      ? "border-app-accent bg-app-accent-soft/30 text-app-accent"
                         : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-ink-muted/50 hover:bg-app-bg hover:text-app-ink"
                     )}
                   >
