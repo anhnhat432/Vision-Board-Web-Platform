@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 
@@ -73,8 +73,40 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     conflictPending: syncState.conflictPending,
   });
 
-  if (state === "ok" || state === "idle") {
-    return null;
+  const [showSuccess, setShowSuccess] = useState(false);
+  const prevSyncStateRef = useRef<SyncPillState | null>(null);
+  const successTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const prevState = prevSyncStateRef.current;
+    if ((prevState === "syncing" || prevState === "pending") && state === "ok") {
+      setShowSuccess(true);
+      if (successTimeoutRef.current !== null) {
+        window.clearTimeout(successTimeoutRef.current);
+      }
+      successTimeoutRef.current = window.setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+    }
+    prevSyncStateRef.current = state;
+  }, [state]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current !== null) {
+        window.clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const effectiveState = (state === "ok" || state === "idle") && showSuccess ? "ok" : state;
+
+  if (effectiveState === "ok" || effectiveState === "idle") {
+    if (effectiveState === "ok" && showSuccess) {
+      // Allow rendering the success state
+    } else {
+      return null;
+    }
   }
 
   // Demo workaround (verify probe 2026-05-26): nếu state="conflict" do legacy
@@ -82,7 +114,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   // value-diff conflict thật, ẩn pill khỏi header. User vẫn có thể vào
   // /settings#account-sync để xem chi tiết. Tracked riêng:
   // docs/superpowers/prompts/2026-05-26-b2-missing-client-id-backfill.md
-  if (state === "conflict") {
+  if (effectiveState === "conflict") {
     const lastResult = syncState.lastResult;
     const summary = lastResult?.mergeReport?.summary;
     const isLegacyMissingClientId =
@@ -94,9 +126,9 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     }
   }
 
-  const tooltip = getTooltip(state, relativeTime, syncState.pendingCount);
+  const tooltip = getTooltip(effectiveState, relativeTime, syncState.pendingCount);
   const baseClass =
-    "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+    "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium leading-none transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 animate-in fade-in zoom-in-95 duration-200";
   const sizeClass = compact ? "" : "mt-2";
 
   const config = {
@@ -139,11 +171,11 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
 
   const handleClick = () => {
-    if (state === "conflict") {
+    if (effectiveState === "conflict") {
       window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
       return;
     }
-    if (state === "pending" && syncState.online) {
+    if (effectiveState === "pending" && syncState.online) {
       void syncState.triggerSyncNow();
       return;
     }
@@ -153,15 +185,15 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   return (
     <button
       type="button"
-      className={`${baseClass} ${sizeClass} ${config[state].tone} cursor-pointer`}
+      className={`${baseClass} ${sizeClass} ${config[effectiveState].tone} cursor-pointer`}
       title={tooltip}
-      aria-label={config[state].label}
+      aria-label={config[effectiveState].label}
       onClick={handleClick}
     >
-      {config[state].dot}
-      {config[state].icon}
-      <span className="truncate">{config[state].label}</span>
-      {state === "pending" && syncState.pendingCount > 0 ? (
+      {config[effectiveState].dot}
+      {config[effectiveState].icon}
+      <span className="truncate">{config[effectiveState].label}</span>
+      {effectiveState === "pending" && syncState.pendingCount > 0 ? (
         <span className="ml-1 rounded-full bg-app-surface/80 px-1.5 py-0.5 text-xs font-semibold text-app-warm">
           Sao lưu ngay
         </span>
