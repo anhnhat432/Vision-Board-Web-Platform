@@ -262,13 +262,15 @@ export function TwelveWeekTodayTab({
 
     const timerId = window.setTimeout(() => {
       deferredToggleTimersRef.current = deferredToggleTimersRef.current.filter((item) => item !== timerId);
-      Promise.resolve(onToggleTask(taskId, completed)).finally(() => {
+      Promise.resolve(onToggleTask(taskId, completed)).catch((error) => {
+        // Chỉ hoàn tác trạng thái optimistic khi xảy ra lỗi thực tế
         setOptimisticTaskCompletionById((current) => {
           if (!(taskId in current)) return current;
           const next = { ...current };
           delete next[taskId];
           return next;
         });
+        console.error("Failed to toggle task:", error);
       });
     }, delay);
     deferredToggleTimersRef.current.push(timerId);
