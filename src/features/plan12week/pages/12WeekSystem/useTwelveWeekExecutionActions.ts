@@ -298,7 +298,9 @@ export function useTwelveWeekExecutionActions({
       if (shouldEnable12WeekMutationSync()) {
         void executionSyncActions.syncTaskToggle(taskId, completed).then((synced) => {
           if (synced && activeGoalIdRef.current === actionGoalId) {
-            refreshBackendProgressOverlay();
+            // Không gọi refreshBackendProgressOverlay() ở đây vì queue đồng bộ ngầm
+            // chưa hoàn thành. Gọi API kéo plan chi tiết từ server lúc này là thừa và làm chậm UI.
+            // Chỉ cần refreshSnapshotMeta() để cập nhật metadata queue local.
             refreshSnapshotMeta();
           }
         });

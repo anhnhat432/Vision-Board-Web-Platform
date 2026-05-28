@@ -135,10 +135,18 @@ export function useBackendTaskOverlay(goalId: string | null): BackendTaskOverlay
 export function applyTaskOverlay(tasks: TwelveWeekTaskInstance[], overlay: TaskOverlayMap): TwelveWeekTaskInstance[] {
   if (overlay.size === 0) return tasks;
 
+  const now = Date.now();
   return tasks.map((task) => {
     const backendCompleted = overlay.get(task.id);
     if (backendCompleted === undefined) return task;
     if (task.completed === backendCompleted) return task;
+
+    // Guard: Nếu task vừa được chỉnh sửa cục bộ trong vòng 15 giây qua,
+    // ta không cho backend overlay ghi đè lên trạng thái cục bộ (local status wins).
+    // Việc này ngăn chặn tuyệt đối checkbox bị giật/nhảy trạng thái do độ trễ truyền mạng.
+    if (task.lastModifiedAt && now - task.lastModifiedAt < 15000) {
+      return task;
+    }
 
     return { ...task, completed: backendCompleted };
   });

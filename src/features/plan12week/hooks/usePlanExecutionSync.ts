@@ -11,7 +11,7 @@ import { buildBulkSyncRequest, isBulkRequestEmpty } from "../persistence/bulkSyn
 import type { AppError } from "@/types/api";
 import type { PlanDetails, Task, WeekDetails } from "@/types/plan";
 import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
-import { isDemoMode } from "@/app/utils/app-mode";
+import { isDemoMode, shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
 import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
 import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
@@ -975,6 +975,11 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const syncTaskToggle = useCallback(
     async (taskId: string, completed: boolean): Promise<boolean> => {
       if (!goalId || !system || !enabled) return Promise.resolve(true);
+
+      if (shouldEnable12WeekMutationSync()) {
+        enqueueRetry("task_completed", { taskId, completed }, taskId, "task");
+        return Promise.resolve(true);
+      }
 
       const synced = await syncTaskToggleNow(taskId, completed);
       if (!synced) {

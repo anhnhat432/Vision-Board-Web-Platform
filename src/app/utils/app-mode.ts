@@ -24,7 +24,7 @@ function normalizeBoolFlag(value: string | undefined): boolean {
 }
 
 const PAID_CHECKOUT_DISABLED = normalizeBoolFlag(import.meta.env.VITE_BILLING_PAID_CHECKOUT_DISABLED);
-const ENABLE_12_WEEK_MUTATION_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_MUTATION_SYNC === "true";
+const ENABLE_12_WEEK_MUTATION_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_MUTATION_SYNC !== "false";
 const ENABLE_12_WEEK_PULL_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_PULL_SYNC === "true";
 const ENABLE_12_WEEK_GOAL_TOMBSTONE_SYNC = import.meta.env.VITE_ENABLE_12_WEEK_GOAL_TOMBSTONE_SYNC !== "false";
 const ENABLE_12_WEEK_IMPORT_DRY_RUN = import.meta.env.VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN === "true";
