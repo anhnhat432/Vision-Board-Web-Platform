@@ -56,7 +56,7 @@ export function ArchetypePicker({
         {isUserOverridden ? (
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.97]"
             onClick={onResetToInferred}
             aria-label={`Quay lại đoán tự động (${getGoalArchetypeLabel(inferredArchetype)})`}
           >
@@ -76,7 +76,7 @@ export function ArchetypePicker({
               key={option.value}
               type="button"
               className={cn(
-                "group flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                "group flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                 active
                   ? "border-app-accent bg-gradient-to-br from-app-accent-soft/40 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-accent-soft/5 hover:text-app-accent"

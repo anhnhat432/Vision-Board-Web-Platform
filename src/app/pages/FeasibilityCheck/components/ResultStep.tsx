@@ -330,7 +330,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
           >
             {isDesktop ? "Phân tích chi tiết" : "Mở chi tiết"}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -374,7 +374,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </div>
 
           <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1">
               <span>Xem 7 góc nhìn</span>
               <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
@@ -400,7 +400,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1">
               <span>Xem mục tiêu đã viết</span>
               <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
@@ -428,7 +428,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1">
               <span>Xem nhịp triển khai gợi ý</span>
               <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
@@ -448,7 +448,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1">
               <span>Xem lý do đằng sau kết quả</span>
               <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
@@ -482,7 +482,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
           onClick={onAdjustGoal}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -490,7 +490,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         </button>
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
           onClick={onContinue}
         >
           Tiếp tục → Kế hoạch 12 tuần

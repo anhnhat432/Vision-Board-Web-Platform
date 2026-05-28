@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle, ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 
 import { GoalArchetypeExamples } from "@/app/components/GoalArchetypeExamples";
@@ -66,12 +66,12 @@ const COMMITMENT_FIELDS = [
 ] as const;
 
 const selectTriggerClass =
-  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2";
 const selectContentClass = "surface-elevated rounded-xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]";
 const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const optionButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
-const optionButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.98]";
+const optionButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent shadow-sm";
 
 function normalizeCommitmentChange(
   current: LeadIndicatorDraft["commitment"],
@@ -165,7 +165,7 @@ export function LeadIndicatorsStepLab({
             type="button"
             onClick={onAddIndicator}
             disabled={!canAddIndicator}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-sm font-medium text-app-accent transition-all duration-150 hover:bg-app-accent-soft active:scale-[0.97] disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             Thêm chỉ số dẫn dắt
@@ -198,7 +198,7 @@ export function LeadIndicatorsStepLab({
       </section>
 
       <details className="rounded-lg border border-app-line bg-app-surface p-3 sm:p-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
           Việc lặp lại khác chỉ số kết quả thế nào?
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -243,7 +243,7 @@ export function LeadIndicatorsStepLab({
                       type="button"
                       onClick={() => onRemoveIndicator(index)}
                       aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-app-ink-muted transition-all duration-150 hover:text-[color:var(--color-danger-fg)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
                       Xoá
@@ -347,7 +347,7 @@ export function LeadIndicatorsStepLab({
                 <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
                   <button
                     type="button"
-                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.99]"
                     aria-expanded={Boolean(expandedCommitments[indicator.id])}
                     aria-controls={`tactic-commitment-${index}`}
                     onClick={() => toggleCommitmentEditor(indicator.id)}

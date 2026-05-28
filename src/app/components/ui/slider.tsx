@@ -46,7 +46,7 @@ const Slider = React.forwardRef<
           data-slot="slider-thumb"
           // biome-ignore lint/suspicious/noArrayIndexKey: thumb position is stable and index-based in Radix slider.
           key={index}
-          className="block h-4 w-4 shrink-0 rounded-full border-2 border-white bg-app-accent shadow-sm transition-[box-shadow,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:pointer-events-none disabled:opacity-50"
+          className="block h-4 w-4 shrink-0 rounded-full border-2 border-white bg-app-accent shadow-sm transition-[box-shadow,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           style={trackColor ? { backgroundColor: trackColor } : undefined}
         />
       ))}

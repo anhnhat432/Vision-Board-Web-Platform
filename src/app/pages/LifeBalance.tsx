@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker } from "react-router";
 import { AlertTriangle, ArrowRight, Compass, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -330,15 +330,15 @@ export function LifeBalance() {
           </div>
         </header>
 
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-md hover:border-app-accent/30">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
           </article>
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-md hover:border-app-accent/30">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               Lĩnh vực mạnh nhất
             </p>
@@ -346,17 +346,17 @@ export function LifeBalance() {
               <CountUp value={strongestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
-            <p className="mt-1 text-xs text-app-ink-muted">{getLifeAreaLabel(strongestArea.name)}</p>
+            <p className="mt-1.5 text-xs font-medium text-app-ink-soft">{getLifeAreaLabel(strongestArea.name)}</p>
           </article>
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+          <article className="surface-raised rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-md hover:border-amber-500/50">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
               Lĩnh vực cần ưu tiên
             </p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
-            <p className="mt-1 text-xs text-app-ink-muted">{getLifeAreaLabel(weakestArea.name)}</p>
+            <p className="mt-1.5 text-xs font-medium text-amber-700 dark:text-amber-300">{getLifeAreaLabel(weakestArea.name)}</p>
           </article>
         </div>
 
@@ -395,10 +395,10 @@ export function LifeBalance() {
                     const AreaIcon = getLifeAreaIcon(area.name);
 
                     return (
-                      <li key={area.name} className="border-b border-app-line py-3 last:border-0">
+                      <li key={area.name} className="group border-b border-app-line py-3.5 last:border-0">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <span className="flex h-6 w-6 items-center justify-center rounded bg-app-accent-soft text-app-accent">
+                          <div className="flex items-center gap-2.5">
+                            <span className="flex h-6.5 w-6.5 items-center justify-center rounded bg-app-accent-soft text-app-accent transition-colors duration-250 group-hover:bg-app-accent group-hover:text-white">
                               <AreaIcon className="h-4 w-4" />
                             </span>
                             <span className="text-sm font-medium text-app-ink">{getLifeAreaLabel(area.name)}</span>
@@ -408,7 +408,7 @@ export function LifeBalance() {
                           </span>
                         </div>
                         <Slider
-                          className="mt-2"
+                          className="mt-2.5"
                           value={[area.score]}
                           onValueChange={(value) => handleScoreChange(index, value)}
                           min={1}
@@ -420,15 +420,15 @@ export function LifeBalance() {
                     );
                   })}
                 </ul>
-                <div className="mt-5 flex justify-end">
+                <div className="mt-6 flex justify-end">
                   <button
                     type="button"
                     onClick={handleSave}
                     disabled={!hasChanges}
                     className={
                       hasChanges
-                        ? "inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-app-accent"
-                        : "inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-app-ink-muted px-5 py-2.5 text-sm font-medium text-white"
+                        ? "inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                        : "inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-app-ink-muted/50 px-5 py-2.5 text-sm font-medium text-app-ink-muted opacity-60"
                     }
                   >
                     <Save className="h-4 w-4" />

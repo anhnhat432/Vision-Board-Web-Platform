@@ -33,8 +33,8 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
           aria-pressed={smartData.timeBound.mode === "weeks"}
           className={
             smartData.timeBound.mode === "weeks"
-              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-sm font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-sm font-medium text-app-accent transition-all duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
           }
           onClick={() =>
             setSmartData((previous) => ({
@@ -55,8 +55,8 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
           aria-pressed={smartData.timeBound.mode === "date"}
           className={
             smartData.timeBound.mode === "date"
-              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-sm font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-sm font-medium text-app-accent transition-all duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
           }
           onClick={() =>
             setSmartData((previous) => ({

@@ -132,11 +132,11 @@ export function SetupStepShellLab({
                   <button
                     type="button"
                     className={cn(
-                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold shadow-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold shadow-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                       isActive
                         ? "border-app-accent bg-app-accent text-white scale-110 ring-4 ring-app-accent-soft"
                         : isCompleted
-                        ? "border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white"
+                        ? "border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white active:scale-[0.96]"
                         : "border-app-line bg-app-surface text-app-ink-muted",
                       canJump ? "cursor-pointer" : "cursor-default",
                     )}
@@ -178,7 +178,7 @@ export function SetupStepShellLab({
           <div className="mt-5 overflow-hidden rounded-xl border border-app-accent/20 bg-gradient-to-br from-app-accent-soft/20 to-app-accent-soft/5 transition-all duration-200">
             <button
               type="button"
-              className="flex w-full items-center justify-between gap-3 p-4 text-left text-xs font-semibold text-app-accent transition-colors duration-150 hover:bg-app-accent-soft/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="flex w-full items-center justify-between gap-3 p-4 text-left text-xs font-semibold text-app-accent transition-all duration-150 hover:bg-app-accent-soft/10 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
               onClick={() => setIsWhyOpen((isOpen) => !isOpen)}
               aria-expanded={isWhyOpen}
               aria-controls="twelve-week-step-why"
@@ -239,17 +239,17 @@ export function SetupStepShellLab({
           4 bước nhỏ để thiết lập kế hoạch 12 tuần · Đang ở bước {currentStep + 1}/{stepCount}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
+          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Quay lại
           </button>
           {isLastStep ? (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
+            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
               {isSubmitting ? <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
               {isSubmitting ? "Đang lưu..." : "Lưu kế hoạch"}
             </button>
           ) : (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
+            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
               Tiếp →
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>

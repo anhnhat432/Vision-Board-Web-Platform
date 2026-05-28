@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { AlertTriangle, CalendarDays } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
@@ -52,7 +52,7 @@ const LOAD_HINTS: Record<TwelveWeekSetupDraft["tacticLoadPreference"], string> =
 };
 
 const radioButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.98]";
 const radioButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
 
 function CollapsibleScheduleSection({
@@ -68,7 +68,7 @@ function CollapsibleScheduleSection({
     <details className="group rounded-lg border border-app-line bg-app-bg p-3 sm:p-4">
       <summary
         id={id}
-        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-sm font-medium text-app-ink marker:hidden"
+        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1 marker:hidden"
       >
         <span>{title}</span>
         <span className="text-xs font-medium text-app-ink-muted group-open:hidden">Mở</span>
@@ -182,7 +182,7 @@ export function ScheduleStepLab({
                   aria-pressed={isActive}
                   onClick={() => onChange("reviewDay", day.value)}
                   className={cn(
-                    "min-h-10 rounded-md border border-app-line bg-app-surface px-2.5 py-2.5 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    "min-h-10 rounded-md border border-app-line bg-app-surface px-2.5 py-2.5 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.96]",
                     isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
                   )}
                 >

@@ -333,7 +333,7 @@ function ReflectionJournalContent() {
           {hasReflections && (
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm shrink-0 self-start sm:self-center"
+              className="bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-md shadow-app-warm/15"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết nhật ký mới
@@ -361,8 +361,8 @@ function ReflectionJournalContent() {
                 type="button"
                 onClick={() => setFilterType(type)}
                 className={cn(
-                  "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-colors",
-                  filterType === type ? "bg-app-warm-soft text-app-warm" : "text-app-ink-soft hover:bg-app-bg",
+                  "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
+                  filterType === type ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm" : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
                 {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
@@ -382,8 +382,8 @@ function ReflectionJournalContent() {
                   type="button"
                   onClick={() => setFilterMood(mood)}
                   className={cn(
-                    "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-colors",
-                    filterMood === mood ? "bg-app-warm-soft text-app-warm" : "text-app-ink-soft hover:bg-app-bg",
+                    "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
+                    filterMood === mood ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm" : "text-app-ink-soft hover:bg-app-bg",
                   )}
                 >
                   {labels[mood]}
@@ -409,10 +409,10 @@ function ReflectionJournalContent() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p>Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" type="button" onClick={handleRestoreReflectionDraft}>
+                    <Button size="sm" type="button" onClick={handleRestoreReflectionDraft} className="transition-all duration-150 active:scale-[0.97] focus-visible:ring-app-warm focus-visible:ring-offset-2">
                       Khôi phục
                     </Button>
-                    <Button size="sm" type="button" variant="outline" onClick={handleIgnoreReflectionDraft}>
+                    <Button size="sm" type="button" variant="outline" onClick={handleIgnoreReflectionDraft} className="transition-all duration-150 active:scale-[0.97]">
                       Bỏ qua
                     </Button>
                   </div>
@@ -486,9 +486,9 @@ function ReflectionJournalContent() {
                         type="button"
                         onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
                         className={cn(
-                          "rounded-full border px-3 py-1.5 text-sm transition-colors",
+                          "rounded-full border px-3 py-1.5 text-sm transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                           isActive
-                            ? "bg-app-warm text-white border-app-warm"
+                            ? "bg-app-warm text-white border-app-warm shadow-sm font-semibold"
                             : "bg-app-surface border-app-warm-border text-app-ink-soft hover:bg-app-warm-soft",
                         )}
                       >
@@ -503,7 +503,7 @@ function ReflectionJournalContent() {
               <Button
                 onClick={handleAddReflection}
                 disabled={!newReflection.title || !newReflection.content}
-                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm"
+                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.98] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shadow-md shadow-app-warm/15"
               >
                 Lưu nhật ký
               </Button>
@@ -523,7 +523,7 @@ function ReflectionJournalContent() {
                         return getReflectionInputForContent(content, prev);
                       });
                     }}
-                    className="rounded-full border border-app-line bg-app-bg px-3.5 py-2 text-sm text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm transition-colors text-left"
+                    className="rounded-full border border-app-line bg-app-bg px-3.5 py-2 text-sm text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm hover:border-app-warm/30 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2 transition-all duration-150 text-left"
                   >
                     {prompt}
                   </button>

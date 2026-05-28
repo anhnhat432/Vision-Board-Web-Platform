@@ -44,7 +44,7 @@ interface OutcomeStepLabProps {
 }
 
 const selectTriggerClass =
-  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2";
 const selectContentClass = "surface-elevated rounded-xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]";
 const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const infoBoxClass = "rounded-xl border border-app-line bg-app-bg p-4 text-xs leading-relaxed text-app-ink-soft shadow-sm";
@@ -221,7 +221,7 @@ export function OutcomeStepLab({
         <details className="group surface-raised rounded-2xl border border-app-line bg-app-surface p-5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
           <summary
             id="template-personalize-title"
-            className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-md px-2 text-sm font-semibold uppercase tracking-[0.14em] text-app-accent focus:outline-none"
+            className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-md px-2 text-sm font-semibold uppercase tracking-[0.14em] text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1"
           >
             <span>Cá nhân hóa khung gợi ý</span>
             <ChevronDown className="h-4.5 w-4.5 text-app-accent transition-transform duration-200 group-open:rotate-180" />
@@ -275,7 +275,7 @@ export function OutcomeStepLab({
                       aria-pressed={isActive}
                       onClick={() => onPreferredDayToggle(dayIndex)}
                       className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                        "flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                         isActive
                           ? "border-app-accent bg-app-accent text-white shadow-sm font-bold scale-105"
                           : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent",
@@ -341,7 +341,7 @@ export function OutcomeStepLab({
       ) : null}
 
       <details className="group surface-raised rounded-2xl border border-app-line bg-app-surface p-5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between py-1 focus:outline-none">
+        <summary className="flex cursor-pointer list-none items-center justify-between py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1">
           <span className="flex items-center gap-2">
             <Lightbulb className="h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
             <span id="template-picker-title" className="block text-sm font-semibold text-app-ink">
@@ -373,7 +373,7 @@ export function OutcomeStepLab({
               <button
                 type="button"
                 className={cn(
-                  "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto",
+                  "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto active:scale-[0.98]",
                   selectedTemplate?.id === recommendedTemplate.id
                     ? "border border-app-accent bg-app-accent-soft text-app-accent"
                     : "bg-app-accent text-white hover:bg-app-accent",
@@ -384,7 +384,7 @@ export function OutcomeStepLab({
               </button>
               {recommendedTemplateSupport ? (
                 <details className="group mt-4 rounded-xl border border-app-line bg-app-surface px-4 py-3 [&::-webkit-details-marker]:hidden">
-                  <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus:outline-none">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
                     <span>Xem chi tiết gợi ý giữ nhịp</span>
                     <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
                   </summary>
@@ -411,7 +411,7 @@ export function OutcomeStepLab({
           ) : null}
 
           <details className="group mt-4 rounded-xl border border-dashed border-app-line bg-app-bg p-4 [&::-webkit-details-marker]:hidden">
-            <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus:outline-none">
+            <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
               <span>Xem tất cả khung mẫu</span>
               <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
@@ -431,7 +431,7 @@ export function OutcomeStepLab({
                     aria-pressed={isSelected}
                     aria-label={templateAriaLabel}
                     className={cn(
-                      "min-h-11 rounded-xl border p-4 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                      "min-h-11 rounded-xl border p-4 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                       isSelected && "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
                       !isSelected &&
                         isLocked &&
@@ -495,7 +495,7 @@ export function OutcomeStepLab({
 
       {selectedTemplate ? (
         <details className="group surface-raised rounded-2xl border border-app-line bg-app-surface p-5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary id="selected-template-title" className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus:outline-none">
+          <summary id="selected-template-title" className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
             <span>Khung đang dùng: {selectedTemplate.name}</span>
             <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
           </summary>
@@ -513,7 +513,7 @@ export function OutcomeStepLab({
       ) : null}
 
       <details className="group rounded-2xl border border-dashed border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-        <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus:outline-none">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
           <span>Xem mục tiêu đã viết</span>
           <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
         </summary>
@@ -531,7 +531,7 @@ export function OutcomeStepLab({
 
       {planRationaleReasons.length > 0 ? (
         <details className="group rounded-2xl border border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus:outline-none">
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
             <span>Vì sao kế hoạch này được đề xuất</span>
             <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
           </summary>
@@ -555,7 +555,7 @@ export function OutcomeStepLab({
 
       {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
         <details className="group rounded-2xl border border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus:outline-none">
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
             <span>Các gợi ý từ đánh giá khả thi (Feasibility Hints)</span>
             <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
           </summary>

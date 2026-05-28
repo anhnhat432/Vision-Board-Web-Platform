@@ -416,7 +416,7 @@ export function Onboarding() {
               <>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                   onClick={handleStartAssessment}
                 >
                   Bắt đầu chấm điểm
@@ -424,7 +424,7 @@ export function Onboarding() {
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                  className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
                   onClick={handleDefer}
                 >
                   Để sau
@@ -432,13 +432,13 @@ export function Onboarding() {
               </>
             }
           >
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3">
               {JOURNEY_STEPS.map((item) => {
                 const Icon = item.icon;
 
                 return (
-                  <article key={item.title} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                  <article key={item.title} className="group surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-lg hover:border-app-accent/30">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent transition-transform duration-300 group-hover:scale-110">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <h2 className="mt-3 text-sm font-medium text-app-ink">{item.title}</h2>
@@ -589,7 +589,7 @@ export function Onboarding() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
-              className="order-2 inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:order-1"
+              className="order-2 inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 sm:order-1"
               onClick={() => setStep("welcome")}
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -597,7 +597,7 @@ export function Onboarding() {
             </button>
             <button
               type="button"
-              className="order-1 inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:order-2"
+              className="order-1 inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:order-2"
               onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
             >
               {canCompleteAssessment ? "Tiếp → Chọn trọng tâm" : "Để sau"}

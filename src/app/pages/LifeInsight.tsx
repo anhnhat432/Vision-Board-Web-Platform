@@ -360,10 +360,10 @@ export function LifeInsight() {
                     key={area.name}
                     type="button"
                     onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
-                    className={`group rounded-xl border p-3.5 text-left transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
+                    className={`group rounded-xl border p-3.5 text-left transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
                       isSelected
-                        ? "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 ring-1 ring-app-accent/20 shadow-sm shadow-app-accent/15"
-                        : "border-app-line bg-app-surface hover:border-app-ink-muted hover:bg-app-bg"
+                        ? "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 ring-1 ring-app-accent/20 shadow-md shadow-app-accent/15"
+                        : "border-app-line bg-app-surface hover:border-app-ink-muted hover:bg-app-bg hover:shadow-sm"
                     }`}
                   >
                     <div className="flex items-start gap-2.5">
@@ -407,10 +407,10 @@ export function LifeInsight() {
                     key={option.id}
                     type="button"
                     onClick={() => handleIntentSelect(option.id)}
-                    className={`group flex flex-col items-start gap-2.5 rounded-xl border p-4.5 text-left transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
+                    className={`group flex flex-col items-start gap-2.5 rounded-xl border p-4.5 text-left transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
                       isSelected
-                        ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm shadow-app-accent/10"
-                        : "border-app-line bg-app-surface text-app-ink hover:border-app-ink-muted hover:bg-app-bg"
+                        ? "border-app-accent bg-app-accent-soft text-app-accent shadow-md shadow-app-accent/10"
+                        : "border-app-line bg-app-surface text-app-ink hover:border-app-ink-muted hover:bg-app-bg hover:shadow-sm"
                     }`}
                   >
                     <div className="flex w-full items-start justify-between gap-2.5">
@@ -436,7 +436,7 @@ export function LifeInsight() {
             {selectedIntent !== null && (
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-app-line/60">
                 <p className="text-xs text-app-ink-muted">
-                  Lựa chọn này được lưu trên thiết bị này để gợi ý bước SMART và kế hoạch 12 tuần.
+                  Lựa chọn này được lưu để gợi ý bước SMART và kế hoạch 12 tuần.
                 </p>
                 <button
                   type="button"
