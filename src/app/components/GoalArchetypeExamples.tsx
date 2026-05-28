@@ -1,13 +1,8 @@
 import type { GoalArchetype } from "@/lib/smart-goal";
 import { getGoalArchetypeExample, getGoalArchetypeLabel } from "@/lib/smart-goal";
-import { CircleAlert, Lightbulb } from "lucide-react";
+import { CircleAlert, Lightbulb, ChevronDown, Sparkles } from "lucide-react";
+import { cn } from "./ui/utils";
 
-/**
- * Which slice of the example bundle to render. Keeps the panel small —
- * each surface (SMART specific step, SMART measurable step, lead
- * indicators step) only shows the part of the bundle relevant to the
- * step it is on.
- */
 export type GoalArchetypeExampleVariant =
   | "goal" // weakGoal + strongerGoal
   | "metric" // goodMetric + badMetric
@@ -30,15 +25,6 @@ const VARIANT_TITLE: Record<GoalArchetypeExampleVariant, string> = {
   lead_indicator: "So sánh hai cách chọn việc lặp lại",
 };
 
-/**
- * Tiny disclosure panel showing weak vs. stronger examples for one slice
- * of the archetype example bundle. Renders nothing when archetype is
- * null/undefined or `"other"` — those cases get the generic SMART rubric
- * instead, no archetype-specific copy.
- *
- * Pure presentation. Reads only from the deterministic example bundle
- * via `getGoalArchetypeExample`. No analytics, no storage writes.
- */
 export function GoalArchetypeExamples({
   archetype,
   variant,
@@ -60,47 +46,66 @@ export function GoalArchetypeExamples({
       data-testid="goal-archetype-examples"
       data-variant={variant}
       data-archetype={archetype}
-      className={["rounded-lg border border-app-line bg-app-bg p-3 text-left", className ?? ""]
-        .filter(Boolean)
-        .join(" ")}
+      className={cn(
+        "group overflow-hidden rounded-xl border border-app-accent/20 bg-gradient-to-br from-app-accent-soft/20 to-app-accent-soft/5 transition-all duration-200 text-left shadow-sm",
+        className
+      )}
     >
-      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-app-ink">
-        <Lightbulb className="h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-        <span>
-          {headline} <span className="font-normal text-app-ink-muted">— {archetypeLabel}</span>
+      <summary className="flex cursor-pointer items-center justify-between list-none p-4 text-sm font-semibold text-app-accent hover:bg-app-accent-soft/10 focus:outline-none focus:ring-2 focus:ring-app-accent/30 [&::-webkit-details-marker]:hidden">
+        <span className="flex items-center gap-2">
+          <Lightbulb className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+          <span>
+            {headline} <span className="font-normal text-app-ink-muted/80">— {archetypeLabel}</span>
+          </span>
         </span>
+        <ChevronDown
+          className="h-4.5 w-4.5 text-app-accent transition-transform duration-200 group-open:rotate-180"
+          aria-hidden="true"
+        />
       </summary>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {pair.map((entry) => (
+
+      <div className="border-t border-app-accent/10 bg-app-surface/50 p-4 space-y-3.5">
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          {pair.map((entry) => {
+            const isStrong = entry.tone === "stronger";
+            return (
+              <div
+                key={`${variant}-${entry.tone}`}
+                data-tone={entry.tone}
+                className={cn(
+                  "rounded-xl border p-4 text-sm leading-relaxed transition-all duration-200",
+                  isStrong
+                    ? "border-emerald-300/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300 shadow-[0_2px_8px_rgba(16,185,129,0.04)]"
+                    : "border-rose-300/40 bg-rose-500/5 text-rose-800 dark:text-rose-300"
+                )}
+              >
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                  {isStrong ? (
+                    <Sparkles className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                  ) : (
+                    <CircleAlert className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
+                  )}
+                  <span>{entry.label}</span>
+                </div>
+                <p className="mt-2.5 font-medium text-app-ink/90">{entry.body}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {variant === "lead_indicator" ? (
           <div
-            key={`${variant}-${entry.tone}`}
-            data-tone={entry.tone}
-            className={
-              entry.tone === "weak"
-                ? "rounded-lg border border-app-line bg-app-surface px-3 py-2.5 text-sm leading-6 text-app-ink-soft"
-                : "rounded-lg border border-app-accent bg-app-accent-soft px-3 py-2.5 text-sm leading-6 text-app-accent"
-            }
+            data-testid="goal-archetype-week1-starter"
+            className="rounded-xl border border-app-line bg-app-surface/80 p-4 text-sm leading-relaxed text-app-ink-soft shadow-sm"
           >
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em]">
-              {entry.tone === "weak" ? (
-                <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
-              ) : (
-                <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
-              )}
-              <span>{entry.label}</span>
-            </div>
-            <p className="mt-1.5">{entry.body}</p>
+            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-app-accent">
+              <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+              Việc bắt đầu cho tuần 1
+            </p>
+            <p className="mt-2 font-medium text-app-ink">{example.week1StarterTask}</p>
           </div>
-        ))}
+        ) : null}
       </div>
-      {variant === "lead_indicator" ? (
-        <p
-          data-testid="goal-archetype-week1-starter"
-          className="mt-3 rounded-lg border border-app-line bg-app-surface px-3 py-2.5 text-sm leading-6 text-app-ink-soft"
-        >
-          <span className="font-medium text-app-ink">Việc bắt đầu cho tuần 1:</span> {example.week1StarterTask}
-        </p>
-      ) : null}
     </details>
   );
 }

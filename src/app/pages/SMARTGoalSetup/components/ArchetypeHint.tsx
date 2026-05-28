@@ -6,6 +6,7 @@ import {
   getArchetypeQualityHints,
   getGoalArchetypeLabel,
 } from "@/lib/smart-goal/goalArchetypes";
+import { cn } from "../../../components/ui/utils";
 
 export type ArchetypeHintVariant = "metric" | "leadAction" | "antiPattern";
 
@@ -32,21 +33,21 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
 
   if (variant === "metric") {
     Icon = Target;
-    body = <p>{hints.recommendedMetric}</p>;
+    body = <p className="font-semibold text-app-ink">{hints.recommendedMetric}</p>;
   } else if (variant === "leadAction") {
     body = (
-      <ul className="list-disc space-y-1 pl-4">
+      <ul className="list-disc space-y-1.5 pl-4">
         {planDefaults.recommendedLeadIndicators.map((indicator) => (
-          <li key={indicator}>{indicator}</li>
+          <li key={indicator} className="font-medium text-app-ink">{indicator}</li>
         ))}
       </ul>
     );
   } else {
     Icon = TriangleAlert;
     body = (
-      <ul className="list-disc space-y-1 pl-4">
+      <ul className="list-disc space-y-1.5 pl-4">
         {hints.antiPatterns.slice(0, 3).map((pattern) => (
-          <li key={pattern}>{pattern}</li>
+          <li key={pattern} className="font-medium text-app-ink">{pattern}</li>
         ))}
       </ul>
     );
@@ -56,20 +57,36 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
     <div
       role="note"
       aria-label={`${VARIANT_TITLE[variant]} (${archetypeLabel})`}
-      className="rounded-lg border border-app-line bg-app-bg p-3"
+      className={cn(
+        "rounded-xl border p-4 shadow-sm transition-all duration-200 hover:scale-[1.005] hover:shadow-md",
+        variant === "antiPattern"
+          ? "border-amber-300/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
+          : variant === "metric"
+          ? "border-emerald-300/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
+          : "border-sky-300/40 bg-sky-500/5 text-sky-800 dark:text-sky-300"
+      )}
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
     >
       {showArchetypeTag ? (
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
+        <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-app-ink-muted/80">
           Loại mục tiêu: {archetypeLabel}
         </p>
       ) : null}
-      <div className="flex items-start gap-2">
-        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-        <div className="min-w-0 text-xs leading-relaxed text-app-ink-soft">
-          <p className="font-medium text-app-ink">{VARIANT_TITLE[variant]}</p>
-          <div className="mt-1.5">{body}</div>
+      <div className="flex items-start gap-3">
+        <div className={cn(
+          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
+          variant === "antiPattern"
+            ? "border-amber-400/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+            : variant === "metric"
+            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            : "border-sky-400/30 bg-sky-500/10 text-sky-600 dark:text-sky-400"
+        )}>
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 text-sm leading-relaxed text-app-ink-soft">
+          <p className="font-bold text-app-ink">{VARIANT_TITLE[variant]}</p>
+          <div className="mt-2 text-app-ink-soft">{body}</div>
         </div>
       </div>
     </div>

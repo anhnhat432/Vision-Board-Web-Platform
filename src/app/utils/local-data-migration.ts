@@ -518,7 +518,7 @@ function mergeById<T extends { id: string }>(
       const accTime = typeof accDate === "string" ? new Date(accDate).getTime() : 0;
       const anonTime = typeof anonDate === "string" ? new Date(anonDate).getTime() : 0;
 
-      if (!isNaN(accTime) && !isNaN(anonTime)) {
+      if (!Number.isNaN(accTime) && !Number.isNaN(anonTime)) {
         if (accTime >= anonTime) {
           mergedMap.set(accItem.id, accItem);
         } else {
@@ -568,7 +568,7 @@ function pickNewer<T extends { updatedAt?: string; createdAt?: string }>(
   const accTime = accDate ? new Date(accDate).getTime() : 0;
   const anonTime = anonDate ? new Date(anonDate).getTime() : 0;
 
-  if (!isNaN(accTime) && !isNaN(anonTime)) {
+  if (!Number.isNaN(accTime) && !Number.isNaN(anonTime)) {
     if (accTime >= anonTime) {
       return accountVal;
     } else {

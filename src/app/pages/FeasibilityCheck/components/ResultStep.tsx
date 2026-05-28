@@ -1,4 +1,4 @@
-﻿import {
+import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
@@ -8,6 +8,7 @@
   ShieldCheck,
   Sparkles,
   Target,
+  ChevronDown,
   type LucideIcon,
 } from "lucide-react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
@@ -207,13 +208,13 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
   return (
     <section
-      className="mt-6 surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+      className="mt-6 surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm"
       aria-labelledby="feasibility-result-title"
     >
       <div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">Kết quả kiểm tra</p>
-          <span className="w-fit rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
+          <span className="w-fit rounded-full bg-app-accent-soft px-3 py-1 text-xs font-semibold text-app-accent">
             {getLifeAreaLabel(focusArea)}
           </span>
         </div>
@@ -226,42 +227,81 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         <p className="mt-2 text-sm leading-6 text-app-ink-soft">{result.summary}</p>
       </div>
 
-      <div className="mt-6 rounded-card border border-app-line bg-app-bg p-5">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <div className="flex shrink-0 flex-col items-center text-center sm:w-44">
-            <Compass className="h-12 w-12 text-app-accent" aria-hidden="true" />
-            {/* Score display: oversized numeric needs custom size beyond text-display tier. */}
-            <p className="mt-3 font-serif text-[56px] font-medium leading-none text-app-ink">{scoreOutOfTen}</p>
-            <p className="mt-1 text-sm font-medium text-app-ink-muted">/10 · {statusLabel}</p>
+      {/* Visual score gauge block */}
+      <div className="mt-6 rounded-2xl border border-app-line bg-gradient-to-br from-app-surface to-app-bg p-5 sm:p-6 shadow-sm">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="relative flex shrink-0 flex-col items-center justify-center text-center sm:w-48">
+            <div className="relative flex items-center justify-center h-32 w-32">
+              <div className="absolute inset-0 rounded-full bg-app-accent/5 blur-md" />
+              <svg className="absolute inset-0 w-full h-full transform -rotate-90" role="img" aria-label="Biểu đồ tiến trình độ khả thi">
+                <title>Biểu đồ tiến trình độ khả thi</title>
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="52"
+                  className="stroke-app-line/60"
+                  strokeWidth="6"
+                  fill="transparent"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="52"
+                  className="stroke-app-accent transition-all duration-1000 ease-out"
+                  strokeWidth="8"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 52}
+                  strokeDashoffset={2 * Math.PI * 52 - (scorePercent / 100) * (2 * Math.PI * 52)}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="relative flex flex-col items-center justify-center">
+                <span className="font-serif text-5xl font-bold leading-none text-app-ink tracking-tight">{scoreOutOfTen}</span>
+                <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted/80">Điểm số</span>
+              </div>
+            </div>
+            <p className="mt-3 text-sm font-bold text-app-accent">{statusLabel}</p>
+            <p className="mt-0.5 text-xs text-app-ink-muted">Mức độ khả thi</p>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-app-ink">{copy.statusHint}</p>
-            <div className="relative mt-4 h-2 w-full overflow-hidden rounded-full bg-app-line" aria-hidden="true">
-              <div className="h-full rounded-full bg-app-accent" style={{ width: `${scoreOutOfTen * 10}%` }} />
-              <span className="absolute left-[10%] top-0 h-full w-px bg-app-ink-muted/40" />
-              <span className="absolute left-1/2 top-0 h-full w-px bg-app-ink-muted/40" />
-              <span className="absolute left-[90%] top-0 h-full w-px bg-app-ink-muted/40" />
+          
+          <div className="min-w-0 flex-1 space-y-4">
+            <div className="rounded-xl bg-app-accent-soft/20 p-4 border border-app-accent/10">
+              <p className="text-sm font-semibold leading-relaxed text-app-ink">{copy.statusHint}</p>
             </div>
-            <div className="mt-2 flex justify-between text-xs text-app-ink-muted">
-              <span>Cần nhẹ</span>
-              <span>Vừa sức</span>
-              <span>Sẵn sàng</span>
+            
+            <div className="space-y-2">
+              <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-app-line/60" aria-hidden="true">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-app-accent/40 via-app-accent/80 to-app-accent transition-all duration-500"
+                  style={{ width: `${scorePercent}%` }}
+                />
+                <span className="absolute left-[25%] top-0 h-full w-px bg-app-ink-muted/30" />
+                <span className="absolute left-[50%] top-0 h-full w-px bg-app-ink-muted/30" />
+                <span className="absolute left-[75%] top-0 h-full w-px bg-app-ink-muted/30" />
+              </div>
+              <div className="flex justify-between text-[11px] font-semibold text-app-ink-muted">
+                <span>Cần nhẹ (0-5)</span>
+                <span>Vừa sức (5-7.5)</span>
+                <span>Sẵn sàng (7.5-10)</span>
+              </div>
             </div>
-            <p className="mt-4 text-sm leading-6 text-app-ink-soft">{result.recommendation}</p>
+            <p className="text-sm leading-relaxed text-app-ink-soft">{result.recommendation}</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3">
+      <div className="mt-6 grid gap-3.5">
         {copy.highlights.map((item) => {
           const Icon = item.icon;
 
           return (
-            <div key={item.title} className="flex gap-3 rounded-lg border border-app-line bg-app-bg p-3">
-              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-              <div>
-                <p className="text-sm font-medium text-app-ink">{item.title}</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">{item.description}</p>
+            <div key={item.title} className="flex gap-3.5 rounded-xl border border-app-line bg-app-bg p-4 transition-all duration-200 hover:shadow-sm">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+                <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-app-ink">{item.title}</p>
+                <p className="text-xs leading-relaxed text-app-ink-soft">{item.description}</p>
               </div>
             </div>
           );
@@ -269,12 +309,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       </div>
 
       {showRiskWarning ? (
-        <div className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-4">
+        <div className="mt-6 rounded-xl border border-amber-300/40 bg-amber-500/5 p-4 text-amber-850 dark:text-amber-300">
           <div className="flex gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
             <div>
-              <p className="font-serif text-lg font-medium text-app-warm-strong">Có vài rủi ro cần xử lý trước</p>
-              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
+              <p className="font-semibold text-sm">Có vài trở ngại cần lưu ý</p>
+              <p className="mt-1 text-sm leading-relaxed text-app-ink-soft">
                 {result.smartGoalQualityNote ?? result.bottleneck.action}
               </p>
             </div>
@@ -290,14 +330,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           >
             {isDesktop ? "Phân tích chi tiết" : "Mở chi tiết"}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4 space-y-4 data-[state=closed]:hidden">
-          <div className="rounded-card border border-app-line bg-app-bg p-4 md:p-5">
+          <div className="rounded-xl border border-app-line bg-app-bg p-4 md:p-5">
             <div className="flex items-center gap-2">
               <Compass className="h-4 w-4 text-app-accent" aria-hidden="true" />
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
@@ -306,14 +346,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </div>
             <h3 className="mt-3 font-serif text-xl font-medium text-app-ink">{copy.guideTitle}</h3>
             <p className="mt-2 text-sm leading-6 text-app-ink-soft">{copy.guideBody}</p>
-            <div className="mt-4 rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-sm font-medium text-app-ink">Tuần 1 nên thế nào</p>
+            <div className="mt-4 rounded-xl border border-app-line bg-app-surface p-3.5">
+              <p className="text-sm font-bold text-app-ink">Lời khuyên Tuần 1</p>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">{result.firstWeekGuidance}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
+                <span className="rounded-full bg-app-accent-soft px-3 py-1 text-xs font-bold text-app-accent">
                   Mức tải: {PLAN_LOAD_LABEL[result.planLoad]}
                 </span>
-                <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs text-app-ink-muted">
+                <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-muted">
                   Quỹ thời gian: {CAPACITY_LABEL[result.weeklyCapacity]}
                 </span>
               </div>
@@ -322,20 +362,23 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
           <div className="grid gap-4 md:grid-cols-3">
             {scoreCards.map((card) => (
-              <div key={card.label} className="rounded-lg border border-app-line bg-app-surface p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{card.label}</p>
-                <p className="mt-2 text-2xl font-semibold leading-6 text-app-ink">{card.value}</p>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
-                  <div className="h-full rounded-full bg-app-accent" style={{ width: `${card.progress}%` }} />
+              <div key={card.label} className="rounded-xl border border-app-line bg-app-surface p-4.5 shadow-sm transition-all duration-200 hover:shadow-md">
+                <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">{card.label}</p>
+                <p className="mt-2 text-2xl font-bold leading-none text-app-ink">{card.value}</p>
+                <div className="mt-3.5 h-2 overflow-hidden rounded-full bg-app-line/60" aria-hidden="true">
+                  <div className="h-full rounded-full bg-gradient-to-r from-app-accent/60 to-app-accent" style={{ width: `${card.progress}%` }} />
                 </div>
-                <p className="mt-2 text-xs leading-5 text-app-ink-muted">{card.note}</p>
+                <p className="mt-3 text-xs leading-normal text-app-ink-muted">{card.note}</p>
               </div>
             ))}
           </div>
 
-          <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">Xem 7 góc nhìn</summary>
-            <div className="mt-4 grid gap-3">
+          <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+              <span>Xem 7 góc nhìn</span>
+              <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+            </summary>
+            <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3">
               {result.axisScores.map((axis) => (
                 <div key={axis.axis} className="rounded-lg border border-app-line bg-app-bg p-3">
                   <div className="flex items-center justify-between gap-3">
@@ -356,11 +399,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </div>
           </details>
 
-          <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-              Xem mục tiêu đã viết
+          <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+              <span>Xem mục tiêu đã viết</span>
+              <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 border-t border-app-line/60 pt-4 space-y-3">
               <p className="text-sm font-medium leading-6 text-app-ink">{pendingGoal.specific}</p>
               <div className="grid gap-3 text-sm leading-6 text-app-ink-soft">
                 <div>
@@ -383,11 +427,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </div>
           </details>
 
-          <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-              Xem nhịp triển khai gợi ý
+          <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+              <span>Xem nhịp triển khai gợi ý</span>
+              <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
-            <div className="mt-4 grid gap-3">
+            <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3">
               {copy.weeklyRhythm.map((item, index) => (
                 <div key={item.label} className="flex gap-3">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-xs font-medium text-app-accent">
@@ -402,11 +447,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </div>
           </details>
 
-          <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-              Xem lý do đằng sau kết quả
+          <details className="group rounded-xl border border-app-line bg-app-surface p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+              <span>Xem lý do đằng sau kết quả</span>
+              <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
             </summary>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 border-t border-app-line/60 pt-4 space-y-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-app-accent" aria-hidden="true" />
                 <p className="text-sm font-medium text-app-ink">Nên làm trước khi tạo kế hoạch</p>

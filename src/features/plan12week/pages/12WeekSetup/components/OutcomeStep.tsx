@@ -1,4 +1,4 @@
-﻿import { Lightbulb, Lock, Sparkles } from "lucide-react";
+import { Lightbulb, Lock, Sparkles, ChevronDown } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
@@ -89,23 +89,26 @@ export function OutcomeStep({
       ) : null}
 
       {planRationaleReasons.length > 0 ? (
-        <details className="rounded-lg border border-app-line bg-app-bg p-3">
-          <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-            Vì sao kế hoạch này được đề xuất
+        <details className="group rounded-xl border border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+            <span>Vì sao kế hoạch này được đề xuất</span>
+            <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
           </summary>
-          <ul className="mt-3 grid gap-2 md:grid-cols-2">
-            {planRationaleReasons.map((reason) => (
-              <li key={reason.id} className="rounded-lg border border-app-line bg-app-surface p-3">
-                <p className="text-sm font-medium text-app-ink">{reason.title}</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-soft">{reason.detail}</p>
-              </li>
-            ))}
-          </ul>
-          {feasibility.smartGoalQualityNote ? (
-            <div className="mt-3 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs leading-5 text-app-ink-soft">
-              {feasibility.smartGoalQualityNote}
-            </div>
-          ) : null}
+          <div className="mt-4 border-t border-app-line/60 pt-4">
+            <ul className="grid gap-3 md:grid-cols-2">
+              {planRationaleReasons.map((reason) => (
+                <li key={reason.id} className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+                  <p className="text-sm font-bold text-app-ink">{reason.title}</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">{reason.detail}</p>
+                </li>
+              ))}
+            </ul>
+            {feasibility.smartGoalQualityNote ? (
+              <div className="mt-3.5 rounded-xl border border-app-line bg-app-surface px-4 py-3 text-xs leading-relaxed text-app-ink-soft">
+                {feasibility.smartGoalQualityNote}
+              </div>
+            ) : null}
+          </div>
         </details>
       ) : null}
 
@@ -314,7 +317,7 @@ export function OutcomeStep({
 
             <div>
               <p className={labelClass}>Những ngày nào bạn muốn tập trung?</p>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="flex flex-wrap gap-2">
                 {WEEKDAY_LABELS.map((dayLabel, dayIndex) => {
                   const isActive = draft.preferredDays.includes(dayIndex);
                   return (
@@ -324,8 +327,10 @@ export function OutcomeStep({
                       aria-pressed={isActive}
                       onClick={() => onPreferredDayToggle(dayIndex)}
                       className={cn(
-                        "rounded-md border border-app-line bg-app-surface px-2 py-2 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
-                        isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
+                        "flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                        isActive
+                          ? "border-app-accent bg-app-accent text-white shadow-sm font-bold scale-105"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent",
                       )}
                     >
                       {dayLabel}
@@ -456,11 +461,12 @@ export function OutcomeStep({
           </div>
         ) : null}
 
-        <details className="mt-4 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3">
-          <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-            Xem tất cả khung mẫu
+        <details className="group mt-4 rounded-xl border border-dashed border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+            <span>Xem tất cả khung mẫu</span>
+            <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
           </summary>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3.5 md:grid-cols-2">
             {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
               const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
               const isSelected = selectedTemplate?.id === template.id;
@@ -476,43 +482,43 @@ export function OutcomeStep({
                   aria-pressed={isSelected}
                   aria-label={templateAriaLabel}
                   className={cn(
-                    "rounded-lg border p-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
-                    isSelected && "border-app-accent bg-app-accent-soft text-app-accent",
+                    "rounded-xl border p-4.5 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    isSelected && "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
                     !isSelected &&
                       isLocked &&
-                      "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent hover:bg-app-accent-soft",
-                    !isSelected && !isLocked && "border-app-line bg-app-surface text-app-ink hover:bg-app-bg",
+                      "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/5",
+                    !isSelected && !isLocked && "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-bg",
                   )}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium">{template.name}</p>
-                        <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs text-app-ink-muted">
+                        <p className="text-sm font-bold">{template.name}</p>
+                        <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-app-ink-muted">
                           {template.requiredPlan ? `Khung ${getPlanLabel(template.requiredPlan)}` : "Khung miễn phí"}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm leading-5 text-app-ink-soft">{template.subtitle}</p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">{template.subtitle}</p>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs text-app-ink-muted">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-app-ink-muted">
                       {isLocked ? <Lock className="h-3 w-3" aria-hidden="true" /> : null}
                       {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
                     </span>
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-app-ink-soft">{template.description}</p>
-                  <div className="mt-3 grid gap-2 text-xs leading-5 text-app-ink-soft sm:grid-cols-2">
-                    <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  <p className="mt-3 text-xs leading-relaxed text-app-ink-soft">{template.description}</p>
+                  <div className="mt-3.5 grid gap-2.5 text-xs leading-relaxed text-app-ink-soft sm:grid-cols-2">
+                    <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-sm">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                         Hợp khi
                       </p>
-                      <p className="mt-1">{template.bestFor}</p>
+                      <p className="mt-1 font-medium">{template.bestFor}</p>
                     </div>
-                    <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1</p>
-                      <p className="mt-1">{template.firstWeekWin}</p>
+                    <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-sm">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Tuần 1</p>
+                      <p className="mt-1 font-medium">{template.firstWeekWin}</p>
                     </div>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3.5 flex flex-wrap gap-2">
                     {template.idealFor.map((item) => (
                       <span key={`${template.id}_${item}`} className={chipClass}>
                         {item}
@@ -525,7 +531,7 @@ export function OutcomeStep({
                     ))}
                   </div>
                   {isLocked ? (
-                    <div className="mt-4 flex items-center justify-between border-t border-app-line pt-3 text-xs font-medium text-app-accent">
+                    <div className="mt-4 flex items-center justify-between border-t border-app-line pt-3 text-xs font-semibold text-app-accent">
                       <span>Cần gói Plus để dùng khung này</span>
                       <span>Mở khóa →</span>
                     </div>
@@ -560,18 +566,19 @@ export function OutcomeStep({
         </section>
       ) : null}
 
-      <details className="rounded-lg border border-dashed border-app-line bg-app-bg p-4">
-        <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-          Xem mục tiêu đã viết
+      <details className="group rounded-xl border border-dashed border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer items-center justify-between list-none text-sm font-semibold text-app-ink focus:outline-none">
+          <span>Xem mục tiêu đã viết</span>
+          <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
         </summary>
-        <div className="mt-4 grid gap-3">
-          <div className="rounded-lg border border-app-line bg-app-surface p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu cụ thể</p>
-            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{smartGoal.specific}</p>
+        <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3.5">
+          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Mục tiêu cụ thể</p>
+            <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{smartGoal.specific}</p>
           </div>
-          <div className="rounded-lg border border-app-line bg-app-surface p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Cách đo kết quả</p>
-            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{smartGoal.measurable}</p>
+          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Cách đo kết quả</p>
+            <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{smartGoal.measurable}</p>
           </div>
         </div>
       </details>

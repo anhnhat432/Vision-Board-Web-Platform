@@ -222,7 +222,7 @@ function createTwelveWeekSystem(): NonNullable<Goal["twelveWeekSystem"]> {
   };
 }
 
-function seedMeaningfulAnonymousTwelveWeekData() {
+function _seedMeaningfulAnonymousTwelveWeekData() {
   const data = createFreshUserData();
   data.goals.push(
     createRealGoal({

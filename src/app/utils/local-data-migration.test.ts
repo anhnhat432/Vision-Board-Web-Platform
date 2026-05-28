@@ -264,7 +264,7 @@ describe("anonymous local data migration candidate", () => {
     // Retrieve merged goals
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     const storedScoped = JSON.parse(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1")) || "{}");
-    const titles = stored.goals.map((goal: any) => goal.title);
+    const titles = stored.goals.map((goal: Goal) => goal.title);
 
     expect(titles).toContain("Existing account goal");
     expect(titles).toContain("Anonymous goal");

@@ -3,13 +3,11 @@ import { CloudRain, Waves, BrainCircuit, Volume2, VolumeX, Music } from "lucide-
 import { ambienceService, type AmbienceMode } from "../../services/ambienceService";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { useReducedMotion } from "./use-reduced-motion";
 
 export function MindfulPlayer() {
   const [mode, setMode] = useState<AmbienceMode>("none");
   const [volume, setVolume] = useState(0.2);
   const [isOpen, setIsOpen] = useState(false);
-  const isReduced = useReducedMotion();
 
   useEffect(() => {
     setMode(ambienceService.getMode());
