@@ -1,6 +1,7 @@
 import { useCallback, useMemo, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { toast } from "sonner";
 
+import { shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import { hapticLight, hapticMedium, hapticSuccess } from "@/app/utils/haptics";
 import { playAllCompleteSound, playTaskCompleteSound } from "@/app/utils/sound";
@@ -271,72 +272,86 @@ export function useTwelveWeekExecutionActions({
         );
       }
 
-      // Fire feel-good feedback (haptic, sound, confetti, toast) NGAY sau khi local commit
-      // thành công, không đợi backend sync. Nếu sync fail bên dưới, ta sẽ rollback state +
-      // hiện toast error đè lên — user vẫn thấy click có phản hồi tức thì như khi local-only.
+      // Fire feel-good feedback (haptic, sound, confetti, toast) DEFERRED.
+      // We wrap it in a setTimeout(..., 0) to allow style/layout/paint of the checked state first.
       if (taskCompletedFromIncomplete) {
         const nextTodayQueue = getTodayQueueForSystem(savedSystem);
         const allTodayTasksCompleted = nextTodayQueue.length > 0 && nextTodayQueue.every((task) => task.completed);
-        hapticMedium();
-        if (allTodayTasksCompleted) {
-          hapticSuccess();
-          playAllCompleteSound();
-        } else {
-          playTaskCompleteSound();
-        }
-        triggerTaskCompletionConfetti(allTodayTasksCompleted);
-      }
-      toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-
-      const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
-      if (!synced) {
-        const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
-        const latestSystem = latestGoal?.twelveWeekSystem;
-        const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
-        const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
-        if (latestSystem && shouldRollbackTask) {
-          const rollbackSystem = {
-            ...latestSystem,
-            taskInstances: latestSystem.taskInstances.map((task) =>
-              task.id === taskId
-                ? {
-                    ...task,
-                    completed: !completed,
-                    completedAt: !completed ? undefined : toggledTask?.completedAt,
-                    lastModifiedAt: toggledTask?.lastModifiedAt ?? 0,
-                  }
-                : task,
-            ),
-          };
-          const normalizedRollbackSystem = {
-            ...rollbackSystem,
-            scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
-          };
-
-          updateGoal(actionGoalId, {
-            twelveWeekSystem: normalizedRollbackSystem,
-          });
-          if (activeGoalIdRef.current === actionGoalId) {
-            updateActiveSystemState(() => normalizedRollbackSystem);
+        window.setTimeout(() => {
+          hapticMedium();
+          if (allTodayTasksCompleted) {
+            hapticSuccess();
+            playAllCompleteSound();
+          } else {
+            playTaskCompleteSound();
           }
-          const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
-          if (rollbackTask) {
-            enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
-            enqueueLeadMetricUpsertedMutations(actionGoalId, normalizedRollbackSystem, "task_progress", {
-              weekNumbers: [rollbackTask.weekNumber],
-              indicatorIds: rollbackTask.tacticId ? [rollbackTask.tacticId] : undefined,
-              indicatorNames: [rollbackTask.leadIndicatorName],
+          triggerTaskCompletionConfetti(allTodayTasksCompleted);
+        }, 0);
+      }
+      window.setTimeout(() => {
+        toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
+      }, 0);
+
+      // Under the mutation sync queue architecture, if mutation queue is active, we don't
+      // block the user thread or rollback the local state upon REST sync failures.
+      if (shouldEnable12WeekMutationSync()) {
+        void executionSyncActions.syncTaskToggle(taskId, completed).then((synced) => {
+          if (synced && activeGoalIdRef.current === actionGoalId) {
+            refreshBackendProgressOverlay();
+            refreshSnapshotMeta();
+          }
+        });
+      } else {
+        const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
+        if (!synced) {
+          const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
+          const latestSystem = latestGoal?.twelveWeekSystem;
+          const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
+          const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
+          if (latestSystem && shouldRollbackTask) {
+            const rollbackSystem = {
+              ...latestSystem,
+              taskInstances: latestSystem.taskInstances.map((task) =>
+                task.id === taskId
+                  ? {
+                      ...task,
+                      completed: !completed,
+                      completedAt: !completed ? undefined : toggledTask?.completedAt,
+                      lastModifiedAt: toggledTask?.lastModifiedAt ?? 0,
+                    }
+                  : task,
+              ),
+            };
+            const normalizedRollbackSystem = {
+              ...rollbackSystem,
+              scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
+            };
+
+            updateGoal(actionGoalId, {
+              twelveWeekSystem: normalizedRollbackSystem,
             });
+            if (activeGoalIdRef.current === actionGoalId) {
+              updateActiveSystemState(() => normalizedRollbackSystem);
+            }
+            const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
+            if (rollbackTask) {
+              enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
+              enqueueLeadMetricUpsertedMutations(actionGoalId, normalizedRollbackSystem, "task_progress", {
+                weekNumbers: [rollbackTask.weekNumber],
+                indicatorIds: rollbackTask.tacticId ? [rollbackTask.tacticId] : undefined,
+                indicatorNames: [rollbackTask.leadIndicatorName],
+              });
+            }
           }
+
+          toast.error("Không thể cập nhật, vui lòng thử lại");
+          return;
         }
 
-        toast.error("Không thể cập nhật, vui lòng thử lại");
-        return;
-      }
-
-      if (activeGoalIdRef.current === actionGoalId) {
-        refreshBackendProgressOverlay();
-        refreshSnapshotMeta();
+        if (activeGoalIdRef.current === actionGoalId) {
+          refreshBackendProgressOverlay();
+          refreshSnapshotMeta();
+        }
       }
     },
     [

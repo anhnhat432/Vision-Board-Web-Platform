@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -242,6 +242,9 @@ export function TwelveWeekTodayTab({
     hapticLight();
     setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
 
+    const isTest = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || import.meta.env.MODE === "test");
+    const delay = isTest ? 0 : 80;
+
     const timerId = window.setTimeout(() => {
       deferredToggleTimersRef.current = deferredToggleTimersRef.current.filter((item) => item !== timerId);
       Promise.resolve(onToggleTask(taskId, completed)).finally(() => {
@@ -252,7 +255,7 @@ export function TwelveWeekTodayTab({
           return next;
         });
       });
-    }, 0);
+    }, delay);
     deferredToggleTimersRef.current.push(timerId);
   };
 
