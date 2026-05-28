@@ -1,4 +1,4 @@
-﻿import {
+import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
@@ -200,6 +200,66 @@ function getAverageLeadScore(system: TwelveWeekSystem): number {
     reviewedWeeks.reduce((sum, week) => sum + Math.max(0, Math.min(100, week.leadCompletionPercent)), 0) /
       reviewedWeeks.length,
   );
+}
+
+function getWeekPerformanceStyle(
+  leadCompletionPercent: number,
+  reviewDone: boolean,
+  isCurrentWeek: boolean,
+): {
+  card: string;
+  badge: string;
+  badgeText: string;
+  textColor: string;
+  progressColor: string;
+} {
+  if (isCurrentWeek) {
+    return {
+      card: "border-app-ink bg-app-surface shadow-md ring-2 ring-app-ink/10 scale-[1.02] motion-safe:transition-all duration-200",
+      badge: "bg-app-ink text-white hover:bg-app-ink animate-[pulse_2s_infinite]",
+      badgeText: "Đang chạy",
+      textColor: "text-app-ink",
+      progressColor: "[&>div]:bg-app-ink",
+    };
+  }
+
+  if (!reviewDone) {
+    return {
+      card: "border-app-line bg-app-bg text-app-ink-muted",
+      badge: "border-app-line bg-app-surface text-app-ink-muted",
+      badgeText: "Chưa review",
+      textColor: "text-app-ink-soft",
+      progressColor: "",
+    };
+  }
+
+  if (leadCompletionPercent >= 85) {
+    return {
+      card: "border-emerald-200 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900/50 shadow-sm",
+      badge: "bg-emerald-100 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/50 dark:text-emerald-300",
+      badgeText: "Xuất sắc",
+      textColor: "text-emerald-900 dark:text-emerald-300",
+      progressColor: "[&>div]:bg-emerald-500",
+    };
+  }
+
+  if (leadCompletionPercent >= 50) {
+    return {
+      card: "border-amber-200 bg-amber-50/40 text-amber-800 dark:bg-amber-950/20 dark:border-amber-900/50 shadow-sm",
+      badge: "bg-amber-100 text-amber-800 border-amber-200/50 dark:bg-amber-950/50 dark:text-amber-300",
+      badgeText: "Khá tốt",
+      textColor: "text-amber-900 dark:text-amber-300",
+      progressColor: "[&>div]:bg-amber-500",
+    };
+  }
+
+  return {
+    card: "border-rose-200 bg-rose-50/40 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900/50 shadow-sm",
+    badge: "bg-rose-100 text-rose-800 border-rose-200/50 dark:bg-rose-950/50 dark:text-rose-300",
+    badgeText: "Cần cải thiện",
+    textColor: "text-rose-900 dark:text-rose-300",
+    progressColor: "[&>div]:bg-rose-500",
+  };
 }
 
 export function TwelveWeekProgressTab({
@@ -443,53 +503,43 @@ export function TwelveWeekProgressTab({
               {system.scoreboard.map((week) => {
                 const isCurrentWeek = week.weekNumber === currentWeek;
                 const isReviewed = week.reviewDone;
+                const style = getWeekPerformanceStyle(week.leadCompletionPercent, isReviewed, isCurrentWeek);
 
                 return (
                   <div
                     key={week.weekNumber}
-                    className={`rounded-card border bg-app-surface p-4 ${
-                      isCurrentWeek ? "border-app-ink" : isReviewed ? "border-app-accent/30" : "border-app-line"
-                    }`}
+                    className={`rounded-xl border p-5 ${style.card}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p
-                          className={`text-xs font-semibold uppercase tracking-[0.16em] ${
-                            isCurrentWeek ? "text-app-ink" : "text-app-ink-muted"
-                          }`}
-                        >
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                           Tuần {week.weekNumber}
                         </p>
-                        <p className="mt-2 font-serif text-2xl font-medium text-app-ink">{week.weeklyScore}</p>
+                        <p className={`mt-1 font-serif text-2xl font-bold ${style.textColor}`}>
+                          {week.weeklyScore} <span className="text-xs font-sans font-normal text-app-ink-muted">điểm</span>
+                        </p>
                       </div>
                       <Badge
-                        variant={isReviewed ? "default" : "outline"}
-                        className={
-                          isCurrentWeek
-                            ? "border-app-ink bg-app-ink text-white hover:bg-app-ink"
-                            : isReviewed
-                              ? "bg-app-accent text-white hover:bg-app-accent"
-                              : "border-app-line bg-app-bg text-app-ink-muted"
-                        }
+                        className={`border-none text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}
                       >
-                        {isCurrentWeek ? "Đang chạy" : isReviewed ? "Đã review" : "Chưa review"}
+                        {style.badgeText}
                       </Badge>
                     </div>
 
                     <div className="mt-4 stack-tight">
                       <div>
-                        <div className="flex items-center justify-between text-sm text-app-ink-soft">
+                        <div className="flex items-center justify-between text-xs text-app-ink-soft">
                           <span>Hoàn thành cốt lõi</span>
-                          <span className="font-semibold text-app-ink">{week.leadCompletionPercent}%</span>
+                          <span className="font-semibold">{week.leadCompletionPercent}%</span>
                         </div>
-                        <Progress value={week.leadCompletionPercent} className="mt-2 h-2.5" />
+                        <Progress value={week.leadCompletionPercent} className={`mt-2 h-2 ${style.progressColor}`} />
                       </div>
 
-                      <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                      <div className="rounded-lg border border-app-line/60 bg-app-bg/50 px-3 py-2 mt-2">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
                           Chỉ số chính
                         </p>
-                        <p className="mt-1 text-sm font-medium text-app-ink">
+                        <p className="mt-0.5 text-xs font-medium text-app-ink truncate">
                           {week.mainMetricProgress || "Chưa cập nhật"}
                         </p>
                       </div>
@@ -518,15 +568,15 @@ export function TwelveWeekProgressTab({
                   const isLastItem = index === milestoneItems.length - 1;
 
                   return (
-                    <div key={item.label} className={`relative pl-12 ${isLastItem ? "" : "pb-5"}`}>
-                      {!isLastItem && <div className="absolute left-[17px] top-9 h-full w-px bg-app-line" />}
-                      <div className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-lg bg-app-ink text-sm font-semibold text-white">
+                    <div key={item.label} className={`relative pl-12 ${isLastItem ? "" : "pb-6"}`}>
+                      {!isLastItem && <div className="absolute left-[15px] top-8 h-full w-[2px] bg-gradient-to-b from-app-line to-app-line/30" />}
+                      <div className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-app-ink to-app-ink/80 text-xs font-bold text-white shadow-md ring-4 ring-app-accent/20">
                         {index + 1}
                       </div>
-                      <p className="pt-1 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                      <p className="pt-0.5 text-xs font-bold uppercase tracking-[0.16em] text-app-accent">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-sm leading-7 text-app-ink-soft">{item.value}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-app-ink font-medium">{item.value}</p>
                     </div>
                   );
                 })}
@@ -732,22 +782,43 @@ export function TwelveWeekProgressTab({
           )}
         </div>
       ) : (
-        <Card className="border border-app-line bg-app-surface">
-          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-              <Lock className="h-6 w-6" />
+        <Card className="relative overflow-hidden border border-amber-300/30 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent backdrop-blur-md shadow-2xl rounded-2xl transition-all duration-300 hover:shadow-amber-500/5 hover:border-amber-300/50">
+          {/* Background Accents */}
+          <div className="absolute -right-16 -top-16 -z-10 w-32 h-32 rounded-full bg-amber-400/15 blur-2xl pointer-events-none" />
+          <div className="absolute -left-16 -bottom-16 -z-10 w-32 h-32 rounded-full bg-yellow-400/10 blur-2xl pointer-events-none" />
+          
+          <CardContent className="flex flex-col items-center gap-5 p-8 text-center sm:p-10">
+            {/* Glowing Lock Icon */}
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/25 ring-4 ring-amber-500/10 transition-transform duration-300 hover:scale-105">
+              <Lock className="h-7 w-7" />
+              <Sparkles className="absolute -right-2.5 -top-2.5 h-5 w-5 text-amber-300 animate-pulse" />
             </div>
-            <div>
-              <p className="font-serif text-lg font-medium text-app-ink">Phân tích thực thi nâng cao</p>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-app-ink-soft">
-                Bản đồ nhiệt hoàn thành, xu hướng theo tuần và phân tích từng việc lặp lại giúp bạn biết chỗ nào đang
-                mạnh, chỗ nào cần chú ý trước.
+
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl font-semibold tracking-wide text-app-ink">
+                Phân tích thực thi nâng cao
+              </h3>
+              <p className="mx-auto max-w-md text-sm leading-relaxed text-app-ink-soft">
+                Khai phá toàn bộ tiềm năng với Bản đồ nhiệt hoàn thành, phân tích xu hướng chi tiết theo tuần và đo lường hiệu quả từng việc lặp lại. Giúp bạn biết rõ chỗ nào đang mạnh, điểm nào cần tối ưu hóa để bứt phá.
               </p>
             </div>
-            <Badge className="border-app-accent/20 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft">
-              <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
-              Tính năng Plus
-            </Badge>
+
+            <div className="flex flex-col items-center gap-3">
+              <Badge className="border border-amber-400/30 bg-amber-400/10 text-amber-700 dark:text-amber-300 hover:bg-amber-400/20 px-3.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-sm transition-all">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Tính năng Plus cao cấp
+              </Badge>
+
+              {onOpenSettingsTab && (
+                <Button 
+                  onClick={onOpenSettingsTab}
+                  className="mt-2 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-medium px-6 py-2 rounded-xl shadow-md shadow-amber-500/15 hover:shadow-lg hover:shadow-amber-500/25 transition-all duration-300 flex items-center gap-2 text-sm border-none"
+                >
+                  Khám phá gói Plus
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
