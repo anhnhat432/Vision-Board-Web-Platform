@@ -1,4 +1,4 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, BookOpen } from "lucide-react";
 
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
 import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
@@ -36,26 +36,26 @@ function buildSetupSteps(userData: UserData): SetupStep[] {
 
   return [
     {
-      title: "Cân bằng",
-      description: "Chấm điểm 8 lĩnh vực để biết hiện tại đang lệch ở đâu.",
+      title: "Cân bằng cuộc sống",
+      description: "Chấm điểm 8 lĩnh vực cuộc sống để tìm ra nơi lệch nhịp cần ưu tiên nhất.",
       completed: hasLifeBalance,
       href: "/onboarding",
     },
     {
-      title: "Trọng tâm",
-      description: "Chọn một vùng sống đáng ưu tiên trong chu kỳ này.",
+      title: "Trọng tâm chu kỳ",
+      description: "Chọn duy nhất một lĩnh vực cốt lõi để tập trung thay đổi trong 12 tuần tới.",
       completed: hasInsight,
       href: hasLifeBalance ? "/life-insight" : "/onboarding",
     },
     {
       title: "Mục tiêu SMART",
-      description: "Viết mục tiêu rõ kết quả, chỉ số, hạn và lý do.",
+      description: "Đóng gói ý định thành mục tiêu SMART rõ nét kết quả, thời gian và lý do.",
       completed: hasSmartGoal,
       href: hasInsight ? "/smart-goal-setup" : "/life-insight",
     },
     {
       title: "Kế hoạch 12 tuần",
-      description: "Dựng việc lặp lại, mốc tuần và ngày review.",
+      description: "Xây dựng các tactics việc lặp lại, mốc checkpoint tuần và ngày khóa review.",
       completed: false,
       href: hasFeasibility ? "/12-week-setup" : hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
     },
@@ -68,67 +68,81 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
 
   return (
     <div className="space-y-6">
-      <section>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Không gian mới</p>
-        <h1 className="mt-4 max-w-3xl font-serif text-4xl font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-5xl">
+      {/* Greeting Banner */}
+      <section className="relative overflow-hidden rounded-2xl border border-emerald-300/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent backdrop-blur-md p-6 md:p-8 shadow-md">
+        <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
+        
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Không gian mới</p>
+        <h1 className="mt-4 max-w-3xl font-serif text-3xl font-bold leading-[1.2] tracking-tight text-app-ink sm:text-4xl">
           Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu chu kỳ 12 tuần đầu tiên.
         </h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-app-ink-soft">
-          Trang chính sẽ sáng rõ hơn sau khi có một mục tiêu thật, một kế hoạch tuần và vài việc hôm nay.
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-ink-soft">
+          Trang chính sẽ sáng rõ và đầy ắp số liệu trực quan sau khi bạn hoàn thành một mục tiêu thật, một lịch biểu tuần và vài việc hôm nay.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-app-accent/30 bg-app-accent-soft px-3.5 py-1.5 text-xs font-medium text-app-accent">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Cần hướng dẫn 6 bước?</span>
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-300/50 bg-app-surface/80 px-3.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 shadow-sm">
+          <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+          <span>Cần hướng dẫn 6 bước chi tiết?</span>
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
-            className="ml-1 font-semibold underline-offset-2 hover:underline"
+            className="ml-1 font-extrabold underline underline-offset-2 hover:text-emerald-600 transition-colors"
           >
-            Mở →
+            Mở ngay →
           </button>
         </div>
       </section>
 
+      {/* Setup Steps Panel V2 */}
       <section
         data-testid="fresh-workspace-empty-state"
-        className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-5 md:p-6"
+        className="surface-empty rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
         aria-labelledby="dashboard-new-user-title"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-app-line pb-4 mb-6">
           <div>
-            <h2 id="dashboard-new-user-title" className="text-base font-semibold text-app-ink">
+            <h2 id="dashboard-new-user-title" className="text-base font-bold text-app-ink flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-emerald-500" />
               Thiết lập chu kỳ đầu tiên
             </h2>
-            <p className="mt-1 text-sm leading-6 text-app-ink-muted">
-              Chưa có dữ liệu thực thi để hiển thị. Đi qua 4 bước này để Trang chính có dữ liệu thật.
+            <p className="text-xs font-semibold text-app-ink-muted mt-0.5">
+              Hãy đi qua 4 bước hành động cốt lõi này để khởi động chu kỳ của bạn.
             </p>
           </div>
           <button
             type="button"
             onClick={() => onContinue(nextStep.href)}
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-app-accent/90 shadow-md hover:-translate-y-0.5"
           >
             Tiếp tục thiết lập →
           </button>
         </div>
 
-        <ol className="mt-6 space-y-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {steps.map((step, index) => (
-            <li key={step.title} className="flex gap-3 rounded-xl border border-app-line bg-app-bg p-4">
+            <button
+              key={step.title}
+              type="button"
+              onClick={() => onContinue(step.href)}
+              className="flex text-left gap-4 rounded-xl border border-app-line bg-app-bg/50 p-4 hover:bg-app-bg hover:shadow-md hover:border-app-line-strong hover:-translate-y-0.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30"
+            >
               <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                  step.completed ? "bg-app-accent text-white" : "bg-app-surface text-app-ink-muted"
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-sm ${
+                  step.completed
+                    ? "bg-gradient-to-br from-emerald-500 to-teal-400 text-white"
+                    : "bg-app-surface border border-app-line text-app-ink-muted"
                 }`}
               >
-                {step.completed ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : index + 1}
+                {step.completed ? <Check className="h-4 w-4" strokeWidth={3.5} /> : index + 1}
               </span>
-              <div className="min-w-0">
-                <h3 className="text-sm font-medium text-app-ink">{step.title}</h3>
-                <p className="mt-1 text-sm leading-5 text-app-ink-muted">{step.description}</p>
+              <div className="min-w-0 flex-1">
+                <h3 className={`text-sm font-bold ${step.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}>
+                  {step.title}
+                </h3>
+                <p className="mt-1 text-xs font-semibold leading-relaxed text-app-ink-muted">{step.description}</p>
               </div>
-            </li>
+            </button>
           ))}
-        </ol>
+        </div>
       </section>
     </div>
   );

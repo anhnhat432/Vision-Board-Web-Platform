@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
@@ -539,10 +539,17 @@ function DashboardContent({
   return (
     <div
       className={
-        showMobileStickyCTA ? "min-h-screen bg-app-bg pb-24 text-app-ink" : "min-h-screen bg-app-bg text-app-ink"
+        showMobileStickyCTA
+          ? "min-h-screen bg-app-bg pb-24 text-app-ink relative overflow-hidden"
+          : "min-h-screen bg-app-bg text-app-ink relative overflow-hidden"
       }
     >
-      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      {/* Background Graphic Effects for Premium SaaS Aesthetics */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.05)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute top-[300px] right-1/4 w-[400px] h-[400px] bg-app-accent/8 dark:bg-app-accent/3 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '12s' }} />
+
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
         {shouldShowFreeGoalLimit ? (
           <FreeGoalLimitCard
             current={goalLimitUsage.current}

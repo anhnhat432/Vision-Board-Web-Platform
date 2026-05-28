@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { ArrowRight, CheckCircle2, Circle, ListTodo } from "lucide-react";
 
 import type { TwelveWeekTaskInstance } from "@/app/utils/storage";
 
@@ -14,48 +15,54 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
 
   return (
     <section
-      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
+      className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 shadow-sm hover:shadow-md transition-shadow duration-300"
       aria-labelledby="dashboard-today-mini-title"
     >
-      <div>
-        <h2 id="dashboard-today-mini-title" className="text-base font-semibold text-app-ink">
+      <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-4">
+        <h2 id="dashboard-today-mini-title" className="text-base font-bold text-app-ink flex items-center gap-2">
+          <ListTodo className="h-5 w-5 text-emerald-500" />
           {title}
         </h2>
-        <p className="mt-1 text-sm text-app-ink-muted">
-          {completedCount}/{totalCount} việc
+        <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
+          Đã chốt <span className="text-emerald-500 font-extrabold">{completedCount}</span> trên tổng số <span className="text-app-ink font-extrabold">{totalCount}</span> việc
         </p>
       </div>
 
-      <div className="mt-5 space-y-2">
+      <div className="space-y-3.5">
         {visibleTasks.length > 0 ? (
           visibleTasks.map((task) => (
-            <div key={task.id} className="flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3">
-              <span
-                aria-hidden="true"
-                className={`mt-0.5 flex size-[14px] shrink-0 items-center justify-center rounded-[4px] border ${
-                  task.completed ? "border-app-accent bg-app-accent" : "border-app-line-strong bg-app-surface"
-                }`}
-              />
+            <div
+              key={task.id}
+              className="flex items-center gap-3 rounded-xl border border-app-line bg-app-bg/50 px-4 py-3 hover:-translate-x-0.5 hover:shadow-sm hover:border-app-line-strong transition-all duration-200"
+            >
+              {task.completed ? (
+                <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
+              ) : (
+                <Circle className="h-4.5 w-4.5 text-app-ink-muted hover:text-app-accent transition-colors duration-200 shrink-0" />
+              )}
               <p
-                className={`min-w-0 flex-1 line-clamp-1 text-sm leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
+                className={`min-w-0 flex-1 line-clamp-1 text-sm font-medium leading-relaxed ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
               >
                 {task.title}
               </p>
             </div>
           ))
         ) : (
-          <p className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 px-3 py-3 text-sm leading-5 text-app-ink-muted">
+          <div className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-6 text-sm leading-relaxed text-app-ink-muted text-center italic">
             Hôm nay chưa có việc mở. Mở Today để thêm hoặc xem lại tuần.
-          </p>
+          </div>
         )}
       </div>
 
-      <Link
-        to="/today-v2"
-        className="mt-5 inline-flex text-sm font-medium text-app-accent transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-      >
-        Mở Today →
-      </Link>
+      <div className="mt-5 pt-3 border-t border-app-line flex justify-end">
+        <Link
+          to="/today-v2"
+          className="inline-flex items-center gap-1 text-xs font-bold text-app-accent hover:text-emerald-600 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        >
+          Mở Today
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
     </section>
   );
 }

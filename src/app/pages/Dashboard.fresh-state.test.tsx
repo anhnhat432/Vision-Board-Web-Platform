@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getUserData, saveUserData } from "../utils/storage";
+import { getUserData, saveUserData, initializeUserData } from "../utils/storage";
 import { Dashboard } from "./Dashboard";
 
 const authContextMock = vi.hoisted(() => ({
@@ -131,6 +131,7 @@ function seedStaleLocalGoal() {
 describe("Dashboard fresh workspace states", () => {
   beforeEach(() => {
     localStorage.clear();
+    initializeUserData();
     appModeMock.mode = "real";
     planHookMock.loadPlan.mockReset();
     setAuthContext();
@@ -187,17 +188,17 @@ describe("Dashboard fresh workspace states", () => {
     renderDashboard();
 
     expect(await screen.findByTestId("fresh-workspace-empty-state")).toBeInTheDocument();
-    expect(screen.getByText("Cần hướng dẫn 6 bước?")).toBeInTheDocument();
+    expect(screen.getByText(/Cần hướng dẫn 6 bước/)).toBeInTheDocument();
     expect(screen.queryByText(/Free: 0\/3/)).not.toBeInTheDocument();
-    expect(screen.getByText(/Chưa có dữ liệu thực thi để hiển thị/i)).toBeInTheDocument();
+    expect(screen.getByText(/Hãy đi qua 4 bước hành động cốt lõi/i)).toBeInTheDocument();
     expect(screen.queryByText("Chưa có dữ liệu bánh xe cuộc sống")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng quan hiệu suất 12 tuần")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tiếp tục thiết lập →" })).toBeInTheDocument();
-    expect(screen.getByText("Cân bằng")).toBeInTheDocument();
+    expect(screen.getByText("Cân bằng cuộc sống")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Tôi đã có insight" })).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu gần đây")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Mở →" }));
+    await user.click(screen.getByRole("button", { name: "Mở ngay →" }));
     expect(openGuideHandler).toHaveBeenCalledTimes(1);
     window.removeEventListener("visionboard:open-guide", openGuideHandler);
   });
