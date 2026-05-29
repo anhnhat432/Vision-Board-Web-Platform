@@ -115,17 +115,29 @@ export function DailyStoicCard() {
   };
 
   return (
-    <div className="w-full aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] perspective-1000 select-none">
+    <div 
+      className="w-full aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] select-none"
+      style={{ perspective: "1000px", WebkitPerspective: "1000px" }}
+    >
       <div
-        className="relative w-full h-full duration-700 preserve-3d"
+        className="relative w-full h-full transition-transform duration-700"
         style={{
+          transformStyle: "preserve-3d",
+          WebkitTransformStyle: "preserve-3d",
           transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
         {/* MẶT SAU THẺ BÀI (CARD BACK) - Nhìn thấy đầu tiên */}
         <button
           type="button"
-          className="absolute inset-0 w-full h-full rounded-2xl border border-amber-900/30 bg-gradient-to-br from-amber-950 via-amber-900 to-amber-950 text-amber-100 p-6 flex flex-col items-center justify-between shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backface-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+          className="absolute inset-0 w-full h-full rounded-2xl border border-amber-900/30 bg-gradient-to-br from-amber-950 via-amber-900 to-amber-950 text-amber-100 p-6 flex flex-col items-center justify-between shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+          style={{
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "rotateY(0deg)",
+            WebkitTransform: "rotateY(0deg)",
+            zIndex: isFlipped ? 0 : 2,
+          }}
           onClick={handleFlip}
           onKeyDown={handleKeyDown}
         >
@@ -160,7 +172,14 @@ export function DailyStoicCard() {
 
         {/* MẶT TRƯỚC THẺ BÀI (CARD FRONT) - Hiển thị sau khi lật */}
         <div
-          className="absolute inset-0 w-full h-full rounded-2xl border border-app-line bg-app-surface text-app-ink p-5 flex flex-col justify-between shadow-lg rotate-y-180 backface-hidden"
+          className="absolute inset-0 w-full h-full rounded-2xl border border-app-line bg-app-surface text-app-ink p-5 flex flex-col justify-between shadow-lg"
+          style={{
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "rotateY(180deg)",
+            WebkitTransform: "rotateY(180deg)",
+            zIndex: isFlipped ? 2 : 0,
+          }}
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-app-line/60 pb-3">
