@@ -45,6 +45,7 @@ import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
 import { TwelveWeekPremiumInsightSection } from "./TwelveWeekPremiumInsightSection";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
+import { TwelveWeekEmotionFlow } from "./TwelveWeekEmotionFlow";
 import { SectionBlock } from "../layout/SectionBlock";
 import { TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon } from "../illustrations";
 
@@ -700,6 +701,12 @@ export function TwelveWeekWeekTab({
               )}
               {showForm && (
                 <>
+                  <TwelveWeekEmotionFlow
+                    system={system}
+                    currentWeekRange={currentWeekRange}
+                    currentWeek={reviewWeekNumber}
+                  />
+
                   <div
                     data-testid="wam-section-score"
                     className="rounded-lg border border-app-line bg-app-bg p-5"

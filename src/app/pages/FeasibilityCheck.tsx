@@ -20,6 +20,7 @@ import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
 import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
+import { FeasibilityBalanceScale } from "./FeasibilityCheck/components/FeasibilityBalanceScale";
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
 import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./FeasibilityCheck/helpers";
@@ -422,6 +423,8 @@ export function FeasibilityCheck() {
             </div>
           </div>
         </section>
+
+        <FeasibilityBalanceScale answers={answers} />
 
         <FeasibilityStepShell
           currentQuestion={currentQuestion}

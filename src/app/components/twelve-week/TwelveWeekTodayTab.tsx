@@ -32,6 +32,8 @@ import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
 import { hapticLight } from "../../utils/haptics";
+import { playZenBell } from "../../utils/zen-bell";
+import { triggerSparkles } from "../../utils/sparkles";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
 import { PrimaryActionCard } from "@/app/components/layout/PrimaryActionCard";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
@@ -206,6 +208,17 @@ export function TwelveWeekTodayTab({
   const isFirstWeek = currentWeek === 1;
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
   const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
+  const lastClickCoords = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      lastClickCoords.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("click", handleGlobalClick, true);
+    return () => {
+      window.removeEventListener("click", handleGlobalClick, true);
+    };
+  }, []);
   const toggleTimerRef = useRef<number | null>(null);
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
@@ -259,6 +272,13 @@ export function TwelveWeekTodayTab({
 
     hapticLight();
     setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
+
+    if (completed) {
+      playZenBell();
+      const x = lastClickCoords.current.x || window.innerWidth / 2;
+      const y = lastClickCoords.current.y || window.innerHeight / 2;
+      triggerSparkles(x, y);
+    }
 
     const isTest = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || import.meta.env.MODE === "test");
 
@@ -609,7 +629,7 @@ export function TwelveWeekTodayTab({
                 data-testid="today-primary-mark-done"
                 size="lg"
                 className="w-full sm:w-auto"
-                onClick={() => onToggleTask(primaryTask.id, true)}
+                onClick={() => handleTaskCompletionChange(primaryTask.id, true)}
               >
                 <Check className="h-4 w-4" />
                 Đánh dấu xong
