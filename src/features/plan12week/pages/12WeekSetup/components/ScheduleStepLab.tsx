@@ -1,5 +1,21 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, CalendarDays, ChevronDown } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarDays,
+  ChevronDown,
+  Play,
+  Flag,
+  Calendar,
+  Clock,
+  Sliders,
+  Activity,
+  Target,
+  Hash,
+  Tag,
+  HelpCircle,
+  Shield,
+  CheckCircle
+} from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { cn } from "@/app/components/ui/utils";
@@ -40,30 +56,32 @@ const REVIEW_DAY_SHORT_LABEL: Record<string, string> = {
 };
 
 const LOAD_HINTS: Record<TwelveWeekSetupDraft["tacticLoadPreference"], string> = {
-  lighter: "Ít việc hơn. Hợp khi thiếu thời gian, năng lượng hoặc cần giữ nhịp trước.",
-  balanced: "Vừa đủ để tiến bộ mà không quá tải. Mặc định tốt cho hầu hết mục tiêu.",
-  push: "Nhiều việc hơn. Chỉ chọn khi bạn có lịch rộng và muốn tăng tốc có kiểm soát.",
+  lighter: "Tập trung tối giản. Phù hợp khi bạn có quỹ thời gian hạn chế hoặc bắt đầu tạo thói quen.",
+  balanced: "Nhịp độ cân bằng để tiến bộ bền bỉ mà không quá tải. Phù hợp với hầu hết mọi người.",
+  push: "Nhịp độ tăng tốc. Chỉ khuyên dùng khi bạn thực sự rảnh rỗi và muốn bứt phá nhanh.",
 };
+
+interface CollapsibleScheduleSectionProps {
+  id: string;
+  title: string;
+  children: ReactNode;
+  icon?: React.ComponentType<{ className?: string }>;
+}
 
 function CollapsibleScheduleSection({
   id,
   title,
   children,
-  emoji = "💡",
-}: {
-  id: string;
-  title: string;
-  children: ReactNode;
-  emoji?: string;
-}) {
+  icon: Icon = HelpCircle,
+}: CollapsibleScheduleSectionProps) {
   return (
-    <details className="group rounded-3xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-4 sm:p-5 relative z-10 transition-all duration-300 [&::-webkit-details-marker]:hidden">
+    <details className="group rounded-3xl border border-slate-200/60 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-4 sm:p-5 relative z-10 transition-all duration-300 [&::-webkit-details-marker]:hidden">
       <summary
         id={id}
-        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-sm font-bold text-slate-850 dark:text-slate-200 focus-visible:outline-none p-1 marker:hidden"
+        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md px-2 text-sm font-bold text-slate-855 dark:text-slate-200 focus-visible:outline-none p-1 marker:hidden"
       >
         <span className="flex items-center gap-2">
-          <span className="text-lg">{emoji}</span>
+          <Icon className="h-4.5 w-4.5 text-indigo-500" />
           <span>{title}</span>
         </span>
         <ChevronDown className="h-4.5 w-4.5 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
@@ -103,7 +121,7 @@ export function ScheduleStepLab({
   return (
     <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
       <section
-        className="relative overflow-hidden rounded-3xl border border-white/20 dark:border-slate-850/40 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl p-6 sm:p-8 transition-all duration-300 group"
+        className="relative overflow-hidden rounded-3xl border border-slate-200/60 dark:border-slate-855/40 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl p-6 sm:p-8 transition-all duration-300 group"
         aria-labelledby="schedule-main-title"
       >
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -113,7 +131,7 @@ export function ScheduleStepLab({
           </div>
           <div>
             <p id="schedule-main-title" className="text-base font-extrabold text-slate-850 dark:text-slate-100">
-              📅 Chốt lịch trình & Lịch biểu
+              Chốt lịch trình & Lịch biểu
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold">
               Xây dựng khung giờ cam kết thực thi đều đặn. Chọn ngày bắt đầu, ngày nhìn lại tuần, và thời gian biểu tối ưu mỗi ngày.
@@ -124,7 +142,7 @@ export function ScheduleStepLab({
         <div className="mt-6 grid gap-5 md:grid-cols-2 relative z-10">
           <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <label htmlFor="cycle-start-date" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
-              <span className="text-lg">🚀</span>
+              <Play className="h-4 w-4 text-indigo-500" />
               <span>Ngày bắt đầu chu kỳ</span>
             </label>
             <Input
@@ -159,8 +177,8 @@ export function ScheduleStepLab({
 
           <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <label htmlFor="cycle-end-date" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
-              <span className="text-lg">🏁</span>
-              <span>Ngày kết thúc viễn chinh</span>
+              <Flag className="h-4 w-4 text-indigo-500" />
+              <span>Ngày hoàn thành kế hoạch 12 tuần</span>
             </label>
             <Input
               id="cycle-end-date"
@@ -172,9 +190,9 @@ export function ScheduleStepLab({
           </div>
         </div>
 
-        <fieldset className="mt-6 rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
+        <fieldset className="mt-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
           <legend className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-3")}>
-            <span className="text-lg">📆</span>
+            <Calendar className="h-4 w-4 text-indigo-500" />
             <span>Ngày nhìn lại tuần (Reflection Day)</span>
           </legend>
           <div className="flex flex-wrap gap-2.5 justify-start">
@@ -208,15 +226,15 @@ export function ScheduleStepLab({
 
         <fieldset className="mt-6 rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
           <legend className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-3")}>
-            <span className="text-lg">⏳</span>
-            <span>Mỗi ngày bạn có thể dành bao lâu?</span>
+            <Clock className="h-4 w-4 text-indigo-500" />
+            <span>Thời lượng dành cho mục tiêu mỗi ngày</span>
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { value: "30min", label: "30 phút ⏱️", hint: "Ngày bận rộn" },
-              { value: "1h", label: "1 giờ ⌛", hint: "Vừa vặn sức" },
-              { value: "1.5h", label: "1.5 giờ ⚡", hint: "Dư dả lực" },
-              { value: "2h+", label: "2+ giờ 🧘", hint: "Chuyên sâu" },
+              { value: "30min", label: "30 phút", hint: "Tối giản & Tập trung" },
+              { value: "1h", label: "1 giờ", hint: "Duy trì ổn định" },
+              { value: "1.5h", label: "1.5 giờ", hint: "Tiến bộ nhanh chóng" },
+              { value: "2h+", label: "2+ giờ", hint: "Nỗ lực chuyên sâu" },
             ].map((option) => {
               const isActive = draft.dailyTimeBudget === option.value;
               return (
@@ -249,14 +267,14 @@ export function ScheduleStepLab({
 
         <fieldset className="mt-6 rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
           <legend className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-3")}>
-            <span className="text-lg">🌱</span>
+            <Sliders className="h-4 w-4 text-indigo-500" />
             <span>Mức tải hành động tuần đầu</span>
           </legend>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
             {[
-              { value: "lighter" as const, label: "Nhẹ nhàng 🌱", emoji: "🟢" },
-              { value: "balanced" as const, label: "Cân bằng ⚖️", emoji: "🟡" },
-              { value: "push" as const, label: "Bứt tốc 🔥", emoji: "🔴" },
+              { value: "lighter" as const, label: "Nhẹ nhàng" },
+              { value: "balanced" as const, label: "Cân bằng" },
+              { value: "push" as const, label: "Tăng tốc" },
             ].map((option) => {
               const isActive = draft.tacticLoadPreference === option.value;
               return (
@@ -276,7 +294,6 @@ export function ScheduleStepLab({
                   )}
                 >
                   <span className="text-sm font-extrabold flex items-center gap-1.5">
-                    <span>{option.emoji}</span>
                     <span>{option.label}</span>
                   </span>
                   <span className="text-xs font-semibold opacity-85 leading-relaxed">{LOAD_HINTS[option.value]}</span>
@@ -288,9 +305,9 @@ export function ScheduleStepLab({
           {/* Load Gauge Meter */}
           <div className="mt-5 rounded-xl border border-white/20 bg-slate-50/60 dark:bg-slate-950/40 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 select-none">
             <div className="flex items-center gap-2">
-              <span className="text-xl">📊</span>
+              <Activity className="h-5 w-5 text-indigo-500" />
               <div>
-                <p className="text-xs font-extrabold text-slate-700 dark:text-slate-200">Load Gauge Meter (Đồng hồ đo mức tải)</p>
+                <p className="text-xs font-extrabold text-slate-700 dark:text-slate-200">Chỉ báo mức tải hành động (Load Indicator)</p>
                 <p className="text-[10px] font-bold text-slate-400">Độ phức tạp của hành trình</p>
               </div>
             </div>
@@ -300,21 +317,21 @@ export function ScheduleStepLab({
                 <div 
                   className={cn(
                     "h-full rounded-full transition-all duration-500",
-                    draft.tacticLoadPreference === "lighter" && "w-1/3 bg-emerald-500",
-                    draft.tacticLoadPreference === "balanced" && "w-2/3 bg-amber-500",
-                    draft.tacticLoadPreference === "push" && "w-full bg-rose-500"
+                    draft.tacticLoadPreference === "lighter" && "w-1/3 bg-indigo-500",
+                    draft.tacticLoadPreference === "balanced" && "w-2/3 bg-indigo-500",
+                    draft.tacticLoadPreference === "push" && "w-full bg-indigo-500"
                   )}
                 />
               </div>
               <span className={cn(
                 "text-[10px] font-extrabold shrink-0 px-2.5 py-0.5 rounded-full border",
-                draft.tacticLoadPreference === "lighter" && "border-emerald-500/20 bg-emerald-500/10 text-emerald-500",
-                draft.tacticLoadPreference === "balanced" && "border-amber-500/20 bg-amber-500/10 text-amber-500",
-                draft.tacticLoadPreference === "push" && "border-rose-500/20 bg-rose-500/10 text-rose-500"
+                draft.tacticLoadPreference === "lighter" && "border-indigo-500/20 bg-indigo-500/10 text-indigo-500",
+                draft.tacticLoadPreference === "balanced" && "border-indigo-500/20 bg-indigo-500/10 text-indigo-500",
+                draft.tacticLoadPreference === "push" && "border-indigo-500/20 bg-indigo-500/10 text-indigo-500"
               )}>
-                {draft.tacticLoadPreference === "lighter" && "DỄ THỞ"}
-                {draft.tacticLoadPreference === "balanced" && "VỪA SỨC"}
-                {draft.tacticLoadPreference === "push" && "QUÁ TẢI!"}
+                {draft.tacticLoadPreference === "lighter" && "NHẸ"}
+                {draft.tacticLoadPreference === "balanced" && "CÂN BẰNG"}
+                {draft.tacticLoadPreference === "push" && "TĂNG TỐC"}
               </span>
             </div>
           </div>
@@ -324,7 +341,7 @@ export function ScheduleStepLab({
         <div className="mt-6 grid gap-5 md:grid-cols-3 relative z-10">
           <div className="md:col-span-2 rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <label htmlFor="lag-metric-name" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
-              <span className="text-lg">🎯</span>
+              <Target className="h-4 w-4 text-indigo-500" />
               <span>Chỉ số kết quả chính</span>
             </label>
             <Input
@@ -338,7 +355,7 @@ export function ScheduleStepLab({
           </div>
           <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <label htmlFor="lag-metric-target" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
-              <span className="text-lg">📊</span>
+              <Hash className="h-4 w-4 text-indigo-500" />
               <span>Con số mục tiêu</span>
             </label>
             <Input
@@ -352,7 +369,7 @@ export function ScheduleStepLab({
           </div>
           <div className="md:col-span-3 rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <label htmlFor="lag-metric-unit" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
-              <span className="text-lg">🏷️</span>
+              <Tag className="h-4 w-4 text-indigo-500" />
               <span>Đơn vị của chỉ số</span>
             </label>
             <Input
@@ -367,14 +384,14 @@ export function ScheduleStepLab({
         </div>
       </section>
 
-      <CollapsibleScheduleSection id="schedule-summary-title" title="Chu kỳ viễn chinh 12 tuần" emoji="🗺️">
+      <CollapsibleScheduleSection id="schedule-summary-title" title="Chu kỳ thực thi 12 tuần" icon={Calendar}>
         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-          🗓️ Diễn ra từ ngày: <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{cycleStartDate}</span> đến ngày <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{cycleEndDate}</span>
+          Diễn ra từ ngày: <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{cycleStartDate}</span> đến ngày <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{cycleEndDate}</span>
         </p>
       </CollapsibleScheduleSection>
 
       {setupGuideSupport && setupGuideTemplate ? (
-        <CollapsibleScheduleSection id="schedule-guide-title" title="Gợi ý giữ nhịp chiến thắng cho tuần 1" emoji="💡">
+        <CollapsibleScheduleSection id="schedule-guide-title" title="Gợi ý giữ nhịp chiến thắng cho tuần 1" icon={HelpCircle}>
           <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-200">{setupGuideSupport.week1Headline}</p>
           <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold">{setupGuideSupport.week1Support}</p>
           <div className="mt-3.5 rounded-xl border border-white/20 bg-slate-50/60 dark:bg-slate-950/30 p-4">
@@ -385,7 +402,7 @@ export function ScheduleStepLab({
       ) : null}
 
       {setupGuideSupport ? (
-        <CollapsibleScheduleSection id="schedule-recommendation-title" title="Ngày nhìn lại và mức tải tối ưu gợi ý" emoji="🛡️">
+        <CollapsibleScheduleSection id="schedule-recommendation-title" title="Ngày nhìn lại và mức tải tối ưu gợi ý" icon={Shield}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-200/50 dark:border-slate-800/40 bg-white/40 dark:bg-slate-950/10 p-4.5">
               <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">🔍 Ngày nhìn lại tuần</p>
@@ -406,11 +423,11 @@ export function ScheduleStepLab({
       ) : null}
 
       {(draft.week4Milestone || draft.week8Milestone) && (
-        <CollapsibleScheduleSection id="schedule-milestones-title" title="Các trạm cột mốc viễn chinh gợi ý" emoji="🚩">
+        <CollapsibleScheduleSection id="schedule-milestones-title" title="Các trạm cột mốc thực thi gợi ý" icon={Flag}>
           <div className="grid gap-4 sm:grid-cols-2">
             {[
-              { label: "🚀 Tuần 4 (Trạm 1)", value: draft.week4Milestone },
-              { label: "🚩 Tuần 8 (Trạm 2)", value: draft.week8Milestone },
+              { label: "Tuần 4 (Mốc rà soát 1)", value: draft.week4Milestone },
+              { label: "Tuần 8 (Mốc rà soát 2)", value: draft.week8Milestone },
             ].map((milestone) => (
               <div key={milestone.label} className="rounded-2xl border border-slate-200/50 dark:border-slate-800/40 bg-white/40 dark:bg-slate-950/10 p-4.5">
                 <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
@@ -423,7 +440,7 @@ export function ScheduleStepLab({
         </CollapsibleScheduleSection>
       )}
 
-      <CollapsibleScheduleSection id="schedule-week-one-title" title="Danh sách việc Hôm nay của tuần 1" emoji="⚡">
+      <CollapsibleScheduleSection id="schedule-week-one-title" title="Danh sách hành động hằng ngày của tuần 1" icon={Activity}>
         <div className="space-y-2.5">
           {weekOneTaskPreview.length === 0 ? (
             <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold">
@@ -436,7 +453,7 @@ export function ScheduleStepLab({
                 key={task}
                 className="rounded-2xl border border-slate-200/50 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 px-4 py-3 text-xs text-slate-600 dark:text-slate-350 font-bold flex items-center gap-2"
               >
-                <span>⚡</span>
+                <CheckCircle className="h-3.5 w-3.5 text-indigo-500" />
                 <span>{task}</span>
               </div>
             ))

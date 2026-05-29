@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Lightbulb, Lock, Sparkles, ChevronDown } from "lucide-react";
+import { Lightbulb, Lock, Sparkles, ChevronDown, Target, Flag, Award, Activity, ClipboardCheck } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
@@ -67,61 +67,12 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
   const isW12Filled = week12.trim().length > 0;
 
   return (
-    <div className="relative w-full py-6 select-none bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 p-4 mb-6 overflow-hidden">
-      {/* Nhúng styles trực tiếp cho các animation động */}
-      <style>{`
-        @keyframes dash {
-          to {
-            stroke-dashoffset: -20;
-          }
-        }
-        @keyframes float-slower {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-5px) scale(1.05); }
-        }
-        @keyframes float-faster {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-7px) scale(1.08); }
-        }
-        @keyframes pulse-spread {
-          0% { transform: scale(0.6); opacity: 0.8; }
-          100% { transform: scale(1.6); opacity: 0; }
-        }
-        @keyframes shimmer-grad {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-dash-flow {
-          animation: dash 1.2s linear infinite;
-        }
-        .animate-float-1 {
-          animation: float-slower 3.5s ease-in-out infinite;
-        }
-        .animate-float-2 {
-          animation: float-faster 2.8s ease-in-out infinite;
-        }
-        .animate-float-3 {
-          animation: float-slower 3s ease-in-out infinite;
-        }
-        .animate-float-4 {
-          animation: float-faster 3.2s ease-in-out infinite;
-        }
-        .animate-pulse-spread {
-          animation: pulse-spread 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-        }
-        .animate-holographic-border {
-          background-size: 300% 300%;
-          animation: shimmer-grad 5s ease infinite;
-        }
-      `}</style>
-
-      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400 mb-6 text-center flex items-center justify-center gap-1.5 relative z-10">
-        <Sparkles className="h-3.5 w-3.5 animate-pulse text-indigo-500" />
-        Bản đồ viễn chinh 12 tuần (Expedition Map)
+    <div className="relative w-full py-5 select-none bg-slate-50/40 dark:bg-slate-950/20 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 p-4 mb-6 overflow-hidden">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-450 dark:text-slate-400 mb-5 text-center flex items-center justify-center gap-1.5 relative z-10">
+        LỘ TRÌNH THỰC THI 12 TUẦN (12-WEEK EXECUTION ROADMAP)
       </p>
 
-      {/* Canvas SVG vẽ con đường lượn sóng */}
+      {/* Canvas SVG vẽ con đường lượn sóng tối giản */}
       <div className="relative w-full max-w-lg mx-auto aspect-[320/115] flex items-center justify-center">
         <svg
           viewBox="0 0 320 115"
@@ -131,138 +82,104 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
           <defs>
             <linearGradient id="expedition-active-grad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="50%" stopColor="#818cf8" />
               <stop offset="100%" stopColor="#10b981" />
             </linearGradient>
           </defs>
 
-          {/* 1. Đường nền nét đứt màu xám nhạt */}
+          {/* 1. Đường nền mỏng nhẹ */}
           <path
             d="M 40 40 C 80 20, 100 20, 120 30 C 140 40, 180 60, 200 50 C 220 40, 260 30, 280 40"
             fill="none"
             stroke="currentColor"
-            strokeWidth="3.5"
+            strokeWidth="2"
             strokeLinecap="round"
-            strokeDasharray="6, 6"
-            className="text-slate-250 dark:text-slate-850"
+            className="text-slate-200 dark:text-slate-800/60"
           />
 
-          {/* 2. Đường tiến trình phát sáng động (chỉ vẽ đến chặng đã điền) */}
+          {/* 2. Đường tiến trình liền mạch tinh tế */}
           <path
             d="M 40 40 C 80 20, 100 20, 120 30"
             fill="none"
             stroke={isW4Filled ? "url(#expedition-active-grad)" : "currentColor"}
-            strokeWidth={isW4Filled ? "4" : "3.5"}
+            strokeWidth="2"
             strokeLinecap="round"
-            strokeDasharray={isW4Filled ? "5, 4" : "6, 6"}
-            className={cn(
-              isW4Filled ? "animate-dash-flow" : "text-slate-200 dark:text-slate-800/40",
-              isW4Filled && "drop-shadow-[0_0_4px_rgba(99,102,241,0.4)]"
-            )}
+            className={isW4Filled ? "text-indigo-500" : "text-slate-200 dark:text-slate-800/40"}
           />
 
           <path
             d="M 120 30 C 140 40, 180 60, 200 50"
             fill="none"
             stroke={isW8Filled ? "url(#expedition-active-grad)" : "currentColor"}
-            strokeWidth={isW8Filled ? "4" : "3.5"}
+            strokeWidth="2"
             strokeLinecap="round"
-            strokeDasharray={isW8Filled ? "5, 4" : "6, 6"}
-            className={cn(
-              isW8Filled ? "animate-dash-flow" : "text-slate-200 dark:text-slate-800/40",
-              isW8Filled && "drop-shadow-[0_0_4px_rgba(245,158,11,0.4)]"
-            )}
+            className={isW8Filled ? "text-indigo-500" : "text-slate-200 dark:text-slate-800/40"}
           />
 
           <path
             d="M 200 50 C 220 40, 260 30, 280 40"
             fill="none"
             stroke={isW12Filled ? "url(#expedition-active-grad)" : "currentColor"}
-            strokeWidth={isW12Filled ? "4" : "3.5"}
+            strokeWidth="2"
             strokeLinecap="round"
-            strokeDasharray={isW12Filled ? "5, 4" : "6, 6"}
-            className={cn(
-              isW12Filled ? "animate-dash-flow" : "text-slate-200 dark:text-slate-800/40",
-              isW12Filled && "drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]"
-            )}
+            className={isW12Filled ? "text-emerald-500" : "text-slate-200 dark:text-slate-800/40"}
           />
         </svg>
 
-        {/* CÁC ĐIỂM TRẠM HOẠT HỌA NỔI (Định vị bằng phần trăm để luôn bám sát đường SVG lượn sóng) */}
+        {/* CÁC ĐIỂM TRẠM THIẾT KẾ PHẲNG SANG TRỌNG */}
         <div 
-          className="absolute flex flex-col items-center z-10 animate-float-1"
+          className="absolute flex flex-col items-center z-10"
           style={{ left: "12.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
         >
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-indigo-500 bg-white dark:bg-slate-900 text-lg shadow-[0_4px_12px_rgba(99,102,241,0.25)] select-none">
-            🚀
-            <div className="absolute inset-0 rounded-full border border-indigo-400/30 animate-ping opacity-75" />
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-full border border-indigo-500 bg-white dark:bg-slate-900 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 shadow-sm select-none">
+            W1
           </div>
-          <span className="mt-2.5 text-[10px] font-extrabold text-slate-700 dark:text-slate-200 tracking-wide">Khởi động</span>
-          <span className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400">Tuần 1</span>
+          <span className="mt-2 text-[9px] font-bold text-slate-600 dark:text-slate-300 tracking-wide uppercase">Khởi đầu</span>
         </div>
 
         <div 
-          className={cn("absolute flex flex-col items-center z-10", isW4Filled ? "animate-float-2" : "opacity-75")}
+          className="absolute flex flex-col items-center z-10"
           style={{ left: "37.5%", top: "26.09%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
-            "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
+            "relative flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
             isW4Filled 
-              ? "border-indigo-500 text-indigo-500 shadow-[0_4px_12px_rgba(99,102,241,0.25)]" 
-              : "border-slate-200 dark:border-slate-800 text-slate-300 opacity-60"
+              ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+              : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
-            {isW4Filled ? (
-              <>
-                🚩
-                <div className="absolute -inset-2 rounded-full bg-indigo-500/10 animate-pulse-spread" />
-              </>
-            ) : "🔒"}
+            W4
           </div>
-          <span className={cn("mt-2.5 text-[10px] font-bold transition-colors duration-500", isW4Filled ? "text-slate-700 dark:text-slate-200" : "text-slate-400")}>Tuần 4</span>
-          <span className="text-[9px] font-semibold text-slate-400">{isW4Filled ? "Mốc 1/3" : "Chờ đặt"}</span>
+          <span className={cn("mt-2 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW4Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 1</span>
         </div>
 
         <div 
-          className={cn("absolute flex flex-col items-center z-10", isW8Filled ? "animate-float-3" : "opacity-75")}
+          className="absolute flex flex-col items-center z-10"
           style={{ left: "62.5%", top: "43.48%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
-            "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
+            "relative flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
             isW8Filled 
-              ? "border-amber-500 text-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.25)]" 
-              : "border-slate-200 dark:border-slate-800 text-slate-300 opacity-60"
+              ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+              : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
-            {isW8Filled ? (
-              <>
-                🚩
-                <div className="absolute -inset-2 rounded-full bg-amber-500/10 animate-pulse-spread" />
-              </>
-            ) : "🔒"}
+            W8
           </div>
-          <span className={cn("mt-2.5 text-[10px] font-bold transition-colors duration-500", isW8Filled ? "text-slate-700 dark:text-slate-200" : "text-slate-400")}>Tuần 8</span>
-          <span className="text-[9px] font-semibold text-slate-400">{isW8Filled ? "Mốc 2/3" : "Chờ đặt"}</span>
+          <span className={cn("mt-2 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW8Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 2</span>
         </div>
 
         <div 
-          className={cn("absolute flex flex-col items-center z-10", isW12Filled ? "animate-float-4" : "opacity-75")}
+          className="absolute flex flex-col items-center z-10"
           style={{ left: "87.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
-            "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
+            "relative flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
             isW12Filled 
-              ? "border-emerald-500 text-emerald-500 shadow-[0_4px_16px_rgba(16,185,129,0.35)]" 
-              : "border-slate-200 dark:border-slate-800 text-slate-300 opacity-60"
+              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm" 
+              : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
-            {isW12Filled ? (
-              <>
-                🏆
-                <div className="absolute inset-0 rounded-full border-2 border-emerald-400/40 animate-ping opacity-75" />
-                <div className="absolute -inset-3.5 rounded-full bg-emerald-500/10 animate-pulse-spread" />
-              </>
-            ) : "🏁"}
+            W12
           </div>
-          <span className={cn("mt-2.5 text-[10px] font-extrabold transition-colors duration-500", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")}>Tuần 12</span>
-          <span className="text-[9px] font-semibold text-slate-400">{isW12Filled ? "Đích đến" : "Chờ đặt"}</span>
+          <span className={cn("mt-2 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")}>Đích đến</span>
         </div>
       </div>
     </div>
@@ -350,7 +267,7 @@ export function OutcomeStepLab({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
               <label htmlFor="milestone-week-4" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-                <span className="text-lg animate-bounce duration-1000">🚀</span>
+                <Target className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
                 <span>Cột mốc sau 4 tuần</span>
               </label>
               <Input
@@ -364,7 +281,7 @@ export function OutcomeStepLab({
             </div>
             <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
               <label htmlFor="milestone-week-8" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-                <span className="text-lg animate-bounce duration-1000">🚩</span>
+                <Flag className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
                 <span>Cột mốc sau 8 tuần</span>
               </label>
               <Input
@@ -380,7 +297,7 @@ export function OutcomeStepLab({
 
           <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <label htmlFor="week-12-outcome" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-              <span className="text-lg animate-pulse">🏆</span>
+              <Award className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Đích đến sau 12 tuần (Tuần 12)</span>
             </label>
             <Textarea
@@ -410,8 +327,8 @@ export function OutcomeStepLab({
           </div>
 
           <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
-            <label htmlFor="vision-12-week" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-              <span className="text-lg">🌟</span>
+            <label htmlFor="vision-12-week" className={cn(labelClass, "flex items-center gap-1.5 text-slate-850 dark:text-slate-200 font-bold mb-2")}>
+              <Lightbulb className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Vì sao mục tiêu này quan trọng?</span>
             </label>
             <Textarea
@@ -426,8 +343,8 @@ export function OutcomeStepLab({
           </div>
 
           <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
-            <label htmlFor="lag-metric-name" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-              <span className="text-lg">🎯</span>
+            <label htmlFor="lag-metric-name" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
+              <Activity className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Tên chỉ số cần theo dõi</span>
             </label>
             <Input
@@ -447,8 +364,8 @@ export function OutcomeStepLab({
           <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
               <div>
-                <label htmlFor="lag-metric-target" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-                  <span className="text-lg">📊</span>
+                <label htmlFor="lag-metric-target" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
+                  <Target className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
                   <span>Con số mục tiêu</span>
                 </label>
                 <Input
@@ -478,8 +395,8 @@ export function OutcomeStepLab({
           </div>
 
           <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
-            <label htmlFor="goal-type" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-              <span className="text-lg">🧬</span>
+            <label htmlFor="goal-type" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
+              <ClipboardCheck className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Loại mục tiêu</span>
             </label>
             <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
@@ -638,59 +555,57 @@ export function OutcomeStepLab({
           </p>
 
           {recommendedTemplate && adaptiveTemplateRecommendation ? (
-            <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-indigo-500 via-purple-500 via-pink-500 via-amber-400 via-emerald-500 to-indigo-500 animate-holographic-border shadow-xl shadow-indigo-500/10 overflow-hidden">
-              <div className="rounded-[14px] bg-white dark:bg-slate-900 p-5.5 relative z-10">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-app-accent">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-                      Đề xuất nhiều nhất cho bạn (Recommended)
-                    </div>
-                    <p className="mt-2 text-lg font-bold text-app-ink">{recommendedTemplate.name}</p>
-                    <p className="mt-2 text-xs leading-relaxed text-app-ink-soft">{adaptiveTemplateRecommendation.reason}</p>
+            <div className="relative rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.02] dark:bg-indigo-950/10 shadow-lg shadow-indigo-500/[0.02] p-5 sm:p-6 relative z-10 overflow-hidden">
+              <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/[0.03] rounded-full blur-3xl pointer-events-none" />
+              <div className="flex flex-wrap items-start justify-between gap-3 relative z-10">
+                <div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
+                    💡 Đề xuất nhiều nhất cho bạn (Recommended)
                   </div>
-                  <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-muted">
-                    {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
-                  </span>
+                  <p className="mt-2 text-lg font-bold text-slate-800 dark:text-slate-100">{recommendedTemplate.name}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold">{adaptiveTemplateRecommendation.reason}</p>
                 </div>
-                <button
-                  type="button"
-                  className={cn(
-                    "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto active:scale-[0.98]",
-                    selectedTemplate?.id === recommendedTemplate.id
-                      ? "border border-app-accent bg-app-accent-soft text-app-accent"
-                      : "bg-app-accent text-white hover:bg-app-accent",
-                  )}
-                  onClick={() => onTemplateSelect(recommendedTemplate)}
-                >
-                  {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
-                </button>
-                {recommendedTemplateSupport ? (
-                  <details className="group mt-4 rounded-xl border border-app-line bg-app-surface px-4 py-3 [&::-webkit-details-marker]:hidden">
-                    <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-                      <span>Xem chi tiết gợi ý giữ nhịp</span>
-                      <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-                    </summary>
-                    <div className="mt-3 border-t border-app-line/60 pt-3 grid gap-3 sm:grid-cols-2">
-                      <div className={infoBoxClass}>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                          Tuần 1 nên thắng ở đâu
-                        </p>
-                        <p className="mt-2 text-sm font-bold text-app-ink">
-                          {recommendedTemplateSupport.week1Headline}
-                        </p>
-                        <p className="mt-1.5 leading-relaxed">{recommendedTemplateSupport.week1Support}</p>
-                      </div>
-                      <div className={infoBoxClass}>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                          Nhịp nên giữ
-                        </p>
-                        <p className="mt-2 leading-relaxed">{recommendedTemplateSupport.week1CadenceHint}</p>
-                      </div>
-                    </div>
-                  </details>
-                ) : null}
+                <span className="rounded-full border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 px-3 py-1 text-xs font-semibold text-slate-500">
+                  {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
+                </span>
               </div>
+              <button
+                type="button"
+                className={cn(
+                  "mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/20 sm:w-auto active:scale-[0.98]",
+                  selectedTemplate?.id === recommendedTemplate.id
+                    ? "border border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                    : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-md shadow-indigo-500/10",
+                )}
+                onClick={() => onTemplateSelect(recommendedTemplate)}
+              >
+                {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
+              </button>
+              {recommendedTemplateSupport ? (
+                <details className="group mt-4 rounded-xl border border-slate-200/60 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/20 px-4 py-3 [&::-webkit-details-marker]:hidden">
+                  <summary className="flex min-h-10 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-slate-600 dark:text-slate-350 focus-visible:outline-none p-1">
+                    <span>Xem chi tiết gợi ý giữ nhịp</span>
+                    <ChevronDown className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-3 border-t border-slate-200/40 dark:border-slate-800/40 pt-3 grid gap-3 sm:grid-cols-2">
+                    <div className={infoBoxClass}>
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Tuần 1 nên thắng ở đâu
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-100">
+                        {recommendedTemplateSupport.week1Headline}
+                      </p>
+                      <p className="mt-1 leading-relaxed">{recommendedTemplateSupport.week1Support}</p>
+                    </div>
+                    <div className={infoBoxClass}>
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Nhịp nên giữ
+                      </p>
+                      <p className="mt-1 leading-relaxed">{recommendedTemplateSupport.week1CadenceHint}</p>
+                    </div>
+                  </div>
+                </details>
+              ) : null}
             </div>
           ) : null}
 

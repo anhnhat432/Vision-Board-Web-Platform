@@ -1,4 +1,4 @@
-import { CalendarDays, ClipboardCheck, Target, Zap } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Target, Zap, CheckCircle, Flag } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
 import type { TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
@@ -50,22 +50,11 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
-      {/* Nhúng custom styles cho viền óng ánh của Adventure Scroll */}
-      <style>{`
-        @keyframes border-shimmer {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-scroll-border {
-          background-size: 300% 300%;
-          animation: border-shimmer 6s ease infinite;
-        }
-      `}</style>
+
 
       {/* Adventure Scroll (Chứng thư Viễn chinh) */}
-      <section className="relative overflow-hidden rounded-3xl p-[2.5px] bg-gradient-to-r from-indigo-500 via-purple-500 via-pink-500 via-amber-400 via-emerald-500 to-indigo-500 animate-scroll-border shadow-2xl shadow-indigo-500/10">
-        <div className="rounded-[22px] bg-white dark:bg-slate-900 p-6 sm:p-8 relative z-10">
+      <section className="relative overflow-hidden rounded-3xl p-[2.5px] border border-slate-200/80 dark:border-slate-800/60 shadow-xl shadow-slate-100 dark:shadow-none">
+        <div className="rounded-3xl bg-white dark:bg-slate-900 p-6 sm:p-8 relative z-10">
           
           {/* Background radial glow */}
           <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -74,17 +63,17 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200/40 dark:border-slate-800/40 pb-5 relative z-10">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400 flex items-center gap-1.5">
-                📜 TỜ TRÌNH KHỞI HÀNH (ADVENTURE SCROLL)
+                BẢN RÀ SOÁT KẾ HOẠCH THỰC THI 12 TUẦN (12-WEEK PLAN REVIEW SHEET)
               </p>
               <h3 className="mt-2.5 font-serif italic text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span>⛰️</span> Chứng thư Viễn chinh 12 Tuần
+                <span></span> Kế hoạch Thực thi 12 Tuần
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold">
                 Bản tóm tắt hành trình được tự động đúc từ các lựa chọn cam kết của bạn. Hãy rà soát thật kỹ trước khi rung chuông khởi phát.
               </p>
             </div>
             <Badge variant="brand" className="inline-flex min-h-10 shrink-0 items-center px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold rounded-full text-xs shadow-lg shadow-indigo-500/20">
-              👑 Giai đoạn 12 Tuần
+              Thực thi Kế hoạch 12 Tuần
             </Badge>
           </div>
 
@@ -113,7 +102,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
                   <Target className="h-4.5 w-4.5" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Vì sao mục tiêu này quan trọng (Tầm nhìn)</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Tầm nhìn động lực (Vision & Purpose)</p>
                   <p className="mt-1.5 line-clamp-4 max-w-3xl text-xs font-bold leading-relaxed text-slate-700 dark:text-slate-200 italic">
                     "{draft.vision12Week || "Chưa có nội dung"}"
                   </p>
@@ -125,7 +114,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-100/30">
                 <CalendarDays className="h-4.5 w-4.5" aria-hidden="true" />
               </div>
-              <p className="mt-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Ngày bắt đầu khởi hành</p>
+              <p className="mt-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Ngày khởi hành chu kỳ</p>
               <p className="mt-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">{formatDateLabel(draft.startDate)}</p>
             </div>
 
@@ -157,7 +146,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/40 dark:border-slate-800/40 pb-4 relative z-10">
           <div>
             <h4 className="text-base font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-              <span>🚀</span> Hành động lặp lại hằng tuần (Lead Indicators)
+              <CheckCircle className="h-4.5 w-4.5 text-indigo-500 shrink-0 inline-block mr-1.5" aria-hidden="true" /> Hành động lặp lại hằng tuần (Lead Indicators)
             </h4>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-semibold">
               Cam kết tập trung vào việc nhỏ hằng tuần để gặt hái kết quả lớn.
@@ -180,7 +169,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             repeatedItems.map((leadMetric) => (
               <div key={leadMetric.name} className="rounded-2xl border border-slate-250/50 dark:border-slate-800/50 bg-slate-50/20 dark:bg-slate-950/10 p-4 hover:scale-[1.01] transition-transform duration-300">
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                  <span>⚡</span>
+                  <CheckCircle className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
                   <span>{leadMetric.name}</span>
                 </p>
                 <p className="mt-1.5 text-xs text-slate-450 dark:text-slate-400 font-semibold">
@@ -199,13 +188,13 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         <div className="absolute -bottom-16 -right-16 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
         
         <h4 className="text-base font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-1.5 border-b border-slate-200/40 dark:border-slate-800/40 pb-4 relative z-10">
-          <span>🌱</span> Điểm xuất phát của Tuần 1
+          <CalendarDays className="h-4.5 w-4.5 text-indigo-500 shrink-0 inline-block mr-1.5" aria-hidden="true" /> Điểm xuất phát của Tuần 1
         </h4>
         {week1 ? (
           <div className="mt-4 space-y-3.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold relative z-10">
             {week1.focus ? (
               <p className="flex items-start gap-1.5">
-                <span className="text-indigo-500 text-sm">🎯</span>
+                <Target className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-slate-700 dark:text-slate-200 font-extrabold">Trọng tâm tuần:</strong> {week1.focus}
                 </span>
@@ -213,7 +202,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             ) : null}
             {week1.expectedOutput ? (
               <p className="flex items-start gap-1.5 whitespace-pre-line">
-                <span className="text-emerald-500 text-sm">🏁</span>
+                <Flag className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-slate-700 dark:text-slate-200 font-extrabold">Kết quả dự kiến:</strong> {week1.expectedOutput}
                 </span>
@@ -224,7 +213,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               {weekOneTasks.slice(0, 4).map((task) => (
                 <div key={task.id} className="rounded-2xl border border-slate-250/50 dark:border-slate-800/50 bg-slate-50/20 dark:bg-slate-950/10 px-4.5 py-3 hover:scale-[1.01] transition-transform duration-300">
                   <p className="font-bold text-slate-750 dark:text-slate-150 flex items-center gap-1.5">
-                    <span>⚡</span>
+                    <CheckCircle className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
                     <span>{task.title}</span>
                   </p>
                   <p className="mt-1 text-[10px] text-slate-450 dark:text-slate-400 font-bold">{formatDateLabel(task.scheduledDate)}</p>
