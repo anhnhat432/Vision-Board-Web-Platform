@@ -211,12 +211,12 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:shadow-app-md"
+      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:border-app-accent/20"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
         <h2 id="dashboard-week-rhythm-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <Zap className="h-5 w-5 text-app-accent/80 animate-pulse" />
+          <Zap className="h-5 w-5 text-app-accent/80" />
           Nhịp tuần {safeWeek}
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
@@ -233,7 +233,7 @@ export function WeekRhythmCard({
           return (
             <div
               key={item.caption}
-              className={`rounded-[16px] border ${styles.bg} p-4 shadow-app-sm hover:shadow-app-md transition-all duration-300`}
+              className={`rounded-[16px] border ${styles.bg} p-4 shadow-app-sm hover:border-app-accent/25 transition-all duration-300`}
             >
               <div className="flex items-center justify-between">
                 <div className={`p-2 rounded-xl ${styles.iconBg}`}>
@@ -254,6 +254,40 @@ export function WeekRhythmCard({
             </div>
           );
         })}
+      </div>
+
+      {/* Things 3 style consistency dots */}
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-app-line bg-app-bg/40 px-4 py-3">
+        <span className="text-xs font-bold text-app-ink-soft">Nhịp check-in hàng ngày:</span>
+        <div className="flex items-center gap-2">
+          {days.map((day) => {
+            const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
+            let dotClass = "";
+            let tooltipText = "";
+
+            if (day.isFuture) {
+              dotClass = "bg-app-line/25 border-transparent";
+              tooltipText = `${day.label}: Tương lai`;
+            } else if (hasCheckIn) {
+              dotClass = "bg-app-accent border-transparent";
+              tooltipText = `${day.label}: Đã check-in`;
+            } else {
+              dotClass = "bg-transparent border border-app-line dark:border-neutral-700";
+              tooltipText = `${day.label}: Chưa check-in`;
+            }
+
+            return (
+              <div
+                key={day.key}
+                className="flex flex-col items-center gap-1"
+                title={tooltipText}
+              >
+                <div className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${dotClass}`} />
+                <span className="text-[9px] font-extrabold text-app-ink-muted uppercase">{day.label}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="mt-6 border-t border-app-line pt-6">

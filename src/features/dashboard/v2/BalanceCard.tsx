@@ -51,7 +51,7 @@ const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; tex
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
     <section
-      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:shadow-app-md"
+      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:border-app-accent/20"
       aria-labelledby="dashboard-balance-title"
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">

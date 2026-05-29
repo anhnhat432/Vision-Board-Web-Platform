@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import { Link } from "react-router";
 
@@ -28,6 +29,20 @@ export function DashboardHero({
   const safeProgress = clampPercent(progressPercent);
   const weekLabel = currentWeek ? `Tuần ${currentWeek} / ${totalWeeks}` : "Tuần -- / 12";
 
+  const selectedQuote = useMemo(() => {
+    const quotes = [
+      "Chậm lại một chút để nhìn rõ hơn hướng đi của mình.",
+      "Mỗi ngày một hành động nhỏ, kiên trì tạo nên hành trình lớn.",
+      "Tập trung vào hiện tại, kết quả sẽ tự an bài.",
+      "Giữ tâm tĩnh tại giữa những ồn ào của cuộc sống.",
+      "Sự nhất quán quan trọng hơn tốc độ.",
+      "Lắng nghe bản thân và bước tiếp với sự rõ ràng.",
+      "Một tuần trôi qua ý nghĩa bắt đầu từ một ngày sống trọn vẹn."
+    ];
+    const day = new Date().getDate();
+    return quotes[day % quotes.length];
+  }, []);
+
   return (
     <section
       data-testid="dashboard-primary-action-card"
@@ -54,6 +69,9 @@ export function DashboardHero({
         <p className="text-sm text-app-ink-soft max-w-xl leading-relaxed font-sans">
           Chào ngày mới! Hãy theo sát kế hoạch 12 tuần của bạn, tập trung vào các cam kết cốt lõi để tạo ra bước chuyển
           dịch thực sự.
+        </p>
+        <p className="font-serif italic text-app-warm text-sm mt-3 opacity-90 block">
+          “{selectedQuote}”
         </p>
       </div>
 
