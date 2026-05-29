@@ -188,12 +188,12 @@ export function Dashboard() {
     return (
       <div className="min-h-screen bg-app-bg text-app-ink">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-          <div className="space-y-5">
-            <Skeleton className="h-14 rounded-card bg-app-surface" />
-            <Skeleton className="h-56 rounded-card bg-app-surface" />
-            <div className="grid gap-5 lg:grid-cols-3">
-              <Skeleton className="h-48 rounded-card bg-app-surface lg:col-span-2" />
-              <Skeleton className="h-48 rounded-card bg-app-surface" />
+          <div className="space-y-6">
+            <Skeleton className="h-14 rounded-[18px] bg-app-surface" />
+            <Skeleton className="h-56 rounded-[18px] bg-app-surface" />
+            <div className="grid gap-6 lg:grid-cols-3">
+              <Skeleton className="h-48 rounded-[18px] bg-app-surface lg:col-span-2" />
+              <Skeleton className="h-48 rounded-[18px] bg-app-surface" />
             </div>
           </div>
         </div>
@@ -703,7 +703,7 @@ function DashboardActiveLayout({
   const planHref = "/12-week-system?tab=week";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div data-tour-id="dashboard-start-card">
         <DashboardHero
           caption={caption}
@@ -734,8 +734,8 @@ function DashboardActiveLayout({
         />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="space-y-5 lg:col-span-2">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
           <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
           <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
           <WeekRhythmCard
@@ -753,7 +753,7 @@ function DashboardActiveLayout({
           <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
         </div>
 
-        <aside className="space-y-5">
+        <aside className="space-y-6">
           {data.reviewDueToday ? (
             <ReflectionPrompt
               currentWeek={data.dashboardKpiCurrentWeek}

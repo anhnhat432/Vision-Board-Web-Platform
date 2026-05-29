@@ -48,27 +48,26 @@ function clampPercent(value: number): number {
   return clamp(Math.round(value), 0, 100);
 }
 
-// Flat design tokens for KPI Cards
 const KPI_CARD_STYLES = {
   "Tuần": {
-    bg: "bg-app-surface border-app-line",
+    bg: "from-emerald-50/10 to-teal-50/10 dark:from-green-950/10 dark:to-neutral-900/10",
     text: "text-app-accent",
-    iconBg: "bg-app-accent-soft",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
   "Tỷ lệ lead": {
-    bg: "bg-app-surface border-app-line",
+    bg: "from-emerald-50/10 to-teal-50/10 dark:from-green-950/10 dark:to-neutral-900/10",
     text: "text-app-accent",
-    iconBg: "bg-app-accent-soft",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
   "Nhịp": {
-    bg: "bg-app-surface border-app-line",
+    bg: "from-emerald-50/10 to-teal-50/10 dark:from-green-950/10 dark:to-neutral-900/10",
     text: "text-app-accent",
-    iconBg: "bg-app-accent-soft",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
   "Chuỗi": {
-    bg: "bg-app-surface border-app-line",
+    bg: "from-emerald-50/10 to-teal-50/10 dark:from-green-950/10 dark:to-neutral-900/10",
     text: "text-app-accent",
-    iconBg: "bg-app-accent-soft",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
 };
 
@@ -119,7 +118,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const barContent = (() => {
     if (day.isFuture) {
       return (
-        <div className="h-16 w-5.5 rounded-full bg-app-line/25" aria-hidden="true" />
+        <div className="h-16 w-6 rounded-full bg-app-line/20 border border-transparent" aria-hidden="true" />
       );
     }
 
@@ -127,20 +126,19 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
       const fillHeight = day.total === 0 ? 18 : clamp(day.percent, 18, 100);
       return (
         <div
-          className="flex h-16 w-5.5 items-end rounded-full bg-app-accent-soft border border-app-accent"
+          className="flex h-16 w-6 items-end rounded-full bg-app-accent-soft/40 border border-app-accent shadow-[0_0_8px_rgba(47,93,80,0.2)] animate-pulse"
           aria-hidden="true"
         >
-          <div className="w-full rounded-full bg-app-accent" style={{ height: `${fillHeight}%` }} />
+          <div className="w-full rounded-full bg-gradient-to-t from-app-accent-hover to-app-accent" style={{ height: `${fillHeight}%` }} />
         </div>
       );
     }
 
-    // Past day bar chart fill representation
     const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 10, 100);
     return (
-      <div className="flex h-16 w-5.5 items-end rounded-full bg-app-line/40" aria-hidden="true">
+      <div className="flex h-16 w-6 items-end rounded-full bg-app-line/30 border border-transparent" aria-hidden="true">
         <div
-          className="w-full rounded-full bg-app-accent/60"
+          className="w-full rounded-full bg-app-accent/50 group-hover:bg-app-accent/80 transition-all duration-300"
           style={{ height: `${fillHeight}%` }}
         />
       </div>
@@ -148,10 +146,10 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   })();
 
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
-      <span className={`text-xs font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-muted"}`}>{day.label}</span>
+    <div className="group flex flex-col items-center gap-2 text-center transition-all duration-300 hover:scale-105">
+      <span className={`text-xs font-extrabold ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted"}`}>{day.label}</span>
       {barContent}
-      <span className={`text-[10px] tabular-nums font-bold ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}>
+      <span className={`text-[10px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-soft"}`}>
         {day.completed}/{day.total}
       </span>
     </div>
@@ -175,13 +173,9 @@ export function WeekRhythmCard({
   const stats: Array<{
     icon: typeof CalendarDays;
     caption: "Tuần" | "Tỷ lệ lead" | "Nhịp" | "Chuỗi";
-    /** When set, render `value` static (e.g. composite strings like "5/12"). */
     value?: string;
-    /** When set, render an animated CountUp that respects reduced-motion. */
     numericValue?: number;
-    /** Display formatter for numericValue. */
     suffix?: string;
-    /** Precision for numeric value. */
     precision?: number;
     subLine: string;
   }> = [
@@ -217,12 +211,12 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-[14px] border border-app-line bg-app-surface p-5 md:p-6"
+      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:shadow-app-md"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
         <h2 id="dashboard-week-rhythm-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <Zap className="h-5 w-5 text-app-accent" />
+          <Zap className="h-5 w-5 text-app-accent animate-pulse" />
           Nhịp tuần {safeWeek}
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
@@ -230,8 +224,7 @@ export function WeekRhythmCard({
         </p>
       </div>
 
-      {/* Stats Cards V2 */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((item) => {
           const Icon = item.icon;
           const styles = KPI_CARD_STYLES[item.caption];
@@ -239,17 +232,17 @@ export function WeekRhythmCard({
           return (
             <div
               key={item.caption}
-              className="rounded-[14px] border p-4 border-app-line bg-app-surface"
+              className={`rounded-[16px] border border-app-line bg-gradient-to-b ${styles.bg} p-4 shadow-app-sm hover:border-app-accent/30 hover:shadow-app-md transition-all duration-300`}
             >
               <div className="flex items-center justify-between">
-                <div className={`p-2 rounded-lg ${styles.iconBg} ${styles.text}`}>
+                <div className={`p-2 rounded-xl ${styles.iconBg}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
               <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                 {item.caption}
               </p>
-              <p className="mt-1 font-serif text-3xl font-bold leading-none text-app-ink">
+              <p className="mt-1 font-serif text-3xl font-extrabold leading-none text-app-ink">
                 {item.numericValue !== undefined ? (
                   <CountUp
                     value={item.numericValue}
@@ -266,13 +259,12 @@ export function WeekRhythmCard({
         })}
       </div>
 
-      {/* Week Progress Bar Chart V2 */}
       <div className="mt-6 border-t border-app-line pt-6">
         <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-app-ink-muted">
           <Clock3 className="h-4 w-4 text-app-accent" />
           Nhịp độ thực thi hàng ngày
         </div>
-        <div className="grid grid-cols-7 gap-2.5 max-w-md mx-auto pt-2">
+        <div className="grid grid-cols-7 gap-2 sm:gap-4 max-w-md mx-auto pt-2">
           {days.map((day) => (
             <WeekProgressDay key={day.key} day={day} />
           ))}
