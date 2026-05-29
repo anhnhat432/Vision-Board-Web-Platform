@@ -120,8 +120,10 @@ export function SmartGoalStepShell({
     const xc = rect.width / 2;
     const yc = rect.height / 2;
 
-    const angleX = (yc - y) / 12; // Xoay tối đa ~15 độ xung quanh trục X
-    const angleY = (x - xc) / 12; // Xoay tối đa ~15 độ xung quanh trục Y
+    // Làm dịu hiệu ứng: giới hạn góc xoay tối đa chỉ 3 độ để tạo cảm giác tinh tế, sang trọng
+    const maxRotation = 3.0; 
+    const angleX = Math.min(Math.max((yc - y) / 22, -maxRotation), maxRotation);
+    const angleY = Math.min(Math.max((x - xc) / 80, -maxRotation), maxRotation);
 
     card.style.setProperty("--rotate-x", `${angleX}deg`);
     card.style.setProperty("--rotate-y", `${angleY}deg`);
@@ -245,7 +247,7 @@ export function SmartGoalStepShell({
         onMouseLeave={handleMouseLeave}
         style={{
           transform: "perspective(1000px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) scale3d(1, 1, 1)",
-          transition: "transform 0.15s ease-out, box-shadow 0.15s ease-out",
+          transition: "transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease-out",
         } as React.CSSProperties}
         className="group relative mb-6 rounded-2xl border border-white/20 dark:border-white/10 bg-gradient-to-br from-indigo-500/10 via-app-surface to-emerald-500/10 p-5 sm:p-6 shadow-md overflow-hidden backdrop-blur-md"
       >
