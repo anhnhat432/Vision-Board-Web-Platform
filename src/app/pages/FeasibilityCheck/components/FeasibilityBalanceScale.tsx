@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
+import { Scale, ShieldAlert, BadgeCheck, Sparkles } from "lucide-react";
 import { QUESTIONS } from "../constants";
 
 interface FeasibilityBalanceScaleProps {
@@ -37,31 +38,12 @@ function useAnimatedValue(target: number, duration = 900) {
 }
 
 /* ── Constants ─────────────────────────────────────────────────────── */
-const CX = 200;  // Center X of SVG
-const CY = 180;  // Center Y (pivot point)
-const R = 140;   // Main arc radius
-const ARC_WIDTH = 18;
-const TOTAL_QUESTIONS = QUESTIONS.length;
-
-// Helper: polar to cartesian (0° = left of semi-circle, 180° = right)
-function polarToXY(angleDeg: number, radius: number) {
-  const rad = (angleDeg * Math.PI) / 180;
-  return {
-    x: CX - radius * Math.cos(rad),
-    y: CY - radius * Math.sin(rad),
-  };
-}
-
-// Build arc path
-function arcPath(r: number, startAngle = 0, endAngle = 180) {
-  const s = polarToXY(startAngle, r);
-  const e = polarToXY(endAngle, r);
-  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y}`;
-}
+const CX = 150;
+const CY = 140;
+const R = 82;
 
 export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProps) {
-  /* ── Score logic ── */
+  // ── Score calculations ──
   const balanceData = useMemo(() => {
     let totalScore = 0;
     let answeredCount = 0;
@@ -78,8 +60,8 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     }
 
     const average = answeredCount > 0 ? totalScore / answeredCount : 2.5;
-    const normalized = (average - 2.5) / 1.5; // -1 to +1
-    const needleAngle = normalized * 90;       // -90° to +90°
+    const normalized = (average - 2.5) / 1.5;
+    const needleAngle = normalized * 90;
 
     return {
       needleAngle,
@@ -91,9 +73,9 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
   }, [answers]);
 
   const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight } = balanceData;
-  const animatedAverage = useAnimatedValue(answeredCount > 0 ? average : 0, 1000);
+  const animatedAverage = useAnimatedValue(answeredCount > 0 ? average : 0);
 
-  /* ── Per-axis scores ── */
+  // ── Per-axis scores ──
   const axisScores = useMemo(() => {
     return QUESTIONS.map((q) => {
       const answerVal = answers[q.id];
@@ -107,445 +89,286 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     });
   }, [answers]);
 
-  /* ── Status copy ── */
-  const statusCopy = useMemo(() => {
-    if (answeredCount === 0) {
-      return { title: "Chờ hiệu chuẩn", sub: "Trả lời các câu hỏi để đo mức sẵn sàng", color: "#94a3b8" };
-    }
-    if (isHeavyLeft) {
-      return { title: "Rào cản lớn — Cần tinh gọn", sub: `Đã đánh giá ${answeredCount}/${TOTAL_QUESTIONS} khía cạnh`, color: "#f43f5e" };
-    }
-    if (isHeavyRight) {
-      return { title: "Khả thi cao — Sẵn sàng lập kế hoạch", sub: `Đã đánh giá ${answeredCount}/${TOTAL_QUESTIONS} khía cạnh`, color: "#10b981" };
-    }
-    return { title: "Cân bằng — Hãy duy trì kỷ luật", sub: `Đã đánh giá ${answeredCount}/${TOTAL_QUESTIONS} khía cạnh`, color: "#f59e0b" };
-  }, [answeredCount, isHeavyLeft, isHeavyRight]);
-
-  /* ── 3D Tilt ── */
+  // ── 3D Tilt ──
   const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     setTiltStyle({
-      transform: `perspective(1200px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg)`,
+      transform: `perspective(1200px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) scale3d(1.01, 1.01, 1.01)`,
       transition: "transform 0.1s ease-out",
     });
   };
   const handleMouseLeave = () => {
     setTiltStyle({
-      transform: "perspective(1200px) rotateX(0deg) rotateY(0deg)",
-      transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      transform: "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+      transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
     });
   };
 
-  /* ── SVG Tick marks ── */
-  const ticks = useMemo(() => {
-    const result = [];
-    for (let i = 0; i <= 40; i++) {
-      const angle = (i / 40) * 180;
-      const isMajor = i % 10 === 0;
-      const isMid = i % 5 === 0;
-      const innerR = R + 2;
-      const outerR = isMajor ? R + 14 : isMid ? R + 10 : R + 6;
-      const p1 = polarToXY(angle, innerR);
-      const p2 = polarToXY(angle, outerR);
+  // ── Status label + color ──
+  const statusInfo = useMemo(() => {
+    if (answeredCount === 0) {
+      return { label: "Cán cân đang thăng bằng", sub: "Trả lời các câu hỏi bên dưới để hiệu chuẩn cán cân khả thi", emoji: "🔮", color: "#94a3b8", badgeClass: "bg-slate-50 dark:bg-slate-800/50 text-slate-500 border-slate-200/60 dark:border-slate-700/50" };
+    }
+    if (isHeavyLeft) {
+      return { label: "Rào cản khá nặng nề — Nên tinh gọn bớt việc", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "🤯", color: "#f43f5e", badgeClass: "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/40" };
+    }
+    if (isHeavyRight) {
+      return { label: "Mức độ khả thi rất tốt — Sẵn sàng lập kế hoạch", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "🚀", color: "#10b981", badgeClass: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40" };
+    }
+    return { label: "Cân bằng lý tưởng — Hãy duy trì kỷ luật", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "⚖️", color: "#f59e0b", badgeClass: "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/40" };
+  }, [answeredCount, isHeavyLeft, isHeavyRight]);
 
-      // Smooth color interpolation from rose → amber → emerald
-      const t = i / 40;
-      let r: number, g: number, b: number;
-      if (t < 0.35) {
-        const p = t / 0.35;
-        r = 244 + (249 - 244) * p;
-        g = 63 + (115 - 63) * p;
-        b = 94 + (22 - 94) * p;
-      } else if (t < 0.65) {
-        const p = (t - 0.35) / 0.3;
-        r = 249 + (245 - 249) * p;
-        g = 115 + (158 - 115) * p;
-        b = 22 + (11 - 22) * p;
+  // ── SVG Tick marks ──
+  const radialTicks = useMemo(() => {
+    const ticks = [];
+    for (let i = 0; i <= 36; i++) {
+      const angle = (i / 36) * 180;
+      const rad = (angle * Math.PI) / 180;
+      const isMajor = i % 9 === 0;
+      const isMid = i % 3 === 0;
+
+      const r1 = isMajor ? R + 4 : isMid ? R + 6 : R + 8;
+      const r2 = R + 14;
+      const x1 = CX - r1 * Math.cos(rad);
+      const y1 = CY - r1 * Math.sin(rad);
+      const x2 = CX - r2 * Math.cos(rad);
+      const y2 = CY - r2 * Math.sin(rad);
+
+      // Smooth color interpolation
+      const t = i / 36;
+      let cr: number, cg: number, cb: number;
+      if (t < 0.33) {
+        const p = t / 0.33;
+        cr = 244 + (245 - 244) * p; cg = 63 + (158 - 63) * p; cb = 94 + (11 - 94) * p;
+      } else if (t < 0.66) {
+        const p = (t - 0.33) / 0.33;
+        cr = 245 + (16 - 245) * p; cg = 158 + (185 - 158) * p; cb = 11 + (129 - 11) * p;
       } else {
-        const p = (t - 0.65) / 0.35;
-        r = 245 + (16 - 245) * p;
-        g = 158 + (185 - 158) * p;
-        b = 11 + (129 - 11) * p;
+        const p = (t - 0.66) / 0.34;
+        cr = 16; cg = 185 + (200 - 185) * p; cb = 129 + (150 - 129) * p;
       }
 
-      result.push({ p1, p2, isMajor, isMid, angle, color: `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})` });
+      ticks.push({
+        x1, y1, x2, y2, isMajor, isMid, angle,
+        color: `rgb(${Math.round(cr)},${Math.round(cg)},${Math.round(cb)})`,
+      });
     }
-    return result;
+    return ticks;
   }, []);
 
-  /* ── Zone labels on arc ── */
-  const zoneMarkers = useMemo(() => {
-    return [
-      { angle: 0, label: "1.0" },
-      { angle: 90, label: "2.5" },
-      { angle: 180, label: "4.0" },
-    ].map((z) => {
-      const pos = polarToXY(z.angle, R + 22);
-      return { ...z, ...pos };
-    });
-  }, []);
-
-  /* ── Needle dot position on arc ── */
-  const needleDotAngle = answeredCount > 0 ? 90 + needleAngle : 90;
-  const needleDot = polarToXY(needleDotAngle, R);
-
-  /* ── Segment arc (filled portion based on score) ── */
-  const filledArcEndAngle = answeredCount > 0 ? ((average - 1) / 3) * 180 : 0;
-
-  // Calculate the arc length for dash animation
-  const totalArcLen = Math.PI * R; // half-circle
-  const filledLen = (filledArcEndAngle / 180) * totalArcLen;
+  // Arc half-circle path
+  const arcD = `M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`;
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Decorative 3D tilt only
+    // biome-ignore lint/a11y/noStaticElementInteractions: Decorative 3D tilt effect only
     <div
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={tiltStyle}
-      className="relative rounded-2xl overflow-hidden transition-all duration-300"
+      className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/60 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)] p-5 flex flex-col items-center gap-4 transition-all duration-300 group"
     >
-      {/* ═══ Outer container with refined border ═══ */}
-      <div className="relative bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
-
-        {/* ═══ Gauge area — dark inset panel ═══ */}
-        <div className="relative mx-3 mt-3 rounded-xl bg-gradient-to-b from-slate-900 via-slate-925 to-slate-950 overflow-hidden">
-          {/* Subtle noise texture */}
-          <div
-            className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            }}
-          />
-
-          {/* Ambient glow behind arc */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 bottom-4 w-[280px] h-[140px] rounded-full pointer-events-none transition-all duration-700"
-            style={{
-              background: `radial-gradient(ellipse, ${statusCopy.color}15, transparent 70%)`,
-            }}
-          />
-
-          {/* ── SVG Gauge ── */}
-          <div className="relative w-full px-4 pt-6 pb-3 flex justify-center select-none">
-            <svg viewBox="0 0 400 220" className="w-full max-w-[380px] h-auto overflow-visible" aria-hidden="true">
-              <defs>
-                {/* Arc gradient */}
-                <linearGradient id="fbs-g" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#fb7185" />
-                  <stop offset="20%" stopColor="#f97316" />
-                  <stop offset="40%" stopColor="#fbbf24" />
-                  <stop offset="60%" stopColor="#a3e635" />
-                  <stop offset="80%" stopColor="#34d399" />
-                  <stop offset="100%" stopColor="#10b981" />
-                </linearGradient>
-
-                {/* Filled arc glow */}
-                <filter id="fbs-glow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="6" result="b" />
-                  <feMerge>
-                    <feMergeNode in="b" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-
-                {/* Needle drop-shadow */}
-                <filter id="fbs-ns" x="-100%" y="-100%" width="300%" height="300%">
-                  <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#6366f1" floodOpacity="0.6" />
-                </filter>
-
-                {/* Hub shadow */}
-                <filter id="fbs-hs" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="1" stdDeviation="4" floodColor="black" floodOpacity="0.4" />
-                </filter>
-
-                {/* Indicator dot glow */}
-                <filter id="fbs-dg" x="-100%" y="-100%" width="300%" height="300%">
-                  <feGaussianBlur stdDeviation="3" result="b" />
-                  <feMerge>
-                    <feMergeNode in="b" />
-                    <feMergeNode in="b" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              {/* ── Tick marks ── */}
-              {ticks.map((t) => (
-                <line
-                  key={t.angle}
-                  x1={t.p1.x} y1={t.p1.y}
-                  x2={t.p2.x} y2={t.p2.y}
-                  stroke={t.color}
-                  strokeWidth={t.isMajor ? "2.5" : t.isMid ? "1.5" : "0.8"}
-                  strokeLinecap="round"
-                  opacity={t.isMajor ? 0.6 : t.isMid ? 0.35 : 0.15}
-                />
-              ))}
-
-              {/* ── Zone labels ── */}
-              {zoneMarkers.map((z) => (
-                <text
-                  key={z.label}
-                  x={z.x}
-                  y={z.y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize="11"
-                  fontWeight="600"
-                  fill="#64748b"
-                  opacity="0.5"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif", fontFeatureSettings: "'tnum'" }}
-                >
-                  {z.label}
-                </text>
-              ))}
-
-              {/* ── Background track ── */}
-              <path
-                d={arcPath(R)}
-                fill="none"
-                stroke="#1e293b"
-                strokeWidth={ARC_WIDTH}
-                strokeLinecap="round"
-              />
-
-              {/* Inner subtle border of track */}
-              <path
-                d={arcPath(R)}
-                fill="none"
-                stroke="#334155"
-                strokeWidth={ARC_WIDTH + 1}
-                strokeLinecap="round"
-                opacity="0.3"
-              />
-
-              {/* ── Filled gradient arc ── */}
-              {answeredCount > 0 && (
-                <>
-                  {/* Glow layer */}
-                  <path
-                    d={arcPath(R)}
-                    fill="none"
-                    stroke="url(#fbs-g)"
-                    strokeWidth={ARC_WIDTH + 8}
-                    strokeLinecap="round"
-                    strokeDasharray={`${totalArcLen}`}
-                    strokeDashoffset={`${totalArcLen - filledLen}`}
-                    filter="url(#fbs-glow)"
-                    opacity="0.35"
-                    style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }}
-                  />
-                  {/* Main fill */}
-                  <path
-                    d={arcPath(R)}
-                    fill="none"
-                    stroke="url(#fbs-g)"
-                    strokeWidth={ARC_WIDTH}
-                    strokeLinecap="round"
-                    strokeDasharray={`${totalArcLen}`}
-                    strokeDashoffset={`${totalArcLen - filledLen}`}
-                    style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }}
-                  />
-                </>
-              )}
-
-              {/* ── Indicator dot on arc ── */}
-              {answeredCount > 0 && (
-                <g style={{ transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
-                  <circle
-                    cx={needleDot.x}
-                    cy={needleDot.y}
-                    r="8"
-                    fill="white"
-                    filter="url(#fbs-dg)"
-                    style={{ transition: "cx 1s cubic-bezier(0.34, 1.56, 0.64, 1), cy 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
-                  />
-                  <circle
-                    cx={needleDot.x}
-                    cy={needleDot.y}
-                    r="4"
-                    fill={statusCopy.color}
-                    style={{ transition: "cx 1s cubic-bezier(0.34, 1.56, 0.64, 1), cy 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
-                  />
-                </g>
-              )}
-
-              {/* ── Needle ── */}
-              <g
-                style={{
-                  transform: `rotate(${needleAngle}deg)`,
-                  transformOrigin: `${CX}px ${CY}px`,
-                  transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                }}
-              >
-                {/* Needle body — tapered polygon */}
-                <polygon
-                  points={`${CX - 2},${CY + 8} ${CX},${CY - R + 30} ${CX + 2},${CY + 8}`}
-                  fill="#e2e8f0"
-                  filter="url(#fbs-ns)"
-                  opacity="0.9"
-                />
-                {/* Needle bright tip */}
-                <polygon
-                  points={`${CX - 1.2},${CY - R + 42} ${CX},${CY - R + 28} ${CX + 1.2},${CY - R + 42}`}
-                  fill="white"
-                />
-              </g>
-
-              {/* ── Center hub ── */}
-              <circle cx={CX} cy={CY} r="16" fill="#0f172a" stroke="#334155" strokeWidth="1" filter="url(#fbs-hs)" />
-              <circle cx={CX} cy={CY} r="12" fill="#1e293b" stroke="#475569" strokeWidth="0.5" />
-              <circle cx={CX} cy={CY} r="4" fill="#94a3b8" />
-              <circle cx={CX} cy={CY} r="1.5" fill="#e2e8f0" />
-
-              {/* ── Score display in center below hub ── */}
-              <text
-                x={CX}
-                y={CY + 42}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="36"
-                fontWeight="800"
-                fill="white"
-                opacity={answeredCount > 0 ? 1 : 0.2}
-                style={{
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                  fontFeatureSettings: "'tnum'",
-                  transition: "opacity 0.5s ease",
-                }}
-              >
-                {answeredCount > 0 ? animatedAverage.toFixed(1) : "—"}
-              </text>
-              <text
-                x={CX}
-                y={CY + 62}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="11"
-                fontWeight="500"
-                fill="#64748b"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-              >
-                / 4.0
-              </text>
-
-              {/* ── Edge labels ── */}
-              <text
-                x={CX - R - 6}
-                y={CY + 16}
-                textAnchor="end"
-                fontSize="9"
-                fontWeight="700"
-                fill="#fb7185"
-                opacity="0.7"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}
-              >
-                Rào cản
-              </text>
-              <text
-                x={CX + R + 6}
-                y={CY + 16}
-                textAnchor="start"
-                fontSize="9"
-                fontWeight="700"
-                fill="#34d399"
-                opacity="0.7"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}
-              >
-                Khả thi
-              </text>
-            </svg>
+      {/* ═══ Header ═══ */}
+      <div className="w-full flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/60">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500">
+            <Scale className="h-4 w-4" />
           </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">
+            Đồng hồ khả thi 12 tuần
+          </span>
         </div>
 
-        {/* ═══ Bottom section — light panel ═══ */}
-        <div className="px-4 pt-4 pb-4 space-y-3.5">
-          {/* ── Axis breakdown ── */}
-          <div className="space-y-1.5">
-            {axisScores.map((ax) => {
-              const pct = ax.answered ? (ax.score / 4) * 100 : 0;
-              const barColor = !ax.answered
-                ? "bg-slate-100 dark:bg-slate-800"
-                : ax.score >= 3
-                  ? "bg-emerald-500"
-                  : ax.score === 2
-                    ? "bg-amber-500"
-                    : "bg-rose-500";
-              const trackColor = "bg-slate-100 dark:bg-slate-800/80";
-              const textColor = ax.answered
-                ? "text-slate-700 dark:text-slate-200"
-                : "text-slate-400 dark:text-slate-600";
-              const scoreColor = !ax.answered
-                ? "text-slate-300 dark:text-slate-700"
-                : ax.score >= 3
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : ax.score === 2
-                    ? "text-amber-600 dark:text-amber-400"
-                    : "text-rose-600 dark:text-rose-400";
+        <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-800/60">
+          {answeredCount > 0 && isHeavyRight && (
+            <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />
+          )}
+          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Điểm</span>
+          <span className="text-sm font-extrabold tabular-nums text-indigo-600 dark:text-indigo-400" style={{ fontFeatureSettings: "'tnum'" }}>
+            {answeredCount > 0 ? animatedAverage.toFixed(1) : "—"}
+          </span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">/4.0</span>
+        </div>
+      </div>
 
-              return (
-                <div key={ax.axis} className="flex items-center gap-3 group/row">
-                  <span className={`text-xs font-medium w-[100px] shrink-0 truncate transition-colors duration-300 ${textColor}`}>
-                    {ax.label}
-                  </span>
-                  <div className={`flex-1 h-1.5 rounded-full ${trackColor} overflow-hidden`}>
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className={`text-xs font-bold tabular-nums w-[28px] text-right transition-colors duration-300 ${scoreColor}`}
-                    style={{ fontFeatureSettings: "'tnum'" }}
-                  >
-                    {ax.answered ? ax.score : "·"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+      {/* ═══ SVG Gauge ═══ */}
+      <div className="relative w-full max-w-[280px] h-[150px] flex items-center justify-center select-none">
+        <svg viewBox="0 0 300 170" className="w-full h-full overflow-visible" aria-hidden="true">
+          <defs>
+            <linearGradient id="fbs-arc" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#fb7185" />
+              <stop offset="35%" stopColor="#f59e0b" />
+              <stop offset="65%" stopColor="#84cc16" />
+              <stop offset="100%" stopColor="#10b981" />
+            </linearGradient>
 
-          {/* ── Divider ── */}
-          <div className="h-px bg-slate-100 dark:bg-slate-800/80" />
+            <linearGradient id="fbs-needle" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#a5b4fc" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.85" />
+            </linearGradient>
 
-          {/* ── Status footer ── */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">
-                {statusCopy.title}
-              </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
-                {statusCopy.sub}
-              </p>
-            </div>
-            <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors duration-300"
-              style={{
-                borderColor: `${statusCopy.color}25`,
-                backgroundColor: `${statusCopy.color}08`,
-              }}
-            >
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{
-                  backgroundColor: statusCopy.color,
-                  boxShadow: `0 0 6px ${statusCopy.color}60`,
-                }}
-              />
+            <filter id="fbs-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            <filter id="fbs-hub" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#6366f1" floodOpacity="0.2" />
+            </filter>
+          </defs>
+
+          {/* ── Tick marks ── */}
+          {radialTicks.map((t) => (
+            <line
+              key={t.angle}
+              x1={t.x1} y1={t.y1}
+              x2={t.x2} y2={t.y2}
+              stroke={t.color}
+              strokeWidth={t.isMajor ? "2" : t.isMid ? "1" : "0.5"}
+              strokeLinecap="round"
+              opacity={t.isMajor ? 0.55 : t.isMid ? 0.3 : 0.12}
+            />
+          ))}
+
+          {/* ── Track (background arc) ── */}
+          <path
+            d={arcD}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="10"
+            strokeLinecap="round"
+            className="text-slate-100 dark:text-slate-800/50"
+          />
+
+          {/* ── Gradient arc ── */}
+          <path
+            d={arcD}
+            fill="none"
+            stroke="url(#fbs-arc)"
+            strokeWidth="10"
+            strokeLinecap="round"
+            opacity="0.85"
+          />
+
+          {/* ── Gradient arc glow ── */}
+          <path
+            d={arcD}
+            fill="none"
+            stroke="url(#fbs-arc)"
+            strokeWidth="16"
+            strokeLinecap="round"
+            filter="url(#fbs-glow)"
+            opacity="0.15"
+          />
+
+          {/* ── Needle assembly ── */}
+          <g
+            style={{
+              transform: `rotate(${needleAngle}deg)`,
+              transformOrigin: `${CX}px ${CY}px`,
+              transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            }}
+          >
+            {/* Needle glow */}
+            <line
+              x1={CX} y1={CY}
+              x2={CX} y2={CY - 72}
+              stroke="url(#fbs-needle)"
+              strokeWidth="6"
+              strokeLinecap="round"
+              filter="url(#fbs-glow)"
+              opacity="0.5"
+            />
+
+            {/* Needle body */}
+            <line
+              x1={CX} y1={CY + 4}
+              x2={CX} y2={CY - 70}
+              stroke="#6366f1"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+
+            {/* Needle tip */}
+            <polygon
+              points={`${CX - 2.5},${CY - 65} ${CX},${CY - 76} ${CX + 2.5},${CY - 65}`}
+              fill="#4f46e5"
+              opacity="0.9"
+            />
+
+            {/* Hub — multi-layer */}
+            <circle cx={CX} cy={CY} r="10" className="fill-white dark:fill-slate-900" filter="url(#fbs-hub)" />
+            <circle cx={CX} cy={CY} r="8" fill="none" stroke="#e2e8f0" strokeWidth="0.5" className="dark:stroke-slate-700" />
+            <circle cx={CX} cy={CY} r="4.5" fill="#6366f1" />
+            <circle cx={CX} cy={CY} r="1.8" fill="white" opacity="0.85" />
+          </g>
+        </svg>
+
+        {/* ── Edge labels ── */}
+        <div className="absolute left-0 bottom-0 flex items-center gap-1">
+          <ShieldAlert className="h-3 w-3 text-rose-400" />
+          <span className="text-[9px] font-bold text-rose-500/70 dark:text-rose-400/60 uppercase tracking-wider">
+            Rào cản
+          </span>
+        </div>
+        <div className="absolute right-0 bottom-0 flex items-center gap-1">
+          <BadgeCheck className="h-3 w-3 text-emerald-400" />
+          <span className="text-[9px] font-bold text-emerald-500/70 dark:text-emerald-400/60 uppercase tracking-wider">
+            Khả thi
+          </span>
+        </div>
+      </div>
+
+      {/* ═══ Axis breakdown — subtle inline bars ═══ */}
+      <div className="w-full space-y-1">
+        {axisScores.map((ax) => {
+          const pct = ax.answered ? (ax.score / 4) * 100 : 0;
+          const barColor = !ax.answered
+            ? "bg-slate-100 dark:bg-slate-800"
+            : ax.score >= 3
+              ? "bg-emerald-500"
+              : ax.score === 2
+                ? "bg-amber-500"
+                : "bg-rose-500";
+
+          return (
+            <div key={ax.axis} className="flex items-center gap-2.5">
+              <span className={`text-[11px] w-[88px] shrink-0 truncate font-medium transition-colors ${ax.answered ? "text-slate-600 dark:text-slate-300" : "text-slate-300 dark:text-slate-700"}`}>
+                {ax.label}
+              </span>
+              <div className="flex-1 h-[5px] rounded-full bg-slate-100 dark:bg-slate-800/60 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
               <span
-                className="text-xs font-bold tabular-nums"
-                style={{
-                  color: statusCopy.color,
-                  fontFeatureSettings: "'tnum'",
-                }}
+                className={`text-[11px] font-semibold tabular-nums w-5 text-right transition-colors ${ax.answered ? (ax.score >= 3 ? "text-emerald-600 dark:text-emerald-400" : ax.score === 2 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") : "text-slate-300 dark:text-slate-700"}`}
+                style={{ fontFeatureSettings: "'tnum'" }}
               >
-                {answeredCount > 0 ? `${Math.round((average / 4) * 100)}%` : "—"}
+                {ax.answered ? ax.score : "·"}
               </span>
             </div>
-          </div>
-        </div>
+          );
+        })}
+      </div>
+
+      {/* ═══ Status badge ═══ */}
+      <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold transition-all duration-300 ${statusInfo.badgeClass}`}>
+        <span className="text-sm">{statusInfo.emoji}</span>
+        <span>{statusInfo.label}</span>
+      </div>
+
+      {/* ═══ Description ═══ */}
+      <div className="w-full text-center">
+        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+          {statusInfo.sub}
+        </p>
       </div>
     </div>
   );
