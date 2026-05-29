@@ -16,6 +16,16 @@ import { AssistantActionCard } from "./AssistantActionCard";
 import type { AssistantAction } from "./parseActions";
 import { executeAction } from "./executeAction";
 import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
 
 interface AssistantPanelProps {
   open: boolean;
@@ -38,6 +48,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     messageFeedback,
   } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
+  const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [actionStatus, setActionStatus] = useState<Record<string, { status: "pending" | "executing" | "done" | "error"; errorMessage?: string }>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -177,9 +188,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   };
 
   const handleClearHistory = () => {
-    if (window.confirm("Xóa toàn bộ lịch sử chat?")) {
-      clearHistory();
-    }
+    setIsClearHistoryOpen(true);
   };
 
   if (!open) return null;
@@ -419,6 +428,31 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
           </div>
         </div>
       </motion.div>
+
+      <AlertDialog open={isClearHistoryOpen} onOpenChange={setIsClearHistoryOpen}>
+        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-app-ink">Xóa lịch sử chat?</AlertDialogTitle>
+            <AlertDialogDescription className="text-app-ink-soft">
+              Hành động này sẽ xóa toàn bộ lịch sử tin nhắn của bạn với Trợ lý AI trên thiết bị này.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
+              Quay lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90 animate-none duration-0"
+              onClick={() => {
+                clearHistory();
+                setIsClearHistoryOpen(false);
+              }}
+            >
+              Xóa lịch sử
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

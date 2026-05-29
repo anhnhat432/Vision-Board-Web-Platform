@@ -29,6 +29,7 @@ import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
+import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 
 type OnboardingStep = "welcome" | "assessment";
 
@@ -256,15 +257,13 @@ export function Onboarding() {
 
   useEffect(() => cancelPendingDraftSave, [cancelPendingDraftSave]);
 
-  useEffect(() => {
+  const flushDraft = useCallback(() => {
     if (!isDirty) return;
-    const handler = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [isDirty]);
+    cancelPendingDraftSave();
+    writeOnboardingDraft(createOnboardingDraft(step, lifeAreas, reviewedAreaIndices));
+  }, [cancelPendingDraftSave, isDirty, lifeAreas, reviewedAreaIndices, step]);
+
+  useDirtyFormGuard(isDirty, flushDraft);
 
   const completeAssessment = () => {
     updateWheelOfLife(lifeAreas);
@@ -373,14 +372,14 @@ export function Onboarding() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
             onClick={handleResumeDraft}
           >
             Tiếp tục
           </button>
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
             onClick={handleRestartDraft}
           >
             Bắt đầu lại
@@ -437,8 +436,8 @@ export function Onboarding() {
                 const Icon = item.icon;
 
                 return (
-                  <article key={item.title} className="group surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-lg hover:border-app-accent/30">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent transition-transform duration-300 group-hover:scale-110">
+                  <article key={item.title} className="group surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <h2 className="mt-3 text-sm font-medium text-app-ink">{item.title}</h2>

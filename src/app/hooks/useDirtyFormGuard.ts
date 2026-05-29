@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-const BEFORE_UNLOAD_WARNING = "Bạn có thay đổi chưa lưu.";
 
 export function useDirtyFormGuard(isDirty: boolean, flushPendingSave: () => void) {
   const isDirtyRef = useRef(isDirty);
@@ -20,8 +19,8 @@ export function useDirtyFormGuard(isDirty: boolean, flushPendingSave: () => void
 
       flushPendingSaveRef.current();
       event.preventDefault();
-      event.returnValue = BEFORE_UNLOAD_WARNING;
-      return BEFORE_UNLOAD_WARNING;
+      event.returnValue = "";
+      return "";
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);

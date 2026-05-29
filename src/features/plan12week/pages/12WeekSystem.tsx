@@ -19,6 +19,8 @@ import {
   AlertDialogTitle,
 } from "@/app/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
+import { Checkbox } from "@/app/components/ui/checkbox";
+import { Label } from "@/app/components/ui/label";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
@@ -167,6 +169,7 @@ function buildCycleReviewContent(input: {
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const tabPanelId = useId();
+  const [isCloudDeleteConfirmed, setIsCloudDeleteConfirmed] = useState(false);
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
   const {
     isReady,
@@ -773,6 +776,12 @@ export function TwelveWeekSystem() {
     navigate,
   });
 
+  useEffect(() => {
+    if (!isDeleteCloudDialogOpen) {
+      setIsCloudDeleteConfirmed(false);
+    }
+  }, [isDeleteCloudDialogOpen]);
+
   useScrollToTopOnChange(activeTab, {
     targetRef: tabsTopRef,
     focus: false,
@@ -1005,7 +1014,7 @@ export function TwelveWeekSystem() {
               Quay lại
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              className="bg-app-status-error text-white hover:bg-app-status-error/90"
               onClick={handleResetCycle}
             >
               Làm mới từ tuần này
@@ -1028,7 +1037,7 @@ export function TwelveWeekSystem() {
               Giữ lại
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              className="bg-app-status-error text-white hover:bg-app-status-error/90"
               onClick={handleClearLocalSignals}
             >
               Xóa dấu vết trên thiết bị
@@ -1047,13 +1056,27 @@ export function TwelveWeekSystem() {
               tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="flex items-start gap-2.5 px-1 py-1">
+            <Checkbox
+              id="cloud-delete-confirm-checkbox"
+              checked={isCloudDeleteConfirmed}
+              onCheckedChange={(checked) => setIsCloudDeleteConfirmed(checked === true)}
+            />
+            <Label
+              htmlFor="cloud-delete-confirm-checkbox"
+              className="text-sm font-medium leading-relaxed text-app-ink-soft select-none cursor-pointer pt-3"
+            >
+              Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.
+            </Label>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
               Quay lại
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              className="bg-app-status-error text-white hover:bg-app-status-error/90 disabled:opacity-50"
               onClick={handleConfirmDeleteCloudWorkspace}
+              disabled={!isCloudDeleteConfirmed}
             >
               Xóa dữ liệu đã đồng bộ
             </AlertDialogAction>
@@ -1158,7 +1181,7 @@ export function TwelveWeekSystem() {
           >
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-[color:var(--color-danger-fg)] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:opacity-90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-app-status-error px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-status-error/90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
               disabled={isBackendSyncing}
               onClick={handleRunOutboxSync}
             >

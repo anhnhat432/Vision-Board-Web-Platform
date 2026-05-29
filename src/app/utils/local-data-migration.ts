@@ -24,6 +24,11 @@ import type {
 type ComparableValue = Record<string, unknown>;
 type LocalDataMigrationPromptState = Record<string, string[]>;
 
+let onImportCompleteCallback: (() => void) | null = null;
+export function registerOnImportComplete(cb: () => void): void {
+  onImportCompleteCallback = cb;
+}
+
 export interface LocalDataMigrationSummary {
   goalCount: number;
   twelveWeekSystemCount: number;
@@ -648,6 +653,7 @@ export function importAnonymousLocalDataToAccountScope(
       window.localStorage.setItem(STORAGE_KEY, mergedRaw);
       window.localStorage.removeItem(snapshotKey);
       notifyUserDataUpdated();
+      onImportCompleteCallback?.();
 
       return {
         status: "merged",
@@ -692,6 +698,7 @@ export function importAnonymousLocalDataToAccountScope(
     window.localStorage.setItem(STORAGE_KEY, anonymousRaw);
     window.localStorage.removeItem(snapshotKey);
     notifyUserDataUpdated();
+    onImportCompleteCallback?.();
 
     return {
       status: "imported",

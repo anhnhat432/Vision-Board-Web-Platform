@@ -4,6 +4,8 @@ import { FeedbackDialog } from "../FeedbackDialog";
 import { DataStorageInfo } from "../DataStorageInfo";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
+import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
+import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
@@ -53,6 +55,55 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
       >
         <DataStorageInfo variant="inline" />
       </SectionBlock>
+
+      <TwelveWeekLocalStatusSection
+        activeGoalId={props.activeGoalId}
+        appPreferences={props.appPreferences}
+        backendConnectionStatus={props.backendConnectionStatus}
+        isHydratingBackendPlans={props.isHydratingBackendPlans}
+        isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
+        lastBackendHydrationResult={props.lastBackendHydrationResult}
+        mutationQueueSyncStatus={props.mutationQueueSyncStatus}
+        onExportLocalData={props.onExportLocalData}
+        onExportCloudWorkspace={props.onExportCloudWorkspace}
+        onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
+        onHydrateBackendPlans={props.onHydrateBackendPlans}
+        onRunMutationQueueSync={props.onRunMutationQueueSync}
+        onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
+        onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
+        onUseCloudVersion={props.onUseCloudVersion}
+        pendingOutboxCount={props.pendingOutboxCount}
+      />
+
+      <TwelveWeekDeviceDetailsSection
+        appPreferences={props.appPreferences}
+        backendConnectionStatus={props.backendConnectionStatus}
+        funnelSteps={props.funnelSteps}
+        monetizationSteps={props.monetizationSteps}
+        browserNotificationStatus={props.browserNotificationStatus}
+        lastSyncSnapshot={props.lastSyncSnapshot}
+        pendingOutboxCount={props.pendingOutboxCount}
+        archivedOutboxCount={props.archivedOutboxCount}
+        eventCount={props.eventCount}
+        activeReminders={props.activeReminders}
+        recentOutboxItems={props.recentOutboxItems}
+        onPreferenceToggle={props.onPreferenceToggle}
+        onArchivePendingOutbox={props.onArchivePendingOutbox}
+        onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
+        onOpenReminder={props.onOpenReminder}
+        onExportLocalData={props.onExportLocalData}
+        onBrowserNotificationToggle={props.onBrowserNotificationToggle}
+        onRunOutboxSync={props.onRunOutboxSync}
+        onOutboxItemToggle={props.onOutboxItemToggle}
+        onClearEventLog={props.onClearEventLog}
+        onClearArchivedOutbox={props.onClearArchivedOutbox}
+        onOpenClearLocalDialog={props.onOpenClearLocalDialog}
+        onOpenDeleteDataDialog={props.onOpenDeleteDataDialog}
+        onOpenResetDialog={props.onOpenResetDialog}
+        onNavigateGoals={props.onNavigateGoals}
+        onNavigateJournal={props.onNavigateJournal}
+        onNavigateSetup={props.onNavigateSetup}
+      />
 
       <SectionBlock
         title={

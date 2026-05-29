@@ -2,6 +2,7 @@ import { Suspense, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
+import { DeleteCloudWorkspaceDialog } from "@/app/components/twelve-week/DeleteCloudWorkspaceDialog";
 import { DataStorageInfo } from "@/app/components/DataStorageInfo";
 import {
   AlertDialog,
@@ -204,6 +205,9 @@ export function TwelveWeekSystemSettings() {
     handleDeleteAllData,
     handleOpenDeleteDataDialog,
     handleResetCycle,
+    isDeleteCloudDialogOpen,
+    setIsDeleteCloudDialogOpen,
+    handleConfirmDeleteCloudWorkspace,
   } = useTwelveWeekSettingsActions({
     activeGoal,
     system,
@@ -307,6 +311,12 @@ export function TwelveWeekSystemSettings() {
         isSignedIn={Boolean(user)}
         onConfirm={handleDeleteAllData}
         isLoading={isDeletingData}
+      />
+
+      <DeleteCloudWorkspaceDialog
+        open={isDeleteCloudDialogOpen}
+        onOpenChange={setIsDeleteCloudDialogOpen}
+        onConfirm={handleConfirmDeleteCloudWorkspace}
       />
 
       <DataStorageInfo showSyncHint className="mb-6" />

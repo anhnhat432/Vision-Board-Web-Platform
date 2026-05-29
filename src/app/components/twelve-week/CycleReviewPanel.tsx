@@ -1,4 +1,4 @@
-﻿import { BarChart3, CheckCircle2, Flag, RefreshCw, Save, Trophy } from "lucide-react";
+import { BarChart3, CheckCircle2, Flag, RefreshCw, Save, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { calculateCycleSummary } from "@/features/plan12week/logic/cycleReview";
@@ -89,7 +89,7 @@ export function CycleReviewPanel({
         }
       >
         <div className="pointer-events-none hidden justify-end sm:flex">
-          <WeeklyReviewIllustration className="-my-6 w-40 text-app-accent opacity-60" />
+          <WeeklyReviewIllustration className="-my-6 w-40 text-app-warm opacity-60" />
         </div>
         {aspirationalVisionSummary ? (
           <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-sm text-app-ink-soft">
@@ -105,7 +105,7 @@ export function CycleReviewPanel({
         {kpis.map(({ label, value, icon: Icon }) => (
           <div key={label} className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-              <Icon className="h-3.5 w-3.5 text-app-accent" />
+              <Icon className="h-3.5 w-3.5 text-app-warm" />
               {label}
             </p>
             <p className="mt-3 font-serif text-2xl font-medium text-app-ink">{value}</p>
@@ -123,7 +123,7 @@ export function CycleReviewPanel({
                   summary.biggestWins.map((win) => (
                     <li
                       key={win}
-                      className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm text-app-accent"
+                      className="rounded-lg border border-app-warm-border/20 bg-app-warm-soft px-4 py-3 text-sm text-app-warm"
                     >
                       {win}
                     </li>
@@ -176,7 +176,7 @@ export function CycleReviewPanel({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button
-              className="w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto"
+              className="w-full bg-app-warm text-white hover:bg-app-warm/90 sm:w-auto"
               onClick={() => onSaveCycleReview({ lessons: sanitizedLessons, summary })}
             >
               <Save className="mr-2 h-4 w-4" />

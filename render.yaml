@@ -24,6 +24,8 @@ services:
         value: casso
       - key: BILLING_REPOSITORY
         value: mongo
+      - key: BILLING_PAID_DISABLED
+        value: "true"
       - key: CASSO_WEBHOOK_SECRET
         sync: false
       - key: CASSO_BANK_ACCOUNT
@@ -40,7 +42,43 @@ services:
         value: production
       - key: SENTRY_TRACES_SAMPLE_RATE
         value: "0.05"
+      # PayOS billing (when BILLING_PROVIDER=payos)
+      - key: PAYOS_CLIENT_ID
+        sync: false
+      - key: PAYOS_API_KEY
+        sync: false
+      - key: PAYOS_CHECKSUM_KEY
+        sync: false
+      - key: PAYOS_RETURN_URL
+        sync: false
+      - key: PAYOS_CANCEL_URL
+        sync: false
+      # AI Assistant
+      - key: ASSISTANT_PROVIDER
+        value: groq
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      # Email notifications
+      - key: EMAIL_PROVIDER
+        value: disabled
+      - key: BILLING_SUPPORT_EMAIL
+        sync: false
+      # R2 backup (optional)
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false

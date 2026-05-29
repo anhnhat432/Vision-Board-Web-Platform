@@ -28,13 +28,27 @@ export type SupportedProviderId =
   | "momo"
   | "vnpay";
 
+function isPaidCheckoutDisabled(): boolean {
+  const raw = process.env.BILLING_PAID_DISABLED?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
 function getProviderIdFromEnv(): SupportedProviderId {
   const raw = process.env.BILLING_PROVIDER?.trim().toLowerCase();
-  if (!raw || raw === "mock") return "mock";
   if (raw === "casso") return "casso";
   if (raw === "payos") return "payos";
   if (raw === "momo") return "momo";
   if (raw === "vnpay") return "vnpay";
+  if (raw === "mock") return "mock";
+
+  if (!raw) return "mock";
+
+  if (!isPaidCheckoutDisabled()) {
+    console.error(
+      `[billing] Unknown BILLING_PROVIDER="${raw}" with paid checkout enabled. Failing closed.`,
+    );
+    return "momo"; // placeholder adapter which will fail closed
+  }
 
   console.warn(
     `[billing] Unknown BILLING_PROVIDER="${raw}". Falling back to mock.`,
@@ -66,6 +80,24 @@ const adapterCache = new Map<SupportedProviderId, PaymentProviderAdapter>();
 
 export function getPaymentProviderAdapter(): PaymentProviderAdapter {
   const providerId = getProviderIdFromEnv();
+
+  if (process.env.NODE_ENV === "production" && !isPaidCheckoutDisabled() && (providerId === "mock" || !process.env.BILLING_PROVIDER)) {
+    const err = () => new Error("[billing] Mock billing provider is disabled in production with paid checkout enabled.");
+    return {
+      providerId: "mock",
+      isConfigured: false,
+      createCheckoutSession: () => Promise.reject(err()),
+      verifyWebhookSignature: () => ({
+        valid: false,
+        reason: "Mock billing is disabled in production with paid checkout enabled",
+      }),
+      parseWebhookEvent: () => {
+        throw err();
+      },
+      mapSubscriptionStatus: () => null,
+      createCustomerPortalSession: () => Promise.resolve(null),
+    };
+  }
 
   const cached = adapterCache.get(providerId);
   if (cached) return cached;

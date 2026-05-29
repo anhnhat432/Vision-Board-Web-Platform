@@ -331,14 +331,14 @@ export function LifeBalance() {
         </header>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-md hover:border-app-accent/30">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
           </article>
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-md hover:border-app-accent/30">
+          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               Lĩnh vực mạnh nhất
             </p>
@@ -348,15 +348,15 @@ export function LifeBalance() {
             </p>
             <p className="mt-1.5 text-xs font-medium text-app-ink-soft">{getLifeAreaLabel(strongestArea.name)}</p>
           </article>
-          <article className="surface-raised rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-md hover:border-amber-500/50">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
+          <article className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
               Lĩnh vực cần ưu tiên
             </p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
-            <p className="mt-1.5 text-xs font-medium text-amber-700 dark:text-amber-300">{getLifeAreaLabel(weakestArea.name)}</p>
+            <p className="mt-1.5 text-xs font-medium text-app-warm">{getLifeAreaLabel(weakestArea.name)}</p>
           </article>
         </div>
 

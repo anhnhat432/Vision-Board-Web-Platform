@@ -1,4 +1,4 @@
-﻿import type { ReactElement } from "react";
+import type { ReactElement } from "react";
 import { ArrowRight, ChevronUp, Lightbulb, ShieldAlert, Sparkles } from "lucide-react";
 
 import type {
@@ -10,11 +10,14 @@ import { getNextActionFromInsights } from "@/features/plan12week/logic";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { cn } from "../ui/utils";
 
 interface TwelveWeekInsightsCardProps {
   insights: ReadonlyArray<ExecutionInsight>;
   /** Section title rendered at the top of the card. */
   title?: string;
+  /** Visual style variant. 'reflection' uses warm terracotta tokens, 'execution' uses forest green. */
+  variant?: "execution" | "reflection";
   /**
    * Optional action callbacks. The card picks the most relevant from the top
    * insight's `nextActionId` and renders a button only when the matching
@@ -28,24 +31,6 @@ interface TwelveWeekInsightsCardProps {
   onCelebrate?: () => void;
   onOpenSetup?: () => void;
 }
-
-const SEVERITY_ACCENT: Record<ExecutionInsightSeverity, string> = {
-  positive: "border-app-accent/20 bg-app-accent-soft",
-  neutral: "border-app-line bg-app-bg",
-  warning: "border-app-warm-border bg-app-warm-soft",
-};
-
-const SEVERITY_BADGE: Record<ExecutionInsightSeverity, string> = {
-  positive: "border-app-accent/20 bg-app-surface text-app-accent",
-  neutral: "border-app-line bg-app-surface text-app-ink",
-  warning: "border-app-warm-border bg-app-surface text-app-warm",
-};
-
-const SEVERITY_ICON: Record<ExecutionInsightSeverity, ReactElement> = {
-  positive: <Sparkles className="h-4 w-4 text-app-accent" />,
-  neutral: <Lightbulb className="h-4 w-4 text-app-ink-muted" />,
-  warning: <ShieldAlert className="h-4 w-4 text-app-warm" />,
-};
 
 const SEVERITY_LABEL: Record<ExecutionInsightSeverity, string> = {
   positive: "Đang giúp bạn",
@@ -78,11 +63,31 @@ function getCallbackForActionId(
 }
 
 export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
-  const { insights, title = "Góc nhìn nhịp thực thi" } = props;
+  const { insights, title = "Góc nhìn nhịp thực thi", variant = "execution" } = props;
   if (insights.length === 0) return null;
 
+  const isReflection = variant === "reflection";
   const nextAction = getNextActionFromInsights(insights);
   const nextActionCallback = getCallbackForActionId(nextAction.id, props);
+
+  // Dynamic style configs based on variant
+  const severityAccent: Record<ExecutionInsightSeverity, string> = {
+    positive: isReflection ? "border-app-warm-border bg-app-warm-soft" : "border-app-accent/20 bg-app-accent-soft",
+    neutral: "border-app-line bg-app-bg",
+    warning: "border-app-warm-border bg-app-warm-soft",
+  };
+
+  const severityBadge: Record<ExecutionInsightSeverity, string> = {
+    positive: isReflection ? "border-app-warm-border bg-app-surface text-app-warm" : "border-app-accent/20 bg-app-surface text-app-accent",
+    neutral: "border-app-line bg-app-surface text-app-ink",
+    warning: "border-app-warm-border bg-app-surface text-app-warm",
+  };
+
+  const severityIcon: Record<ExecutionInsightSeverity, ReactElement> = {
+    positive: <Sparkles className={cn("h-4 w-4", isReflection ? "text-app-warm" : "text-app-accent")} />,
+    neutral: <Lightbulb className="h-4 w-4 text-app-ink-muted" />,
+    warning: <ShieldAlert className="h-4 w-4 text-app-warm" />,
+  };
 
   return (
     <section
@@ -92,7 +97,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-app-bg text-app-accent">
+          <span className={cn("flex h-7 w-7 items-center justify-center rounded-full bg-app-bg", isReflection ? "text-app-warm" : "text-app-accent")}>
             <ChevronUp className="h-4 w-4" />
           </span>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{title}</p>
@@ -106,14 +111,14 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
             key={insight.id}
             data-insight-id={insight.id}
             data-insight-severity={insight.severity}
-            className={`rounded-lg border p-3 ${SEVERITY_ACCENT[insight.severity]}`}
+            className={cn("rounded-lg border p-3", severityAccent[insight.severity])}
           >
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 shrink-0">{SEVERITY_ICON[insight.severity]}</span>
+              <span className="mt-0.5 shrink-0">{severityIcon[insight.severity]}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-semibold leading-6 text-app-ink">{insight.headline}</p>
-                  <Badge variant="outline" className={SEVERITY_BADGE[insight.severity]}>
+                  <Badge variant="outline" className={severityBadge[insight.severity]}>
                     {SEVERITY_LABEL[insight.severity]}
                   </Badge>
                 </div>
@@ -125,9 +130,9 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
       </ul>
 
       {nextActionCallback && nextAction.id !== "no_action" && (
-        <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-lg border border-app-accent/20 bg-app-accent-soft p-3">
+        <div className={cn("mt-4 flex flex-wrap items-start justify-between gap-3 rounded-lg border p-3", isReflection ? "border-app-warm-border bg-app-warm-soft" : "border-app-accent/20 bg-app-accent-soft")}>
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
+            <p className={cn("text-xs font-semibold uppercase tracking-[0.14em]", isReflection ? "text-app-warm" : "text-app-accent")}>
               Gợi ý hành động tiếp theo
             </p>
             <p data-testid="execution-insights-next-action-hint" className="mt-1 text-sm leading-6 text-app-ink">
@@ -137,7 +142,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="bg-app-surface"
+            className={cn("bg-app-surface", isReflection ? "border-app-warm-border text-app-warm hover:bg-app-warm-soft/40 hover:text-app-warm" : "border-app-line")}
             data-testid="execution-insights-next-action-button"
             onClick={nextActionCallback}
           >

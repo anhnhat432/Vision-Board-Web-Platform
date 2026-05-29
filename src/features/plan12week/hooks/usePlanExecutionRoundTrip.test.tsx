@@ -329,6 +329,10 @@ vi.mock("@/services/planService", () => ({
   createPlan: fakeBackend.createPlan,
   getPlan: fakeBackend.getPlan,
   getPlans: fakeBackend.getPlans,
+  bulkSyncPlan: vi.fn().mockRejectedValue({
+    status: 404,
+    message: "Endpoint not found",
+  }),
 }));
 
 vi.mock("@/services/taskService", () => ({

@@ -21,6 +21,7 @@ const {
   savePlanDetailsLink,
   setMetricIdForGoal,
   setRemoteTaskIdForGoal,
+  bulkSyncPlan,
 } = vi.hoisted(() => ({
   createMetric: vi.fn(),
   createPlan: vi.fn(),
@@ -41,6 +42,10 @@ const {
   savePlanDetailsLink: vi.fn(),
   setMetricIdForGoal: vi.fn(),
   setRemoteTaskIdForGoal: vi.fn(),
+  bulkSyncPlan: vi.fn().mockRejectedValue({
+    status: 404,
+    message: "Endpoint not found",
+  }),
 }));
 
 vi.mock("@/services/metricService", () => ({
@@ -54,6 +59,7 @@ vi.mock("@/services/planService", () => ({
   createPlan,
   getPlan,
   getPlans,
+  bulkSyncPlan,
 }));
 
 vi.mock("@/services/taskService", () => ({
@@ -213,6 +219,10 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
     savePlanDetailsLink.mockReset();
     setMetricIdForGoal.mockReset();
     setRemoteTaskIdForGoal.mockReset();
+    bulkSyncPlan.mockRejectedValue({
+      status: 404,
+      message: "Endpoint not found",
+    });
 
     getPlanLink.mockReturnValue({
       planId: "plan_1",

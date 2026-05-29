@@ -38,7 +38,7 @@ export function TwelveWeekPremiumInsightSection({
       open={isOpen}
       onOpenChange={setIsOpen}
       className={`rounded-card border ${
-        hasPremiumInsights ? "border-app-accent/20 bg-app-accent-soft" : "border-app-line bg-app-bg"
+        hasPremiumInsights ? "border-app-warm-border/20 bg-app-warm-soft" : "border-app-line bg-app-bg"
       }`}
     >
       <CollapsibleTrigger asChild>
@@ -57,7 +57,7 @@ export function TwelveWeekPremiumInsightSection({
               variant="outline"
               className={
                 hasPremiumInsights
-                  ? "border-app-accent/20 bg-app-surface/90 text-app-accent"
+                  ? "border-app-warm-border/20 bg-app-surface/90 text-app-warm"
                   : "border-app-line bg-app-surface/90 text-app-ink-soft"
               }
             >
@@ -92,7 +92,7 @@ export function TwelveWeekPremiumInsightSection({
                 <p className="mt-2 text-sm leading-7 text-app-ink">{premiumInsight.coachNote}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-app-accent/20 bg-app-surface p-4">
+            <div className="rounded-lg border border-app-warm-border/20 bg-app-surface p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
@@ -101,7 +101,7 @@ export function TwelveWeekPremiumInsightSection({
                   <p className="mt-2 text-base font-semibold leading-7 text-app-ink">{suggestedNextWeekPlan?.focus}</p>
                   <p className="mt-2 text-sm leading-7 text-app-ink-soft">{suggestedNextWeekPlan?.rationale}</p>
                 </div>
-                <Badge className="bg-app-accent text-white hover:bg-app-accent">
+                <Badge className="bg-app-warm text-white hover:bg-app-warm">
                   {getWorkloadDecisionLabel(suggestedNextWeekPlan?.workloadDecision ?? "keep same")}
                 </Badge>
               </div>
@@ -133,7 +133,7 @@ export function TwelveWeekPremiumInsightSection({
                 Bước đầu tuần nên làm: {suggestedNextWeekPlan?.firstMove}
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <Button className="w-full sm:w-auto" onClick={onApplySuggestedPlan}>
+                <Button className="w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90" onClick={onApplySuggestedPlan}>
                   Dùng gợi ý này cho tuần sau
                 </Button>
                 <p className="text-sm text-app-ink-muted">Bạn vẫn có thể sửa lại trước khi chốt review.</p>
@@ -146,7 +146,7 @@ export function TwelveWeekPremiumInsightSection({
               <div className="flex items-center gap-2">
                 <div
                   className={`h-2 w-2 rounded-full ${
-                    premiumInsight.status === "strong" ? "bg-app-accent" : "bg-app-warm"
+                    premiumInsight.status === "strong" ? "bg-app-warm" : "bg-app-warm"
                   }`}
                 />
                 <span className="text-sm font-semibold text-app-ink">Đã đọc được nhịp tuần này</span>
@@ -155,7 +155,7 @@ export function TwelveWeekPremiumInsightSection({
                 variant="outline"
                 className={
                   premiumInsight.status === "strong"
-                    ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                    ? "border-app-warm-border bg-app-warm-soft text-app-warm"
                     : "border-app-warm-border bg-app-warm-soft text-app-warm"
                 }
               >
@@ -171,8 +171,8 @@ export function TwelveWeekPremiumInsightSection({
                 </p>
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-app-surface/50">
-                <Crown className="h-5 w-5 text-app-accent" />
-                <p className="mt-1 text-xs font-semibold text-app-accent">Chỉ dành cho Plus</p>
+                <Crown className="h-5 w-5 text-app-warm" />
+                <p className="mt-1 text-xs font-semibold text-app-warm">Chỉ dành cho Plus</p>
               </div>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-4">
@@ -183,7 +183,7 @@ export function TwelveWeekPremiumInsightSection({
                 Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt - không chỉ là phân tích để
                 đọc.
               </p>
-              <Button className="mt-4 w-full sm:w-auto" onClick={onOpenPremiumInsights}>
+              <Button className="mt-4 w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90" onClick={onOpenPremiumInsights}>
                 Mở ôn lại Plus ngay
               </Button>
             </div>

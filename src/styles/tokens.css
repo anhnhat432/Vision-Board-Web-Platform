@@ -18,7 +18,7 @@
   --green-950: #152B25;
   --green-900: #1E3D35;
   --green-800: #264E43;
-  --green-700: #2F5D50;   /* accent base */
+  --green-700: #2A5447;   /* accent base - deeper, calmer forest green */
   --green-600: #3A7261;
   --green-100: #E8F0EC;   /* accent-soft base */
   --green-050: #F2F7F4;   /* accent-subtle base */
@@ -26,7 +26,7 @@
   /* Terracotta palette */
   --terra-800: #A8522F;
   --terra-700: #C96843;
-  --terra-600: #D97757;   /* warm base */
+  --terra-600: #D36A47;   /* warm base - calmer, deeper terracotta */
   --terra-100: #FCEDE5;   /* warm-soft base */
   --terra-050: #FEF6F1;   /* warm-subtle base */
 
@@ -37,7 +37,7 @@
   --neutral-400: #8A8A8A;
   --neutral-300: #B8B2AA;
   --neutral-200: #D4CFC8;
-  --neutral-150: #ECE8E1;
+  --neutral-150: #E8E3DA;   /* slightly warmer, softer border */
   --neutral-050: #FAF8F5;
   --neutral-000: #FFFFFF;
 
@@ -102,7 +102,7 @@
   --app-warm-soft:     var(--terra-100);   /* pill bg trong reflection */
   --app-warm-subtle:   var(--terra-050);   /* background nhẹ trong reflection */
   --app-warm-strong:   #5C3A2E;            /* dark text trong warm context */
-  --app-warm-border:   #F3D9CC;            /* border warm-tinted */
+  --app-warm-border:   #ECD4C6;            /* border warm-tinted */
 
   /* — Status — */
   --app-status-success: var(--status-green);

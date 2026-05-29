@@ -43,6 +43,8 @@ const PRIVATE_KEY_HEADER = "-----BEGIN PRIVATE KEY-----";
 const PRIVATE_KEY_FOOTER = "-----END PRIVATE KEY-----";
 
 const SUPPORTED_BILLING_PROVIDERS = new Set(["mock", "casso", "payos", "momo", "vnpay"]);
+/** Providers with a real adapter implementation that can process payments. */
+const IMPLEMENTED_BILLING_PROVIDERS = new Set(["casso", "payos"]);
 const SUPPORTED_BILLING_REPOSITORIES = new Set(["mongo", "memory"]);
 
 function isNonEmpty(value: string | undefined | null): value is string {
@@ -151,16 +153,51 @@ function hasAnyCassoSecret(env: NodeJS.ProcessEnv): boolean {
   ].some(isNonEmpty);
 }
 
-function validateBillingProvider(env: NodeJS.ProcessEnv): EnvValidationIssue[] {
+function validateBillingProvider(env: NodeJS.ProcessEnv, isProduction: boolean): EnvValidationIssue[] {
   const issues: EnvValidationIssue[] = [];
   const raw = env.BILLING_PROVIDER?.trim().toLowerCase();
-  if (raw && !SUPPORTED_BILLING_PROVIDERS.has(raw)) {
-    issues.push({
-      level: "warning",
-      key: "BILLING_PROVIDER",
-      category: "billing",
-      message: `unrecognized value. Allowed: ${Array.from(SUPPORTED_BILLING_PROVIDERS).join(", ")}. Will fall back to "mock".`,
-    });
+  const paidCheckoutEnabled = !isPaidCheckoutDisabled(env);
+
+  if (isProduction && paidCheckoutEnabled) {
+    if (!raw) {
+      issues.push({
+        level: "error",
+        key: "BILLING_PROVIDER",
+        category: "billing",
+        message: 'must be set in production when paid checkout is enabled (BILLING_PAID_DISABLED is not enabled). Must be a real provider (e.g. "payos" or "casso").',
+      });
+    } else if (raw === "mock") {
+      issues.push({
+        level: "error",
+        key: "BILLING_PROVIDER",
+        category: "billing",
+        message: 'cannot be "mock" in production when paid checkout is enabled.',
+      });
+    } else if (!SUPPORTED_BILLING_PROVIDERS.has(raw)) {
+      issues.push({
+        level: "error",
+        key: "BILLING_PROVIDER",
+        category: "billing",
+        message: `unrecognized value "${raw}" in production with paid checkout enabled. Implemented providers: ${Array.from(IMPLEMENTED_BILLING_PROVIDERS).join(", ")}.`,
+      });
+    } else if (!IMPLEMENTED_BILLING_PROVIDERS.has(raw)) {
+      // Recognized but not implemented (momo, vnpay) — fail closed
+      issues.push({
+        level: "error",
+        key: "BILLING_PROVIDER",
+        category: "billing",
+        message: `"${raw}" is recognized but not yet implemented. Only ${Array.from(IMPLEMENTED_BILLING_PROVIDERS).join(", ")} can process real payments. Set BILLING_PAID_DISABLED=true or switch to an implemented provider.`,
+      });
+    }
+  } else {
+    if (raw && !SUPPORTED_BILLING_PROVIDERS.has(raw)) {
+      issues.push({
+        level: "warning",
+        key: "BILLING_PROVIDER",
+        category: "billing",
+        message: `unrecognized value. Allowed: ${Array.from(SUPPORTED_BILLING_PROVIDERS).join(", ")}. Will fall back to "mock".`,
+      });
+    }
   }
   return issues;
 }
@@ -380,7 +417,7 @@ export function validateBackendEnv(
     if (issue) issues.push(issue);
   }
 
-  issues.push(...validateBillingProvider(env));
+  issues.push(...validateBillingProvider(env, isProduction));
   issues.push(...validateBillingRepository(env, isProduction));
   issues.push(...validateCassoConfig(env, isProduction));
   issues.push(...validatePayosConfig(env, isProduction));

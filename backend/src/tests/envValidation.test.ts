@@ -18,6 +18,12 @@ function baseProductionEnv(): NodeJS.ProcessEnv {
     BILLING_REPOSITORY: "mongo",
     SENTRY_DSN: "https://example@o0.ingest.sentry.io/0",
     BILLING_SUPPORT_EMAIL: "support@example.com",
+    BILLING_PROVIDER: "payos",
+    PAYOS_CLIENT_ID: "payos-client-id",
+    PAYOS_API_KEY: "payos-api-key",
+    PAYOS_CHECKSUM_KEY: "payos-checksum-key",
+    PLUS_PRICE_VND: "99000",
+    BILLING_PAID_DISABLED: "false",
   };
 }
 
@@ -256,11 +262,28 @@ describe("validateBackendEnv: dev/test forgiveness", () => {
     assert.deepEqual(cassoErrors, []);
   });
 
-  it("warns instead of errors on unknown billing provider", () => {
-    const env = { ...baseProductionEnv(), BILLING_PROVIDER: "stripe-extra" };
+  it("warns instead of errors on unknown billing provider when checkout is locked or outside production", () => {
+    const env = { ...baseProductionEnv(), BILLING_PROVIDER: "stripe-extra", BILLING_PAID_DISABLED: "true" };
     const issues = validateBackendEnv(env, { nodeEnv: "production" });
     const warning = issues.find((issue) => issue.key === "BILLING_PROVIDER" && issue.level === "warning");
     assert.ok(warning, "expected BILLING_PROVIDER warning for unknown value");
+  });
+
+  it("errors on unknown billing provider in production when paid checkout is enabled", () => {
+    const env = { ...baseProductionEnv(), BILLING_PROVIDER: "stripe-extra", BILLING_PAID_DISABLED: "false" };
+    const issues = validateBackendEnv(env, { nodeEnv: "production" });
+    const offending = issues.find((issue) => issue.key === "BILLING_PROVIDER" && issue.level === "error");
+    assert.ok(offending, "expected BILLING_PROVIDER error for unknown value");
+  });
+
+  it("errors on momo or vnpay billing provider in production when paid checkout is enabled", () => {
+    for (const provider of ["momo", "vnpay"]) {
+      const env = { ...baseProductionEnv(), BILLING_PROVIDER: provider, BILLING_PAID_DISABLED: "false" };
+      const issues = validateBackendEnv(env, { nodeEnv: "production" });
+      const offending = issues.find((issue) => issue.key === "BILLING_PROVIDER" && issue.level === "error");
+      assert.ok(offending, `expected BILLING_PROVIDER error for ${provider}`);
+      assert.match(offending!.message, /recognized but not yet implemented/);
+    }
   });
 });
 

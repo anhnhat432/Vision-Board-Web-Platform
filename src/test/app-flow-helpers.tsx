@@ -12,6 +12,7 @@ import {
   formatDateInputValue,
   getUserData,
   saveUserData,
+  resetUserDataCache,
   type Goal,
   type PricingPlanCode,
   type TacticType,
@@ -45,6 +46,7 @@ export function getCleanUserData(): UserData {
 
 export function resetTestStorage(): void {
   localStorage.clear();
+  resetUserDataCache();
   saveUserData(getCleanUserData());
 }
 

@@ -739,6 +739,14 @@ describe("12-week core flows", () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
+
+      // Summary card still renders since reviewCompleted === true
+      expect(await screen.findByTestId("weekly-review-summary")).toBeInTheDocument();
+
+      // Click Chỉnh sửa đánh giá to show the form since it was completed
+      const editButton = screen.getByRole("button", { name: "Chỉnh sửa đánh giá" });
+      await user.click(editButton);
+
       await openWeeklyReviewDetails(user);
 
       // Existing legacy fields should hydrate the WAM form
@@ -747,9 +755,6 @@ describe("12-week core flows", () => {
 
       // Old optional obstacle field is no longer rendered in the WAM form.
       expect(screen.queryByDisplayValue("Legacy obstacle")).toBeNull();
-
-      // Summary card still renders since reviewCompleted === true
-      expect(screen.getByTestId("weekly-review-summary")).toBeInTheDocument();
     },
     INTEGRATION_TEST_TIMEOUT_MS,
   );
@@ -772,6 +777,9 @@ describe("12-week core flows", () => {
       await waitFor(() => {
         expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("First weekly insight.");
       });
+
+      // Click Chỉnh sửa đánh giá to open form since it is completed and hidden
+      await user.click(screen.getByRole("button", { name: "Chỉnh sửa đánh giá" }));
 
       const insightsInput = document.querySelector("#weekly-insights");
       const commitmentsInput = document.querySelector("#weekly-next-commitments");

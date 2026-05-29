@@ -33,12 +33,19 @@ interface MockCassoPaymentOrder {
   save(): Promise<MockCassoPaymentOrder>;
 }
 
+import { FailedReceiptQueueModel } from "../models/FailedReceiptQueueModel";
+
 type MockableModel = {
   findOne: unknown;
 };
 
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
 const originalUserFindOne = UserModel.findOne;
+const originalFailedReceiptDeleteOne = FailedReceiptQueueModel.deleteOne;
+const originalFailedReceiptUpdateOne = FailedReceiptQueueModel.updateOne;
+
+(FailedReceiptQueueModel as any).deleteOne = async () => ({ acknowledged: true, deletedCount: 1 });
+(FailedReceiptQueueModel as any).updateOne = async () => ({ acknowledged: true, modifiedCount: 1 });
 
 function createResponse(): MockResponse {
   return {
@@ -119,6 +126,8 @@ afterEach(() => {
   mock.restoreAll();
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  (FailedReceiptQueueModel as any).deleteOne = originalFailedReceiptDeleteOne;
+  (FailedReceiptQueueModel as any).updateOne = originalFailedReceiptUpdateOne;
   delete process.env.CASSO_WEBHOOK_SECRET;
 });
 

@@ -269,7 +269,7 @@ describe("AssistantPanel", () => {
   });
 
   it("clears history when user confirms", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const confirmSpy = vi.spyOn(window, "confirm");
     localStorage.setItem(
       "assistant.chat.history:anon",
       JSON.stringify({
@@ -282,10 +282,15 @@ describe("AssistantPanel", () => {
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
     expect(screen.getByText("hello")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
+
+    const confirmBtn = screen.getByRole("button", { name: "Xóa lịch sử" });
+    await user.click(confirmBtn);
 
     expect(screen.queryByText("hello")).not.toBeInTheDocument();
     expect(localStorage.getItem("assistant.chat.history:anon")).toBeNull();
+    expect(confirmSpy).not.toHaveBeenCalled();
   });
 
   it("has correct ARIA attributes", () => {
@@ -327,8 +332,8 @@ describe("AssistantPanel", () => {
     expect(assistantMessageId).toBeDefined();
   });
 
-  it("clears history when user confirms", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+  it("clears history when user confirms (duplicate test)", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm");
     localStorage.setItem(
       "assistant.chat.history:anon",
       JSON.stringify({
@@ -341,10 +346,15 @@ describe("AssistantPanel", () => {
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
     expect(screen.getByText("hello")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Xóa lịch sử chat" }));
+
+    const confirmBtn = screen.getByRole("button", { name: "Xóa lịch sử" });
+    await user.click(confirmBtn);
 
     expect(screen.queryByText("hello")).not.toBeInTheDocument();
     expect(localStorage.getItem("assistant.chat.history:anon")).toBeNull();
+    expect(confirmSpy).not.toHaveBeenCalled();
   });
 
   it("has correct ARIA attributes", () => {

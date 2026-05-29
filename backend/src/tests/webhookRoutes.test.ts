@@ -206,11 +206,13 @@ describe("POST /api/billing/webhook/:provider", () => {
   beforeEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    process.env.BILLING_PAID_DISABLED = "true";
   });
 
   afterEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.BILLING_PAID_DISABLED;
   });
 
   it("accepts a valid mock webhook and updates subscription", async () => {

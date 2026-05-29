@@ -134,9 +134,9 @@ function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore
   switch (level) {
     case "strong":
       return {
-        marker: "bg-app-accent",
-        panel: "border-app-accent/20 bg-app-accent-soft",
-        text: "text-app-accent",
+        marker: "bg-app-warm",
+        panel: "border-app-warm-border/20 bg-app-warm-soft",
+        text: "text-app-warm",
       };
     case "okay":
       return {
@@ -378,7 +378,7 @@ export function TwelveWeekWeekTab({
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-base font-semibold text-app-ink">
-                    <Layers className="h-5 w-5 text-app-accent" />
+                    <Layers className="h-5 w-5 text-app-warm" />
                     Tuần này chỉ cần giữ 2 lớp việc
                   </div>
                   <span className="text-xs text-app-ink-soft">
@@ -388,7 +388,7 @@ export function TwelveWeekWeekTab({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-app-accent/20 bg-app-accent-soft text-app-accent hidden sm:inline-flex">
+                  <Badge variant="outline" className="border-app-warm-border/20 bg-app-warm-soft text-app-warm hidden sm:inline-flex">
                     {coreIndicators.length} việc cốt lõi | {optionalIndicators.length} tùy chọn
                   </Badge>
                   <ChevronDown
@@ -409,15 +409,15 @@ export function TwelveWeekWeekTab({
                   )}
                 </div>
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-5">
+                  <div className="rounded-lg border border-app-warm-border/20 bg-app-warm-soft p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Cốt lõi trước</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">Cốt lõi trước</p>
                         <p className="mt-2 text-lg font-semibold text-app-ink">
                           {coreIndicators.length} việc lặp lại chính
                         </p>
                       </div>
-                      <Badge className="bg-app-accent text-white hover:bg-app-accent">{coreIndicators.length}</Badge>
+                      <Badge className="bg-app-warm text-white hover:bg-app-warm">{coreIndicators.length}</Badge>
                     </div>
                     <div className="mt-4 stack-tight">
                       {coreIndicators.length === 0 ? (
@@ -432,7 +432,7 @@ export function TwelveWeekWeekTab({
                             className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
                           >
                             <p className="flex items-center gap-2 font-medium text-app-ink">
-                              <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-accent" />
+                              <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-warm" />
                               {indicator.name}
                             </p>
                             <p className="mt-1 text-sm text-app-ink-muted">
@@ -561,8 +561,8 @@ export function TwelveWeekWeekTab({
                   className="stack-stack"
                 >
                   {/* Banner chúc mừng */}
-                  <div className="flex flex-col items-center text-center p-6 bg-app-accent-soft rounded-xl border border-app-accent/20">
-                    <CheckCircle2 className="h-12 w-12 text-app-accent animate-[bounce_2s_infinite]" />
+                  <div className="flex flex-col items-center text-center p-6 bg-app-warm-soft rounded-xl border border-app-warm-border/20">
+                    <CheckCircle2 className="h-12 w-12 text-app-warm animate-[bounce_2s_infinite]" />
                     <h3 className="mt-3 text-lg font-bold text-app-ink">Đã hoàn thành đánh giá Tuần {summaryReview.weekNumber}!</h3>
                     <p className="mt-1 text-sm text-app-ink-soft max-w-md">
                       Tuyệt vời! Bạn đã chốt WAM 4 câu cho tuần này. Hãy xem các phân tích và chuẩn bị cho tuần tiếp theo.
@@ -580,10 +580,21 @@ export function TwelveWeekWeekTab({
                       <div className="rounded-lg border border-app-line bg-app-surface px-4 py-3 mt-2">
                         <div className="flex items-center justify-between text-sm text-app-ink-muted">
                           <span className="font-medium text-app-ink">Điểm việc lặp lại</span>
-                          <span className="font-bold text-app-accent">{summaryReview.leadCompletionPercent}%</span>
+                          <span className="font-bold text-app-warm">{summaryReview.leadCompletionPercent}%</span>
                         </div>
                         <Progress value={summaryReview.leadCompletionPercent} className="mt-2 h-2" />
                         <p className="mt-2 text-xs text-app-ink-soft">{scoreInterpretation.headline}</p>
+                      </div>
+
+                      <div
+                        data-testid="weekly-score-interpretation"
+                        className={`rounded-lg border px-4 py-3 ${scoreTone.panel}`}
+                      >
+                        <p className={`flex items-center gap-2 text-sm font-semibold ${scoreTone.text}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                          {scoreInterpretation.headline}
+                        </p>
+                        <p className="mt-1.5 text-sm leading-6 text-app-ink-soft">{scoreInterpretation.advice}</p>
                       </div>
 
                       {lagScoreValue !== null && (
@@ -650,7 +661,7 @@ export function TwelveWeekWeekTab({
                     {onOpenTodayTab && (
                       <Button
                         type="button"
-                        className="bg-app-accent hover:bg-app-accent/90 text-white font-medium"
+                        className="bg-app-warm hover:bg-app-warm/90 text-white font-medium"
                         onClick={onOpenTodayTab}
                       >
                         Bắt đầu tuần mới ngay ở Hôm nay
@@ -676,6 +687,7 @@ export function TwelveWeekWeekTab({
               )}
               {!showForm && summaryReview && weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
                 <TwelveWeekInsightsCard
+                  variant="reflection"
                   insights={weeklyReflectionInsights}
                   title="Đáng giữ và đáng điều chỉnh tuần sau"
                   onOpenToday={onOpenTodayTab}
@@ -693,7 +705,7 @@ export function TwelveWeekWeekTab({
                     className="rounded-lg border border-app-line bg-app-bg p-5"
                   >
                     <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                      <Target className="h-5 w-5 text-app-accent" />
+                      <Target className="h-5 w-5 text-app-warm" />
                       1. Kết quả thực thi tuần qua (Hệ thống tự tính)
                     </div>
                     
@@ -850,7 +862,7 @@ export function TwelveWeekWeekTab({
                       className="rounded-lg border border-app-warm-border bg-app-warm-soft/30 p-5"
                     >
                       <Label htmlFor="weekly-next-commitments" className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                        <Rocket className="h-5 w-5 text-app-accent animate-[bounce_3s_infinite]" />
+                        <Rocket className="h-5 w-5 text-app-warm animate-[bounce_3s_infinite]" />
                         4. Cam kết của tuần tới là gì?
                       </Label>
                       <NextWeekCommitmentsEditor

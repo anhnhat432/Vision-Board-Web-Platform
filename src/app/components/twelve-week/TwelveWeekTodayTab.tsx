@@ -148,7 +148,6 @@ function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
       return "border-indigo-300 bg-indigo-50/50 text-indigo-900 dark:border-indigo-950/40 dark:bg-indigo-950/30 dark:text-indigo-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
     case "high":
       return "border-amber-300 bg-amber-50/50 text-amber-900 dark:border-amber-950/40 dark:bg-amber-950/30 dark:text-amber-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
-    case "steady":
     default:
       return "border-emerald-300 bg-emerald-50/50 text-emerald-900 dark:border-emerald-950/40 dark:bg-emerald-950/30 dark:text-emerald-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
   }
@@ -776,9 +775,7 @@ export function TwelveWeekTodayTab({
                                     className={`h-4 w-4 shrink-0 ${
                                       isPrimaryTask && !taskCompleted
                                         ? "text-white"
-                                        : taskCompleted
-                                          ? "text-app-accent"
-                                          : "text-app-accent"
+                                        : "text-app-accent"
                                     }`}
                                   />
                                   <p
@@ -807,9 +804,7 @@ export function TwelveWeekTodayTab({
                                   className={`mt-1 text-sm ${
                                     isPrimaryTask && !taskCompleted
                                       ? "text-white/80"
-                                      : taskCompleted
-                                        ? "text-app-ink-muted"
-                                        : "text-app-ink-muted"
+                                      : "text-app-ink-muted"
                                   }`}
                                 >
                                   {task.leadIndicatorName}

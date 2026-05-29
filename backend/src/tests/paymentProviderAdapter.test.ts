@@ -385,6 +385,7 @@ describe("PaymentProviderRegistry", () => {
 
   beforeEach(() => {
     _resetAdapterCacheForTesting();
+    process.env.BILLING_PAID_DISABLED = "true";
   });
 
   afterEach(() => {
@@ -395,6 +396,7 @@ describe("PaymentProviderRegistry", () => {
         process.env[key] = value;
       }
     }
+    delete process.env.BILLING_PAID_DISABLED;
     _resetAdapterCacheForTesting();
   });
 

@@ -13,23 +13,19 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Trash2 } from "lucide-react";
 
-interface DeleteDataConfirmationDialogProps {
+interface DeleteCloudWorkspaceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  isDemoMode: boolean;
-  isSignedIn: boolean;
   onConfirm: () => void | Promise<void>;
   isLoading?: boolean;
 }
 
-export function DeleteDataConfirmationDialog({
+export function DeleteCloudWorkspaceDialog({
   open,
   onOpenChange,
-  isDemoMode,
-  isSignedIn,
   onConfirm,
   isLoading = false,
-}: DeleteDataConfirmationDialogProps) {
+}: DeleteCloudWorkspaceDialogProps) {
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   useEffect(() => {
@@ -38,18 +34,6 @@ export function DeleteDataConfirmationDialog({
     }
   }, [open]);
 
-  const title = isDemoMode
-    ? "Xóa dữ liệu trên thiết bị?"
-    : isSignedIn
-      ? "Xóa tài khoản và dữ liệu?"
-      : "Xóa dữ liệu trên thiết bị?";
-
-  const actionLabel = isDemoMode
-    ? "Xóa dữ liệu trên thiết bị"
-    : isSignedIn
-      ? "Xóa tài khoản và dữ liệu"
-      : "Xóa dữ liệu trên thiết bị";
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md surface-raised rounded-xl border border-app-line bg-app-surface">
@@ -57,26 +41,11 @@ export function DeleteDataConfirmationDialog({
           <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--color-danger-bg)]">
             <Trash2 className="h-7 w-7 text-[color:var(--color-danger-fg)]" />
           </div>
-          <AlertDialogTitle className="font-serif text-xl font-medium text-app-ink">{title}</AlertDialogTitle>
+          <AlertDialogTitle className="font-serif text-xl font-medium text-app-ink">
+            Xóa dữ liệu 12 tuần đã đồng bộ?
+          </AlertDialogTitle>
           <AlertDialogDescription className="text-sm leading-6 text-app-ink-soft">
-            {isDemoMode ? (
-              <>
-                <span className="rounded-full bg-app-warm-soft px-2 py-0.5 text-xs font-medium text-app-warm">
-                  Chỉ trên thiết bị này
-                </span>{" "}
-                sẽ bị xóa vĩnh viễn.
-              </>
-            ) : isSignedIn ? (
-              <>
-                Tất cả dữ liệu trên đám mây và thiết bị sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần, nhật
-                ký, review và cài đặt. Tài khoản sẽ không còn có thể truy cập.
-              </>
-            ) : (
-              <>
-                Tất cả dữ liệu trên thiết bị này sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần, nhật ký,
-                review và cài đặt.
-              </>
-            )}
+            Hành động này sẽ xóa dữ liệu chu kỳ 12 tuần của bạn trên đám mây. Dữ liệu cục bộ trên thiết bị này vẫn được giữ nguyên.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -84,27 +53,20 @@ export function DeleteDataConfirmationDialog({
           <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">
             Hành động này không thể hoàn tác.
           </p>
-          <p className="mt-1 text-sm font-semibold text-[color:var(--color-danger-fg)]">
-            Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
+          <p className="mt-1 text-xs text-[color:var(--color-danger-fg)]">
+            Tất cả bản sao lưu của chu kỳ này trên máy chủ đám mây sẽ bị xóa vĩnh viễn.
           </p>
-          <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-danger-fg)]">
-            <li>• Mục tiêu và kế hoạch 12 tuần sẽ bị xóa</li>
-            <li>• Nhật ký, review và check-in sẽ bị xóa</li>
-            {isSignedIn && !isDemoMode && <li>• Dữ liệu tài khoản sẽ bị xóa khỏi hệ thống</li>}
-            {isSignedIn && !isDemoMode && <li>• Tài khoản sẽ bị vô hiệu hóa</li>}
-            <li>• Cài đặt và trạng thái gói Plus sẽ bị xóa</li>
-          </ul>
         </div>
 
         <div className="flex items-start gap-2.5 px-1 py-1">
           <Checkbox
-            id="delete-confirm-checkbox"
+            id="delete-cloud-confirm-checkbox"
             checked={isConfirmed}
             onCheckedChange={(checked) => setIsConfirmed(checked === true)}
             disabled={isLoading}
           />
           <Label
-            htmlFor="delete-confirm-checkbox"
+            htmlFor="delete-cloud-confirm-checkbox"
             className="text-sm font-medium leading-relaxed text-app-ink-soft select-none cursor-pointer pt-3"
           >
             Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.
@@ -127,7 +89,7 @@ export function DeleteDataConfirmationDialog({
             }}
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            {isLoading ? "Đang xóa..." : actionLabel}
+            {isLoading ? "Đang xóa..." : "Xóa dữ liệu đã đồng bộ"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

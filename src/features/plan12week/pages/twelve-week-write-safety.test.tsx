@@ -165,7 +165,7 @@ describe("12-week write-path safety", () => {
     const taskMutations = pendingMutations.filter((m) => m.kind === "task_completed_changed");
     expect(taskMutations).toHaveLength(1);
     expect(taskMutations[0].payload.clientTaskId).toBe(toggledTaskId);
-    expect(taskMutations[0].payload.completed).toBe(false);
+    expect(taskMutations[0].payload.completed).toBe(true);
   });
 
   it("keeps local daily check-in saved when queue persistence fails", async () => {

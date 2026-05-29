@@ -1,4 +1,4 @@
-﻿import { ArrowRight, Compass, ShieldCheck } from "lucide-react";
+import { ArrowRight, Compass, ShieldCheck } from "lucide-react";
 
 import type { NextWeekAdjustment, NextWeekConfidence, NextWeekRecommendation } from "@/features/plan12week/logic";
 
@@ -26,8 +26,8 @@ const ADJUSTMENT_BADGE_LABEL: Record<NextWeekAdjustment, string> = {
 
 const ADJUSTMENT_ACCENT: Record<NextWeekAdjustment, string> = {
   lighter: "border-app-warm-border bg-app-warm-soft text-app-ink",
-  same: "border-app-accent/20 bg-app-accent-soft text-app-ink",
-  push: "border-app-accent/20 bg-app-accent-soft text-app-ink",
+  same: "border-app-warm-border bg-app-warm-soft text-app-ink",
+  push: "border-app-warm-border bg-app-warm-soft text-app-ink",
   reset: "border-app-line bg-app-bg text-app-ink",
   reduce_scope: "border-app-warm-border bg-app-warm-soft text-app-ink",
 };

@@ -96,7 +96,7 @@ import {
   shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
 } from "./storage-demo-data";
 import { createLocalUserDataBackupJson } from "./local-data-backup";
-import { cleanupExpiredMigrationBackups } from "./local-data-migration";
+import { cleanupExpiredMigrationBackups, registerOnImportComplete } from "./local-data-migration";
 import { getEntitlementsForPlan } from "./twelve-week-premium";
 import { shouldSeedDemoData } from "./app-mode";
 import { postUserDataMutation, subscribeUserDataMutation, userDataMutationSource } from "./cross-tab-sync";
@@ -212,6 +212,11 @@ if (typeof window !== "undefined") {
     }
   });
 }
+
+registerOnImportComplete(() => {
+  resetUserDataCache();
+  hydrateUserDataCacheFromStorage();
+});
 
 function notifyUserDataUpdated(): void {
   if (typeof window === "undefined") return;

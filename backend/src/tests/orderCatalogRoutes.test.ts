@@ -44,6 +44,9 @@ const originalFindOneAndUpdate = OrderCatalogModel.findOneAndUpdate;
 const originalCreate = OrderCatalogModel.create;
 const originalAuditCreate = AuditLogModel.create;
 
+// Mock globally to prevent buffering timeouts when database is not connected
+(AuditLogModel as unknown as { create: unknown }).create = async () => null;
+
 function mockFind(items: unknown[], captured: CapturedFindCall[]): void {
   (OrderCatalogModel as unknown as MockableModel).find = (filter: unknown) => {
     const call: CapturedFindCall = { filter, sort: undefined };
@@ -67,7 +70,7 @@ function restoreFind(): void {
   (OrderCatalogModel as unknown as MockableModel).findOne = originalFindOne;
   (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = originalFindOneAndUpdate;
   (OrderCatalogModel as unknown as MockableModel).create = originalCreate;
-  (AuditLogModel as unknown as { create: unknown }).create = originalAuditCreate;
+  (AuditLogModel as unknown as { create: unknown }).create = async () => null;
 }
 
 function createCatalogTestApp(): Express {

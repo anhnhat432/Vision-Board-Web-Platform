@@ -55,6 +55,15 @@ const cassoBillingKeys = [
   "PLUS_PRICE_VND",
 ];
 
+const payosBillingKeys = [
+  "BILLING_PROVIDER",
+  "BILLING_REPOSITORY",
+  "PAYOS_CLIENT_ID",
+  "PAYOS_API_KEY",
+  "PAYOS_CHECKSUM_KEY",
+  "PLUS_PRICE_VND",
+];
+
 const optionalBackendMonitoringKeys = [
   "SENTRY_DSN",
   "SENTRY_ENVIRONMENT",
@@ -247,20 +256,46 @@ const fullStackFailures = [
   ...(shouldRequireBackendSyncEnv ? backendMissing.map((key) => `backend:${key}`) : []),
 ];
 
+function isPaidCheckoutDisabled(env) {
+  const raw = env.BILLING_PAID_DISABLED?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
 const backendBillingProvider = backendEnv.values.BILLING_PROVIDER?.trim().toLowerCase();
-const cassoBillingExpected = requireCassoBilling || backendBillingProvider === "casso";
-if (shouldRequireBackendSyncEnv && cassoBillingExpected) {
-  fullStackFailures.push(
-    ...collectMissing(cassoBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
-  );
+const paidCheckoutDisabled = isPaidCheckoutDisabled(backendEnv.values);
 
-  if (hasValue(backendEnv.values, "BILLING_PROVIDER") && backendBillingProvider !== "casso") {
-    fullStackFailures.push("backend:BILLING_PROVIDER(casso-required)");
-  }
+if (shouldRequireBackendSyncEnv) {
+  if (!paidCheckoutDisabled) {
+    if (!backendBillingProvider || backendBillingProvider === "mock") {
+      fullStackFailures.push("backend:BILLING_PROVIDER(real-provider-required-in-production)");
+    } else if (backendBillingProvider === "casso") {
+      fullStackFailures.push(
+        ...collectMissing(cassoBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
+      );
+    } else if (backendBillingProvider === "payos") {
+      fullStackFailures.push(
+        ...collectMissing(payosBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
+      );
+    } else if (backendBillingProvider === "momo" || backendBillingProvider === "vnpay") {
+      fullStackFailures.push(`backend:BILLING_PROVIDER(unimplemented-provider:${backendBillingProvider})`);
+    } else {
+      fullStackFailures.push(`backend:BILLING_PROVIDER(unknown-provider:${backendBillingProvider})`);
+    }
 
-  const billingRepository = backendEnv.values.BILLING_REPOSITORY?.trim().toLowerCase();
-  if (hasValue(backendEnv.values, "BILLING_REPOSITORY") && billingRepository !== "mongo") {
-    fullStackFailures.push("backend:BILLING_REPOSITORY(mongo-required)");
+    const billingRepository = backendEnv.values.BILLING_REPOSITORY?.trim().toLowerCase();
+    if (!billingRepository || billingRepository !== "mongo") {
+      fullStackFailures.push("backend:BILLING_REPOSITORY(mongo-required-in-production)");
+    }
+  } else {
+    if (backendBillingProvider === "casso") {
+      fullStackFailures.push(
+        ...collectMissing(cassoBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
+      );
+    } else if (backendBillingProvider === "payos") {
+      fullStackFailures.push(
+        ...collectMissing(payosBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
+      );
+    }
   }
 }
 
