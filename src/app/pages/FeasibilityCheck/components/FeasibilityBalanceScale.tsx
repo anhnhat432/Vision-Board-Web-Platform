@@ -141,14 +141,14 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       <div className="w-full flex items-center justify-between border-b border-app-line/40 dark:border-slate-800/60 pb-3.5 relative z-10">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500">
-            <Scale className="h-4.5 w-4.5" />
+            <Scale className="h-5 w-5" />
           </div>
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-app-ink-muted">
+          <span className="text-sm font-bold uppercase tracking-[0.12em] text-app-ink-muted">
             Đồng hồ khả thi 12 tuần
           </span>
         </div>
-        <span className="text-xs font-bold text-app-ink select-none bg-white/80 dark:bg-slate-900/80 px-3 py-1.5 rounded-full border border-app-line/40 dark:border-slate-800/60 shadow-sm flex items-center gap-1.5">
-          {answeredCount > 0 && isHeavyRight && <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />}
+        <span className="text-sm font-bold text-app-ink select-none bg-white/80 dark:bg-slate-900/80 px-3.5 py-1.5 rounded-full border border-app-line/40 dark:border-slate-800/60 shadow-sm flex items-center gap-1.5">
+          {answeredCount > 0 && isHeavyRight && <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />}
           Điểm số: <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{answeredCount > 0 ? average.toFixed(1) : "—"}</span>/4.0
         </span>
       </div>
@@ -282,28 +282,28 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
         </svg>
 
         {/* Text nhãn góc trái (Rào cản) và góc phải (Khả thi) */}
-        <div className="absolute left-1 bottom-1 flex items-center gap-1 opacity-80 backdrop-blur-[2px] bg-white/20 dark:bg-black/10 px-1.5 py-0.5 rounded-md border border-white/10">
-          <ShieldAlert className="h-3 w-3 text-rose-500" />
-          <span className="text-[9px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Rào cản</span>
+        <div className="absolute left-1 bottom-1 flex items-center gap-1.5 backdrop-blur-[4px] bg-white/40 dark:bg-black/20 px-2.5 py-1 rounded-md border border-white/20">
+          <ShieldAlert className="h-3.5 w-3.5 text-rose-500" />
+          <span className="text-[11px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Rào cản</span>
         </div>
-        <div className="absolute right-1 bottom-1 flex items-center gap-1 opacity-80 backdrop-blur-[2px] bg-white/20 dark:bg-black/10 px-1.5 py-0.5 rounded-md border border-white/10">
-          <BadgeCheck className="h-3 w-3 text-emerald-500" />
-          <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Khả thi</span>
+        <div className="absolute right-1 bottom-1 flex items-center gap-1.5 backdrop-blur-[4px] bg-white/40 dark:bg-black/20 px-2.5 py-1 rounded-md border border-white/20">
+          <BadgeCheck className="h-3.5 w-3.5 text-emerald-500" />
+          <span className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Khả thi</span>
         </div>
       </div>
 
       {/* Nhãn sticker cảm xúc động lớn dạng Iridescent Badge */}
       <div className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md ${emotionSticker.style}`}>
         <span className="text-base animate-bounce duration-1000">{emotionSticker.emoji}</span>
-        <span className="tracking-wide">{emotionSticker.label}</span>
+        <span className="tracking-wide text-xs">{emotionSticker.label}</span>
       </div>
 
       {/* Thông tin mô tả trạng thái phản hồi */}
       <div className="w-full text-center px-4 py-3 bg-slate-50/50 dark:bg-slate-950/40 rounded-xl border border-slate-200/40 dark:border-slate-800/40 backdrop-blur-[1px] relative z-10">
-        <p className="text-xs font-bold leading-relaxed text-app-ink">
+        <p className="text-sm font-bold leading-relaxed text-app-ink">
           {statusLabel()}
         </p>
-        <p className="text-[10px] text-app-ink-muted mt-1 font-medium">
+        <p className="text-xs text-app-ink-muted mt-1 font-semibold">
           {answeredCount === 0
             ? "Bắt đầu trả lời các câu hỏi bên dưới để hiệu chuẩn cán cân khả thi"
             : `Đã đánh giá ${answeredCount} / ${QUESTIONS.length} khía cạnh khả thi`}

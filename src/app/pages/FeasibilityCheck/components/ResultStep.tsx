@@ -208,37 +208,41 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
   return (
     <section
-      className="mt-6 rounded-[14px] border border-app-line bg-app-surface p-5 sm:p-6"
+      className="mt-6 relative overflow-hidden rounded-3xl border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl p-6 sm:p-8 group"
       aria-labelledby="feasibility-result-title"
     >
-      <div>
+      {/* Premium Background Glow effects */}
+      <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none transition-all duration-1000 group-hover:bg-indigo-500/20" />
+      <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none transition-all duration-1000 group-hover:bg-emerald-500/20" />
+
+      <div className="relative z-10">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">Kết quả kiểm tra</p>
-          <span className="w-fit rounded-full bg-app-accent-soft px-3 py-1 text-xs font-semibold text-app-accent">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400">Kết quả kiểm tra</p>
+          <span className="w-fit rounded-full bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-150/30">
             {getLifeAreaLabel(focusArea)}
           </span>
         </div>
         <h2
           id="feasibility-result-title"
-          className="mt-2 font-serif text-3xl font-medium leading-8 tracking-[-0.01em] text-app-ink"
+          className="mt-3 font-serif text-3xl font-bold leading-9 tracking-tight text-slate-900 dark:text-white"
         >
           {copy.statusLabel}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-app-ink-soft">{result.summary}</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-350">{result.summary}</p>
       </div>
 
       {/* Visual score gauge block */}
-      <div className="mt-6 rounded-[14px] border border-app-line bg-app-bg p-5 sm:p-6">
+      <div className="mt-6 relative z-10 rounded-2xl border border-white/10 dark:border-slate-850/40 bg-slate-50/40 dark:bg-slate-950/20 p-5 sm:p-6 backdrop-blur-[2px]">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="relative flex shrink-0 flex-col items-center justify-center text-center sm:w-48">
-            <div className="relative flex items-center justify-center h-32 w-32">
+            <div className="relative flex items-center justify-center h-32 w-32 drop-shadow-[0_0_15px_rgba(99,102,241,0.25)] dark:drop-shadow-[0_0_20px_rgba(99,102,241,0.35)]">
               <svg className="absolute inset-0 w-full h-full transform -rotate-90" role="img" aria-label="Biểu đồ tiến trình độ khả thi">
                 <title>Biểu đồ tiến trình độ khả thi</title>
                 <circle
                   cx="64"
                   cy="64"
                   r="52"
-                  className="stroke-app-line/60"
+                  className="stroke-slate-200/60 dark:stroke-slate-800/60"
                   strokeWidth="6"
                   fill="transparent"
                 />
@@ -246,7 +250,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   cx="64"
                   cy="64"
                   r="52"
-                  className="stroke-app-accent transition-all duration-1000 ease-out"
+                  className="stroke-indigo-500 dark:stroke-indigo-400 transition-all duration-1000 ease-out"
                   strokeWidth="8"
                   fill="transparent"
                   strokeDasharray={2 * Math.PI * 52}
@@ -255,52 +259,60 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 />
               </svg>
               <div className="relative flex flex-col items-center justify-center">
-                <span className="font-serif text-5xl font-bold leading-none text-app-ink tracking-tight">{scoreOutOfTen}</span>
-                <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted/80">Điểm số</span>
+                <span className="font-serif text-5.5xl font-extrabold leading-none bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-white dark:to-indigo-200 bg-clip-text text-transparent tracking-tight">{scoreOutOfTen}</span>
+                <span className="mt-1 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Điểm số</span>
               </div>
             </div>
-            <p className="mt-3 text-sm font-bold text-app-accent">{statusLabel}</p>
-            <p className="mt-0.5 text-xs text-app-ink-muted">Mức độ khả thi</p>
+            <p className="mt-3 text-sm font-extrabold text-indigo-500 dark:text-indigo-400">{statusLabel}</p>
+            <p className="mt-0.5 text-xs text-slate-450 dark:text-slate-500 font-medium">Mức độ khả thi</p>
           </div>
           
           <div className="min-w-0 flex-1 space-y-4">
-            <div className="rounded-[14px] bg-app-accent-soft/20 p-4 border border-app-accent/10">
-              <p className="text-sm font-semibold leading-relaxed text-app-ink">{copy.statusHint}</p>
+            <div className="rounded-xl bg-indigo-500/5 p-4 border border-indigo-500/10">
+              <p className="text-sm font-bold leading-relaxed text-indigo-600 dark:text-indigo-400">{copy.statusHint}</p>
             </div>
             
-            <div className="space-y-2">
-              <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-app-line/60" aria-hidden="true">
+            <div className="space-y-3">
+              {/* Premium Multi-Color Gradient Progress Track */}
+              <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800/60 shadow-inner" aria-hidden="true">
                 <div
-                  className="h-full rounded-full bg-app-accent transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 transition-all duration-1000 ease-out relative"
                   style={{ width: `${scorePercent}%` }}
-                />
-                <span className="absolute left-[25%] top-0 h-full w-px bg-app-ink-muted/30" />
-                <span className="absolute left-[50%] top-0 h-full w-px bg-app-ink-muted/30" />
-                <span className="absolute left-[75%] top-0 h-full w-px bg-app-ink-muted/30" />
+                >
+                  {/* Floating Indicator Bubble */}
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)] animate-ping" />
+                </div>
+                <span className="absolute left-[25%] top-0 h-full w-px bg-slate-200/50 dark:bg-slate-700/50" />
+                <span className="absolute left-[50%] top-0 h-full w-px bg-slate-200/50 dark:bg-slate-700/50" />
+                <span className="absolute left-[75%] top-0 h-full w-px bg-slate-200/50 dark:bg-slate-700/50" />
               </div>
-              <div className="flex justify-between text-[11px] font-semibold text-app-ink-muted">
+              <div className="flex justify-between text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 <span>Cần nhẹ (0-5)</span>
                 <span>Vừa sức (5-7.5)</span>
                 <span>Sẵn sàng (7.5-10)</span>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-app-ink-soft">{result.recommendation}</p>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-350">{result.recommendation}</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3.5">
+      {/* Grid Highlights cards - 3 columns on Desktop, beautifully designed Glass cards */}
+      <div className="mt-6 grid gap-4 sm:grid-cols-3 relative z-10">
         {copy.highlights.map((item) => {
           const Icon = item.icon;
 
           return (
-            <div key={item.title} className="flex gap-3.5 rounded-[14px] border border-app-line bg-app-bg p-4 transition-all duration-200">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
-                <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+            <div 
+              key={item.title} 
+              className="flex flex-col sm:items-center sm:text-center gap-3.5 rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 hover:scale-[1.03] hover:-translate-y-0.5 hover:bg-white/80 dark:hover:bg-slate-900/80 hover:shadow-lg transition-all duration-300 group/card cursor-pointer"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 group-hover/card:bg-indigo-500 group-hover/card:text-white transition-all duration-300 shadow-sm">
+                <Icon className="h-5 w-5" aria-hidden="true" />
               </div>
-              <div className="space-y-0.5">
-                <p className="text-sm font-bold text-app-ink">{item.title}</p>
-                <p className="text-xs leading-relaxed text-app-ink-soft">{item.description}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-855 dark:text-white tracking-wide">{item.title}</p>
+                <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">{item.description}</p>
               </div>
             </div>
           );
@@ -308,12 +320,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       </div>
 
       {showRiskWarning ? (
-        <div className="mt-6 rounded-[14px] border border-amber-300/40 bg-amber-500/5 p-4 text-amber-850 dark:text-amber-300">
+        <div className="mt-6 rounded-2xl border border-amber-200/30 bg-amber-500/5 p-4 text-amber-850 dark:text-amber-300 relative z-10">
           <div className="flex gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" aria-hidden="true" />
             <div>
-              <p className="font-semibold text-sm">Có vài trở ngại cần lưu ý</p>
-              <p className="mt-1 text-sm leading-relaxed text-app-ink-soft">
+              <p className="font-bold text-sm">Có vài trở ngại cần lưu ý</p>
+              <p className="mt-1 text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
                 {result.smartGoalQualityNote ?? result.bottleneck.action}
               </p>
             </div>

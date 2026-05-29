@@ -122,10 +122,10 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
       </p>
 
       {/* Canvas SVG vẽ con đường lượn sóng */}
-      <div className="relative w-full max-w-lg mx-auto h-[100px] flex items-center justify-center">
+      <div className="relative w-full max-w-lg mx-auto h-[135px]">
         <svg
           viewBox="0 0 320 80"
-          className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
+          className="absolute top-0 left-0 w-full h-[80px] overflow-visible pointer-events-none"
           aria-hidden="true"
         >
           <defs>
