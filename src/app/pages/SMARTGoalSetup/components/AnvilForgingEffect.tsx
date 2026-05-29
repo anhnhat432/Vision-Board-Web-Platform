@@ -7,7 +7,7 @@ interface AnvilForgingEffectProps {
 // Bộ tổng hợp tiếng chuông thiền ngân vang trong trẻo 528Hz nhẹ nhàng
 const playMindfulBell = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
 

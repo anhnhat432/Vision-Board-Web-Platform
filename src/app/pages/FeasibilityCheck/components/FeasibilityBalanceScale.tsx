@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Scale, ShieldAlert, BadgeCheck, Sparkles } from "lucide-react";
 import { QUESTIONS } from "../constants";
 
@@ -40,6 +40,27 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
   }, [answers]);
 
   const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight } = balanceData;
+
+  // Hiệu ứng 3D Mouse-Tilt siêu cao cấp
+  const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // khoảng từ -0.5 đến 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // khoảng từ -0.5 đến 0.5
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) scale3d(1.02, 1.02, 1.02)`,
+      boxShadow: `${-x * 20}px ${-y * 20}px 35px rgba(99, 102, 241, 0.1), 0 25px 60px rgba(0, 0, 0, 0.12)`,
+      transition: "transform 0.1s ease-out, box-shadow 0.1s ease-out",
+    });
+  };
+  const handleMouseLeave = () => {
+    setTiltStyle({
+      transform: "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+      boxShadow: "0 20px 50px rgba(0, 0, 0, 0.05)",
+      transition: "transform 0.5s ease, box-shadow 0.5s ease",
+    });
+  };
 
   // Tính toán nhãn trạng thái và sticker emoji trực quan với phong cách Iridescent / Glow
   const emotionSticker = useMemo(() => {
@@ -106,7 +127,13 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-6 flex flex-col items-center gap-4.5 transition-all duration-300 group">
+    // biome-ignore lint/a11y/noStaticElementInteractions: Mouse events are for decorative 3D tilt effect only
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={tiltStyle}
+      className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-6 flex flex-col items-center gap-4.5 transition-all duration-300 group"
+    >
       {/* Background radial glow */}
       <div className="absolute -top-16 -left-16 w-32 h-32 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-indigo-500/10" />
       <div className="absolute -bottom-16 -right-16 w-32 h-32 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-emerald-500/10" />

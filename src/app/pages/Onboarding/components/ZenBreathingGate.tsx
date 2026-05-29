@@ -10,7 +10,7 @@ type BreathPhase = "idle" | "inhale" | "hold" | "exhale" | "completed";
 // Bộ tổng hợp tiếng chuông Zen thanh tịnh 528Hz bằng Web Audio API khi hoàn thành hơi thở
 const playZenBell528 = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
 

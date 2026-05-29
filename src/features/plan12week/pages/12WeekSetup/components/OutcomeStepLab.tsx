@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Lightbulb, Lock, Sparkles, ChevronDown } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
@@ -14,6 +15,7 @@ import {
   type TwelveWeekTemplateDefinition,
 } from "@/app/utils/twelve-week-premium";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
+import { soundService } from "@/app/services/soundService";
 import {
   errorTextClass,
   helperTextClass,
@@ -281,6 +283,22 @@ export function OutcomeStepLab({
   onTemplatePersonalizationChange,
   onPreferredDayToggle,
 }: OutcomeStepLabProps) {
+  const [hasPlayedSuccess, setHasPlayedSuccess] = useState(false);
+  const isW4Filled = draft.week4Milestone.trim().length > 0;
+  const isW8Filled = draft.week8Milestone.trim().length > 0;
+  const isW12Filled = draft.week12Outcome.trim().length > 0;
+
+  useEffect(() => {
+    if (isW4Filled && isW8Filled && isW12Filled) {
+      if (!hasPlayedSuccess) {
+        soundService.success();
+        setHasPlayedSuccess(true);
+      }
+    } else {
+      setHasPlayedSuccess(false);
+    }
+  }, [isW4Filled, isW8Filled, isW12Filled, hasPlayedSuccess]);
+
   const planRationaleReasons = buildPlanRationaleReasons(feasibility);
   const milestoneError = getMilestoneValidationError({
     week4: draft.week4Milestone,

@@ -7,6 +7,7 @@ import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import type { Question } from "../types";
 import { cn } from "../../../components/ui/utils";
+import { soundService } from "@/app/services/soundService";
 
 interface FeasibilityStepShellProps {
   currentQuestion: Question;
@@ -48,6 +49,11 @@ export function FeasibilityStepShell({
 }: FeasibilityStepShellProps) {
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
+
+  const handleAnswerSelect = (value: string) => {
+    soundService.click();
+    onAnswerChange(value);
+  };
 
   return (
     <section
@@ -102,7 +108,7 @@ export function FeasibilityStepShell({
 
           <RadioGroup
             value={selectedAnswer}
-            onValueChange={onAnswerChange}
+            onValueChange={handleAnswerSelect}
             aria-labelledby={`feasibility-question-${currentQuestion.id}`}
             aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
             className="grid gap-4 sm:grid-cols-2"
@@ -188,7 +194,10 @@ export function FeasibilityStepShell({
           <button
             type="button"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 sm:w-auto"
-            onClick={onBack}
+            onClick={() => {
+              soundService.click();
+              onBack();
+            }}
             disabled={isFirstStep}
           >
             <ArrowLeft className="h-4.5 w-4.5" aria-hidden="true" />
@@ -197,7 +206,10 @@ export function FeasibilityStepShell({
           <button
             type="button"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-indigo-500 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-60 disabled:hover:translate-y-0 shadow-md shadow-indigo-600/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 sm:w-auto"
-            onClick={onNext}
+            onClick={() => {
+              soundService.click();
+              onNext();
+            }}
             disabled={!selectedAnswer}
             aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
           >

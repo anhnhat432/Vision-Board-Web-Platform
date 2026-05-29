@@ -10,6 +10,7 @@ import type { TacticType } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 import type { GoalArchetype } from "@/lib/smart-goal";
+import { soundService } from "@/app/services/soundService";
 import {
   errorTextClass,
   helperTextClass,
@@ -292,6 +293,7 @@ export function LeadIndicatorsStepLab({
                         <button
                           type="button"
                           onClick={() => {
+                            soundService.click();
                             const val = parseInt(indicator.target.trim(), 10);
                             const currentVal = Number.isNaN(val) ? 0 : val;
                             const newVal = Math.max(1, currentVal - 1);
@@ -322,6 +324,7 @@ export function LeadIndicatorsStepLab({
                         <button
                           type="button"
                           onClick={() => {
+                            soundService.click();
                             const val = parseInt(indicator.target.trim(), 10);
                             const currentVal = Number.isNaN(val) ? 0 : val;
                             const newVal = Math.min(21, currentVal + 1);

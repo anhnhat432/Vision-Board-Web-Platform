@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 // Bộ tổng hợp tiếng giọt nước rơi thanh lọc tâm hồn Stoic bằng Web Audio API
 const playWaterDroplet = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
 
@@ -24,7 +24,7 @@ const playWaterDroplet = () => {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.12);
-  } catch (e) {
+  } catch (_e) {
     // Thầm lặng bỏ qua nếu trình duyệt chưa sẵn sàng
   }
 };
