@@ -122,10 +122,10 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
       </p>
 
       {/* Canvas SVG vẽ con đường lượn sóng */}
-      <div className="relative w-full max-w-lg mx-auto h-[135px]">
+      <div className="relative w-full max-w-lg mx-auto aspect-[320/115] flex items-center justify-center">
         <svg
-          viewBox="0 0 320 80"
-          className="absolute top-0 left-0 w-full h-[80px] overflow-visible pointer-events-none"
+          viewBox="0 0 320 115"
+          className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
           aria-hidden="true"
         >
           <defs>
@@ -188,10 +188,10 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
           />
         </svg>
 
-        {/* CÁC ĐIỂM TRẠM HOẠT HỌA NỔI */}
+        {/* CÁC ĐIỂM TRẠM HOẠT HỌA NỔI (Định vị bằng phần trăm để luôn bám sát đường SVG lượn sóng) */}
         <div 
           className="absolute flex flex-col items-center z-10 animate-float-1"
-          style={{ left: "12.5%", top: "40px", transform: "translate(-50%, -50%)" }}
+          style={{ left: "12.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
         >
           <div className="relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-indigo-500 bg-white dark:bg-slate-900 text-lg shadow-[0_4px_12px_rgba(99,102,241,0.25)] select-none">
             🚀
@@ -203,7 +203,7 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
 
         <div 
           className={cn("absolute flex flex-col items-center z-10", isW4Filled ? "animate-float-2" : "opacity-75")}
-          style={{ left: "37.5%", top: "30px", transform: "translate(-50%, -50%)" }}
+          style={{ left: "37.5%", top: "26.09%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
             "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
@@ -224,7 +224,7 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
 
         <div 
           className={cn("absolute flex flex-col items-center z-10", isW8Filled ? "animate-float-3" : "opacity-75")}
-          style={{ left: "62.5%", top: "50px", transform: "translate(-50%, -50%)" }}
+          style={{ left: "62.5%", top: "43.48%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
             "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
@@ -245,7 +245,7 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
 
         <div 
           className={cn("absolute flex flex-col items-center z-10", isW12Filled ? "animate-float-4" : "opacity-75")}
-          style={{ left: "87.5%", top: "40px", transform: "translate(-50%, -50%)" }}
+          style={{ left: "87.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
             "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
