@@ -320,10 +320,20 @@ Frontend:
 ```powershell
 npm run typecheck
 npm run lint
-npm run test:run
+npm run test:run   # fast/default Vitest group: unit/logic .ts tests
+npm run test:ui    # component/page .tsx tests without flow/sync suites
+npm run test:flows # core flow and e2e-like Vitest tests
+npm run test:sync  # local/cloud sync and queue tests
+npm run test:slow  # ui + flow + sync Vitest groups
+npm run test:all   # full Vitest suite
 npm run build
 npm run check
 ```
+
+`npm run check` still runs the full frontend suite through `test:all`. During
+daily development, use `test:run` for logic changes, `test:ui -- <path>` for
+component/page changes, or a targeted group first; run `test:all` before
+release-sensitive changes.
 
 Backend:
 

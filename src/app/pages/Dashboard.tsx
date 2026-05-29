@@ -12,6 +12,7 @@ import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
 import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
 import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
 import { TwelveWeekTrendCard } from "@/features/dashboard/v2/TwelveWeekTrendCard";
+import { VisionBoardMiniCard } from "@/features/dashboard/v2/VisionBoardMiniCard";
 import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import {
   buildCurrentWeekExecutionSnapshot,
@@ -579,6 +580,7 @@ function DashboardContent({
             displayName={dashboardDisplayName}
             caption={caption}
             balanceRows={balanceRows}
+            visionBoards={userData.visionBoards}
             topTrigger={topTrigger}
             planLoading={planLoading}
             hasPlan={Boolean(plan)}
@@ -671,6 +673,7 @@ function DashboardActiveLayout({
   displayName,
   caption,
   balanceRows,
+  visionBoards,
   topTrigger,
   planLoading,
   hasPlan,
@@ -684,6 +687,7 @@ function DashboardActiveLayout({
   displayName: string;
   caption: string;
   balanceRows: LifeBalanceRow[];
+  visionBoards: UserData["visionBoards"];
   topTrigger: ReturnType<typeof evaluateRescueTriggers>[number] | null;
   planLoading: boolean;
   hasPlan: boolean;
@@ -766,6 +770,7 @@ function DashboardActiveLayout({
             />
           </div>
           <BalanceCard rows={balanceRows} />
+          <VisionBoardMiniCard visionBoards={visionBoards} />
           <QuoteBlock />
         </aside>
       </div>
