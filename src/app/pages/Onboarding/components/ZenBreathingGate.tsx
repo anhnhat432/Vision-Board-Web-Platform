@@ -90,75 +90,53 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
   const getInstructionText = () => {
     switch (phase) {
       case "idle":
-        return "Hãy chọn tư thế thật thoải mái, hít một hơi sâu tự nhiên trước khi bắt đầu lắng đọng.";
+        return "Hãy chọn tư thế thoải mái, hít một hơi sâu tự nhiên trước khi bắt đầu.";
       case "inhale":
-        return "Hít vào thật nhẹ nhàng... Nhận biết luồng năng lượng tích cực...";
+        return "Hít vào thật nhẹ nhàng... Nhận biết luồng sinh khí...";
       case "hold":
-        return "Tĩnh lặng giữ hơi thở... Cảm nhận sự bình yên trọn vẹn...";
+        return "Nín thở tĩnh lặng... Lắng nghe sự yên bình bên trong...";
       case "exhale":
-        return "Thở ra buông bỏ... Giải phóng mọi lo toan và áp lực...";
+        return "Thở ra buông bỏ... Giải phóng mọi áp lực và lo toan...";
       case "completed":
         return "Tâm trí bạn giờ đây đã sẵn sàng và tĩnh tại.";
     }
   };
 
-  // Lấy màu sắc chủ đạo dựa trên giai đoạn thở
-  const getThemeColorClass = () => {
-    switch (phase) {
-      case "inhale":
-        return "from-mood-sky to-mood-lavender text-mood-sky";
-      case "hold":
-        return "from-mood-lavender to-mood-rose text-mood-lavender";
-      case "exhale":
-        return "from-mood-rose to-mood-amber text-mood-rose";
-      case "completed":
-        return "from-mood-mint to-mood-sky text-mood-mint";
-      default:
-        return "from-mood-sky to-mood-sky text-mood-sky";
-    }
-  };
-
-  const getOverlayScale = () => {
-    if (phase === "inhale") return "scale-110 opacity-70";
-    if (phase === "hold") return "scale-125 opacity-100";
-    if (phase === "exhale") return "scale-95 opacity-40";
-    if (phase === "completed") return "scale-105 opacity-80";
-    return "scale-100 opacity-30";
-  };
-
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center transition-all duration-500 animate-[fadeIn_0.4s_ease-out]">
       {/* Biểu tượng Sprout chánh niệm nhỏ mờ */}
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mood-lavender-soft text-mood-lavender shadow-inner animate-[pulse_3s_infinite]">
-        <Sprout className="h-5 w-5" />
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 shadow-inner">
+        <Sprout className="h-5 w-5 animate-pulse" />
       </div>
 
       <h2 className="mt-4 font-serif text-2xl font-medium tracking-tight text-app-ink sm:text-3xl">
         Khai mở nhịp thở tĩnh tâm
       </h2>
       <p className="mt-2.5 max-w-sm text-xs leading-5 text-app-ink-soft">
-        Dành ra 10 giây tĩnh lặng điều hòa hơi thở để gieo hạt mầm cho tầm nhìn sáng suốt nhất của bạn.
+        Dành ra 10 giây tĩnh lặng điều hòa hơi thở Stoic để gieo hạt mầm tầm nhìn sáng suốt nhất.
       </p>
 
       {/* Sân khấu vòng tròn thở (Zen Breathing Circle) */}
       <div className="my-10 flex h-48 w-48 items-center justify-center relative">
-        {/* Hào quang nền lan tỏa đa sắc mượt mà */}
+        {/* Hào quang nền lan tỏa chậm */}
         <div 
-          className={`absolute rounded-full bg-gradient-to-tr from-mood-sky/15 via-mood-lavender/15 to-mood-rose/10 blur-2xl transition-all duration-[2500ms] ease-out pointer-events-none w-44 h-44 ${getOverlayScale()}`}
+          className={`absolute rounded-full bg-emerald-500/5 blur-xl transition-all duration-[3000ms] pointer-events-none ${
+            phase === "inhale" ? "h-44 w-44 opacity-80" : phase === "hold" ? "h-48 w-48 opacity-100 scale-105" : "h-36 w-36 opacity-30"
+          }`}
         />
 
         {/* Vòng tròn thở chính thay đổi kích thước mượt mà theo nhịp thở */}
         <div
-          className={`relative z-10 flex items-center justify-center rounded-full border border-white/20 bg-gradient-to-br shadow-lg backdrop-blur-md transition-all duration-1000 ${
+          className={`relative z-10 flex items-center justify-center rounded-full border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 shadow-inner transition-all duration-1000 ${
             phase === "idle"
-              ? "h-28 w-28 scale-100 from-mood-sky/10 to-mood-lavender/5"
+              ? "h-28 w-28 scale-100"
               : phase === "inhale"
-                ? "h-40 w-40 from-mood-sky/20 to-mood-lavender/15 shadow-mood-sky/10"
+                ? "h-40 w-40 bg-emerald-500/20 shadow-emerald-500/15"
                 : phase === "hold"
-                  ? "h-40 w-40 scale-105 from-mood-lavender/25 to-mood-rose/20 ring-8 ring-mood-lavender-soft/30 shadow-mood-lavender/15 animate-pulse"
+                  ? "h-40 w-40 scale-105 bg-emerald-500/25 ring-8 ring-emerald-500/5 shadow-emerald-500/25 animate-pulse"
                   : phase === "exhale"
-                    ? "h-28 w-28 from-mood-rose/15 to-mood-amber/10 shadow-mood-rose/5"
-                    : "h-32 w-32 from-mood-mint/20 to-mood-sky/15 ring-4 ring-mood-mint-soft/30 border-mood-mint/30 shadow-mood-mint/10 animate-[bounce_1s_infinite_alternate]" // completed
+                    ? "h-28 w-28 bg-emerald-500/10 shadow-emerald-500/5"
+                    : "h-32 w-32 bg-emerald-500/20 ring-4 ring-emerald-500/10 border-emerald-500/40" // completed
           }`}
         >
           {/* Nhãn giây hoặc icon */}
@@ -166,15 +144,15 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
             <button
               type="button"
               onClick={handleStart}
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-mood-sky to-mood-lavender text-white shadow-md shadow-mood-sky/20 hover:scale-[1.06] active:scale-95 transition-all duration-200"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all"
               aria-label="Bắt đầu bài tập thở"
             >
               <Play className="h-6 w-6 fill-white ml-0.5" />
             </button>
           ) : phase === "completed" ? (
-            <Sparkles className="h-8 w-8 text-mood-mint animate-[spin_4s_linear_infinite]" />
+            <Sparkles className="h-8 w-8 text-emerald-600 animate-bounce" />
           ) : (
-            <span className="text-2xl font-bold font-serif text-app-ink tabular-nums animate-[pulse_1s_infinite]">
+            <span className="text-xl font-bold font-serif text-emerald-800 dark:text-emerald-300 tabular-nums">
               {secondsLeft}s
             </span>
           )}
@@ -183,16 +161,16 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
 
       {/* Hướng dẫn thở chánh niệm */}
       <div className="h-14 max-w-md">
-        <p className={`text-sm leading-relaxed font-serif italic transition-all duration-500 ${phase !== "idle" ? "text-app-ink font-medium" : "text-app-ink-soft"}`}>
+        <p className={`text-sm leading-relaxed font-serif italic text-app-ink transition-all duration-500 ${phase !== "idle" ? "text-emerald-700 dark:text-emerald-400 font-semibold" : "text-app-ink-soft"}`}>
           {getInstructionText()}
         </p>
       </div>
 
       {/* Thanh tiến trình siêu mỏng ở dưới */}
       {phase !== "idle" && phase !== "completed" && (
-        <div className="mt-4 w-48 h-[3px] bg-app-line rounded-full overflow-hidden">
+        <div className="mt-4 w-48 h-[2px] bg-app-line rounded-full overflow-hidden">
           <div
-            className={`h-full bg-gradient-to-r ${getThemeColorClass()} transition-all duration-1000 ease-linear`}
+            className="h-full bg-emerald-500 transition-all duration-1000 ease-linear"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -203,7 +181,7 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
         <button
           type="button"
           onClick={onComplete}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-mood-mint to-mood-sky px-6 py-3 text-sm font-medium text-white shadow-md shadow-mood-mint/25 hover:scale-[1.03] active:scale-95 transition-all duration-200 animate-[fadeIn_0.5s_ease-out] ring-4 ring-mood-mint-soft/50"
+          className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-500 hover:to-teal-500 hover:scale-[1.03] active:scale-97 transition-all duration-200 animate-[fadeIn_0.5s_ease-out] ring-4 ring-emerald-500/10"
         >
           Khai mở tầm nhìn cuộc sống
           <Sparkles className="h-4 w-4" />

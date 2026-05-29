@@ -3,17 +3,6 @@ import { Calendar } from "lucide-react";
 
 import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
 
-export const LIFE_AREA_COLORS: Record<string, { bg: string; border: string; text: string; accentClass: string; accentHex: string; softBg: string }> = {
-  Career: { bg: "bg-mood-mint-soft/40", border: "border-mood-mint/20", text: "text-mood-mint", accentClass: "bg-mood-mint", accentHex: "#5CA08E", softBg: "bg-mood-mint-soft" },
-  Finance: { bg: "bg-mood-amber-soft/40", border: "border-mood-amber/20", text: "text-mood-amber", accentClass: "bg-mood-amber", accentHex: "#E29E4B", softBg: "bg-mood-amber-soft" },
-  Health: { bg: "bg-mood-sky-soft/40", border: "border-mood-sky/20", text: "text-mood-sky", accentClass: "bg-mood-sky", accentHex: "#6BA4E8", softBg: "bg-mood-sky-soft" },
-  Education: { bg: "bg-mood-lavender-soft/40", border: "border-mood-lavender/20", text: "text-mood-lavender", accentClass: "bg-mood-lavender", accentHex: "#9F92EC", softBg: "bg-mood-lavender-soft" },
-  Relationships: { bg: "bg-mood-rose-soft/40", border: "border-mood-rose/20", text: "text-mood-rose", accentClass: "bg-mood-rose", accentHex: "#E88BA4", softBg: "bg-mood-rose-soft" },
-  Family: { bg: "bg-mood-rose-soft/40", border: "border-mood-rose/20", text: "text-mood-rose", accentClass: "bg-mood-rose", accentHex: "#E88BA4", softBg: "bg-mood-rose-soft" },
-  "Personal Growth": { bg: "bg-mood-lavender-soft/40", border: "border-mood-lavender/20", text: "text-mood-lavender", accentClass: "bg-mood-lavender", accentHex: "#9F92EC", softBg: "bg-mood-lavender-soft" },
-  Leisure: { bg: "bg-mood-amber-soft/40", border: "border-mood-amber/20", text: "text-mood-amber", accentClass: "bg-mood-amber", accentHex: "#E29E4B", softBg: "bg-mood-amber-soft" },
-};
-
 export interface GoalCardChipProps {
   goal?: {
     title: string;
@@ -44,38 +33,34 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
 
   const deadlineDisplay = formatShortDate(goal.deadline);
   const progress = Math.max(0, Math.min(100, Math.round(goal.progress)));
-  const areaColor = areaName ? (LIFE_AREA_COLORS[areaName] ?? { bg: "bg-app-accent-soft", border: "border-app-accent/20", text: "text-app-accent", accentHex: "#2A5447", softBg: "bg-app-accent-soft" }) : { bg: "bg-app-accent-soft", border: "border-app-accent/20", text: "text-app-accent", accentHex: "#2A5447", softBg: "bg-app-accent-soft" };
 
   return (
     <div
-      className={`rounded-2xl border p-3.5 text-left shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md ${areaColor.bg} ${areaColor.border}`}
+      className="rounded-2xl border border-app-accent/30 bg-app-accent-soft p-3 text-left text-app-accent shadow-[var(--shadow-1)]"
       style={{ width: `${width}px` }}
     >
       {areaLabel && area && (
         <span
-          className="inline-flex items-center rounded-full border border-white/50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm"
-          style={{ backgroundColor: `${area.color}26`, color: area.color }}
+          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+          style={{ backgroundColor: `${area.color}1F`, color: area.color }}
         >
           {areaLabel}
         </span>
       )}
-      <h4 className="mt-2 line-clamp-2 text-sm font-bold leading-snug text-app-ink">{goal.title}</h4>
+      <h4 className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-app-ink">{goal.title}</h4>
       {deadlineDisplay && (
-        <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-app-ink-soft opacity-80">
-          <Calendar className="h-3.5 w-3.5" />
+        <div className="mt-2 flex items-center gap-1.5 text-xs text-app-ink-soft">
+          <Calendar className="h-3 w-3" />
           <span>{deadlineDisplay}</span>
         </div>
       )}
-      <div className="mt-3.5">
-        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-app-ink-soft opacity-80">
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-app-ink-soft">
           <span>Tiến độ</span>
-          <span className={areaColor.text}>{progress}%</span>
+          <span>{progress}%</span>
         </div>
-        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/60 border border-white/15">
-          <div 
-            className="h-full rounded-full transition-all duration-500 ease-out" 
-            style={{ width: `${progress}%`, backgroundColor: areaColor.accentHex }} 
-          />
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-app-bg">
+          <div className="h-full rounded-full bg-app-accent transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>
     </div>

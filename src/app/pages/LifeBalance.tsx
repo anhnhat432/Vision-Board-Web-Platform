@@ -3,7 +3,6 @@ import { Link, useBlocker } from "react-router";
 import { AlertTriangle, ArrowRight, Compass, Save } from "lucide-react";
 import { toast } from "sonner";
 
-import { cn } from "../components/ui/utils";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import {
   AlertDialog,
@@ -34,17 +33,6 @@ const LifeBalanceHistoryChart = lazy(() =>
     default: (await import("../components/LifeBalanceHistoryChart")).LifeBalanceHistoryChart,
   })),
 );
-
-export const LIFE_AREA_COLORS: Record<string, { bg: string; border: string; text: string; accentClass: string; accentHex: string; softBg: string }> = {
-  Career: { bg: "bg-mood-mint-soft/30", border: "border-mood-mint/20", text: "text-mood-mint", accentClass: "bg-mood-mint", accentHex: "#5CA08E", softBg: "bg-mood-mint-soft" },
-  Finance: { bg: "bg-mood-amber-soft/30", border: "border-mood-amber/20", text: "text-mood-amber", accentClass: "bg-mood-amber", accentHex: "#E29E4B", softBg: "bg-mood-amber-soft" },
-  Health: { bg: "bg-mood-sky-soft/30", border: "border-mood-sky/20", text: "text-mood-sky", accentClass: "bg-mood-sky", accentHex: "#6BA4E8", softBg: "bg-mood-sky-soft" },
-  Education: { bg: "bg-mood-lavender-soft/30", border: "border-mood-lavender/20", text: "text-mood-lavender", accentClass: "bg-mood-lavender", accentHex: "#9F92EC", softBg: "bg-mood-lavender-soft" },
-  Relationships: { bg: "bg-mood-rose-soft/30", border: "border-mood-rose/20", text: "text-mood-rose", accentClass: "bg-mood-rose", accentHex: "#E88BA4", softBg: "bg-mood-rose-soft" },
-  Family: { bg: "bg-mood-rose-soft/30", border: "border-mood-rose/20", text: "text-mood-rose", accentClass: "bg-mood-rose", accentHex: "#E88BA4", softBg: "bg-mood-rose-soft" },
-  "Personal Growth": { bg: "bg-mood-lavender-soft/30", border: "border-mood-lavender/20", text: "text-mood-lavender", accentClass: "bg-mood-lavender", accentHex: "#9F92EC", softBg: "bg-mood-lavender-soft" },
-  Leisure: { bg: "bg-mood-amber-soft/30", border: "border-mood-amber/20", text: "text-mood-amber", accentClass: "bg-mood-amber", accentHex: "#E29E4B", softBg: "bg-mood-amber-soft" },
-};
 
 type FlushableDebouncedSave<T> = {
   schedule: (value: T) => void;
@@ -402,39 +390,30 @@ export function LifeBalance() {
                   <h2 className="text-base font-semibold text-app-ink">Cập nhật điểm</h2>
                   <p className="text-xs text-app-ink-muted">Kéo thanh để chấm lại</p>
                 </header>
-                <ul className="mt-5 space-y-3">
+                <ul className="mt-5">
                   {lifeAreas.map((area, index) => {
                     const AreaIcon = getLifeAreaIcon(area.name);
-                    const areaColors = LIFE_AREA_COLORS[area.name] ?? { bg: "bg-app-accent-soft/30", border: "border-app-accent/20", text: "text-app-accent", accentClass: "bg-app-accent", accentHex: "#2A5447", softBg: "bg-app-accent-soft" };
 
                     return (
-                      <li
-                        key={area.name}
-                        className={cn(
-                          "group rounded-xl border p-4.5 transition-all duration-300 backdrop-blur-sm",
-                          areaColors.bg,
-                          areaColors.border
-                        )}
-                      >
+                      <li key={area.name} className="group border-b border-app-line py-3.5 last:border-0">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2.5">
-                            <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg border border-white/50 shadow-sm", areaColors.softBg, areaColors.text)}>
-                              <AreaIcon className="h-4.5 w-4.5" />
+                            <span className="flex h-6.5 w-6.5 items-center justify-center rounded bg-app-accent-soft text-app-accent transition-colors duration-250 group-hover:bg-app-accent group-hover:text-white">
+                              <AreaIcon className="h-4 w-4" />
                             </span>
-                            <span className="text-sm font-semibold text-app-ink">{getLifeAreaLabel(area.name)}</span>
+                            <span className="text-sm font-medium text-app-ink">{getLifeAreaLabel(area.name)}</span>
                           </div>
-                          <span className={cn("font-serif text-2xl font-semibold tabular-nums", areaColors.text)}>
+                          <span className="font-serif text-xl font-medium tabular-nums text-app-ink">
                             {area.score}
                           </span>
                         </div>
                         <Slider
-                          className="mt-3.5"
+                          className="mt-2.5"
                           value={[area.score]}
                           onValueChange={(value) => handleScoreChange(index, value)}
                           min={1}
                           max={10}
                           step={1}
-                          trackColor={areaColors.accentHex}
                           aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                         />
                       </li>
