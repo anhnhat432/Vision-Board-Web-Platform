@@ -173,6 +173,35 @@ function ConfettiCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 z-50 pointer-events-none w-full h-full" />;
 }
 
+// Hook hiệu ứng gõ chữ sinh động được đặt bên ngoài component để tránh reset state và chạy song song
+function useTypingEffect(text: string, speed = 6) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    setDisplayedText("");
+    if (!text) return;
+
+    let index = 0;
+    let currentText = "";
+    
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        currentText += text.charAt(index);
+        setDisplayedText(currentText);
+        index++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [text, speed]);
+
+  return displayedText;
+}
+
 export function SmartGoalStepShell({
   stepIndex,
   totalSteps,
@@ -434,28 +463,7 @@ export function SmartGoalStepShell({
 
   const { coachMessage, coreText: coreTextToApply } = getPersonaData(selectedTone);
 
-  // Hook hiệu ứng gõ chữ sinh động
-  const useTypingEffect = (text: string, speed = 8) => {
-    const [displayedText, setDisplayedText] = useState("");
 
-    useEffect(() => {
-      setDisplayedText("");
-      if (!text) return;
-      
-      let i = 0;
-      const timer = setInterval(() => {
-        setDisplayedText((prev) => prev + text.charAt(i));
-        i++;
-        if (i >= text.length) {
-          clearInterval(timer);
-        }
-      }, speed);
-
-      return () => clearInterval(timer);
-    }, [text, speed]);
-
-    return displayedText;
-  };
 
   const typedCoachText = useTypingEffect(coachMessage, 10);
 
