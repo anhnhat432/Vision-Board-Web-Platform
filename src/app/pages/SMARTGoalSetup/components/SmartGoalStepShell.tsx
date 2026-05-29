@@ -334,30 +334,37 @@ export function SmartGoalStepShell({
   const weeksVal = smartGoalStarter.targetWeeks;
 
   // Lấy câu gợi ý AI Coach và text cốt lõi đi kèm
-  const getPersonaData = (tone: "empathetic" | "pragmatic" | "strategic") => {
+  const getPersonaData = (tone: "empathetic" | "pragmatic" | "strategic"): {
+    coachComment: string;
+    goalDraft: string;
+    coreTextToApply: string;
+  } => {
     const cleanMetric = metric.toLowerCase();
     
     if (step.key === "specific") {
       if (tone === "empathetic") {
         return {
-          coachMessage: `Bạn đang hướng tới một tầm nhìn rất ý nghĩa đấy. Hãy bắt đầu nhẹ nhàng nhưng đầy cam kết: “${goalStr}”`,
-          coreText: goalStr,
+          coachComment: "Bạn đang hướng tới một tầm nhìn rất ý nghĩa đấy. Hãy bắt đầu nhẹ nhàng nhưng đầy cam kết:",
+          goalDraft: goalStr,
+          coreTextToApply: goalStr,
         };
       }
+      const pragmaticGoal = goalStr
+        .replace("Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.", "Thực hiện cam kết hành động 12 tuần để cải thiện lĩnh vực ưu tiên và ghi nhận tiến bộ rõ ràng.")
+        .replace("Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.", "Hoàn thành 1 dự án trọng điểm trong 12 tuần để chứng minh năng lực và thăng tiến nghề nghiệp.")
+        .replace("Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.", "Tích lũy quỹ dự phòng khẩn cấp trong 12 tuần nhằm ổn định tài chính cá nhân trước các sự cố phát sinh.")
+        .replace("Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.", "Duy trì tập thể dục 3 buổi mỗi tuần trong 12 tuần nhằm nâng cao thể lực và năng lượng làm việc.")
+        .replace("Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.", "Hoàn thành lộ trình học kỹ năng mới trong 12 tuần và tự làm 1 sản phẩm thực tế để ứng dụng.")
+        .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Chủ động kết nối với những người quan trọng 2 lần mỗi tuần trong 12 tuần để gia tăng sự gắn kết.")
+        .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Dành riêng 2 khoảng thời gian chất lượng cho gia đình mỗi tuần trong 12 tuần, gác lại công việc riêng.")
+        .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Thực hiện thói quen phát triển bản thân đều đặn mỗi tuần trong 12 tuần để nâng cao nhận thức cá nhân.")
+        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.");
+
       if (tone === "pragmatic") {
-        const pragmaticGoal = goalStr
-          .replace("Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.", "Thực hiện cam kết hành động 12 tuần để cải thiện lĩnh vực ưu tiên và ghi nhận tiến bộ rõ ràng.")
-          .replace("Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.", "Hoàn thành 1 dự án trọng điểm trong 12 tuần để chứng minh năng lực và thăng tiến nghề nghiệp.")
-          .replace("Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.", "Tích lũy quỹ dự phòng khẩn cấp trong 12 tuần nhằm ổn định tài chính cá nhân trước các sự cố phát sinh.")
-          .replace("Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.", "Duy trì tập thể dục 3 buổi mỗi tuần trong 12 tuần nhằm nâng cao thể lực và năng lượng làm việc.")
-          .replace("Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.", "Hoàn thành lộ trình học kỹ năng mới trong 12 tuần và tự làm 1 sản phẩm thực tế để ứng dụng.")
-          .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Chủ động kết nối với những người quan trọng 2 lần mỗi tuần trong 12 tuần để gia tăng sự gắn kết.")
-          .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Dành riêng 2 khoảng thời gian chất lượng cho gia đình mỗi tuần trong 12 tuần, gác lại công việc riêng.")
-          .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Thực hiện thói quen phát triển bản thân đều đặn mỗi tuần trong 12 tuần để nâng cao nhận thức cá nhân.")
-          .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.");
         return {
-          coachMessage: `Vào thẳng hành động thực tế nào. Hãy điền ngắn gọn, rõ việc cần làm: “${pragmaticGoal}”`,
-          coreText: pragmaticGoal,
+          coachComment: "Vào thẳng hành động thực tế nào. Hãy điền ngắn gọn, rõ việc cần làm:",
+          goalDraft: pragmaticGoal,
+          coreTextToApply: pragmaticGoal,
         };
       }
       const strategicGoal = goalStr
@@ -371,46 +378,53 @@ export function SmartGoalStepShell({
         .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Chuẩn hóa quy trình tự phản tỉnh và thực hiện thói quen phát triển bản thân mỗi tuần trong 12 tuần.")
         .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Quản trị năng lượng bằng 2 khoảng nghỉ sâu mỗi tuần trong 12 tuần, ngăn chặn rủi ro kiệt sức.");
       return {
-        coachMessage: `Phân tích chiến lược cho thấy đây là lộ trình tối ưu nhất. Hãy tham khảo cấu trúc mục tiêu: “${strategicGoal}”`,
-        coreText: strategicGoal,
+        coachComment: "Phân tích chiến lược cho thấy đây là lộ trình tối ưu nhất. Hãy tham khảo cấu trúc mục tiêu:",
+        goalDraft: strategicGoal,
+        coreTextToApply: strategicGoal,
       };
     }
     
     if (step.key === "measurable") {
       if (tone === "empathetic") {
         return {
-          coachMessage: `Số liệu là tấm gương giúp bạn tự quan sát nhẹ nhàng: Hãy đo lường bằng cách đạt mốc ${targetVal} ${cleanMetric} (khởi điểm từ mốc ${baseVal}). Chúc bạn có những bước đi thảnh thơi!`,
-          coreText: "",
+          coachComment: "Số liệu là tấm gương giúp bạn tự quan sát nhẹ nhàng. Chúc bạn có những bước đi thảnh thơi!",
+          goalDraft: `Hãy đo lường bằng cách đạt mốc ${targetVal} ${cleanMetric} (khởi điểm từ mốc ${baseVal}).`,
+          coreTextToApply: "",
         };
       }
       if (tone === "pragmatic") {
         return {
-          coachMessage: `Đo lường cụ thể để kiểm soát kết quả tốt nhất. Chỉ tiêu hành động: Đạt mốc ${targetVal} ${cleanMetric} (bắt đầu từ mốc ${baseVal}).`,
-          coreText: "",
+          coachComment: "Đo lường cụ thể để kiểm soát kết quả tốt nhất. Chỉ tiêu hành động:",
+          goalDraft: `Đạt mốc ${targetVal} ${cleanMetric} (bắt đầu từ mốc ${baseVal}).`,
+          coreTextToApply: "",
         };
       }
       return {
-        coachMessage: `KPI đo lường hiệu suất dẫn dắt (leading indicator): Thiết lập chỉ số đạt ${targetVal} ${cleanMetric} với mốc cơ sở hiện tại là ${baseVal}.`,
-        coreText: "",
+        coachComment: "KPI đo lường hiệu suất dẫn dắt (leading indicator) tối ưu cho bạn:",
+        goalDraft: `Thiết lập chỉ số đạt ${targetVal} ${cleanMetric} với mốc cơ sở hiện tại là ${baseVal}.`,
+        coreTextToApply: "",
       };
     }
 
     if (step.key === "achievable") {
       if (tone === "empathetic") {
         return {
-          coachMessage: `Nuôi dưỡng thói quen bền bỉ tốt hơn là ép mình quá sức. Hãy dành ra khoảng ${hoursVal} giờ mỗi tuần để thích nghi từ từ bạn nhé.`,
-          coreText: "",
+          coachComment: "Nuôi dưỡng thói quen bền bỉ tốt hơn là ép mình quá sức. Bạn nên bắt đầu chậm rãi:",
+          goalDraft: `Dành ra khoảng ${hoursVal} giờ mỗi tuần để thích nghi từ từ bạn nhé.`,
+          coreTextToApply: "",
         };
       }
       if (tone === "pragmatic") {
         return {
-          coachMessage: `Cam kết dành ra đúng ${hoursVal} giờ mỗi tuần để hành động thực tế. Hãy chuẩn bị trước các nguồn lực cần thiết để sẵn sàng thực hiện.`,
-          coreText: "",
+          coachComment: "Tập trung phân bổ thời gian kỷ luật tối đa. Hãy cam kết:",
+          goalDraft: `Dành ra đúng ${hoursVal} giờ mỗi tuần để hành động thực tế. Hãy chuẩn bị trước các nguồn lực cần thiết để sẵn sàng thực hiện.`,
+          coreTextToApply: "",
         };
       }
       return {
-        coachMessage: `Để tối ưu hóa tính khả thi, phân bổ quỹ thời gian biểu là ${hoursVal} giờ/tuần. Việc chuẩn bị nguồn lực hỗ trợ sẽ giảm thiểu 40% rủi ro từ bỏ.`,
-        coreText: "",
+        coachComment: "Để tối ưu hóa tính khả thi và giảm thiểu 40% rủi ro từ bỏ, định mức chiến lược:",
+        goalDraft: `Phân bổ quỹ thời gian biểu là ${hoursVal} giờ/tuần cùng với việc chuẩn bị nguồn lực hỗ trợ đầy đủ.`,
+        coreTextToApply: "",
       };
     }
 
@@ -418,54 +432,62 @@ export function SmartGoalStepShell({
       const cleanReason = motivationReasonStr.replace("Tôi muốn mục tiêu này vì ", "");
       if (tone === "empathetic") {
         return {
-          coachMessage: `Lý do sâu sắc từ trái tim sẽ tiếp thêm sức mạnh cho bạn: “${motivationReasonStr}”. Hãy cảm nhận xem điều này đã thực sự chạm tới ước muốn của bạn chưa.`,
-          coreText: motivationReasonStr,
+          coachComment: "Lý do sâu sắc từ trái tim sẽ tiếp thêm sức mạnh cho bạn. Hãy cảm nhận xem điều này đã thực sự chạm tới ước muốn của bạn chưa:",
+          goalDraft: motivationReasonStr,
+          coreTextToApply: motivationReasonStr,
         };
       }
+      
+      const pragmaticReason = `Động lực thực tế: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
       if (tone === "pragmatic") {
-        const pragmaticReason = `Động lực thực tế: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
         return {
-          coachMessage: `Tập trung vào giá trị thực tế nhất lúc này: “${pragmaticReason}”`,
-          coreText: pragmaticReason,
+          coachComment: "Tập trung vào giá trị thực tế nhất cho cuộc sống của bạn lúc này:",
+          goalDraft: pragmaticReason,
+          coreTextToApply: pragmaticReason,
         };
       }
+      
       const strategicReason = `Căn chỉnh trục phát triển: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
       return {
-        coachMessage: `Định hình tầm nhìn chiến lược và căn chỉnh giá trị: “${strategicReason}”`,
-        coreText: strategicReason,
+        coachComment: "Định hình tầm nhìn chiến lược và căn chỉnh hệ giá trị phát triển cốt lõi:",
+        goalDraft: strategicReason,
+        coreTextToApply: strategicReason,
       };
     }
 
     if (step.key === "timeBound") {
       if (tone === "empathetic") {
         return {
-          coachMessage: `Tạo một nhịp điệu thời gian vừa vặn với cuộc sống của bạn: Hãy theo dõi tiến trình trong ${weeksVal} tuần trước khi chốt kết quả. 12 tuần là khoảng thời gian hoàn hảo để chứng kiến sự chuyển hóa nhẹ nhàng.`,
-          coreText: "",
+          coachComment: "Tạo một nhịp điệu thời gian vừa vặn và không gây áp lực cho cuộc sống:",
+          goalDraft: `Theo dõi tiến trình trong ${weeksVal} tuần trước khi chốt kết quả. 12 tuần là khoảng thời gian hoàn hảo để chứng kiến sự chuyển hóa nhẹ nhàng.`,
+          coreTextToApply: "",
         };
       }
       if (tone === "pragmatic") {
         return {
-          coachMessage: `Đặt mốc thời gian rõ ràng để tập trung kỷ luật tối đa: Cam kết hoàn thành trong vòng ${weeksVal} tuần tới. Đừng trì hoãn thêm nữa.`,
-          coreText: "",
+          coachComment: "Đặt mốc thời gian rõ ràng để tập trung kỷ luật tối đa, không trì hoãn:",
+          goalDraft: `Cam kết hoàn thành trong vòng ${weeksVal} tuần tới.`,
+          coreTextToApply: "",
         };
       }
       return {
-        coachMessage: `Thiết lập mốc thời gian kết thúc chiến dịch 12 tuần. Đây là điểm rơi phong độ lý tưởng để chúng ta đánh giá hiệu suất tổng thể của bạn.`,
-        coreText: "",
+        coachComment: "Thiết lập mốc thời gian kết thúc chiến dịch. Đây là điểm rơi phong độ lý tưởng để đánh giá:",
+        goalDraft: `Cam kết hoàn thành trong vòng ${weeksVal} tuần để đánh giá hiệu suất tổng thể của bạn.`,
+        coreTextToApply: "",
       };
     }
 
     return {
-      coachMessage: starterPreview,
-      coreText: starterPreview,
+      coachComment: "Gợi ý cấu trúc mục tiêu cho bước này của bạn:",
+      goalDraft: starterPreview,
+      coreTextToApply: starterPreview,
     };
   };
 
-  const { coachMessage, coreText: coreTextToApply } = getPersonaData(selectedTone);
+  const { coachComment, goalDraft, coreTextToApply } = getPersonaData(selectedTone);
 
-
-
-  const typedCoachText = useTypingEffect(coachMessage, 10);
+  const typedCommentText = useTypingEffect(coachComment, 6);
+  const typedDraftText = useTypingEffect(goalDraft, 6);
 
   // Tính toán nhanh độ khả thi
   const calculateFeasibilityScore = () => {
@@ -696,72 +718,93 @@ export function SmartGoalStepShell({
         >
           {children}
 
-          {/* AI Coach Hub - Giao diện Cố vấn Holographic Tương lai */}
-          <div className="relative overflow-hidden rounded-[24px] border border-teal-500/15 dark:border-teal-900/30 bg-gradient-to-br from-teal-500/5 via-app-surface/95 to-indigo-500/5 dark:from-teal-950/10 dark:via-slate-900/80 dark:to-indigo-950/10 p-5 sm:p-6 shadow-[0_12px_40px_rgba(13,148,136,0.03)] transition-all duration-300 hover:shadow-[0_12px_45px_rgba(13,148,136,0.06)] hover:border-teal-500/25">
+          {/* AI Coach Hub - Giao diện Cố vấn Holographic Tương lai Siêu Cấp */}
+          <div className="relative overflow-hidden rounded-[24px] border border-teal-500/20 dark:border-teal-900/40 bg-gradient-to-br from-teal-500/[0.04] via-app-surface/98 to-indigo-500/[0.04] dark:from-teal-950/20 dark:via-slate-900/90 dark:to-indigo-950/20 p-5 sm:p-6 shadow-[0_16px_45px_rgba(13,148,136,0.04)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(13,148,136,0.08)] hover:border-teal-500/35">
             {/* Background glowing decor */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
             
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex gap-4 items-start min-w-0 flex-1">
-                {/* Mindfulness Orb phát sáng nhịp thở */}
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:justify-between">
+              <div className="flex gap-4.5 items-start min-w-0 flex-1">
+                {/* Mindfulness Orb phát sáng nhịp thở 3D */}
                 <div className="flex-shrink-0 relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 via-emerald-400 to-indigo-500 text-white shadow-lg shadow-teal-500/20 border border-teal-300/30 dark:border-teal-700/20 transition-transform duration-300 hover:scale-105 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 via-emerald-500/20 to-indigo-500/20 animate-pulse blur-sm" />
-                    <Sparkles className="h-5.5 w-5.5 text-white relative z-10 animate-[spin_10s_linear_infinite]" />
+                  <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 via-emerald-400 to-indigo-500 text-white shadow-[0_8px_25px_rgba(20,184,166,0.25)] border border-white/20 dark:border-white/5 transition-transform duration-300 hover:scale-105 overflow-hidden">
+                    {/* Breath animation overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-teal-500 to-emerald-400 opacity-60 animate-[pulse_3s_ease-in-out_infinite]" />
+                    
+                    {/* Floating light elements inside */}
+                    <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-white/30 blur-sm animate-[pulse_2s_ease-in-out_infinite]" />
+                    <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-teal-300/20 blur-md animate-[pulse_4s_ease-in-out_infinite]" />
+
+                    <Sparkles className="h-6 w-6 text-white relative z-10 animate-[spin_12s_linear_infinite]" />
                   </div>
                   {/* Chỉ báo hoạt động */}
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-sm" aria-hidden="true">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-white dark:bg-slate-900 border-2 border-white dark:border-slate-900 shadow-md" aria-hidden="true">
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-[pulse_1.5s_ease-in-out_infinite]" />
                   </span>
                 </div>
 
-                {/* Nội dung bong bóng AI */}
-                <div className="space-y-3 min-w-0 flex-1">
+                {/* Nội dung bong bóng thoại AI Coach */}
+                <div className="space-y-3.5 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
                       Cố vấn mục tiêu AI
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/5 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/5 px-2.5 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10 select-none">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                       Trực tuyến
                     </span>
                   </div>
 
-                  <div className="relative bg-white/60 dark:bg-slate-900/65 border border-teal-500/10 rounded-2xl rounded-tl-none p-4 shadow-sm text-sm text-slate-800 dark:text-slate-200">
+                  <div className="relative bg-white/50 dark:bg-slate-900/60 border border-teal-500/10 rounded-2xl rounded-tl-none p-5 shadow-sm text-sm text-slate-800 dark:text-slate-200 backdrop-blur-md">
                     {/* Đuôi bong bóng thoại */}
-                    <div className="absolute -left-2 top-0 w-2 h-2 bg-white/60 dark:bg-slate-900/65 border-l border-t border-teal-500/10 rotate-45 transform origin-top-right hidden sm:block" />
+                    <div className="absolute -left-2 top-0 w-2 h-2 bg-white/50 dark:bg-slate-900/60 border-l border-t border-teal-500/10 rotate-45 transform origin-top-right hidden sm:block" />
                     
-                    <p className="font-serif italic text-[14.5px] leading-relaxed text-slate-700 dark:text-slate-350 min-h-[44px]">
-                      “{typedCoachText}”
+                    {/* Lời dẫn dắt của Coach */}
+                    <p className="text-[13px] font-semibold text-slate-500 dark:text-slate-400 leading-relaxed mb-3.5 select-none">
+                      {typedCommentText}
                     </p>
+
+                    {/* Câu mục tiêu gợi ý đặt trong Blockquote viền trái gradient */}
+                    {typedDraftText && (
+                      <div className="relative my-3 rounded-xl border-l-[4px] border-emerald-500/80 bg-gradient-to-r from-emerald-500/[0.04] to-indigo-500/[0.01] dark:from-emerald-500/[0.08] dark:to-indigo-500/[0.02] px-4.5 py-3.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.015)] transition-all duration-300">
+                        <p className="font-serif italic text-[15.5px] leading-relaxed text-slate-850 dark:text-slate-100 select-text">
+                          “{typedDraftText}”
+                        </p>
+                      </div>
+                    )}
                     
-                    <div className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 select-none border-t border-teal-500/5 pt-2">
-                      <Sparkles className="h-3.5 w-3.5 text-teal-500 animate-pulse" />
+                    <div className="mt-3.5 text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5 select-none border-t border-teal-500/5 pt-2.5">
+                      <Sparkles className="h-3.5 w-3.5 text-teal-400 dark:text-teal-500 animate-pulse" />
                       <span>Gợi ý chánh niệm giúp bạn nhanh chóng điền chuẩn xác.</span>
                     </div>
 
                     {/* Thanh đo sức mạnh mục tiêu thời gian thực */}
-                    <div className="mt-4 pt-3 border-t border-teal-500/10 grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
+                    <div className="mt-5 pt-4 border-t border-teal-500/10 grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
                         <div className="flex justify-between text-[10px] font-bold">
-                          <span className="text-slate-500 dark:text-slate-400">Độ rõ nét (Clarity)</span>
+                          <span className="text-slate-400 dark:text-slate-500 uppercase tracking-wider">Độ rõ nét (Clarity)</span>
                           <span className="text-teal-600 dark:text-teal-400">{Math.round(clarityProgress)}%</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                          <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-indigo-500 transition-all duration-500" style={{ width: `${clarityProgress}%` }} />
+                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden relative">
+                          <div 
+                            className="h-full rounded-full bg-gradient-to-r from-teal-400 to-indigo-500 transition-all duration-500 shadow-[0_0_8px_rgba(20,184,166,0.25)]" 
+                            style={{ width: `${clarityProgress}%` }} 
+                          />
                         </div>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div className="flex justify-between text-[10px] font-bold">
-                          <span className="text-slate-500 dark:text-slate-400">Khả thi (Feasibility)</span>
+                          <span className="text-slate-400 dark:text-slate-500 uppercase tracking-wider">Khả thi (Feasibility)</span>
                           <span className="text-emerald-600 dark:text-emerald-400">{feasibilityScore}%</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden relative">
                           <div 
                             className={cn(
-                              "h-full rounded-full transition-all duration-500 bg-gradient-to-r",
-                              feasibilityScore >= 80 ? "from-emerald-400 to-teal-500" :
-                              feasibilityScore >= 60 ? "from-amber-400 to-emerald-500" : "from-rose-400 to-amber-550"
+                              "h-full rounded-full transition-all duration-500 bg-gradient-to-r shadow-sm",
+                              feasibilityScore >= 80 ? "from-emerald-400 to-teal-500 shadow-[0_0_8px_rgba(52,211,153,0.25)]" :
+                              feasibilityScore >= 60 ? "from-amber-400 to-emerald-500 shadow-[0_0_8px_rgba(251,191,36,0.25)]" : 
+                              "from-rose-400 to-amber-500 shadow-[0_0_8px_rgba(251,113,133,0.25)]"
                             )} 
                             style={{ width: `${feasibilityScore}%` }} 
                           />
@@ -773,67 +816,74 @@ export function SmartGoalStepShell({
               </div>
 
               {/* Bảng điều khiển Giọng điệu cố vấn + Nút áp dụng gợi ý */}
-              <div className="flex flex-col gap-3 shrink-0 w-full sm:w-48">
-                {/* Lựa chọn giọng điệu */}
-                <div className="bg-slate-100/60 dark:bg-slate-900/60 p-2.5 rounded-xl border border-app-line">
-                  <span className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 select-none">
+              <div className="flex flex-col gap-4 shrink-0 w-full lg:w-52 justify-between">
+                {/* Lựa chọn giọng điệu theo kiểu Segmented Control trượt cao cấp */}
+                <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] backdrop-blur-sm">
+                  <span className="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none">
                     Giọng điệu Cố vấn:
                   </span>
-                  <div className="grid grid-cols-3 gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTone("empathetic")}
-                      className={cn(
-                        "py-1 text-[10px] font-bold rounded-lg border transition-all duration-205",
-                        selectedTone === "empathetic"
-                          ? "bg-teal-500 text-white border-teal-500 shadow-sm"
-                          : "bg-white dark:bg-slate-800 border-app-line text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
-                      )}
-                      title="Đồng cảm & Chánh niệm"
-                    >
-                      ✨
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTone("pragmatic")}
-                      className={cn(
-                        "py-1 text-[10px] font-bold rounded-lg border transition-all duration-205",
-                        selectedTone === "pragmatic"
-                          ? "bg-teal-500 text-white border-teal-500 shadow-sm"
-                          : "bg-white dark:bg-slate-800 border-app-line text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
-                      )}
-                      title="Thực tế & Hành động"
-                    >
-                      ⚡
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTone("strategic")}
-                      className={cn(
-                        "py-1 text-[10px] font-bold rounded-lg border transition-all duration-205",
-                        selectedTone === "strategic"
-                          ? "bg-teal-500 text-white border-teal-500 shadow-sm"
-                          : "bg-white dark:bg-slate-800 border-app-line text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
-                      )}
-                      title="Chiến lược & Phân tích"
-                    >
-                      🧠
-                    </button>
+                  
+                  <div className="relative flex items-center bg-slate-200/40 dark:bg-slate-900/65 p-1 rounded-xl w-full border border-slate-200/30 dark:border-slate-800/30">
+                    <div className="grid grid-cols-3 w-full relative z-10">
+                      {(["empathetic", "pragmatic", "strategic"] as const).map((tone) => {
+                        const isActive = selectedTone === tone;
+                        const toneLabels = {
+                          empathetic: { label: "Đồng cảm", icon: "✨", color: "text-teal-600 dark:text-teal-400" },
+                          pragmatic: { label: "Thực tế", icon: "⚡", color: "text-amber-600 dark:text-amber-400" },
+                          strategic: { label: "Chiến lược", icon: "🧠", color: "text-indigo-650 dark:text-indigo-400" },
+                        };
+                        const currentTone = toneLabels[tone];
+
+                        return (
+                          <button
+                            key={tone}
+                            type="button"
+                            onClick={() => setSelectedTone(tone)}
+                            className={cn(
+                              "relative flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-extrabold transition-all duration-300 focus-visible:outline-none",
+                              isActive 
+                                ? "text-slate-850 dark:text-white" 
+                                : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-350"
+                            )}
+                          >
+                            {isActive && (
+                              <motion.div
+                                layoutId="activeToneIndicator"
+                                transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                                className="absolute inset-0 bg-white dark:bg-slate-800 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200/40 dark:border-slate-700/30 z-0"
+                              />
+                            )}
+                            <span className="relative z-10 text-[13px] mb-0.5">{currentTone.icon}</span>
+                            <span className={cn("relative z-10", isActive ? currentTone.color : "")}>
+                              {currentTone.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                <button
+                {/* Nút áp dụng gợi ý có shimmer lướt sáng cao cấp */}
+                <motion.button
                   type="button"
-                  className="relative overflow-hidden inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 px-4 py-3 text-xs font-bold text-white shadow-md shadow-teal-500/10 transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.97] group/shimmer"
+                  whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(20, 184, 166, 0.35)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="relative overflow-hidden inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600 px-4 py-3.5 text-xs font-bold text-white shadow-md shadow-teal-500/10 transition-all duration-200 active:scale-[0.97] group/shimmer"
                   onClick={handleApplyTransformedStarter}
                   aria-label={`Dùng gợi ý cho bước ${step.label}`}
                 >
                   {/* Shimmer effect reflection */}
-                  <span className="absolute inset-0 w-1/2 h-full bg-white/20 transform -skew-x-12 -translate-x-full group-hover/shimmer:animate-[shimmer_1.5s_ease-in-out_infinite]" />
+                  <motion.div
+                    className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none"
+                    initial={{ left: "-100%" }}
+                    animate={{ left: "100%" }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "linear", repeatDelay: 1.5 }}
+                  />
                   
-                  <Sparkles className="h-3.5 w-3.5 relative z-10 animate-[pulse_1.5s_infinite]" />
+                  <Sparkles className="h-4 w-4 relative z-10 animate-[pulse_1.5s_infinite]" />
                   <span className="relative z-10">Sử dụng gợi ý này</span>
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
