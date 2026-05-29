@@ -3,7 +3,6 @@ import { AlertTriangle, ChevronDown, GripVertical, Plus, Minus, Trash2 } from "l
 
 import { GoalArchetypeExamples } from "@/app/components/GoalArchetypeExamples";
 import { Input } from "@/app/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Textarea } from "@/app/components/ui/textarea";
 import { cn } from "@/app/components/ui/utils";
 import type { TacticType } from "@/app/utils/storage";
@@ -47,32 +46,38 @@ const COMMITMENT_FIELDS = [
   {
     key: "want",
     label: "Tôi thực sự muốn điều này vì...",
+    emoji: "🔥",
+    placeholder: "Tại sao bạn muốn điều này nhất? Động lực sâu thẳm..."
   },
   {
     key: "cost",
     label: "Tôi sẵn sàng trả giá gì...",
+    emoji: "⏳",
+    placeholder: "Mất đi thời gian rảnh, công sức, sự lười biếng..."
   },
   {
     key: "means",
     label: "Tôi sẽ làm thế nào (cụ thể)...",
+    emoji: "⚙️",
+    placeholder: "Cách thực hiện chi tiết, các bước nhỏ nhất..."
   },
   {
     key: "tradeoff",
     label: "Tôi sẽ phải bỏ qua/giảm điều gì...",
+    emoji: "🛑",
+    placeholder: "Bỏ lướt điện thoại, giảm tụ tập không cần thiết..."
   },
   {
     key: "reward",
     label: "Tôi sẽ tự thưởng gì khi giữ được...",
+    emoji: "🎁",
+    placeholder: "Một ly cà phê ngon, một buổi xem phim thư giãn..."
   },
 ] as const;
 
-const selectTriggerClass =
-  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2";
-const selectContentClass = "surface-elevated rounded-xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]";
-const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const optionButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.98]";
-const optionButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent shadow-sm";
+  "flex flex-col items-start gap-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 p-3.5 text-left text-sm font-bold text-slate-650 dark:text-slate-350 transition-all duration-300 hover:scale-[1.02] hover:border-indigo-500/40 hover:bg-indigo-500/[0.02] dark:hover:bg-indigo-500/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/20 active:scale-[0.97]";
+const optionButtonActiveClass = "border-indigo-500 bg-indigo-500/5 dark:bg-indigo-950/20 text-indigo-650 dark:text-indigo-400 shadow-lg shadow-indigo-500/[0.03] ring-1 ring-indigo-500/20";
 
 function normalizeCommitmentChange(
   current: LeadIndicatorDraft["commitment"],
@@ -151,68 +156,74 @@ export function LeadIndicatorsStepLab({
     shouldShowFieldError(fieldKey) && !indicator.name.trim();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 sm:space-y-5">
-      <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-step-hero">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
+      <section className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-4 sm:p-5 group z-10" aria-labelledby="lead-step-hero">
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between relative z-10">
           <div>
-            <p id="lead-step-hero" className="text-sm leading-6 text-app-ink-soft">
-              Việc lặp lại là việc bạn chủ động làm đều mỗi tuần. Chỉ số kết quả là con số bạn xem lại để biết mình đã tiến tới đâu.
+            <p id="lead-step-hero" className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              ⚡ Chỉ số dẫn dắt (Lead Indicators)
             </p>
-            <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-              Chọn việc nhỏ và đo bằng số lần thực hiện, không đo bằng kết quả cuối cùng.
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+              Việc lặp lại là việc bạn chủ động làm đều mỗi tuần. Chỉ số kết quả là con số bạn xem lại để biết mình đã tiến tới đâu. Chọn việc nhỏ và đo bằng số lần thực hiện, không đo bằng kết quả cuối cùng.
             </p>
           </div>
           <button
             type="button"
             onClick={onAddIndicator}
             disabled={!canAddIndicator}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-sm font-medium text-app-accent transition-all duration-150 hover:bg-app-accent-soft active:scale-[0.97] disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55 transition-all px-4 py-2.5 text-sm font-bold sm:w-auto"
           >
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Thêm chỉ số dẫn dắt
+            <Plus className="h-4.5 w-4.5" aria-hidden="true" />
+            Thêm chỉ số hành động
           </button>
         </div>
       </section>
 
-      <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-examples-title">
-        <p id="lead-examples-title" className="text-sm font-medium text-app-ink">
-          Ví dụ dễ phân biệt
+      <section className="rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-4 relative z-10" aria-labelledby="lead-examples-title">
+        <p id="lead-examples-title" className="text-xs font-extrabold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-3.5">
+          🎯 Ví dụ dễ phân biệt
         </p>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          <div className="rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">Chỉ số kết quả — không nhập ở bước này</p>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-app-ink-soft">
-              <li>- Có 100 người dùng</li>
-              <li>- Hoàn thành app</li>
-              <li>- Giảm 5kg</li>
+        <div className="grid gap-3.5 md:grid-cols-2">
+          <div className="rounded-xl border border-rose-200/30 dark:border-rose-950/20 bg-rose-500/5 dark:bg-rose-950/10 p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-rose-500 flex items-center gap-1.5">
+              <span>❌</span> Chỉ số kết quả — không nhập ở bước này
+            </p>
+            <ul className="mt-2.5 space-y-1 text-xs leading-6 text-slate-500 dark:text-slate-400 font-semibold">
+              <li>- Có 100 người dùng thực tế</li>
+              <li>- Hoàn thành xong hoàn toàn app</li>
+              <li>- Giảm nhanh 5kg cân nặng</li>
             </ul>
           </div>
-          <div className="rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Việc lặp lại — nên nhập ở bước này</p>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-app-ink-soft">
-              <li>- Demo sản phẩm cho 5 người / tuần</li>
+          <div className="rounded-xl border border-emerald-200/30 dark:border-emerald-950/20 bg-emerald-500/5 dark:bg-emerald-950/10 p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-500 flex items-center gap-1.5">
+              <span>⚡</span> Việc lặp lại — nên nhập ở bước này
+            </p>
+            <ul className="mt-2.5 space-y-1 text-xs leading-6 text-slate-500 dark:text-slate-400 font-semibold">
+              <li>- Demo sản phẩm trực tiếp cho 5 người / tuần</li>
               <li>- Code chức năng chính 5 buổi / tuần</li>
-              <li>- Tập 3 buổi / tuần</li>
+              <li>- Tập gym bền bỉ 3 buổi / tuần</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <details className="rounded-lg border border-app-line bg-app-surface p-3 sm:p-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-          Việc lặp lại khác chỉ số kết quả thế nào?
+      <details className="group rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-3 sm:p-4 [&::-webkit-details-marker]:hidden relative z-10">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-md px-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-350 focus-visible:outline-none p-1">
+          <span>💡 Việc lặp lại khác chỉ số kết quả thế nào?</span>
+          <ChevronDown className="h-4.5 w-4.5 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
         </summary>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">Việc lặp lại</p>
-            <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-              Việc bạn có thể mở lịch và làm trong tuần: viết 800 từ, tập 45 phút, gửi 5 email.
+        <div className="mt-4 border-t border-slate-200/40 dark:border-slate-800/40 pt-4 grid gap-3.5 sm:grid-cols-2">
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Việc lặp lại (Lead)</p>
+            <p className="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400 font-semibold">
+              Việc bạn có thể chủ động mở lịch ra và hoàn thành ngay trong tuần: viết 800 từ, tập thể dục 45 phút, gửi 5 email kết nối khách hàng.
             </p>
           </div>
-          <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chỉ số kết quả</p>
-            <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-              Con số hoặc trạng thái để xem cuối kỳ có tiến bộ không: tăng follower, giảm kg, có job mới, đạt IELTS 7.0.
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-widest text-rose-500">Chỉ số kết quả (Lag)</p>
+            <p className="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400 font-semibold">
+              Con số hoặc trạng thái để xem lại cuối kỳ xem nỗ lực có hiệu quả không: tăng 1000 follower, giảm 3kg, đạt chứng chỉ IELTS 7.5.
             </p>
           </div>
         </div>
@@ -220,29 +231,29 @@ export function LeadIndicatorsStepLab({
 
       <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
 
-      <div className="space-y-4">
+      <div className="space-y-5 relative z-10">
         {draft.leadIndicators.map((indicator, index) => (
           <article
             key={indicator.id}
-            className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-5 sm:p-6 transition-all duration-300 group"
+            className="relative overflow-hidden rounded-3xl border border-white/25 dark:border-slate-800/50 bg-white/70 dark:bg-slate-900/65 backdrop-blur-xl shadow-2xl p-5 sm:p-6 hover:scale-[1.01] hover:-translate-y-0.5 hover:shadow-indigo-500/5 transition-all duration-300 group"
             aria-labelledby={`tactic-card-title-${index}`}
           >
             {/* Background radial glow */}
             <div className="absolute -top-12 -left-12 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex items-start gap-2 sm:gap-3 relative z-10">
-              <GripVertical className="mt-1 hidden h-4 w-4 shrink-0 text-app-ink-muted sm:block cursor-grab" aria-hidden="true" />
+              <GripVertical className="mt-1 hidden h-4 w-4 shrink-0 text-slate-400 sm:block cursor-grab" aria-hidden="true" />
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/40 dark:border-slate-800/40 pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/40 dark:border-slate-800/40 pb-3.5">
                   <div>
-                    <p id={`tactic-card-title-${index}`} className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <p id={`tactic-card-title-${index}`} className="text-sm font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                       <span className="inline-flex h-5.5 w-5.5 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/30 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">
                         {index + 1}
                       </span>
                       Hành động lặp lại
                     </p>
-                    <p className="mt-1 text-xs text-app-ink-muted font-medium">
-                      {indicator.name || "Chưa đặt tên"} · <span className="text-indigo-600 dark:text-indigo-400 font-bold">{indicator.target || "0"}</span> {indicator.unit || "chưa có đơn vị"} / tuần
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                      {indicator.name || "Chưa đặt tên"} · <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{indicator.target || "0"}</span> {indicator.unit || "chưa có đơn vị"} / tuần
                     </p>
                   </div>
                   {draft.leadIndicators.length > 2 ? (
@@ -250,7 +261,7 @@ export function LeadIndicatorsStepLab({
                       type="button"
                       onClick={() => onRemoveIndicator(index)}
                       aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200/30 transition-all duration-200 active:scale-95"
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-extrabold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200/30 transition-all duration-200 active:scale-95"
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                       Xoá việc này
@@ -258,10 +269,11 @@ export function LeadIndicatorsStepLab({
                   ) : null}
                 </div>
 
-                <div className="mt-4 grid gap-4">
-                  <div>
-                    <label htmlFor={`tactic-name-${index}`} className={cn(labelClass, "font-bold text-slate-700 dark:text-slate-350")}>
-                      Mô tả hành động lặp lại
+                <div className="mt-5 grid gap-5">
+                  <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+                    <label htmlFor={`tactic-name-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
+                      <span className="text-lg">🏃</span>
+                      <span>Mô tả hành động lặp lại</span>
                     </label>
                     <Input
                       id={`tactic-name-${index}`}
@@ -269,27 +281,28 @@ export function LeadIndicatorsStepLab({
                       aria-describedby={showNameError(indicator, `name-${indicator.id}`) ? `tactic-name-${index}-error` : `tactic-name-${index}-helper`}
                       onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
                       placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
-                      className={cn(inputClass, "mt-1.5 focus:border-indigo-500 focus:ring-indigo-500/30 rounded-xl")}
+                      className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/30 rounded-xl")}
                     />
                     {showNameError(indicator, `name-${indicator.id}`) ? (
-                      <p id={`tactic-name-${index}-error`} role="alert" className={errorTextClass}>
+                      <p id={`tactic-name-${index}-error`} role="alert" className={cn(errorTextClass, "mt-1.5 text-xs font-bold text-rose-500")}>
                         Đặt tên cho việc lặp lại này.
                       </p>
                     ) : (
-                      <p id={`tactic-name-${index}-helper`} className={helperTextClass}>
+                      <p id={`tactic-name-${index}-helper`} className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>
                         Đặt tên bằng một hành động cụ thể bạn có thể tự kiểm soát và lặp lại trong tuần.
                       </p>
                     )}
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor={`tactic-target-${index}`} className={cn(labelClass, "font-bold text-slate-700 dark:text-slate-350")}>
-                        Số lần / tuần
+                    <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+                      <label htmlFor={`tactic-target-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
+                        <span className="text-lg">🔢</span>
+                        <span>Số lần / tuần</span>
                       </label>
                       
                       {/* Pill-shaped Picker cao cấp */}
-                      <div className="flex items-center bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-full p-1 w-full max-w-[170px] mt-1.5 shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/20">
+                      <div className="flex items-center bg-slate-100/70 dark:bg-slate-900/60 border border-slate-250 dark:border-slate-800/80 rounded-full p-1.5 w-full max-w-[170px] mt-2 shadow-inner transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/20">
                         <button
                           type="button"
                           onClick={() => {
@@ -299,7 +312,7 @@ export function LeadIndicatorsStepLab({
                             const newVal = Math.max(1, currentVal - 1);
                             onIndicatorChange(index, "target", newVal.toString());
                           }}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all active:scale-90 shadow-sm"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-350 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all active:scale-90 shadow-sm"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
@@ -330,25 +343,26 @@ export function LeadIndicatorsStepLab({
                             const newVal = Math.min(21, currentVal + 1);
                             onIndicatorChange(index, "target", newVal.toString());
                           }}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all active:scale-90 shadow-sm"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-350 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all active:scale-90 shadow-sm"
                         >
                           <Plus className="h-4 w-4" />
                         </button>
                       </div>
                       {indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`) ? (
-                        <p id={`tactic-target-${index}-error`} role="alert" className={errorTextClass}>
+                        <p id={`tactic-target-${index}-error`} role="alert" className={cn(errorTextClass, "mt-1.5 text-xs font-bold text-rose-500")}>
                           {indicatorTargetErrors[index]}
                         </p>
                       ) : (
-                        <p id={`tactic-target-${index}-helper`} className={helperTextClass}>
+                        <p id={`tactic-target-${index}-helper`} className={cn(helperTextClass, "mt-2 text-[11px] font-semibold text-slate-450")}>
                           Nhập hoặc dùng nút xoay để tăng/giảm mục tiêu.
                         </p>
                       )}
                     </div>
 
-                    <div>
-                      <label htmlFor={`tactic-unit-${index}`} className={labelClass}>
-                        Đơn vị
+                    <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+                      <label htmlFor={`tactic-unit-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
+                        <span className="text-lg">🏷️</span>
+                        <span>Đơn vị</span>
                       </label>
                       <Input
                         id={`tactic-unit-${index}`}
@@ -361,6 +375,7 @@ export function LeadIndicatorsStepLab({
                         }
                         className={cn(
                           inputClass,
+                          "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/30 rounded-xl",
                           indicatorUnitErrors[index] &&
                             shouldShowFieldError(`unit-${indicator.id}`) &&
                             "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
@@ -369,11 +384,11 @@ export function LeadIndicatorsStepLab({
                         placeholder="buổi, bài, lần..."
                       />
                       {indicatorUnitErrors[index] && shouldShowFieldError(`unit-${indicator.id}`) ? (
-                        <p id={`tactic-unit-${index}-error`} role="alert" className={errorTextClass}>
+                        <p id={`tactic-unit-${index}-error`} role="alert" className={cn(errorTextClass, "mt-1.5 text-xs font-bold text-rose-500")}>
                           {indicatorUnitErrors[index]}
                         </p>
                       ) : (
-                        <p id={`tactic-unit-${index}-helper`} className={helperTextClass}>
+                        <p id={`tactic-unit-${index}-helper`} className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>
                           Dùng đơn vị gần với hành động: buổi, bài, lần, phút...
                         </p>
                       )}
@@ -381,19 +396,19 @@ export function LeadIndicatorsStepLab({
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
+                <div className="mt-5 rounded-xl border border-white/10 dark:border-slate-850/20 bg-slate-50/20 dark:bg-slate-950/10 p-3.5">
                   <button
                     type="button"
-                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.99]"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-2 text-left text-sm font-bold text-slate-700 dark:text-slate-350 focus-visible:outline-none active:scale-[0.99]"
                     aria-expanded={Boolean(expandedCommitments[indicator.id])}
                     aria-controls={`tactic-commitment-${index}`}
                     onClick={() => toggleCommitmentEditor(indicator.id)}
                   >
-                    <span>Cài đặt nâng cao</span>
-                    <span className="flex items-center gap-2 text-xs font-medium text-app-ink-muted">
+                    <span>🛠️ Cài đặt cam kết nâng cao (Thử thách Stoic)</span>
+                    <span className="flex items-center gap-2 text-xs font-semibold text-slate-400">
                       <ChevronDown
                         className={cn(
-                          "h-4 w-4 transition-transform duration-150",
+                          "h-4.5 w-4.5 transition-transform duration-150",
                           expandedCommitments[indicator.id] && "rotate-180",
                         )}
                         aria-hidden="true"
@@ -405,14 +420,14 @@ export function LeadIndicatorsStepLab({
                   </p>
                   {expandedCommitments[indicator.id] ? (
                     <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div>
-                          <p className={labelClass}>Loại</p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="rounded-xl border border-white/10 dark:border-slate-850/20 bg-slate-50/10 dark:bg-slate-950/10 p-4">
+                          <p className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>📌 Loại hành động</p>
                           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                             {(
                               [
-                                { value: "core", label: "Cốt lõi", hint: "Bắt buộc, ảnh hưởng trực tiếp tới mục tiêu." },
-                                { value: "optional", label: "Tùy chọn", hint: "Làm thêm nếu còn thời gian/sức." },
+                                { value: "core", label: "Cốt lõi 🎯", hint: "Bắt buộc leo núi" },
+                                { value: "optional", label: "Tùy chọn 🌱", hint: "Làm thêm khi có sức" },
                               ] as const
                             ).map((option) => {
                               const active = indicator.type === option.value;
@@ -421,69 +436,78 @@ export function LeadIndicatorsStepLab({
                                   key={option.value}
                                   type="button"
                                   aria-pressed={active}
-                                  onClick={() => onIndicatorChange(index, "type", option.value as TacticType)}
-                                  className={cn(optionButtonClass, "min-h-11 px-4 py-3", active && optionButtonActiveClass)}
+                                  onClick={() => {
+                                    soundService.click();
+                                    onIndicatorChange(index, "type", option.value as TacticType);
+                                  }}
+                                  className={cn(optionButtonClass, "min-h-11 px-3 py-2.5", active && optionButtonActiveClass)}
                                 >
-                                  <span>{option.label}</span>
-                                  <span className="text-xs font-normal opacity-80">{option.hint}</span>
+                                  <span className="text-xs font-extrabold">{option.label}</span>
+                                  <span className="text-[9px] font-semibold opacity-75 mt-0.5 leading-snug">{option.hint}</span>
                                 </button>
                               );
                             })}
                           </div>
                         </div>
 
-                        <div>
-                          <label htmlFor={`tactic-cadence-${index}`} className={labelClass}>
-                            Nhịp
-                          </label>
-                          <Select
-                            value={indicator.cadence}
-                            onValueChange={(value) =>
-                              onIndicatorChange(index, "cadence", value as LeadIndicatorDraft["cadence"])
-                            }
-                          >
-                            <SelectTrigger
-                              id={`tactic-cadence-${index}`}
-                              aria-label={`Chọn nhịp cho việc ${index + 1}`}
-                              className={selectTriggerClass}
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className={selectContentClass}>
-                              <SelectItem value="spread" className={selectItemClass}>
-                                Trải đều
-                              </SelectItem>
-                              <SelectItem value="frontload" className={selectItemClass}>
-                                Đầu tuần
-                              </SelectItem>
-                              <SelectItem value="backload" className={selectItemClass}>
-                                Cuối tuần
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                        <div className="rounded-xl border border-white/10 dark:border-slate-850/20 bg-slate-50/10 dark:bg-slate-950/10 p-4">
+                          <p className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>⚡ Nhịp phân bổ</p>
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                            {(
+                              [
+                                { value: "spread", label: "Trải đều 🗓️", hint: "Cả tuần" },
+                                { value: "frontload", label: "Đầu tuần 🚀", hint: "Xong sớm" },
+                                { value: "backload", label: "Cuối tuần 🌅", hint: "Về đích" },
+                              ] as const
+                            ).map((option) => {
+                              const active = indicator.cadence === option.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  aria-pressed={active}
+                                  onClick={() => {
+                                    soundService.click();
+                                    onIndicatorChange(index, "cadence", option.value);
+                                  }}
+                                  className={cn(optionButtonClass, "min-h-11 px-2.5 py-2.5", active && optionButtonActiveClass)}
+                                >
+                                  <span className="text-xs font-extrabold">{option.label}</span>
+                                  <span className="text-[9px] font-semibold opacity-75 mt-0.5 leading-snug">{option.hint}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
 
-                      {COMMITMENT_FIELDS.map((field) => (
-                        <div key={field.key}>
-                          <label htmlFor={`tactic-commitment-${field.key}-${index}`} className={labelClass}>
-                            {field.label}
-                          </label>
-                          <Textarea
-                            id={`tactic-commitment-${field.key}-${index}`}
-                            rows={3}
-                            value={indicator.commitment?.[field.key] ?? ""}
-                            onChange={(event) =>
-                              onIndicatorChange(
-                                index,
-                                "commitment",
-                                normalizeCommitmentChange(indicator.commitment, field.key, event.target.value),
-                              )
-                            }
-                            className={textareaClass}
-                          />
-                        </div>
-                      ))}
+                      <div className="mt-4 grid gap-3.5">
+                        {COMMITMENT_FIELDS.map((field) => (
+                          <div key={field.key} className="rounded-2xl border border-slate-200/50 dark:border-slate-800/40 bg-white/50 dark:bg-slate-950/20 p-4.5 transition-all duration-300 hover:border-indigo-500/20 focus-within:border-indigo-500/30 focus-within:ring-2 focus-within:ring-indigo-500/5">
+                            <label htmlFor={`tactic-commitment-${field.key}-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2.5")}>
+                              <span className="text-lg">{field.emoji}</span>
+                              <span className="text-xs tracking-wide">{field.label}</span>
+                            </label>
+                            <Textarea
+                              id={`tactic-commitment-${field.key}-${index}`}
+                              rows={2}
+                              value={indicator.commitment?.[field.key] ?? ""}
+                              onChange={(event) =>
+                                onIndicatorChange(
+                                  index,
+                                  "commitment",
+                                  normalizeCommitmentChange(indicator.commitment, field.key, event.target.value),
+                                )
+                              }
+                              placeholder={field.placeholder}
+                              className={cn(
+                                textareaClass,
+                                "min-h-[70px] bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20 rounded-xl text-xs font-semibold leading-relaxed"
+                              )}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : null}
                 </div>

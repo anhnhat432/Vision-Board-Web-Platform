@@ -320,17 +320,21 @@ export function OutcomeStepLab({
         </div>
       ) : null}
 
-      <section className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-6 sm:p-8 transition-all duration-300" aria-labelledby="outcome-required-title">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <section className="relative overflow-hidden rounded-3xl border border-white/20 dark:border-slate-850/40 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl p-6 sm:p-8 transition-all duration-300 group" aria-labelledby="outcome-required-title">
+        {/* Background glow effects */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-all duration-1000" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-1000" />
+
+        <div className="flex flex-wrap items-start justify-between gap-3 relative z-10">
           <div>
-            <p id="outcome-required-title" className="text-sm font-semibold text-app-ink">
+            <p id="outcome-required-title" className="text-sm font-extrabold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
               Chốt phần bắt buộc trước
             </p>
-            <p className="mt-1 text-xs text-app-ink-soft">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
               Ba mục này đủ để đi tiếp. Khung gợi ý phía dưới chỉ là phần hỗ trợ nhanh.
             </p>
           </div>
-          <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs font-semibold text-app-ink-muted">
+          <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-150/30">
             Bắt buộc
           </span>
         </div>
@@ -342,39 +346,42 @@ export function OutcomeStepLab({
           week12={draft.week12Outcome}
         />
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-6 space-y-5 relative z-10">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="milestone-week-4" className={labelClass}>
-                Cột mốc sau 4 tuần
+            <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+              <label htmlFor="milestone-week-4" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+                <span className="text-lg animate-bounce duration-1000">🚀</span>
+                <span>Cột mốc sau 4 tuần</span>
               </label>
               <Input
                 id="milestone-week-4"
                 value={draft.week4Milestone}
-                className={inputClass}
+                className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
                 onChange={(event) => onChange("week4Milestone", event.target.value)}
                 placeholder="Ví dụ: Hoàn thành bản nháp 1..."
               />
-              <p className={helperTextClass}>Mục tiêu đạt được sau 1/3 chặng đường.</p>
+              <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Mục tiêu đạt được sau 1/3 chặng đường.</p>
             </div>
-            <div>
-              <label htmlFor="milestone-week-8" className={labelClass}>
-                Cột mốc sau 8 tuần
+            <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+              <label htmlFor="milestone-week-8" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+                <span className="text-lg animate-bounce duration-1000">🚩</span>
+                <span>Cột mốc sau 8 tuần</span>
               </label>
               <Input
                 id="milestone-week-8"
                 value={draft.week8Milestone}
-                className={inputClass}
+                className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
                 onChange={(event) => onChange("week8Milestone", event.target.value)}
                 placeholder="Ví dụ: Hoàn thiện tính năng chính..."
               />
-              <p className={helperTextClass}>Mục tiêu đạt được sau 2/3 chặng đường.</p>
+              <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Mục tiêu đạt được sau 2/3 chặng đường.</p>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="week-12-outcome" className={labelClass}>
-              Đích đến sau 12 tuần (Tuần 12)
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <label htmlFor="week-12-outcome" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+              <span className="text-lg animate-pulse">🏆</span>
+              <span>Đích đến sau 12 tuần (Tuần 12)</span>
             </label>
             <Textarea
               id="week-12-outcome"
@@ -384,7 +391,7 @@ export function OutcomeStepLab({
               aria-describedby={milestoneError ? "week-12-outcome-error" : "week-12-outcome-helper"}
               className={cn(
                 textareaClass,
-                "min-h-[100px]",
+                "min-h-[90px] bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500",
                 milestoneError &&
                   "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
               )}
@@ -392,82 +399,88 @@ export function OutcomeStepLab({
               placeholder="Ví dụ: Sau 12 tuần, tôi có bản portfolio 3 case study đủ gửi đi ứng tuyển."
             />
             {milestoneError ? (
-              <p id="week-12-outcome-error" role="alert" className={errorTextClass}>
+              <p id="week-12-outcome-error" role="alert" className={cn(errorTextClass, "mt-1 text-xs font-bold text-rose-500")}>
                 {milestoneError}
               </p>
             ) : (
-              <p id="week-12-outcome-helper" className={helperTextClass}>
+              <p id="week-12-outcome-helper" className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>
                 Mô tả trạng thái bạn muốn đạt được khi 12 tuần kết thúc. Đây là đích đến cuối chu kỳ.
               </p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="vision-12-week" className={labelClass}>
-              Vì sao mục tiêu này quan trọng?
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <label htmlFor="vision-12-week" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+              <span className="text-lg">🌟</span>
+              <span>Vì sao mục tiêu này quan trọng?</span>
             </label>
             <Textarea
               id="vision-12-week"
               rows={3}
               value={draft.vision12Week}
               onChange={(event) => onChange("vision12Week", event.target.value)}
-              className={textareaClass}
+              className={cn(textareaClass, "min-h-[80px] bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
               placeholder="Vì sao kết quả này đáng để bạn dành 12 tuần tới?"
             />
-            <p className={helperTextClass}>Một câu đủ thật giúp bạn giữ nhịp khi tuần bận lên.</p>
+            <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Một câu đủ thật giúp bạn giữ nhịp khi tuần bận lên.</p>
           </div>
 
-          <div>
-            <label htmlFor="lag-metric-name" className={labelClass}>
-              Tên chỉ số cần theo dõi
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <label htmlFor="lag-metric-name" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+              <span className="text-lg">🎯</span>
+              <span>Tên chỉ số cần theo dõi</span>
             </label>
             <Input
               id="lag-metric-name"
               value={draft.lagMetricName}
               onChange={(event) => onChange("lagMetricName", event.target.value)}
-              className={inputClass}
+              className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
               placeholder="Ví dụ: số bài xuất bản, số kg giảm, doanh thu mới..."
             />
             {lagMetricPreview ? (
-              <p className={helperTextClass}>
-                Đang theo dõi: <span className="font-semibold text-app-accent">{lagMetricPreview}</span>
+              <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-bold text-indigo-500 dark:text-indigo-400")}>
+                Đang theo dõi: <span>{lagMetricPreview}</span>
               </p>
             ) : null}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_140px]">
-            <div>
-              <label htmlFor="lag-metric-target" className={labelClass}>
-                Con số mục tiêu
-              </label>
-              <Input
-                id="lag-metric-target"
-                type="number"
-                inputMode="decimal"
-                value={draft.lagMetricTarget}
-                onChange={(event) => onChange("lagMetricTarget", event.target.value)}
-                className={inputClass}
-                placeholder="VD: 12"
-              />
-              <p className={helperTextClass}>Con số mục tiêu cuối chu kỳ.</p>
-            </div>
-            <div>
-              <label htmlFor="lag-metric-unit" className={labelClass}>
-                Đơn vị
-              </label>
-              <Input
-                id="lag-metric-unit"
-                value={draft.lagMetricUnit}
-                onChange={(event) => onChange("lagMetricUnit", event.target.value)}
-                className={inputClass}
-                placeholder="bài, kg, triệu"
-              />
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
+              <div>
+                <label htmlFor="lag-metric-target" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+                  <span className="text-lg">📊</span>
+                  <span>Con số mục tiêu</span>
+                </label>
+                <Input
+                  id="lag-metric-target"
+                  type="number"
+                  inputMode="decimal"
+                  value={draft.lagMetricTarget}
+                  onChange={(event) => onChange("lagMetricTarget", event.target.value)}
+                  className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
+                  placeholder="VD: 12"
+                />
+                <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Con số mục tiêu cuối chu kỳ.</p>
+              </div>
+              <div>
+                <label htmlFor="lag-metric-unit" className={cn(labelClass, "text-slate-800 dark:text-slate-200 font-bold mb-2 block")}>
+                  Đơn vị
+                </label>
+                <Input
+                  id="lag-metric-unit"
+                  value={draft.lagMetricUnit}
+                  onChange={(event) => onChange("lagMetricUnit", event.target.value)}
+                  className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
+                  placeholder="bài, kg, triệu"
+                />
+              </div>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="goal-type" className={labelClass}>
-              Loại mục tiêu
+          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <label htmlFor="goal-type" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
+              <span className="text-lg">🧬</span>
+              <span>Loại mục tiêu</span>
             </label>
             <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
               <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu" className={selectTriggerClass}>
