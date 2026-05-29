@@ -249,63 +249,72 @@ export function SmartGoalStepShell({
           transform: "perspective(1000px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) scale3d(1, 1, 1)",
           transition: "transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease-out",
         } as React.CSSProperties}
-        className="group relative mb-6 rounded-2xl border border-white/20 dark:border-white/10 bg-gradient-to-br from-indigo-500/10 via-app-surface to-emerald-500/10 p-5 sm:p-6 shadow-md overflow-hidden backdrop-blur-md"
+        className="group relative mb-6 rounded-2xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-slate-900/45 p-6 sm:p-7 shadow-lg overflow-hidden backdrop-blur-xl transition-all duration-300"
       >
+        {/* Vòng tròn màu trừu tượng tạo chiều sâu kính mờ Glassmorphism */}
+        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-10 -right-10 w-44 h-44 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+
         {/* Lớp bóng chiếu sáng 3D Glare */}
         <div
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
-            background: "radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.18) 0%, transparent 60%)",
+            background: "radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.22) 0%, transparent 65%)",
           } as React.CSSProperties}
         />
-        <div className="absolute top-3 right-4 flex items-center gap-1.5 text-xs text-app-accent/80 font-medium select-none pointer-events-none">
+        
+        <div className="absolute top-4 right-5 flex items-center gap-1.5 text-xs text-app-accent/80 font-bold select-none pointer-events-none">
           <span>🔮 Thẻ Bài Tương Lai</span>
         </div>
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-accent mb-3.5 flex items-center gap-1.5">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-app-accent/70 mb-4 flex items-center gap-1.5 select-none pointer-events-none">
           <span>✨</span> MỤC TIÊU CỦA BẠN (LIVE PREVIEW)
         </p>
-        <div className="text-base sm:text-lg leading-relaxed text-app-ink/90 font-serif">
+
+        <div className="text-base sm:text-[17px] leading-loose text-slate-800 dark:text-slate-200 font-serif tracking-wide select-text">
           Tôi quyết tâm{" "}
-          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300",
+          <span className={cn("transition-all duration-300 pb-0.5",
             isSpecFilled
-              ? "bg-emerald-100/90 text-emerald-900 dark:bg-emerald-950/70 dark:text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.2)]"
-              : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+              ? "text-emerald-600 dark:text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.25)] border-b-2 border-emerald-500/40"
+              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
           )}>
-            {isSpecFilled ? specText : "[làm việc cụ thể này]"}
-          </span>{" "}
-          🎯. Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
-          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300",
+            {isSpecFilled ? specText : "[hành động cụ thể]"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">🎯</span>. 
+          Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
+          <span className={cn("transition-all duration-300 pb-0.5",
             isMeasFilled
-              ? "bg-blue-100/90 text-blue-900 dark:bg-blue-950/70 dark:text-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.2)]"
-              : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+              ? "text-blue-600 dark:text-blue-400 font-bold drop-shadow-[0_0_8px_rgba(59,130,246,0.25)] border-b-2 border-blue-500/40"
+              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
           )}>
             {isMeasFilled ? `${measTarget} ${measUnit}` : "[chỉ số mục tiêu]"}
-          </span>{" "}
-          📊. Tôi cam kết dành ra{" "}
-          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300",
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">📊</span>. 
+          Tôi cam kết dành ra{" "}
+          <span className={cn("transition-all duration-300 pb-0.5",
             isAchFilled
-              ? "bg-amber-100/90 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)]"
-              : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+              ? "text-amber-600 dark:text-amber-500 font-bold drop-shadow-[0_0_8px_rgba(245,158,11,0.25)] border-b-2 border-amber-500/40"
+              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
           )}>
-            {isAchFilled ? `${achHours} giờ mỗi tuần` : "[số tiếng/tuần]"}
-          </span>{" "}
-          ⚡ để hành động. Việc này rất quan trọng vì{" "}
-          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300",
+            {isAchFilled ? `${achHours} giờ mỗi tuần` : "[thời gian cam kết]"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">⚡</span> để hành động. 
+          Việc này rất quan trọng vì{" "}
+          <span className={cn("transition-all duration-300 pb-0.5",
             isRelFilled
-              ? "bg-rose-100/90 text-rose-900 dark:bg-rose-950/70 dark:text-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.2)]"
-              : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+              ? "text-rose-600 dark:text-rose-400 font-bold drop-shadow-[0_0_8px_rgba(244,63,94,0.25)] border-b-2 border-rose-500/40"
+              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
           )}>
             {isRelFilled ? relReason : "[lý do sâu sắc của bạn]"}
-          </span>{" "}
-          ❤️ và thời hạn hoàn thành trước{" "}
-          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300",
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">❤️</span> và thời hạn hoàn thành trước{" "}
+          <span className={cn("transition-all duration-300 pb-0.5",
             isTimeFilled
-              ? "bg-purple-100/90 text-purple-900 dark:bg-purple-950/70 dark:text-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
-              : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+              ? "text-purple-600 dark:text-purple-400 font-bold drop-shadow-[0_0_8px_rgba(168,85,247,0.25)] border-b-2 border-purple-500/40"
+              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
           )}>
-            {isTimeFilled ? timeDate : "[thời gian đích]"}
-          </span>{" "}
-          📅.
+            {isTimeFilled ? timeDate : "[ngày hoàn thành]"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">📅</span>.
         </div>
       </div>
 
