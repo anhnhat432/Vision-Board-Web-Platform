@@ -333,11 +333,12 @@ npm run check      # daily fast check
 npm run check:full # full frontend release gate
 ```
 
-For small edits, use `check:changed` first. It only lints files changed from
-`HEAD` and runs Vitest tests affected by those changed files. `npm run check` is
-the daily pre-commit gate and runs `typecheck`, `lint`, the fast Vitest group,
-and `build`. Use `check:full` before release-sensitive changes because it runs
-the full frontend Vitest suite through `test:all`.
+For small edits, use `check:changed` first. It only lints frontend files changed
+from `HEAD`, runs changed test files directly, and runs fast related tests for
+changed `src` source files. `npm run check` is the daily pre-commit gate and
+runs `typecheck`, `lint`, the fast Vitest group, and `build`. Use `check:full`
+before release-sensitive changes because it runs the full frontend Vitest suite
+through `test:all`.
 
 Backend:
 

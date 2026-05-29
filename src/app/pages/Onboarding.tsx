@@ -27,6 +27,7 @@ import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
 import { ZenBreathingGate } from "./Onboarding/components/ZenBreathingGate";
 import { Slider } from "../components/ui/slider";
 import { trackAnalyticsEvent } from "../utils/analytics";
+import { VisionMapIllustration } from "../components/illustrations/VisionMapIllustration";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -39,20 +40,122 @@ type AutoSaveDraftStatus = "idle" | "saving" | "saved";
 const JOURNEY_STEPS = [
   {
     icon: Heart,
-    title: "Chấm 8 lĩnh vực",
+    title: "🎯 Chấm 8 lĩnh vực",
     description: "Nhìn nhanh sức khỏe hiện tại của từng phần trong cuộc sống.",
   },
   {
     icon: Compass,
-    title: "Chọn trọng tâm",
+    title: "💡 Chọn trọng tâm",
     description: "Dữ liệu này mở Góc nhìn cuộc sống để chọn đúng nơi nên ưu tiên.",
   },
   {
     icon: Target,
-    title: "Đi tiếp tới mục tiêu SMART",
+    title: "🚀 Đi tiếp tới mục tiêu SMART",
     description: "Trọng tâm được chuyển thành mục tiêu rõ và kế hoạch 12 tuần.",
   },
 ] satisfies Array<{ icon: LucideIcon; title: string; description: string }>;
+
+interface AreaColorConfig {
+  bgLight: string;
+  text: string;
+  border: string;
+  accent: string;
+  glow: string;
+}
+
+const getAreaColorConfig = (name: string): AreaColorConfig => {
+  switch (name) {
+    case "Career":
+      return {
+        bgLight: "bg-blue-50 dark:bg-blue-950/20",
+        text: "text-blue-600 dark:text-blue-400",
+        border: "border-blue-100 dark:border-blue-900/30",
+        accent: "#2563eb",
+        glow: "shadow-blue-500/10 dark:shadow-blue-500/20",
+      };
+    case "Finance":
+      return {
+        bgLight: "bg-amber-50 dark:bg-amber-950/20",
+        text: "text-amber-600 dark:text-amber-400",
+        border: "border-amber-100 dark:border-amber-900/30",
+        accent: "#d97706",
+        glow: "shadow-amber-500/10 dark:shadow-amber-500/20",
+      };
+    case "Health":
+      return {
+        bgLight: "bg-emerald-50 dark:bg-emerald-950/20",
+        text: "text-emerald-600 dark:text-emerald-400",
+        border: "border-emerald-100 dark:border-emerald-900/30",
+        accent: "#059669",
+        glow: "shadow-emerald-500/10 dark:shadow-emerald-500/20",
+      };
+    case "Education":
+      return {
+        bgLight: "bg-indigo-50 dark:bg-indigo-950/20",
+        text: "text-indigo-600 dark:text-indigo-400",
+        border: "border-indigo-100 dark:border-indigo-900/30",
+        accent: "#4f46e5",
+        glow: "shadow-indigo-500/10 dark:shadow-indigo-500/20",
+      };
+    case "Relationships":
+      return {
+        bgLight: "bg-rose-50 dark:bg-rose-950/20",
+        text: "text-rose-600 dark:text-rose-400",
+        border: "border-rose-100 dark:border-rose-900/30",
+        accent: "#e11d48",
+        glow: "shadow-rose-500/10 dark:shadow-rose-500/20",
+      };
+    case "Family":
+      return {
+        bgLight: "bg-teal-50 dark:bg-teal-950/20",
+        text: "text-teal-600 dark:text-teal-400",
+        border: "border-teal-100 dark:border-teal-900/30",
+        accent: "#0d9488",
+        glow: "shadow-teal-500/10 dark:shadow-teal-500/20",
+      };
+    case "Personal Growth":
+      return {
+        bgLight: "bg-orange-50 dark:bg-orange-950/20",
+        text: "text-orange-600 dark:text-orange-400",
+        border: "border-orange-100 dark:border-orange-900/30",
+        accent: "#ea580c",
+        glow: "shadow-orange-500/10 dark:shadow-orange-500/20",
+      };
+    case "Leisure":
+      return {
+        bgLight: "bg-sky-50 dark:bg-sky-950/20",
+        text: "text-sky-600 dark:text-sky-400",
+        border: "border-sky-100 dark:border-sky-900/30",
+        accent: "#0284c7",
+        glow: "shadow-sky-500/10 dark:shadow-sky-500/20",
+      };
+    default:
+      return {
+        bgLight: "bg-app-accent-soft",
+        text: "text-app-accent",
+        border: "border-app-line",
+        accent: "var(--app-accent)",
+        glow: "shadow-app-accent/5",
+      };
+  }
+};
+
+const getPillColor = (item: string) => {
+  switch (item) {
+    case "8 lĩnh vực":
+      return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/30";
+    case "3 phút":
+      return "bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-300 border-amber-100 dark:border-amber-900/30";
+    case "Góc nhìn cuộc sống":
+      return "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-300 border-indigo-100 dark:border-indigo-900/30";
+    case "mục tiêu SMART":
+      return "bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-300 border-rose-100 dark:border-rose-900/30";
+    case "12 tuần":
+      return "bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border-blue-100 dark:border-blue-900/30";
+    default:
+      return "bg-app-bg text-app-ink-soft border-app-line";
+  }
+};
 
 const FEATURE_PILLS = ["8 lĩnh vực", "3 phút", "Góc nhìn cuộc sống", "mục tiêu SMART", "12 tuần"];
 
@@ -411,68 +514,77 @@ export function Onboarding() {
 
               {draftBanner}
 
-              <EmptyState
-                as="section"
-                align="left"
-                headingLevel={1}
-                icon={<Compass className="h-6 w-6" aria-hidden="true" />}
-                eyebrow="BẮT ĐẦU · CÂN BẰNG CUỘC SỐNG"
-                title="Cùng xem bức tranh hiện tại của bạn."
-                description="Dear Our Future giúp bạn chuyển hóa tầm nhìn dài hạn thành mục tiêu SMART và kế hoạch hành động 12 tuần cụ thể. Hãy đánh giá 8 lĩnh vực cuộc sống để tìm ra nơi lệch nhịp cần ưu tiên nhất."
-                actions={
-                  <div className="flex flex-wrap gap-2.5">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                      onClick={() => setShowBreathing(true)}
-                    >
-                      Tập thở & Bắt đầu (10s)
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
-                      onClick={handleStartAssessment}
-                    >
-                      Bắt đầu nhanh
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
-                      onClick={handleDefer}
-                    >
-                      Để sau
-                    </button>
-                  </div>
-                }
-              >
-                <div className="grid gap-4 md:grid-cols-3">
-                  {JOURNEY_STEPS.map((item) => {
-                    const Icon = item.icon;
+              <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-center">
+                <div className="space-y-6">
+                  <EmptyState
+                    as="section"
+                    align="left"
+                    headingLevel={1}
+                    icon={<Compass className="h-6 w-6" aria-hidden="true" />}
+                    eyebrow="BẮT ĐẦU · CÂN BẰNG CUỘC SỐNG"
+                    title="Cùng xem bức tranh hiện tại của bạn."
+                    description="Dear Our Future giúp bạn chuyển hóa tầm nhìn dài hạn thành mục tiêu SMART và kế hoạch hành động 12 tuần cụ thể. Hãy đánh giá 8 lĩnh vực cuộc sống để tìm ra nơi lệch nhịp cần ưu tiên nhất."
+                    className="bg-gradient-to-br from-emerald-500/5 via-app-surface to-teal-500/5"
+                    actions={
+                      <div className="flex flex-wrap gap-2.5">
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                          onClick={() => setShowBreathing(true)}
+                        >
+                          Tập thở & Bắt đầu (10s)
+                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
+                          onClick={handleStartAssessment}
+                        >
+                          Bắt đầu nhanh
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
+                          onClick={handleDefer}
+                        >
+                          Để sau
+                        </button>
+                      </div>
+                    }
+                  >
+                    <div className="grid gap-4 md:grid-cols-3">
+                      {JOURNEY_STEPS.map((item) => {
+                        const Icon = item.icon;
 
-                    return (
-                      <article key={item.title} className="group surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                          <Icon className="h-4 w-4" aria-hidden="true" />
-                        </div>
-                        <h2 className="mt-3 text-sm font-medium text-app-ink">{item.title}</h2>
-                        <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">{item.description}</p>
-                      </article>
-                    );
-                  })}
-                </div>
+                        return (
+                          <article key={item.title} className="group surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                              <Icon className="h-4 w-4" aria-hidden="true" />
+                            </div>
+                            <h2 className="mt-3 text-sm font-medium text-app-ink">{item.title}</h2>
+                            <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">{item.description}</p>
+                          </article>
+                        );
+                      })}
+                    </div>
 
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {FEATURE_PILLS.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs font-medium text-app-ink-soft"
-                    >
-                      {item}
-                    </span>
-                  ))}
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {FEATURE_PILLS.map((item) => (
+                        <span
+                          key={item}
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold ${getPillColor(item)}`}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </EmptyState>
                 </div>
-              </EmptyState>
+                <div className="hidden lg:flex flex-col items-center justify-center surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-6 shadow-sm hover:shadow-md transition-shadow h-full min-h-[360px]">
+                  <VisionMapIllustration className="w-full h-auto max-w-[280px] text-app-accent opacity-90 animate-[float_4s_ease-in-out_infinite]" />
+                  <p className="mt-4 text-xs font-medium italic text-emerald-800/70 dark:text-emerald-300/70">Thiết lập bản đồ cuộc đời của riêng bạn</p>
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -537,19 +649,25 @@ export function Onboarding() {
             const AreaIcon = getCalmLifeAreaIcon(area.name);
             const areaLabel = getLifeAreaLabel(area.name);
             const isAreaReviewed = reviewedAreaIndices.has(index);
+            const colorConfig = getAreaColorConfig(area.name);
 
             return (
-              <article key={area.name} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+              <article
+                key={area.name}
+                className={`surface-raised rounded-xl border p-5 transition-all duration-200 shadow-sm hover:shadow ${
+                  isAreaReviewed ? colorConfig.border : "border-app-line"
+                }`}
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                      <AreaIcon className="h-4 w-4" aria-hidden="true" />
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-inner ${colorConfig.bgLight} ${colorConfig.text}`}>
+                      <AreaIcon className="h-4.5 w-4.5" aria-hidden="true" />
                     </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-sm font-medium text-app-ink">{areaLabel}</h2>
+                        <h2 className={`text-sm font-bold ${isAreaReviewed ? colorConfig.text : "text-app-ink"}`}>{areaLabel}</h2>
                         {isAreaReviewed ? (
-                          <span className="rounded-full bg-app-accent-soft px-2 py-0.5 text-xs font-medium text-app-accent">
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${colorConfig.bgLight} ${colorConfig.text}`}>
                             Đã rà
                           </span>
                         ) : null}
@@ -560,11 +678,18 @@ export function Onboarding() {
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-2">
-                    <p className="font-serif text-3xl font-medium leading-none text-app-ink tabular-nums">{area.score}</p>
+                    <div className="flex items-center gap-1.5">
+                      {area.score >= 9 ? (
+                        <span className="text-[10px] font-bold text-amber-500 animate-[bounce_1s_infinite]">🌟 Xuất sắc</span>
+                      ) : area.score >= 8 ? (
+                        <span className="text-[10px] font-bold text-amber-500 animate-pulse">⭐ Đỉnh cao</span>
+                      ) : null}
+                      <p className={`font-serif text-3xl font-bold leading-none tabular-nums ${isAreaReviewed ? colorConfig.text : "text-app-ink"}`}>{area.score}</p>
+                    </div>
                     {!isAreaReviewed ? (
                       <button
                         type="button"
-                        className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                        className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                         onClick={() => handleSkipArea(index)}
                       >
                         Để sau
@@ -580,7 +705,7 @@ export function Onboarding() {
                     min={0}
                     max={10}
                     step={1}
-                    className="w-full"
+                    className={`w-full ${colorConfig.text}`}
                     aria-label={`Điểm ${areaLabel}`}
                   />
                   <div className="mt-2 flex items-center justify-between text-xs text-app-ink-muted">

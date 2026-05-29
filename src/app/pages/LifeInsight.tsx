@@ -29,6 +29,216 @@ const INTENT_ICONS: Record<UserIntentId, LucideIcon> = {
   unsure: Sparkles,
 };
 
+interface AreaColorConfig {
+  bgLight: string;
+  text: string;
+  border: string;
+  accent: string;
+  hoverBg: string;
+  selectedBg: string;
+  iconBg: string;
+  iconSelectedBg: string;
+}
+
+const getAreaColorConfig = (name: string): AreaColorConfig => {
+  switch (name) {
+    case "Career":
+      return {
+        bgLight: "bg-blue-50 dark:bg-blue-950/20",
+        text: "text-blue-600 dark:text-blue-400",
+        border: "border-blue-200 dark:border-blue-900/30",
+        accent: "text-blue-700 dark:text-blue-300",
+        hoverBg: "hover:bg-blue-50/50 hover:border-blue-300 dark:hover:bg-blue-950/10",
+        selectedBg: "border-blue-500 bg-gradient-to-br from-blue-500/10 to-blue-500/5 ring-1 ring-blue-500/20 shadow-md shadow-blue-500/10",
+        iconBg: "bg-blue-100/60 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 group-hover:bg-blue-100",
+        iconSelectedBg: "bg-blue-600 text-white",
+      };
+    case "Finance":
+      return {
+        bgLight: "bg-amber-50 dark:bg-amber-950/20",
+        text: "text-amber-600 dark:text-amber-400",
+        border: "border-amber-200 dark:border-amber-900/30",
+        accent: "text-amber-700 dark:text-amber-300",
+        hoverBg: "hover:bg-amber-50/50 hover:border-amber-300 dark:hover:bg-amber-950/10",
+        selectedBg: "border-amber-500 bg-gradient-to-br from-amber-500/10 to-amber-500/5 ring-1 ring-amber-500/20 shadow-md shadow-amber-500/10",
+        iconBg: "bg-amber-100/60 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 group-hover:bg-amber-100",
+        iconSelectedBg: "bg-amber-500 text-white",
+      };
+    case "Health":
+      return {
+        bgLight: "bg-emerald-50 dark:bg-emerald-950/20",
+        text: "text-emerald-600 dark:text-emerald-400",
+        border: "border-emerald-200 dark:border-emerald-900/30",
+        accent: "text-emerald-700 dark:text-emerald-300",
+        hoverBg: "hover:bg-emerald-50/50 hover:border-emerald-300 dark:hover:bg-emerald-950/10",
+        selectedBg: "border-emerald-500 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 ring-1 ring-emerald-500/20 shadow-md shadow-emerald-500/10",
+        iconBg: "bg-emerald-100/60 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 group-hover:bg-emerald-100",
+        iconSelectedBg: "bg-emerald-600 text-white",
+      };
+    case "Education":
+      return {
+        bgLight: "bg-indigo-50 dark:bg-indigo-950/20",
+        text: "text-indigo-600 dark:text-indigo-400",
+        border: "border-indigo-200 dark:border-indigo-900/30",
+        accent: "text-indigo-700 dark:text-indigo-300",
+        hoverBg: "hover:bg-indigo-50/50 hover:border-indigo-300 dark:hover:bg-indigo-950/10",
+        selectedBg: "border-indigo-500 bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 ring-1 ring-indigo-500/20 shadow-md shadow-indigo-500/10",
+        iconBg: "bg-indigo-100/60 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 group-hover:bg-indigo-100",
+        iconSelectedBg: "bg-indigo-600 text-white",
+      };
+    case "Relationships":
+      return {
+        bgLight: "bg-rose-50 dark:bg-rose-950/20",
+        text: "text-rose-600 dark:text-rose-400",
+        border: "border-rose-200 dark:border-rose-900/30",
+        accent: "text-rose-700 dark:text-rose-300",
+        hoverBg: "hover:bg-rose-50/50 hover:border-rose-300 dark:hover:bg-rose-950/10",
+        selectedBg: "border-rose-500 bg-gradient-to-br from-rose-500/10 to-rose-500/5 ring-1 ring-rose-500/20 shadow-md shadow-rose-500/10",
+        iconBg: "bg-rose-100/60 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 group-hover:bg-rose-100",
+        iconSelectedBg: "bg-rose-600 text-white",
+      };
+    case "Family":
+      return {
+        bgLight: "bg-teal-50 dark:bg-teal-950/20",
+        text: "text-teal-600 dark:text-teal-400",
+        border: "border-teal-200 dark:border-teal-900/30",
+        accent: "text-teal-700 dark:text-teal-300",
+        hoverBg: "hover:bg-teal-50/50 hover:border-teal-300 dark:hover:bg-teal-950/10",
+        selectedBg: "border-teal-500 bg-gradient-to-br from-teal-500/10 to-teal-500/5 ring-1 ring-teal-500/20 shadow-md shadow-teal-500/10",
+        iconBg: "bg-teal-100/60 text-teal-600 dark:bg-teal-950/40 dark:text-teal-400 group-hover:bg-teal-100",
+        iconSelectedBg: "bg-teal-600 text-white",
+      };
+    case "Personal Growth":
+      return {
+        bgLight: "bg-orange-50 dark:bg-orange-950/20",
+        text: "text-orange-600 dark:text-orange-400",
+        border: "border-orange-200 dark:border-orange-900/30",
+        accent: "text-orange-700 dark:text-orange-300",
+        hoverBg: "hover:bg-orange-50/50 hover:border-orange-300 dark:hover:bg-orange-950/10",
+        selectedBg: "border-orange-500 bg-gradient-to-br from-orange-500/10 to-orange-500/5 ring-1 ring-orange-500/20 shadow-md shadow-orange-500/10",
+        iconBg: "bg-orange-100/60 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400 group-hover:bg-orange-100",
+        iconSelectedBg: "bg-orange-600 text-white",
+      };
+    case "Leisure":
+      return {
+        bgLight: "bg-sky-50 dark:bg-sky-950/20",
+        text: "text-sky-600 dark:text-sky-400",
+        border: "border-sky-200 dark:border-sky-900/30",
+        accent: "text-sky-700 dark:text-sky-300",
+        hoverBg: "hover:bg-sky-50/50 hover:border-sky-300 dark:hover:bg-sky-950/10",
+        selectedBg: "border-sky-500 bg-gradient-to-br from-sky-500/10 to-sky-500/5 ring-1 ring-sky-500/20 shadow-md shadow-sky-500/10",
+        iconBg: "bg-sky-100/60 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400 group-hover:bg-sky-100",
+        iconSelectedBg: "bg-sky-600 text-white",
+      };
+    default:
+      return {
+        bgLight: "bg-app-accent-soft",
+        text: "text-app-accent",
+        border: "border-app-line",
+        accent: "text-app-accent",
+        hoverBg: "hover:bg-app-bg hover:border-app-ink-muted",
+        selectedBg: "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 ring-1 ring-app-accent/20 shadow-md shadow-app-accent/15",
+        iconBg: "bg-app-line text-app-ink-muted group-hover:bg-app-line/80",
+        iconSelectedBg: "bg-app-accent text-white",
+      };
+  }
+};
+
+interface IntentColorConfig {
+  hoverBorder: string;
+  hoverBg: string;
+  selectedBg: string;
+  selectedText: string;
+  iconBg: string;
+  iconSelectedBg: string;
+  accent: string;
+}
+
+const getIntentColorConfig = (id: UserIntentId): IntentColorConfig => {
+  switch (id) {
+    case "complete_project":
+      return {
+        hoverBorder: "hover:border-blue-400",
+        hoverBg: "hover:bg-blue-50/30 dark:hover:bg-blue-950/10",
+        selectedBg: "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300 ring-1 ring-blue-500/20",
+        selectedText: "text-blue-700 dark:text-blue-300",
+        iconBg: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 group-hover:bg-blue-200",
+        iconSelectedBg: "bg-blue-500/20 text-blue-700 dark:bg-blue-500/30 dark:text-blue-300",
+        accent: "text-blue-600 dark:text-blue-400",
+      };
+    case "build_habit":
+      return {
+        hoverBorder: "hover:border-orange-400",
+        hoverBg: "hover:bg-orange-50/30 dark:hover:bg-orange-950/10",
+        selectedBg: "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300 ring-1 ring-orange-500/20",
+        selectedText: "text-orange-700 dark:text-orange-300",
+        iconBg: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 group-hover:bg-orange-200",
+        iconSelectedBg: "bg-orange-500/20 text-orange-700 dark:bg-orange-500/30 dark:text-orange-300",
+        accent: "text-orange-600 dark:text-orange-400",
+      };
+    case "learn_skill":
+      return {
+        hoverBorder: "hover:border-purple-400",
+        hoverBg: "hover:bg-purple-50/30 dark:hover:bg-purple-950/10",
+        selectedBg: "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-300 ring-1 ring-purple-500/20",
+        selectedText: "text-purple-700 dark:text-purple-300",
+        iconBg: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 group-hover:bg-purple-200",
+        iconSelectedBg: "bg-purple-500/20 text-purple-700 dark:bg-purple-500/30 dark:text-purple-300",
+        accent: "text-purple-600 dark:text-purple-400",
+      };
+    case "improve_health":
+      return {
+        hoverBorder: "hover:border-emerald-400",
+        hoverBg: "hover:bg-emerald-50/30 dark:hover:bg-emerald-950/10",
+        selectedBg: "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300 ring-1 ring-emerald-500/20",
+        selectedText: "text-emerald-700 dark:text-emerald-300",
+        iconBg: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 group-hover:bg-emerald-200",
+        iconSelectedBg: "bg-emerald-500/20 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300",
+        accent: "text-emerald-600 dark:text-emerald-400",
+      };
+    case "prepare_exam":
+      return {
+        hoverBorder: "hover:border-rose-400",
+        hoverBg: "hover:bg-rose-50/30 dark:hover:bg-rose-950/10",
+        selectedBg: "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300 ring-1 ring-rose-500/20",
+        selectedText: "text-rose-700 dark:text-rose-300",
+        iconBg: "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 group-hover:bg-rose-200",
+        iconSelectedBg: "bg-rose-500/20 text-rose-700 dark:bg-rose-500/30 dark:text-rose-300",
+        accent: "text-rose-600 dark:text-rose-400",
+      };
+    case "grow_finance":
+      return {
+        hoverBorder: "hover:border-amber-400",
+        hoverBg: "hover:bg-amber-50/30 dark:hover:bg-amber-950/10",
+        selectedBg: "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300 ring-1 ring-amber-500/20",
+        selectedText: "text-amber-700 dark:text-amber-300",
+        iconBg: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 group-hover:bg-amber-200",
+        iconSelectedBg: "bg-amber-500/20 text-amber-700 dark:bg-amber-500/30 dark:text-amber-300",
+        accent: "text-amber-600 dark:text-amber-400",
+      };
+    case "find_direction":
+      return {
+        hoverBorder: "hover:border-cyan-400",
+        hoverBg: "hover:bg-cyan-50/30 dark:hover:bg-cyan-950/10",
+        selectedBg: "border-cyan-500 bg-cyan-50 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-300 ring-1 ring-cyan-500/20",
+        selectedText: "text-cyan-700 dark:text-cyan-300",
+        iconBg: "bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 group-hover:bg-cyan-200",
+        iconSelectedBg: "bg-cyan-500/20 text-cyan-700 dark:bg-cyan-500/30 dark:text-cyan-300",
+        accent: "text-cyan-600 dark:text-cyan-400",
+      };
+    default:
+      return {
+        hoverBorder: "hover:border-violet-400",
+        hoverBg: "hover:bg-violet-50/30 dark:hover:bg-violet-950/10",
+        selectedBg: "border-violet-500 bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 ring-1 ring-violet-500/20",
+        selectedText: "text-violet-700 dark:text-violet-300",
+        iconBg: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 group-hover:bg-violet-200",
+        iconSelectedBg: "bg-violet-500/20 text-violet-700 dark:bg-violet-500/30 dark:text-violet-300",
+        accent: "text-violet-600 dark:text-violet-400",
+      };
+  }
+};
+
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { getLifeAreaIcon } from "../components/illustrations/mini/lifeAreaMap";
@@ -324,7 +534,14 @@ export function LifeInsight() {
                   </div>
                   
                   {/* Motivations block */}
-                  <div className="mt-6 relative rounded-xl border border-app-line/60 bg-app-surface/60 p-4 leading-relaxed">
+                  <div className="mt-6 relative rounded-xl border border-app-line/60 bg-gradient-to-r from-amber-50/50 via-teal-50/40 to-indigo-50/30 dark:from-slate-900 dark:via-teal-950/10 dark:to-slate-900/60 p-4 leading-relaxed shadow-sm">
+                    {/* Sticker kẹp giấy hoạt họa dễ thương */}
+                    <div className="absolute -top-3 -left-2 z-10 rotate-[-15deg] animate-[bounce_3s_infinite_ease-in-out]">
+                      <svg width="20" height="26" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md">
+                        <title>Kẹp giấy</title>
+                        <path d="M12 2C8.686 2 6 4.686 6 8v12c0 2.209 1.791 4 4 4s4-1.791 4-4V8c0-1.103-.897-2-2-2s-2 .897-2 2v10c0 .553.447 1 1 1s1-.447 1-1V8c0-.552.448-1 1-1s1 .448 1 1v12c0 3.309-2.691 6-6 6s-6-2.691-6-6V8c0-4.963 4.037-9 9-9s9 4.037 9 9v12c0 .553-.447 1-1 1s-1-.447-1-1V8c0-3.859-3.141-7-7-7Z" fill="currentColor" className="text-amber-500 dark:text-amber-400" />
+                      </svg>
+                    </div>
                     <div className="absolute top-2 left-3 text-3xl font-serif text-app-accent/20 leading-none select-none">“</div>
                     <p className="text-sm font-serif italic text-app-ink pl-4 pt-1">
                       {smartGoalStarter.motivationReason}
@@ -354,6 +571,7 @@ export function LifeInsight() {
               {lifeAreas.map((area) => {
                 const isSelected = focusArea.name === area.name;
                 const AreaIcon = getLifeAreaIcon(area.name);
+                const colors = getAreaColorConfig(area.name);
                 return (
                   <button
                     key={area.name}
@@ -361,29 +579,29 @@ export function LifeInsight() {
                     onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
                     className={`group rounded-xl border p-3.5 text-left transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
                       isSelected
-                        ? "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 ring-1 ring-app-accent/20 shadow-md shadow-app-accent/15"
-                        : "border-app-line bg-app-surface hover:border-app-ink-muted hover:bg-app-bg hover:shadow-sm"
+                        ? colors.selectedBg
+                        : `border-app-line bg-app-surface ${colors.hoverBg} hover:shadow-sm`
                     }`}
                   >
                     <div className="flex items-start gap-2.5">
                       <div
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                          isSelected ? "bg-app-accent text-white" : "bg-app-line text-app-ink-muted group-hover:bg-app-line/80"
+                          isSelected ? colors.iconSelectedBg : colors.iconBg
                         }`}
                       >
                         <AreaIcon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p
-                          className={`truncate text-sm font-bold ${isSelected ? "text-app-accent" : "text-app-ink"}`}
+                          className={`truncate text-sm font-bold ${isSelected ? colors.text : "text-app-ink"}`}
                         >
                           {getLifeAreaLabel(area.name)}
                         </p>
-                        <p className={`mt-0.5 text-xs font-semibold ${isSelected ? "text-app-accent/80" : "text-app-ink-muted"}`}>
+                        <p className={`mt-0.5 text-xs font-semibold ${isSelected ? colors.text : "text-app-ink-muted"}`}>
                           {area.score}/10
                         </p>
                       </div>
-                      {isSelected && <Check className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />}
+                      {isSelected && <Check className={`h-4 w-4 shrink-0 mt-0.5 ${colors.text}`} />}
                     </div>
                   </button>
                 );
@@ -401,6 +619,7 @@ export function LifeInsight() {
               {intentOptions.map((option) => {
                 const isSelected = selectedIntent === option.id;
                 const OptionIcon = INTENT_ICONS[option.id];
+                const colors = getIntentColorConfig(option.id);
                 return (
                   <button
                     key={option.id}
@@ -408,23 +627,23 @@ export function LifeInsight() {
                     onClick={() => handleIntentSelect(option.id)}
                     className={`group flex flex-col items-start gap-2.5 rounded-xl border p-4.5 text-left transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
                       isSelected
-                        ? "border-app-accent bg-app-accent-soft text-app-accent shadow-md shadow-app-accent/10"
-                        : "border-app-line bg-app-surface text-app-ink hover:border-app-ink-muted hover:bg-app-bg hover:shadow-sm"
+                        ? colors.selectedBg
+                        : `border-app-line bg-app-surface text-app-ink ${colors.hoverBorder} ${colors.hoverBg} hover:shadow-sm`
                     }`}
                   >
                     <div className="flex w-full items-start justify-between gap-2.5">
                       <span className="flex items-center gap-2 text-sm font-bold">
                         <span className={`p-1.5 rounded-lg transition-colors ${
-                          isSelected ? "bg-app-accent/15 text-app-accent" : "bg-app-line text-app-ink-muted group-hover:bg-app-line/80"
+                          isSelected ? colors.iconSelectedBg : colors.iconBg
                         }`}>
                           <OptionIcon className="h-4 w-4" />
                         </span>
                         {option.label}
                       </span>
-                      {isSelected && <Check className="h-4 w-4 shrink-0 mt-1" />}
+                      {isSelected && <Check className={`h-4 w-4 shrink-0 mt-1 ${colors.selectedText}`} />}
                     </div>
                     <p
-                      className={`text-xs leading-relaxed pl-8 ${isSelected ? "text-app-accent/90" : "text-app-ink-soft"}`}
+                      className={`text-xs leading-relaxed pl-8 ${isSelected ? colors.selectedText : "text-app-ink-soft"}`}
                     >
                       {option.description}
                     </p>
