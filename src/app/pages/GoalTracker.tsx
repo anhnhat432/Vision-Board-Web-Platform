@@ -439,11 +439,11 @@ function GoalTrackerContent({
           {/* Cột trái — Goal summary */}
           <div>
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 rounded-lg bg-app-accent-soft text-app-accent items-center justify-center">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className="flex h-10 w-10 shrink-0 rounded-lg bg-app-accent-soft text-app-accent items-center justify-center mt-0.5">
                   <GoalArchetypeIcon className="h-5 w-5" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-serif text-lg font-medium text-app-ink leading-snug break-words">{goal.title}</h3>
                     {system ? (
@@ -618,20 +618,21 @@ function GoalTrackerContent({
         {/* Cột chính bên trái */}
         <div className="space-y-6">
           <div data-tour-id="goaltracker-hero" className="rounded-[14px] border border-app-line bg-app-accent-soft/15 p-6 md:p-8 relative overflow-hidden">
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">MỤC TIÊU</p>
-              <h1 className="mt-4 font-serif text-3xl font-medium leading-tight tracking-normal text-app-ink sm:text-4xl">
-                Hành trình mục tiêu
-              </h1>
-              <p className="mt-3 text-sm leading-relaxed text-app-ink-soft max-w-xl">
-                Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn để tạo ra sự chuyển dịch thực sự.
-              </p>
-            </div>
-            {/* Câu châm ngôn chánh niệm mờ ở góc dưới bên phải trên desktop */}
-            <div className="hidden md:block absolute bottom-6 right-8 text-right max-w-xs opacity-60">
-              <p className="font-serif text-xs italic text-app-accent">
-                “Những bước chân nhỏ bé đi đúng hướng sẽ đưa bạn đi rất xa.”
-              </p>
+            <div className="grid gap-6 md:grid-cols-[1fr_240px] md:items-end">
+              <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">MỤC TIÊU</p>
+                <h1 className="font-serif text-3xl font-medium leading-tight tracking-normal text-app-ink sm:text-4xl">
+                  Hành trình mục tiêu
+                </h1>
+                <p className="text-sm leading-relaxed text-app-ink-soft max-w-xl">
+                  Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn để tạo ra sự chuyển dịch thực sự.
+                </p>
+              </div>
+              <div className="text-left md:text-right border-l md:border-l-0 border-app-line pl-4 md:pl-0 opacity-70">
+                <p className="font-serif text-xs italic text-app-accent leading-relaxed">
+                  “Những bước chân nhỏ bé đi đúng hướng sẽ đưa bạn đi rất xa.”
+                </p>
+              </div>
             </div>
           </div>
 
