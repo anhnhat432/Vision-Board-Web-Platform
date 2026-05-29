@@ -330,35 +330,42 @@ export function SmartGoalStepShell({
           {children}
 
           {/* AI Coach Bubble sinh động */}
-          <div className="relative overflow-hidden rounded-2xl border border-teal-200/50 dark:border-teal-900/30 bg-gradient-to-r from-teal-50/40 to-emerald-50/30 dark:from-teal-950/20 dark:to-emerald-950/10 p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-300 hover:shadow-md">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="relative overflow-hidden rounded-[24px] border border-teal-100/80 dark:border-teal-900/30 bg-gradient-to-br from-teal-50/30 via-app-surface/90 to-emerald-50/20 dark:from-teal-950/10 dark:via-slate-900/80 dark:to-emerald-950/10 p-5 sm:p-6 shadow-[0_12px_40px_rgba(13,148,136,0.03)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(13,148,136,0.06)] hover:border-teal-500/20">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex gap-4 items-start min-w-0">
                 {/* Icon trợ lý AI lấp lánh sinh động */}
                 <div className="flex-shrink-0 relative">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20 animate-[pulse_2s_infinite]">
-                    <Sparkles className="h-5 w-5 animate-[spin_6s_linear_infinite]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 via-emerald-500 to-indigo-500 text-white shadow-lg shadow-teal-500/20 transition-transform duration-300 hover:scale-105 group/avatar">
+                    <Sparkles className="h-5.5 w-5.5 animate-[spin_8s_linear_infinite]" />
                   </div>
-                  <span className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900 border border-white text-[10px]" aria-hidden="true">🤖</span>
+                  {/* Vạch chỉ báo Online nhấp nháy tinh xảo đè lên ở góc dưới phải */}
+                  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-sm" aria-hidden="true">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </span>
                 </div>
 
                 {/* Bong bóng thoại */}
-                <div className="space-y-1.5 min-w-0">
+                <div className="space-y-2 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                      Cố vấn mục tiêu SMART
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+                      Cố vấn mục tiêu AI
                     </span>
-                    <span className="inline-flex items-center rounded-md bg-teal-100/60 dark:bg-teal-900/50 px-1.5 py-0.5 text-[10px] font-medium text-teal-800 dark:text-teal-300">
-                      Online
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/5 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      Trực tuyến
                     </span>
                   </div>
 
-                  <div className="relative bg-app-surface border border-app-line rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm leading-relaxed text-app-ink">
-                    <p className="font-serif italic text-app-ink/90">
+                  <div className="relative bg-white/70 dark:bg-slate-900/60 border border-teal-500/10 rounded-2xl rounded-tl-none p-4 shadow-sm text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+                    {/* Đuôi bong bóng thoại */}
+                    <div className="absolute -left-2 top-0 w-2 h-2 bg-white/70 dark:bg-slate-900/60 border-l border-t border-teal-500/10 rotate-45 transform origin-top-right hidden sm:block" />
+                    
+                    <p className="font-serif italic text-[14.5px] leading-relaxed text-slate-700 dark:text-slate-300">
                       “{starterPreview}”
                     </p>
-                    <div className="mt-2 text-xs text-app-ink-muted flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      <span>Bạn có thể sử dụng gợi ý này làm bản nháp và điều chỉnh lại.</span>
+                    <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 select-none">
+                      <Sparkles className="h-3.5 w-3.5 text-teal-500 animate-pulse" />
+                      <span>Gợi ý chánh niệm giúp bạn điền nhanh biểu mẫu.</span>
                     </div>
                   </div>
                 </div>
@@ -366,12 +373,12 @@ export function SmartGoalStepShell({
 
               <button
                 type="button"
-                className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/10 transition-all duration-200 hover:brightness-105 active:scale-[0.98] sm:w-auto"
+                className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 px-5 py-3 text-xs font-bold text-white shadow-md shadow-teal-500/10 transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.98] sm:w-auto"
                 onClick={onApplyStarter}
                 aria-label={`Dùng gợi ý cho bước ${step.label}`}
               >
-                <Sparkles className="h-3.5 w-3.5" />
-                Sử dụng ngay
+                <Sparkles className="h-3.5 w-3.5 animate-[pulse_1.5s_infinite]" />
+                Sử dụng gợi ý này
               </button>
             </div>
           </div>
