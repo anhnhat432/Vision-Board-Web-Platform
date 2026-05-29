@@ -50,24 +50,24 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-slate-50/50 dark:bg-slate-950/20 border-slate-100/80 dark:border-slate-900/30",
-    text: "text-slate-700 dark:text-slate-300",
-    iconBg: "bg-slate-100/80 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400",
+    bg: "bg-white dark:bg-neutral-900 border-app-line",
+    text: "text-app-ink",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
   "Tỷ lệ lead": {
-    bg: "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100/60 dark:border-emerald-900/30",
-    text: "text-emerald-700 dark:text-emerald-300",
-    iconBg: "bg-emerald-100/80 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400",
+    bg: "bg-white dark:bg-neutral-900 border-app-line",
+    text: "text-app-ink",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
   Nhịp: {
-    bg: "bg-violet-50/50 dark:bg-violet-950/20 border-violet-100/60 dark:border-violet-900/30",
-    text: "text-violet-700 dark:text-violet-300",
-    iconBg: "bg-violet-100/80 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400",
+    bg: "bg-white dark:bg-neutral-900 border-app-line",
+    text: "text-app-ink",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
   Chuỗi: {
-    bg: "bg-amber-50/50 dark:bg-amber-950/20 border-amber-100/40 dark:border-amber-900/30",
-    text: "text-amber-700 dark:text-amber-300",
-    iconBg: "bg-amber-100/80 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400",
+    bg: "bg-white dark:bg-neutral-900 border-app-line",
+    text: "text-app-ink",
+    iconBg: "bg-app-accent-soft text-app-accent",
   },
 };
 

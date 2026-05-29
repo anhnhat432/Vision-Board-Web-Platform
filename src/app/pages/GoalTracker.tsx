@@ -63,65 +63,11 @@ const CATEGORY_STYLES: Record<
     bar: string;
   }
 > = {
-  "Sức khoẻ": {
-    bg: "bg-emerald-50 dark:bg-emerald-950/20",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-100/60 dark:border-emerald-900/20",
-    bar: "from-emerald-400 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
-  },
-  "Sức khỏe": {
-    bg: "bg-emerald-50 dark:bg-emerald-950/20",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-100/60 dark:border-emerald-900/20",
-    bar: "from-emerald-400 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
-  },
-  "Sự nghiệp": {
-    bg: "bg-blue-50 dark:bg-blue-950/20",
-    text: "text-blue-600 dark:text-blue-400",
-    border: "border-blue-100/60 dark:border-blue-900/20",
-    bar: "from-blue-400 to-blue-500 dark:from-blue-600 dark:to-blue-700",
-  },
-  "Mối quan hệ": {
-    bg: "bg-rose-50 dark:bg-rose-950/20",
-    text: "text-rose-600 dark:text-rose-400",
-    border: "border-rose-100/60 dark:border-rose-900/20",
-    bar: "from-rose-400 to-rose-500 dark:from-rose-600 dark:to-rose-700",
-  },
-  "Tinh thần": {
-    bg: "bg-amber-50 dark:bg-amber-950/20",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "border-amber-100/60 dark:border-amber-900/20",
-    bar: "from-amber-400 to-amber-500 dark:from-amber-600 dark:to-amber-700",
-  },
-  "Tài chính": {
-    bg: "bg-amber-50 dark:bg-amber-950/20",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "border-amber-100/60 dark:border-amber-900/20",
-    bar: "from-amber-400 to-amber-500 dark:from-amber-600 dark:to-amber-700",
-  },
-  "Gia đình": {
-    bg: "bg-indigo-50 dark:bg-indigo-950/20",
-    text: "text-indigo-600 dark:text-indigo-400",
-    border: "border-indigo-100/60 dark:border-indigo-900/20",
-    bar: "from-indigo-400 to-indigo-500 dark:from-indigo-600 dark:to-indigo-700",
-  },
-  "Học tập": {
-    bg: "bg-violet-50 dark:bg-violet-950/20",
-    text: "text-violet-600 dark:text-violet-400",
-    border: "border-violet-100/60 dark:border-violet-900/20",
-    bar: "from-violet-400 to-violet-500 dark:from-violet-600 dark:to-violet-700",
-  },
-  "Giải trí": {
-    bg: "bg-fuchsia-50 dark:bg-fuchsia-950/20",
-    text: "text-fuchsia-600 dark:text-fuchsia-400",
-    border: "border-fuchsia-100/60 dark:border-fuchsia-900/20",
-    bar: "from-fuchsia-400 to-fuchsia-500 dark:from-fuchsia-600 dark:to-fuchsia-700",
-  },
-  "Phát triển bản thân": {
-    bg: "bg-teal-50 dark:bg-teal-950/20",
-    text: "text-teal-600 dark:text-teal-400",
-    border: "border-teal-100/60 dark:border-teal-900/20",
-    bar: "from-teal-400 to-teal-500 dark:from-teal-600 dark:to-teal-700",
+  default: {
+    bg: "bg-app-accent-soft text-app-accent",
+    text: "text-app-accent",
+    border: "border-app-accent/15",
+    bar: "from-app-accent/80 to-app-accent",
   },
 };
 
@@ -495,15 +441,8 @@ function GoalTrackerContent({
     const totalTodayCount = systemTodayTasks.length;
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
-    const getCategoryStyle = (cat: string) => {
-      return (
-        CATEGORY_STYLES[cat] ?? {
-          bg: "bg-emerald-50 dark:bg-emerald-950/20",
-          text: "text-emerald-600 dark:text-emerald-400",
-          border: "border-emerald-100/60 dark:border-emerald-900/20",
-          bar: "from-emerald-400 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
-        }
-      );
+    const getCategoryStyle = (_cat: string) => {
+      return CATEGORY_STYLES.default;
     };
 
     const areaStyle = getCategoryStyle(goal.category);
@@ -724,14 +663,12 @@ function GoalTrackerContent({
         <div className="space-y-8">
           <div
             data-tour-id="goaltracker-hero"
-            className="rounded-[18px] border border-app-line bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-emerald-100/30 dark:from-neutral-900 dark:via-emerald-950/10 dark:to-neutral-950 p-6 md:p-8 relative overflow-hidden shadow-app-sm hover:shadow-app-md transition-all duration-300"
+            className="rounded-[18px] border border-app-line bg-white dark:bg-neutral-950 p-6 md:p-8 relative overflow-hidden shadow-app-sm"
           >
-            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-app-accent/10 blur-3xl pointer-events-none" />
             <div className="grid gap-6 md:grid-cols-[1fr_240px] md:items-end relative z-10">
               <div className="space-y-3">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent"></span>
                   </span>
                   MỤC TIÊU
@@ -901,18 +838,18 @@ function GoalTrackerContent({
             })}
           </div>
 
-          {/* Widget Nhắc nhở tĩnh tâm - Glassmorphism */}
-          <div className="rounded-[18px] border border-white/40 dark:border-neutral-800/40 bg-white/70 dark:bg-neutral-900/60 p-5 shadow-app-sm backdrop-blur-md transition-all duration-300 hover:shadow-app-md">
-            <h3 className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-ink-muted mb-3 flex items-center gap-1.5">
+          {/* Widget Nhắc nhở tĩnh tâm - Reflection style */}
+          <div className="rounded-[18px] border border-app-line bg-app-warm-soft/60 dark:bg-neutral-900/40 p-5 shadow-app-sm">
+            <h3 className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-warm mb-3 flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-app-warm"></span>
               </span>
               NHẮC NHỞ TĨNH TÂM
             </h3>
             <p className="text-xs italic leading-relaxed text-app-ink-soft font-serif">
               “Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.”
             </p>
-            <div className="mt-4 pt-3 border-t border-app-line/60 flex items-center justify-between text-[10px] font-bold text-app-ink-muted">
+            <div className="mt-4 pt-3 border-t border-app-line/40 flex items-center justify-between text-[10px] font-bold text-app-warm/80">
               <span>Hôm nay</span>
               <span>·</span>
               <span>Chậm rãi & tập trung</span>

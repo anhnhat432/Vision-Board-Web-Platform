@@ -1,16 +1,4 @@
-import {
-  Activity,
-  ArrowRight,
-  Briefcase,
-  Compass,
-  GraduationCap,
-  Heart,
-  Plus,
-  Sparkles,
-  Target,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { ArrowRight, Plus, Target } from "lucide-react";
 
 import {
   calculateGoalProgress,
@@ -27,98 +15,18 @@ interface ActiveGoalsCardProps {
   onAddGoal: () => void;
 }
 
-// Color and icon themes mapping to Life Areas to avoid monotonic green
-const AREA_THEMES: Record<
-  string,
-  {
-    bg: string;
-    text: string;
-    bar: string;
-    accentText: string;
-    icon: typeof Target;
-  }
-> = {
-  Health: {
-    bg: "bg-emerald-50/70 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400",
-    text: "text-emerald-600/80 dark:text-emerald-400/80",
-    bar: "bg-emerald-500/75 dark:bg-emerald-600/75",
-    accentText: "text-emerald-600 dark:text-emerald-400",
-    icon: Activity,
-  },
-  Career: {
-    bg: "bg-blue-50/70 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400",
-    text: "text-blue-600/80 dark:text-blue-400/80",
-    bar: "bg-blue-500/75 dark:bg-blue-600/75",
-    accentText: "text-blue-600 dark:text-blue-400",
-    icon: Briefcase,
-  },
-  Relationships: {
-    bg: "bg-rose-50/70 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400",
-    text: "text-rose-600/80 dark:text-rose-400/80",
-    bar: "bg-rose-500/75 dark:bg-rose-600/75",
-    accentText: "text-rose-600 dark:text-rose-400",
-    icon: Heart,
-  },
-  "Personal Growth": {
-    bg: "bg-teal-50/70 dark:bg-teal-950/20 text-teal-600 dark:text-teal-400",
-    text: "text-teal-600/80 dark:text-teal-400/80",
-    bar: "bg-teal-500/75 dark:bg-teal-600/75",
-    accentText: "text-teal-600 dark:text-teal-400",
-    icon: Sparkles,
-  },
-  Finance: {
-    bg: "bg-amber-50/70 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400",
-    text: "text-amber-600/80 dark:text-amber-400/80",
-    bar: "bg-amber-500/75 dark:bg-amber-600/75",
-    accentText: "text-amber-600 dark:text-amber-400",
-    icon: Wallet,
-  },
-  Family: {
-    bg: "bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400",
-    text: "text-indigo-600/80 dark:text-indigo-400/80",
-    bar: "bg-indigo-500/75 dark:bg-indigo-600/75",
-    accentText: "text-indigo-600 dark:text-indigo-400",
-    icon: Users,
-  },
-  Education: {
-    bg: "bg-violet-50/70 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400",
-    text: "text-violet-600/80 dark:text-violet-400/80",
-    bar: "bg-violet-500/75 dark:bg-violet-600/75",
-    accentText: "text-violet-600 dark:text-violet-400",
-    icon: GraduationCap,
-  },
-  Leisure: {
-    bg: "bg-fuchsia-50/70 dark:bg-fuchsia-950/20 text-fuchsia-600 dark:text-fuchsia-400",
-    text: "text-fuchsia-600/80 dark:text-fuchsia-400/80",
-    bar: "bg-fuchsia-500/75 dark:bg-fuchsia-600/75",
-    accentText: "text-fuchsia-600 dark:text-fuchsia-400",
-    icon: Compass,
-  },
+const AREA_THEMES = {
   default: {
-    bg: "bg-app-accent-soft/70 text-app-accent",
+    bg: "bg-app-accent-soft text-app-accent",
     text: "text-app-accent/70",
-    bar: "bg-app-accent/75",
+    bar: "bg-app-accent",
     accentText: "text-app-accent",
     icon: Target,
   },
 };
 
-function getAreaTheme(areaKey: string | undefined | null) {
-  if (!areaKey) return AREA_THEMES.default;
-  const normalizedKey = areaKey.trim();
-  const labelToKeyMap: Record<string, string> = {
-    "Sức khỏe": "Health",
-    "Sức khoẻ": "Health",
-    "Sự nghiệp": "Career",
-    "Mối quan hệ": "Relationships",
-    "Tài chính": "Finance",
-    "Học tập": "Education",
-    "Gia đình": "Family",
-    "Phát triển bản thân": "Personal Growth",
-    "Giải trí": "Leisure",
-  };
-  const englishKey = labelToKeyMap[normalizedKey] || normalizedKey;
-  return AREA_THEMES[englishKey] || AREA_THEMES.default;
+function getAreaTheme(_areaKey: string | undefined | null) {
+  return AREA_THEMES.default;
 }
 
 function clampPercent(value: number): number {

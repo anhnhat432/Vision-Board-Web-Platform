@@ -14,31 +14,37 @@ function clampScore(score: number): number {
   return Math.max(0, Math.min(10, Math.round(score)));
 }
 
-// Subtle pastel color variants for visual richness while maintaining Forest Calm aesthetic
+// Subtle green styles for calm productivity Forest Green zone consistency
 const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; textColor: string; iconBg: string }> = {
   "Sức khoẻ": {
-    gradient: "from-emerald-300 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
+    gradient: "from-app-accent to-app-accent",
     icon: Activity,
-    textColor: "text-emerald-600/80 dark:text-emerald-400/80",
-    iconBg: "bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/40 dark:border-emerald-900/20",
+    textColor: "text-app-accent",
+    iconBg: "bg-app-accent-soft border border-app-accent/10",
+  },
+  "Sức khỏe": {
+    gradient: "from-app-accent to-app-accent",
+    icon: Activity,
+    textColor: "text-app-accent",
+    iconBg: "bg-app-accent-soft border border-app-accent/10",
   },
   "Sự nghiệp": {
-    gradient: "from-blue-300 to-blue-500 dark:from-blue-600 dark:to-blue-700",
+    gradient: "from-app-accent to-app-accent",
     icon: Briefcase,
-    textColor: "text-blue-600/80 dark:text-blue-400/80",
-    iconBg: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/40 dark:border-blue-900/20",
+    textColor: "text-app-accent",
+    iconBg: "bg-app-accent-soft border border-app-accent/10",
   },
   "Mối quan hệ": {
-    gradient: "from-rose-300 to-rose-500 dark:from-rose-600 dark:to-rose-700",
+    gradient: "from-app-accent to-app-accent",
     icon: Heart,
-    textColor: "text-rose-600/80 dark:text-rose-400/80",
-    iconBg: "bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/40 dark:border-rose-900/20",
+    textColor: "text-app-accent",
+    iconBg: "bg-app-accent-soft border border-app-accent/10",
   },
   "Tinh thần": {
-    gradient: "from-amber-300 to-amber-500 dark:from-amber-600 dark:to-amber-700",
+    gradient: "from-app-accent to-app-accent",
     icon: Compass,
-    textColor: "text-amber-600/80 dark:text-amber-400/80",
-    iconBg: "bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100/40 dark:border-amber-900/20",
+    textColor: "text-app-accent",
+    iconBg: "bg-app-accent-soft border border-app-accent/10",
   },
 };
 
@@ -50,7 +56,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
         <h2 id="dashboard-balance-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <Scale className="h-5 w-5 text-app-accent/80 animate-pulse" />
+          <Scale className="h-5 w-5 text-app-accent/80" />
           Cân bằng cuộc sống
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">Tỉ lệ thực tế so với bánh xe cuộc sống</p>
