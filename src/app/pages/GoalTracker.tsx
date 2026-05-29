@@ -1,5 +1,8 @@
+import { AlertTriangle, ArrowRight, CheckCircle2, Circle, Plus, Search, Target, Trash2, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { EmptyState } from "@/app/components/states/EmptyState";
 import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
@@ -7,9 +10,8 @@ import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twe
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { AlertTriangle, CheckCircle2, Circle, Plus, Search, Target, Trash2, Zap, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-
+import { getGoalArchetypeIcon } from "../components/illustrations";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,25 +24,22 @@ import {
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import { CountUp } from "../components/ui/count-up";
-import { getGoalArchetypeIcon } from "../components/illustrations";
-import { EmptyState } from "@/app/components/states/EmptyState";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { SpotlightCard } from "../components/ui/spotlight-card";
-import { soundService } from "../services/soundService";
 import { Skeleton } from "../components/ui/skeleton";
+import { SpotlightCard } from "../components/ui/spotlight-card";
 import { cn } from "../components/ui/utils";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { soundService } from "../services/soundService";
+import { isRealMode, shouldEnable12WeekGoalTombstoneSync } from "../utils/app-mode";
 import { celebrateSpark, celebrateSpotlight } from "../utils/experience";
 import { hasReachedLimit } from "../utils/feature-entitlements";
 import {
   APP_STORAGE_KEYS,
-  type UserData,
-  type Goal,
   calculateGoalProgress,
   clearGoalPlanningDrafts,
   deleteGoal as deleteLocalGoal,
+  type Goal,
   getCalendarDayDifference,
   getGoalExecutionStats,
   getLifeAreaLabel,
@@ -50,31 +49,79 @@ import {
   recomputeGoalProgressFromWeeks,
   saveUserData,
   toggleTwelveWeekTask,
+  type UserData,
   updateGoal,
 } from "../utils/storage";
-import { isRealMode, shouldEnable12WeekGoalTombstoneSync } from "../utils/app-mode";
 import { getPlanLabel } from "../utils/twelve-week-premium";
 
-const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+const CATEGORY_STYLES: Record<
+  string,
+  {
+    bg: string;
+    text: string;
+    border: string;
+    bar: string;
+  }
+> = {
   "Sức khoẻ": {
-    bg: "bg-emerald-50 dark:bg-emerald-950/30",
+    bg: "bg-emerald-50 dark:bg-emerald-950/20",
     text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-100 dark:border-emerald-900/30",
+    border: "border-emerald-100/60 dark:border-emerald-900/20",
+    bar: "from-emerald-400 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
+  },
+  "Sức khỏe": {
+    bg: "bg-emerald-50 dark:bg-emerald-950/20",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-100/60 dark:border-emerald-900/20",
+    bar: "from-emerald-400 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
   },
   "Sự nghiệp": {
-    bg: "bg-teal-50 dark:bg-teal-950/30",
-    text: "text-teal-600 dark:text-teal-400",
-    border: "border-teal-100 dark:border-teal-900/30",
+    bg: "bg-blue-50 dark:bg-blue-950/20",
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-100/60 dark:border-blue-900/20",
+    bar: "from-blue-400 to-blue-500 dark:from-blue-600 dark:to-blue-700",
   },
   "Mối quan hệ": {
-    bg: "bg-green-50 dark:bg-green-950/30",
-    text: "text-green-600 dark:text-green-400",
-    border: "border-green-100 dark:border-green-900/30",
+    bg: "bg-rose-50 dark:bg-rose-950/20",
+    text: "text-rose-600 dark:text-rose-400",
+    border: "border-rose-100/60 dark:border-rose-900/20",
+    bar: "from-rose-400 to-rose-500 dark:from-rose-600 dark:to-rose-700",
   },
   "Tinh thần": {
-    bg: "bg-lime-50 dark:bg-lime-950/30",
-    text: "text-lime-600 dark:text-lime-400",
-    border: "border-lime-100 dark:border-lime-900/30",
+    bg: "bg-amber-50 dark:bg-amber-950/20",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-100/60 dark:border-amber-900/20",
+    bar: "from-amber-400 to-amber-500 dark:from-amber-600 dark:to-amber-700",
+  },
+  "Tài chính": {
+    bg: "bg-amber-50 dark:bg-amber-950/20",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-100/60 dark:border-amber-900/20",
+    bar: "from-amber-400 to-amber-500 dark:from-amber-600 dark:to-amber-700",
+  },
+  "Gia đình": {
+    bg: "bg-indigo-50 dark:bg-indigo-950/20",
+    text: "text-indigo-600 dark:text-indigo-400",
+    border: "border-indigo-100/60 dark:border-indigo-900/20",
+    bar: "from-indigo-400 to-indigo-500 dark:from-indigo-600 dark:to-indigo-700",
+  },
+  "Học tập": {
+    bg: "bg-violet-50 dark:bg-violet-950/20",
+    text: "text-violet-600 dark:text-violet-400",
+    border: "border-violet-100/60 dark:border-violet-900/20",
+    bar: "from-violet-400 to-violet-500 dark:from-violet-600 dark:to-violet-700",
+  },
+  "Giải trí": {
+    bg: "bg-fuchsia-50 dark:bg-fuchsia-950/20",
+    text: "text-fuchsia-600 dark:text-fuchsia-400",
+    border: "border-fuchsia-100/60 dark:border-fuchsia-900/20",
+    bar: "from-fuchsia-400 to-fuchsia-500 dark:from-fuchsia-600 dark:to-fuchsia-700",
+  },
+  "Phát triển bản thân": {
+    bg: "bg-teal-50 dark:bg-teal-950/20",
+    text: "text-teal-600 dark:text-teal-400",
+    border: "border-teal-100/60 dark:border-teal-900/20",
+    bar: "from-teal-400 to-teal-500 dark:from-teal-600 dark:to-teal-700",
   },
 };
 
@@ -448,11 +495,18 @@ function GoalTrackerContent({
     const totalTodayCount = systemTodayTasks.length;
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
-    const areaStyle = CATEGORY_STYLES[goal.category] ?? {
-      bg: "bg-app-accent-soft text-app-accent",
-      border: "border-app-accent/15",
-      text: "text-app-accent",
+    const getCategoryStyle = (cat: string) => {
+      return (
+        CATEGORY_STYLES[cat] ?? {
+          bg: "bg-emerald-50 dark:bg-emerald-950/20",
+          text: "text-emerald-600 dark:text-emerald-400",
+          border: "border-emerald-100/60 dark:border-emerald-900/20",
+          bar: "from-emerald-400 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
+        }
+      );
     };
+
+    const areaStyle = getCategoryStyle(goal.category);
 
     return (
       <SpotlightCard
@@ -461,7 +515,7 @@ function GoalTrackerContent({
           "rounded-[18px] border p-5 md:p-6 overflow-hidden transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md",
           progress === 100
             ? "bg-emerald-50/15 dark:bg-emerald-950/5 border-emerald-500/25 dark:border-emerald-500/15"
-            : "bg-app-surface border-app-line"
+            : "bg-app-surface border-app-line",
         )}
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_1px_minmax(220px,1fr)]">
@@ -469,7 +523,13 @@ function GoalTrackerContent({
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0 flex-1">
-                <div className="flex h-11 w-11 shrink-0 rounded-xl bg-app-accent-soft text-app-accent items-center justify-center mt-0.5 shadow-app-sm">
+                <div
+                  className={cn(
+                    "flex h-11 w-11 shrink-0 rounded-xl items-center justify-center mt-0.5 shadow-app-sm",
+                    areaStyle.bg,
+                    areaStyle.text,
+                  )}
+                >
                   <GoalArchetypeIcon className="h-5.5 w-5.5" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-1">
@@ -479,7 +539,8 @@ function GoalTrackerContent({
                     </h3>
                   </div>
                   <p className="text-xs text-app-ink-soft font-semibold">
-                    {system ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} · <span className="text-app-accent font-bold">{getLifeAreaLabel(goal.category)}</span>
+                    {system ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
+                    <span className={cn("font-bold", areaStyle.text)}>{getLifeAreaLabel(goal.category)}</span>
                   </p>
                 </div>
               </div>
@@ -496,7 +557,9 @@ function GoalTrackerContent({
 
             {/* Metadata pills */}
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className={`border text-xs font-bold rounded-full px-3 py-1 inline-flex items-center gap-1.5 shadow-app-sm ${areaStyle.bg} ${areaStyle.border} ${areaStyle.text}`}>
+              <span
+                className={`border text-xs font-bold rounded-full px-3 py-1 inline-flex items-center gap-1.5 shadow-app-sm ${areaStyle.bg} ${areaStyle.border} ${areaStyle.text}`}
+              >
                 <GoalArchetypeIcon className="h-3.5 w-3.5" />
                 {getLifeAreaLabel(goal.category)}
               </span>
@@ -521,12 +584,18 @@ function GoalTrackerContent({
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs font-bold">
                 <span className="text-app-ink-soft">Tiến độ</span>
-                <span className="text-app-accent tabular-nums text-[13px]">
+                <span className={cn("tabular-nums text-[13px]", areaStyle.text)}>
                   <CountUp value={progress} suffix="%" />
                 </span>
               </div>
-              <div className="h-2 rounded-full bg-app-accent-soft/60 overflow-hidden" aria-hidden="true">
-                <div className="h-full rounded-full bg-gradient-to-r from-app-accent/80 to-app-accent transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+              <div className="h-2 rounded-full bg-slate-100 dark:bg-neutral-800 overflow-hidden" aria-hidden="true">
+                <div
+                  className={cn(
+                    "h-full rounded-full bg-gradient-to-r transition-all duration-500 ease-out",
+                    areaStyle.bar,
+                  )}
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </div>
 
@@ -558,14 +627,19 @@ function GoalTrackerContent({
           <div className="lg:pl-2 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between border-b border-app-line/50 pb-2 mb-3">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-app-ink-muted">
+                  VIỆC HÔM NAY
+                </p>
                 <span className="text-xs font-extrabold tabular-nums text-app-accent">
                   {completedTodayCount}/{totalTodayCount}
                 </span>
               </div>
               <div className="space-y-2 max-h-[110px] overflow-y-auto pr-1">
                 {systemTodayOpenTasks.slice(0, 3).map((task) => (
-                  <div key={task.id} className="group/task flex items-center gap-3 rounded-lg border border-app-line/40 bg-app-bg-subtle/30 px-3 py-2 hover:border-app-accent/20 hover:bg-app-accent-subtle/20 transition-all duration-300">
+                  <div
+                    key={task.id}
+                    className="group/task flex items-center gap-3 rounded-lg border border-app-line/40 bg-app-bg-subtle/30 px-3 py-2 hover:border-app-accent/20 hover:bg-app-accent-subtle/20 transition-all duration-300"
+                  >
                     <button
                       type="button"
                       onClick={() => handleToggleTask(goal.id, task.id)}
@@ -648,8 +722,8 @@ function GoalTrackerContent({
       <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:gap-8">
         {/* Cột chính bên trái */}
         <div className="space-y-8">
-          <div 
-            data-tour-id="goaltracker-hero" 
+          <div
+            data-tour-id="goaltracker-hero"
             className="rounded-[18px] border border-app-line bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-emerald-100/30 dark:from-neutral-900 dark:via-emerald-950/10 dark:to-neutral-950 p-6 md:p-8 relative overflow-hidden shadow-app-sm hover:shadow-app-md transition-all duration-300"
           >
             <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-app-accent/10 blur-3xl pointer-events-none" />
@@ -666,7 +740,8 @@ function GoalTrackerContent({
                   Hành trình mục tiêu
                 </h1>
                 <p className="text-sm leading-relaxed text-app-ink-soft max-w-xl font-sans">
-                  Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn để tạo ra sự chuyển dịch thực sự.
+                  Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn
+                  để tạo ra sự chuyển dịch thực sự.
                 </p>
               </div>
               <div className="text-left md:text-right border-l md:border-l-0 border-app-line pl-4 md:pl-0 opacity-70">
@@ -713,7 +788,10 @@ function GoalTrackerContent({
                 description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
                 actions={
                   <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                    <Button className="bg-app-accent text-white hover:bg-app-accent" onClick={handleStartGuidedGoalFlow}>
+                    <Button
+                      className="bg-app-accent text-white hover:bg-app-accent"
+                      onClick={handleStartGuidedGoalFlow}
+                    >
                       Bắt đầu chu kỳ 12 tuần →
                     </Button>
                     <Button
@@ -735,8 +813,12 @@ function GoalTrackerContent({
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                           CHU KỲ 12 TUẦN
                         </p>
-                        <h2 className="mt-1 font-serif text-xl font-bold tracking-normal text-app-ink">Mục tiêu đang chạy</h2>
-                        <p className="mt-1 text-xs text-app-ink-muted font-semibold">{filteredTwelveWeekGoals.length} mục tiêu</p>
+                        <h2 className="mt-1 font-serif text-xl font-bold tracking-normal text-app-ink">
+                          Mục tiêu đang chạy
+                        </h2>
+                        <p className="mt-1 text-xs text-app-ink-muted font-semibold">
+                          {filteredTwelveWeekGoals.length} mục tiêu
+                        </p>
                       </div>
                     </div>
                     <div className="stack-stack mt-4 space-y-4">
@@ -785,10 +867,15 @@ function GoalTrackerContent({
             {overviewItems.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="rounded-[18px] border border-app-line bg-gradient-to-b from-app-surface to-app-bg-subtle/40 p-4 relative overflow-hidden shadow-app-sm hover:border-app-accent/20 hover:shadow-app-md transition-all duration-300">
+                <div
+                  key={item.title}
+                  className="rounded-[18px] border border-app-line bg-gradient-to-b from-app-surface to-app-bg-subtle/40 p-4 relative overflow-hidden shadow-app-sm hover:border-app-accent/20 hover:shadow-app-md transition-all duration-300"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">{item.title}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                        {item.title}
+                      </p>
                       <p className="mt-2 font-serif text-3xl font-extrabold text-app-ink tabular-nums leading-none">
                         {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
                       </p>
@@ -799,8 +886,14 @@ function GoalTrackerContent({
                     </div>
                   </div>
                   {item.title === "Việc" && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-app-line/20 overflow-hidden" aria-hidden="true">
-                      <div className="h-full bg-gradient-to-r from-emerald-400 to-app-accent transition-all duration-500 ease-out" style={{ width: `${completionRate}%` }} />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-1.5 bg-app-line/20 overflow-hidden"
+                      aria-hidden="true"
+                    >
+                      <div
+                        className="h-full bg-gradient-to-r from-emerald-400 to-app-accent transition-all duration-500 ease-out"
+                        style={{ width: `${completionRate}%` }}
+                      />
                     </div>
                   )}
                 </div>

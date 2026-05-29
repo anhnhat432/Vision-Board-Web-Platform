@@ -1,4 +1,4 @@
-import { Activity, Briefcase, Heart, Compass, Scale } from "lucide-react";
+import { Activity, Briefcase, Compass, Heart, Scale } from "lucide-react";
 
 interface LifeBalanceRow {
   label: string;
@@ -14,7 +14,7 @@ function clampScore(score: number): number {
   return Math.max(0, Math.min(10, Math.round(score)));
 }
 
-// Extremely soft green/teal variants gradient to keep the calm Forest Calm zone consistent
+// Subtle pastel color variants for visual richness while maintaining Forest Calm aesthetic
 const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; textColor: string; iconBg: string }> = {
   "Sức khoẻ": {
     gradient: "from-emerald-300 to-emerald-500 dark:from-emerald-600 dark:to-emerald-700",
@@ -23,22 +23,22 @@ const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; tex
     iconBg: "bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/40 dark:border-emerald-900/20",
   },
   "Sự nghiệp": {
-    gradient: "from-teal-300 to-teal-500 dark:from-teal-600 dark:to-teal-700",
+    gradient: "from-blue-300 to-blue-500 dark:from-blue-600 dark:to-blue-700",
     icon: Briefcase,
-    textColor: "text-teal-600/80 dark:text-teal-400/80",
-    iconBg: "bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100/40 dark:border-teal-900/20",
+    textColor: "text-blue-600/80 dark:text-blue-400/80",
+    iconBg: "bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/40 dark:border-blue-900/20",
   },
   "Mối quan hệ": {
-    gradient: "from-green-300 to-green-500 dark:from-green-600 dark:to-green-700",
+    gradient: "from-rose-300 to-rose-500 dark:from-rose-600 dark:to-rose-700",
     icon: Heart,
-    textColor: "text-green-600/80 dark:text-green-400/80",
-    iconBg: "bg-green-50/50 dark:bg-green-950/20 border border-green-100/40 dark:border-green-900/20",
+    textColor: "text-rose-600/80 dark:text-rose-400/80",
+    iconBg: "bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/40 dark:border-rose-900/20",
   },
   "Tinh thần": {
-    gradient: "from-lime-300 to-lime-500 dark:from-lime-600 dark:to-lime-700",
+    gradient: "from-amber-300 to-amber-500 dark:from-amber-600 dark:to-amber-700",
     icon: Compass,
-    textColor: "text-lime-600/80 dark:text-lime-400/80",
-    iconBg: "bg-lime-50/50 dark:bg-lime-950/20 border border-lime-100/40 dark:border-lime-900/20",
+    textColor: "text-amber-600/80 dark:text-amber-400/80",
+    iconBg: "bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100/40 dark:border-amber-900/20",
   },
 };
 
@@ -68,18 +68,24 @@ export function BalanceCard({ rows }: BalanceCardProps) {
           const Icon = style.icon;
 
           return (
-            <div 
-              key={row.label} 
+            <div
+              key={row.label}
               className="group p-3 rounded-[12px] border border-transparent hover:border-app-line/60 hover:bg-app-bg-subtle/30 transition-all duration-300"
             >
               <div className="mb-2.5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-xl transition-transform duration-300 group-hover:scale-105 shadow-app-sm ${style.iconBg} ${style.textColor}`}>
+                  <div
+                    className={`p-2 rounded-xl transition-transform duration-300 group-hover:scale-105 shadow-app-sm ${style.iconBg} ${style.textColor}`}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-semibold text-app-ink-soft group-hover:text-app-ink transition-colors duration-200">{row.label}</span>
+                  <span className="text-sm font-semibold text-app-ink-soft group-hover:text-app-ink transition-colors duration-200">
+                    {row.label}
+                  </span>
                 </div>
-                <span className="text-xs font-bold tabular-nums text-app-ink-muted group-hover:text-app-accent transition-colors duration-200">{score}/10</span>
+                <span className="text-xs font-bold tabular-nums text-app-ink-muted group-hover:text-app-accent transition-colors duration-200">
+                  {score}/10
+                </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-app-line/20" aria-hidden="true">
                 <div
