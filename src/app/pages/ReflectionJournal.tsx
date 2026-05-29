@@ -34,6 +34,7 @@ import { Skeleton } from "../components/ui/skeleton";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { WaterReflectionPool } from "./ReflectionJournal/components/WaterReflectionPool";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import {
   celebrateAchievementUnlock,
@@ -295,6 +296,7 @@ function ReflectionJournalContent() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <WaterReflectionPool />
       <AlertDialog
         open={Boolean(reflectionToDelete)}
         onOpenChange={(open) => {

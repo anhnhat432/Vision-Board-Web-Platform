@@ -6,6 +6,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { AnvilForgingEffect } from "./SMARTGoalSetup/components/AnvilForgingEffect";
 import { FormSkeleton } from "../components/ui/skeleton";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -98,6 +99,7 @@ export function SMARTGoalSetup() {
     "checking",
   );
   const [currentStep, setCurrentStep] = useState(0);
+  const [showAnvilEffect, setShowAnvilEffect] = useState(false);
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
   const [userIntent, setUserIntentState] = useState<UserIntentId | null>(null);
@@ -343,7 +345,7 @@ export function SMARTGoalSetup() {
       archetype_overridden: isArchetypeOverridden,
     });
 
-    navigate("/feasibility");
+    setShowAnvilEffect(true);
   };
 
   const handleNext = () => {
@@ -629,6 +631,9 @@ export function SMARTGoalSetup() {
           </details>
         </div>
       </div>
+      {showAnvilEffect && (
+        <AnvilForgingEffect onComplete={() => navigate("/feasibility")} />
+      )}
     </PageShell>
   );
 }

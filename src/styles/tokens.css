@@ -46,6 +46,18 @@
   --status-amber:  #C4841A;
   --status-red:    #B84040;
   --status-blue:   #3A6B9E;
+
+  /* Mood / Emotional palette (Soft Aesthetics) */
+  --mood-lavender:      #9F92EC;
+  --mood-lavender-soft: #F1EFFE;
+  --mood-sky:           #6BA4E8;
+  --mood-sky-soft:      #EEF5FC;
+  --mood-rose:          #E88BA4;
+  --mood-rose-soft:     #FDF0F3;
+  --mood-mint:          #5CA08E;
+  --mood-mint-soft:     #EAF5F2;
+  --mood-amber:         #E29E4B;
+  --mood-amber-soft:    #FEF6EB;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -293,6 +305,18 @@ html.dark {
   --color-app-status-warning: var(--app-status-warning);
   --color-app-status-error:   var(--app-status-error);
   --color-app-status-info:    var(--app-status-info);
+
+  /* — Mood colors — */
+  --color-mood-lavender:      var(--mood-lavender);
+  --color-mood-lavender-soft: var(--mood-lavender-soft);
+  --color-mood-sky:           var(--mood-sky);
+  --color-mood-sky-soft:      var(--mood-sky-soft);
+  --color-mood-rose:          var(--mood-rose);
+  --color-mood-rose-soft:     var(--mood-rose-soft);
+  --color-mood-mint:          var(--mood-mint);
+  --color-mood-mint-soft:     var(--mood-mint-soft);
+  --color-mood-amber:         var(--mood-amber);
+  --color-mood-amber-soft:    var(--mood-amber-soft);
 
   /* — Font — */
   --font-sans:  var(--app-font-sans);

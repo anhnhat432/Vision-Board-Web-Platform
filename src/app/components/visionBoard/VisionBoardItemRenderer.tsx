@@ -43,7 +43,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
         {frame.decorationsLayout === "washi" && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -top-2 left-4 h-5 w-16 -rotate-6 rounded-sm bg-app-warm opacity-80"
+            className="pointer-events-none absolute -top-2.5 left-4 h-4.5 w-16 -rotate-3 rounded-sm bg-gradient-to-r from-mood-sky/40 via-mood-lavender/40 to-mood-rose/40 border border-white/25 shadow-sm backdrop-blur-[1px] opacity-90"
           />
         )}
         {!item.content && <ImageIcon className="mx-auto h-10 w-10 text-app-ink-muted" aria-hidden="true" />}
@@ -54,7 +54,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
           style={{ width: "100%" }}
         />
         {frame.decorationsLayout === "polaroid" && (
-          <div className="mt-2 px-1 pb-1 text-center text-xs uppercase tracking-widest text-app-ink-soft">
+          <div className="mt-2.5 px-1 pb-0.5 text-center font-serif italic text-xs tracking-wider text-mood-lavender font-semibold">
             {areaLabel ?? "Tầm nhìn"}
           </div>
         )}
@@ -91,7 +91,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="flex items-center justify-center rounded-2xl bg-app-accent text-white shadow-[var(--shadow-3)]"
+        className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-mood-sky to-mood-lavender text-white shadow-sm border border-white/20"
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         <Icon className="h-10 w-10" style={{ width: size * 0.4, height: size * 0.4 }} />
