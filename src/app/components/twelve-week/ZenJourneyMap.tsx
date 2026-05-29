@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flame, Sparkles, CheckCircle2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface ScoreboardWeek {
   weekNumber: number;
@@ -63,7 +63,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
             Bản đồ hành trình Zen Journey
           </h3>
           <p className="text-xs text-app-ink-soft">
-            Con đường 12 tuần uốn lượn chánh niệm. Chạm vào mỗi trạm dừng (Zen Stone) để suy ngẫm.
+            Con đường 12 tuần uốn lượn chánh niệm. Chạm vào mỗi trạm dừng (Zen Stone) để xem suy ngẫm sâu sắc bên dưới.
           </p>
         </div>
         <div className="flex flex-wrap gap-3 text-xs text-app-ink-muted">
@@ -73,73 +73,17 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
-            Tuần hiện tại
+            Tuần hiện tại (Lửa trại)
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-app-line" />
-            Tuơng lai (Sương mù)
+            Tương lai (Sương mù)
           </span>
         </div>
       </div>
 
-      {/* Popover chi tiết trạm dừng đang active */}
-      {activeWeek && (
-        <div className="absolute top-16 left-5 right-5 z-20 mx-auto max-w-sm rounded-xl border border-app-accent/30 bg-app-surface/95 p-4 shadow-xl backdrop-blur-md transition-all duration-300 animate-[fadeIn_0.2s_ease-out]">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
-                Trạm dừng chân
-              </p>
-              <h4 className="font-serif text-base font-semibold text-app-ink">
-                Tuần {activeWeek.weekNumber}
-                {activeWeek.weekNumber === currentWeek && " (Trọng tâm hiện tại)"}
-              </h4>
-            </div>
-            {activeWeek.weekNumber === currentWeek ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 animate-pulse">
-                <Flame className="h-3 w-3 fill-amber-500" />
-                Đang thắp lửa
-              </span>
-            ) : activeWeek.reviewDone ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
-                <CheckCircle2 className="h-3 w-3" />
-                Đã hoàn tất
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-app-line px-2 py-0.5 text-[10px] font-bold text-app-ink-muted">
-                {activeWeek.weekNumber > currentWeek ? "Sương mù tương lai" : "Cần review"}
-              </span>
-            )}
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-app-line/40 pt-3 text-xs">
-            <div>
-              <p className="text-app-ink-soft">Điểm tuần:</p>
-              <p className="text-lg font-bold text-app-ink tabular-nums">
-                {activeWeek.weeklyScore} <span className="text-[10px] font-normal text-app-ink-muted">điểm</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-app-ink-soft">Hoàn thành cốt lõi:</p>
-              <p className="text-lg font-bold text-app-ink tabular-nums">
-                {activeWeek.leadCompletionPercent}%
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-lg bg-app-bg/50 px-3 py-2 border border-app-line/40">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-app-ink-muted">
-              Chỉ số tiến triển
-            </p>
-            <p className="mt-0.5 text-xs font-medium text-app-ink leading-tight">
-              {activeWeek.mainMetricProgress || "Chưa cập nhật chỉ số chính"}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Sân khấu bản đồ SVG */}
-      <div className="relative overflow-x-auto overflow-y-hidden pb-4 pt-16 md:pt-20">
+      {/* Sân khấu bản đồ SVG thông thoáng 100% */}
+      <div className="relative overflow-x-auto overflow-y-hidden pb-4 pt-4">
         <div className="min-w-[800px] h-[480px] relative">
           <svg
             className="absolute inset-0 w-full h-full"
@@ -186,7 +130,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 // biome-ignore lint/a11y/useSemanticElements: interactive SVG group represents a Camp/Stone
                 <g
                   key={week.weekNumber}
-                  className="cursor-pointer"
+                  className="cursor-pointer font-sans"
                   onClick={() => setActiveWeek(week)}
                   role="button"
                   tabIndex={0}
@@ -230,15 +174,44 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
 
                   {/* Icon phụ trợ bên trên hòn đá */}
                   {isFuture ? (
-                    // Sương mù che phủ tương lai - ổ khóa nhỏ
+                    // Sương mù che phủ tương lai - ổ khóa nhỏ tự vẽ
                     <g transform={`translate(${coord.x - 5}, ${coord.y - 5})`} className="opacity-45">
                       <rect x="1" y="4" width="8" height="6" rx="1" fill="currentColor" className="text-app-ink-muted" />
                       <path d="M3,4 V2.5 A 2,2 0 0,1 7,2.5 V4" stroke="currentColor" strokeWidth="1" fill="none" className="text-app-ink-muted" />
                     </g>
                   ) : isCurrent ? (
-                    // Lửa trại bập bùng (Campfire) cho tuần hiện tại
-                    <g transform={`translate(${coord.x - 7}, ${coord.y - 7})`}>
-                      <Flame className="h-3.5 w-3.5 fill-amber-100 text-amber-200 animate-bounce" />
+                    // Lửa trại bập bùng (Campfire) cho tuần hiện tại vẽ bằng SVG path tự bập bùng tuyệt đối chuẩn xác
+                    <g transform={`translate(${coord.x}, ${coord.y - 9}) scale(0.75)`}>
+                      {/* Lớp lửa cam bên ngoài */}
+                      <path
+                        d="M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z"
+                        fill="#f59e0b"
+                      >
+                        <animate
+                          attributeName="d"
+                          values="M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z;
+                                  M 0 -13 C 2.5 -7, 6 -4, 6 2 C 6 6, 3 9, 0 9 C -3 9, -6 6, -6 2 C -6 -4, -2.5 -7, 0 -13 Z;
+                                  M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z"
+                          dur="0.8s"
+                          repeatCount="indefinite"
+                        />
+                      </path>
+                      {/* Lớp lửa vàng ấm bên trong */}
+                      <path
+                        d="M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z"
+                        fill="#fcd34d"
+                      >
+                        <animate
+                          attributeName="d"
+                          values="M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z;
+                                  M 0 -9 C 1.5 -5, 4 -3, 4 1 C 4 4, 2 6, 0 6 C -2 6, -4 4, -4 1 C -4 -3, -1.5 -5, 0 -9 Z;
+                                  M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z"
+                          dur="0.6s"
+                          repeatCount="indefinite"
+                        />
+                      </path>
+                      {/* Gỗ củi đốt mộc mạc bên dưới ngọn lửa */}
+                      <path d="M -7 4 L 7 7 M -7 7 L 7 4" stroke="#78350f" strokeWidth="2.5" strokeLinecap="round" />
                     </g>
                   ) : (
                     // Điểm số tuần cho tuần đã hoàn tất
@@ -272,7 +245,6 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
             })}
 
             {/* HIỆU ỨNG SƯƠNG MÙ CHE PHỦ (Fog of War) CHO CÁC TUẦN TƯƠNG LAI */}
-            {/* Vẽ một đám mây sương mù bao quanh khu vực các tuần tương lai lớn hơn tuần hiện tại */}
             {scoreboard
               .filter((w) => w.weekNumber > currentWeek)
               .map((week) => {
@@ -303,6 +275,68 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
           </svg>
         </div>
       </div>
+
+      {/* TẤM CARD CHI TIẾT TRẠM DỪNG CHÂN NẰM THÔNG THOÁNG BÊN DƯỚI BẢN ĐỒ */}
+      {activeWeek && (
+        <div className="mt-6 rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-bg/30 to-app-surface p-5 shadow-sm transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">🪨</span>
+              <div>
+                <h4 className="font-serif text-base font-semibold text-app-ink flex items-center gap-2">
+                  Trạm dừng chân: Tuần {activeWeek.weekNumber}
+                  {activeWeek.weekNumber === currentWeek && (
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full animate-pulse border border-amber-500/20 flex items-center gap-0.5">
+                      🔥 Hiện tại
+                    </span>
+                  )}
+                </h4>
+                <p className="text-xs text-app-ink-soft">
+                  {activeWeek.weekNumber === currentWeek 
+                    ? "Ngọn lửa kỷ luật đang thắp sáng tại trạm dừng này. Hãy tiếp tục duy trì!"
+                    : activeWeek.reviewDone 
+                      ? "Bạn đã vượt qua và hoàn thành việc suy ngẫm sâu sắc cho tuần này."
+                      : "Trạm dừng tương lai hoặc cần bạn tiến hành review để thắp sáng."}
+                </p>
+              </div>
+            </div>
+            {activeWeek.weekNumber === currentWeek ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600 border border-amber-500/20 animate-pulse">
+                Đang thắp lửa
+              </span>
+            ) : activeWeek.reviewDone ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+                Đã hoàn tất review
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-app-line px-3 py-1 text-xs font-bold text-app-ink-soft border border-app-line/60">
+                {activeWeek.weekNumber > currentWeek ? "Tương lai" : "Cần review"}
+              </span>
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Điểm hiệu suất</span>
+              <p className="mt-2 font-serif text-3xl font-bold text-app-ink tabular-nums">
+                {activeWeek.weeklyScore} <span className="text-xs font-sans font-normal text-app-ink-muted">điểm</span>
+              </p>
+            </div>
+            <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Hoàn thành cốt lõi</span>
+              <p className="mt-2 font-serif text-3xl font-bold text-app-ink tabular-nums">
+                {activeWeek.leadCompletionPercent}%
+              </p>
+            </div>
+            <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Chỉ số tiến triển</span>
+              <p className="mt-2 text-xs font-semibold text-app-ink leading-relaxed line-clamp-2">
+                {activeWeek.mainMetricProgress || "Chưa cập nhật chỉ số chính"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
