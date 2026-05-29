@@ -28,6 +28,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { SpotlightCard } from "../components/ui/spotlight-card";
 import { soundService } from "../services/soundService";
 import { Skeleton } from "../components/ui/skeleton";
+import { cn } from "../components/ui/utils";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -425,7 +426,15 @@ function GoalTrackerContent({
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
     return (
-      <SpotlightCard key={goal.id} className="rounded-[14px] border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
+      <SpotlightCard
+        key={goal.id}
+        className={cn(
+          "rounded-[14px] border p-5 md:p-6 overflow-hidden transition-all duration-300",
+          progress === 100
+            ? "bg-app-accent-soft/10 border-app-accent/25 hover:border-app-accent/40"
+            : "bg-app-surface border-app-line"
+        )}
+      >
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_1px_minmax(220px,1fr)]">
           {/* Cột trái — Goal summary */}
           <div>
@@ -435,8 +444,19 @@ function GoalTrackerContent({
                   <GoalArchetypeIcon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-medium text-app-ink leading-snug break-words">{goal.title}</h3>
-                  <p className="text-xs text-app-ink-muted mt-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-serif text-lg font-medium text-app-ink leading-snug break-words">{goal.title}</h3>
+                    {system ? (
+                      <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-app-accent bg-app-accent-soft px-2 py-0.5 rounded-full border border-app-accent/20">
+                        12 Tuần
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-app-ink-soft bg-app-line/40 px-2 py-0.5 rounded-full border border-app-line">
+                        Thường
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-app-ink-muted mt-1.5">
                     Tuần {systemCurrentWeek ?? "-"}/12 · {getLifeAreaLabel(goal.category)}
                   </p>
                 </div>
@@ -454,7 +474,8 @@ function GoalTrackerContent({
 
             {/* Metadata pills */}
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="bg-app-bg border border-app-line text-app-ink-soft text-xs rounded-full px-2.5 py-0.5">
+              <span className="bg-app-bg border border-app-line text-app-ink-soft text-xs rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                <GoalArchetypeIcon className="h-3.5 w-3.5 text-app-accent" />
                 {getLifeAreaLabel(goal.category)}
               </span>
               {isNearDeadline && (
@@ -592,150 +613,172 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <div data-tour-id="goaltracker-hero" className="rounded-[14px] border border-app-line bg-app-accent-soft/15 p-6 md:p-8 relative overflow-hidden mb-6">
-        <div className="max-w-3xl">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">MỤC TIÊU</p>
-          <h1 className="mt-4 font-serif text-3xl font-medium leading-tight tracking-normal text-app-ink sm:text-4xl">
-            Hành trình mục tiêu
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-app-ink-soft max-w-xl">
-            Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn để tạo ra sự chuyển dịch thực sự.
-          </p>
-        </div>
-        {/* Câu châm ngôn chánh niệm mờ ở góc dưới bên phải trên desktop */}
-        <div className="hidden md:block absolute bottom-6 right-8 text-right max-w-xs opacity-60">
-          <p className="font-serif text-xs italic text-app-accent">
-            “Những bước chân nhỏ bé đi đúng hướng sẽ đưa bạn đi rất xa.”
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-96">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
-          <input
-            type="search"
-            placeholder="Tìm theo tên hoặc mô tả..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-app-line bg-app-surface pl-10 pr-3.5 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
-          />
-        </div>
-        <Button
-          className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent inline-flex items-center gap-2"
-          onClick={handleStartGuidedGoalFlow}
-          disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
-        >
-          <Plus className="h-4 w-4" />
-          Mục tiêu mới
-        </Button>
-      </div>
-
-      <div data-tour-id="goaltracker-summary" className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {overviewItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div key={item.title} className="rounded-[14px] border border-app-line bg-app-surface p-4 relative overflow-hidden">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{item.title}</p>
-                  <p className="mt-2 font-serif text-3xl font-medium text-app-ink tabular-nums">
-                    {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
-                  </p>
-                  <p className="mt-1 text-xs text-app-ink-muted">{item.note}</p>
-                </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                  <Icon className="h-4 w-4" />
-                </div>
-              </div>
-              {item.title === "Việc" && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-app-line" aria-hidden="true">
-                  <div className="h-full bg-app-accent" style={{ width: `${completionRate}%` }} />
-                </div>
-              )}
+      {/* Grid Layout 2 Cột trên Desktop */}
+      <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+        {/* Cột chính bên trái */}
+        <div className="space-y-6">
+          <div data-tour-id="goaltracker-hero" className="rounded-[14px] border border-app-line bg-app-accent-soft/15 p-6 md:p-8 relative overflow-hidden">
+            <div className="max-w-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">MỤC TIÊU</p>
+              <h1 className="mt-4 font-serif text-3xl font-medium leading-tight tracking-normal text-app-ink sm:text-4xl">
+                Hành trình mục tiêu
+              </h1>
+              <p className="mt-3 text-sm leading-relaxed text-app-ink-soft max-w-xl">
+                Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn để tạo ra sự chuyển dịch thực sự.
+              </p>
             </div>
-          );
-        })}
-      </div>
-
-      <div data-tour-id="goaltracker-goals">
-        {hasGoals && (
-          <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Danh sách</p>
-            <h2 className="mt-1 font-serif text-2xl font-medium tracking-normal text-app-ink">Mục tiêu của bạn</h2>
+            {/* Câu châm ngôn chánh niệm mờ ở góc dưới bên phải trên desktop */}
+            <div className="hidden md:block absolute bottom-6 right-8 text-right max-w-xs opacity-60">
+              <p className="font-serif text-xs italic text-app-accent">
+                “Những bước chân nhỏ bé đi đúng hướng sẽ đưa bạn đi rất xa.”
+              </p>
+            </div>
           </div>
-        )}
-        {!hasGoals ? (
-          <EmptyState
-            variant="card"
-            icon={<Target className="h-10 w-10" />}
-            title="Chưa có mục tiêu"
-            description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
-            actions={
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Button className="bg-app-accent text-white hover:bg-app-accent" onClick={handleStartGuidedGoalFlow}>
-                  Bắt đầu chu kỳ 12 tuần →
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                  onClick={handleStartGuidedGoalFlow}
-                >
-                  Tạo mục tiêu thường
-                </Button>
-              </div>
-            }
-          />
-        ) : (
-          <div className="stack-section mt-8">
-            {filteredTwelveWeekGoals.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-                      CHU KỲ 12 TUẦN
-                    </p>
-                    <h2 className="mt-1 font-serif text-xl font-medium tracking-normal text-app-ink">Mục tiêu đang chạy</h2>
-                    <p className="mt-1 text-xs text-app-ink-muted">{filteredTwelveWeekGoals.length} mục tiêu</p>
-                  </div>
-                </div>
-                <div className="stack-stack mt-4 space-y-3">
-                  {filteredTwelveWeekGoals.map((goal) => (
-                    <div key={goal.id}>{renderGoalCard(goal)}</div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {filteredStandardGoals.length > 0 && (
-              <div className="mt-8">
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-                      MỤC TIÊU THƯỜNG
-                    </p>
-                    <h2 className="mt-1 font-serif text-xl font-medium tracking-normal text-app-ink">
-                      {filteredStandardGoals.length} mục tiêu
-                    </h2>
-                  </div>
-                </div>
-                <div className="stack-stack mt-4 space-y-3">
-                  {filteredStandardGoals.map((goal) => (
-                    <div key={goal.id}>{renderGoalCard(goal)}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {searchQuery.trim() && filteredTwelveWeekGoals.length === 0 && filteredStandardGoals.length === 0 && (
-              <EmptyState
-                variant="dashed"
-                title="Không tìm thấy mục tiêu"
-                description={`Không tìm thấy mục tiêu nào khớp với "${searchQuery}"`}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:w-96">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+              <input
+                type="search"
+                placeholder="Tìm theo tên hoặc mô tả..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-app-line bg-app-surface pl-10 pr-3.5 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
               />
+            </div>
+            <Button
+              className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent inline-flex items-center gap-2"
+              onClick={handleStartGuidedGoalFlow}
+              disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
+            >
+              <Plus className="h-4 w-4" />
+              Mục tiêu mới
+            </Button>
+          </div>
+
+          <div data-tour-id="goaltracker-goals">
+            {hasGoals && (
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Danh sách</p>
+                <h2 className="mt-1 font-serif text-2xl font-medium tracking-normal text-app-ink">Mục tiêu của bạn</h2>
+              </div>
+            )}
+            {!hasGoals ? (
+              <EmptyState
+                variant="card"
+                icon={<Target className="h-10 w-10" />}
+                title="Chưa có mục tiêu"
+                description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
+                actions={
+                  <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                    <Button className="bg-app-accent text-white hover:bg-app-accent" onClick={handleStartGuidedGoalFlow}>
+                      Bắt đầu chu kỳ 12 tuần →
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                      onClick={handleStartGuidedGoalFlow}
+                    >
+                      Tạo mục tiêu thường
+                    </Button>
+                  </div>
+                }
+              />
+            ) : (
+              <div className="stack-section mt-8">
+                {filteredTwelveWeekGoals.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                          CHU KỲ 12 TUẦN
+                        </p>
+                        <h2 className="mt-1 font-serif text-xl font-medium tracking-normal text-app-ink">Mục tiêu đang chạy</h2>
+                        <p className="mt-1 text-xs text-app-ink-muted">{filteredTwelveWeekGoals.length} mục tiêu</p>
+                      </div>
+                    </div>
+                    <div className="stack-stack mt-4 space-y-3">
+                      {filteredTwelveWeekGoals.map((goal) => (
+                        <div key={goal.id}>{renderGoalCard(goal)}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {filteredStandardGoals.length > 0 && (
+                  <div className="mt-8">
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                          MỤC TIÊU THƯỜNG
+                        </p>
+                        <h2 className="mt-1 font-serif text-xl font-medium tracking-normal text-app-ink">
+                          {filteredStandardGoals.length} mục tiêu
+                        </h2>
+                      </div>
+                    </div>
+                    <div className="stack-stack mt-4 space-y-3">
+                      {filteredStandardGoals.map((goal) => (
+                        <div key={goal.id}>{renderGoalCard(goal)}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {searchQuery.trim() && filteredTwelveWeekGoals.length === 0 && filteredStandardGoals.length === 0 && (
+                  <EmptyState
+                    variant="dashed"
+                    title="Không tìm thấy mục tiêu"
+                    description={`Không tìm thấy mục tiêu nào khớp với "${searchQuery}"`}
+                  />
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
+
+        {/* Sidebar bên phải */}
+        <aside className="space-y-6 lg:pt-4">
+          <div data-tour-id="goaltracker-summary" className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+            {overviewItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title} className="rounded-[14px] border border-app-line bg-app-surface p-4 relative overflow-hidden">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{item.title}</p>
+                      <p className="mt-2 font-serif text-3xl font-medium text-app-ink tabular-nums">
+                        {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
+                      </p>
+                      <p className="mt-1 text-xs text-app-ink-muted">{item.note}</p>
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                  </div>
+                  {item.title === "Việc" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-app-line" aria-hidden="true">
+                      <div className="h-full bg-app-accent" style={{ width: `${completionRate}%` }} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Widget Nhắc nhở tĩnh tâm */}
+          <div className="rounded-[14px] border border-app-line bg-app-surface p-5">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-ink-muted mb-3">NHẮC NHỞ TĨNH TÂM</h3>
+            <p className="text-xs italic leading-relaxed text-app-ink-soft font-serif">
+              “Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.”
+            </p>
+            <div className="mt-4 pt-3 border-t border-app-line flex items-center justify-between text-[10px] text-app-ink-muted">
+              <span>Hôm nay</span>
+              <span>·</span>
+              <span>Chậm rãi & tập trung</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );
