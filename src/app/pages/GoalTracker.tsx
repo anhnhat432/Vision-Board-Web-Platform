@@ -419,6 +419,9 @@ function GoalTrackerContent({
     const isNearDeadline = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
     const systemCurrentWeek = system ? getTwelveWeekCurrentWeek(system) : null;
     const systemTodayOpenTasks = system ? getTwelveWeekTodayTasks(system).filter((task) => !task.completed) : [];
+    const systemTodayTasks = system ? getTwelveWeekTodayTasks(system) : [];
+    const completedTodayCount = systemTodayTasks.filter((t) => t.completed).length;
+    const totalTodayCount = systemTodayTasks.length;
     const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
 
     return (
@@ -441,7 +444,7 @@ function GoalTrackerContent({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg text-app-ink-muted hover:text-[color:var(--color-danger-fg)]"
+                className="h-8 w-8 rounded-lg text-app-ink-muted hover:text-app-status-error hover:bg-app-status-error/10"
                 onClick={() => setGoalToDelete(goal.id)}
                 aria-label={`Xóa mục tiêu ${goal.title}`}
               >
@@ -460,7 +463,7 @@ function GoalTrackerContent({
                 </span>
               )}
               {isOverdue && (
-                <span className="bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)] border border-[color:var(--color-danger-border)] text-xs rounded-full px-2.5 py-0.5">
+                <span className="bg-app-status-error/10 text-app-status-error border border-app-status-error/20 text-xs rounded-full px-2.5 py-0.5">
                   Quá hạn
                 </span>
               )}
@@ -497,7 +500,7 @@ function GoalTrackerContent({
               )}
               <Button
                 variant="ghost"
-                className="text-app-ink-muted hover:text-[color:var(--color-danger-fg)] text-sm px-3"
+                className="text-app-ink-muted hover:text-app-status-error hover:bg-app-status-error/10 text-sm px-3"
                 onClick={() => setGoalToDelete(goal.id)}
               >
                 Xóa
@@ -509,8 +512,8 @@ function GoalTrackerContent({
           <div>
             <div className="flex items-baseline justify-between">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
-              <span className="text-xs text-app-ink-muted">
-                {systemTodayOpenTasks.filter((t) => !t.completed).length}/{systemTodayOpenTasks.length}
+              <span className="text-xs font-bold tabular-nums text-app-accent">
+                {completedTodayCount}/{totalTodayCount}
               </span>
             </div>
             <div className="mt-2 space-y-1 max-h-[100px] overflow-y-auto">
@@ -576,7 +579,7 @@ function GoalTrackerContent({
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDeleteGoal}
-              className="bg-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-fg)]"
+              className="bg-app-status-error hover:bg-app-status-error/90 text-white"
             >
               Xóa
             </AlertDialogAction>
@@ -587,10 +590,10 @@ function GoalTrackerContent({
       <div data-tour-id="goaltracker-hero">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU</p>
-          <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
+          <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-normal text-app-ink">
             Mục tiêu của bạn
           </h1>
-          <p className="mt-2 text-sm text-app-ink-soft max-w-2xl">
+          <p className="mt-3 text-sm leading-relaxed text-app-ink-soft max-w-2xl">
             Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -629,7 +632,7 @@ function GoalTrackerContent({
                   </p>
                   <p className="mt-1 text-xs text-app-ink-muted">{item.note}</p>
                 </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-app-bg text-app-accent">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
@@ -642,7 +645,7 @@ function GoalTrackerContent({
         {hasGoals && (
           <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Danh sách</p>
-            <h2 className="mt-1 font-serif text-2xl font-medium text-app-ink">Mục tiêu của bạn</h2>
+            <h2 className="mt-1 font-serif text-2xl font-medium tracking-normal text-app-ink">Mục tiêu của bạn</h2>
           </div>
         )}
         {!hasGoals ? (
@@ -675,7 +678,7 @@ function GoalTrackerContent({
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       CHU KỲ 12 TUẦN
                     </p>
-                    <h2 className="mt-1 font-serif text-xl font-medium text-app-ink">Mục tiêu đang chạy</h2>
+                    <h2 className="mt-1 font-serif text-xl font-medium tracking-normal text-app-ink">Mục tiêu đang chạy</h2>
                     <p className="mt-1 text-xs text-app-ink-muted">{filteredTwelveWeekGoals.length} mục tiêu</p>
                   </div>
                 </div>
@@ -694,7 +697,7 @@ function GoalTrackerContent({
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       MỤC TIÊU THƯỜNG
                     </p>
-                    <h2 className="mt-1 font-serif text-xl font-medium text-app-ink">
+                    <h2 className="mt-1 font-serif text-xl font-medium tracking-normal text-app-ink">
                       {filteredStandardGoals.length} mục tiêu
                     </h2>
                   </div>
