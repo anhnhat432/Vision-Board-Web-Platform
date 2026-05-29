@@ -1,13 +1,12 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Gauge, ShieldAlert, BadgeCheck, Sparkles, Zap, TrendingUp, Activity } from "lucide-react";
 import { QUESTIONS } from "../constants";
 
 interface FeasibilityBalanceScaleProps {
   answers: Record<number, string>;
 }
 
-/* ── Animated counter hook ─────────────────────────────────────────── */
-function useAnimatedValue(target: number, duration = 800) {
+/* ── Animated counter ──────────────────────────────────────────────── */
+function useAnimatedValue(target: number, duration = 900) {
   const [display, setDisplay] = useState(0);
   const rafRef = useRef<number>(0);
   const currentRef = useRef(0);
@@ -15,12 +14,12 @@ function useAnimatedValue(target: number, duration = 800) {
   useEffect(() => {
     const start = currentRef.current;
     const diff = target - start;
+    if (Math.abs(diff) < 0.001) return;
     const startTime = performance.now();
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
       const eased = 1 - (1 - progress) ** 3;
       const value = start + diff * eased;
       currentRef.current = value;
@@ -37,8 +36,32 @@ function useAnimatedValue(target: number, duration = 800) {
   return display;
 }
 
+/* ── Constants ─────────────────────────────────────────────────────── */
+const CX = 200;  // Center X of SVG
+const CY = 180;  // Center Y (pivot point)
+const R = 140;   // Main arc radius
+const ARC_WIDTH = 18;
+const TOTAL_QUESTIONS = QUESTIONS.length;
+
+// Helper: polar to cartesian (0° = left of semi-circle, 180° = right)
+function polarToXY(angleDeg: number, radius: number) {
+  const rad = (angleDeg * Math.PI) / 180;
+  return {
+    x: CX - radius * Math.cos(rad),
+    y: CY - radius * Math.sin(rad),
+  };
+}
+
+// Build arc path
+function arcPath(r: number, startAngle = 0, endAngle = 180) {
+  const s = polarToXY(startAngle, r);
+  const e = polarToXY(endAngle, r);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y}`;
+}
+
 export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProps) {
-  // ── Tính điểm trung bình khả thi hiện tại ──
+  /* ── Score logic ── */
   const balanceData = useMemo(() => {
     let totalScore = 0;
     let answeredCount = 0;
@@ -55,29 +78,22 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     }
 
     const average = answeredCount > 0 ? totalScore / answeredCount : 2.5;
-
-    // Đưa điểm trung bình (1.0 đến 4.0) về góc xoay kim chỉ hướng (-90 đến +90 độ)
-    const normalized = (average - 2.5) / 1.5;
-    const needleAngle = normalized * 90;
+    const normalized = (average - 2.5) / 1.5; // -1 to +1
+    const needleAngle = normalized * 90;       // -90° to +90°
 
     return {
       needleAngle,
       average,
       answeredCount,
-      totalScore,
       isHeavyLeft: average < 2.3,
       isHeavyRight: average > 2.7,
-      isBalanced: average >= 2.3 && average <= 2.7,
     };
   }, [answers]);
 
-  const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight, totalScore } = balanceData;
+  const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight } = balanceData;
+  const animatedAverage = useAnimatedValue(answeredCount > 0 ? average : 0, 1000);
 
-  // ── Animated score ──
-  const animatedAverage = useAnimatedValue(answeredCount > 0 ? average : 0, 900);
-  const animatedPercent = useAnimatedValue(answeredCount > 0 ? (average / 4) * 100 : 0, 900);
-
-  // ── Axis scores for mini radar ──
+  /* ── Per-axis scores ── */
   const axisScores = useMemo(() => {
     return QUESTIONS.map((q) => {
       const answerVal = answers[q.id];
@@ -91,532 +107,446 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     });
   }, [answers]);
 
-  // ── Hiệu ứng 3D Mouse-Tilt ──
+  /* ── Status copy ── */
+  const statusCopy = useMemo(() => {
+    if (answeredCount === 0) {
+      return { title: "Chờ hiệu chuẩn", sub: "Trả lời các câu hỏi để đo mức sẵn sàng", color: "#94a3b8" };
+    }
+    if (isHeavyLeft) {
+      return { title: "Rào cản lớn — Cần tinh gọn", sub: `Đã đánh giá ${answeredCount}/${TOTAL_QUESTIONS} khía cạnh`, color: "#f43f5e" };
+    }
+    if (isHeavyRight) {
+      return { title: "Khả thi cao — Sẵn sàng lập kế hoạch", sub: `Đã đánh giá ${answeredCount}/${TOTAL_QUESTIONS} khía cạnh`, color: "#10b981" };
+    }
+    return { title: "Cân bằng — Hãy duy trì kỷ luật", sub: `Đã đánh giá ${answeredCount}/${TOTAL_QUESTIONS} khía cạnh`, color: "#f59e0b" };
+  }, [answeredCount, isHeavyLeft, isHeavyRight]);
+
+  /* ── 3D Tilt ── */
   const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const rect = el.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     setTiltStyle({
-      transform: `perspective(1200px) rotateX(${-y * 8}deg) rotateY(${x * 8}deg) scale3d(1.01, 1.01, 1.01)`,
-      transition: "transform 0.08s ease-out",
+      transform: `perspective(1200px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg)`,
+      transition: "transform 0.1s ease-out",
     });
   };
   const handleMouseLeave = () => {
     setTiltStyle({
-      transform: "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+      transform: "perspective(1200px) rotateX(0deg) rotateY(0deg)",
       transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
     });
   };
 
-  // ── Emotion sticker ──
-  const emotionData = useMemo(() => {
-    if (answeredCount === 0) {
-      return {
-        emoji: "🔮",
-        label: "Chờ hiệu chuẩn",
-        color: "from-slate-400 to-slate-500",
-        bgStyle: "bg-slate-50/60 dark:bg-slate-800/40 text-slate-500 border-slate-200/60 dark:border-slate-700/50",
-        glowColor: "rgba(148, 163, 184, 0.15)",
-      };
+  /* ── SVG Tick marks ── */
+  const ticks = useMemo(() => {
+    const result = [];
+    for (let i = 0; i <= 40; i++) {
+      const angle = (i / 40) * 180;
+      const isMajor = i % 10 === 0;
+      const isMid = i % 5 === 0;
+      const innerR = R + 2;
+      const outerR = isMajor ? R + 14 : isMid ? R + 10 : R + 6;
+      const p1 = polarToXY(angle, innerR);
+      const p2 = polarToXY(angle, outerR);
+
+      // Smooth color interpolation from rose → amber → emerald
+      const t = i / 40;
+      let r: number, g: number, b: number;
+      if (t < 0.35) {
+        const p = t / 0.35;
+        r = 244 + (249 - 244) * p;
+        g = 63 + (115 - 63) * p;
+        b = 94 + (22 - 94) * p;
+      } else if (t < 0.65) {
+        const p = (t - 0.35) / 0.3;
+        r = 249 + (245 - 249) * p;
+        g = 115 + (158 - 115) * p;
+        b = 22 + (11 - 22) * p;
+      } else {
+        const p = (t - 0.65) / 0.35;
+        r = 245 + (16 - 245) * p;
+        g = 158 + (185 - 158) * p;
+        b = 11 + (129 - 11) * p;
+      }
+
+      result.push({ p1, p2, isMajor, isMid, angle, color: `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})` });
     }
-    if (isHeavyLeft) {
-      return {
-        emoji: "🤯",
-        label: "Quá tải · Rào cản lớn",
-        color: "from-rose-500 to-red-600",
-        bgStyle: "bg-gradient-to-r from-rose-500/10 via-red-500/8 to-orange-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
-        glowColor: "rgba(244, 63, 94, 0.2)",
-      };
-    }
-    if (isHeavyRight) {
-      return {
-        emoji: "🚀",
-        label: "Sẵn sàng · Khả thi cao",
-        color: "from-emerald-500 to-teal-600",
-        bgStyle: "bg-gradient-to-r from-emerald-500/10 via-teal-500/8 to-cyan-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
-        glowColor: "rgba(16, 185, 129, 0.2)",
-      };
-    }
-    return {
-      emoji: "⚖️",
-      label: "Cân bằng · Lý tưởng",
-      color: "from-amber-500 to-yellow-600",
-      bgStyle: "bg-gradient-to-r from-amber-500/10 via-yellow-500/8 to-emerald-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25",
-      glowColor: "rgba(245, 158, 11, 0.2)",
-    };
-  }, [answeredCount, isHeavyLeft, isHeavyRight]);
-
-  const statusLabel = () => {
-    if (answeredCount === 0) return "Cán cân đang thăng bằng";
-    if (isHeavyLeft) return "Rào cản khá nặng nề — Nên tinh gọn bớt việc";
-    if (isHeavyRight) return "Mức độ khả thi rất tốt — Sẵn sàng lập kế hoạch";
-    return "Cân bằng lý tưởng — Hãy duy trì kỷ luật";
-  };
-
-  // ── SVG gauge calculations ──
-  const gaugeRadius = 85;
-  const gaugeCenterX = 150;
-  const gaugeCenterY = 145;
-
-  // Tạo radial ticks tinh tế
-  const radialTicks = useMemo(() => {
-    const ticks = [];
-    for (let angle = 0; angle <= 180; angle += 9) {
-      const rad = (angle * Math.PI) / 180;
-      const isMajor = angle % 45 === 0;
-      const isMid = angle % 18 === 0;
-      const r1 = isMajor ? 86 : isMid ? 88 : 90;
-      const r2 = 96;
-      const x1 = gaugeCenterX - r1 * Math.cos(rad);
-      const y1 = gaugeCenterY - r1 * Math.sin(rad);
-      const x2 = gaugeCenterX - r2 * Math.cos(rad);
-      const y2 = gaugeCenterY - r2 * Math.sin(rad);
-
-      // Color gradient from rose through amber to emerald
-      let color = "#f43f5e"; // rose
-      if (angle > 45 && angle <= 75) color = "#f97316"; // orange
-      else if (angle > 75 && angle <= 105) color = "#f59e0b"; // amber
-      else if (angle > 105 && angle <= 135) color = "#84cc16"; // lime
-      else if (angle > 135) color = "#10b981"; // emerald
-
-      ticks.push({ x1, y1, x2, y2, color, isMajor, isMid, angle });
-    }
-    return ticks;
+    return result;
   }, []);
 
-  // Score zone labels along the arc
-  const zoneLabels = useMemo(() => {
-    const zones = [
-      { angle: 15, label: "1.0", size: 9 },
-      { angle: 45, label: "1.5", size: 8 },
-      { angle: 90, label: "2.5", size: 9 },
-      { angle: 135, label: "3.5", size: 8 },
-      { angle: 165, label: "4.0", size: 9 },
-    ];
-    return zones.map((z) => {
-      const rad = (z.angle * Math.PI) / 180;
-      const r = 106;
-      return {
-        ...z,
-        x: gaugeCenterX - r * Math.cos(rad),
-        y: gaugeCenterY - r * Math.sin(rad),
-      };
+  /* ── Zone labels on arc ── */
+  const zoneMarkers = useMemo(() => {
+    return [
+      { angle: 0, label: "1.0" },
+      { angle: 90, label: "2.5" },
+      { angle: 180, label: "4.0" },
+    ].map((z) => {
+      const pos = polarToXY(z.angle, R + 22);
+      return { ...z, ...pos };
     });
   }, []);
 
+  /* ── Needle dot position on arc ── */
+  const needleDotAngle = answeredCount > 0 ? 90 + needleAngle : 90;
+  const needleDot = polarToXY(needleDotAngle, R);
+
+  /* ── Segment arc (filled portion based on score) ── */
+  const filledArcEndAngle = answeredCount > 0 ? ((average - 1) / 3) * 180 : 0;
+
+  // Calculate the arc length for dash animation
+  const totalArcLen = Math.PI * R; // half-circle
+  const filledLen = (filledArcEndAngle / 180) * totalArcLen;
+
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Mouse events are for decorative 3D tilt effect only
+    // biome-ignore lint/a11y/noStaticElementInteractions: Decorative 3D tilt only
     <div
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={tiltStyle}
-      className="relative overflow-hidden rounded-2xl border border-white/30 dark:border-slate-700/40 bg-gradient-to-br from-white/80 via-white/60 to-slate-50/80 dark:from-slate-900/80 dark:via-slate-900/60 dark:to-slate-950/80 backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.05)] p-0 transition-all duration-300 group"
+      className="relative rounded-2xl overflow-hidden transition-all duration-300"
     >
-      {/* ═══ Ambient background effects ═══ */}
-      <div
-        className="absolute inset-0 opacity-30 dark:opacity-20 pointer-events-none transition-opacity duration-700"
-        style={{
-          background: `
-            radial-gradient(ellipse 50% 50% at 20% 20%, rgba(99, 102, 241, 0.08), transparent),
-            radial-gradient(ellipse 50% 50% at 80% 80%, ${emotionData.glowColor}, transparent)
-          `,
-        }}
-      />
+      {/* ═══ Outer container with refined border ═══ */}
+      <div className="relative bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
 
-      {/* Animated scan line */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute w-full h-[1px] opacity-[0.07]"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.6), transparent)",
-            animation: "feasibility-scan 4s ease-in-out infinite",
-          }}
-        />
-      </div>
+        {/* ═══ Gauge area — dark inset panel ═══ */}
+        <div className="relative mx-3 mt-3 rounded-xl bg-gradient-to-b from-slate-900 via-slate-925 to-slate-950 overflow-hidden">
+          {/* Subtle noise texture */}
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            }}
+          />
 
-      {/* ═══ Header ═══ */}
-      <div className="relative z-10 px-5 pt-5 pb-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50">
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 dark:from-indigo-500/20 dark:to-violet-500/20 border border-indigo-500/10">
-              <Gauge className="h-4.5 w-4.5 text-indigo-500" />
-            </div>
-            {/* Live pulse indicator */}
-            {answeredCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              </span>
-            )}
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-indigo-500/70 dark:text-indigo-400/70">
-              Đồng hồ khả thi
-            </p>
-            <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 -mt-0.5">
-              12-Week Readiness Gauge
-            </p>
-          </div>
-        </div>
+          {/* Ambient glow behind arc */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2 bottom-4 w-[280px] h-[140px] rounded-full pointer-events-none transition-all duration-700"
+            style={{
+              background: `radial-gradient(ellipse, ${statusCopy.color}15, transparent 70%)`,
+            }}
+          />
 
-        {/* Score pill */}
-        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm">
-          {answeredCount > 0 && isHeavyRight && (
-            <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-          )}
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Score</span>
-          <span className="text-lg font-black tabular-nums text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 leading-none">
-            {answeredCount > 0 ? animatedAverage.toFixed(1) : "—"}
-          </span>
-          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">/4.0</span>
-        </div>
-      </div>
+          {/* ── SVG Gauge ── */}
+          <div className="relative w-full px-4 pt-6 pb-3 flex justify-center select-none">
+            <svg viewBox="0 0 400 220" className="w-full max-w-[380px] h-auto overflow-visible" aria-hidden="true">
+              <defs>
+                {/* Arc gradient */}
+                <linearGradient id="fbs-g" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#fb7185" />
+                  <stop offset="20%" stopColor="#f97316" />
+                  <stop offset="40%" stopColor="#fbbf24" />
+                  <stop offset="60%" stopColor="#a3e635" />
+                  <stop offset="80%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
 
-      {/* ═══ Main SVG Gauge ═══ */}
-      <div className="relative w-full px-5 pt-4 pb-2 flex items-center justify-center select-none">
-        <div className="relative w-full max-w-[300px] h-[170px]">
-          <svg
-            viewBox="0 0 300 180"
-            className="w-full h-full overflow-visible"
-            aria-hidden="true"
-          >
-            <defs>
-              {/* Main arc gradient */}
-              <linearGradient id="fbs-arc-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#f43f5e" />
-                <stop offset="25%" stopColor="#f97316" />
-                <stop offset="50%" stopColor="#f59e0b" />
-                <stop offset="75%" stopColor="#84cc16" />
-                <stop offset="100%" stopColor="#10b981" />
-              </linearGradient>
+                {/* Filled arc glow */}
+                <filter id="fbs-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="6" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
 
-              {/* Active arc glow gradient */}
-              <linearGradient id="fbs-arc-glow" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#f59e0b" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.4" />
-              </linearGradient>
+                {/* Needle drop-shadow */}
+                <filter id="fbs-ns" x="-100%" y="-100%" width="300%" height="300%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#6366f1" floodOpacity="0.6" />
+                </filter>
 
-              {/* Needle glow */}
-              <linearGradient id="fbs-needle-grad" x1="0%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stopColor="#818cf8" stopOpacity="0.1" />
-                <stop offset="50%" stopColor="#6366f1" stopOpacity="0.7" />
-                <stop offset="100%" stopColor="#4f46e5" stopOpacity="1" />
-              </linearGradient>
+                {/* Hub shadow */}
+                <filter id="fbs-hs" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="1" stdDeviation="4" floodColor="black" floodOpacity="0.4" />
+                </filter>
 
-              {/* Neon glow filter */}
-              <filter id="fbs-neon-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
+                {/* Indicator dot glow */}
+                <filter id="fbs-dg" x="-100%" y="-100%" width="300%" height="300%">
+                  <feGaussianBlur stdDeviation="3" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
-              {/* Soft shadow for hub */}
-              <filter id="fbs-hub-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#6366f1" floodOpacity="0.3" />
-              </filter>
+              {/* ── Tick marks ── */}
+              {ticks.map((t) => (
+                <line
+                  key={t.angle}
+                  x1={t.p1.x} y1={t.p1.y}
+                  x2={t.p2.x} y2={t.p2.y}
+                  stroke={t.color}
+                  strokeWidth={t.isMajor ? "2.5" : t.isMid ? "1.5" : "0.8"}
+                  strokeLinecap="round"
+                  opacity={t.isMajor ? 0.6 : t.isMid ? 0.35 : 0.15}
+                />
+              ))}
 
-              {/* Outer glow for arc */}
-              <filter id="fbs-arc-outer-glow" x="-10%" y="-10%" width="120%" height="120%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
+              {/* ── Zone labels ── */}
+              {zoneMarkers.map((z) => (
+                <text
+                  key={z.label}
+                  x={z.x}
+                  y={z.y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize="11"
+                  fontWeight="600"
+                  fill="#64748b"
+                  opacity="0.5"
+                  style={{ fontFamily: "'Inter', system-ui, sans-serif", fontFeatureSettings: "'tnum'" }}
+                >
+                  {z.label}
+                </text>
+              ))}
 
-            {/* Outer decorative ring */}
-            <path
-              d={`M ${gaugeCenterX - 98} ${gaugeCenterY} A 98 98 0 0 1 ${gaugeCenterX + 98} ${gaugeCenterY}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.5"
-              className="text-slate-200/50 dark:text-slate-800/50"
-            />
-
-            {/* Radial ticks with color gradient */}
-            {radialTicks.map((tick) => (
-              <line
-                key={tick.angle}
-                x1={tick.x1}
-                y1={tick.y1}
-                x2={tick.x2}
-                y2={tick.y2}
-                stroke={tick.color}
-                strokeWidth={tick.isMajor ? "2" : tick.isMid ? "1.2" : "0.6"}
+              {/* ── Background track ── */}
+              <path
+                d={arcPath(R)}
+                fill="none"
+                stroke="#1e293b"
+                strokeWidth={ARC_WIDTH}
                 strokeLinecap="round"
-                opacity={tick.isMajor ? 0.7 : tick.isMid ? 0.5 : 0.25}
-                className="transition-all duration-300"
               />
-            ))}
 
-            {/* Score zone number labels */}
-            {zoneLabels.map((z) => (
+              {/* Inner subtle border of track */}
+              <path
+                d={arcPath(R)}
+                fill="none"
+                stroke="#334155"
+                strokeWidth={ARC_WIDTH + 1}
+                strokeLinecap="round"
+                opacity="0.3"
+              />
+
+              {/* ── Filled gradient arc ── */}
+              {answeredCount > 0 && (
+                <>
+                  {/* Glow layer */}
+                  <path
+                    d={arcPath(R)}
+                    fill="none"
+                    stroke="url(#fbs-g)"
+                    strokeWidth={ARC_WIDTH + 8}
+                    strokeLinecap="round"
+                    strokeDasharray={`${totalArcLen}`}
+                    strokeDashoffset={`${totalArcLen - filledLen}`}
+                    filter="url(#fbs-glow)"
+                    opacity="0.35"
+                    style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                  />
+                  {/* Main fill */}
+                  <path
+                    d={arcPath(R)}
+                    fill="none"
+                    stroke="url(#fbs-g)"
+                    strokeWidth={ARC_WIDTH}
+                    strokeLinecap="round"
+                    strokeDasharray={`${totalArcLen}`}
+                    strokeDashoffset={`${totalArcLen - filledLen}`}
+                    style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                  />
+                </>
+              )}
+
+              {/* ── Indicator dot on arc ── */}
+              {answeredCount > 0 && (
+                <g style={{ transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+                  <circle
+                    cx={needleDot.x}
+                    cy={needleDot.y}
+                    r="8"
+                    fill="white"
+                    filter="url(#fbs-dg)"
+                    style={{ transition: "cx 1s cubic-bezier(0.34, 1.56, 0.64, 1), cy 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+                  />
+                  <circle
+                    cx={needleDot.x}
+                    cy={needleDot.y}
+                    r="4"
+                    fill={statusCopy.color}
+                    style={{ transition: "cx 1s cubic-bezier(0.34, 1.56, 0.64, 1), cy 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+                  />
+                </g>
+              )}
+
+              {/* ── Needle ── */}
+              <g
+                style={{
+                  transform: `rotate(${needleAngle}deg)`,
+                  transformOrigin: `${CX}px ${CY}px`,
+                  transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                }}
+              >
+                {/* Needle body — tapered polygon */}
+                <polygon
+                  points={`${CX - 2},${CY + 8} ${CX},${CY - R + 30} ${CX + 2},${CY + 8}`}
+                  fill="#e2e8f0"
+                  filter="url(#fbs-ns)"
+                  opacity="0.9"
+                />
+                {/* Needle bright tip */}
+                <polygon
+                  points={`${CX - 1.2},${CY - R + 42} ${CX},${CY - R + 28} ${CX + 1.2},${CY - R + 42}`}
+                  fill="white"
+                />
+              </g>
+
+              {/* ── Center hub ── */}
+              <circle cx={CX} cy={CY} r="16" fill="#0f172a" stroke="#334155" strokeWidth="1" filter="url(#fbs-hs)" />
+              <circle cx={CX} cy={CY} r="12" fill="#1e293b" stroke="#475569" strokeWidth="0.5" />
+              <circle cx={CX} cy={CY} r="4" fill="#94a3b8" />
+              <circle cx={CX} cy={CY} r="1.5" fill="#e2e8f0" />
+
+              {/* ── Score display in center below hub ── */}
               <text
-                key={z.label}
-                x={z.x}
-                y={z.y - 2}
+                x={CX}
+                y={CY + 42}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize={z.size}
-                fontWeight="700"
-                className="fill-slate-300 dark:fill-slate-600 select-none"
-                style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
+                fontSize="36"
+                fontWeight="800"
+                fill="white"
+                opacity={answeredCount > 0 ? 1 : 0.2}
+                style={{
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFeatureSettings: "'tnum'",
+                  transition: "opacity 0.5s ease",
+                }}
               >
-                {z.label}
+                {answeredCount > 0 ? animatedAverage.toFixed(1) : "—"}
               </text>
-            ))}
+              <text
+                x={CX}
+                y={CY + 62}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="11"
+                fontWeight="500"
+                fill="#64748b"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              >
+                / 4.0
+              </text>
 
-            {/* Background track arc - muted */}
-            <path
-              d={`M ${gaugeCenterX - gaugeRadius} ${gaugeCenterY} A ${gaugeRadius} ${gaugeRadius} 0 0 1 ${gaugeCenterX + gaugeRadius} ${gaugeCenterY}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="8"
-              strokeLinecap="round"
-              className="text-slate-100 dark:text-slate-800/60"
-            />
+              {/* ── Edge labels ── */}
+              <text
+                x={CX - R - 6}
+                y={CY + 16}
+                textAnchor="end"
+                fontSize="9"
+                fontWeight="700"
+                fill="#fb7185"
+                opacity="0.7"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}
+              >
+                Rào cản
+              </text>
+              <text
+                x={CX + R + 6}
+                y={CY + 16}
+                textAnchor="start"
+                fontSize="9"
+                fontWeight="700"
+                fill="#34d399"
+                opacity="0.7"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}
+              >
+                Khả thi
+              </text>
+            </svg>
+          </div>
+        </div>
 
-            {/* Active gradient arc with glow */}
-            <path
-              d={`M ${gaugeCenterX - gaugeRadius} ${gaugeCenterY} A ${gaugeRadius} ${gaugeRadius} 0 0 1 ${gaugeCenterX + gaugeRadius} ${gaugeCenterY}`}
-              fill="none"
-              stroke="url(#fbs-arc-glow)"
-              strokeWidth="14"
-              strokeLinecap="round"
-              filter="url(#fbs-arc-outer-glow)"
-              className="opacity-40"
-            />
+        {/* ═══ Bottom section — light panel ═══ */}
+        <div className="px-4 pt-4 pb-4 space-y-3.5">
+          {/* ── Axis breakdown ── */}
+          <div className="space-y-1.5">
+            {axisScores.map((ax) => {
+              const pct = ax.answered ? (ax.score / 4) * 100 : 0;
+              const barColor = !ax.answered
+                ? "bg-slate-100 dark:bg-slate-800"
+                : ax.score >= 3
+                  ? "bg-emerald-500"
+                  : ax.score === 2
+                    ? "bg-amber-500"
+                    : "bg-rose-500";
+              const trackColor = "bg-slate-100 dark:bg-slate-800/80";
+              const textColor = ax.answered
+                ? "text-slate-700 dark:text-slate-200"
+                : "text-slate-400 dark:text-slate-600";
+              const scoreColor = !ax.answered
+                ? "text-slate-300 dark:text-slate-700"
+                : ax.score >= 3
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : ax.score === 2
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-rose-600 dark:text-rose-400";
 
-            {/* Main gradient arc */}
-            <path
-              d={`M ${gaugeCenterX - gaugeRadius} ${gaugeCenterY} A ${gaugeRadius} ${gaugeRadius} 0 0 1 ${gaugeCenterX + gaugeRadius} ${gaugeCenterY}`}
-              fill="none"
-              stroke="url(#fbs-arc-gradient)"
-              strokeWidth="6"
-              strokeLinecap="round"
-              className="transition-all duration-500"
-            />
+              return (
+                <div key={ax.axis} className="flex items-center gap-3 group/row">
+                  <span className={`text-xs font-medium w-[100px] shrink-0 truncate transition-colors duration-300 ${textColor}`}>
+                    {ax.label}
+                  </span>
+                  <div className={`flex-1 h-1.5 rounded-full ${trackColor} overflow-hidden`}>
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className={`text-xs font-bold tabular-nums w-[28px] text-right transition-colors duration-300 ${scoreColor}`}
+                    style={{ fontFeatureSettings: "'tnum'" }}
+                  >
+                    {ax.answered ? ax.score : "·"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
 
-            {/* ── Needle assembly ── */}
-            <g
+          {/* ── Divider ── */}
+          <div className="h-px bg-slate-100 dark:bg-slate-800/80" />
+
+          {/* ── Status footer ── */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">
+                {statusCopy.title}
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
+                {statusCopy.sub}
+              </p>
+            </div>
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors duration-300"
               style={{
-                transform: `rotate(${needleAngle}deg)`,
-                transformOrigin: `${gaugeCenterX}px ${gaugeCenterY}px`,
-                transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                borderColor: `${statusCopy.color}25`,
+                backgroundColor: `${statusCopy.color}08`,
               }}
             >
-              {/* Needle glow aura */}
-              <line
-                x1={gaugeCenterX}
-                y1={gaugeCenterY}
-                x2={gaugeCenterX}
-                y2={gaugeCenterY - 70}
-                stroke="url(#fbs-needle-grad)"
-                strokeWidth="8"
-                strokeLinecap="round"
-                filter="url(#fbs-neon-glow)"
-                className="opacity-60"
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: statusCopy.color,
+                  boxShadow: `0 0 6px ${statusCopy.color}60`,
+                }}
               />
-
-              {/* Needle body - tapered */}
-              <line
-                x1={gaugeCenterX}
-                y1={gaugeCenterY + 6}
-                x2={gaugeCenterX}
-                y2={gaugeCenterY - 68}
-                stroke="#6366f1"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-
-              {/* Needle tip arrowhead */}
-              <polygon
-                points={`${gaugeCenterX - 3.5},${gaugeCenterY - 63} ${gaugeCenterX},${gaugeCenterY - 75} ${gaugeCenterX + 3.5},${gaugeCenterY - 63}`}
-                fill="#4f46e5"
-                className="drop-shadow-[0_0_4px_rgba(99,102,241,0.8)]"
-              />
-
-              {/* Hub multi-layer center */}
-              <circle
-                cx={gaugeCenterX}
-                cy={gaugeCenterY}
-                r="12"
-                fill="white"
-                className="dark:fill-slate-900"
-                filter="url(#fbs-hub-shadow)"
-              />
-              <circle
-                cx={gaugeCenterX}
-                cy={gaugeCenterY}
-                r="10"
-                fill="none"
-                stroke="#e0e7ff"
-                strokeWidth="1"
-                className="dark:stroke-slate-700"
-              />
-              <circle
-                cx={gaugeCenterX}
-                cy={gaugeCenterY}
-                r="6"
-                fill="#6366f1"
-              />
-              <circle
-                cx={gaugeCenterX}
-                cy={gaugeCenterY}
-                r="3"
-                fill="white"
-                opacity="0.9"
-              />
-              {/* Tiny specular highlight on hub */}
-              <circle
-                cx={gaugeCenterX - 1.5}
-                cy={gaugeCenterY - 1.5}
-                r="1.2"
-                fill="white"
-                opacity="0.7"
-              />
-            </g>
-          </svg>
-
-          {/* Text nhãn Rào cản / Khả thi */}
-          <div className="absolute left-0 bottom-0 flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-rose-200/40 dark:border-rose-800/30 shadow-sm">
-            <ShieldAlert className="h-3 w-3 text-rose-500" />
-            <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest">
-              Rào cản
-            </span>
-          </div>
-          <div className="absolute right-0 bottom-0 flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-emerald-200/40 dark:border-emerald-800/30 shadow-sm">
-            <BadgeCheck className="h-3 w-3 text-emerald-500" />
-            <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
-              Khả thi
-            </span>
+              <span
+                className="text-xs font-bold tabular-nums"
+                style={{
+                  color: statusCopy.color,
+                  fontFeatureSettings: "'tnum'",
+                }}
+              >
+                {answeredCount > 0 ? `${Math.round((average / 4) * 100)}%` : "—"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* ═══ Axis Progress Strip ═══ */}
-      <div className="relative z-10 px-5 pb-3">
-        <div className="flex items-center gap-1">
-          {axisScores.map((ax) => {
-            const fillHeight = ax.answered ? (ax.score / 4) * 100 : 0;
-            const barColor = !ax.answered
-              ? "bg-slate-200 dark:bg-slate-800"
-              : ax.score >= 3
-                ? "bg-gradient-to-t from-emerald-500 to-teal-400"
-                : ax.score === 2
-                  ? "bg-gradient-to-t from-amber-500 to-yellow-400"
-                  : "bg-gradient-to-t from-rose-500 to-red-400";
-            const pillBg = !ax.answered
-              ? "bg-slate-100 dark:bg-slate-800/60"
-              : "bg-slate-100/80 dark:bg-slate-800/40";
-
-            return (
-              <div key={ax.axis} className="flex-1 group/axis">
-                <div
-                  className={`relative h-8 rounded-full overflow-hidden ${pillBg} border border-slate-200/40 dark:border-slate-700/30 transition-all duration-300`}
-                  title={`${ax.label}: ${ax.answered ? `${ax.score}/4` : "Chưa trả lời"}`}
-                >
-                  <div
-                    className={`absolute bottom-0 left-0 right-0 rounded-full transition-all duration-700 ease-out ${barColor}`}
-                    style={{ height: `${fillHeight}%` }}
-                  />
-                  {/* Shimmer effect on filled bars */}
-                  {ax.answered && (
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover/axis:opacity-100 transition-opacity duration-300"
-                      style={{
-                        background: "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                      }}
-                    />
-                  )}
-                </div>
-                <p className="text-[7px] font-bold text-center text-slate-400 dark:text-slate-500 mt-1 leading-none truncate">
-                  {ax.label.split(" ")[0]}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ═══ Emotion Badge + Stats Strip ═══ */}
-      <div className="relative z-10 px-5 pb-4 space-y-3">
-        {/* Emotion badge */}
-        <div className="flex items-center justify-center">
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.97] shadow-sm ${emotionData.bgStyle}`}
-          >
-            <span className="text-base" style={{ animation: answeredCount > 0 ? "feasibility-bounce 2s ease-in-out infinite" : undefined }}>
-              {emotionData.emoji}
-            </span>
-            <span className="tracking-wide">{emotionData.label}</span>
-          </div>
-        </div>
-
-        {/* Stats strip */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="text-center px-2 py-2.5 rounded-xl bg-white/60 dark:bg-slate-800/40 border border-slate-200/30 dark:border-slate-700/30">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Activity className="h-3 w-3 text-indigo-400" />
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tiến độ</span>
-            </div>
-            <p className="text-sm font-black tabular-nums text-indigo-600 dark:text-indigo-400">
-              {answeredCount}/{QUESTIONS.length}
-            </p>
-          </div>
-          <div className="text-center px-2 py-2.5 rounded-xl bg-white/60 dark:bg-slate-800/40 border border-slate-200/30 dark:border-slate-700/30">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <TrendingUp className="h-3 w-3 text-violet-400" />
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Mức sẵn sàng</span>
-            </div>
-            <p className="text-sm font-black tabular-nums text-violet-600 dark:text-violet-400">
-              {answeredCount > 0 ? `${Math.round(animatedPercent)}%` : "—"}
-            </p>
-          </div>
-          <div className="text-center px-2 py-2.5 rounded-xl bg-white/60 dark:bg-slate-800/40 border border-slate-200/30 dark:border-slate-700/30">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Zap className="h-3 w-3 text-amber-400" />
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tổng điểm</span>
-            </div>
-            <p className="text-sm font-black tabular-nums text-amber-600 dark:text-amber-400">
-              {answeredCount > 0 ? totalScore : "—"}
-              <span className="text-[9px] font-bold text-slate-400">/{QUESTIONS.length * 4}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Status message */}
-        <div className="text-center px-4 py-3 bg-slate-50/50 dark:bg-slate-950/30 rounded-xl border border-slate-200/30 dark:border-slate-800/30">
-          <p className="text-sm font-bold leading-relaxed text-app-ink">
-            {statusLabel()}
-          </p>
-          <p className="text-xs text-app-ink-muted mt-1 font-medium">
-            {answeredCount === 0
-              ? "Bắt đầu trả lời các câu hỏi bên dưới để hiệu chuẩn đồng hồ khả thi"
-              : `Đã đánh giá ${answeredCount} / ${QUESTIONS.length} khía cạnh khả thi`}
-          </p>
-        </div>
-      </div>
-
-      {/* ═══ Keyframe animations ═══ */}
-      <style>{`
-        @keyframes feasibility-scan {
-          0% { top: -2px; }
-          50% { top: 100%; }
-          100% { top: -2px; }
-        }
-        @keyframes feasibility-bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-2px); }
-        }
-      `}</style>
     </div>
   );
 }
