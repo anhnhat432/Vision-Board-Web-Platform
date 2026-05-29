@@ -99,3 +99,21 @@ export function sortReflectionsByDateDesc(reflections: Reflection[]): Reflection
     return right.id.localeCompare(left.id);
   });
 }
+
+export function formatDisplayDate(dateInput: Date | string): string {
+  const date = typeof dateInput === "string" ? parseCalendarDate(dateInput) : dateInput;
+  if (!date || Number.isNaN(date.getTime())) return "--";
+  const day = padDatePart(date.getDate());
+  const month = padDatePart(date.getMonth() + 1);
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+export function formatDisplayDateWithWeekday(dateInput: Date | string): string {
+  const date = typeof dateInput === "string" ? parseCalendarDate(dateInput) : dateInput;
+  if (!date || Number.isNaN(date.getTime())) return "--";
+  const weekdays = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
+  const weekday = weekdays[date.getDay()];
+  return `${weekday}, ${formatDisplayDate(date)}`;
+}
+

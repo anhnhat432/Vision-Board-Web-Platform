@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
   Calendar,
@@ -46,6 +46,7 @@ import {
 } from "@/services/visionBoardService";
 import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { generateId } from "../utils/storage-types";
+import { formatDisplayDate } from "../utils/storage-date-utils";
 
 const ICON_COMPONENTS = {
   Sparkles,
@@ -372,7 +373,7 @@ export function VisionBoardGallery() {
                                   )}
                                 </div>
                                 <CardDescription>
-                                  {new Date(board.createdAt).toLocaleDateString("vi-VN")} • {board.items.length} phần tử
+                                  {formatDisplayDate(board.createdAt)} • {board.items.length} phần tử
                                 </CardDescription>
                               </div>
                               <Badge

@@ -166,13 +166,32 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
         </p>
       </div>
 
+      {phase === "idle" && (
+        <button
+          type="button"
+          onClick={onComplete}
+          className="mt-2 text-xs font-semibold text-app-ink-soft underline hover:text-app-ink transition-colors"
+        >
+          Vào thẳng chấm điểm
+        </button>
+      )}
+
       {/* Thanh tiến trình siêu mỏng ở dưới */}
       {phase !== "idle" && phase !== "completed" && (
-        <div className="mt-4 w-48 h-[2px] bg-app-line rounded-full overflow-hidden">
-          <div
-            className="h-full bg-emerald-500 transition-all duration-1000 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="mt-4 flex flex-col items-center gap-3">
+          <div className="w-48 h-[2px] bg-app-line rounded-full overflow-hidden">
+            <div
+              className="h-full bg-emerald-500 transition-all duration-1000 ease-linear"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={onComplete}
+            className="text-xs text-app-ink-soft underline hover:text-app-ink transition-colors"
+          >
+            Bỏ qua bài thở
+          </button>
         </div>
       )}
 

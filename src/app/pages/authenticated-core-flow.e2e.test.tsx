@@ -355,7 +355,7 @@ describe("authenticated new user core flow", () => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(screen.getByRole("button", { name: /Bắt đầu nhanh/i }));
     for (const slider of await screen.findAllByRole("slider")) {
       slider.focus();
       await user.keyboard("{ArrowRight}");

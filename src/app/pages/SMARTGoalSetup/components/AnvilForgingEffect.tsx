@@ -72,7 +72,11 @@ export function AnvilForgingEffect({ onComplete }: AnvilForgingEffectProps) {
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      // Gọi onComplete ngay lập tức nếu không hỗ trợ Canvas (ví dụ môi trường test JSDOM) để tránh kẹt trang
+      onComplete();
+      return;
+    }
 
     const width = window.innerWidth;
     const height = window.innerHeight;

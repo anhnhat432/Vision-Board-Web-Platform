@@ -61,6 +61,7 @@ import {
   type UserData,
 } from "../utils/storage";
 import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
+import { formatDisplayDate } from "../utils/storage-date-utils";
 
 const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
@@ -118,7 +119,8 @@ function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]
 
 function formatDashboardDateCaption(date: Date, greeting: string): string {
   const weekday = new Intl.DateTimeFormat("vi-VN", { weekday: "long" }).format(date);
-  return `${greeting} · ${weekday}, ngày ${date.getDate()} tháng ${date.getMonth() + 1}`.toLocaleUpperCase("vi-VN");
+  const formattedDate = formatDisplayDate(date);
+  return `${greeting} · ${weekday}, ${formattedDate}`.toLocaleUpperCase("vi-VN");
 }
 
 function getLifeBalanceRows(areas: LifeArea[]): LifeBalanceRow[] {

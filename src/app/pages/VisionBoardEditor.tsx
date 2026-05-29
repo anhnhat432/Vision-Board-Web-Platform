@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import {
   Download,
@@ -78,6 +78,7 @@ import {
   updateVisionBoard as backendUpdateVisionBoard,
 } from "@/services/visionBoardService";
 import { getBackendVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
+import { VISION_BOARD_TEMPLATES, type VisionBoardTemplate } from "../utils/vision-board-templates";
 
 const ICON_COMPONENTS = {
   Star,
@@ -227,6 +228,7 @@ export function VisionBoardEditor() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isInitDialogOpen, setIsInitDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [selectedRatio, setSelectedRatio] = useState<ExportOptions["ratio"]>("wallpaper");
@@ -296,6 +298,7 @@ export function VisionBoardEditor() {
     });
     setThemeId("aurora");
     setIsResolvingBoard(false);
+    setIsInitDialogOpen(true);
   }, [id, navigate]);
 
   const boardStats = useMemo(() => {
@@ -587,6 +590,28 @@ export function VisionBoardEditor() {
     toast.success("Đã tạo bảng theo câu chuyện của bạn. Kéo thả để chỉnh nếu muốn.");
   };
 
+  const handleSelectTemplate = (template: VisionBoardTemplate) => {
+    if (!board) return;
+
+    const ts = Date.now();
+    const itemsWithIds = template.items.map((item, idx) => ({
+      ...item,
+      id: `tmpl_${template.id}_${ts}_${idx}`,
+    })) as VisionBoardItem[];
+
+    setBoard({
+      ...board,
+      name: template.name,
+      items: itemsWithIds,
+      theme: template.themeId,
+    });
+    setBoardName(template.name);
+    setThemeId(template.themeId);
+    setHasUnsavedChanges(true);
+    setIsInitDialogOpen(false);
+    toast.success(`Đã áp dụng template "${template.name}". Bạn có thể tự do kéo thả, sửa đổi các phần tử!`);
+  };
+
   const handleExport = async () => {
     if (!canvasExportRef.current || !board) return;
 
@@ -734,6 +759,99 @@ export function VisionBoardEditor() {
             <Button onClick={handleExport} disabled={isExporting}>
               {isExporting ? "Đang xuất..." : "Tải về"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isInitDialogOpen} onOpenChange={setIsInitDialogOpen}>
+        <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl text-app-ink">Khởi tạo Vision Board của bạn</DialogTitle>
+            <DialogDescription className="text-app-ink-soft">
+              Chọn một cách bắt đầu phù hợp để truyền cảm hứng và hình ảnh hóa mục tiêu của bạn.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-6 py-4 md:grid-cols-2">
+            {/* Cột trái: Chọn Template mẫu */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
+                1. Dùng Template theo chủ đề
+              </h3>
+              <p className="text-xs text-app-ink-soft">
+                Nạp sẵn bố cục ảnh mẫu, câu nói truyền cảm hứng và biểu tượng phù hợp với chủ đề lựa chọn.
+              </p>
+              <div className="grid gap-2.5">
+                {VISION_BOARD_TEMPLATES.map((tmpl) => (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    onClick={() => handleSelectTemplate(tmpl)}
+                    className="w-full text-left rounded-xl border border-app-line bg-app-surface p-3 transition hover:border-app-accent hover:bg-app-accent-soft group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-app-ink group-hover:text-app-accent">
+                        {tmpl.name}
+                      </span>
+                      <span
+                        className="h-3.5 w-3.5 rounded-full border border-white"
+                        style={{ background: VISION_BOARD_THEMES.find(t => t.id === tmpl.themeId)?.preview.gradient }}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">
+                      {tmpl.description}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cột phải: Các cách khởi tạo khác */}
+            <div className="space-y-6 flex flex-col justify-between">
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
+                  2. Chế độ kể chuyện (Story Mode)
+                </h3>
+                <div className="rounded-xl border border-app-line bg-app-surface p-4 flex flex-col gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                    <Wand2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-app-ink">Tự động sinh bảng</h4>
+                    <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">
+                      Trả lời 4 câu hỏi cực nhanh về cảm xúc và lĩnh vực tập trung để hệ thống tự động thiết kế bảng riêng cho bạn.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setIsInitDialogOpen(false);
+                      setIsWizardOpen(true);
+                    }}
+                    className="w-full mt-1.5"
+                  >
+                    Bắt đầu Story Mode
+                  </Button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-app-line space-y-3">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
+                  3. Bắt đầu từ trang trắng
+                </h3>
+                <p className="text-xs text-app-ink-soft">
+                  Nếu bạn đã có sẵn ý tưởng, hãy bắt đầu thiết kế thủ công từ đầu.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsInitDialogOpen(false)}
+                  className="w-full"
+                >
+                  Tạo bảng trống
+                </Button>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

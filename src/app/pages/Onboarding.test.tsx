@@ -44,9 +44,10 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    const startButton = await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i });
-    expect(startButton).toHaveClass("bg-app-accent");
-    expect(startButton).not.toHaveClass("gradient-brand");
+    const startButton = await screen.findByRole("button", { name: /Bắt đầu nhanh/i });
+    const breathingStartButton = await screen.findByRole("button", { name: /Tập thở & Bắt đầu/i });
+    expect(breathingStartButton).toHaveClass("bg-app-accent");
+    expect(breathingStartButton).not.toHaveClass("gradient-brand");
 
     scrollToMock.mockClear();
     await user.click(startButton);
@@ -74,7 +75,7 @@ describe("Onboarding", () => {
 
     expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
     expect(await screen.findByRole("button", { name: /Tiếp → Chọn trọng tâm/i })).toBeEnabled();
   });
 
@@ -86,8 +87,8 @@ describe("Onboarding", () => {
     );
 
     expect((await screen.findAllByText(/8 lĩnh vực/i)).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/khoảng 3 phút/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /Bắt đầu chấm điểm/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/3 phút/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /Bắt đầu nhanh/i })).toBeInTheDocument();
   });
 
   it("shows returning users that existing scores will be updated", async () => {
@@ -137,7 +138,7 @@ describe("Onboarding", () => {
     );
 
     // Go to assessment step first
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
 
     // Modify first slider
     const firstSlider = screen.getAllByRole("slider")[0];
@@ -174,7 +175,7 @@ describe("Onboarding", () => {
 
     // Go to assessment and verify first slider value
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
 
     // Verify the scores from storage are loaded (first area should show score 2)
     const sliders = screen.getAllByRole("slider");
@@ -190,7 +191,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
     const summary = await screen.findByTestId("onboarding-assessment-summary");
     expect(summary).toHaveTextContent("0/8");
 
@@ -212,7 +213,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
     const summary = await screen.findByTestId("onboarding-assessment-summary");
     expect(summary).toHaveTextContent("0/8");
 
@@ -233,7 +234,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
     const continueButtons = screen.getAllByRole("button", { name: "Để sau" });
     await user.click(continueButtons[continueButtons.length - 1]);
 

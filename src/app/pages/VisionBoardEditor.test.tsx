@@ -168,6 +168,9 @@ function renderEditor(initialEntry = "/vision-board") {
 }
 
 async function openAddDialog(user: ReturnType<typeof userEvent.setup>) {
+  // Đóng dialog khởi tạo tự động bằng cách click "Tạo bảng trống"
+  const blankBoardBtn = await screen.findByRole("button", { name: "Tạo bảng trống" });
+  await user.click(blankBoardBtn);
   await user.click(await screen.findByRole("button", { name: "Hoặc tự thêm phần tử" }));
 }
 

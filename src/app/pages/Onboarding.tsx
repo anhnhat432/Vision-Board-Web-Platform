@@ -418,16 +418,23 @@ export function Onboarding() {
                 icon={<Compass className="h-6 w-6" aria-hidden="true" />}
                 eyebrow="BẮT ĐẦU · CÂN BẰNG CUỘC SỐNG"
                 title="Cùng xem bức tranh hiện tại của bạn."
-                description="Chấm 8 lĩnh vực để chọn đúng nơi cần ưu tiên. Mất khoảng 3 phút."
+                description="Dear Our Future giúp bạn chuyển hóa tầm nhìn dài hạn thành mục tiêu SMART và kế hoạch hành động 12 tuần cụ thể. Hãy đánh giá 8 lĩnh vực cuộc sống để tìm ra nơi lệch nhịp cần ưu tiên nhất."
                 actions={
-                  <>
+                  <div className="flex flex-wrap gap-2.5">
                     <button
                       type="button"
                       className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                       onClick={() => setShowBreathing(true)}
                     >
-                      Bắt đầu chấm điểm
+                      Tập thở & Bắt đầu (10s)
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
+                      onClick={handleStartAssessment}
+                    >
+                      Bắt đầu nhanh
                     </button>
                     <button
                       type="button"
@@ -436,7 +443,7 @@ export function Onboarding() {
                     >
                       Để sau
                     </button>
-                  </>
+                  </div>
                 }
               >
                 <div className="grid gap-4 md:grid-cols-3">
@@ -449,7 +456,7 @@ export function Onboarding() {
                           <Icon className="h-4 w-4" aria-hidden="true" />
                         </div>
                         <h2 className="mt-3 text-sm font-medium text-app-ink">{item.title}</h2>
-                        <p className="mt-1 text-sm leading-relaxed text-app-ink-soft">{item.description}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">{item.description}</p>
                       </article>
                     );
                   })}

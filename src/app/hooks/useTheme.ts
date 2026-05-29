@@ -14,7 +14,7 @@ function getStoredTheme(): Theme {
   } catch {
     /* ignore */
   }
-  return "system";
+  return "light";
 }
 
 function prefersReducedMotion(): boolean {
