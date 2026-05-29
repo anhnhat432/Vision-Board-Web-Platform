@@ -48,6 +48,7 @@ import { FormSkeleton } from "../components/ui/skeleton";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
+import { FocusLantern } from "./LifeInsight/components/FocusLantern";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter } from "../utils/smart-goal-starters";
@@ -304,9 +305,7 @@ export function LifeInsight() {
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Đang chọn</p>
                   <div className="mt-4 flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-app-accent text-white shadow-md shadow-app-accent/20">
-                      <FocusAreaIcon className="h-5 w-5" />
-                    </div>
+                    <FocusLantern Icon={FocusAreaIcon} label={focusArea.name} />
                     <div>
                       <h2 className="text-2xl font-serif font-medium text-app-ink leading-tight">
                         {focusAreaLabel}

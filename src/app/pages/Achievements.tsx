@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   ArrowRight,
@@ -21,6 +21,7 @@ import { emptyNarratives } from "../components/empty-states/narratives";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { celebrateLarge } from "@/lib/effects/celebrate";
 import { hasNewCelebrationIds } from "@/lib/effects/celebrationTriggers";
+import { Stoic3DCoin } from "./Achievements/components/Stoic3DCoin";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Target,
@@ -104,6 +105,7 @@ function AchievementsContent() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
   const seenAchievementIdsRef = useRef<Set<string> | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementCard | null>(null);
 
   const sortedAchievements = useMemo(() => {
     if (!userData) return [];
@@ -218,10 +220,28 @@ function AchievementsContent() {
             const isUnlocked = achievement.unlocked;
 
             return (
+              // biome-ignore lint/a11y/useKeyWithClickEvents: click only achievement badge
               <article
                 key={achievement.key}
-                className={`surface-raised rounded-xl border border-app-line bg-app-surface p-5 ${isUnlocked ? "" : "opacity-60"}`}
+                onClick={() => isUnlocked && setSelectedAchievement(achievement)}
+                className={`surface-raised relative rounded-xl border border-app-line bg-app-surface p-5 transition-all ${
+                  isUnlocked 
+                    ? "cursor-pointer hover:scale-[1.02] hover:shadow-md" 
+                    : "opacity-60"
+                }`}
               >
+                {/* Wax Seal Stamp (Con dấu sáp đỏ) cho huy hiệu đã đạt */}
+                {isUnlocked && (
+                  <div 
+                    className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-red-700 to-red-900 shadow-md transform rotate-12 border border-red-800 animate-[bounce_0.6s_ease-out_1]"
+                    title="Đã đóng dấu chứng nhận"
+                  >
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full border border-red-600/40 bg-red-800 text-[6px] font-bold text-red-200 select-none shadow-inner">
+                      印
+                    </div>
+                  </div>
+                )}
+
                 <div
                   className={`flex h-12 w-12 items-center justify-center rounded-lg ${
                     isUnlocked ? "bg-app-accent-soft text-app-accent" : "bg-app-bg text-app-ink-muted"
@@ -246,6 +266,13 @@ function AchievementsContent() {
           })}
         </div>
       </section>
+
+      {selectedAchievement && (
+        <Stoic3DCoin
+          achievement={selectedAchievement}
+          onClose={() => setSelectedAchievement(null)}
+        />
+      )}
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <Button type="button" variant="outline" onClick={() => navigate("/goals")}>

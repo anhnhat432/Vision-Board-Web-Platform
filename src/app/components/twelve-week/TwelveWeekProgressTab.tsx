@@ -29,6 +29,7 @@ import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/feat
 import type { ExecutionInsight } from "@/features/plan12week/logic";
 
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
+import { ZenJourneyMap } from "./ZenJourneyMap";
 
 const WEEKLY_EXECUTION_TARGET_TOOLTIP =
   "Theo phương pháp 12 Week Year, đạt 85% cam kết hàng tuần là chỉ số dẫn dắt mạnh nhất tới mục tiêu";
@@ -202,65 +203,7 @@ function getAverageLeadScore(system: TwelveWeekSystem): number {
   );
 }
 
-function getWeekPerformanceStyle(
-  leadCompletionPercent: number,
-  reviewDone: boolean,
-  isCurrentWeek: boolean,
-): {
-  card: string;
-  badge: string;
-  badgeText: string;
-  textColor: string;
-  progressColor: string;
-} {
-  if (isCurrentWeek) {
-    return {
-      card: "border-app-ink bg-app-surface shadow-md ring-2 ring-app-ink/10 scale-[1.02] motion-safe:transition-all duration-200",
-      badge: "bg-app-ink text-white hover:bg-app-ink animate-[pulse_2s_infinite]",
-      badgeText: "Đang chạy",
-      textColor: "text-app-ink",
-      progressColor: "[&>div]:bg-app-ink",
-    };
-  }
 
-  if (!reviewDone) {
-    return {
-      card: "border-app-line bg-app-bg text-app-ink-muted",
-      badge: "border-app-line bg-app-surface text-app-ink-muted",
-      badgeText: "Chưa review",
-      textColor: "text-app-ink-soft",
-      progressColor: "",
-    };
-  }
-
-  if (leadCompletionPercent >= 85) {
-    return {
-      card: "border-emerald-200 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900/50 shadow-sm",
-      badge: "bg-emerald-100 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/50 dark:text-emerald-300",
-      badgeText: "Xuất sắc",
-      textColor: "text-emerald-900 dark:text-emerald-300",
-      progressColor: "[&>div]:bg-emerald-500",
-    };
-  }
-
-  if (leadCompletionPercent >= 50) {
-    return {
-      card: "border-amber-200 bg-amber-50/40 text-amber-800 dark:bg-amber-950/20 dark:border-amber-900/50 shadow-sm",
-      badge: "bg-amber-100 text-amber-800 border-amber-200/50 dark:bg-amber-950/50 dark:text-amber-300",
-      badgeText: "Khá tốt",
-      textColor: "text-amber-900 dark:text-amber-300",
-      progressColor: "[&>div]:bg-amber-500",
-    };
-  }
-
-  return {
-    card: "border-rose-200 bg-rose-50/40 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900/50 shadow-sm",
-    badge: "bg-rose-100 text-rose-800 border-rose-200/50 dark:bg-rose-950/50 dark:text-rose-300",
-    badgeText: "Cần cải thiện",
-    textColor: "text-rose-900 dark:text-rose-300",
-    progressColor: "[&>div]:bg-rose-500",
-  };
-}
 
 export function TwelveWeekProgressTab({
   system,
@@ -499,55 +442,7 @@ export function TwelveWeekProgressTab({
               </div>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {system.scoreboard.map((week) => {
-                const isCurrentWeek = week.weekNumber === currentWeek;
-                const isReviewed = week.reviewDone;
-                const style = getWeekPerformanceStyle(week.leadCompletionPercent, isReviewed, isCurrentWeek);
-
-                return (
-                  <div
-                    key={week.weekNumber}
-                    className={`rounded-xl border p-5 ${style.card}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-                          Tuần {week.weekNumber}
-                        </p>
-                        <p className={`mt-1 font-serif text-2xl font-bold ${style.textColor}`}>
-                          {week.weeklyScore} <span className="text-xs font-sans font-normal text-app-ink-muted">điểm</span>
-                        </p>
-                      </div>
-                      <Badge
-                        className={`border-none text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}
-                      >
-                        {style.badgeText}
-                      </Badge>
-                    </div>
-
-                    <div className="mt-4 stack-tight">
-                      <div>
-                        <div className="flex items-center justify-between text-xs text-app-ink-soft">
-                          <span>Hoàn thành cốt lõi</span>
-                          <span className="font-semibold">{week.leadCompletionPercent}%</span>
-                        </div>
-                        <Progress value={week.leadCompletionPercent} className={`mt-2 h-2 ${style.progressColor}`} />
-                      </div>
-
-                      <div className="rounded-lg border border-app-line/60 bg-app-bg/50 px-3 py-2 mt-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
-                          Chỉ số chính
-                        </p>
-                        <p className="mt-0.5 text-xs font-medium text-app-ink truncate">
-                          {week.mainMetricProgress || "Chưa cập nhật"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ZenJourneyMap scoreboard={system.scoreboard} currentWeek={currentWeek} />
           </CardContent>
         </Card>
 
