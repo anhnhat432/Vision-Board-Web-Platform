@@ -10,7 +10,7 @@ import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twe
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { getGoalArchetypeIcon } from "../components/illustrations";
+import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -720,7 +720,7 @@ function GoalTrackerContent({
             {!hasGoals ? (
               <EmptyState
                 variant="card"
-                icon={<Target className="h-10 w-10" />}
+                illustration={<MountainMoonIllustration className="w-full text-app-ink-muted" />}
                 title="Chưa có mục tiêu"
                 description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
                 actions={

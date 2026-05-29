@@ -9,7 +9,6 @@ import {
   ChevronDown,
   Crown,
   Gauge,
-  Inbox,
   Loader2,
   Sparkles,
   X,
@@ -27,7 +26,7 @@ import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
 import { useReducedMotion } from "../ui/use-reduced-motion";
-import { EmptyTaskIllustration, TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon } from "../illustrations";
+import { EmptyTaskIllustration, TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon, ZenLeafIllustration } from "../illustrations";
 import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
@@ -719,8 +718,7 @@ export function TwelveWeekTodayTab({
                     <EmptyState
                       variant="dashed"
                       testId="today-empty-state"
-                      illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
-                      icon={<Inbox className="h-5 w-5" />}
+                      illustration={<ZenLeafIllustration className="w-full text-app-accent" />}
                       title="Chưa có việc nào trong chu kỳ này"
                       description={
                         hasLeadMetrics

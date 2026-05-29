@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { cn } from "../components/ui/utils";
-import { ArrowRight, BookOpen, Frown, Meh, Plus, Search, Smile, MoreVertical } from "lucide-react";
+import { ArrowRight, Frown, Meh, Plus, Search, Smile, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -16,6 +16,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { EmptyState } from "@/app/components/states/EmptyState";
+import { ZenLeafIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -558,13 +559,13 @@ function ReflectionJournalContent() {
       {sortedReflections.length === 0 ? (
         <EmptyState
           variant="card"
-          icon={<BookOpen className="h-12 w-12 text-app-warm" />}
+          illustration={<ZenLeafIllustration className="w-full text-app-warm" />}
           title="Bắt đầu nhật ký của bạn"
           description="Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển."
           actions={
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm"
+              className="bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.98] transition-all duration-150 shadow-md shadow-app-warm/15"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết entry đầu tiên
