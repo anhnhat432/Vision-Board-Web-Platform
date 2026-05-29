@@ -604,6 +604,7 @@ export function SMARTGoalSetup() {
             isCurrentStepValid={isCurrentStepValid}
             qualityFeedback={qualityFeedback}
             smartData={smartData}
+            smartGoalStarter={smartGoalStarter}
             onApplyStarter={(transformedText) => handleApplyStarterForStep(currentStepKey, transformedText)}
             onJumpToStep={handleJumpToStep}
             onBack={handleBack}

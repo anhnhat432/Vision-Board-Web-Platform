@@ -23,6 +23,7 @@ import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
 import { SMART_STEPS } from "../constants";
 import type { GoalClarityItem, SMARTData, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
+import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 
 interface QualityFeedbackData {
   level: QualityLevel;
@@ -49,6 +50,7 @@ interface SmartGoalStepShellProps {
   isCurrentStepValid: boolean;
   qualityFeedback: QualityFeedbackData | null;
   smartData: SMARTData;
+  smartGoalStarter: SmartGoalStarter;
   onApplyStarter: (transformedText?: string) => void;
   onJumpToStep: (stepKey: SmartStepKey) => void;
   onBack: () => void;
@@ -188,6 +190,7 @@ export function SmartGoalStepShell({
   isCurrentStepValid,
   qualityFeedback,
   smartData,
+  smartGoalStarter,
   onApplyStarter,
   onJumpToStep,
   onBack,
@@ -292,86 +295,144 @@ export function SmartGoalStepShell({
   const isRelFilled = relReason.length > 0;
   const isTimeFilled = timeDate.length > 0;
 
-  // Biến đổi câu gợi ý AI chánh niệm theo Tone giọng được chọn
-  const getPersonaPreview = (baseText: string, tone: "empathetic" | "pragmatic" | "strategic") => {
-    if (!baseText) return "";
+  // Trích xuất các trường từ smartGoalStarter cho gọn
+  const goalStr = smartGoalStarter.specificGoalStatement;
+  const metric = smartGoalStarter.metricName;
+  const baseVal = smartGoalStarter.baselineValue;
+  const targetVal = smartGoalStarter.targetValue;
+  const hoursVal = smartGoalStarter.weeklyHours;
+  const motivationReasonStr = smartGoalStarter.motivationReason;
+  const weeksVal = smartGoalStarter.targetWeeks;
+
+  // Lấy câu gợi ý AI Coach và text cốt lõi đi kèm
+  const getPersonaData = (tone: "empathetic" | "pragmatic" | "strategic") => {
+    const cleanMetric = metric.toLowerCase();
     
     if (step.key === "specific") {
       if (tone === "empathetic") {
-        return `Bạn đang hướng tới một tầm nhìn rất ý nghĩa đấy. Hãy bắt đầu nhẹ nhàng nhưng đầy cam kết: “${baseText}”`;
+        return {
+          coachMessage: `Bạn đang hướng tới một tầm nhìn rất ý nghĩa đấy. Hãy bắt đầu nhẹ nhàng nhưng đầy cam kết: “${goalStr}”`,
+          coreText: goalStr,
+        };
       }
       if (tone === "pragmatic") {
-        return `Vào thẳng hành động thực tế nào. Hãy điền ngắn gọn, rõ việc cần làm: “${baseText}”`;
+        const pragmaticGoal = goalStr
+          .replace("Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.", "Thực hiện cam kết hành động 12 tuần để cải thiện lĩnh vực ưu tiên và ghi nhận tiến bộ rõ ràng.")
+          .replace("Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.", "Hoàn thành 1 dự án trọng điểm trong 12 tuần để chứng minh năng lực và thăng tiến nghề nghiệp.")
+          .replace("Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.", "Tích lũy quỹ dự phòng khẩn cấp trong 12 tuần nhằm ổn định tài chính cá nhân trước các sự cố phát sinh.")
+          .replace("Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.", "Duy trì tập thể dục 3 buổi mỗi tuần trong 12 tuần nhằm nâng cao thể lực và năng lượng làm việc.")
+          .replace("Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.", "Hoàn thành lộ trình học kỹ năng mới trong 12 tuần và tự làm 1 sản phẩm thực tế để ứng dụng.")
+          .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Chủ động kết nối với những người quan trọng 2 lần mỗi tuần trong 12 tuần để gia tăng sự gắn kết.")
+          .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Dành riêng 2 khoảng thời gian chất lượng cho gia đình mỗi tuần trong 12 tuần, gác lại công việc riêng.")
+          .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Thực hiện thói quen phát triển bản thân đều đặn mỗi tuần trong 12 tuần để nâng cao nhận thức cá nhân.")
+          .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.");
+        return {
+          coachMessage: `Vào thẳng hành động thực tế nào. Hãy điền ngắn gọn, rõ việc cần làm: “${pragmaticGoal}”`,
+          coreText: pragmaticGoal,
+        };
       }
-      return `Phân tích chiến lược cho thấy đây là điểm xuất phát tối ưu nhất. Hãy tham khảo cấu trúc: “${baseText}”`;
+      const strategicGoal = goalStr
+        .replace("Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.", "Thực thi chiến lược 12 tuần nhằm tối ưu hóa lĩnh vực ưu tiên và tạo chỉ số tiến trình rõ nét.")
+        .replace("Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.", "Xây dựng dự án trọng điểm trong 12 tuần, tạo đòn bẩy thăng tiến nghề nghiệp rõ rệt.")
+        .replace("Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.", "Tối ưu hóa phân bổ dòng tiền và thiết lập quỹ dự phòng 12 tuần nhằm bảo vệ an toàn tài chính lâu dài.")
+        .replace("Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.", "Xây dựng thói quen vận động 3 buổi/tuần trong 12 tuần nhằm tái tạo năng lượng thể chất và tinh thần tối đa.")
+        .replace("Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.", "Làm chủ kỹ năng mới thông qua lộ trình học 12 tuần và đóng gói kết quả dưới dạng sản phẩm kiểm chứng.")
+        .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Hệ thống hóa lịch kết nối chất lượng 2 lần/tuần trong 12 tuần nhằm tối ưu hóa các mối quan hệ cốt lõi.")
+        .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Thiết lập ranh giới công việc, dành 2 buổi sinh hoạt gia đình chất lượng mỗi tuần trong 12 tuần.")
+        .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Chuẩn hóa quy trình tự phản tỉnh và thực hiện thói quen phát triển bản thân mỗi tuần trong 12 tuần.")
+        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Quản trị năng lượng bằng 2 khoảng nghỉ sâu mỗi tuần trong 12 tuần, ngăn chặn rủi ro kiệt sức.");
+      return {
+        coachMessage: `Phân tích chiến lược cho thấy đây là lộ trình tối ưu nhất. Hãy tham khảo cấu trúc mục tiêu: “${strategicGoal}”`,
+        coreText: strategicGoal,
+      };
     }
     
     if (step.key === "measurable") {
       if (tone === "empathetic") {
-        return `Số liệu là công cụ giúp bạn tự quan sát tiến trình của mình mà không áp lực: “${baseText}”. Chúc bạn có những bước đi thảnh thơi!`;
+        return {
+          coachMessage: `Số liệu là tấm gương giúp bạn tự quan sát nhẹ nhàng: Hãy đo lường bằng cách đạt mốc ${targetVal} ${cleanMetric} (khởi điểm từ mốc ${baseVal}). Chúc bạn có những bước đi thảnh thơi!`,
+          coreText: "",
+        };
       }
       if (tone === "pragmatic") {
-        return `Đo lường rõ ràng để kiểm soát tốt nhất. Đặt mốc: “${baseText}”. Mốc xuất phát (Baseline) nên ghi nhận chân thực.`;
+        return {
+          coachMessage: `Đo lường cụ thể để kiểm soát kết quả tốt nhất. Chỉ tiêu hành động: Đạt mốc ${targetVal} ${cleanMetric} (bắt đầu từ mốc ${baseVal}).`,
+          coreText: "",
+        };
       }
-      return `Thiết lập mốc đo lường “${baseText}” là chỉ số dẫn dắt (leading indicator) quan trọng cho hiệu suất lâu dài.`;
+      return {
+        coachMessage: `KPI đo lường hiệu suất dẫn dắt (leading indicator): Thiết lập chỉ số đạt ${targetVal} ${cleanMetric} với mốc cơ sở hiện tại là ${baseVal}.`,
+        coreText: "",
+      };
     }
 
     if (step.key === "achievable") {
       if (tone === "empathetic") {
-        return `Nuôi dưỡng thói quen bền bỉ tốt hơn là ép mình quá sức. Gợi ý: “${baseText}”. Hãy cho phép mình thích nghi từ từ.`;
+        return {
+          coachMessage: `Nuôi dưỡng thói quen bền bỉ tốt hơn là ép mình quá sức. Hãy dành ra khoảng ${hoursVal} giờ mỗi tuần để thích nghi từ từ bạn nhé.`,
+          coreText: "",
+        };
       }
       if (tone === "pragmatic") {
-        return `Hãy thực tế về nguồn lực và thời gian biểu: “${baseText}”. Đảm bảo bạn có lịch cố định để thực thi.`;
+        return {
+          coachMessage: `Cam kết dành ra đúng ${hoursVal} giờ mỗi tuần để hành động thực tế. Hãy chuẩn bị trước các nguồn lực cần thiết để sẵn sàng thực hiện.`,
+          coreText: "",
+        };
       }
-      return `Để tối ưu hóa tài nguyên và kỹ năng, đề xuất phân bổ: “${baseText}”. Việc chuẩn bị trước giúp giảm 40% nguy cơ bỏ cuộc.`;
+      return {
+        coachMessage: `Để tối ưu hóa tính khả thi, phân bổ quỹ thời gian biểu là ${hoursVal} giờ/tuần. Việc chuẩn bị nguồn lực hỗ trợ sẽ giảm thiểu 40% rủi ro từ bỏ.`,
+        coreText: "",
+      };
     }
 
     if (step.key === "relevant") {
+      const cleanReason = motivationReasonStr.replace("Tôi muốn mục tiêu này vì ", "");
       if (tone === "empathetic") {
-        return `Lý do sâu sắc từ trái tim sẽ tiếp thêm lửa khi bạn mệt mỏi: “${baseText}”. Hãy lắng nghe xem điều này có chạm tới ước muốn thật sự của bạn không.`;
+        return {
+          coachMessage: `Lý do sâu sắc từ trái tim sẽ tiếp thêm sức mạnh cho bạn: “${motivationReasonStr}”. Hãy cảm nhận xem điều này đã thực sự chạm tới ước muốn của bạn chưa.`,
+          coreText: motivationReasonStr,
+        };
       }
       if (tone === "pragmatic") {
-        return `Động lực thực tế để duy trì kỷ luật: “${baseText}”. Mục tiêu này phải phục vụ trực tiếp lợi ích thiết thực nhất của bạn.`;
+        const pragmaticReason = `Động lực thực tế: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
+        return {
+          coachMessage: `Tập trung vào giá trị thực tế nhất lúc này: “${pragmaticReason}”`,
+          coreText: pragmaticReason,
+        };
       }
-      return `Kết nối mục tiêu này với các trục phát triển tổng thể: “${baseText}”. Đây là mảnh ghép chiến lược cho sự cân bằng cuộc sống của bạn.`;
+      const strategicReason = `Căn chỉnh trục phát triển: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
+      return {
+        coachMessage: `Định hình tầm nhìn chiến lược và căn chỉnh giá trị: “${strategicReason}”`,
+        coreText: strategicReason,
+      };
     }
 
     if (step.key === "timeBound") {
       if (tone === "empathetic") {
-        return `Tạo một nhịp điệu thời gian vừa vặn với cuộc sống của bạn: “${baseText}”. 12 tuần là khoảng thời gian hoàn hảo để chứng kiến sự chuyển hóa.`;
+        return {
+          coachMessage: `Tạo một nhịp điệu thời gian vừa vặn với cuộc sống của bạn: Hãy theo dõi tiến trình trong ${weeksVal} tuần trước khi chốt kết quả. 12 tuần là khoảng thời gian hoàn hảo để chứng kiến sự chuyển hóa nhẹ nhàng.`,
+          coreText: "",
+        };
       }
       if (tone === "pragmatic") {
-        return `Đặt deadline cụ thể để tập trung cao độ: “${baseText}”. Đừng để mục tiêu trôi dạt vô hạn.`;
+        return {
+          coachMessage: `Đặt mốc thời gian rõ ràng để tập trung kỷ luật tối đa: Cam kết hoàn thành trong vòng ${weeksVal} tuần tới. Đừng trì hoãn thêm nữa.`,
+          coreText: "",
+        };
       }
-      return `Thiết lập chiến dịch 12 tuần với deadline “${baseText}”. Đây là điểm rơi phong độ lý tưởng để đánh giá hiệu suất của bạn.`;
+      return {
+        coachMessage: `Thiết lập mốc thời gian kết thúc chiến dịch 12 tuần. Đây là điểm rơi phong độ lý tưởng để chúng ta đánh giá hiệu suất tổng thể của bạn.`,
+        coreText: "",
+      };
     }
 
-    return baseText;
+    return {
+      coachMessage: starterPreview,
+      coreText: starterPreview,
+    };
   };
 
-  // Biến đổi câu text cốt lõi điền vào form khi Apply
-  const getTransformedCoreText = (baseText: string, tone: "empathetic" | "pragmatic" | "strategic") => {
-    if (!baseText) return baseText;
-    if (step.key === "specific") {
-      if (tone === "pragmatic") {
-        return baseText.replace("Hoàn thành một kết quả quan trọng trong 12 tuần để", "Quyết tâm đạt kết quả thực tế trong 12 tuần:");
-      }
-      if (tone === "strategic") {
-        return baseText.replace("Hoàn thành một kết quả quan trọng trong 12 tuần để", "Thực thi chiến lược 12 tuần nhằm");
-      }
-    }
-    if (step.key === "relevant") {
-      if (tone === "pragmatic") {
-        return baseText.replace("Tôi muốn mục tiêu này vì", "Động lực thực tế:");
-      }
-      if (tone === "strategic") {
-        return baseText.replace("Tôi muốn mục tiêu này vì", "Tối ưu hóa trục cuộc sống vì");
-      }
-    }
-    return baseText;
-  };
-
-  const currentPersonaText = getPersonaPreview(starterPreview, selectedTone);
+  const { coachMessage, coreText: coreTextToApply } = getPersonaData(selectedTone);
 
   // Hook hiệu ứng gõ chữ sinh động
   const useTypingEffect = (text: string, speed = 8) => {
@@ -396,7 +457,7 @@ export function SmartGoalStepShell({
     return displayedText;
   };
 
-  const typedCoachText = useTypingEffect(currentPersonaText, 10);
+  const typedCoachText = useTypingEffect(coachMessage, 10);
 
   // Tính toán nhanh độ khả thi
   const calculateFeasibilityScore = () => {
@@ -411,9 +472,7 @@ export function SmartGoalStepShell({
   const feasibilityScore = calculateFeasibilityScore();
 
   const handleApplyTransformedStarter = () => {
-    // Lấy câu text cốt lõi đã biến đổi nhẹ
-    const coreText = getTransformedCoreText(starterPreview, selectedTone);
-    onApplyStarter(coreText);
+    onApplyStarter(coreTextToApply);
   };
 
   return (

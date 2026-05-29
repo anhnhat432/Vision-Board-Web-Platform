@@ -396,6 +396,19 @@ describe("SmartGoalStepShell — a11y", () => {
 
   it("gives the 'Dùng gợi ý' button a step-specific accessible name", () => {
     const headingRef = createRef<HTMLHeadingElement>();
+    const mockStarter = {
+      specificGoalStatement: "Statement",
+      metricName: "Metric",
+      baselineValue: "0",
+      targetValue: "10",
+      weeklyHours: "4",
+      requiredSkills: "Skills",
+      supportResources: "Resources",
+      motivationReason: "Motivation",
+      lifeDimensionAlignment: "Alignment",
+      targetWeeks: "12",
+    };
+
     render(
       <SmartGoalStepShell
         stepIndex={0}
@@ -413,6 +426,7 @@ describe("SmartGoalStepShell — a11y", () => {
         isCurrentStepValid={false}
         qualityFeedback={null}
         smartData={makeSmartData()}
+        smartGoalStarter={mockStarter}
         onApplyStarter={() => {}}
         onJumpToStep={() => {}}
         onBack={() => {}}
