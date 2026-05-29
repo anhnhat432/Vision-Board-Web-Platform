@@ -47,10 +47,10 @@ export function DashboardHero({
             {weekLabel}
           </span>
         </div>
-        <h1 className="mt-5 max-w-3xl font-serif text-3xl font-medium leading-[1.2] tracking-tight text-app-ink sm:text-4xl md:text-5xl">
+        <h1 className="mt-5 max-w-3xl font-serif text-3xl font-medium leading-[1.2] tracking-normal text-app-ink sm:text-4xl md:text-5xl">
           Đây là bức tranh tuần <span className="text-app-accent font-semibold">{currentWeek ?? "--"}</span>, {displayName}.
         </h1>
-        <p className="mt-3 text-sm text-app-ink-soft max-w-xl">
+        <p className="mt-4 text-sm text-app-ink-soft max-w-xl leading-relaxed">
           Chào ngày mới! Hãy theo sát kế hoạch 12 tuần của bạn, tập trung vào các cam kết cốt lõi để tạo ra bước chuyển dịch thực sự.
         </p>
       </div>

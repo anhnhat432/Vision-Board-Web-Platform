@@ -12,7 +12,7 @@ export function QuoteBlock({
   return (
     <div className="relative overflow-hidden rounded-[14px] border border-app-line bg-app-surface p-6">
       {/* Background Decorative Quote Icon */}
-      <div className="absolute -right-3 -top-3 text-app-accent-soft/40 pointer-events-none transform rotate-180">
+      <div className="absolute -right-3 -top-3 text-app-accent-soft/15 pointer-events-none transform rotate-180">
         <Quote className="h-16 w-16" />
       </div>
 

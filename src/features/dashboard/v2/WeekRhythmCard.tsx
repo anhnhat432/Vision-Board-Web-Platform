@@ -119,7 +119,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const barContent = (() => {
     if (day.isFuture) {
       return (
-        <div className="h-16 w-5.5 rounded-full border border-dashed border-app-line bg-transparent" aria-hidden="true" />
+        <div className="h-16 w-5.5 rounded-full bg-app-line/25" aria-hidden="true" />
       );
     }
 
@@ -127,7 +127,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
       const fillHeight = day.total === 0 ? 18 : clamp(day.percent, 18, 100);
       return (
         <div
-          className="flex h-16 w-5.5 items-end rounded-full bg-app-accent-soft ring-1 ring-app-accent ring-offset-1 dark:ring-offset-slate-900"
+          className="flex h-16 w-5.5 items-end rounded-full bg-app-accent-soft border border-app-accent"
           aria-hidden="true"
         >
           <div className="w-full rounded-full bg-app-accent" style={{ height: `${fillHeight}%` }} />
