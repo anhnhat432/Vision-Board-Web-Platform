@@ -183,7 +183,7 @@ export function TwelveWeekDashboardHeader({
       : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần.";
 
   return (
-    <header>
+    <header className="mb-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-app-ink-muted">HỆ THỐNG 12 TUẦN</p>
@@ -200,7 +200,7 @@ export function TwelveWeekDashboardHeader({
             Tuần {currentWeek} / {system.totalWeeks}
             {domainLabel ? ` · ${domainLabel}` : ""}
           </p>
-          <p className="mt-3 max-w-2xl text-base leading-6 text-app-ink-soft">{nextActionLabel}</p>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-app-ink-soft">{nextActionLabel}</p>
         </div>
 
         <div data-testid="twelve-week-header-actions" className="flex flex-col gap-2 sm:flex-row md:shrink-0">
@@ -222,37 +222,43 @@ export function TwelveWeekDashboardHeader({
         </div>
       </div>
 
-      <div data-testid="twelve-week-header-metrics" className="mt-4 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-3.5 py-1 text-sm font-medium text-app-accent">
-          Tuần {currentWeek} / {system.totalWeeks}
-        </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
-          <PhaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          {phaseInfo.label}
-        </span>
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-sm font-medium ${tokenSyncBadgeClass}`}
-        >
-          {syncBadgeLabel === "Đang đồng bộ" ? (
-            <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+      <div data-testid="twelve-week-header-metrics" className="mt-5 flex flex-wrap items-center gap-3">
+        {/* Nhóm 1: Nhịp chu kỳ */}
+        <div className="flex items-center gap-2 rounded-full border border-app-line bg-app-surface/60 px-3 py-1.5 shadow-sm">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-xs font-semibold text-app-accent">
+            Tuần {currentWeek} / {system.totalWeeks}
+          </span>
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-app-ink-soft">
+            <PhaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            {phaseInfo.label}
+          </span>
+        </div>
+
+        {/* Nhóm 2: Đồng bộ & Quyền hạn */}
+        <div className="flex items-center gap-2.5 rounded-full border border-app-line bg-app-surface/60 px-3 py-1.5 shadow-sm">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${tokenSyncBadgeClass}`}
+          >
+            {syncBadgeLabel === "Đang đồng bộ" ? (
+              <Loader2 className="h-2.5 w-2.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
+            )}
+            {syncBadgeLabel}
+          </span>
+          <span className="text-xs font-medium text-app-ink-soft">
+            Gói {getPlanLabel(activePlanCode)}
+          </span>
+        </div>
+
+        {/* Nhóm 3: Tiến độ thực tế */}
+        <div className="flex items-center gap-2 rounded-full border border-app-line bg-app-surface/60 px-3.5 py-1.5 text-xs font-medium text-app-ink-soft shadow-sm">
+          {reviewDueToday ? (
+            <span>{getReviewDayLabel(system.reviewDay)} · {reviewStatusLabel}</span>
           ) : (
-            <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
+            <span>Còn {todayRemainingCount} hôm nay · Đã xong {todayCompletedCount}/{weekCompletion.total} tuần này</span>
           )}
-          {syncBadgeLabel}
-        </span>
-        <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
-          Gói {getPlanLabel(activePlanCode)}
-        </span>
-        {reviewDueToday && (
-          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
-            {getReviewDayLabel(system.reviewDay)} · {reviewStatusLabel}
-          </span>
-        )}
-        {!reviewDueToday && (
-          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
-            Còn {todayRemainingCount} hôm nay · {todayCompletedCount}/{weekCompletion.total} việc tuần
-          </span>
-        )}
+        </div>
       </div>
     </header>
   );

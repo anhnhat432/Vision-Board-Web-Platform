@@ -225,40 +225,40 @@ function getWeekPerformanceStyle(
 
   if (!reviewDone) {
     return {
-      card: "border-app-line bg-app-bg text-app-ink-muted",
-      badge: "border-app-line bg-app-surface text-app-ink-muted",
+      card: "border-app-line/20 bg-app-bg/40 text-app-ink-muted/80 opacity-60",
+      badge: "border-app-line/30 bg-app-surface text-app-ink-muted",
       badgeText: "Chưa review",
       textColor: "text-app-ink-soft",
-      progressColor: "",
+      progressColor: "[&>div]:bg-app-line/30",
     };
   }
 
   if (leadCompletionPercent >= 85) {
     return {
-      card: "border-emerald-200 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900/50 shadow-sm",
-      badge: "bg-emerald-100 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/50 dark:text-emerald-300",
+      card: "border-emerald-200/30 bg-emerald-50/20 text-emerald-800 dark:bg-emerald-950/10 dark:border-emerald-900/30 shadow-none opacity-85",
+      badge: "bg-emerald-100/60 text-emerald-800 border-emerald-200/30 dark:bg-emerald-950/30 dark:text-emerald-400",
       badgeText: "Xuất sắc",
       textColor: "text-emerald-900 dark:text-emerald-300",
-      progressColor: "[&>div]:bg-emerald-500",
+      progressColor: "[&>div]:bg-emerald-500/70",
     };
   }
 
   if (leadCompletionPercent >= 50) {
     return {
-      card: "border-amber-200 bg-amber-50/40 text-amber-800 dark:bg-amber-950/20 dark:border-amber-900/50 shadow-sm",
-      badge: "bg-amber-100 text-amber-800 border-amber-200/50 dark:bg-amber-950/50 dark:text-amber-300",
+      card: "border-amber-200/30 bg-amber-50/20 text-amber-800 dark:bg-amber-950/10 dark:border-amber-900/30 shadow-none opacity-85",
+      badge: "bg-amber-100/60 text-amber-800 border-amber-200/30 dark:bg-amber-950/30 dark:text-amber-400",
       badgeText: "Khá tốt",
       textColor: "text-amber-900 dark:text-amber-300",
-      progressColor: "[&>div]:bg-amber-500",
+      progressColor: "[&>div]:bg-amber-500/70",
     };
   }
 
   return {
-    card: "border-rose-200 bg-rose-50/40 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900/50 shadow-sm",
-    badge: "bg-rose-100 text-rose-800 border-rose-200/50 dark:bg-rose-950/50 dark:text-rose-300",
+    card: "border-rose-200/30 bg-rose-50/20 text-rose-800 dark:bg-rose-950/10 dark:border-rose-900/30 shadow-none opacity-85",
+    badge: "bg-rose-100/60 text-rose-800 border-rose-200/30 dark:bg-rose-950/30 dark:text-rose-400",
     badgeText: "Cần cải thiện",
     textColor: "text-rose-900 dark:text-rose-300",
-    progressColor: "[&>div]:bg-rose-500",
+    progressColor: "[&>div]:bg-rose-500/70",
   };
 }
 
@@ -336,9 +336,10 @@ export function TwelveWeekProgressTab({
         titleClassName="font-serif text-2xl font-medium text-app-ink sm:text-3xl"
         descriptionClassName="text-base leading-6 text-app-ink-soft"
         contentClassName="stack-stack"
+        className="p-6 sm:p-8 gap-6"
         action={
           nextActionHandler ? (
-            <div className="rounded-lg border border-app-line bg-app-bg p-3">
+            <div className="rounded-xl border border-app-line/40 bg-app-bg p-4 border-t border-app-line/30 pt-4 mt-2">
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 Tiếp theo nên làm
               </p>
@@ -562,14 +563,14 @@ export function TwelveWeekProgressTab({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-lg border border-app-line bg-app-bg p-5">
+            <div className="rounded-xl border border-app-line/60 bg-app-bg p-6">
               <div className="stack-stack">
                 {milestoneItems.map((item, index) => {
                   const isLastItem = index === milestoneItems.length - 1;
 
                   return (
-                    <div key={item.label} className={`relative pl-12 ${isLastItem ? "" : "pb-6"}`}>
-                      {!isLastItem && <div className="absolute left-[15px] top-8 h-full w-[2px] bg-gradient-to-b from-app-line to-app-line/30" />}
+                    <div key={item.label} className={`relative pl-12 ${isLastItem ? "" : "pb-8"}`}>
+                      {!isLastItem && <div className="absolute left-[15px] top-8 h-full w-[2px] bg-gradient-to-b from-app-line/50 to-app-line/10" />}
                       <div className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-app-ink to-app-ink/80 text-xs font-bold text-white shadow-md ring-4 ring-app-accent/20">
                         {index + 1}
                       </div>

@@ -369,12 +369,12 @@ export function TwelveWeekWeekTab({
           <Collapsible
             open={isWorkloadOpen}
             onOpenChange={setIsWorkloadOpen}
-            className="border border-app-line bg-app-surface rounded-xl overflow-hidden"
+            className="border border-app-line/60 bg-app-surface rounded-2xl overflow-hidden mb-3"
           >
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="flex w-full items-center justify-between text-left p-5 hover:bg-app-bg/50 transition-colors"
+                className="flex w-full items-center justify-between text-left p-6 hover:bg-app-bg/40 transition-colors"
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-lg font-semibold text-app-ink">
@@ -400,16 +400,16 @@ export function TwelveWeekWeekTab({
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="stack-stack pt-0 border-t border-app-line/50">
-                <div className="rounded-lg border border-app-line bg-app-bg p-5 mt-4">
+              <CardContent className="flex flex-col gap-6 pt-0 pb-6 px-6 border-t border-app-line/40 bg-app-surface/20">
+                <div className="rounded-xl border border-app-line bg-app-bg p-5 mt-5">
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Ưu tiên tuần</p>
                   <p className="mt-2 text-xl font-semibold text-app-ink">{currentPlanFocus}</p>
                   {currentPlanMilestone && (
                     <p className="mt-3 text-base text-app-ink-soft">Cột mốc đang nhắm tới: {currentPlanMilestone}</p>
                   )}
                 </div>
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-lg border border-app-warm-border/20 bg-app-warm-soft p-5">
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="rounded-xl border border-app-warm-border/20 bg-app-warm-soft p-6 sm:p-7">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-app-warm">Cốt lõi trước</p>
@@ -419,9 +419,9 @@ export function TwelveWeekWeekTab({
                       </div>
                       <Badge className="bg-app-warm text-white hover:bg-app-warm text-sm px-2.5 py-0.5">{coreIndicators.length}</Badge>
                     </div>
-                    <div className="mt-4 stack-tight">
+                    <div className="mt-4 flex flex-col gap-3">
                       {coreIndicators.length === 0 ? (
-                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 text-base leading-6 text-app-ink-muted">
+                        <div className="rounded-xl border border-app-line bg-app-surface px-4 py-4 text-base leading-6 text-app-ink-muted">
                           Chưa có việc cốt lõi. Khi việc lặp lại được thêm, phần này sẽ cho bạn biết việc nào cần làm
                           trước.
                         </div>
@@ -429,7 +429,7 @@ export function TwelveWeekWeekTab({
                         coreIndicators.map((indicator) => (
                           <div
                             key={indicator.id || indicator.name}
-                            className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
+                            className="rounded-xl border border-app-line bg-app-surface px-4 py-3"
                           >
                             <p className="flex items-center gap-2 text-base font-medium text-app-ink">
                               <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-warm" />
@@ -444,7 +444,7 @@ export function TwelveWeekWeekTab({
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-app-line bg-app-surface p-5">
+                  <div className="rounded-xl border border-app-line/60 bg-app-surface p-6 sm:p-7">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
@@ -460,16 +460,16 @@ export function TwelveWeekWeekTab({
                         {optionalIndicators.length}
                       </Badge>
                     </div>
-                    <div className="mt-4 stack-tight">
+                    <div className="mt-4 flex flex-col gap-3">
                       {optionalIndicators.length === 0 ? (
-                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 text-base text-app-ink-muted">
+                        <div className="rounded-xl border border-app-line bg-app-surface px-4 py-4 text-base text-app-ink-muted">
                           Tuần này bạn chỉ cần giữ các việc cốt lõi là đủ.
                         </div>
                       ) : (
                         optionalIndicators.map((indicator) => (
                           <div
                             key={indicator.id || indicator.name}
-                            className="rounded-lg border border-app-line bg-app-surface px-4 py-3"
+                            className="rounded-xl border border-app-line/30 bg-app-surface/40 px-4 py-3"
                           >
                             <p className="flex items-center gap-2 text-base font-medium text-app-ink">
                               <TaskTodoIcon className="h-4 w-4 shrink-0 text-app-ink-muted" />
@@ -702,15 +702,15 @@ export function TwelveWeekWeekTab({
                 <>
                   <div
                     data-testid="wam-section-score"
-                    className="rounded-lg border border-app-line bg-app-bg p-5"
+                    className="rounded-2xl border border-app-line/60 bg-app-bg/50 p-6 sm:p-8 flex flex-col gap-6"
                   >
-                    <div className="flex items-center gap-2 text-base font-semibold text-app-ink">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-app-ink">
                       <Target className="h-5 w-5 text-app-warm" />
                       1. Kết quả thực thi tuần qua (Hệ thống tự tính)
                     </div>
                     
-                    <div className="grid gap-4 sm:grid-cols-2 mt-4">
-                      <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4">
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="rounded-xl border border-app-line/40 bg-app-surface px-6 py-6 flex flex-col gap-4">
                         <div className="flex items-center justify-between text-base text-app-ink-muted">
                           <span className="font-medium text-app-ink">Điểm việc lặp lại</span>
                           <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
@@ -731,7 +731,7 @@ export function TwelveWeekWeekTab({
                       </div>
                       
                       {lagScoreValue !== null ? (
-                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4">
+                        <div className="rounded-xl border border-app-line/40 bg-app-surface px-6 py-6 flex flex-col gap-4">
                           <div className="flex items-center justify-between text-base text-app-ink-muted">
                             <span className="font-medium text-app-ink">Điểm kết quả cuối ({system.lagMetric.name})</span>
                             <span data-testid="weekly-lag-score" className="font-bold text-3xl text-app-ink">{lagScoreValue}%</span>
@@ -742,7 +742,7 @@ export function TwelveWeekWeekTab({
                           </p>
                         </div>
                       ) : (
-                        <div className="rounded-lg border border-app-line bg-app-surface px-4 py-4 flex flex-col justify-between">
+                        <div className="rounded-xl border border-app-line/40 bg-app-surface px-6 py-6 flex flex-col gap-4 justify-between">
                           <div>
                             <span className="text-sm font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Kết quả cuối (Lag Metric)</span>
                             <p className="mt-2 text-base text-app-ink-soft">Không yêu cầu đo lường kết quả cuối trong chu kỳ này.</p>
@@ -754,7 +754,7 @@ export function TwelveWeekWeekTab({
                     
                     <div
                       data-testid="weekly-score-interpretation"
-                      className={`mt-4 rounded-lg border px-4 py-3 ${scoreTone.panel}`}
+                      className={`rounded-lg border px-4 py-3 ${scoreTone.panel}`}
                     >
                       <p className={`flex items-center gap-2 text-base font-semibold ${scoreTone.text}`}>
                         <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
@@ -775,18 +775,18 @@ export function TwelveWeekWeekTab({
                   
                   <div
                     data-testid="wam-section-commitments"
-                    className="rounded-lg border border-app-line bg-app-surface p-5"
+                    className="rounded-2xl border border-app-line/60 bg-app-surface p-6 sm:p-8 flex flex-col gap-6 mt-4"
                   >
-                    <Label className="flex items-center gap-2 text-base font-semibold text-app-ink">
+                    <Label className="flex items-center gap-2 text-lg font-semibold text-app-ink">
                       <BookmarkCheck className="h-5 w-5 text-app-warm" />
                       2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
                     </Label>
                     {previousCommitments.length === 0 ? (
-                      <div className="mt-3 rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-base leading-6 text-app-ink-soft">
+                      <div className="rounded-xl border border-dashed border-app-line bg-app-bg px-4 py-4 text-base leading-6 text-app-ink-soft">
                         Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
                       </div>
                     ) : (
-                      <div className="mt-3 stack-tight">
+                      <div className="flex flex-col gap-4">
                         {previousCommitments.map((commitment) => {
                           const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
                           const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
@@ -797,12 +797,12 @@ export function TwelveWeekWeekTab({
                             });
 
                           return (
-                            <div key={commitment} className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
-                              <p className="text-base font-medium text-app-ink">{commitment}</p>
+                            <div key={commitment} className="rounded-xl border border-app-line/40 bg-app-bg/60 p-5">
+                              <p className="text-base font-semibold text-app-ink">{commitment}</p>
                               {commitmentQuote ? (
                                 <p className="mt-1 text-sm italic leading-5 text-app-ink-muted">{commitmentQuote}</p>
                               ) : null}
-                              <div className="mt-3 flex flex-wrap gap-2">
+                              <div className="mt-4 flex flex-wrap gap-3">
                                 <Button
                                   type="button"
                                   variant="outline"
@@ -835,12 +835,12 @@ export function TwelveWeekWeekTab({
                     )}
                   </div>
 
-                  <div className="grid gap-5 lg:grid-cols-2 mt-2">
+                  <div className="grid gap-6 lg:grid-cols-2 mt-4">
                     <div
                       data-testid="wam-section-insights"
-                      className="rounded-lg border border-app-line bg-app-surface p-5"
+                      className="rounded-2xl border border-app-line/60 bg-app-surface p-6 sm:p-8 flex flex-col gap-4"
                     >
-                      <Label htmlFor="weekly-insights" className="flex items-center gap-2 text-base font-semibold text-app-ink">
+                      <Label htmlFor="weekly-insights" className="flex items-center gap-2 text-lg font-semibold text-app-ink">
                         <Lightbulb className="h-5 w-5 text-yellow-500 animate-[pulse_3s_infinite]" />
                         3. Góc nhìn/điều học được nào cần áp dụng tuần sau?
                       </Label>
@@ -856,9 +856,9 @@ export function TwelveWeekWeekTab({
 
                     <div
                       data-testid="wam-section-next-commitments"
-                      className="rounded-lg border border-app-warm-border bg-app-warm-soft/30 p-5"
+                      className="rounded-2xl border border-app-warm-border/40 bg-app-warm-soft/20 p-6 sm:p-8 flex flex-col gap-4"
                     >
-                      <Label htmlFor="weekly-next-commitments" className="flex items-center gap-2 text-base font-semibold text-app-ink">
+                      <Label htmlFor="weekly-next-commitments" className="flex items-center gap-2 text-lg font-semibold text-app-ink">
                         <Rocket className="h-5 w-5 text-app-warm animate-[bounce_3s_infinite]" />
                         4. Cam kết của tuần tới là gì?
                       </Label>
