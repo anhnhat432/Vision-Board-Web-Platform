@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, GripVertical, Plus, Minus, Trash2 } from "lucide-react";
 
 import { GoalArchetypeExamples } from "@/app/components/GoalArchetypeExamples";
 import { Input } from "@/app/components/ui/input";
@@ -219,23 +219,29 @@ export function LeadIndicatorsStepLab({
 
       <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {draft.leadIndicators.map((indicator, index) => (
           <article
             key={indicator.id}
-            className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3"
+            className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-5 sm:p-6 transition-all duration-300 group"
             aria-labelledby={`tactic-card-title-${index}`}
           >
-            <div className="flex items-start gap-2 sm:gap-3">
-              <GripVertical className="mt-1 hidden h-4 w-4 shrink-0 text-app-ink-muted sm:block" aria-hidden="true" />
+            {/* Background radial glow */}
+            <div className="absolute -top-12 -left-12 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex items-start gap-2 sm:gap-3 relative z-10">
+              <GripVertical className="mt-1 hidden h-4 w-4 shrink-0 text-app-ink-muted sm:block cursor-grab" aria-hidden="true" />
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/40 dark:border-slate-800/40 pb-3">
                   <div>
-                    <p id={`tactic-card-title-${index}`} className="text-sm font-medium text-app-ink">
-                      Việc {index + 1}
+                    <p id={`tactic-card-title-${index}`} className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                      <span className="inline-flex h-5.5 w-5.5 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/30 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">
+                        {index + 1}
+                      </span>
+                      Hành động lặp lại
                     </p>
-                    <p className="mt-0.5 text-xs text-app-ink-muted">
-                      {indicator.name || "Chưa có tên"} · {indicator.target || "0"} / tuần · {indicator.unit || "chưa có đơn vị"}
+                    <p className="mt-1 text-xs text-app-ink-muted font-medium">
+                      {indicator.name || "Chưa đặt tên"} · <span className="text-indigo-600 dark:text-indigo-400 font-bold">{indicator.target || "0"}</span> {indicator.unit || "chưa có đơn vị"} / tuần
                     </p>
                   </div>
                   {draft.leadIndicators.length > 2 ? (
@@ -243,18 +249,18 @@ export function LeadIndicatorsStepLab({
                       type="button"
                       onClick={() => onRemoveIndicator(index)}
                       aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-app-ink-muted transition-all duration-150 hover:text-[color:var(--color-danger-fg)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200/30 transition-all duration-200 active:scale-95"
                     >
-                      <Trash2 className="h-4 w-4" aria-hidden="true" />
-                      Xoá
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      Xoá việc này
                     </button>
                   ) : null}
                 </div>
 
-                <div className="mt-4 grid gap-3">
+                <div className="mt-4 grid gap-4">
                   <div>
-                    <label htmlFor={`tactic-name-${index}`} className={labelClass}>
-                      Tên việc
+                    <label htmlFor={`tactic-name-${index}`} className={cn(labelClass, "font-bold text-slate-700 dark:text-slate-350")}>
+                      Mô tả hành động lặp lại
                     </label>
                     <Input
                       id={`tactic-name-${index}`}
@@ -262,7 +268,7 @@ export function LeadIndicatorsStepLab({
                       aria-describedby={showNameError(indicator, `name-${indicator.id}`) ? `tactic-name-${index}-error` : `tactic-name-${index}-helper`}
                       onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
                       placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
-                      className={inputClass}
+                      className={cn(inputClass, "mt-1.5 focus:border-indigo-500 focus:ring-indigo-500/30 rounded-xl")}
                     />
                     {showNameError(indicator, `name-${indicator.id}`) ? (
                       <p id={`tactic-name-${index}-error`} role="alert" className={errorTextClass}>
@@ -270,17 +276,19 @@ export function LeadIndicatorsStepLab({
                       </p>
                     ) : (
                       <p id={`tactic-name-${index}-helper`} className={helperTextClass}>
-                        Đặt tên bằng một hành động cụ thể bạn có thể lặp lại trong tuần.
+                        Đặt tên bằng một hành động cụ thể bạn có thể tự kiểm soát và lặp lại trong tuần.
                       </p>
                     )}
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor={`tactic-target-${index}`} className={labelClass}>
+                      <label htmlFor={`tactic-target-${index}`} className={cn(labelClass, "font-bold text-slate-700 dark:text-slate-350")}>
                         Số lần / tuần
                       </label>
-                      <div className="flex items-center gap-1.5 mt-1">
+                      
+                      {/* Pill-shaped Picker cao cấp */}
+                      <div className="flex items-center bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-full p-1 w-full max-w-[170px] mt-1.5 shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/20">
                         <button
                           type="button"
                           onClick={() => {
@@ -289,9 +297,9 @@ export function LeadIndicatorsStepLab({
                             const newVal = Math.max(1, currentVal - 1);
                             onIndicatorChange(index, "target", newVal.toString());
                           }}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-surface text-lg font-bold text-app-ink transition-colors hover:bg-app-bg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all active:scale-90 shadow-sm"
                         >
-                          -
+                          <Minus className="h-4 w-4" />
                         </button>
                         <Input
                           id={`tactic-target-${index}`}
@@ -303,14 +311,13 @@ export function LeadIndicatorsStepLab({
                               : `tactic-target-${index}-helper`
                           }
                           className={cn(
-                            inputClass,
-                            "text-center mt-0",
+                            "w-14 bg-transparent border-0 text-center font-extrabold text-slate-800 dark:text-slate-100 text-base focus:ring-0 focus:outline-none p-0 h-9 select-all mt-0",
                             indicatorTargetErrors[index] &&
                               shouldShowFieldError(`target-${indicator.id}`) &&
-                              "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                              "text-red-500",
                           )}
                           onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
-                          placeholder="Ví dụ: 2"
+                          placeholder="2"
                         />
                         <button
                           type="button"
@@ -320,9 +327,9 @@ export function LeadIndicatorsStepLab({
                             const newVal = Math.min(21, currentVal + 1);
                             onIndicatorChange(index, "target", newVal.toString());
                           }}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-surface text-lg font-bold text-app-accent transition-colors hover:bg-app-bg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all active:scale-90 shadow-sm"
                         >
-                          +
+                          <Plus className="h-4 w-4" />
                         </button>
                       </div>
                       {indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`) ? (
@@ -331,7 +338,7 @@ export function LeadIndicatorsStepLab({
                         </p>
                       ) : (
                         <p id={`tactic-target-${index}-helper`} className={helperTextClass}>
-                          Nhập hoặc dùng nút (+/-) chọn số lần hoàn thành mỗi tuần.
+                          Nhập hoặc dùng nút xoay để tăng/giảm mục tiêu.
                         </p>
                       )}
                     </div>

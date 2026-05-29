@@ -65,78 +65,202 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
   const isW12Filled = week12.trim().length > 0;
 
   return (
-    <div className="w-full py-5 select-none bg-app-bg/50 rounded-2xl border border-app-line/60 p-4 mb-6">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-app-accent mb-5 text-center flex items-center justify-center gap-1">
-        <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
-        Bản đồ chặng đường 12 tuần của bạn
+    <div className="relative w-full py-6 select-none bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 p-4 mb-6 overflow-hidden">
+      {/* Nhúng styles trực tiếp cho các animation động */}
+      <style>{`
+        @keyframes dash {
+          to {
+            stroke-dashoffset: -20;
+          }
+        }
+        @keyframes float-slower {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-5px) scale(1.05); }
+        }
+        @keyframes float-faster {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-7px) scale(1.08); }
+        }
+        @keyframes pulse-spread {
+          0% { transform: scale(0.6); opacity: 0.8; }
+          100% { transform: scale(1.6); opacity: 0; }
+        }
+        @keyframes shimmer-grad {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-dash-flow {
+          animation: dash 1.2s linear infinite;
+        }
+        .animate-float-1 {
+          animation: float-slower 3.5s ease-in-out infinite;
+        }
+        .animate-float-2 {
+          animation: float-faster 2.8s ease-in-out infinite;
+        }
+        .animate-float-3 {
+          animation: float-slower 3s ease-in-out infinite;
+        }
+        .animate-float-4 {
+          animation: float-faster 3.2s ease-in-out infinite;
+        }
+        .animate-pulse-spread {
+          animation: pulse-spread 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+        .animate-holographic-border {
+          background-size: 300% 300%;
+          animation: shimmer-grad 5s ease infinite;
+        }
+      `}</style>
+
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400 mb-6 text-center flex items-center justify-center gap-1.5 relative z-10">
+        <Sparkles className="h-3.5 w-3.5 animate-pulse text-indigo-500" />
+        Bản đồ viễn chinh 12 tuần (Expedition Map)
       </p>
-      <div className="relative flex items-center justify-between w-full max-w-lg mx-auto px-6">
-        {/* Đường nối nền */}
-        <div className="absolute left-8 right-8 top-[22px] h-1 bg-app-line/70 dark:bg-app-line/30 rounded-full" />
-        
-        {/* Đường nối phát sáng */}
+
+      {/* Canvas SVG vẽ con đường lượn sóng */}
+      <div className="relative w-full max-w-lg mx-auto h-[100px] flex items-center justify-center">
+        <svg
+          viewBox="0 0 320 80"
+          className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="expedition-active-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#6366f1" />
+              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#10b981" />
+            </linearGradient>
+          </defs>
+
+          {/* 1. Đường nền nét đứt màu xám nhạt */}
+          <path
+            d="M 40 40 C 80 20, 100 20, 120 30 C 140 40, 180 60, 200 50 C 220 40, 260 30, 280 40"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeDasharray="6, 6"
+            className="text-slate-250 dark:text-slate-850"
+          />
+
+          {/* 2. Đường tiến trình phát sáng động (chỉ vẽ đến chặng đã điền) */}
+          <path
+            d="M 40 40 C 80 20, 100 20, 120 30"
+            fill="none"
+            stroke={isW4Filled ? "url(#expedition-active-grad)" : "currentColor"}
+            strokeWidth={isW4Filled ? "4" : "3.5"}
+            strokeLinecap="round"
+            strokeDasharray={isW4Filled ? "5, 4" : "6, 6"}
+            className={cn(
+              isW4Filled ? "animate-dash-flow" : "text-slate-200 dark:text-slate-800/40",
+              isW4Filled && "drop-shadow-[0_0_4px_rgba(99,102,241,0.4)]"
+            )}
+          />
+
+          <path
+            d="M 120 30 C 140 40, 180 60, 200 50"
+            fill="none"
+            stroke={isW8Filled ? "url(#expedition-active-grad)" : "currentColor"}
+            strokeWidth={isW8Filled ? "4" : "3.5"}
+            strokeLinecap="round"
+            strokeDasharray={isW8Filled ? "5, 4" : "6, 6"}
+            className={cn(
+              isW8Filled ? "animate-dash-flow" : "text-slate-200 dark:text-slate-800/40",
+              isW8Filled && "drop-shadow-[0_0_4px_rgba(245,158,11,0.4)]"
+            )}
+          />
+
+          <path
+            d="M 200 50 C 220 40, 260 30, 280 40"
+            fill="none"
+            stroke={isW12Filled ? "url(#expedition-active-grad)" : "currentColor"}
+            strokeWidth={isW12Filled ? "4" : "3.5"}
+            strokeLinecap="round"
+            strokeDasharray={isW12Filled ? "5, 4" : "6, 6"}
+            className={cn(
+              isW12Filled ? "animate-dash-flow" : "text-slate-200 dark:text-slate-800/40",
+              isW12Filled && "drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]"
+            )}
+          />
+        </svg>
+
+        {/* CÁC ĐIỂM TRẠM HOẠT HỌA NỔI */}
         <div 
-          className="absolute left-8 top-[22px] h-1 bg-gradient-to-r from-app-accent via-amber-400 to-emerald-500 rounded-full transition-all duration-500" 
-          style={{
-            width: isW12Filled 
-              ? "calc(100% - 64px)" 
-              : isW8Filled 
-                ? "66%" 
-                : isW4Filled 
-                  ? "33%" 
-                  : "0%"
-          }}
-        />
-
-        {/* Trạm 1: Tuần 1 */}
-        <div className="relative flex flex-col items-center z-10">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-app-accent bg-app-surface text-base shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.15)]">
+          className="absolute flex flex-col items-center z-10 animate-float-1"
+          style={{ left: "12.5%", top: "40px", transform: "translate(-50%, -50%)" }}
+        >
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-indigo-500 bg-white dark:bg-slate-900 text-lg shadow-[0_4px_12px_rgba(99,102,241,0.25)] select-none">
             🚀
+            <div className="absolute inset-0 rounded-full border border-indigo-400/30 animate-ping opacity-75" />
           </div>
-          <span className="mt-2 text-[11px] font-bold text-app-ink">Khởi động</span>
-          <span className="text-[9px] text-app-ink-muted">Tuần 1</span>
+          <span className="mt-2.5 text-[10px] font-extrabold text-slate-700 dark:text-slate-200 tracking-wide">Khởi động</span>
+          <span className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400">Tuần 1</span>
         </div>
 
-        {/* Trạm 2: Tuần 4 */}
-        <div className="relative flex flex-col items-center z-10">
+        <div 
+          className={cn("absolute flex flex-col items-center z-10", isW4Filled ? "animate-float-2" : "opacity-75")}
+          style={{ left: "37.5%", top: "30px", transform: "translate(-50%, -50%)" }}
+        >
           <div className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 text-base bg-app-surface",
+            "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
             isW4Filled 
-              ? "border-app-accent text-app-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.1)]" 
-              : "border-app-line text-app-ink-muted opacity-50"
+              ? "border-indigo-500 text-indigo-500 shadow-[0_4px_12px_rgba(99,102,241,0.25)]" 
+              : "border-slate-200 dark:border-slate-800 text-slate-300 opacity-60"
           )}>
-            {isW4Filled ? "🚩" : "⚪"}
+            {isW4Filled ? (
+              <>
+                🚩
+                <div className="absolute -inset-2 rounded-full bg-indigo-500/10 animate-pulse-spread" />
+              </>
+            ) : "🔒"}
           </div>
-          <span className={cn("mt-2 text-[11px] font-semibold transition-colors duration-300", isW4Filled ? "text-app-ink" : "text-app-ink-muted")}>Tuần 4</span>
-          <span className="text-[9px] text-app-ink-muted">{isW4Filled ? "Đã đặt" : "Chờ mốc"}</span>
+          <span className={cn("mt-2.5 text-[10px] font-bold transition-colors duration-500", isW4Filled ? "text-slate-700 dark:text-slate-200" : "text-slate-400")}>Tuần 4</span>
+          <span className="text-[9px] font-semibold text-slate-400">{isW4Filled ? "Mốc 1/3" : "Chờ đặt"}</span>
         </div>
 
-        {/* Trạm 3: Tuần 8 */}
-        <div className="relative flex flex-col items-center z-10">
+        <div 
+          className={cn("absolute flex flex-col items-center z-10", isW8Filled ? "animate-float-3" : "opacity-75")}
+          style={{ left: "62.5%", top: "50px", transform: "translate(-50%, -50%)" }}
+        >
           <div className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 text-base bg-app-surface",
+            "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
             isW8Filled 
-              ? "border-app-accent text-app-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.1)]" 
-              : "border-app-line text-app-ink-muted opacity-50"
+              ? "border-amber-500 text-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.25)]" 
+              : "border-slate-200 dark:border-slate-800 text-slate-300 opacity-60"
           )}>
-            {isW8Filled ? "🚩" : "⚪"}
+            {isW8Filled ? (
+              <>
+                🚩
+                <div className="absolute -inset-2 rounded-full bg-amber-500/10 animate-pulse-spread" />
+              </>
+            ) : "🔒"}
           </div>
-          <span className={cn("mt-2 text-[11px] font-semibold transition-colors duration-300", isW8Filled ? "text-app-ink" : "text-app-ink-muted")}>Tuần 8</span>
-          <span className="text-[9px] text-app-ink-muted">{isW8Filled ? "Đã đặt" : "Chờ mốc"}</span>
+          <span className={cn("mt-2.5 text-[10px] font-bold transition-colors duration-500", isW8Filled ? "text-slate-700 dark:text-slate-200" : "text-slate-400")}>Tuần 8</span>
+          <span className="text-[9px] font-semibold text-slate-400">{isW8Filled ? "Mốc 2/3" : "Chờ đặt"}</span>
         </div>
 
-        {/* Trạm 4: Tuần 12 */}
-        <div className="relative flex flex-col items-center z-10">
+        <div 
+          className={cn("absolute flex flex-col items-center z-10", isW12Filled ? "animate-float-4" : "opacity-75")}
+          style={{ left: "87.5%", top: "40px", transform: "translate(-50%, -50%)" }}
+        >
           <div className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 text-base bg-app-surface",
+            "relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-500 text-lg bg-white dark:bg-slate-900 select-none",
             isW12Filled 
-              ? "border-emerald-500 text-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.2)]" 
-              : "border-app-line text-app-ink-muted opacity-50"
+              ? "border-emerald-500 text-emerald-500 shadow-[0_4px_16px_rgba(16,185,129,0.35)]" 
+              : "border-slate-200 dark:border-slate-800 text-slate-300 opacity-60"
           )}>
-            {isW12Filled ? "🏆" : "⚪"}
+            {isW12Filled ? (
+              <>
+                🏆
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-400/40 animate-ping opacity-75" />
+                <div className="absolute -inset-3.5 rounded-full bg-emerald-500/10 animate-pulse-spread" />
+              </>
+            ) : "🏁"}
           </div>
-          <span className={cn("mt-2 text-[11px] font-bold transition-colors duration-300", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-app-ink-muted")}>Tuần 12</span>
-          <span className="text-[9px] text-app-ink-muted">{isW12Filled ? "Đích đến" : "Chờ mốc"}</span>
+          <span className={cn("mt-2.5 text-[10px] font-extrabold transition-colors duration-500", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")}>Tuần 12</span>
+          <span className="text-[9px] font-semibold text-slate-400">{isW12Filled ? "Đích đến" : "Chờ đặt"}</span>
         </div>
       </div>
     </div>
@@ -178,7 +302,7 @@ export function OutcomeStepLab({
         </div>
       ) : null}
 
-      <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm" aria-labelledby="outcome-required-title">
+      <section className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-6 sm:p-8 transition-all duration-300" aria-labelledby="outcome-required-title">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p id="outcome-required-title" className="text-sm font-semibold text-app-ink">
@@ -483,8 +607,8 @@ export function OutcomeStepLab({
           </p>
 
           {recommendedTemplate && adaptiveTemplateRecommendation ? (
-            <div className="relative rounded-xl border border-transparent p-[1.5px] bg-gradient-to-br from-app-accent via-amber-400 to-emerald-500 shadow-md">
-              <div className="rounded-[10px] bg-app-surface p-4.5">
+            <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-indigo-500 via-purple-500 via-pink-500 via-amber-400 via-emerald-500 to-indigo-500 animate-holographic-border shadow-xl shadow-indigo-500/10 overflow-hidden">
+              <div className="rounded-[14px] bg-white dark:bg-slate-900 p-5.5 relative z-10">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-app-accent">

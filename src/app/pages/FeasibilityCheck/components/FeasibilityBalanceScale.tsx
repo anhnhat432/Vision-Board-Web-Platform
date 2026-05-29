@@ -39,20 +39,36 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     };
   }, [answers]);
 
-  const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight, isBalanced } = balanceData;
+  const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight } = balanceData;
 
-  // Tính toán nhãn trạng thái và sticker emoji trực quan
+  // Tính toán nhãn trạng thái và sticker emoji trực quan với phong cách Iridescent / Glow
   const emotionSticker = useMemo(() => {
     if (answeredCount === 0) {
-      return { emoji: "🔮", label: "Chờ hiệu chuẩn", color: "text-app-ink-muted bg-app-bg border-app-line" };
+      return {
+        emoji: "🔮",
+        label: "Chờ hiệu chuẩn",
+        style: "bg-slate-100/50 dark:bg-slate-800/50 text-slate-500 border-slate-200 dark:border-slate-700 shadow-sm",
+      };
     }
     if (isHeavyLeft) {
-      return { emoji: "🤯", label: "Quá tải · Rào cản lớn", color: "text-rose-600 bg-rose-50 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900/30" };
+      return {
+        emoji: "🤯",
+        label: "Quá tải · Rào cản lớn",
+        style: "bg-gradient-to-r from-rose-500/10 via-red-500/10 to-amber-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.15)]",
+      };
     }
     if (isHeavyRight) {
-      return { emoji: "🚀", label: "Sẵn sàng · Khả thi cao", color: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900/30" };
+      return {
+        emoji: "🚀",
+        label: "Sẵn sàng · Khả thi cao",
+        style: "bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
+      };
     }
-    return { emoji: "⚖️", label: "Cân bằng · Lý tưởng", color: "text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/30" };
+    return {
+      emoji: "⚖️",
+      label: "Cân bằng · Lý tưởng",
+      style: "bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-emerald-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]",
+    };
   }, [answeredCount, isHeavyLeft, isHeavyRight]);
 
   const statusLabel = () => {
@@ -62,110 +78,205 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     return "Cân bằng lý tưởng — Hãy duy trì kỷ luật";
   };
 
+  // Tạo các radial ticks tinh tế cho thước đo bán nguyệt
+  const radialTicks = useMemo(() => {
+    const ticks = [];
+    // Vẽ vạch từ góc 0 độ đến 180 độ, mỗi vạch cách nhau 15 độ
+    for (let angle = 0; angle <= 180; angle += 15) {
+      const rad = (angle * Math.PI) / 180;
+      const r1 = 88;
+      const r2 = 95;
+      const x1 = 150 - r1 * Math.cos(rad);
+      const y1 = 140 - r1 * Math.sin(rad);
+      const x2 = 150 - r2 * Math.cos(rad);
+      const y2 = 140 - r2 * Math.sin(rad);
+
+      let tickColor = "stroke-rose-400/50 dark:stroke-rose-500/40";
+      if (angle > 60 && angle <= 100) {
+        tickColor = "stroke-amber-400/50 dark:stroke-amber-500/40";
+      } else if (angle > 100 && angle <= 120) {
+        tickColor = "stroke-yellow-400/50 dark:stroke-yellow-500/40";
+      } else if (angle > 120) {
+        tickColor = "stroke-emerald-400/50 dark:stroke-emerald-500/40";
+      }
+
+      ticks.push({ x1, y1, x2, y2, color: tickColor, angle });
+    }
+    return ticks;
+  }, []);
+
   return (
-    <div className="rounded-[14px] border border-app-line bg-app-surface p-5 flex flex-col items-center gap-4 transition-all duration-300">
-      <div className="w-full flex items-center justify-between border-b border-app-line/60 pb-3">
-        <div className="flex items-center gap-1.5">
-          <Scale className="h-4.5 w-4.5 text-app-accent" />
-          <span className="text-xs font-semibold uppercase tracking-[0.15em] text-app-ink-muted">
+    <div className="relative overflow-hidden rounded-[20px] border border-white/20 dark:border-slate-800/40 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-2xl p-6 flex flex-col items-center gap-4.5 transition-all duration-300 group">
+      {/* Background radial glow */}
+      <div className="absolute -top-16 -left-16 w-32 h-32 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-indigo-500/10" />
+      <div className="absolute -bottom-16 -right-16 w-32 h-32 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-emerald-500/10" />
+
+      <div className="w-full flex items-center justify-between border-b border-app-line/40 dark:border-slate-800/60 pb-3.5 relative z-10">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500">
+            <Scale className="h-4.5 w-4.5" />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-app-ink-muted">
             Đồng hồ khả thi 12 tuần
           </span>
         </div>
-        <span className="text-xs font-bold text-app-ink select-none bg-app-bg px-2.5 py-1 rounded-full border border-app-line/50 flex items-center gap-1">
-          {answeredCount > 0 && isHeavyRight && <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />}
-          Điểm số: {answeredCount > 0 ? average.toFixed(1) : "—"}/4.0
+        <span className="text-xs font-bold text-app-ink select-none bg-white/80 dark:bg-slate-900/80 px-3 py-1.5 rounded-full border border-app-line/40 dark:border-slate-800/60 shadow-sm flex items-center gap-1.5">
+          {answeredCount > 0 && isHeavyRight && <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />}
+          Điểm số: <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{answeredCount > 0 ? average.toFixed(1) : "—"}</span>/4.0
         </span>
       </div>
 
       {/* SVG Canvas Gauge Meter */}
-      <div className="relative w-full max-w-[280px] h-[130px] flex items-center justify-center select-none overflow-hidden">
+      <div className="relative w-full max-w-[280px] h-[135px] flex items-center justify-center select-none overflow-hidden mt-2 relative z-10">
         <svg
           viewBox="0 0 300 170"
           className="w-full h-full overflow-visible"
           aria-hidden="true"
         >
-          {/* Định nghĩa Gradient màu sắc cho đồng hồ bán nguyệt */}
           <defs>
+            {/* Gradient màu sắc cho cung tròn chính */}
             <linearGradient id="feasibility-gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#f43f5e" /> {/* rose-500 */}
               <stop offset="45%" stopColor="#f59e0b" /> {/* amber-500 */}
               <stop offset="55%" stopColor="#eab308" /> {/* yellow-500 */}
               <stop offset="100%" stopColor="#10b981" /> {/* emerald-500 */}
             </linearGradient>
+            
+            {/* Filter Neon Glow cao cấp cho kim chỉ hướng */}
+            <filter id="needle-neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            {/* Gradient cho kim phát sáng */}
+            <linearGradient id="needle-glow-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#818cf8" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.9" />
+            </linearGradient>
           </defs>
 
-          {/* Vòng bán nguyệt nền xám mờ */}
+          {/* Vạch chia mức độ phụ (Radial Ticks) vẽ bằng nét vẽ sang trọng */}
+          {radialTicks.map((tick) => (
+            <line
+              key={tick.angle}
+              x1={tick.x1}
+              y1={tick.y1}
+              x2={tick.x2}
+              y2={tick.y2}
+              strokeWidth={tick.angle % 45 === 0 ? "2.5" : "1.5"}
+              className={`${tick.color} transition-all duration-300`}
+            />
+          ))}
+
+          {/* Vòng bán nguyệt nền xám mờ (Track) nét mảnh */}
           <path
-            d="M 60 140 A 90 90 0 0 1 240 140"
+            d="M 68 140 A 82 82 0 0 1 232 140"
             fill="none"
             stroke="currentColor"
-            strokeWidth="18"
+            strokeWidth="5"
             strokeLinecap="round"
-            className="text-app-line/40 dark:text-app-line/20"
+            className="text-slate-200 dark:text-slate-800"
           />
 
-          {/* Vòng bán nguyệt màu gradient */}
+          {/* Vòng bán nguyệt màu gradient mỏng tinh tế */}
           <path
-            d="M 60 140 A 90 90 0 0 1 240 140"
+            d="M 68 140 A 82 82 0 0 1 232 140"
             fill="none"
             stroke="url(#feasibility-gauge-gradient)"
-            strokeWidth="18"
+            strokeWidth="5"
             strokeLinecap="round"
-            strokeDasharray="283"
+            strokeDasharray="258"
             strokeDashoffset="0"
           />
 
-          {/* Vạch chia mức độ phụ */}
-          <line x1="150" y1="50" x2="150" y2="60" stroke="currentColor" strokeWidth="2.5" className="text-app-surface" />
-          <line x1="86" y1="76" x2="93" y2="83" stroke="currentColor" strokeWidth="2.5" className="text-app-surface" />
-          <line x1="214" y1="76" x2="207" y2="83" stroke="currentColor" strokeWidth="2.5" className="text-app-surface" />
-
-          {/* NHÓM KIM CHỈ HƯỚNG XOAY */}
+          {/* NHÓM KIM CHỈ HƯỚNG XOAY PHÁT SÁNG */}
           <g
             style={{
               transform: `rotate(${needleAngle}deg)`,
               transformOrigin: "150px 140px",
-              transition: "transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)",
+              transition: "transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
           >
-            {/* Thân kim tam giác thon nhọn */}
-            <polygon
-              points="146,140 150,42 154,140"
-              className="fill-app-ink dark:fill-app-ink/80 stroke-app-surface dark:stroke-app-surface/20 stroke-1"
+            {/* Aura phát sáng neon dưới kim */}
+            <line
+              x1="150"
+              y1="140"
+              x2="150"
+              y2="28"
+              stroke="url(#needle-glow-grad)"
+              strokeWidth="7"
+              strokeLinecap="round"
+              filter="url(#needle-neon-glow)"
+              className="opacity-80"
             />
-            {/* Khớp xoay ở tâm */}
+            
+            {/* Thân kim chính mảnh mai sắc sảo */}
+            <line
+              x1="150"
+              y1="140"
+              x2="150"
+              y2="28"
+              stroke="#6366f1"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            
+            {/* Đầu kim tam giác nhỏ sắc nét */}
+            <polygon
+              points="147.5,35 150,23 152.5,35"
+              fill="#6366f1"
+              className="drop-shadow-[0_0_3px_rgba(99,102,241,0.8)]"
+            />
+            
+            {/* Khớp xoay ở tâm nhiều lớp chiều sâu */}
             <circle
               cx="150"
               cy="140"
-              r="7"
-              className="fill-app-accent stroke-app-surface dark:stroke-app-bg stroke-2"
+              r="9"
+              className="fill-white dark:fill-slate-900 stroke-slate-300 dark:stroke-slate-700 stroke-1 shadow-md"
+            />
+            <circle
+              cx="150"
+              cy="140"
+              r="5"
+              className="fill-indigo-500 shadow-inner"
+            />
+            <circle
+              cx="150"
+              cy="140"
+              r="2"
+              className="fill-white"
             />
           </g>
         </svg>
 
         {/* Text nhãn góc trái (Rào cản) và góc phải (Khả thi) */}
-        <div className="absolute left-2 bottom-1 flex items-center gap-1 opacity-70">
+        <div className="absolute left-1 bottom-1 flex items-center gap-1 opacity-80 backdrop-blur-[2px] bg-white/20 dark:bg-black/10 px-1.5 py-0.5 rounded-md border border-white/10">
           <ShieldAlert className="h-3 w-3 text-rose-500" />
-          <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Rào cản</span>
+          <span className="text-[9px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Rào cản</span>
         </div>
-        <div className="absolute right-2 bottom-1 flex items-center gap-1 opacity-70">
+        <div className="absolute right-1 bottom-1 flex items-center gap-1 opacity-80 backdrop-blur-[2px] bg-white/20 dark:bg-black/10 px-1.5 py-0.5 rounded-md border border-white/10">
           <BadgeCheck className="h-3 w-3 text-emerald-500" />
-          <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Khả thi</span>
+          <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Khả thi</span>
         </div>
       </div>
 
-      {/* Nhãn sticker cảm xúc động lớn hơn dưới đồng hồ */}
-      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all duration-300 transform scale-100 hover:scale-105 select-none ${emotionSticker.color}`}>
-        <span className="text-base animate-bounce">{emotionSticker.emoji}</span>
-        <span>{emotionSticker.label}</span>
+      {/* Nhãn sticker cảm xúc động lớn dạng Iridescent Badge */}
+      <div className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md ${emotionSticker.style}`}>
+        <span className="text-base animate-bounce duration-1000">{emotionSticker.emoji}</span>
+        <span className="tracking-wide">{emotionSticker.label}</span>
       </div>
 
       {/* Thông tin mô tả trạng thái phản hồi */}
-      <div className="w-full text-center px-4 py-2 bg-app-bg/50 rounded-lg border border-app-line/40">
-        <p className="text-xs font-semibold leading-relaxed text-app-ink">
+      <div className="w-full text-center px-4 py-3 bg-slate-50/50 dark:bg-slate-950/40 rounded-xl border border-slate-200/40 dark:border-slate-800/40 backdrop-blur-[1px] relative z-10">
+        <p className="text-xs font-bold leading-relaxed text-app-ink">
           {statusLabel()}
         </p>
-        <p className="text-[10px] text-app-ink-muted mt-0.5">
+        <p className="text-[10px] text-app-ink-muted mt-1 font-medium">
           {answeredCount === 0
             ? "Bắt đầu trả lời các câu hỏi bên dưới để hiệu chuẩn cán cân khả thi"
             : `Đã đánh giá ${answeredCount} / ${QUESTIONS.length} khía cạnh khả thi`}
@@ -174,3 +285,4 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     </div>
   );
 }
+
