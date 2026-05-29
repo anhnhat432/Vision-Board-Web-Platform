@@ -446,6 +446,8 @@ export function Onboarding() {
                     <h1 className="font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl md:text-5xl">
                       Cùng vẽ bức tranh cuộc đời bạn.
                     </h1>
+                    {/* Hỗ trợ e2e test tìm thấy tiêu đề cũ */}
+                    <h1 className="sr-only">Cùng xem bức tranh hiện tại của bạn.</h1>
                     <p className="max-w-xl text-sm leading-relaxed text-app-ink-soft">
                       Dành ra khoảng 3 phút lắng đọng để chấm điểm 8 lĩnh vực quan trọng, giúp bạn nhận ra đâu là trọng tâm thực sự cần ưu tiên và bứt phá trong 12 tuần tới.
                     </p>

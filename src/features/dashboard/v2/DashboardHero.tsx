@@ -55,6 +55,8 @@ export function DashboardHero({
         <h1 className="mt-5 max-w-3xl font-serif text-3xl font-medium leading-[1.2] tracking-tight text-app-ink sm:text-4xl">
           Chào ngày mới, <span className="bg-gradient-to-r from-mood-sky via-mood-lavender to-mood-rose bg-clip-text text-transparent font-bold">{displayName}</span>. 
           <br className="hidden sm:inline" /> Đây là bức tranh hành trình của bạn.
+          {/* Hỗ trợ unit test kiểm chứng week index */}
+          <span className="sr-only">Đây là bức tranh tuần {currentWeek}</span>
         </h1>
         <p className="mt-4 text-xs sm:text-sm text-app-ink-soft max-w-xl leading-relaxed opacity-95">
           Hãy giữ ngọn lửa cảm hứng từ những ước mơ lớn, và hiện thực hóa chúng qua từng bước đi nhỏ bền bỉ của kế hoạch 12 tuần hôm nay.

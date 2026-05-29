@@ -438,7 +438,7 @@ export function LifeInsight() {
                     className={cn(
                       "group flex flex-col items-start gap-2.5 rounded-xl border p-4.5 text-left transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mood-lavender focus-visible:ring-offset-2",
                       isSelected
-                        ? "border-mood-lavender bg-mood-lavender-soft/30 text-mood-lavender shadow-sm"
+                        ? "bg-app-accent-soft border-mood-lavender bg-mood-lavender-soft/30 text-mood-lavender shadow-sm"
                         : "border-app-line bg-app-surface text-app-ink hover:border-app-line-strong hover:bg-app-bg"
                     )}
                   >

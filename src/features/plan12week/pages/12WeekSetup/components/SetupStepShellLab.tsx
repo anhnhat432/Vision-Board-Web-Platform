@@ -39,11 +39,37 @@ const STEP_META: Array<{
   icon: LucideIcon;
   eyebrow: string;
   caption: string;
+  themeColor: string;
+  gradient: string;
 }> = [
-  { icon: Target, eyebrow: "Kết quả", caption: "Chốt kết quả đủ rõ để 12 tuần có điểm đến." },
-  { icon: ListChecks, eyebrow: "Việc lặp lại", caption: "Chọn 1-3 việc lặp lại tạo ra kết quả." },
-  { icon: CalendarDays, eyebrow: "Lịch", caption: "Đặt ngày bắt đầu và nhịp nhìn lại tuần." },
-  { icon: Flag, eyebrow: "Hoàn tất", caption: "Rà soát toàn bộ trước khi kích hoạt chu kỳ." },
+  { 
+    icon: Target, 
+    eyebrow: "Kết quả", 
+    caption: "Chốt kết quả đủ rõ để 12 tuần có điểm đến.",
+    themeColor: "text-violet-500 dark:text-violet-400",
+    gradient: "from-violet-500 to-indigo-500",
+  },
+  { 
+    icon: ListChecks, 
+    eyebrow: "Việc lặp lại", 
+    caption: "Chọn 1-3 việc lặp lại tạo ra kết quả.",
+    themeColor: "text-sky-500 dark:text-sky-400",
+    gradient: "from-sky-500 to-indigo-500",
+  },
+  { 
+    icon: CalendarDays, 
+    eyebrow: "Lịch", 
+    caption: "Đặt ngày bắt đầu và nhịp nhìn lại tuần.",
+    themeColor: "text-mint-600 dark:text-mint-400",
+    gradient: "from-emerald-500 to-teal-500",
+  },
+  { 
+    icon: Flag, 
+    eyebrow: "Hoàn tất", 
+    caption: "Rà soát toàn bộ trước khi kích hoạt chu kỳ.",
+    themeColor: "text-rose-500 dark:text-rose-400",
+    gradient: "from-rose-500 to-pink-500",
+  },
 ];
 
 export function SetupStepShellLab({
@@ -89,30 +115,37 @@ export function SetupStepShellLab({
   return (
     <section
       ref={stepShellRef}
-      className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5 md:p-6 shadow-sm"
+      className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-[#26231D]/75 backdrop-blur-md p-5 sm:p-6 md:p-8 shadow-xl"
       aria-labelledby="twelve-week-step-title"
     >
-      <div>
+      {/* Decorative blurred shapes behind card to create a dreamy Vision Board atmosphere */}
+      <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-violet-200/25 dark:bg-violet-900/10 blur-[80px]" aria-hidden="true" />
+      <div className="pointer-events-none absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-sky-200/20 dark:bg-sky-900/10 blur-[80px]" aria-hidden="true" />
+
+      <div className="relative z-10">
         <div className="mb-2 flex items-center gap-2">
-          <StepIcon className="h-4 w-4 text-app-accent" aria-hidden="true" />
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
-            Thiết lập kế hoạch 12 tuần · Bước nhỏ {currentStep + 1}/{stepCount} · {stepMeta.eyebrow.toUpperCase()}
+          <div className={cn("flex h-7 w-7 items-center justify-center rounded-full bg-white/60 dark:bg-[#1C1A15]/40 shadow-sm border border-white/40 dark:border-white/5", stepMeta.themeColor)}>
+            <StepIcon className="h-4 w-4" aria-hidden="true" />
+          </div>
+          <p className={cn("text-xs font-semibold uppercase tracking-[0.14em]", stepMeta.themeColor)}>
+            Thiết lập kế hoạch 12 tuần · Bước {currentStep + 1}/{stepCount} · {stepMeta.eyebrow}
           </p>
         </div>
-        <h2 id="twelve-week-step-title" ref={titleFocusRef} tabIndex={-1} className="mt-2 font-serif text-2xl font-medium leading-7 text-app-ink focus:outline-none sm:text-2xl">
+        
+        <h2 id="twelve-week-step-title" ref={titleFocusRef} tabIndex={-1} className="mt-3 font-serif text-2xl md:text-3xl font-medium tracking-tight text-app-ink focus:outline-none">
           {title}
         </h2>
-        <div className="mt-2 text-sm leading-6 text-app-ink-soft">{description}</div>
+        <div className="mt-2 text-sm md:text-base leading-relaxed text-app-ink-soft/90 max-w-3xl">{description}</div>
 
         {/* Connected stepper timeline */}
-        <div className="relative my-8 flex items-center justify-between px-2">
+        <div className="relative my-10 flex items-center justify-between px-4 sm:px-6">
           {/* Stepper background track line */}
-          <div className="absolute left-4 right-4 top-1/2 h-0.5 -translate-y-1/2 bg-app-line/60" aria-hidden="true" />
+          <div className="absolute left-6 right-6 top-1/2 h-1 -translate-y-1/2 rounded-full bg-app-line/40" aria-hidden="true" />
           
           {/* Stepper active track line */}
           <div
-            className="absolute left-4 top-1/2 h-0.5 -translate-y-1/2 bg-app-accent transition-all duration-300"
-            style={{ width: `calc(${(currentStep / (stepCount - 1)) * 100}% - ${currentStep === stepCount - 1 ? '32px' : '16px'})` }}
+            className="absolute left-6 top-1/2 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-400 via-sky-400 to-emerald-400 dark:from-violet-600 dark:to-emerald-600 transition-all duration-500 ease-out"
+            style={{ width: `calc(${(currentStep / (stepCount - 1)) * 100}% - ${currentStep === stepCount - 1 ? '48px' : '24px'})` }}
             aria-hidden="true"
           />
 
@@ -121,7 +154,8 @@ export function SetupStepShellLab({
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
               const canJump = Boolean(onJumpToStep && isCompleted);
-              const StepMetaIcon = STEP_META[index]?.icon ?? Target;
+              const stepConfig = STEP_META[index] ?? STEP_META[0];
+              const StepMetaIcon = stepConfig.icon;
 
               return (
                 <li
@@ -132,12 +166,12 @@ export function SetupStepShellLab({
                   <button
                     type="button"
                     className={cn(
-                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold shadow-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+                      "relative z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 text-sm font-bold shadow-sm transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2",
                       isActive
-                        ? "border-app-accent bg-app-accent text-white scale-110 ring-4 ring-app-accent-soft"
+                        ? "border-none bg-gradient-to-r from-violet-500 to-indigo-500 dark:from-violet-600 dark:to-indigo-600 text-white scale-115 shadow-md shadow-violet-300/40 dark:shadow-violet-950/20 ring-[5px] ring-violet-100 dark:ring-violet-900/30"
                         : isCompleted
-                        ? "border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white active:scale-[0.96]"
-                        : "border-app-line bg-app-surface text-app-ink-muted",
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-600 dark:border-emerald-800/60 dark:bg-emerald-950/30 dark:text-emerald-400 hover:bg-emerald-100/70 hover:scale-105 active:scale-[0.96]"
+                        : "border-app-line bg-white/80 dark:bg-[#1C1A15]/80 text-app-ink-muted",
                       canJump ? "cursor-pointer" : "cursor-default",
                     )}
                     disabled={!canJump}
@@ -147,15 +181,19 @@ export function SetupStepShellLab({
                     aria-label={`Đi tới bước ${index + 1}: ${step.label}`}
                   >
                     {isCompleted ? (
-                      <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                      <CheckCircle2 className="h-5 w-5 stroke-[2.5]" aria-hidden="true" />
                     ) : (
                       <StepMetaIcon className="h-4.5 w-4.5" aria-hidden="true" />
                     )}
                     
                     {/* Step label for desktop */}
                     <span className={cn(
-                      "absolute -bottom-7 hidden whitespace-nowrap text-xs font-semibold sm:block transition-colors duration-200",
-                      isActive ? "text-app-accent font-bold" : isCompleted ? "text-app-ink" : "text-app-ink-muted"
+                      "absolute -bottom-8 hidden whitespace-nowrap text-xs font-semibold sm:block transition-all duration-300",
+                      isActive 
+                        ? "text-violet-600 dark:text-violet-400 font-bold tracking-wide scale-105 translate-y-0.5" 
+                        : isCompleted 
+                        ? "text-emerald-600 dark:text-emerald-400 font-medium" 
+                        : "text-app-ink-muted/80"
                     )}>
                       {step.label}
                     </span>
@@ -170,27 +208,31 @@ export function SetupStepShellLab({
           </ol>
         </div>
 
-        <p className="mt-4 text-xs font-medium leading-relaxed text-app-ink-muted/90 sm:mt-6 bg-app-bg px-3.5 py-2 rounded-lg border border-app-line/40 italic">
-          💡 Ý nghĩa: {stepMeta.caption}
-        </p>
+        {/* Caption Box - soft, styled pastel border */}
+        <div className="mt-6 flex gap-2.5 rounded-2xl border border-amber-200/60 dark:border-amber-900/30 bg-gradient-to-r from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 p-4 shadow-sm text-sm italic text-amber-800 dark:text-amber-300/90">
+          <span className="text-base leading-none">💡</span>
+          <p className="leading-relaxed">
+            <span className="font-semibold not-italic">Gợi ý cho bước này:</span> {stepMeta.caption}
+          </p>
+        </div>
 
         {whyThisMatters ? (
-          <div className="mt-5 overflow-hidden rounded-xl border border-app-accent/20 bg-gradient-to-br from-app-accent-soft/20 to-app-accent-soft/5 transition-all duration-200">
+          <div className="mt-5 overflow-hidden rounded-2xl border border-violet-100 dark:border-violet-900/40 bg-gradient-to-br from-violet-50/30 to-indigo-50/20 dark:from-violet-950/10 dark:to-indigo-950/5 transition-all duration-300 hover:border-violet-200 dark:hover:border-violet-800/40 shadow-sm">
             <button
               type="button"
-              className="flex w-full items-center justify-between gap-3 p-4 text-left text-xs font-semibold text-app-accent transition-all duration-150 hover:bg-app-accent-soft/10 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              className="flex w-full items-center justify-between gap-3 p-4 text-left text-sm font-semibold text-violet-700 dark:text-violet-300 transition-all duration-150 hover:bg-violet-100/10 active:scale-[0.99] focus-visible:outline-none"
               onClick={() => setIsWhyOpen((isOpen) => !isOpen)}
               aria-expanded={isWhyOpen}
               aria-controls="twelve-week-step-why"
             >
               <span className="flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-app-accent/10">
-                  <span className="text-xs">💡</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/50 text-xs">
+                  ✨
                 </span>
                 Tại sao bước này quan trọng?
               </span>
               <ChevronDown
-                className={cn("h-4 w-4 text-app-accent transition-transform duration-200", isWhyOpen && "rotate-180")}
+                className={cn("h-4 w-4 text-violet-500 transition-transform duration-300", isWhyOpen && "rotate-180")}
                 aria-hidden="true"
               />
             </button>
@@ -201,8 +243,8 @@ export function SetupStepShellLab({
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="border-t border-app-accent/10 bg-app-surface/50 p-4 text-sm leading-relaxed text-app-ink-soft"
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  className="border-t border-violet-100/50 dark:border-violet-900/20 bg-white/40 dark:bg-black/10 p-4 text-sm leading-relaxed text-app-ink-soft/90"
                 >
                   {whyThisMatters}
                 </motion.div>
@@ -212,21 +254,21 @@ export function SetupStepShellLab({
         ) : null}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8 relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
           >
             {children}
             {stepError ? (
-              <div role="alert" className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-[color:var(--color-danger-fg)]">
-                <div className="flex items-start gap-2">
+              <div role="alert" className="mt-5 rounded-xl border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-4 text-[color:var(--color-danger-fg)] shadow-sm">
+                <div className="flex items-start gap-2.5">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                  <p className="text-sm font-medium leading-5">{stepError}</p>
+                  <p className="text-sm font-medium leading-relaxed">{stepError}</p>
                 </div>
               </div>
             ) : null}
@@ -234,23 +276,40 @@ export function SetupStepShellLab({
         </AnimatePresence>
       </div>
 
-      <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-app-ink-muted">
-          4 bước nhỏ để thiết lập kế hoạch 12 tuần · Đang ở bước {currentStep + 1}/{stepCount}
+      <div className="mt-10 relative z-10 flex flex-col-reverse gap-4 border-t border-app-line/60 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-medium text-app-ink-muted/80">
+          Chương trình thiết lập 12 tuần · Đang ở bước {currentStep + 1}/{stepCount}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto" onClick={onBack} disabled={isSubmitting}>
+          <button 
+            type="button" 
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-white dark:bg-[#1C1A15] px-5 py-2 text-sm font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none sm:w-auto" 
+            onClick={onBack} 
+            disabled={isSubmitting}
+          >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Quay lại
           </button>
+          
           {isLastStep ? (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
+            <button 
+              type="button" 
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-200 dark:shadow-none transition-all duration-200 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:from-app-ink-muted disabled:to-app-ink-muted focus-visible:outline-none sm:w-auto" 
+              onClick={handleSubmitClick} 
+              disabled={isSubmitting || isSubmitDisabled} 
+              aria-busy={isSubmitting}
+            >
               {isSubmitting ? <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
-              {isSubmitting ? "Đang lưu..." : "Lưu kế hoạch"}
+              {isSubmitting ? "Đang kích hoạt..." : "Kích hoạt kế hoạch 12 tuần ✨"}
             </button>
           ) : (
-            <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>
-              Tiếp →
+            <button 
+              type="button" 
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-200 dark:shadow-none transition-all duration-200 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:from-app-ink-muted disabled:to-app-ink-muted focus-visible:outline-none sm:w-auto" 
+              onClick={onNext} 
+              disabled={isNextDisabled}
+            >
+              Tiếp tục
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           )}

@@ -105,27 +105,29 @@ export function ScheduleStepLab({
     .join(" ");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 sm:space-y-5">
+    <div className="mx-auto max-w-4xl space-y-5">
       <section
-        className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5"
+        className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/50 dark:bg-[#1C1A15]/50 p-5 sm:p-6 shadow-sm backdrop-blur-sm"
         aria-labelledby="schedule-main-title"
       >
-        <div className="flex items-start gap-2">
-          <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+        <div className="flex items-start gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-50 dark:bg-violet-950/30 text-violet-500 shrink-0">
+            <CalendarDays className="h-4.5 w-4.5" aria-hidden="true" />
+          </div>
           <div>
-            <p id="schedule-main-title" className="text-sm font-medium text-app-ink">
-              Chốt lịch thực hiện
+            <p id="schedule-main-title" className="text-sm font-bold text-app-ink tracking-tight">
+              Chốt lịch trình và Nhịp độ thực thi
             </p>
-            <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-              Chọn ngày bắt đầu, ngày bạn muốn xem lại tuần, và thời gian thật sự có thể dành mỗi ngày.
+            <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">
+              Chọn ngày bắt đầu chu kỳ, thời gian bạn có thể cam kết thực tế hằng ngày, và ngày nhìn lại tuần cố định.
             </p>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="cycle-start-date" className={labelClass}>
-              Ngày bắt đầu chu kỳ
+              Ngày bắt đầu chu kỳ 12 tuần
             </label>
             <Input
               id="cycle-start-date"
@@ -136,6 +138,7 @@ export function ScheduleStepLab({
               aria-describedby={startDateDescription}
               className={cn(
                 inputClass,
+                "rounded-xl focus:ring-violet-400 focus:border-violet-400",
                 startDateValidation.error &&
                   "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
               )}
@@ -147,32 +150,32 @@ export function ScheduleStepLab({
               </p>
             ) : null}
             {startDateValidation.warning ? (
-              <p id="cycle-start-date-warning" role="status" className={helperTextClass}>
-                {startDateValidation.warning}
+              <p id="cycle-start-date-warning" role="status" className={cn(helperTextClass, "text-amber-600 dark:text-amber-500 font-medium")}>
+                ⚠️ {startDateValidation.warning}
               </p>
             ) : null}
             <p id="cycle-start-date-helper" className={helperTextClass}>
-              Kế hoạch sẽ tự xếp tuần làm việc từ Thứ Hai để việc trong tuần dễ theo dõi.
+              💡 Ứng dụng sẽ tự động xếp tuần làm việc từ Thứ Hai để bạn dễ quản lý công việc trong tuần.
             </p>
           </div>
 
           <div>
             <label htmlFor="cycle-end-date" className={labelClass}>
-              Ngày kết thúc
+              Ngày kết thúc (Dự kiến)
             </label>
             <Input
               id="cycle-end-date"
               value={cycleEndDate}
               readOnly
-              className={cn(inputClass, "border-app-line bg-app-bg text-app-ink-muted")}
+              className={cn(inputClass, "rounded-xl border-app-line bg-app-bg/50 text-app-ink-muted cursor-not-allowed")}
             />
-            <p className={helperTextClass}>Tự tính 83 ngày sau ngày bắt đầu chu kỳ.</p>
+            <p className={helperTextClass}>Tự động tính toán 83 ngày (12 tuần + 1 tuần đệm) kể từ ngày bắt đầu.</p>
           </div>
         </div>
 
-        <fieldset className="mt-5">
-          <legend className={labelClass}>Ngày xem lại tuần</legend>
-          <div className="grid grid-cols-4 gap-1 sm:grid-cols-7">
+        <fieldset className="mt-6">
+          <legend className={labelClass}>Ngày xem lại tuần (Weekly Review)</legend>
+          <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-7 mt-2">
             {REVIEW_DAYS.map((day) => {
               const isActive = draft.reviewDay === day.value;
               return (
@@ -182,8 +185,10 @@ export function ScheduleStepLab({
                   aria-pressed={isActive}
                   onClick={() => onChange("reviewDay", day.value)}
                   className={cn(
-                    "min-h-10 rounded-md border border-app-line bg-app-surface px-2.5 py-2.5 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.96]",
-                    isActive && "border-app-accent bg-app-accent-soft font-medium text-app-accent",
+                    "min-h-10 rounded-full border text-xs font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 focus-visible:outline-none",
+                    isActive 
+                      ? "border-none bg-gradient-to-r from-violet-500 to-indigo-500 dark:from-violet-600 dark:to-indigo-600 text-white shadow-md scale-110" 
+                      : "border-app-line bg-app-surface text-app-ink-soft hover:border-violet-400 hover:text-violet-500 dark:hover:text-violet-400",
                   )}
                 >
                   {REVIEW_DAY_SHORT_LABEL[day.value] ?? day.label}
@@ -192,14 +197,13 @@ export function ScheduleStepLab({
             })}
           </div>
           <p className={helperTextClass}>
-            Chọn một ngày cố định để xem tuần vừa rồi làm được gì và tuần tới cần chỉnh gì. Nên chọn ngày ít bận, dễ nhớ.
+            Chọn một ngày thảnh thơi cố định để AI giúp bạn tổng hợp kết quả tuần qua và lên lịch tuần mới.
           </p>
         </fieldset>
 
-
-        <fieldset className="mt-5">
-          <legend className={labelClass}>Mỗi ngày bạn có thể dành bao lâu?</legend>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <fieldset className="mt-6">
+          <legend className={labelClass}>Mỗi ngày bạn có thể dành bao lâu cho mục tiêu này?</legend>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 mt-2">
             {DAILY_TIME_OPTIONS.map((option) => {
               const isActive = draft.dailyTimeBudget === option.value;
               return (
@@ -208,23 +212,28 @@ export function ScheduleStepLab({
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => onChange("dailyTimeBudget", option.value)}
-                  className={cn(radioButtonClass, "min-h-11 px-3.5 py-3", isActive && radioButtonActiveClass)}
+                  className={cn(
+                    radioButtonClass, 
+                    "min-h-11 px-4 py-3 rounded-2xl border transition-all duration-300", 
+                    isActive 
+                      ? "border-violet-400 bg-violet-50/50 text-violet-700 dark:border-violet-800 dark:bg-violet-900/20 dark:text-violet-300 font-semibold shadow-xs scale-[1.01]" 
+                      : "border-app-line hover:border-violet-300 hover:bg-violet-50/10"
+                  )}
                 >
-                  <span>{option.label}</span>
-                  <span className="text-xs font-normal opacity-80">{option.hint}</span>
+                  <span className="text-xs">{option.label}</span>
+                  <span className="text-[10px] font-normal opacity-80 leading-tight">{option.hint}</span>
                 </button>
               );
             })}
           </div>
           <p className={helperTextClass}>
-            Chọn theo ngày thường của bạn. Ứng dụng chỉ lưu khoảng thời gian có thể dành cho mục tiêu, không lưu giờ cụ thể.
-            Mốc 2+ giờ chỉ nên chọn khi bạn thật sự có nhiều thời gian.
+            Ước lượng quỹ thời gian rảnh rỗi thực tế. AI sẽ tự động phân bổ khối lượng Todolist tuần đầu dựa trên mốc này.
           </p>
         </fieldset>
 
-        <fieldset className="mt-5">
-          <legend className={labelClass}>Tuần đầu nên nhẹ hay nhiều việc?</legend>
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+        <fieldset className="mt-6">
+          <legend className={labelClass}>Tuần đầu tiên nên chịu tải thế nào?</legend>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 mt-2">
             {LOAD_PREFERENCE_OPTIONS.map((option) => {
               const isActive = draft.tacticLoadPreference === option.value;
               return (
@@ -233,144 +242,154 @@ export function ScheduleStepLab({
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => onChange("tacticLoadPreference", option.value)}
-                  className={cn(radioButtonClass, "min-h-11 px-3.5 py-3", isActive && radioButtonActiveClass)}
+                  className={cn(
+                    radioButtonClass, 
+                    "min-h-11 px-4 py-3 rounded-2xl border transition-all duration-300", 
+                    isActive 
+                      ? "border-violet-400 bg-violet-50/50 text-violet-700 dark:border-violet-800 dark:bg-violet-900/20 dark:text-violet-300 font-semibold shadow-xs scale-[1.01]" 
+                      : "border-app-line hover:border-violet-300 hover:bg-violet-50/10"
+                  )}
                 >
-                  <span>{option.label}</span>
-                  <span className="text-xs font-normal opacity-80">{LOAD_HINTS[option.value]}</span>
+                  <span className="text-xs">{option.label}</span>
+                  <span className="text-[10px] font-normal opacity-85 leading-normal">{LOAD_HINTS[option.value]}</span>
                 </button>
               );
             })}
           </div>
-          <p className={helperTextClass}>Đây chỉ là nhịp bắt đầu cho tuần 1. Bạn vẫn có thể chỉnh lại sau trong phần Cài đặt.</p>
+          <p className={helperTextClass}>Nhịp bắt đầu khởi động cho tuần 1. Bạn luôn có thể chủ động tăng/giảm khối lượng việc sau đó.</p>
         </fieldset>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 border-t border-app-line/65 pt-5 md:grid-cols-3">
           <div className="md:col-span-2">
             <label htmlFor="lag-metric-name" className={labelClass}>
-              Chỉ số kết quả chính
+              Chỉ số kết quả cốt lõi cần đo lường (Lag Metric)
             </label>
             <Input
               id="lag-metric-name"
               value={draft.lagMetricName}
               onChange={(event) => onChange("lagMetricName", event.target.value)}
-              placeholder="Ví dụ: số kg giảm, số bài xuất bản, doanh thu mới..."
-              className={inputClass}
+              placeholder="Ví dụ: số kg giảm, số bài viết xuất bản, doanh thu..."
+              className={cn(inputClass, "rounded-xl focus:ring-violet-400 focus:border-violet-400")}
             />
-            <p className={helperTextClass}>Đây là chỉ số kết quả cuối chu kỳ, khác với việc hằng tuần.</p>
+            <p className={helperTextClass}>Chỉ số kiểm chứng cuối chu kỳ 12 tuần để xác nhận thành công.</p>
           </div>
           <div>
             <label htmlFor="lag-metric-target" className={labelClass}>
-              Mục tiêu
+              Mục tiêu số
             </label>
             <Input
               id="lag-metric-target"
               value={draft.lagMetricTarget}
               onChange={(event) => onChange("lagMetricTarget", event.target.value)}
               placeholder="Ví dụ: 12"
-              className={inputClass}
+              className={cn(inputClass, "rounded-xl focus:ring-violet-400 focus:border-violet-400")}
             />
-            <p className={helperTextClass}>Con số cụ thể giúp biết 12 tuần này đã về đích hay chưa.</p>
+            <p className={helperTextClass}>Con số cụ thể cần chạm tới.</p>
           </div>
           <div className="md:col-span-3">
             <label htmlFor="lag-metric-unit" className={labelClass}>
-              Đơn vị của chỉ số
+              Đơn vị đo lường
             </label>
             <Input
               id="lag-metric-unit"
               value={draft.lagMetricUnit}
               onChange={(event) => onChange("lagMetricUnit", event.target.value)}
-              placeholder="kg, bài, triệu đồng..."
-              className={inputClass}
+              placeholder="kg, bài viết, khách hàng, triệu đồng..."
+              className={cn(inputClass, "rounded-xl focus:ring-violet-400 focus:border-violet-400")}
             />
-            <p className={helperTextClass}>Đơn vị nên khớp với số ở trên để review cuối chu kỳ rõ hơn.</p>
           </div>
         </div>
       </section>
 
-      <CollapsibleScheduleSection id="schedule-summary-title" title="Chu kỳ 12 tuần">
-        <p className="text-sm leading-6 text-app-ink-soft">
-          {cycleStartDate} đến {cycleEndDate}
-        </p>
+      <CollapsibleScheduleSection id="schedule-summary-title" title="📅 Chi tiết chu kỳ 12 tuần">
+        <div className="rounded-xl border border-app-line bg-white/50 dark:bg-black/20 p-4 animate-fade-in">
+          <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Thời gian diễn ra</p>
+          <p className="mt-1.5 text-sm font-bold text-app-ink">
+            Từ {cycleStartDate} đến {cycleEndDate}
+          </p>
+          <p className="mt-1 text-xs text-app-ink-soft/90">Chu kỳ gồm 12 tuần thực thi tập trung và 1 tuần đệm để đánh giá, nghỉ ngơi.</p>
+        </div>
       </CollapsibleScheduleSection>
 
       {setupGuideSupport && setupGuideTemplate ? (
-        <CollapsibleScheduleSection id="schedule-guide-title" title="Gợi ý cho tuần 1">
-          <p className="mt-2 text-sm font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
-          <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
-          <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Gợi ý duy trì</p>
-            <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.week1CadenceHint}</p>
+        <CollapsibleScheduleSection id="schedule-guide-title" title="💡 Chiến thuật gợi ý cho Tuần 1">
+          <div className="rounded-xl border border-violet-100 dark:border-violet-900/30 bg-gradient-to-br from-violet-50/20 to-indigo-50/10 dark:from-violet-950/5 p-4.5 animate-fade-in">
+            <p className="text-sm font-bold text-app-ink tracking-tight">{setupGuideSupport.week1Headline}</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft/90">{setupGuideSupport.week1Support}</p>
+            <div className="mt-3 rounded-lg border border-app-line bg-white/70 dark:bg-[#1C1A15]/75 px-3 py-2 text-xs leading-normal italic text-app-ink-soft/90">
+              📌 {setupGuideSupport.week1CadenceHint}
+            </div>
           </div>
         </CollapsibleScheduleSection>
       ) : null}
 
       {setupGuideSupport ? (
-        <CollapsibleScheduleSection id="schedule-recommendation-title" title="Ngày xem lại và nhịp tuần gợi ý">
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
-              <p className="mt-2 text-sm font-medium text-app-ink">{draft.reviewDay}</p>
-              <p className="mt-2 text-sm leading-6 text-app-ink-soft">
+        <CollapsibleScheduleSection id="schedule-recommendation-title" title="⚡ Ngày xem lại & Nhịp tuần đề xuất">
+          <div className="grid gap-3.5 sm:grid-cols-2 animate-fade-in">
+            <div className="rounded-xl border border-app-line bg-white/50 dark:bg-black/20 p-4 shadow-xs">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-app-ink-muted">Buổi nhìn lại tuần</p>
+              <p className="mt-1.5 text-sm font-bold text-app-ink">{draft.reviewDay}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft/90">
                 {setupGuideSupport.recommendedReviewReason}
               </p>
             </div>
-            <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>
-              <p className="mt-2 text-sm font-medium text-app-ink">
+            <div className="rounded-xl border border-app-line bg-white/50 dark:bg-black/20 p-4 shadow-xs">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-app-ink-muted">Nhịp độ tải tuần</p>
+              <p className="mt-1.5 text-sm font-bold text-app-ink">
                 {getLoadPreferenceLabel(draft.tacticLoadPreference)}
               </p>
-              <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.recommendedLoadReason}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft/90">{setupGuideSupport.recommendedLoadReason}</p>
             </div>
           </div>
         </CollapsibleScheduleSection>
       ) : null}
 
       {(draft.week4Milestone || draft.week8Milestone) && (
-        <CollapsibleScheduleSection id="schedule-milestones-title" title="Mốc gợi ý theo khung">
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <CollapsibleScheduleSection id="schedule-milestones-title" title="🚩 Các cột mốc quan trọng (Milestones)">
+          <div className="grid gap-3.5 sm:grid-cols-2 animate-fade-in">
             {[
-              { label: "Tuần 4", value: draft.week4Milestone },
-              { label: "Tuần 8", value: draft.week8Milestone },
+              { label: "Cột mốc Tuần 4", value: draft.week4Milestone, color: "border-sky-100 bg-sky-50/10 dark:border-sky-950/20 dark:bg-sky-950/10 text-sky-600 dark:text-sky-400" },
+              { label: "Cột mốc Tuần 8", value: draft.week8Milestone, color: "border-rose-100 bg-rose-50/10 dark:border-rose-950/20 dark:bg-rose-950/10 text-rose-600 dark:text-rose-400" },
             ].map((milestone) => (
-              <div key={milestone.label} className="rounded-lg border border-app-line bg-app-surface p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <div key={milestone.label} className={cn("rounded-xl border p-4 shadow-xs", milestone.color)}>
+                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80">
                   {milestone.label}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-app-ink-soft">{milestone.value}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft/95 font-medium">{milestone.value}</p>
               </div>
             ))}
           </div>
         </CollapsibleScheduleSection>
       )}
 
-      <CollapsibleScheduleSection id="schedule-week-one-title" title="Những việc sẽ hiện ở màn Hôm nay">
-        <div className="mt-3 space-y-2">
+      <CollapsibleScheduleSection id="schedule-week-one-title" title="📋 Danh sách việc ngày thường sẽ hiện ở màn Hôm nay">
+        <div className="space-y-2 mt-1.5 animate-fade-in">
           {weekOneTaskPreview.length === 0 ? (
-            <p className="text-sm leading-6 text-app-ink-soft">
-              Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay. Mục tiêu là làm
-              ít nhưng đều.
+            <p className="text-xs leading-relaxed text-app-ink-muted italic">
+              Khi bạn chốt việc lặp lại, Todolist cụ thể cho từng ngày sẽ hiển thị tự động tại đây. Hãy bắt đầu bằng cách làm ít nhưng đều đặn.
             </p>
           ) : (
             weekOneTaskPreview.map((task) => (
               <div
                 key={task}
-                className="rounded-lg border border-app-line bg-app-surface px-4 py-3 text-sm text-app-ink-soft"
+                className="rounded-xl border border-app-line bg-white/40 dark:bg-[#1C1A15]/40 px-4 py-2.5 text-xs text-app-ink-soft/90 transition-all duration-200 hover:bg-white/60 dark:hover:bg-black/20 flex items-center gap-2"
               >
-                {task}
+                <span className="text-violet-400 font-semibold">•</span>
+                <span>{task}</span>
               </div>
             ))
           )}
         </div>
         {weekOneTaskWarning ? (
-          <p
+          <div
             role="status"
-            className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-[color:var(--color-danger-fg)]"
+            className="mt-3.5 flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50/20 dark:border-amber-900/30 dark:bg-amber-950/10 px-4 py-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300/90 shadow-xs"
           >
-            <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <AlertTriangle className="mt-[1px] h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" aria-hidden="true" />
             <span>
-              <span className="font-medium">Cảnh báo:</span> {weekOneTaskWarning}
+              <span className="font-bold">Lời khuyên chịu tải:</span> {weekOneTaskWarning}
             </span>
-          </p>
+          </div>
         ) : null}
       </CollapsibleScheduleSection>
     </div>
