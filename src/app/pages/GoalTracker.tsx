@@ -426,7 +426,7 @@ function GoalTrackerContent({
 
     return (
       <SpotlightCard key={goal.id} className="rounded-[14px] border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,1fr)]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_1px_minmax(220px,1fr)]">
           {/* Cột trái — Goal summary */}
           <div>
             <div className="flex items-start justify-between gap-3">
@@ -508,8 +508,11 @@ function GoalTrackerContent({
             </div>
           </div>
 
+          {/* Đường chia mỏng dọc trên desktop */}
+          <div className="hidden lg:block w-px bg-app-line my-1" aria-hidden="true" />
+
           {/* Cột phải — Today tasks preview */}
-          <div>
+          <div className="lg:pl-3">
             <div className="flex items-baseline justify-between">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
               <span className="text-xs font-bold tabular-nums text-app-accent">
@@ -533,7 +536,9 @@ function GoalTrackerContent({
                 </div>
               ))}
               {systemTodayOpenTasks.length === 0 && (
-                <p className="text-xs text-app-ink-muted">Không có việc nào hôm nay</p>
+                <p className="text-xs italic leading-relaxed text-app-ink-muted/80 mt-2">
+                  Hôm nay chưa có việc mới. Hãy giữ nhịp độ hoặc mở kế hoạch để thêm cam kết.
+                </p>
               )}
             </div>
             {system && (
@@ -587,43 +592,50 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <div data-tour-id="goaltracker-hero">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU</p>
-          <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-normal text-app-ink">
-            Mục tiêu của bạn
+      <div data-tour-id="goaltracker-hero" className="rounded-[14px] border border-app-line bg-app-accent-soft/15 p-6 md:p-8 relative overflow-hidden mb-6">
+        <div className="max-w-3xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">MỤC TIÊU</p>
+          <h1 className="mt-4 font-serif text-3xl font-medium leading-tight tracking-normal text-app-ink sm:text-4xl">
+            Hành trình mục tiêu
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-app-ink-soft max-w-2xl">
-            Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
+          <p className="mt-3 text-sm leading-relaxed text-app-ink-soft max-w-xl">
+            Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần hành động đều đặn để tạo ra sự chuyển dịch thực sự.
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:w-96">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
-              <input
-                type="search"
-                placeholder="Tìm theo tên hoặc mô tả..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-app-line bg-app-surface pl-10 pr-3.5 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
-              />
-            </div>
-            <Button
-              className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent inline-flex items-center gap-2"
-              onClick={handleStartGuidedGoalFlow}
-              disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
-            >
-              <Plus className="h-4 w-4" />
-              Mục tiêu mới
-            </Button>
-          </div>
+        </div>
+        {/* Câu châm ngôn chánh niệm mờ ở góc dưới bên phải trên desktop */}
+        <div className="hidden md:block absolute bottom-6 right-8 text-right max-w-xs opacity-60">
+          <p className="font-serif text-xs italic text-app-accent">
+            “Những bước chân nhỏ bé đi đúng hướng sẽ đưa bạn đi rất xa.”
+          </p>
         </div>
       </div>
 
-      <div data-tour-id="goaltracker-summary" className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-96">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+          <input
+            type="search"
+            placeholder="Tìm theo tên hoặc mô tả..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-lg border border-app-line bg-app-surface pl-10 pr-3.5 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
+          />
+        </div>
+        <Button
+          className="bg-app-accent text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-app-accent inline-flex items-center gap-2"
+          onClick={handleStartGuidedGoalFlow}
+          disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
+        >
+          <Plus className="h-4 w-4" />
+          Mục tiêu mới
+        </Button>
+      </div>
+
+      <div data-tour-id="goaltracker-summary" className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {overviewItems.map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.title} className="rounded-[14px] border border-app-line bg-app-surface p-4">
+            <div key={item.title} className="rounded-[14px] border border-app-line bg-app-surface p-4 relative overflow-hidden">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{item.title}</p>
@@ -636,6 +648,11 @@ function GoalTrackerContent({
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
+              {item.title === "Việc" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-app-line" aria-hidden="true">
+                  <div className="h-full bg-app-accent" style={{ width: `${completionRate}%` }} />
+                </div>
+              )}
             </div>
           );
         })}
