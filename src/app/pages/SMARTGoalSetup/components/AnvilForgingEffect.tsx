@@ -4,63 +4,30 @@ interface AnvilForgingEffectProps {
   onComplete: () => void;
 }
 
-// Bộ tổng hợp tiếng búa rèn đập đe sắt Stoic trầm hùng bằng Web Audio API
-const playAnvilClang = () => {
+// Bộ tổng hợp tiếng chuông thiền ngân vang trong trẻo 528Hz nhẹ nhàng
+const playMindfulBell = () => {
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
 
-    // 1. Tiếng Clang kim loại cao
-    const oscClang = ctx.createOscillator();
-    const gainClang = ctx.createGain();
-    oscClang.type = "sine";
-    oscClang.frequency.setValueAtTime(330, ctx.currentTime); // E4 mộc mạc
-    oscClang.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.15);
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
 
-    // 2. Tiếng hài âm kim loại vang rền (Harmonics)
-    const oscHarmonic = ctx.createOscillator();
-    const gainHarmonic = ctx.createGain();
-    oscHarmonic.type = "triangle";
-    oscHarmonic.frequency.setValueAtTime(165, ctx.currentTime); // E3
+    osc.type = "sine";
+    // Tần số Solfeggio 528Hz phục hồi và chánh niệm ngân vang trong trẻo
+    osc.frequency.setValueAtTime(528, ctx.currentTime);
 
-    // 3. Tiếng Thump nện mạnh ban đầu (Impact)
-    const oscThump = ctx.createOscillator();
-    const gainThump = ctx.createGain();
-    oscThump.type = "sawtooth";
-    oscThump.frequency.setValueAtTime(90, ctx.currentTime);
-    oscThump.frequency.exponentialRampToValueAtTime(15, ctx.currentTime + 0.3);
+    gainNode.gain.setValueAtTime(0.08, ctx.currentTime); // Âm lượng siêu nhẹ nhàng, dịu dàng
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5); // Ngân vang nhẹ trong 2.5s
 
-    // Cấu hình âm lượng tắt dần theo thời gian (decay)
-    gainClang.gain.setValueAtTime(0.25, ctx.currentTime);
-    gainClang.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
 
-    gainHarmonic.gain.setValueAtTime(0.15, ctx.currentTime);
-    gainHarmonic.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-
-    gainThump.gain.setValueAtTime(0.35, ctx.currentTime);
-    gainThump.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-
-    // Kết nối
-    oscClang.connect(gainClang);
-    oscHarmonic.connect(gainHarmonic);
-    oscThump.connect(gainThump);
-
-    gainClang.connect(ctx.destination);
-    gainHarmonic.connect(ctx.destination);
-    gainThump.connect(ctx.destination);
-
-    // Bắt đầu
-    oscClang.start();
-    oscHarmonic.start();
-    oscThump.start();
-
-    // Dừng
-    oscClang.stop(ctx.currentTime + 1.5);
-    oscHarmonic.stop(ctx.currentTime + 1.5);
-    oscThump.stop(ctx.currentTime + 0.4);
-  } catch (e) {
-    console.warn("Web Audio API not supported", e);
+    osc.start();
+    osc.stop(ctx.currentTime + 2.5);
+  } catch (_e) {
+    // Thầm lặng bỏ qua nếu trình duyệt chưa sẵn sàng
   }
 };
 
@@ -99,41 +66,41 @@ export function AnvilForgingEffect({ onComplete }: AnvilForgingEffectProps) {
     }
 
     const particles: SparkParticle[] = [];
-    const particleCount = 45; // 45 tia lửa rực rỡ
-    const colors = ["#ef4444", "#f97316", "#f59e0b", "#fcd34d", "#ffffff"];
+    const particleCount = 35; // Số hạt lấp lánh vừa phải, tinh tế
+    const colors = ["#10b981", "#34d399", "#6ee7b7", "#fbbf24", "#ffffff"]; // Tông xanh lá chánh niệm và bụi vàng lấp lánh
 
     const centerX = width / 2;
     const centerY = height / 2;
 
-    // Khởi tạo các tia lửa bắn ra từ tâm màn hình
+    // Khởi tạo bụi sáng lấp lánh bay nhẹ nhàng hướng lên trên
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 6 + Math.random() * 16;
+      const speed = 1.5 + Math.random() * 3.5;
       particles.push({
         x: centerX,
         y: centerY,
         lastX: centerX,
         lastY: centerY,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 3, // Bắn hơi vút lên trên
-        size: 1.5 + Math.random() * 2.5,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: 0.8 + Math.random() * 0.2,
-        decay: 0.015 + Math.random() * 0.02,
-        gravity: 0.35, // Trọng lực kéo tia lửa rơi xuống
-        friction: 0.97, // Ma sát không khí làm chậm lại
+        vy: Math.sin(angle) * speed - 1.5, // Chuyển động nhẹ lên trên
+        size: 1.0 + Math.random() * 2.0,
+        color: colors[Math.floor(Math.random() * colors.length)] ?? "#10b981",
+        alpha: 0.7 + Math.random() * 0.3,
+        decay: 0.01 + Math.random() * 0.015,
+        gravity: -0.04, // Bay lên giống bong bóng hoặc hạt phấn chánh niệm
+        friction: 0.98,
       });
     }
 
-    // Phát âm thanh rèn sắt rầm rì ngay lập tức
-    playAnvilClang();
+    // Phát âm thanh chuông ngân dịu dàng thay vì búa tạ
+    playMindfulBell();
 
     let animId: number;
     const startTime = Date.now();
 
     const render = () => {
-      // Làm mờ background nhẹ để lại vệt sáng đuôi (motion blur)
-      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      // Làm mờ background rất nhẹ để tạo hiệu ứng vệt sáng đuôi dịu dàng
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, width, height);
 
       let activeParticles = 0;
@@ -157,21 +124,16 @@ export function AnvilForgingEffect({ onComplete }: AnvilForgingEffectProps) {
         // Giảm dần alpha
         p.alpha -= p.decay;
 
-        // Vẽ vệt sáng tia lửa (Streak line)
+        // Vẽ các đốm sáng lấp lánh
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.alpha);
-        ctx.strokeStyle = p.color;
-        ctx.lineWidth = p.size;
-        ctx.lineCap = "round";
-
-        // Tỏa sáng neon cho tia lửa Stoic
-        ctx.shadowBlur = 6;
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 4;
         ctx.shadowColor = p.color;
 
         ctx.beginPath();
-        ctx.moveTo(p.lastX, p.lastY);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       }
 
@@ -193,18 +155,18 @@ export function AnvilForgingEffect({ onComplete }: AnvilForgingEffectProps) {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-xs pointer-events-none">
+    <div className="fixed inset-0 z-50 bg-emerald-950/15 backdrop-blur-[2px] pointer-events-none">
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
       />
-      {/* Thông báo tôi luyện chánh niệm ở tâm */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white pointer-events-none z-10 transition-all select-none animate-[ping_1.5s_infinite_alternate]">
-        <h3 className="font-serif text-3xl font-bold tracking-widest text-amber-400 drop-shadow-lg">
-          KỶ LUẬT SẮT
+      {/* Thông báo gieo hạt mầm chánh niệm ở tâm */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 transition-all select-none animate-[ping_1.8s_infinite_alternate]">
+        <h3 className="font-serif text-3xl font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 drop-shadow-md">
+          GIEO HẠT MẦM
         </h3>
-        <p className="mt-2 text-xs uppercase tracking-widest text-amber-200/80 drop-shadow-md">
-          Mục tiêu đã được tôi luyện
+        <p className="mt-2 text-xs uppercase tracking-widest text-emerald-700/80 dark:text-emerald-300/80">
+          Mục tiêu của bạn đã sẵn sàng phát triển
         </p>
       </div>
     </div>

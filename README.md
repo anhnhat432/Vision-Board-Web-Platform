@@ -325,15 +325,19 @@ npm run test:ui    # component/page .tsx tests without flow/sync suites
 npm run test:flows # core flow and e2e-like Vitest tests
 npm run test:sync  # local/cloud sync and queue tests
 npm run test:slow  # ui + flow + sync Vitest groups
+npm run test:changed
 npm run test:all   # full Vitest suite
+npm run check:changed
 npm run build
-npm run check
+npm run check      # daily fast check
+npm run check:full # full frontend release gate
 ```
 
-`npm run check` still runs the full frontend suite through `test:all`. During
-daily development, use `test:run` for logic changes, `test:ui -- <path>` for
-component/page changes, or a targeted group first; run `test:all` before
-release-sensitive changes.
+For small edits, use `check:changed` first. It only lints files changed from
+`HEAD` and runs Vitest tests affected by those changed files. `npm run check` is
+the daily pre-commit gate and runs `typecheck`, `lint`, the fast Vitest group,
+and `build`. Use `check:full` before release-sensitive changes because it runs
+the full frontend Vitest suite through `test:all`.
 
 Backend:
 
@@ -348,6 +352,8 @@ Full project:
 ```powershell
 npm run check:all
 ```
+
+`check:all` runs the full frontend gate plus the backend check.
 
 Production smoke e2e:
 
