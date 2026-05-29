@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Lightbulb, Lock, Sparkles, ChevronDown, Target, Flag, Award, Activity, ClipboardCheck } from "lucide-react";
+import { Lightbulb, Lock, Sparkles, ChevronDown, Target, Flag, Award, ClipboardCheck, ArrowRight } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
@@ -24,7 +24,7 @@ import {
   textareaClass,
 } from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
 import { GOAL_TYPES } from "../constants";
-import { buildPlanRationaleReasons, getMilestoneValidationError, getPlanLoadLabel } from "../helpers";
+import { getMilestoneValidationError } from "../helpers";
 import type { PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
 
 interface OutcomeStepLabProps {
@@ -49,9 +49,6 @@ const selectTriggerClass =
   "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-sm font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2";
 const selectContentClass = "surface-elevated rounded-xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]";
 const selectItemClass = "cursor-pointer text-sm text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
-const infoBoxClass = "rounded-xl border border-app-line bg-app-bg p-4 text-xs leading-relaxed text-app-ink-soft shadow-sm";
-const chipClass =
-  "rounded-full border border-app-line px-3 py-1 text-xs text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent";
 
 const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
 
@@ -67,15 +64,14 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
   const isW12Filled = week12.trim().length > 0;
 
   return (
-    <div className="relative w-full py-5 select-none bg-slate-50/40 dark:bg-slate-950/20 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 p-4 mb-6 overflow-hidden">
-      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-450 dark:text-slate-400 mb-5 text-center flex items-center justify-center gap-1.5 relative z-10">
-        LỘ TRÌNH THỰC THI 12 TUẦN (12-WEEK EXECUTION ROADMAP)
+    <div className="relative w-full py-4 bg-slate-50/40 dark:bg-slate-950/20 rounded-xl border border-slate-200/50 dark:border-slate-800/40 px-4 select-none overflow-hidden max-w-xl mx-auto">
+      <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-400 mb-4 text-center">
+        LỘ TRÌNH THỰC THI 12 TUẦN
       </p>
 
-      {/* Canvas SVG vẽ con đường lượn sóng tối giản */}
-      <div className="relative w-full max-w-lg mx-auto aspect-[320/115] flex items-center justify-center">
+      <div className="relative w-full aspect-[320/75] flex items-center justify-center">
         <svg
-          viewBox="0 0 320 115"
+          viewBox="0 0 320 75"
           className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
           aria-hidden="true"
         >
@@ -87,99 +83,62 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
             </linearGradient>
           </defs>
 
-          {/* 1. Đường nền mỏng nhẹ */}
+          {/* Đường nền */}
           <path
-            d="M 40 40 C 80 20, 100 20, 120 30 C 140 40, 180 60, 200 50 C 220 40, 260 30, 280 40"
+            d="M 40 30 H 280"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            className="text-slate-200 dark:text-slate-800/60"
+            strokeWidth="1.5"
+            className="text-slate-200 dark:text-slate-800"
           />
 
-          {/* 2. Đường tiến trình liền mạch tinh tế */}
+          {/* Đường tiến trình */}
           <path
-            d="M 40 40 C 80 20, 100 20, 120 30"
+            d={`M 40 30 H ${isW12Filled ? 280 : isW8Filled ? 200 : isW4Filled ? 120 : 40}`}
             fill="none"
-            stroke={isW4Filled ? "url(#expedition-active-grad)" : "currentColor"}
+            stroke="url(#expedition-active-grad)"
             strokeWidth="2"
             strokeLinecap="round"
-            className={isW4Filled ? "text-indigo-500" : "text-slate-200 dark:text-slate-800/40"}
-          />
-
-          <path
-            d="M 120 30 C 140 40, 180 60, 200 50"
-            fill="none"
-            stroke={isW8Filled ? "url(#expedition-active-grad)" : "currentColor"}
-            strokeWidth="2"
-            strokeLinecap="round"
-            className={isW8Filled ? "text-indigo-500" : "text-slate-200 dark:text-slate-800/40"}
-          />
-
-          <path
-            d="M 200 50 C 220 40, 260 30, 280 40"
-            fill="none"
-            stroke={isW12Filled ? "url(#expedition-active-grad)" : "currentColor"}
-            strokeWidth="2"
-            strokeLinecap="round"
-            className={isW12Filled ? "text-emerald-500" : "text-slate-200 dark:text-slate-800/40"}
+            className="transition-all duration-500"
           />
         </svg>
 
-        {/* CÁC ĐIỂM TRẠM THIẾT KẾ PHẲNG SANG TRỌNG */}
-        <div 
-          className="absolute flex flex-col items-center z-10"
-          style={{ left: "12.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
-        >
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-indigo-500 bg-white dark:bg-slate-900 text-xs font-bold text-indigo-600 dark:text-indigo-400 shadow-sm select-none">
+        {/* Các mốc điểm */}
+        <div className="absolute flex flex-col items-center z-10" style={{ left: "12.5%", top: "40%", transform: "translate(-50%, -50%)" }}>
+          <div className="relative flex h-8 w-8 items-center justify-center rounded-full border border-indigo-500 bg-white dark:bg-slate-900 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 shadow-sm">
             W1
           </div>
-          <span className="mt-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 tracking-wide uppercase">Khởi đầu</span>
+          <span className="mt-1.5 text-[9px] font-bold text-slate-500 tracking-wide uppercase">Khởi đầu</span>
         </div>
 
-        <div 
-          className="absolute flex flex-col items-center z-10"
-          style={{ left: "37.5%", top: "26.09%", transform: "translate(-50%, -50%)" }}
-        >
+        <div className="absolute flex flex-col items-center z-10" style={{ left: "37.5%", top: "40%", transform: "translate(-50%, -50%)" }}>
           <div className={cn(
-            "relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
-            isW4Filled 
-              ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm" 
-              : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
+            "relative flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 transition-all duration-300",
+            isW4Filled ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm scale-105" : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
             W4
           </div>
-          <span className={cn("mt-2 text-[11px] font-bold tracking-wide uppercase transition-colors duration-300", isW4Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 1</span>
+          <span className={cn("mt-1.5 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW4Filled ? "text-slate-650 dark:text-slate-300" : "text-slate-400")}>Chặng 1</span>
         </div>
 
-        <div 
-          className="absolute flex flex-col items-center z-10"
-          style={{ left: "62.5%", top: "43.48%", transform: "translate(-50%, -50%)" }}
-        >
+        <div className="absolute flex flex-col items-center z-10" style={{ left: "62.5%", top: "40%", transform: "translate(-50%, -50%)" }}>
           <div className={cn(
-            "relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
-            isW8Filled 
-              ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm" 
-              : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
+            "relative flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 transition-all duration-300",
+            isW8Filled ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm scale-105" : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
             W8
           </div>
-          <span className={cn("mt-2 text-[11px] font-bold tracking-wide uppercase transition-colors duration-300", isW8Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 2</span>
+          <span className={cn("mt-1.5 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW8Filled ? "text-slate-650 dark:text-slate-300" : "text-slate-400")}>Chặng 2</span>
         </div>
 
-        <div 
-          className="absolute flex flex-col items-center z-10"
-          style={{ left: "87.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
-        >
+        <div className="absolute flex flex-col items-center z-10" style={{ left: "87.5%", top: "40%", transform: "translate(-50%, -50%)" }}>
           <div className={cn(
-            "relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
-            isW12Filled 
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm" 
-              : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
+            "relative flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 transition-all duration-300",
+            isW12Filled ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm scale-110" : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
             W12
           </div>
-          <span className={cn("mt-2 text-[11px] font-bold tracking-wide uppercase transition-colors duration-300", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")}>Đích đến</span>
+          <span className={cn("mt-1.5 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW12Filled ? "text-emerald-650 dark:text-emerald-450" : "text-slate-400")}>Đích đến</span>
         </div>
       </div>
     </div>
@@ -216,42 +175,178 @@ export function OutcomeStepLab({
     }
   }, [isW4Filled, isW8Filled, isW12Filled, hasPlayedSuccess]);
 
-  const planRationaleReasons = buildPlanRationaleReasons(feasibility);
   const milestoneError = getMilestoneValidationError({
     week4: draft.week4Milestone,
     week8: draft.week8Milestone,
     week12: draft.week12Outcome,
   });
-  const lagMetricPreview = draft.lagMetricName.trim()
-    ? `${draft.lagMetricName.trim()}${draft.lagMetricUnit.trim() ? ` (${draft.lagMetricUnit.trim()})` : ""}`
-    : "";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 px-3 sm:space-y-5 sm:px-0">
-      {smartGoal.measurable ? (
-        <div role="note" className={cn(infoBoxClass, "flex items-start gap-2 bg-gradient-to-r from-app-accent-soft/20 to-transparent border-app-accent/20")}>
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-app-accent animate-pulse" aria-hidden="true" />
-          <p>
-            <span className="font-semibold text-app-ink">Đã suy ra từ SMART Goal của bạn:</span> {smartGoal.measurable}
-          </p>
+    <div className="space-y-6">
+      
+      {/* KHU VỰC 1: KHỞI ĐẦU NHANH BẰNG KHUNG MẪU (TEMPLATE CAROUSEL) */}
+      <section aria-labelledby="template-carousel-title" className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 id="template-carousel-title" className="text-xs font-extrabold uppercase tracking-wider text-app-accent flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4" />
+            <span>Chọn khung mẫu bắt đầu nhanh (Recommends)</span>
+          </h3>
+          <span className="text-[11px] text-app-ink-muted">Tự động điền nhanh cột mốc & hành động</span>
         </div>
-      ) : null}
 
-      <section className="relative overflow-hidden rounded-3xl border border-white/20 dark:border-slate-850/40 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl p-6 sm:p-8 transition-all duration-300 group" aria-labelledby="outcome-required-title">
-        {/* Background glow effects */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-all duration-1000" />
-        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-1000" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {TWELVE_WEEK_TEMPLATE_CATALOG.slice(0, 3).map((template) => {
+            const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
+            const isSelected = selectedTemplate?.id === template.id;
+            const isRecommended = recommendedTemplate?.id === template.id;
 
-        <div className="flex flex-wrap items-start justify-between gap-3 relative z-10">
-          <div>
-            <p id="outcome-required-title" className="text-sm font-extrabold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
-              Chốt phần bắt buộc trước
+            return (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => onTemplateSelect(template)}
+                className={cn(
+                  "flex flex-col rounded-2xl border p-4 text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/20",
+                  isSelected
+                    ? "border-app-accent bg-app-accent-soft/30 text-app-ink shadow-md shadow-app-accent/5 ring-1 ring-app-accent/20"
+                    : isRecommended
+                    ? "border-amber-400 bg-amber-500/[0.01] hover:border-app-accent/40"
+                    : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30"
+                )}
+              >
+                <div className="flex items-start justify-between gap-2 w-full">
+                  <div>
+                    {isRecommended && (
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[8px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1.5 animate-pulse">
+                        💡 Khuyên dùng
+                      </span>
+                    )}
+                    <h4 className="text-xs font-bold text-app-ink leading-tight flex items-center gap-1">
+                      {template.name}
+                    </h4>
+                    <p className="mt-1 text-[10px] text-app-ink-muted leading-tight line-clamp-1">{template.subtitle}</p>
+                  </div>
+                  <span className={cn(
+                    "rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide border",
+                    isSelected 
+                      ? "bg-app-accent border-app-accent text-white" 
+                      : isLocked 
+                      ? "bg-app-bg border-app-line text-app-ink-muted" 
+                      : "bg-slate-100 dark:bg-slate-800 border-transparent text-app-ink-soft"
+                  )}>
+                    {isSelected ? "Đang dùng" : isLocked ? "Gói Plus" : "Sẵn sàng"}
+                  </span>
+                </div>
+                <p className="mt-3 text-[11px] leading-relaxed text-app-ink-soft line-clamp-2">{template.description}</p>
+                
+                <div className="mt-3 flex items-center justify-between border-t border-app-line/60 pt-2.5 w-full text-[10px] text-app-ink-muted">
+                  <span>Tuần 1: <strong className="text-app-ink font-semibold">{template.firstWeekWin}</strong></span>
+                  {isLocked && <span className="text-app-accent font-bold">Mở khóa →</span>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* KHU VỰC 2: CÁ NHÂN HÓA KHUNG GỢI Ý (CHỈ HIỆN KHI ĐÃ CHỌN TEMPLATE) */}
+      {selectedTemplate && (
+        <details className="group rounded-2xl border border-app-line bg-app-bg p-4 transition-all duration-200 [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between px-1 text-xs font-bold uppercase tracking-wider text-app-accent focus-visible:outline-none">
+            <span>⚙️ Cá nhân hóa khung gợi ý ({selectedTemplate.name})</span>
+            <ChevronDown className="h-4 w-4 text-app-accent transition-transform duration-200 group-open:rotate-180" />
+          </summary>
+          <div className="mt-4 border-t border-app-line/60 pt-4 space-y-4 text-xs">
+            <p className="text-app-ink-soft">
+              Điều chỉnh 3 câu dưới đây để khung mẫu tự động cân chỉnh tải việc cho phù hợp.
             </p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Ba mục này đủ để đi tiếp. Khung gợi ý phía dưới chỉ là phần hỗ trợ nhanh.
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="daily-time-budget" className={labelClass}>
+                  Quỹ thời gian dành cho mục tiêu mỗi ngày?
+                </label>
+                <Select
+                  value={draft.dailyTimeBudget}
+                  onValueChange={(value) => onTemplatePersonalizationChange("dailyTimeBudget", value)}
+                >
+                  <SelectTrigger id="daily-time-budget" className={selectTriggerClass}>
+                    <SelectValue placeholder="Chọn thời lượng" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClass}>
+                    <SelectItem value="30min" className={selectItemClass}>30 phút</SelectItem>
+                    <SelectItem value="1h" className={selectItemClass}>1 giờ</SelectItem>
+                    <SelectItem value="1.5h" className={selectItemClass}>1.5 giờ</SelectItem>
+                    <SelectItem value="2h+" className={selectItemClass}>2+ giờ</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="personal-constraint" className={labelClass}>
+                  Trở ngại lớn nhất của bạn lúc này?
+                </label>
+                <Select
+                  value={draft.personalConstraint}
+                  onValueChange={(value) =>
+                    onTemplatePersonalizationChange(
+                      "personalConstraint",
+                      value as TwelveWeekSetupDraft["personalConstraint"]
+                    )
+                  }
+                >
+                  <SelectTrigger id="personal-constraint" className={selectTriggerClass}>
+                    <SelectValue placeholder="Chọn trở ngại" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClass}>
+                    <SelectItem value="time" className={selectItemClass}>Thiếu thời gian</SelectItem>
+                    <SelectItem value="motivation" className={selectItemClass}>Khó giữ động lực</SelectItem>
+                    <SelectItem value="consistency" className={selectItemClass}>Hay bị đứt nhịp</SelectItem>
+                    <SelectItem value="complexity" className={selectItemClass}>Mục tiêu quá phức tạp</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className={labelClass}>Những ngày tập trung hành động chính?</p>
+              <div className="flex flex-wrap gap-2">
+                {WEEKDAY_LABELS.map((dayLabel, dayIndex) => {
+                  const isActive = draft.preferredDays.includes(dayIndex);
+                  return (
+                    <button
+                      key={dayLabel}
+                      type="button"
+                      onClick={() => onPreferredDayToggle(dayIndex)}
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-bold transition-all duration-200 active:scale-90",
+                        isActive
+                          ? "border-app-accent bg-app-accent text-white shadow-sm"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40"
+                      )}
+                    >
+                      {dayLabel}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </details>
+      )}
+
+      {/* KHU VỰC 3: FORM BIỂU MẪU CỐT LÕI (MỤC TIÊU & CỘT MỐC) */}
+      <section className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm space-y-5" aria-labelledby="outcome-required-title">
+        <div className="flex items-center justify-between border-b border-app-line/60 pb-3">
+          <div>
+            <h3 id="outcome-required-title" className="text-xs font-extrabold uppercase tracking-wider text-app-accent">
+              Chốt kết quả & Cột mốc 12 tuần
+            </h3>
+            <p className="mt-0.5 text-[11px] text-app-ink-muted">
+              Xác định lộ trình tiến bước và đích đến rõ ràng của chu kỳ
             </p>
           </div>
-          <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-150/30">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[10px] font-bold text-app-accent border border-app-accent/15">
             Bắt buộc
           </span>
         </div>
@@ -263,144 +358,91 @@ export function OutcomeStepLab({
           week12={draft.week12Outcome}
         />
 
-        <div className="mt-6 space-y-5 relative z-10">
+        <div className="space-y-4 pt-2">
+          {/* Cột mốc Tuần 4 & Tuần 8 - Đưa lên cùng một hàng ngang */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label htmlFor="milestone-week-4" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-                <Target className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
-                <span>Cột mốc sau 4 tuần</span>
+            <div className="space-y-1.5">
+              <label htmlFor="milestone-week-4" className={cn(labelClass, "flex items-center gap-1 text-app-ink font-bold")}>
+                <Target className="h-4 w-4 text-app-accent shrink-0" />
+                <span>Cột mốc sau 4 tuần (1/3 chặng đường)</span>
               </label>
               <Input
                 id="milestone-week-4"
                 value={draft.week4Milestone}
-                className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
+                className={inputClass}
                 onChange={(event) => onChange("week4Milestone", event.target.value)}
-                placeholder="Ví dụ: Hoàn thành bản nháp 1..."
+                placeholder="Ví dụ: Hoàn thành bản nháp phác thảo 1..."
               />
-              <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Mục tiêu đạt được sau 1/3 chặng đường.</p>
             </div>
-            <div className="space-y-2">
-              <label htmlFor="milestone-week-8" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-                <Flag className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
-                <span>Cột mốc sau 8 tuần</span>
+            <div className="space-y-1.5">
+              <label htmlFor="milestone-week-8" className={cn(labelClass, "flex items-center gap-1 text-app-ink font-bold")}>
+                <Flag className="h-4 w-4 text-app-accent shrink-0" />
+                <span>Cột mốc sau 8 tuần (2/3 chặng đường)</span>
               </label>
               <Input
                 id="milestone-week-8"
                 value={draft.week8Milestone}
-                className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
+                className={inputClass}
                 onChange={(event) => onChange("week8Milestone", event.target.value)}
-                placeholder="Ví dụ: Hoàn thiện tính năng chính..."
+                placeholder="Ví dụ: Hoàn thiện 80% tính năng cốt lõi..."
               />
-              <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Mục tiêu đạt được sau 2/3 chặng đường.</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="week-12-outcome" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
-              <Award className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
+          {/* Đích đến cuối cùng Tuần 12 */}
+          <div className="space-y-1.5">
+            <label htmlFor="week-12-outcome" className={cn(labelClass, "flex items-center gap-1 text-app-ink font-bold")}>
+              <Award className="h-4 w-4 text-app-accent shrink-0" />
               <span>Đích đến sau 12 tuần (Tuần 12)</span>
             </label>
             <Textarea
               id="week-12-outcome"
-              rows={3}
+              rows={2}
               value={draft.week12Outcome}
               aria-invalid={Boolean(milestoneError)}
-              aria-describedby={milestoneError ? "week-12-outcome-error" : "week-12-outcome-helper"}
               className={cn(
                 textareaClass,
-                "min-h-[90px] bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500",
-                milestoneError &&
-                  "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                "min-h-[70px]",
+                milestoneError && "border-red-400 focus-visible:border-red-500 focus-visible:ring-red-150"
               )}
               onChange={(event) => onChange("week12Outcome", event.target.value)}
-              placeholder="Ví dụ: Sau 12 tuần, tôi có bản portfolio 3 case study đủ gửi đi ứng tuyển."
+              placeholder="Ví dụ: Đạt bản portfolio 3 case study chất lượng cao đủ gửi đi ứng tuyển."
             />
             {milestoneError ? (
-              <p id="week-12-outcome-error" role="alert" className={cn(errorTextClass, "mt-1 text-xs font-bold text-rose-500")}>
+              <p role="alert" className="text-[10px] font-bold text-red-500">
                 {milestoneError}
               </p>
             ) : (
-              <p id="week-12-outcome-helper" className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>
-                Mô tả trạng thái bạn muốn đạt được khi 12 tuần kết thúc. Đây là đích đến cuối chu kỳ.
+              <p className={helperTextClass}>
+                Mô tả trạng thái bạn muốn đạt được khi 12 tuần kết thúc. Đây là đích đến cuối cùng của chu kỳ này.
               </p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="vision-12-week" className={cn(labelClass, "flex items-center gap-1.5 text-slate-850 dark:text-slate-200 font-bold mb-2")}>
-              <Lightbulb className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
-              <span>Vì sao mục tiêu này quan trọng?</span>
+          {/* Động lực cốt lõi */}
+          <div className="space-y-1.5">
+            <label htmlFor="vision-12-week" className={cn(labelClass, "flex items-center gap-1 text-app-ink font-bold")}>
+              <Lightbulb className="h-4 w-4 text-app-accent shrink-0" />
+              <span>Vì sao mục tiêu này thực sự quan trọng với bạn?</span>
             </label>
             <Textarea
               id="vision-12-week"
-              rows={3}
+              rows={2}
               value={draft.vision12Week}
               onChange={(event) => onChange("vision12Week", event.target.value)}
-              className={cn(textareaClass, "min-h-[80px] bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
-              placeholder="Vì sao kết quả này đáng để bạn dành 12 tuần tới?"
+              className="min-h-[60px] text-xs"
+              placeholder="Giải thích ngắn gọn lý do giúp bạn duy trì kỷ luật và kiên trì khi gặp khó khăn..."
             />
-            <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Một câu đủ thật giúp bạn giữ nhịp khi tuần bận lên.</p>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="lag-metric-name" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
-              <Activity className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
-              <span>Tên chỉ số cần theo dõi</span>
-            </label>
-            <Input
-              id="lag-metric-name"
-              value={draft.lagMetricName}
-              onChange={(event) => onChange("lagMetricName", event.target.value)}
-              className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
-              placeholder="Ví dụ: số bài xuất bản, số kg giảm, doanh thu mới..."
-            />
-            {lagMetricPreview ? (
-              <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-bold text-indigo-500 dark:text-indigo-400")}>
-                Đang theo dõi: <span>{lagMetricPreview}</span>
-              </p>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
-              <div>
-                <label htmlFor="lag-metric-target" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
-                  <Target className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
-                  <span>Con số mục tiêu</span>
-                </label>
-                <Input
-                  id="lag-metric-target"
-                  type="number"
-                  inputMode="decimal"
-                  value={draft.lagMetricTarget}
-                  onChange={(event) => onChange("lagMetricTarget", event.target.value)}
-                  className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
-                  placeholder="VD: 12"
-                />
-                <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Con số mục tiêu cuối chu kỳ.</p>
-              </div>
-              <div>
-                <label htmlFor="lag-metric-unit" className={cn(labelClass, "text-slate-800 dark:text-slate-200 font-bold mb-2 block")}>
-                  Đơn vị
-                </label>
-                <Input
-                  id="lag-metric-unit"
-                  value={draft.lagMetricUnit}
-                  onChange={(event) => onChange("lagMetricUnit", event.target.value)}
-                  className={cn(inputClass, "bg-white/80 dark:bg-slate-950/40 border-slate-200 focus:border-indigo-500")}
-                  placeholder="bài, kg, triệu"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="goal-type" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
-              <ClipboardCheck className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
-              <span>Loại mục tiêu</span>
+          {/* Loại mục tiêu */}
+          <div className="space-y-1.5">
+            <label htmlFor="goal-type" className={cn(labelClass, "flex items-center gap-1 text-app-ink font-bold")}>
+              <ClipboardCheck className="h-4 w-4 text-app-accent shrink-0" />
+              <span>Phân loại mục tiêu</span>
             </label>
             <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
-              <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu" className={selectTriggerClass}>
+              <SelectTrigger id="goal-type" className={selectTriggerClass}>
                 <SelectValue placeholder="Chọn loại mục tiêu" />
               </SelectTrigger>
               <SelectContent className={selectContentClass}>
@@ -414,376 +456,6 @@ export function OutcomeStepLab({
           </div>
         </div>
       </section>
-
-      {selectedTemplate ? (
-        <details className="group surface-raised rounded-2xl border border-app-line bg-app-surface p-5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary
-            id="template-personalize-title"
-            className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-md px-2 text-sm font-semibold uppercase tracking-[0.14em] text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1"
-          >
-            <span>Cá nhân hóa khung gợi ý</span>
-            <ChevronDown className="h-4.5 w-4.5 text-app-accent transition-transform duration-200 group-open:rotate-180" />
-          </summary>
-          <div className="mt-4 border-t border-app-line/60 pt-4 space-y-4">
-            <p className="text-sm leading-relaxed text-app-ink-soft">
-              Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
-            </p>
-
-            <div>
-              <label htmlFor="daily-time-budget" className={labelClass}>
-                Mỗi ngày bạn có thể dành bao lâu?
-              </label>
-              <Select
-                value={draft.dailyTimeBudget}
-                onValueChange={(value) => onTemplatePersonalizationChange("dailyTimeBudget", value)}
-              >
-                <SelectTrigger
-                  id="daily-time-budget"
-                  aria-label="Chọn ngân sách thời gian mỗi ngày"
-                  className={selectTriggerClass}
-                >
-                  <SelectValue placeholder="Chọn thời lượng" />
-                </SelectTrigger>
-                <SelectContent className={selectContentClass}>
-                  <SelectItem value="30min" className={selectItemClass}>
-                    30 phút
-                  </SelectItem>
-                  <SelectItem value="1h" className={selectItemClass}>
-                    1 giờ
-                  </SelectItem>
-                  <SelectItem value="1.5h" className={selectItemClass}>
-                    1.5 giờ
-                  </SelectItem>
-                  <SelectItem value="2h+" className={selectItemClass}>
-                    2+ giờ
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <p className={labelClass}>Những ngày nào bạn muốn tập trung?</p>
-              <div className="flex flex-wrap gap-2">
-                {WEEKDAY_LABELS.map((dayLabel, dayIndex) => {
-                  const isActive = draft.preferredDays.includes(dayIndex);
-                  return (
-                    <button
-                      key={dayLabel}
-                      type="button"
-                      aria-pressed={isActive}
-                      onClick={() => onPreferredDayToggle(dayIndex)}
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
-                        isActive
-                          ? "border-app-accent bg-app-accent text-white shadow-sm font-bold scale-105"
-                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent",
-                      )}
-                    >
-                      {dayLabel}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className={helperTextClass}>
-                {draft.preferredDays.length === 0
-                  ? "Chưa chọn — mặc định dàn đều cả tuần."
-                  : `Đã chọn ${draft.preferredDays.length} ngày.`}
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="personal-constraint" className={labelClass}>
-                Trở ngại lớn nhất hiện tại?
-              </label>
-              <Select
-                value={draft.personalConstraint}
-                onValueChange={(value) =>
-                  onTemplatePersonalizationChange(
-                    "personalConstraint",
-                    value as TwelveWeekSetupDraft["personalConstraint"],
-                  )
-                }
-              >
-                <SelectTrigger
-                  id="personal-constraint"
-                  aria-label="Chọn trở ngại lớn nhất"
-                  className={selectTriggerClass}
-                >
-                  <SelectValue placeholder="Chọn trở ngại" />
-                </SelectTrigger>
-                <SelectContent className={selectContentClass}>
-                  <SelectItem value="time" className={selectItemClass}>
-                    Thiếu thời gian
-                  </SelectItem>
-                  <SelectItem value="motivation" className={selectItemClass}>
-                    Khó giữ động lực
-                  </SelectItem>
-                  <SelectItem value="consistency" className={selectItemClass}>
-                    Hay bị đứt nhịp
-                  </SelectItem>
-                  <SelectItem value="complexity" className={selectItemClass}>
-                    Mục tiêu phức tạp, chưa biết bắt đầu
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className={helperTextClass}>
-                {draft.personalConstraint === "time" && "Kế hoạch sẽ ưu tiên giữ nhẹ và tập trung."}
-                {draft.personalConstraint === "motivation" && "Kế hoạch sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
-                {draft.personalConstraint === "consistency" && "Kế hoạch sẽ ưu tiên nhịp đều thay vì tải cao."}
-                {draft.personalConstraint === "complexity" && "Kế hoạch sẽ giúp tách lớp rõ hơn."}
-                {!draft.personalConstraint && "Chọn trở ngại để kế hoạch điều chỉnh phù hợp hơn."}
-              </p>
-            </div>
-          </div>
-        </details>
-      ) : null}
-
-      <details className="group surface-raised rounded-2xl border border-app-line bg-app-surface p-5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1">
-          <span className="flex items-center gap-2">
-            <Lightbulb className="h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
-            <span id="template-picker-title" className="block text-sm font-semibold text-app-ink">
-              Bắt đầu nhanh bằng khung gợi ý
-            </span>
-          </span>
-          <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-        </summary>
-
-        <div className="mt-4 border-t border-app-line/60 pt-4 space-y-4">
-          <p className="text-xs text-app-ink-soft">
-            Dùng khung mẫu được thiết kế sẵn để bắt đầu nhanh chóng. Bạn vẫn có thể tùy chỉnh mọi thông số sau đó.
-          </p>
-
-          {recommendedTemplate && adaptiveTemplateRecommendation ? (
-            <div className="relative rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.02] dark:bg-indigo-950/10 shadow-lg shadow-indigo-500/[0.02] p-5 sm:p-6 relative z-10 overflow-hidden">
-              <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/[0.03] rounded-full blur-3xl pointer-events-none" />
-              <div className="flex flex-wrap items-start justify-between gap-3 relative z-10">
-                <div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
-                    💡 Đề xuất nhiều nhất cho bạn (Recommended)
-                  </div>
-                  <p className="mt-2 text-lg font-bold text-slate-800 dark:text-slate-100">{recommendedTemplate.name}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-semibold">{adaptiveTemplateRecommendation.reason}</p>
-                </div>
-                <span className="rounded-full border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 px-3 py-1 text-xs font-semibold text-slate-500">
-                  {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
-                </span>
-              </div>
-              <button
-                type="button"
-                className={cn(
-                  "mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/20 sm:w-auto active:scale-[0.98]",
-                  selectedTemplate?.id === recommendedTemplate.id
-                    ? "border border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
-                    : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-md shadow-indigo-500/10",
-                )}
-                onClick={() => onTemplateSelect(recommendedTemplate)}
-              >
-                {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
-              </button>
-              {recommendedTemplateSupport ? (
-                <details className="group mt-4 rounded-xl border border-slate-200/60 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/20 px-4 py-3 [&::-webkit-details-marker]:hidden">
-                  <summary className="flex min-h-10 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-slate-600 dark:text-slate-350 focus-visible:outline-none p-1">
-                    <span>Xem chi tiết gợi ý giữ nhịp</span>
-                    <ChevronDown className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
-                  </summary>
-                  <div className="mt-3 border-t border-slate-200/40 dark:border-slate-800/40 pt-3 grid gap-3 sm:grid-cols-2">
-                    <div className={infoBoxClass}>
-                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Tuần 1 nên thắng ở đâu
-                      </p>
-                      <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-100">
-                        {recommendedTemplateSupport.week1Headline}
-                      </p>
-                      <p className="mt-1 leading-relaxed">{recommendedTemplateSupport.week1Support}</p>
-                    </div>
-                    <div className={infoBoxClass}>
-                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Nhịp nên giữ
-                      </p>
-                      <p className="mt-1 leading-relaxed">{recommendedTemplateSupport.week1CadenceHint}</p>
-                    </div>
-                  </div>
-                </details>
-              ) : null}
-            </div>
-          ) : null}
-
-          <details className="group mt-4 rounded-xl border border-dashed border-app-line bg-app-bg p-4 [&::-webkit-details-marker]:hidden">
-            <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-              <span>Xem tất cả khung mẫu</span>
-              <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-            </summary>
-            <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3.5 lg:grid-cols-2">
-              {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
-                const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
-                const isSelected = selectedTemplate?.id === template.id;
-                const isRecommended = recommendedTemplate?.id === template.id;
-                const templateAriaLabel = isLocked
-                  ? `${template.name} — cần gói Plus để dùng khung này`
-                  : `${template.name}${isSelected ? " — đang dùng" : ""}`;
-
-                return (
-                  <button
-                    key={template.id}
-                    type="button"
-                    onClick={() => onTemplateSelect(template)}
-                    aria-pressed={isSelected}
-                    aria-label={templateAriaLabel}
-                    className={cn(
-                      "min-h-11 rounded-xl border p-4 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
-                      isSelected && "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
-                      !isSelected && isRecommended && "border-amber-400 bg-amber-500/[0.02] text-app-ink hover:border-app-accent/40 hover:bg-app-bg shadow-[0_2px_8px_rgba(245,158,11,0.05)]",
-                      !isSelected && !isRecommended &&
-                        isLocked &&
-                        "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/5",
-                      !isSelected && !isRecommended && !isLocked && "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-bg",
-                    )}
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-bold">{template.name}</p>
-                          {isRecommended && (
-                            <span className="flex items-center gap-0.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider animate-pulse">
-                              <Sparkles className="h-2.5 w-2.5" />
-                              Khuyên dùng
-                            </span>
-                          )}
-                          <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-app-ink-muted">
-                            {template.requiredPlan ? `Khung ${getPlanLabel(template.requiredPlan)}` : "Khung miễn phí"}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-xs text-app-ink-soft">{template.subtitle}</p>
-                      </div>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-app-ink-muted">
-                        {isLocked ? <Lock className="h-3 w-3" aria-hidden="true" /> : null}
-                        {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
-                      </span>
-                    </div>
-                    <p className="mt-3 text-xs leading-relaxed text-app-ink-soft">{template.description}</p>
-                    <div className="mt-3.5 grid gap-2.5 text-xs leading-relaxed text-app-ink-soft sm:grid-cols-2">
-                      <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2 shadow-sm">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                          Hợp khi
-                        </p>
-                        <p className="mt-1 font-medium">{template.bestFor}</p>
-                      </div>
-                      <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2 shadow-sm">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Tuần 1</p>
-                        <p className="mt-1 font-medium">{template.firstWeekWin}</p>
-                      </div>
-                    </div>
-                    <div className="mt-3.5 flex flex-wrap gap-2">
-                      {template.idealFor.map((item) => (
-                        <span key={`${template.id}_${item}`} className={chipClass}>
-                          {item}
-                        </span>
-                      ))}
-                      {template.tactics.slice(0, 2).map((tactic) => (
-                        <span key={`${template.id}_${tactic.name}`} className={chipClass}>
-                          {tactic.name}
-                        </span>
-                      ))}
-                    </div>
-                    {isLocked ? (
-                      <div className="mt-4 flex items-center justify-between border-t border-app-line pt-3 text-xs font-semibold text-app-accent">
-                        <span>Cần gói Plus để dùng khung này</span>
-                        <span>Mở khóa →</span>
-                      </div>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </details>
-        </div>
-      </details>
-
-      {selectedTemplate ? (
-        <details className="group surface-raised rounded-2xl border border-app-line bg-app-surface p-5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary id="selected-template-title" className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-            <span>Khung đang dùng: {selectedTemplate.name}</span>
-            <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-          </summary>
-          <div className="mt-3 border-t border-app-line/60 pt-3 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Khung đang dùng</p>
-              <p className="mt-2 text-base font-bold text-app-ink">{selectedTemplate.name}</p>
-              <p className="mt-1 text-sm leading-5 text-app-ink-soft">{selectedTemplate.subtitle}</p>
-            </div>
-            <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-muted">
-              {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Miễn phí"}
-            </span>
-          </div>
-        </details>
-      ) : null}
-
-      <details className="group rounded-2xl border border-dashed border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-        <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-          <span>Xem mục tiêu đã viết</span>
-          <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-        </summary>
-        <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3.5">
-          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Mục tiêu cụ thể</p>
-            <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{smartGoal.specific}</p>
-          </div>
-          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Cách đo kết quả</p>
-            <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{smartGoal.measurable}</p>
-          </div>
-        </div>
-      </details>
-
-      {planRationaleReasons.length > 0 ? (
-        <details className="group rounded-2xl border border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-            <span>Vì sao kế hoạch này được đề xuất</span>
-            <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-          </summary>
-          <div className="mt-4 border-t border-app-line/60 pt-4">
-            <ul className="grid gap-3 md:grid-cols-2">
-              {planRationaleReasons.map((reason) => (
-                <li key={reason.id} className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
-                  <p className="text-sm font-bold text-app-ink">{reason.title}</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">{reason.detail}</p>
-                </li>
-              ))}
-            </ul>
-            {feasibility.smartGoalQualityNote ? (
-              <div className="mt-3.5 rounded-xl border border-app-line bg-app-surface px-4 py-3 text-xs leading-relaxed text-app-ink-soft">
-                {feasibility.smartGoalQualityNote}
-              </div>
-            ) : null}
-          </div>
-        </details>
-      ) : null}
-
-      {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
-        <details className="group rounded-2xl border border-app-line bg-app-bg p-4.5 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-          <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-sm font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-            <span>Các gợi ý từ đánh giá khả thi (Feasibility Hints)</span>
-            <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-          </summary>
-          <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3.5 md:grid-cols-3">
-            <div className={cn(infoBoxClass, "bg-app-surface border-app-line")}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Cần chú ý</p>
-              <p className="mt-1 text-sm font-bold text-app-ink">{feasibility.bottleneck?.label ?? "Chưa có"}</p>
-              {feasibility.bottleneck?.action ? <p className="mt-2 text-xs text-app-ink-soft leading-normal">{feasibility.bottleneck.action}</p> : null}
-            </div>
-            <div className={cn(infoBoxClass, "bg-app-surface border-app-line")}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Tuần 1</p>
-              <p className="mt-1 font-medium leading-relaxed">{feasibility.firstWeekGuidance ?? "Giữ tuần đầu vừa sức để tạo nhịp."}</p>
-            </div>
-            <div className={cn(infoBoxClass, "bg-app-surface border-app-line")}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Mức tải</p>
-              <p className="mt-1 text-sm font-bold text-app-ink">{getPlanLoadLabel(feasibility.planLoad)}</p>
-              <p className="mt-2 text-xs text-app-ink-soft leading-normal">{feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}</p>
-            </div>
-          </div>
-        </details>
-      )}
     </div>
   );
 }
