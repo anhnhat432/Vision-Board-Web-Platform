@@ -186,7 +186,7 @@ export function TwelveWeekDashboardHeader({
     <header>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">HỆ THỐNG 12 TUẦN</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-app-ink-muted">HỆ THỐNG 12 TUẦN</p>
           <span className="sr-only">Nhịp 12 tuần</span>
           <InlineGoalTitleEdit
             title={activeGoal.title}
@@ -196,17 +196,17 @@ export function TwelveWeekDashboardHeader({
             titleClassName="mt-2 break-words font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink"
             inputClassName="mt-2 h-auto rounded-xl px-3 py-2 font-serif text-2xl font-medium leading-tight tracking-tight text-app-ink sm:text-3xl"
           />
-          <p data-testid="twelve-week-header-description" className="mt-1 text-sm leading-6 text-app-ink-soft">
+          <p data-testid="twelve-week-header-description" className="mt-1 text-base leading-6 text-app-ink-soft">
             Tuần {currentWeek} / {system.totalWeeks}
             {domainLabel ? ` · ${domainLabel}` : ""}
           </p>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-app-ink-soft">{nextActionLabel}</p>
+          <p className="mt-3 max-w-2xl text-base leading-6 text-app-ink-soft">{nextActionLabel}</p>
         </div>
 
         <div data-testid="twelve-week-header-actions" className="flex flex-col gap-2 sm:flex-row md:shrink-0">
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-app-accent px-4 py-2.5 text-base font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={onOpenFocusTab}
           >
             {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
@@ -214,7 +214,7 @@ export function TwelveWeekDashboardHeader({
           </button>
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-base font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={onOpenGoals}
           >
             Mở mục tiêu
@@ -223,15 +223,15 @@ export function TwelveWeekDashboardHeader({
       </div>
 
       <div data-testid="twelve-week-header-metrics" className="mt-4 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-3 py-1 text-xs font-medium text-app-accent">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-3.5 py-1 text-sm font-medium text-app-accent">
           Tuần {currentWeek} / {system.totalWeeks}
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
           <PhaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
           {phaseInfo.label}
         </span>
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${tokenSyncBadgeClass}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-sm font-medium ${tokenSyncBadgeClass}`}
         >
           {syncBadgeLabel === "Đang đồng bộ" ? (
             <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
@@ -240,16 +240,16 @@ export function TwelveWeekDashboardHeader({
           )}
           {syncBadgeLabel}
         </span>
-        <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">
+        <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
           Gói {getPlanLabel(activePlanCode)}
         </span>
         {reviewDueToday && (
-          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">
+          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
             {getReviewDayLabel(system.reviewDay)} · {reviewStatusLabel}
           </span>
         )}
         {!reviewDueToday && (
-          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">
+          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3.5 py-1 text-sm text-app-ink-soft">
             Còn {todayRemainingCount} hôm nay · {todayCompletedCount}/{weekCompletion.total} việc tuần
           </span>
         )}
@@ -273,7 +273,7 @@ export function TwelveWeekGoalSwitcher({
     <div className="flex">
       <Select value={activeGoalId} onValueChange={onLoadGoal}>
         <SelectTrigger
-          className="h-auto w-full max-w-full rounded-lg border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-ink shadow-none hover:bg-app-bg focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md"
+          className="h-auto w-full max-w-full rounded-lg border-app-line bg-app-surface px-3.5 py-2 text-base font-medium text-app-ink shadow-none hover:bg-app-bg focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md"
           aria-label="Chọn mục tiêu 12 tuần"
         >
           <SelectValue placeholder="Chọn mục tiêu" />
@@ -283,7 +283,7 @@ export function TwelveWeekGoalSwitcher({
             <SelectItem
               key={goal.id}
               value={goal.id}
-              className={`cursor-pointer rounded-md px-2.5 py-2 text-sm ${
+              className={`cursor-pointer rounded-md px-2.5 py-2 text-base ${
                 goal.id === activeGoalId
                   ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft focus:text-app-accent"
                   : "text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink"
@@ -339,13 +339,13 @@ export function TwelveWeekRescueTriggerBanner({
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="font-serif text-lg font-medium text-app-warm-strong">{trigger.headline}</p>
-            <p className="mt-1 text-sm leading-6 text-app-ink-soft">{trigger.detail}</p>
+            <p className="mt-1 text-base leading-6 text-app-ink-soft">{trigger.detail}</p>
           </div>
         </div>
         <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-lg border border-transparent bg-app-warm px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center rounded-lg border border-transparent bg-app-warm px-4 py-2 text-base font-medium text-white transition-colors duration-150 hover:bg-app-warm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:flex-none"
             onClick={() => {
               const action = isUpgradeTrigger ? "upgrade" : "navigate_system";
               onActionTaken(trigger, action);
@@ -357,7 +357,7 @@ export function TwelveWeekRescueTriggerBanner({
           </button>
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-base font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:flex-none"
             onClick={() => onDismiss(trigger.kind)}
           >
             Bỏ qua
