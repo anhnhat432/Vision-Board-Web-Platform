@@ -1,5 +1,5 @@
 import type { ReactNode, RefObject } from "react";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,7 +14,7 @@ import {
   Heart,
   Clock,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 import { cn } from "@/app/components/ui/utils";
@@ -49,7 +49,7 @@ interface SmartGoalStepShellProps {
   isCurrentStepValid: boolean;
   qualityFeedback: QualityFeedbackData | null;
   smartData: SMARTData;
-  onApplyStarter: () => void;
+  onApplyStarter: (transformedText?: string) => void;
   onJumpToStep: (stepKey: SmartStepKey) => void;
   onBack: () => void;
   onNext: () => void;
@@ -79,6 +79,98 @@ const STEP_ICONS: Record<SmartStepKey, typeof Target> = {
   timeBound: Clock,
 };
 
+// Tổng hợp chuông ngân chánh niệm tần số 639Hz (hoà hợp, kết nối)
+const playMindfulStepSuccess = () => {
+  try {
+    const AudioCtxClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
+    if (!AudioCtxClass) return;
+    const ctx = new AudioCtxClass();
+
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(639, ctx.currentTime); // Tần số Solfeggio 639Hz
+
+    gainNode.gain.setValueAtTime(0.03, ctx.currentTime); // Âm lượng siêu nhẹ nhàng, dịu tai
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2); // Ngân vang nhẹ trong 1.2s
+
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 1.2);
+  } catch (_e) {
+    // Bỏ qua nếu bị chặn phát
+  }
+};
+
+// Canvas hiệu ứng pháo hoa giấy Confetti vẽ trực tiếp bằng JS
+function ConfettiCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    const colors = ["#fbbf24", "#34d399", "#60a5fa", "#f472b6", "#a78bfa", "#f87171"];
+    const particles = Array.from({ length: 65 }).map(() => ({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 20,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 2.5 + Math.random() * 3.5,
+      size: 4 + Math.random() * 5,
+      color: colors[Math.floor(Math.random() * colors.length)] ?? "#fbbf24",
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 8,
+    }));
+
+    let animId: number;
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let active = false;
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotationSpeed;
+
+        if (p.y < canvas.height + 20) {
+          active = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        }
+      }
+
+      if (active) {
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 z-50 pointer-events-none w-full h-full" />;
+}
+
 export function SmartGoalStepShell({
   stepIndex,
   totalSteps,
@@ -102,6 +194,45 @@ export function SmartGoalStepShell({
   onNext,
 }: SmartGoalStepShellProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const [showStickyMini, setShowStickyMini] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [selectedTone, setSelectedTone] = useState<"empathetic" | "pragmatic" | "strategic">("empathetic");
+
+  const prevValidRef = useRef(isCurrentStepValid);
+  const prevGoldRef = useRef(false);
+
+  const isGoldStandard = clarityDoneCount === clarityItems.length;
+
+  // Lắng nghe trạng thái hoàn thành hợp lệ một bước để phát âm thanh chánh niệm
+  useEffect(() => {
+    if (!prevValidRef.current && isCurrentStepValid) {
+      playMindfulStepSuccess();
+    }
+    prevValidRef.current = isCurrentStepValid;
+  }, [isCurrentStepValid]);
+
+  // Lắng nghe trạng thái chuẩn Vàng để kích hoạt pháo hoa giấy Confetti
+  useEffect(() => {
+    if (!prevGoldRef.current && isGoldStandard) {
+      setShowConfetti(true);
+      const timer = setTimeout(() => setShowConfetti(false), 2600);
+      return () => clearTimeout(timer);
+    }
+    prevGoldRef.current = isGoldStandard;
+  }, [isGoldStandard]);
+
+  // Lắng nghe hành vi cuộn để ghim mini-preview trên thiết bị di động
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 280) {
+        setShowStickyMini(true);
+      } else {
+        setShowStickyMini(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleWizardJump = (index: number) => {
     const nextStep = SMART_STEPS[index];
@@ -110,41 +241,42 @@ export function SmartGoalStepShell({
     }
   };
 
+  // Cấu hình xoay 3D vật lý đàn hồi Spring mượt mà từ Framer Motion
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 90, damping: 20 });
+  const mouseYSpring = useSpring(y, { stiffness: 90, damping: 20 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["4.5deg", "-4.5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-4.5deg", "4.5deg"]);
+
+  const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["20%", "80%"]);
+  const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["20%", "80%"]);
+
+  const glareBg = useTransform([glareX, glareY], ([gX, gY]) => {
+    return `radial-gradient(circle at ${gX} ${gY}, rgba(255,255,255,0.22) 0%, transparent 60%)`;
+  });
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const relativeX = (e.clientX - rect.left) / rect.width - 0.5;
+    const relativeY = (e.clientY - rect.top) / rect.height - 0.5;
 
-    const xc = rect.width / 2;
-    const yc = rect.height / 2;
-
-    // Làm dịu hiệu ứng: giới hạn góc xoay tối đa chỉ 3 độ để tạo cảm giác tinh tế, sang trọng
-    const maxRotation = 3.0; 
-    const angleX = Math.min(Math.max((yc - y) / 22, -maxRotation), maxRotation);
-    const angleY = Math.min(Math.max((x - xc) / 80, -maxRotation), maxRotation);
-
-    card.style.setProperty("--rotate-x", `${angleX}deg`);
-    card.style.setProperty("--rotate-y", `${angleY}deg`);
-    card.style.setProperty("--glare-x", `${(x / rect.width) * 100}%`);
-    card.style.setProperty("--glare-y", `${(y / rect.height) * 100}%`);
+    x.set(relativeX);
+    y.set(relativeY);
   };
 
   const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.setProperty("--rotate-x", "0deg");
-    card.style.setProperty("--rotate-y", "0deg");
-    card.style.setProperty("--glare-x", "50%");
-    card.style.setProperty("--glare-y", "50%");
+    x.set(0);
+    y.set(0);
   };
 
   const specText = smartData.specific.goal_statement.trim();
   const measTarget = smartData.measurable.target_value.trim();
-  const measUnit = smartData.measurable.metric_name.includes("/")
-    ? smartData.measurable.metric_name.split("/")[1].trim()
-    : "đơn vị";
+  const measUnit = smartData.measurable.metric_name.trim();
   const achHours = smartData.achievable.weekly_time_commitment_hours.trim();
   const relReason = smartData.relevant.motivation_reason.trim();
   const timeDate =
@@ -160,11 +292,163 @@ export function SmartGoalStepShell({
   const isRelFilled = relReason.length > 0;
   const isTimeFilled = timeDate.length > 0;
 
+  // Biến đổi câu gợi ý AI chánh niệm theo Tone giọng được chọn
+  const getPersonaPreview = (baseText: string, tone: "empathetic" | "pragmatic" | "strategic") => {
+    if (!baseText) return "";
+    
+    if (step.key === "specific") {
+      if (tone === "empathetic") {
+        return `Bạn đang hướng tới một tầm nhìn rất ý nghĩa đấy. Hãy bắt đầu nhẹ nhàng nhưng đầy cam kết: “${baseText}”`;
+      }
+      if (tone === "pragmatic") {
+        return `Vào thẳng hành động thực tế nào. Hãy điền ngắn gọn, rõ việc cần làm: “${baseText}”`;
+      }
+      return `Phân tích chiến lược cho thấy đây là điểm xuất phát tối ưu nhất. Hãy tham khảo cấu trúc: “${baseText}”`;
+    }
+    
+    if (step.key === "measurable") {
+      if (tone === "empathetic") {
+        return `Số liệu là công cụ giúp bạn tự quan sát tiến trình của mình mà không áp lực: “${baseText}”. Chúc bạn có những bước đi thảnh thơi!`;
+      }
+      if (tone === "pragmatic") {
+        return `Đo lường rõ ràng để kiểm soát tốt nhất. Đặt mốc: “${baseText}”. Mốc xuất phát (Baseline) nên ghi nhận chân thực.`;
+      }
+      return `Thiết lập mốc đo lường “${baseText}” là chỉ số dẫn dắt (leading indicator) quan trọng cho hiệu suất lâu dài.`;
+    }
+
+    if (step.key === "achievable") {
+      if (tone === "empathetic") {
+        return `Nuôi dưỡng thói quen bền bỉ tốt hơn là ép mình quá sức. Gợi ý: “${baseText}”. Hãy cho phép mình thích nghi từ từ.`;
+      }
+      if (tone === "pragmatic") {
+        return `Hãy thực tế về nguồn lực và thời gian biểu: “${baseText}”. Đảm bảo bạn có lịch cố định để thực thi.`;
+      }
+      return `Để tối ưu hóa tài nguyên và kỹ năng, đề xuất phân bổ: “${baseText}”. Việc chuẩn bị trước giúp giảm 40% nguy cơ bỏ cuộc.`;
+    }
+
+    if (step.key === "relevant") {
+      if (tone === "empathetic") {
+        return `Lý do sâu sắc từ trái tim sẽ tiếp thêm lửa khi bạn mệt mỏi: “${baseText}”. Hãy lắng nghe xem điều này có chạm tới ước muốn thật sự của bạn không.`;
+      }
+      if (tone === "pragmatic") {
+        return `Động lực thực tế để duy trì kỷ luật: “${baseText}”. Mục tiêu này phải phục vụ trực tiếp lợi ích thiết thực nhất của bạn.`;
+      }
+      return `Kết nối mục tiêu này với các trục phát triển tổng thể: “${baseText}”. Đây là mảnh ghép chiến lược cho sự cân bằng cuộc sống của bạn.`;
+    }
+
+    if (step.key === "timeBound") {
+      if (tone === "empathetic") {
+        return `Tạo một nhịp điệu thời gian vừa vặn với cuộc sống của bạn: “${baseText}”. 12 tuần là khoảng thời gian hoàn hảo để chứng kiến sự chuyển hóa.`;
+      }
+      if (tone === "pragmatic") {
+        return `Đặt deadline cụ thể để tập trung cao độ: “${baseText}”. Đừng để mục tiêu trôi dạt vô hạn.`;
+      }
+      return `Thiết lập chiến dịch 12 tuần với deadline “${baseText}”. Đây là điểm rơi phong độ lý tưởng để đánh giá hiệu suất của bạn.`;
+    }
+
+    return baseText;
+  };
+
+  // Biến đổi câu text cốt lõi điền vào form khi Apply
+  const getTransformedCoreText = (baseText: string, tone: "empathetic" | "pragmatic" | "strategic") => {
+    if (!baseText) return baseText;
+    if (step.key === "specific") {
+      if (tone === "pragmatic") {
+        return baseText.replace("Hoàn thành một kết quả quan trọng trong 12 tuần để", "Quyết tâm đạt kết quả thực tế trong 12 tuần:");
+      }
+      if (tone === "strategic") {
+        return baseText.replace("Hoàn thành một kết quả quan trọng trong 12 tuần để", "Thực thi chiến lược 12 tuần nhằm");
+      }
+    }
+    if (step.key === "relevant") {
+      if (tone === "pragmatic") {
+        return baseText.replace("Tôi muốn mục tiêu này vì", "Động lực thực tế:");
+      }
+      if (tone === "strategic") {
+        return baseText.replace("Tôi muốn mục tiêu này vì", "Tối ưu hóa trục cuộc sống vì");
+      }
+    }
+    return baseText;
+  };
+
+  const currentPersonaText = getPersonaPreview(starterPreview, selectedTone);
+
+  // Hook hiệu ứng gõ chữ sinh động
+  const useTypingEffect = (text: string, speed = 8) => {
+    const [displayedText, setDisplayedText] = useState("");
+
+    useEffect(() => {
+      setDisplayedText("");
+      if (!text) return;
+      
+      let i = 0;
+      const timer = setInterval(() => {
+        setDisplayedText((prev) => prev + text.charAt(i));
+        i++;
+        if (i >= text.length) {
+          clearInterval(timer);
+        }
+      }, speed);
+
+      return () => clearInterval(timer);
+    }, [text, speed]);
+
+    return displayedText;
+  };
+
+  const typedCoachText = useTypingEffect(currentPersonaText, 10);
+
+  // Tính toán nhanh độ khả thi
+  const calculateFeasibilityScore = () => {
+    const hours = Number.parseFloat(smartData.achievable.weekly_time_commitment_hours) || 0;
+    if (hours === 0) return 0;
+    if (hours >= 2 && hours <= 8) return 95; // Tối ưu cho người bận rộn
+    if (hours > 8 && hours <= 15) return 80; // Hơi nặng nhưng khả thi
+    if (hours > 15 && hours <= 25) return 60; // Nặng, cần nỗ lực lớn
+    return 40; // Quá tải, nguy cơ thất bại cao
+  };
+
+  const feasibilityScore = calculateFeasibilityScore();
+
+  const handleApplyTransformedStarter = () => {
+    // Lấy câu text cốt lõi đã biến đổi nhẹ
+    const coreText = getTransformedCoreText(starterPreview, selectedTone);
+    onApplyStarter(coreText);
+  };
+
   return (
     <section
       className="rounded-[20px] border border-app-line bg-app-surface p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
       aria-labelledby="smart-step-title"
     >
+      {/* Pháo hoa giấy Confetti */}
+      {showConfetti && <ConfettiCanvas />}
+
+      {/* Sticky Mini-Preview Header trên Mobile/Scroll */}
+      <AnimatePresence>
+        {showStickyMini && (
+          <motion.div
+            initial={{ y: -65, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -65, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed top-0 left-0 right-0 z-40 bg-white/85 dark:bg-slate-900/85 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-extrabold uppercase tracking-widest text-app-accent mb-0.5 select-none flex items-center gap-1">
+                <span>🎯</span> Mục tiêu hiện tại (Live Preview)
+              </p>
+              <p className="text-xs truncate font-serif italic text-slate-700 dark:text-slate-350 leading-normal">
+                Tôi quyết tâm {isSpecFilled ? specText : "..."} 🎯. Đo lường: {isMeasFilled ? `${measTarget} ${measUnit}` : "..."} 📊. Dành ra {isAchFilled ? `${achHours} giờ/tuần` : "..."} ⚡. Lý do: {isRelFilled ? relReason : "..."} ❤️. Thời hạn: {isTimeFilled ? timeDate : "..."} 📅.
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[10px] font-bold text-app-accent">
+              Bước {stepIndex + 1}/{totalSteps}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-app-accent flex items-center gap-1.5">
@@ -239,84 +523,100 @@ export function SmartGoalStepShell({
 
       <div className="my-6 h-px bg-app-line" aria-hidden="true" />
 
-      {/* Tấm thẻ Live Preview 3D Glassmorphism */}
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: Xoay 3D bằng di chuột tạo hiệu ứng lấp lánh */}
-      <div
+      {/* Tấm thẻ Live Preview 3D Glassmorphism Spring Physics */}
+      <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
-          transform: "perspective(1000px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) scale3d(1, 1, 1)",
-          transition: "transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease-out",
-        } as React.CSSProperties}
-        className="group relative mb-6 rounded-2xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-slate-900/45 p-6 sm:p-7 shadow-lg overflow-hidden backdrop-blur-xl transition-all duration-300"
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+        }}
+        className="group relative mb-7 rounded-2xl border border-white/25 dark:border-white/5 bg-gradient-to-br from-white/70 to-white/40 dark:from-slate-900/60 dark:to-slate-900/30 p-6 sm:p-7 shadow-[0_10px_35px_rgba(31,38,135,0.04)] hover:shadow-[0_12px_45px_rgba(31,38,135,0.08)] overflow-hidden backdrop-blur-xl transition-shadow duration-300 select-none"
       >
         {/* Vòng tròn màu trừu tượng tạo chiều sâu kính mờ Glassmorphism */}
-        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -top-10 -right-10 w-44 h-44 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-emerald-400/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+        <div className="absolute -top-10 -right-10 w-44 h-44 bg-indigo-400/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+        <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-purple-400/5 dark:bg-purple-500/3 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Lớp bóng chiếu sáng 3D Glare */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        {/* Lớp bóng chiếu sáng 3D Glare bằng Spring */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none z-10"
           style={{
-            background: "radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.22) 0%, transparent 65%)",
-          } as React.CSSProperties}
+            background: glareBg,
+          }}
         />
         
-        <div className="absolute top-4 right-5 flex items-center gap-1.5 text-xs text-app-accent/80 font-bold select-none pointer-events-none">
-          <span>🔮 Thẻ Bài Tương Lai</span>
-        </div>
+        {/* Huy hiệu mục tiêu chuẩn Vàng */}
+        <AnimatePresence>
+          {isGoldStandard ? (
+            <motion.div
+              initial={{ scale: 0, rotate: -15 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="absolute top-3 right-4 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 px-3.5 py-1 text-[10px] font-extrabold text-slate-900 shadow-md shadow-amber-500/20 select-none animate-[pulse_2.2s_infinite] z-20 border border-yellow-300/30"
+            >
+              <span>🏆 Chuẩn Vàng</span>
+            </motion.div>
+          ) : (
+            <div className="absolute top-3.5 right-4 flex items-center gap-1.5 text-xs text-app-accent/80 font-bold select-none pointer-events-none z-20">
+              <span>🔮 Thẻ Bài Tương Lai</span>
+            </div>
+          )}
+        </AnimatePresence>
+
         <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-app-accent/70 mb-4 flex items-center gap-1.5 select-none pointer-events-none">
           <span>✨</span> MỤC TIÊU CỦA BẠN (LIVE PREVIEW)
         </p>
 
-        <div className="text-base sm:text-[17px] leading-loose text-slate-800 dark:text-slate-200 font-serif tracking-wide select-text">
+        <div className="text-base sm:text-[18px] leading-loose text-slate-800 dark:text-slate-100 font-serif tracking-wide select-text relative z-20">
           Tôi quyết tâm{" "}
-          <span className={cn("transition-all duration-300 pb-0.5",
+          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
             isSpecFilled
-              ? "text-emerald-600 dark:text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.25)] border-b-2 border-emerald-500/40"
-              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
+              ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-350 font-semibold border border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.08)]"
+              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
           )}>
-            {isSpecFilled ? specText : "[hành động cụ thể]"}
+            {isSpecFilled ? specText : "hành động cụ thể"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">🎯</span>. 
           Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
-          <span className={cn("transition-all duration-300 pb-0.5",
+          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
             isMeasFilled
-              ? "text-blue-600 dark:text-blue-400 font-bold drop-shadow-[0_0_8px_rgba(59,130,246,0.25)] border-b-2 border-blue-500/40"
-              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
+              ? "bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-350 font-semibold border border-blue-500/20 shadow-[0_2px_8px_rgba(59,130,246,0.08)]"
+              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
           )}>
-            {isMeasFilled ? `${measTarget} ${measUnit}` : "[chỉ số mục tiêu]"}
+            {isMeasFilled ? `${measTarget} ${measUnit || "đơn vị"}` : "chỉ số mục tiêu"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">📊</span>. 
           Tôi cam kết dành ra{" "}
-          <span className={cn("transition-all duration-300 pb-0.5",
+          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
             isAchFilled
-              ? "text-amber-600 dark:text-amber-500 font-bold drop-shadow-[0_0_8px_rgba(245,158,11,0.25)] border-b-2 border-amber-500/40"
-              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
+              ? "bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-350 font-semibold border border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.08)]"
+              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
           )}>
-            {isAchFilled ? `${achHours} giờ mỗi tuần` : "[thời gian cam kết]"}
+            {isAchFilled ? `${achHours} giờ mỗi tuần` : "thời gian cam kết"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">⚡</span> để hành động. 
           Việc này rất quan trọng vì{" "}
-          <span className={cn("transition-all duration-300 pb-0.5",
+          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
             isRelFilled
-              ? "text-rose-600 dark:text-rose-400 font-bold drop-shadow-[0_0_8px_rgba(244,63,94,0.25)] border-b-2 border-rose-500/40"
-              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
+              ? "bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-350 font-semibold border border-rose-500/20 shadow-[0_2px_8px_rgba(244,63,94,0.08)]"
+              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
           )}>
-            {isRelFilled ? relReason : "[lý do sâu sắc của bạn]"}
+            {isRelFilled ? relReason : "lý do sâu sắc của bạn"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">❤️</span> và thời hạn hoàn thành trước{" "}
-          <span className={cn("transition-all duration-300 pb-0.5",
+          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
             isTimeFilled
-              ? "text-purple-600 dark:text-purple-400 font-bold drop-shadow-[0_0_8px_rgba(168,85,247,0.25)] border-b-2 border-purple-500/40"
-              : "text-app-ink-muted/50 italic border-b border-dashed border-app-line"
+              ? "bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-350 font-semibold border border-purple-500/20 shadow-[0_2px_8px_rgba(168,85,247,0.08)]"
+              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
           )}>
-            {isTimeFilled ? timeDate : "[ngày hoàn thành]"}
+            {isTimeFilled ? timeDate : "ngày hoàn thành"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">📅</span>.
         </div>
-      </div>
+      </motion.div>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -329,57 +629,145 @@ export function SmartGoalStepShell({
         >
           {children}
 
-          {/* AI Coach Bubble sinh động */}
-          <div className="relative overflow-hidden rounded-[24px] border border-teal-100/80 dark:border-teal-900/30 bg-gradient-to-br from-teal-50/30 via-app-surface/90 to-emerald-50/20 dark:from-teal-950/10 dark:via-slate-900/80 dark:to-emerald-950/10 p-5 sm:p-6 shadow-[0_12px_40px_rgba(13,148,136,0.03)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(13,148,136,0.06)] hover:border-teal-500/20">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex gap-4 items-start min-w-0">
-                {/* Icon trợ lý AI lấp lánh sinh động */}
+          {/* AI Coach Hub - Giao diện Cố vấn Holographic Tương lai */}
+          <div className="relative overflow-hidden rounded-[24px] border border-teal-500/15 dark:border-teal-900/30 bg-gradient-to-br from-teal-500/5 via-app-surface/95 to-indigo-500/5 dark:from-teal-950/10 dark:via-slate-900/80 dark:to-indigo-950/10 p-5 sm:p-6 shadow-[0_12px_40px_rgba(13,148,136,0.03)] transition-all duration-300 hover:shadow-[0_12px_45px_rgba(13,148,136,0.06)] hover:border-teal-500/25">
+            {/* Background glowing decor */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex gap-4 items-start min-w-0 flex-1">
+                {/* Mindfulness Orb phát sáng nhịp thở */}
                 <div className="flex-shrink-0 relative">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 via-emerald-500 to-indigo-500 text-white shadow-lg shadow-teal-500/20 transition-transform duration-300 hover:scale-105 group/avatar">
-                    <Sparkles className="h-5.5 w-5.5 animate-[spin_8s_linear_infinite]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 via-emerald-400 to-indigo-500 text-white shadow-lg shadow-teal-500/20 border border-teal-300/30 dark:border-teal-700/20 transition-transform duration-300 hover:scale-105 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 via-emerald-500/20 to-indigo-500/20 animate-pulse blur-sm" />
+                    <Sparkles className="h-5.5 w-5.5 text-white relative z-10 animate-[spin_10s_linear_infinite]" />
                   </div>
-                  {/* Vạch chỉ báo Online nhấp nháy tinh xảo đè lên ở góc dưới phải */}
+                  {/* Chỉ báo hoạt động */}
                   <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-sm" aria-hidden="true">
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </span>
                 </div>
 
-                {/* Bong bóng thoại */}
-                <div className="space-y-2 min-w-0">
-                  <div className="flex items-center gap-2">
+                {/* Nội dung bong bóng AI */}
+                <div className="space-y-3 min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
                       Cố vấn mục tiêu AI
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/5 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/5 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
                       Trực tuyến
                     </span>
                   </div>
 
-                  <div className="relative bg-white/70 dark:bg-slate-900/60 border border-teal-500/10 rounded-2xl rounded-tl-none p-4 shadow-sm text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+                  <div className="relative bg-white/60 dark:bg-slate-900/65 border border-teal-500/10 rounded-2xl rounded-tl-none p-4 shadow-sm text-sm text-slate-800 dark:text-slate-200">
                     {/* Đuôi bong bóng thoại */}
-                    <div className="absolute -left-2 top-0 w-2 h-2 bg-white/70 dark:bg-slate-900/60 border-l border-t border-teal-500/10 rotate-45 transform origin-top-right hidden sm:block" />
+                    <div className="absolute -left-2 top-0 w-2 h-2 bg-white/60 dark:bg-slate-900/65 border-l border-t border-teal-500/10 rotate-45 transform origin-top-right hidden sm:block" />
                     
-                    <p className="font-serif italic text-[14.5px] leading-relaxed text-slate-700 dark:text-slate-300">
-                      “{starterPreview}”
+                    <p className="font-serif italic text-[14.5px] leading-relaxed text-slate-700 dark:text-slate-350 min-h-[44px]">
+                      “{typedCoachText}”
                     </p>
-                    <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 select-none">
+                    
+                    <div className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 select-none border-t border-teal-500/5 pt-2">
                       <Sparkles className="h-3.5 w-3.5 text-teal-500 animate-pulse" />
-                      <span>Gợi ý chánh niệm giúp bạn điền nhanh biểu mẫu.</span>
+                      <span>Gợi ý chánh niệm giúp bạn nhanh chóng điền chuẩn xác.</span>
+                    </div>
+
+                    {/* Thanh đo sức mạnh mục tiêu thời gian thực */}
+                    <div className="mt-4 pt-3 border-t border-teal-500/10 grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[10px] font-bold">
+                          <span className="text-slate-500 dark:text-slate-400">Độ rõ nét (Clarity)</span>
+                          <span className="text-teal-600 dark:text-teal-400">{Math.round(clarityProgress)}%</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-indigo-500 transition-all duration-500" style={{ width: `${clarityProgress}%` }} />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[10px] font-bold">
+                          <span className="text-slate-500 dark:text-slate-400">Khả thi (Feasibility)</span>
+                          <span className="text-emerald-600 dark:text-emerald-400">{feasibilityScore}%</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                          <div 
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500 bg-gradient-to-r",
+                              feasibilityScore >= 80 ? "from-emerald-400 to-teal-500" :
+                              feasibilityScore >= 60 ? "from-amber-400 to-emerald-500" : "from-rose-400 to-amber-550"
+                            )} 
+                            style={{ width: `${feasibilityScore}%` }} 
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 px-5 py-3 text-xs font-bold text-white shadow-md shadow-teal-500/10 transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.98] sm:w-auto"
-                onClick={onApplyStarter}
-                aria-label={`Dùng gợi ý cho bước ${step.label}`}
-              >
-                <Sparkles className="h-3.5 w-3.5 animate-[pulse_1.5s_infinite]" />
-                Sử dụng gợi ý này
-              </button>
+              {/* Bảng điều khiển Giọng điệu cố vấn + Nút áp dụng gợi ý */}
+              <div className="flex flex-col gap-3 shrink-0 w-full sm:w-48">
+                {/* Lựa chọn giọng điệu */}
+                <div className="bg-slate-100/60 dark:bg-slate-900/60 p-2.5 rounded-xl border border-app-line">
+                  <span className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 select-none">
+                    Giọng điệu Cố vấn:
+                  </span>
+                  <div className="grid grid-cols-3 gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTone("empathetic")}
+                      className={cn(
+                        "py-1 text-[10px] font-bold rounded-lg border transition-all duration-205",
+                        selectedTone === "empathetic"
+                          ? "bg-teal-500 text-white border-teal-500 shadow-sm"
+                          : "bg-white dark:bg-slate-800 border-app-line text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      )}
+                      title="Đồng cảm & Chánh niệm"
+                    >
+                      ✨
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTone("pragmatic")}
+                      className={cn(
+                        "py-1 text-[10px] font-bold rounded-lg border transition-all duration-205",
+                        selectedTone === "pragmatic"
+                          ? "bg-teal-500 text-white border-teal-500 shadow-sm"
+                          : "bg-white dark:bg-slate-800 border-app-line text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      )}
+                      title="Thực tế & Hành động"
+                    >
+                      ⚡
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTone("strategic")}
+                      className={cn(
+                        "py-1 text-[10px] font-bold rounded-lg border transition-all duration-205",
+                        selectedTone === "strategic"
+                          ? "bg-teal-500 text-white border-teal-500 shadow-sm"
+                          : "bg-white dark:bg-slate-800 border-app-line text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      )}
+                      title="Chiến lược & Phân tích"
+                    >
+                      🧠
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="relative overflow-hidden inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 px-4 py-3 text-xs font-bold text-white shadow-md shadow-teal-500/10 transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.97] group/shimmer"
+                  onClick={handleApplyTransformedStarter}
+                  aria-label={`Dùng gợi ý cho bước ${step.label}`}
+                >
+                  {/* Shimmer effect reflection */}
+                  <span className="absolute inset-0 w-1/2 h-full bg-white/20 transform -skew-x-12 -translate-x-full group-hover/shimmer:animate-[shimmer_1.5s_ease-in-out_infinite]" />
+                  
+                  <Sparkles className="h-3.5 w-3.5 relative z-10 animate-[pulse_1.5s_infinite]" />
+                  <span className="relative z-10">Sử dụng gợi ý này</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -396,7 +784,7 @@ export function SmartGoalStepShell({
               </div>
               <div className="flex items-center gap-3">
                 <div className="h-2 w-28 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
-                  <div className="h-full rounded-full bg-app-accent transition-all duration-300" style={{ width: `${clarityProgress}%` }} />
+                  <div className="h-full rounded-full bg-app-accent transition-all duration-305" style={{ width: `${clarityProgress}%` }} />
                 </div>
                 <span className="text-xs font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
               </div>
@@ -501,4 +889,3 @@ export function SmartGoalStepShell({
     </section>
   );
 }
-

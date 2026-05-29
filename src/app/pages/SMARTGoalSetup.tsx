@@ -374,14 +374,14 @@ export function SMARTGoalSetup() {
     if (nextStep >= 0) setCurrentStep(nextStep);
   };
 
-  const handleApplyStarterForStep = (stepKey: SmartStepKey) => {
+  const handleApplyStarterForStep = (stepKey: SmartStepKey, customText?: string) => {
     setSmartData((previous) => {
       switch (stepKey) {
         case "specific":
           return {
             ...previous,
             specific: {
-              goal_statement: smartGoalStarter.specificGoalStatement,
+              goal_statement: customText || smartGoalStarter.specificGoalStatement,
             },
           };
         case "measurable":
@@ -406,7 +406,7 @@ export function SMARTGoalSetup() {
           return {
             ...previous,
             relevant: {
-              motivation_reason: smartGoalStarter.motivationReason,
+              motivation_reason: customText || smartGoalStarter.motivationReason,
               life_dimension_alignment: smartGoalStarter.lifeDimensionAlignment,
             },
           };
@@ -604,7 +604,7 @@ export function SMARTGoalSetup() {
             isCurrentStepValid={isCurrentStepValid}
             qualityFeedback={qualityFeedback}
             smartData={smartData}
-            onApplyStarter={() => handleApplyStarterForStep(currentStepKey)}
+            onApplyStarter={(transformedText) => handleApplyStarterForStep(currentStepKey, transformedText)}
             onJumpToStep={handleJumpToStep}
             onBack={handleBack}
             onNext={handleNext}

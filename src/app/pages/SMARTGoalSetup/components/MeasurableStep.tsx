@@ -1,5 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { Lightbulb } from "lucide-react";
+import { motion } from "motion/react";
+import { cn } from "@/app/components/ui/utils";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 import { parseNumberInput } from "@/lib/smart-goal";
@@ -99,6 +101,40 @@ export function MeasurableStep({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {(() => {
               const suggestions = (() => {
+                const text = smartData.specific.goal_statement.toLowerCase();
+                
+                // Phân tích từ khóa động
+                if (text.includes("chạy bộ") || text.includes("chạy") || text.includes("thể dục") || text.includes("gym") || text.includes("workout")) {
+                  return [
+                    { label: "Chạy bộ: 0 -> 3 buổi/tuần", name: "Số buổi chạy bộ/tuần", baseline: "0", target: "3" },
+                    { label: "Tập gym: 0 -> 4 buổi/tuần", name: "Số buổi tập luyện/tuần", baseline: "0", target: "4" }
+                  ];
+                }
+                if (text.includes("tiếng anh") || text.includes("ielts") || text.includes("english") || text.includes("từ vựng") || text.includes("học từ")) {
+                  return [
+                    { label: "IELTS: 5.5 -> 7.0 điểm", name: "Điểm số IELTS tổng quát", baseline: "5.5", target: "7.0" },
+                    { label: "Từ vựng: 0 -> 300 từ mới", name: "Số từ vựng tiếng Anh học được", baseline: "0", target: "300" }
+                  ];
+                }
+                if (text.includes("lập trình") || text.includes("code") || text.includes("web") || text.includes("react") || text.includes("javascript")) {
+                  return [
+                    { label: "React: 0 -> 12 chương", name: "Số chương học lập trình React", baseline: "0", target: "12" },
+                    { label: "Dự án: 0 -> 2 sản phẩm", name: "Số sản phẩm lập trình thực tế hoàn thành", baseline: "0", target: "2" }
+                  ];
+                }
+                if (text.includes("tiết kiệm") || text.includes("tiền") || text.includes("thu nhập") || text.includes("tài chính") || text.includes("đầu tư")) {
+                  return [
+                    { label: "Tích lũy: 0 -> 20 triệu đồng", name: "Số tiền tiết kiệm được (triệu đồng)", baseline: "0", target: "20" },
+                    { label: "Chi tiêu: 0% -> 15% cắt giảm", name: "Tỷ lệ cắt giảm chi tiêu không cần thiết (%)", baseline: "0", target: "15" }
+                  ];
+                }
+                if (text.includes("viết") || text.includes("blog") || text.includes("bài viết") || text.includes("đăng bài") || text.includes("sách")) {
+                  return [
+                    { label: "Blog: 0 -> 6 bài viết", name: "Số bài viết blog xuất bản", baseline: "0", target: "6" },
+                    { label: "Trang sách: 0 -> 200 trang", name: "Số trang sách đã viết xong", baseline: "0", target: "200" }
+                  ];
+                }
+
                 switch (activeArchetype) {
                   case "habit_building":
                     return [
@@ -238,6 +274,84 @@ export function MeasurableStep({
         </div>
       </div>
       <p className={helperTextClass}>Nhập cả hai mốc thì mốc mục tiêu phải lớn hơn mốc hiện tại.</p>
+
+      {/* Thước đo tiến độ động (Interactive Goal Gauge) */}
+      {(() => {
+        const hasBaseline = smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue !== undefined;
+        const hasTarget = smartData.measurable.target_value.trim().length > 0 && parsedTargetValue !== undefined;
+
+        if (!hasTarget) return null;
+
+        const baseline = hasBaseline ? (parsedBaselineValue ?? 0) : 0;
+        const target = parsedTargetValue ?? 0;
+        const unit = smartData.measurable.metric_name.trim()
+          ? (smartData.measurable.metric_name.includes("/")
+            ? smartData.measurable.metric_name.split("/")[1].trim()
+            : smartData.measurable.metric_name.trim())
+          : "đơn vị";
+
+        let growthPct = 0;
+        let infoText = "";
+        let themeColor = "bg-blue-500";
+        let glowColor = "shadow-blue-500/20";
+        let statusEmoji = "🚀";
+
+        if (hasBaseline) {
+          const diff = target - baseline;
+          growthPct = baseline > 0 ? (diff / baseline) * 100 : 100;
+
+          if (growthPct <= 20) {
+            infoText = "Mức độ khả thi cao! Rất thực tế để hoàn thành.";
+            themeColor = "bg-emerald-500";
+            glowColor = "shadow-emerald-500/20";
+            statusEmoji = "🟢";
+          } else if (growthPct <= 50) {
+            infoText = "Mục tiêu thách thức vừa phải! Cần hành động kỷ luật.";
+            themeColor = "bg-blue-500";
+            glowColor = "shadow-blue-500/20";
+            statusEmoji = "🟡";
+          } else {
+            infoText = "Đột phá vượt bậc! Hãy thiết lập kế hoạch hành động thật chi tiết.";
+            themeColor = "bg-indigo-500";
+            glowColor = "shadow-indigo-500/20";
+            statusEmoji = "🔥";
+          }
+        } else {
+          infoText = "Chinh phục cột mốc mới từ con số 0!";
+        }
+
+        return (
+          <div className="rounded-2xl border border-teal-100/70 bg-gradient-to-r from-teal-50/10 to-emerald-50/10 dark:border-slate-800 dark:from-slate-900/40 p-4 shadow-sm space-y-3 mt-4 animate-[fade-in_0.3s_ease-out]">
+            <div className="flex items-center justify-between text-xs font-semibold select-none">
+              <span className="text-slate-500 dark:text-slate-400">Thước đo khoảng cách mục tiêu</span>
+              <span className="text-app-accent font-extrabold">
+                {hasBaseline ? `Tăng trưởng: +${growthPct.toFixed(0)}%` : "Bắt đầu từ mốc 0"}
+              </span>
+            </div>
+
+            {/* Thanh Progress Bar trực quan */}
+            <div className="relative h-3 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className={cn("h-full rounded-full shadow-md", themeColor, glowColor)}
+              />
+            </div>
+
+            <div className="flex justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 select-none">
+              <span>{hasBaseline ? `Bắt đầu: ${baseline} ${unit}` : `Khởi điểm: 0 ${unit}`}</span>
+              <span>🎯 Đích: {target} {unit}</span>
+            </div>
+
+            <div className="rounded-xl bg-app-surface border border-app-line px-3 py-2 text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <span className="flex-shrink-0">{statusEmoji}</span>
+              <span>{infoText}</span>
+            </div>
+          </div>
+        );
+      })()}
+
       <ArchetypeHint archetype={activeArchetype} variant="metric" />
       <GoalArchetypeExamples archetype={intentArchetype} variant="metric" />
     </div>
