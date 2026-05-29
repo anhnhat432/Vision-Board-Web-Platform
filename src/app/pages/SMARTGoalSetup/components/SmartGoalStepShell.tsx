@@ -21,7 +21,7 @@ import { cn } from "@/app/components/ui/utils";
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
 import { SMART_STEPS } from "../constants";
-import type { GoalClarityItem, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
+import type { GoalClarityItem, SMARTData, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
 
 interface QualityFeedbackData {
   level: QualityLevel;
@@ -47,6 +47,7 @@ interface SmartGoalStepShellProps {
   currentStepSoftWarning: string | null;
   isCurrentStepValid: boolean;
   qualityFeedback: QualityFeedbackData | null;
+  smartData: SMARTData;
   onApplyStarter: () => void;
   onJumpToStep: (stepKey: SmartStepKey) => void;
   onBack: () => void;
@@ -93,6 +94,7 @@ export function SmartGoalStepShell({
   currentStepSoftWarning,
   isCurrentStepValid,
   qualityFeedback,
+  smartData,
   onApplyStarter,
   onJumpToStep,
   onBack,
@@ -104,6 +106,21 @@ export function SmartGoalStepShell({
       onJumpToStep(nextStep.key);
     }
   };
+
+  const specText = smartData.specific.goal_statement.trim();
+  const measTarget = smartData.measurable.target_value.trim();
+  const measUnit = smartData.measurable.metric_name.includes("/") ? smartData.measurable.metric_name.split("/")[1].trim() : "đơn vị";
+  const achHours = smartData.achievable.weekly_time_commitment_hours.trim();
+  const relReason = smartData.relevant.motivation_reason.trim();
+  const timeDate = smartData.timeBound.mode === "date" 
+    ? smartData.timeBound.target_date.trim() 
+    : smartData.timeBound.target_weeks.trim() ? `trong ${smartData.timeBound.target_weeks.trim()} tuần` : "";
+
+  const isSpecFilled = specText.length > 0;
+  const isMeasFilled = measTarget.length > 0;
+  const isAchFilled = achHours.length > 0;
+  const isRelFilled = relReason.length > 0;
+  const isTimeFilled = timeDate.length > 0;
 
   return (
     <section
@@ -172,6 +189,47 @@ export function SmartGoalStepShell({
       </ol>
 
       <div className="my-6 h-px bg-app-line" aria-hidden="true" />
+
+      {/* Live Goal Preview Panel */}
+      <div className="mb-6 rounded-xl border border-app-line/70 bg-gradient-to-br from-indigo-50/15 via-app-surface to-emerald-50/15 dark:from-slate-900 dark:via-app-surface dark:to-teal-950/10 p-4.5 shadow-sm relative overflow-hidden transition-all duration-300">
+        <div className="absolute -top-1 -right-1 text-xl rotate-12 opacity-70 animate-[float_4s_ease-in-out_infinite] select-none pointer-events-none">✨</div>
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-accent mb-2.5 flex items-center gap-1.5">
+          <span>🔮</span> Bảng xem trước mục tiêu (Live Preview)
+        </p>
+        <div className="text-sm md:text-base leading-relaxed text-app-ink/90 font-serif">
+          Tôi quyết tâm{" "}
+          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300", 
+            isSpecFilled ? "bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+          )}>
+            {isSpecFilled ? specText : "[làm việc cụ thể này]"}
+          </span>{" "}
+          🎯. Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
+          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300", 
+            isMeasFilled ? "bg-blue-100/70 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300" : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+          )}>
+            {isMeasFilled ? `${measTarget} ${measUnit}` : "[chỉ số mục tiêu]"}
+          </span>{" "}
+          📊. Tôi cam kết dành ra{" "}
+          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300", 
+            isAchFilled ? "bg-amber-100/70 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300" : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+          )}>
+            {isAchFilled ? `${achHours} giờ mỗi tuần` : "[số tiếng/tuần]"}
+          </span>{" "}
+          ⚡ để hành động. Việc này rất quan trọng vì{" "}
+          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300", 
+            isRelFilled ? "bg-rose-100/70 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300" : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+          )}>
+            {isRelFilled ? relReason : "[lý do sâu sắc của bạn]"}
+          </span>{" "}
+          ❤️ và thời hạn hoàn thành trước{" "}
+          <span className={cn("px-1.5 py-0.5 rounded font-bold transition-all duration-300", 
+            isTimeFilled ? "bg-purple-100/70 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300" : "text-app-ink-muted bg-app-bg/50 italic border-b border-dashed border-app-ink-muted/30"
+          )}>
+            {isTimeFilled ? timeDate : "[thời gian đích]"}
+          </span>{" "}
+          📅.
+        </div>
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div

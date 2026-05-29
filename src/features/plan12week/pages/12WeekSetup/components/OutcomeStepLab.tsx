@@ -53,6 +53,96 @@ const chipClass =
 
 const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
 
+interface MilestoneRoadmapProps {
+  week4: string;
+  week8: string;
+  week12: string;
+}
+
+function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
+  const isW4Filled = week4.trim().length > 0;
+  const isW8Filled = week8.trim().length > 0;
+  const isW12Filled = week12.trim().length > 0;
+
+  return (
+    <div className="w-full py-5 select-none bg-app-bg/50 rounded-2xl border border-app-line/60 p-4 mb-6">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-app-accent mb-5 text-center flex items-center justify-center gap-1">
+        <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
+        Bản đồ chặng đường 12 tuần của bạn
+      </p>
+      <div className="relative flex items-center justify-between w-full max-w-lg mx-auto px-6">
+        {/* Đường nối nền */}
+        <div className="absolute left-8 right-8 top-[22px] h-1 bg-app-line/70 dark:bg-app-line/30 rounded-full" />
+        
+        {/* Đường nối phát sáng */}
+        <div 
+          className="absolute left-8 top-[22px] h-1 bg-gradient-to-r from-app-accent via-amber-400 to-emerald-500 rounded-full transition-all duration-500" 
+          style={{
+            width: isW12Filled 
+              ? "calc(100% - 64px)" 
+              : isW8Filled 
+                ? "66%" 
+                : isW4Filled 
+                  ? "33%" 
+                  : "0%"
+          }}
+        />
+
+        {/* Trạm 1: Tuần 1 */}
+        <div className="relative flex flex-col items-center z-10">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-app-accent bg-app-surface text-base shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.15)]">
+            🚀
+          </div>
+          <span className="mt-2 text-[11px] font-bold text-app-ink">Khởi động</span>
+          <span className="text-[9px] text-app-ink-muted">Tuần 1</span>
+        </div>
+
+        {/* Trạm 2: Tuần 4 */}
+        <div className="relative flex flex-col items-center z-10">
+          <div className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 text-base bg-app-surface",
+            isW4Filled 
+              ? "border-app-accent text-app-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.1)]" 
+              : "border-app-line text-app-ink-muted opacity-50"
+          )}>
+            {isW4Filled ? "🚩" : "⚪"}
+          </div>
+          <span className={cn("mt-2 text-[11px] font-semibold transition-colors duration-300", isW4Filled ? "text-app-ink" : "text-app-ink-muted")}>Tuần 4</span>
+          <span className="text-[9px] text-app-ink-muted">{isW4Filled ? "Đã đặt" : "Chờ mốc"}</span>
+        </div>
+
+        {/* Trạm 3: Tuần 8 */}
+        <div className="relative flex flex-col items-center z-10">
+          <div className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 text-base bg-app-surface",
+            isW8Filled 
+              ? "border-app-accent text-app-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.1)]" 
+              : "border-app-line text-app-ink-muted opacity-50"
+          )}>
+            {isW8Filled ? "🚩" : "⚪"}
+          </div>
+          <span className={cn("mt-2 text-[11px] font-semibold transition-colors duration-300", isW8Filled ? "text-app-ink" : "text-app-ink-muted")}>Tuần 8</span>
+          <span className="text-[9px] text-app-ink-muted">{isW8Filled ? "Đã đặt" : "Chờ mốc"}</span>
+        </div>
+
+        {/* Trạm 4: Tuần 12 */}
+        <div className="relative flex flex-col items-center z-10">
+          <div className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 text-base bg-app-surface",
+            isW12Filled 
+              ? "border-emerald-500 text-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.2)]" 
+              : "border-app-line text-app-ink-muted opacity-50"
+          )}>
+            {isW12Filled ? "🏆" : "⚪"}
+          </div>
+          <span className={cn("mt-2 text-[11px] font-bold transition-colors duration-300", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-app-ink-muted")}>Tuần 12</span>
+          <span className="text-[9px] text-app-ink-muted">{isW12Filled ? "Đích đến" : "Chờ mốc"}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OutcomeStepLab({
   feasibility,
   draft,
@@ -103,20 +193,56 @@ export function OutcomeStepLab({
           </span>
         </div>
 
+        {/* Milestone Roadmap */}
+        <MilestoneRoadmap
+          week4={draft.week4Milestone}
+          week8={draft.week8Milestone}
+          week12={draft.week12Outcome}
+        />
+
         <div className="mt-5 space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="milestone-week-4" className={labelClass}>
+                Cột mốc sau 4 tuần
+              </label>
+              <Input
+                id="milestone-week-4"
+                value={draft.week4Milestone}
+                className={inputClass}
+                onChange={(event) => onChange("week4Milestone", event.target.value)}
+                placeholder="Ví dụ: Hoàn thành bản nháp 1..."
+              />
+              <p className={helperTextClass}>Mục tiêu đạt được sau 1/3 chặng đường.</p>
+            </div>
+            <div>
+              <label htmlFor="milestone-week-8" className={labelClass}>
+                Cột mốc sau 8 tuần
+              </label>
+              <Input
+                id="milestone-week-8"
+                value={draft.week8Milestone}
+                className={inputClass}
+                onChange={(event) => onChange("week8Milestone", event.target.value)}
+                placeholder="Ví dụ: Hoàn thiện tính năng chính..."
+              />
+              <p className={helperTextClass}>Mục tiêu đạt được sau 2/3 chặng đường.</p>
+            </div>
+          </div>
+
           <div>
             <label htmlFor="week-12-outcome" className={labelClass}>
-              Đích đến sau 12 tuần
+              Đích đến sau 12 tuần (Tuần 12)
             </label>
             <Textarea
               id="week-12-outcome"
-              rows={4}
+              rows={3}
               value={draft.week12Outcome}
               aria-invalid={Boolean(milestoneError)}
               aria-describedby={milestoneError ? "week-12-outcome-error" : "week-12-outcome-helper"}
               className={cn(
                 textareaClass,
-                "min-h-[150px]",
+                "min-h-[100px]",
                 milestoneError &&
                   "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
               )}
@@ -129,7 +255,7 @@ export function OutcomeStepLab({
               </p>
             ) : (
               <p id="week-12-outcome-helper" className={helperTextClass}>
-                Mô tả trạng thái bạn muốn đạt được khi 12 tuần kết thúc. Đây là đích đến cuối chu kỳ, không phải việc cần làm mỗi ngày.
+                Mô tả trạng thái bạn muốn đạt được khi 12 tuần kết thúc. Đây là đích đến cuối chu kỳ.
               </p>
             )}
           </div>
@@ -357,56 +483,59 @@ export function OutcomeStepLab({
           </p>
 
           {recommendedTemplate && adaptiveTemplateRecommendation ? (
-            <div className="rounded-xl border border-app-line bg-app-bg p-4.5 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-app-accent">
-                    Gợi ý cho mục tiêu này
-                  </p>
-                  <p className="mt-2 text-lg font-bold text-app-ink">{recommendedTemplate.name}</p>
-                  <p className="mt-2 text-xs leading-relaxed text-app-ink-soft">{adaptiveTemplateRecommendation.reason}</p>
-                </div>
-                <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-muted">
-                  {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
-                </span>
-              </div>
-              <button
-                type="button"
-                className={cn(
-                  "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto active:scale-[0.98]",
-                  selectedTemplate?.id === recommendedTemplate.id
-                    ? "border border-app-accent bg-app-accent-soft text-app-accent"
-                    : "bg-app-accent text-white hover:bg-app-accent",
-                )}
-                onClick={() => onTemplateSelect(recommendedTemplate)}
-              >
-                {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
-              </button>
-              {recommendedTemplateSupport ? (
-                <details className="group mt-4 rounded-xl border border-app-line bg-app-surface px-4 py-3 [&::-webkit-details-marker]:hidden">
-                  <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
-                    <span>Xem chi tiết gợi ý giữ nhịp</span>
-                    <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-                  </summary>
-                  <div className="mt-3 border-t border-app-line/60 pt-3 grid gap-3 sm:grid-cols-2">
-                    <div className={infoBoxClass}>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                        Tuần 1 nên thắng ở đâu
-                      </p>
-                      <p className="mt-2 text-sm font-bold text-app-ink">
-                        {recommendedTemplateSupport.week1Headline}
-                      </p>
-                      <p className="mt-1.5 leading-relaxed">{recommendedTemplateSupport.week1Support}</p>
+            <div className="relative rounded-xl border border-transparent p-[1.5px] bg-gradient-to-br from-app-accent via-amber-400 to-emerald-500 shadow-md">
+              <div className="rounded-[10px] bg-app-surface p-4.5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-app-accent">
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+                      Đề xuất nhiều nhất cho bạn (Recommended)
                     </div>
-                    <div className={infoBoxClass}>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                        Nhịp nên giữ
-                      </p>
-                      <p className="mt-2 leading-relaxed">{recommendedTemplateSupport.week1CadenceHint}</p>
-                    </div>
+                    <p className="mt-2 text-lg font-bold text-app-ink">{recommendedTemplate.name}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-app-ink-soft">{adaptiveTemplateRecommendation.reason}</p>
                   </div>
-                </details>
-              ) : null}
+                  <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-muted">
+                    {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={cn(
+                    "mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto active:scale-[0.98]",
+                    selectedTemplate?.id === recommendedTemplate.id
+                      ? "border border-app-accent bg-app-accent-soft text-app-accent"
+                      : "bg-app-accent text-white hover:bg-app-accent",
+                  )}
+                  onClick={() => onTemplateSelect(recommendedTemplate)}
+                >
+                  {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
+                </button>
+                {recommendedTemplateSupport ? (
+                  <details className="group mt-4 rounded-xl border border-app-line bg-app-surface px-4 py-3 [&::-webkit-details-marker]:hidden">
+                    <summary className="flex min-h-11 cursor-pointer items-center justify-between list-none rounded-md px-2 text-xs font-semibold text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 p-1">
+                      <span>Xem chi tiết gợi ý giữ nhịp</span>
+                      <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+                    </summary>
+                    <div className="mt-3 border-t border-app-line/60 pt-3 grid gap-3 sm:grid-cols-2">
+                      <div className={infoBoxClass}>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+                          Tuần 1 nên thắng ở đâu
+                        </p>
+                        <p className="mt-2 text-sm font-bold text-app-ink">
+                          {recommendedTemplateSupport.week1Headline}
+                        </p>
+                        <p className="mt-1.5 leading-relaxed">{recommendedTemplateSupport.week1Support}</p>
+                      </div>
+                      <div className={infoBoxClass}>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+                          Nhịp nên giữ
+                        </p>
+                        <p className="mt-2 leading-relaxed">{recommendedTemplateSupport.week1CadenceHint}</p>
+                      </div>
+                    </div>
+                  </details>
+                ) : null}
+              </div>
             </div>
           ) : null}
 
@@ -419,6 +548,7 @@ export function OutcomeStepLab({
               {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
                 const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
                 const isSelected = selectedTemplate?.id === template.id;
+                const isRecommended = recommendedTemplate?.id === template.id;
                 const templateAriaLabel = isLocked
                   ? `${template.name} — cần gói Plus để dùng khung này`
                   : `${template.name}${isSelected ? " — đang dùng" : ""}`;
@@ -433,16 +563,23 @@ export function OutcomeStepLab({
                     className={cn(
                       "min-h-11 rounded-xl border p-4 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                       isSelected && "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
-                      !isSelected &&
+                      !isSelected && isRecommended && "border-amber-400 bg-amber-500/[0.02] text-app-ink hover:border-app-accent/40 hover:bg-app-bg shadow-[0_2px_8px_rgba(245,158,11,0.05)]",
+                      !isSelected && !isRecommended &&
                         isLocked &&
                         "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/5",
-                      !isSelected && !isLocked && "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-bg",
+                      !isSelected && !isRecommended && !isLocked && "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-bg",
                     )}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-sm font-bold">{template.name}</p>
+                          {isRecommended && (
+                            <span className="flex items-center gap-0.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider animate-pulse">
+                              <Sparkles className="h-2.5 w-2.5" />
+                              Khuyên dùng
+                            </span>
+                          )}
                           <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-app-ink-muted">
                             {template.requiredPlan ? `Khung ${getPlanLabel(template.requiredPlan)}` : "Khung miễn phí"}
                           </span>

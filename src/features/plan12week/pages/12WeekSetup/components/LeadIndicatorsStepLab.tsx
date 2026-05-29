@@ -280,31 +280,58 @@ export function LeadIndicatorsStepLab({
                       <label htmlFor={`tactic-target-${index}`} className={labelClass}>
                         Số lần / tuần
                       </label>
-                      <Input
-                        id={`tactic-target-${index}`}
-                        value={indicator.target}
-                        aria-invalid={Boolean(indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`))}
-                        aria-describedby={
-                          indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`)
-                            ? `tactic-target-${index}-error`
-                            : `tactic-target-${index}-helper`
-                        }
-                        className={cn(
-                          inputClass,
-                          indicatorTargetErrors[index] &&
-                            shouldShowFieldError(`target-${indicator.id}`) &&
-                            "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
-                        )}
-                        onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
-                        placeholder="Ví dụ: 2"
-                      />
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const val = parseInt(indicator.target.trim(), 10);
+                            const currentVal = Number.isNaN(val) ? 0 : val;
+                            const newVal = Math.max(1, currentVal - 1);
+                            onIndicatorChange(index, "target", newVal.toString());
+                          }}
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-surface text-lg font-bold text-app-ink transition-colors hover:bg-app-bg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent"
+                        >
+                          -
+                        </button>
+                        <Input
+                          id={`tactic-target-${index}`}
+                          value={indicator.target}
+                          aria-invalid={Boolean(indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`))}
+                          aria-describedby={
+                            indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`)
+                              ? `tactic-target-${index}-error`
+                              : `tactic-target-${index}-helper`
+                          }
+                          className={cn(
+                            inputClass,
+                            "text-center mt-0",
+                            indicatorTargetErrors[index] &&
+                              shouldShowFieldError(`target-${indicator.id}`) &&
+                              "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                          )}
+                          onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
+                          placeholder="Ví dụ: 2"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const val = parseInt(indicator.target.trim(), 10);
+                            const currentVal = Number.isNaN(val) ? 0 : val;
+                            const newVal = Math.min(21, currentVal + 1);
+                            onIndicatorChange(index, "target", newVal.toString());
+                          }}
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-surface text-lg font-bold text-app-accent transition-colors hover:bg-app-bg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent"
+                        >
+                          +
+                        </button>
+                      </div>
                       {indicatorTargetErrors[index] && shouldShowFieldError(`target-${indicator.id}`) ? (
                         <p id={`tactic-target-${index}-error`} role="alert" className={errorTextClass}>
                           {indicatorTargetErrors[index]}
                         </p>
                       ) : (
                         <p id={`tactic-target-${index}-helper`} className={helperTextClass}>
-                          Nhập số lần bạn muốn hoàn thành việc này trong mỗi tuần.
+                          Nhập hoặc dùng nút (+/-) chọn số lần hoàn thành mỗi tuần.
                         </p>
                       )}
                     </div>

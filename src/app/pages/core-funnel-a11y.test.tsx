@@ -412,6 +412,7 @@ describe("SmartGoalStepShell — a11y", () => {
         currentStepSoftWarning={null}
         isCurrentStepValid={false}
         qualityFeedback={null}
+        smartData={makeSmartData()}
         onApplyStarter={() => {}}
         onJumpToStep={() => {}}
         onBack={() => {}}

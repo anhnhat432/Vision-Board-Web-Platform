@@ -21,6 +21,19 @@ interface FeasibilityStepShellProps {
   headingRef: Ref<HTMLHeadingElement>;
 }
 
+function getOptionEmoji(qId: number, value: string): string {
+  const emojiMap: Record<number, Record<string, string>> = {
+    1: { lt1: "⏳", "1to3": "🕐", "3to5": "📅", gt5: "⚡" },
+    2: { energy_drained: "😭", energy_low: "🥱", energy_stable: "🙂", energy_high: "🔥" },
+    3: { resources_missing: "🤷‍♂️", resources_basic: "📚", resources_mostly_ready: "🛠️", resources_ready: "🚀" },
+    4: { overwhelming: "🤯", challenging: "🧗‍♂️", realistic: "🎯", very_realistic: "👑" },
+    5: { motivation: "💤", time: "⏰", resources: "📦", complexity: "🌀", none: "☀️" },
+    6: { rarely: "🏜️", sometimes: "⛅", mostly: "🏡", always: "⚓" },
+    7: { exploring: "🤔", interested: "👀", ready: "👍", committed: "🦁" }
+  };
+  return emojiMap[qId]?.[value] || "✨";
+}
+
 export function FeasibilityStepShell({
   currentQuestion,
   currentStep,
@@ -71,7 +84,7 @@ export function FeasibilityStepShell({
                 {currentQuestion.helper}
               </p>
             </div>
-            <span className="inline-flex w-fit items-center justify-center rounded-full bg-app-accent-soft px-3 py-1 text-xs font-bold text-app-accent">
+            <span className="inline-flex w-fit items-center justify-center rounded-full bg-app-accent-soft px-3 py-1 text-xs font-bold text-app-accent animate-pulse">
               Đã trả lời {answeredQuestionCount}/{totalSteps}
             </span>
           </div>
@@ -103,19 +116,24 @@ export function FeasibilityStepShell({
                     htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
                     className={cn(
                       "flex w-full min-h-[5.5rem] cursor-pointer flex-col justify-between rounded-[14px] border p-4 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30",
-                    isSelected
-                      ? "border-app-accent bg-app-accent-soft/30 text-app-accent"
+                      isSelected
+                        ? "border-app-accent bg-gradient-to-br from-app-accent-soft/40 to-app-accent-soft/10 text-app-accent shadow-[0_4px_12px_rgba(var(--color-accent-rgb),0.05)]"
                         : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-ink-muted/50 hover:bg-app-bg hover:text-app-ink"
                     )}
                   >
-                    <span className="flex items-center justify-between gap-3">
-                      <span className={cn(
-                        "inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs font-bold transition-all duration-200",
-                        isSelected
-                          ? "border-app-accent bg-app-accent text-white"
-                          : "border-app-line bg-app-bg text-app-ink-muted group-hover:border-app-ink-soft/40"
-                      )}>
-                        {index + 1}
+                    <span className="flex items-center justify-between gap-3 w-full">
+                      <span className="flex items-center gap-2.5">
+                        <span className={cn(
+                          "inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs font-bold transition-all duration-200",
+                          isSelected
+                            ? "border-app-accent bg-app-accent text-white"
+                            : "border-app-line bg-app-bg text-app-ink-muted group-hover:border-app-ink-soft/40"
+                        )}>
+                          {index + 1}
+                        </span>
+                        <span className="text-lg transition-transform duration-200 group-hover:scale-125 select-none">
+                          {getOptionEmoji(currentQuestion.id, option.value)}
+                        </span>
                       </span>
                       <RadioGroupItem
                         value={option.value}
@@ -132,7 +150,7 @@ export function FeasibilityStepShell({
                         </motion.div>
                       ) : null}
                     </span>
-                    <span className="mt-2.5 leading-relaxed text-app-ink">{option.label}</span>
+                    <span className="mt-3.5 leading-relaxed text-app-ink">{option.label}</span>
                   </Label>
                 </div>
               );

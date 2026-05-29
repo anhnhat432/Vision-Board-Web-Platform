@@ -90,6 +90,68 @@ export function MeasurableStep({
           aria-invalid={showMetricNameError}
           aria-describedby={metricNameDescribedBy}
         />
+        
+        {/* 1-Click Metric Suggestions */}
+        <div className="mt-3 bg-app-bg/40 p-3 rounded-xl border border-app-line/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-wide text-app-accent mb-2 flex items-center gap-1">
+            <span>📊</span> Gợi ý đo lường nhanh (1-Click Suggestions):
+          </p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {(() => {
+              const suggestions = (() => {
+                switch (activeArchetype) {
+                  case "habit_building":
+                    return [
+                      { label: "Chạy bộ: 0 -> 3 buổi/tuần", name: "Số buổi chạy bộ/tuần", baseline: "0", target: "3" },
+                      { label: "Đọc sách: 0 -> 30 trang/ngày", name: "Số trang sách đã đọc/ngày", baseline: "0", target: "30" }
+                    ];
+                  case "skill_learning":
+                    return [
+                      { label: "React: 0 -> 12 chương", name: "Số chương React hoàn thành", baseline: "0", target: "12" },
+                      { label: "Tiếng Anh: 0 -> 300 từ mới", name: "Số từ vựng tiếng Anh học được", baseline: "0", target: "300" }
+                    ];
+                  case "project_completion":
+                    return [
+                      { label: "Bàn giao: 0% -> 100% tiến độ", name: "Phần trăm tiến độ dự án", baseline: "0", target: "100" },
+                      { label: "Blog: 0 -> 3 bài xuất bản", name: "Số bài viết blog đã đăng", baseline: "0", target: "3" }
+                    ];
+                  case "financial_goal":
+                    return [
+                      { label: "Tiết kiệm: 0 -> 15 triệu", name: "Số tiền tích lũy (triệu đồng)", baseline: "0", target: "15" },
+                      { label: "Chi tiêu: 0% -> 15% cắt giảm", name: "Tỷ lệ cắt giảm chi phí sinh hoạt (%)", baseline: "0", target: "15" }
+                    ];
+                  default:
+                    return [
+                      { label: "Hành động: 0 -> 10 lần thực hiện", name: "Số lần thực hiện hành động", baseline: "0", target: "10" },
+                      { label: "Thiền định: 0 -> 15 phút/ngày", name: "Số phút ngồi thiền hàng ngày", baseline: "0", target: "15" }
+                    ];
+                }
+              })();
+
+              return suggestions.map((suggestion) => (
+                <button
+                  key={suggestion.label}
+                  type="button"
+                  onClick={() => {
+                    setSmartData((previous) => ({
+                      ...previous,
+                      measurable: {
+                        metric_name: suggestion.name,
+                        baseline_value: suggestion.baseline,
+                        target_value: suggestion.target,
+                      },
+                    }));
+                    setBlurredFields({ metricName: true, targetValue: true });
+                  }}
+                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-lg border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] w-full block shadow-sm"
+                >
+                  ⚡ <span className="font-semibold">{suggestion.label}</span>
+                </button>
+              ));
+            })()}
+          </div>
+        </div>
+
         <p id="smart-metric-name-hint" className={helperTextClass}>
           Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.
         </p>

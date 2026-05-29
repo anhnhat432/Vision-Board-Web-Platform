@@ -99,6 +99,31 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
             aria-invalid={showTargetWeeksError}
             aria-describedby={showTargetWeeksError ? "smart-target-weeks-error" : undefined}
           />
+          
+          {/* 1-Click Weeks Suggestions */}
+          <div className="mt-2.5 flex flex-wrap gap-2 items-center">
+            <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
+            {["4", "8", "12"].map((weeks) => (
+              <button
+                key={weeks}
+                type="button"
+                onClick={() => {
+                  setSmartData((previous) => ({
+                    ...previous,
+                    timeBound: {
+                      ...previous.timeBound,
+                      target_weeks: weeks,
+                    },
+                  }));
+                  setBlurredFields((previous) => ({ ...previous, targetWeeks: true }));
+                }}
+                className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
+              >
+                {weeks} tuần {weeks === "12" ? " (Khuyên dùng)" : ""}
+              </button>
+            ))}
+          </div>
+
           <p className={helperTextClass}>12 tuần phù hợp nhất với bước lập kế hoạch tiếp theo.</p>
           {showTargetWeeksError ? (
             <FieldError id="smart-target-weeks-error" message="Nhập số tuần mục tiêu lớn hơn 0." role="alert" />
@@ -129,6 +154,39 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
             aria-invalid={showTargetDateError}
             aria-describedby={showTargetDateError ? "smart-target-date-error" : undefined}
           />
+          
+          {/* 1-Click Date Suggestions */}
+          <div className="mt-2.5 flex flex-wrap gap-2 items-center">
+            <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
+            {[4, 8, 12].map((weeks) => {
+              const getFutureDateString = (w: number): string => {
+                const date = new Date();
+                date.setDate(date.getDate() + w * 7);
+                return date.toISOString().split("T")[0];
+              };
+              const futureDate = getFutureDateString(weeks);
+              return (
+                <button
+                  key={weeks}
+                  type="button"
+                  onClick={() => {
+                    setSmartData((previous) => ({
+                      ...previous,
+                      timeBound: {
+                        ...previous.timeBound,
+                        target_date: futureDate,
+                      },
+                    }));
+                    setBlurredFields((previous) => ({ ...previous, targetDate: true }));
+                  }}
+                  className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
+                >
+                  Sau {weeks} tuần ({weeks === 12 ? "12 tuần" : `${weeks} tuần`})
+                </button>
+              );
+            })}
+          </div>
+
           <p className={helperTextClass}>Chọn ngày đủ rõ để nhìn lại tiến độ.</p>
           {showTargetDateError ? (
             <FieldError id="smart-target-date-error" message="Chọn ngày mục tiêu cho kế hoạch này." role="alert" />

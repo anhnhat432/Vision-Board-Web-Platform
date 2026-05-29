@@ -603,6 +603,7 @@ export function SMARTGoalSetup() {
             currentStepSoftWarning={currentStepSoftWarning}
             isCurrentStepValid={isCurrentStepValid}
             qualityFeedback={qualityFeedback}
+            smartData={smartData}
             onApplyStarter={() => handleApplyStarterForStep(currentStepKey)}
             onJumpToStep={handleJumpToStep}
             onBack={handleBack}

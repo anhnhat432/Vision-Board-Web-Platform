@@ -57,6 +57,31 @@ export function AchievableStep({
           aria-invalid={showWeeklyHoursError}
           aria-describedby={showWeeklyHoursError ? "smart-weekly-hours-error" : undefined}
         />
+        
+        {/* 1-Click Hours Suggestions */}
+        <div className="mt-2.5 flex flex-wrap gap-2 items-center">
+          <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
+          {["2", "4", "6", "10"].map((hours) => (
+            <button
+              key={hours}
+              type="button"
+              onClick={() => {
+                setSmartData((previous) => ({
+                  ...previous,
+                  achievable: {
+                    ...previous.achievable,
+                    weekly_time_commitment_hours: hours,
+                  },
+                }));
+                setHasBlurredWeeklyHours(true);
+              }}
+              className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
+            >
+              {hours} giờ/tuần
+            </button>
+          ))}
+        </div>
+
         <p className={helperTextClass}>Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
         {showWeeklyHoursError ? (
           <FieldError id="smart-weekly-hours-error" message="Nhập số giờ mỗi tuần lớn hơn 0." role="alert" />
@@ -80,8 +105,41 @@ export function AchievableStep({
               },
             }))
           }
-          className={textareaClass}
+          className={`${textareaClass} min-h-[80px]`}
         />
+        
+        {/* 1-Click Skills Suggestions */}
+        <div className="mt-2 flex flex-wrap gap-2 items-center">
+          <span className="text-[10px] font-bold text-app-accent">Gợi ý nhanh:</span>
+          {(archetype === "habit_building"
+            ? ["Kỷ luật tự giác", "Quản lý thời gian", "Thiết lập thói quen"]
+            : archetype === "skill_learning"
+              ? ["Tự học nghiên cứu", "Đọc hiểu tài liệu", "Thực hành thực tế"]
+              : archetype === "project_completion"
+                ? ["Lập kế hoạch công việc", "Giải quyết vấn đề", "Quản lý tiến độ"]
+                : ["Quản lý thời gian", "Kỷ luật thực thi"]
+          ).map((skill) => (
+            <button
+              key={skill}
+              type="button"
+              onClick={() => {
+                const current = smartData.achievable.required_skills.trim();
+                const updated = current ? `${current}, ${skill}` : skill;
+                setSmartData((previous) => ({
+                  ...previous,
+                  achievable: {
+                    ...previous.achievable,
+                    required_skills: updated,
+                  },
+                }));
+              }}
+              className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
+            >
+              + {skill}
+            </button>
+          ))}
+        </div>
+
         <p className={helperTextClass}>Liệt kê kỹ năng thật sự ảnh hưởng tới kết quả giai đoạn này.</p>
       </div>
 
@@ -102,8 +160,41 @@ export function AchievableStep({
               },
             }))
           }
-          className={textareaClass}
+          className={`${textareaClass} min-h-[80px]`}
         />
+        
+        {/* 1-Click Resources Suggestions */}
+        <div className="mt-2 flex flex-wrap gap-2 items-center">
+          <span className="text-[10px] font-bold text-app-accent">Gợi ý nhanh:</span>
+          {(archetype === "habit_building"
+            ? ["Ứng dụng ghi nhận", "Người đồng hành", "Chuông báo nhắc nhở"]
+            : archetype === "skill_learning"
+              ? ["Khóa học online", "Mentor hướng dẫn", "Cộng đồng học tập"]
+              : archetype === "project_completion"
+                ? ["Tài liệu hướng dẫn", "Mentor đánh giá", "Trello/Notion"]
+                : ["Lịch tuần cá nhân", "Không gian yên tĩnh"]
+          ).map((res) => (
+            <button
+              key={res}
+              type="button"
+              onClick={() => {
+                const current = smartData.achievable.support_resources.trim();
+                const updated = current ? `${current}, ${res}` : res;
+                setSmartData((previous) => ({
+                  ...previous,
+                  achievable: {
+                    ...previous.achievable,
+                    support_resources: updated,
+                  },
+                }));
+              }}
+              className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
+            >
+              + {res}
+            </button>
+          ))}
+        </div>
+
         <p className={helperTextClass}>Ghi cả người hỗ trợ lẫn tài liệu, công cụ bạn dùng được ngay.</p>
       </div>
 
