@@ -634,7 +634,10 @@ export function SMARTGoalSetup() {
         </div>
       </div>
       {showAnvilEffect && (
-        <AnvilForgingEffect onComplete={() => navigate("/feasibility")} />
+        <AnvilForgingEffect 
+          onComplete={() => navigate("/feasibility")} 
+          goalStatement={smartData.specific.goal_statement}
+        />
       )}
     </PageShell>
   );
