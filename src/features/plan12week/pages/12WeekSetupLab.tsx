@@ -1,27 +1,15 @@
-import { useEffect, useMemo, useCallback, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
 import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { PageShell } from "@/app/components/PageShell";
-import { FormSkeleton } from "@/app/components/ui/skeleton";
 import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
+import { FormSkeleton } from "@/app/components/ui/skeleton";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
-import {
-  APP_STORAGE_KEYS,
-  type LeadIndicatorCommitment,
-  type PricingPlanCode,
-  addGoal,
-  clearGoalPlanningDrafts,
-  formatDateInputValue,
-  getCurrentPlan,
-  getLifeAreaLabel,
-  getUserData,
-  parseCalendarDate,
-  trackAppEvent,
-} from "@/app/utils/storage";
+import { isDemoMode, isRealMode } from "@/app/utils/app-mode";
 import { getScoredLifeArea, hasRealLifeBalance } from "@/app/utils/core-flow-guard";
 import { hasReachedLimit } from "@/app/utils/feature-entitlements";
 import {
@@ -30,23 +18,39 @@ import {
   trackTemplateApplied,
 } from "@/app/utils/monetization-analytics";
 import {
-  TWELVE_WEEK_TEMPLATE_CATALOG,
+  APP_STORAGE_KEYS,
+  addGoal,
+  clearGoalPlanningDrafts,
+  formatDateInputValue,
+  getCurrentPlan,
+  getLifeAreaLabel,
+  getUserData,
+  type LeadIndicatorCommitment,
+  type PricingPlanCode,
+  parseCalendarDate,
+  trackAppEvent,
+} from "@/app/utils/storage";
+import type { AspirationalVision as AspirationalVisionModel } from "@/app/utils/storage-types";
+import {
   buildAdaptiveTemplateRecommendation,
   buildAdaptiveTemplateSupport,
   planSatisfiesRequirement,
+  TWELVE_WEEK_TEMPLATE_CATALOG,
   type TwelveWeekTemplateDefinition,
 } from "@/app/utils/twelve-week-premium";
-import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
-import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
+import { PlanPreviewStepLab } from "@/features/plan12week/components/PlanPreviewStepLab";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
-import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
+import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
-import { createGoal, updateGoal } from "@/services/goalService";
+import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { isDemoMode, isRealMode } from "@/app/utils/app-mode";
-import { cn } from "@/app/components/ui/utils";
-import type { AspirationalVision as AspirationalVisionModel } from "@/app/utils/storage-types";
+import { type PendingSMARTGoal, parsePendingSMARTGoal, parseSmartGoal } from "@/lib/smart-goal";
+import { createGoal, updateGoal } from "@/services/goalService";
+import { LeadIndicatorsStepLab } from "./12WeekSetup/components/LeadIndicatorsStepLab";
+import { OutcomeStepLab } from "./12WeekSetup/components/OutcomeStepLab";
+import { ScheduleStepLab } from "./12WeekSetup/components/ScheduleStepLab";
+import { SetupStepShellLab } from "./12WeekSetup/components/SetupStepShellLab";
 import { STEPS } from "./12WeekSetup/constantsLab";
 import {
   addDays,
@@ -67,15 +71,6 @@ import {
   normalizeReviewDay,
 } from "./12WeekSetup/helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "./12WeekSetup/types";
-import { SetupStepShellLab } from "./12WeekSetup/components/SetupStepShellLab";
-import { OutcomeStepLab } from "./12WeekSetup/components/OutcomeStepLab";
-import { LeadIndicatorsStepLab } from "./12WeekSetup/components/LeadIndicatorsStepLab";
-import { ScheduleStepLab } from "./12WeekSetup/components/ScheduleStepLab";
-import { PlanPreviewStepLab } from "@/features/plan12week/components/PlanPreviewStepLab";
-import { SetupCopilotPanel } from "./12WeekSetup/components/SetupCopilotPanel";
-import { Sheet, SheetContent, SheetTrigger } from "@/app/components/ui/sheet";
-import { Sparkles, SidebarOpen } from "lucide-react";
-
 
 type TwelveWeekSetupGate =
   | "none"
@@ -208,12 +203,41 @@ function readTwelveWeekSetupPrerequisites(): TwelveWeekSetupPrerequisites {
   };
 }
 
+function generateSmartMilestones(specific: string, measurable: string, metricName: string, metricUnit: string) {
+  const textToParse = measurable || specific;
+  const numMatch = textToParse.match(/\d+(\.\d+)?/);
+  const targetNum = numMatch ? parseFloat(numMatch[0]) : null;
+  const unit =
+    metricUnit || textToParse.match(/(kg|bài|triệu|trang|giờ|khách|%|usd|câu|chương|buổi)/i)?.[0] || "đơn vị";
+
+  if (targetNum && targetNum > 0) {
+    const w4Val = Math.round((targetNum / 3) * 10) / 10;
+    const w8Val = Math.round(((targetNum * 2) / 3) * 10) / 10;
+    const name = metricName || "Chỉ số chính";
+
+    return {
+      week4Milestone: `Hoàn thành 33% chặng đường: đạt mốc ${w4Val} ${unit}`,
+      week8Milestone: `Hoàn thành 66% chặng đường: đạt mốc ${w8Val} ${unit}`,
+      lagMetricTarget: String(targetNum),
+      lagMetricName: name,
+      lagMetricUnit: unit,
+    };
+  }
+
+  return {
+    week4Milestone: "Hoàn thành 1/3 khối lượng công việc, xây dựng nền tảng ban đầu",
+    week8Milestone: "Hoàn thành 2/3 khối lượng công việc, chạy thử và hoàn thiện cốt lõi",
+    lagMetricTarget: "1",
+    lagMetricName: metricName || "Mức độ hoàn thành",
+    lagMetricUnit: metricUnit || "kế hoạch",
+  };
+}
+
 export function TwelveWeekSetupLab() {
   const navigate = useNavigate();
   const { actions: planSetupActions } = usePlanSetupSync();
   const auth = useAuthContext();
   const [currentStep, setCurrentStep] = useState(0);
-  const [isCopilotOpen, setIsCopilotOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [setupGate, setSetupGate] = useState<TwelveWeekSetupGate>("none");
   const [currentPlan, setCurrentPlan] = useState<PricingPlanCode>(getCurrentPlan());
@@ -224,7 +248,7 @@ export function TwelveWeekSetupLab() {
   const [smartGoal, setSmartGoal] = useState<PendingSMARTGoal | null>(null);
   const [feasibility, setFeasibility] = useState<PendingFeasibilityResult | null>(null);
   const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
-  const [isVisionPromptDismissed, setIsVisionPromptDismissed] = useState(false);
+  const [_isVisionPromptDismissed, _setIsVisionPromptDismissed] = useState(false);
   const [attemptedStepIndexes, setAttemptedStepIndexes] = useState<Record<number, boolean>>({});
   const [draft, setDraft] = useState<TwelveWeekSetupDraft>({
     templateId: "",
@@ -279,28 +303,66 @@ export function TwelveWeekSetupLab() {
     setFeasibility(prerequisites.parsedFeasibility);
     setCurrentPlan(prerequisites.setupPlan);
 
+    const adaptiveRecommendation = buildAdaptiveTemplateRecommendation({
+      readinessScore: prerequisites.parsedFeasibility.adjustedScore,
+      goalStatement: prerequisites.parsedSmartGoal.specific,
+      measurableText: prerequisites.parsedSmartGoal.measurable,
+    });
+    const recommendedTpl = adaptiveRecommendation
+      ? (TWELVE_WEEK_TEMPLATE_CATALOG.find((t) => t.id === adaptiveRecommendation.templateId) ?? null)
+      : null;
+
+    const smartMilestones = generateSmartMilestones(
+      prerequisites.parsedSmartGoal.specific,
+      prerequisites.parsedSmartGoal.measurable,
+      prerequisites.smartGoalMetricName,
+      prerequisites.smartGoalMetricUnit,
+    );
+
     setDraft((previousDraft) => {
       const baseDraft = {
         ...previousDraft,
+        templateId: recommendedTpl?.id ?? "",
+        goalType: recommendedTpl?.goalType ?? "Personal Growth",
         vision12Week:
           previousDraft.vision12Week ||
+          recommendedTpl?.vision12Week ||
           `Trong 12 tuần tới, tôi muốn biến mục tiêu "${prerequisites.parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
         week12Outcome:
           previousDraft.week12Outcome ||
+          recommendedTpl?.week12Outcome ||
           prerequisites.parsedSmartGoal.measurable ||
           prerequisites.parsedSmartGoal.specific,
-        lagMetricName:
-          previousDraft.lagMetricName ||
-          prerequisites.smartGoalMetricName ||
-          prerequisites.parsedSmartGoal.measurable ||
-          "Chỉ số kết quả chính",
-        lagMetricUnit: previousDraft.lagMetricUnit || prerequisites.smartGoalMetricUnit,
+        week4Milestone:
+          previousDraft.week4Milestone || recommendedTpl?.week4Milestone || smartMilestones.week4Milestone,
+        week8Milestone:
+          previousDraft.week8Milestone || recommendedTpl?.week8Milestone || smartMilestones.week8Milestone,
+        lagMetricName: previousDraft.lagMetricName || recommendedTpl?.lagMetricName || smartMilestones.lagMetricName,
+        lagMetricTarget:
+          previousDraft.lagMetricTarget || recommendedTpl?.lagMetricTarget || smartMilestones.lagMetricTarget,
+        lagMetricUnit: previousDraft.lagMetricUnit || recommendedTpl?.lagMetricUnit || smartMilestones.lagMetricUnit,
         tacticLoadPreference:
           previousDraft.tacticLoadPreference === "balanced"
-            ? prerequisites.feasibilityDefaults.tacticLoadPreference
+            ? prerequisites.feasibilityDefaults.tacticLoadPreference || "balanced"
             : previousDraft.tacticLoadPreference,
-        dailyTimeBudget: previousDraft.dailyTimeBudget || prerequisites.feasibilityDefaults.dailyTimeBudget,
-        personalConstraint: previousDraft.personalConstraint || prerequisites.feasibilityDefaults.personalConstraint,
+        dailyTimeBudget: previousDraft.dailyTimeBudget || prerequisites.feasibilityDefaults.dailyTimeBudget || "1h",
+        personalConstraint: (previousDraft.personalConstraint ||
+          (prerequisites.feasibilityDefaults.personalConstraint === "time" ||
+          prerequisites.feasibilityDefaults.personalConstraint === "motivation" ||
+          prerequisites.feasibilityDefaults.personalConstraint === "consistency" ||
+          prerequisites.feasibilityDefaults.personalConstraint === "complexity"
+            ? prerequisites.feasibilityDefaults.personalConstraint
+            : "")) as TwelveWeekSetupDraft["personalConstraint"],
+        leadIndicators: recommendedTpl
+          ? recommendedTpl.tactics.map((t) => ({
+              id: createIndicatorId(),
+              name: t.name,
+              target: t.target,
+              unit: t.unit,
+              type: t.type,
+              cadence: t.cadence,
+            }))
+          : previousDraft.leadIndicators,
       };
 
       if (!prerequisites.savedDraft) return baseDraft;
@@ -791,7 +853,7 @@ export function TwelveWeekSetupLab() {
     );
   };
 
-  const handleTemplatePersonalizationChange = <K extends "dailyTimeBudget" | "personalConstraint">(
+  const _handleTemplatePersonalizationChange = <K extends "dailyTimeBudget" | "personalConstraint">(
     key: K,
     value: TwelveWeekSetupDraft[K],
   ) => {
@@ -801,7 +863,7 @@ export function TwelveWeekSetupLab() {
     }
   };
 
-  const handlePreferredDayToggle = (dayIndex: number) => {
+  const _handlePreferredDayToggle = (dayIndex: number) => {
     setDraft((previousDraft) => {
       const isActive = previousDraft.preferredDays.includes(dayIndex);
       return {
@@ -1097,7 +1159,7 @@ export function TwelveWeekSetupLab() {
   };
 
   return (
-    <PageShell maxWidth="xl">
+    <PageShell maxWidth="lg">
       <div className="space-y-5 sm:space-y-6">
         <UpgradePaywallDialog
           open={isPaywallOpen}
@@ -1121,157 +1183,98 @@ export function TwelveWeekSetupLab() {
           className="[&_button]:min-h-10 [&_button]:px-3 [&_button]:py-2"
         />
 
-        {/* Tiêu đề chính */}
-        <section aria-labelledby="twelve-week-setup-title" className="space-y-2">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
-            </p>
-            
-            {/* Nút bật/tắt Copilot trên Desktop */}
-            <button
-              type="button"
-              onClick={() => setIsCopilotOpen(!isCopilotOpen)}
-              className="hidden lg:inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg transition-colors"
-            >
-              <SidebarOpen className={cn("h-4 w-4 transition-transform duration-200", isCopilotOpen && "rotate-180")} />
-              <span>{isCopilotOpen ? "Ẩn trợ lý" : "Xem trợ lý"}</span>
-            </button>
-
-            {/* Nút mở trợ lý trên Mobile */}
-            <div className="lg:hidden">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-app-accent-soft px-3.5 py-1.5 text-xs font-bold text-app-accent border border-app-accent/20 shadow-sm animate-pulse"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Trợ lý AI</span>
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[85%] sm:max-w-sm p-0 rounded-l-2xl overflow-hidden">
-                  <SetupCopilotPanel
-                    smartGoal={smartGoal}
-                    feasibility={feasibility}
-                    focusArea={focusArea}
-                    setupGuideSupport={setupGuideSupport}
-                    setupGuideTemplate={setupGuideTemplate}
-                    className="border-0 h-full"
-                  />
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-
+        {/* Tiêu đề chính tối giản */}
+        <section aria-labelledby="twelve-week-setup-title">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
+          </p>
           <h1
             id="twelve-week-setup-title"
-            className="font-serif text-2xl font-medium leading-tight tracking-tight text-app-ink sm:text-3xl"
+            className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
           >
             Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
           </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
+            Dựa trên mục tiêu SMART của bạn, chúng tôi đã tự động chia nhỏ mốc lộ trình và điền sẵn kế hoạch. Bạn chỉ
+            cần xem lại và bấm tiếp tục.
+          </p>
         </section>
 
-        {/* Layout 2 cột chính */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* Cột trái: Biểu mẫu chính */}
-          <div className={cn("space-y-6 transition-all duration-300", isCopilotOpen ? "lg:col-span-8" : "lg:col-span-12")}>
-            <SetupStepShellLab
-              title={STEPS[currentStep].title}
-              description={currentStepDescription}
-              whyThisMatters={currentStepWhy}
-              currentStep={currentStep}
-              stepCount={STEPS.length}
-              onBack={handleBack}
-              onNext={handleNext}
-              onSubmit={handleSubmit}
-              onJumpToStep={handleJumpToStep}
-              stepError={currentStepValidationError}
-              isNextDisabled={false}
-              isSubmitDisabled={false}
-            >
-              {currentStep === 0 && (
-                <OutcomeStepLab
-                  feasibility={feasibility}
-                  draft={draft}
-                  currentPlan={currentPlan}
-                  smartGoal={smartGoal}
-                  selectedTemplate={selectedTemplate}
-                  recommendedTemplate={recommendedTemplate}
-                  adaptiveTemplateRecommendation={adaptiveTemplateRecommendation}
-                  recommendedTemplateSupport={recommendedTemplateSupport}
-                  onChange={handleChange}
-                  onTemplateSelect={handleTemplateSelect}
-                  onTemplatePersonalizationChange={handleTemplatePersonalizationChange}
-                  onPreferredDayToggle={handlePreferredDayToggle}
-                />
-              )}
+        {/* Giao diện 1 cột tối giản sạch sẽ */}
+        <div className="max-w-4xl mx-auto">
+          <SetupStepShellLab
+            title={STEPS[currentStep].title}
+            description={currentStepDescription}
+            whyThisMatters={currentStepWhy}
+            currentStep={currentStep}
+            stepCount={STEPS.length}
+            onBack={handleBack}
+            onNext={handleNext}
+            onSubmit={handleSubmit}
+            onJumpToStep={handleJumpToStep}
+            stepError={currentStepValidationError}
+            isNextDisabled={false}
+            isSubmitDisabled={false}
+          >
+            {currentStep === 0 && (
+              <OutcomeStepLab
+                draft={draft}
+                onChange={handleChange}
+                feasibility={feasibility}
+                currentPlan={currentPlan}
+                smartGoal={smartGoal}
+                selectedTemplate={selectedTemplate}
+                recommendedTemplate={recommendedTemplate}
+                onTemplateSelect={handleTemplateSelect}
+              />
+            )}
 
-              {currentStep === 1 && (
-                <LeadIndicatorsStepLab
-                  draft={draft}
-                  showValidationErrors={Boolean(attemptedStepIndexes[1])}
-                  coreCount={coreCount}
-                  optionalCount={optionalCount}
-                  setupGuideSupport={setupGuideSupport}
-                  setupGuideTemplate={setupGuideTemplate}
-                  selectedTemplate={selectedTemplate}
-                  weekOneTaskPreview={weekOneTaskPreview}
-                  weekOneTaskWarning={weekOneTaskWarning}
-                  weekOneTaskGroups={previewTaskGroups}
-                  onAddIndicator={handleAddIndicator}
-                  onRemoveIndicator={handleRemoveIndicator}
-                  onIndicatorChange={handleIndicatorChange}
-                />
-              )}
+            {currentStep === 1 && (
+              <LeadIndicatorsStepLab
+                draft={draft}
+                showValidationErrors={Boolean(attemptedStepIndexes[1])}
+                onAddIndicator={handleAddIndicator}
+                onRemoveIndicator={handleRemoveIndicator}
+                onIndicatorChange={handleIndicatorChange}
+                coreCount={coreCount}
+                optionalCount={optionalCount}
+                setupGuideSupport={setupGuideSupport}
+                setupGuideTemplate={setupGuideTemplate}
+                selectedTemplate={selectedTemplate}
+                weekOneTaskPreview={weekOneTaskPreview}
+                weekOneTaskWarning={weekOneTaskWarning}
+                weekOneTaskGroups={previewTaskGroups}
+              />
+            )}
 
-              {currentStep === 2 && (
-                <ScheduleStepLab
-                  draft={draft}
-                  cycleStartDate={cycleStartDate}
-                  cycleEndDate={cycleEndDate}
-                  setupGuideSupport={setupGuideSupport}
-                  setupGuideTemplate={setupGuideTemplate}
-                  hasPreviewTasks={previewTasks.length > 0}
-                  weekOneTaskPreview={weekOneTaskPreview}
-                  weekOneTaskWarning={weekOneTaskWarning}
-                  onChange={handleChange}
-                />
-              )}
+            {currentStep === 2 && (
+              <ScheduleStepLab
+                draft={draft}
+                cycleStartDate={cycleStartDate}
+                cycleEndDate={cycleEndDate}
+                onChange={handleChange}
+                setupGuideSupport={setupGuideSupport}
+                setupGuideTemplate={setupGuideTemplate}
+                hasPreviewTasks={previewTasks.length > 0}
+                weekOneTaskPreview={weekOneTaskPreview}
+                weekOneTaskWarning={weekOneTaskWarning}
+              />
+            )}
 
-              {currentStep === 3 && isRealMode() && !auth.user ? (
-                <RealModeLoginGate target="12WeekSetup" />
-              ) : null}
+            {currentStep === 3 && isRealMode() && !auth.user ? <RealModeLoginGate target="12WeekSetup" /> : null}
 
-              {currentStep === 3 && !(isRealMode() && !auth.user) ? (
-                <PlanPreviewStepLab
-                  draft={draft}
-                  smartGoal={smartGoal}
-                  feasibility={feasibility}
-                  focusArea={focusArea}
-                  selectedTemplate={selectedTemplate}
-                  validationMessage={currentStepValidationError}
-                  canConfirm={!currentStepValidationError}
-                />
-              ) : null}
-            </SetupStepShellLab>
-          </div>
-
-          {/* Cột phải: Setup Copilot Panel (chỉ hiển thị trên desktop khi mở) */}
-          {isCopilotOpen && (
-            <div className="hidden lg:block lg:col-span-4 rounded-2xl border border-app-line bg-app-surface overflow-hidden shadow-sm h-[calc(100vh-160px)] sticky top-[100px] transition-all duration-300">
-              <SetupCopilotPanel
+            {currentStep === 3 && !(isRealMode() && !auth.user) ? (
+              <PlanPreviewStepLab
+                draft={draft}
                 smartGoal={smartGoal}
                 feasibility={feasibility}
                 focusArea={focusArea}
-                setupGuideSupport={setupGuideSupport}
-                setupGuideTemplate={setupGuideTemplate}
-                className="h-full border-0"
+                selectedTemplate={selectedTemplate}
+                validationMessage={currentStepValidationError}
+                canConfirm={!currentStepValidationError}
               />
-            </div>
-          )}
-
+            ) : null}
+          </SetupStepShellLab>
         </div>
       </div>
     </PageShell>

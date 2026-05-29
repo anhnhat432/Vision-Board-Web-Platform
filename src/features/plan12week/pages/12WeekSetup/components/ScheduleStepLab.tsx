@@ -1,16 +1,11 @@
-import { CalendarDays, Play, Flag, Calendar, Clock, Sliders } from "lucide-react";
+import { Calendar, CalendarDays, Clock, Flag, Play, Sliders } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { cn } from "@/app/components/ui/utils";
+import { soundService } from "@/app/services/soundService";
 import { formatDateInputValue } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
-import { soundService } from "@/app/services/soundService";
-import {
-  errorTextClass,
-  helperTextClass,
-  inputClass,
-  labelClass,
-} from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
+import { helperTextClass, inputClass, labelClass } from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
 import { REVIEW_DAYS } from "../constants";
 import { getStartDateValidation } from "../helpers";
 import type { TwelveWeekSetupDraft } from "../types";
@@ -44,13 +39,7 @@ const LOAD_HINTS: Record<TwelveWeekSetupDraft["tacticLoadPreference"], string> =
   push: "Tăng tốc. Đòi hỏi nhiều thời gian và năng lượng.",
 };
 
-export function ScheduleStepLab({
-  draft,
-  cycleStartDate,
-  cycleEndDate,
-  todayDateKey,
-  onChange,
-}: ScheduleStepProps) {
+export function ScheduleStepLab({ draft, cycleStartDate, cycleEndDate, todayDateKey, onChange }: ScheduleStepProps) {
   const localTodayDateKey = todayDateKey ?? formatDateInputValue(new Date());
   const referenceDate = new Date(`${localTodayDateKey}T00:00:00`);
   const startDateValidation = getStartDateValidation(
@@ -67,7 +56,6 @@ export function ScheduleStepLab({
 
   return (
     <div className="space-y-6">
-      
       {/* KHU VỰC 1: BIỂU MẪU LỊCH TRÌNH CHÍNH */}
       <section
         className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm space-y-6"
@@ -90,7 +78,10 @@ export function ScheduleStepLab({
         {/* Ngày bắt đầu & Ngày kết thúc - Gom lên một hàng ngang */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label htmlFor="cycle-start-date" className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1")}>
+            <label
+              htmlFor="cycle-start-date"
+              className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1")}
+            >
               <Play className="h-4 w-4 text-app-accent" />
               <span>Ngày bắt đầu chu kỳ</span>
             </label>
@@ -103,7 +94,7 @@ export function ScheduleStepLab({
               aria-describedby={startDateDescription}
               className={cn(
                 inputClass,
-                startDateValidation.error && "border-red-400 focus-visible:border-red-500 focus-visible:ring-red-150"
+                startDateValidation.error && "border-red-400 focus-visible:border-red-500 focus-visible:ring-red-150",
               )}
               onChange={(event) => onChange("startDate", event.target.value)}
             />
@@ -120,7 +111,10 @@ export function ScheduleStepLab({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="cycle-end-date" className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1")}>
+            <label
+              htmlFor="cycle-end-date"
+              className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1")}
+            >
               <Flag className="h-4 w-4 text-app-accent" />
               <span>Ngày hoàn thành kế hoạch</span>
             </label>
@@ -128,7 +122,10 @@ export function ScheduleStepLab({
               id="cycle-end-date"
               value={cycleEndDate}
               readOnly
-              className={cn(inputClass, "bg-slate-100/70 dark:bg-slate-900/60 text-app-ink-muted font-semibold cursor-not-allowed")}
+              className={cn(
+                inputClass,
+                "bg-slate-100/70 dark:bg-slate-900/60 text-app-ink-muted font-semibold cursor-not-allowed",
+              )}
             />
           </div>
         </div>
@@ -155,7 +152,7 @@ export function ScheduleStepLab({
                     "flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-bold transition-all duration-200 active:scale-95",
                     isActive
                       ? "border-app-accent bg-app-accent text-white shadow-sm"
-                      : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40"
+                      : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40",
                   )}
                 >
                   {REVIEW_DAY_SHORT_LABEL[day.value] ?? day.label}
@@ -194,7 +191,7 @@ export function ScheduleStepLab({
                     "flex flex-col items-center justify-center rounded-xl border bg-app-surface p-2.5 text-center text-xs transition-all duration-200 active:scale-[0.98]",
                     isActive
                       ? "border-app-accent bg-app-accent-soft/20 text-app-accent shadow-sm"
-                      : "border-app-line text-app-ink-soft hover:border-app-accent/30"
+                      : "border-app-line text-app-ink-soft hover:border-app-accent/30",
                   )}
                 >
                   <span className="font-bold text-xs">{option.label}</span>
@@ -230,7 +227,7 @@ export function ScheduleStepLab({
                     "flex flex-col items-start rounded-xl border bg-app-surface p-3 text-left transition-all duration-200 active:scale-[0.98]",
                     isActive
                       ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-sm"
-                      : "border-app-line text-app-ink-soft hover:border-app-accent/30"
+                      : "border-app-line text-app-ink-soft hover:border-app-accent/30",
                   )}
                 >
                   <span className="font-bold text-xs text-app-ink">{option.label}</span>
@@ -241,7 +238,6 @@ export function ScheduleStepLab({
           </div>
         </fieldset>
       </section>
-      
     </div>
   );
 }
