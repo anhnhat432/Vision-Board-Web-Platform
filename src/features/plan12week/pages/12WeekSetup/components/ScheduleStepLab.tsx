@@ -140,7 +140,7 @@ export function ScheduleStepLab({
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2 relative z-10">
-          <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="cycle-start-date" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
               <Play className="h-4 w-4 text-indigo-500" />
               <span>Ngày bắt đầu chu kỳ</span>
@@ -175,7 +175,7 @@ export function ScheduleStepLab({
             </p>
           </div>
 
-          <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="cycle-end-date" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
               <Flag className="h-4 w-4 text-indigo-500" />
               <span>Ngày hoàn thành kế hoạch 12 tuần</span>
@@ -190,7 +190,7 @@ export function ScheduleStepLab({
           </div>
         </div>
 
-        <fieldset className="mt-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
+        <fieldset className="mt-8 relative z-10 space-y-2">
           <legend className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-3")}>
             <Calendar className="h-4 w-4 text-indigo-500" />
             <span>Ngày nhìn lại tuần (Reflection Day)</span>
@@ -224,7 +224,7 @@ export function ScheduleStepLab({
           </p>
         </fieldset>
 
-        <fieldset className="mt-6 rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
+        <fieldset className="mt-8 relative z-10 space-y-2">
           <legend className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-3")}>
             <Clock className="h-4 w-4 text-indigo-500" />
             <span>Thời lượng dành cho mục tiêu mỗi ngày</span>
@@ -253,8 +253,8 @@ export function ScheduleStepLab({
                       : "border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-350 hover:border-slate-350 hover:bg-slate-50/50"
                   )}
                 >
-                  <span className="text-sm font-extrabold">{option.label}</span>
-                  <span className="text-xs font-semibold opacity-75">{option.hint}</span>
+                  <span className="text-base font-extrabold">{option.label}</span>
+                  <span className="text-[13px] font-semibold opacity-85">{option.hint}</span>
                 </button>
               );
             })}
@@ -265,7 +265,7 @@ export function ScheduleStepLab({
           </p>
         </fieldset>
 
-        <fieldset className="mt-6 rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 relative z-10">
+        <fieldset className="mt-8 relative z-10 space-y-2">
           <legend className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-3")}>
             <Sliders className="h-4 w-4 text-indigo-500" />
             <span>Mức tải hành động tuần đầu</span>
@@ -339,7 +339,7 @@ export function ScheduleStepLab({
         </fieldset>
 
         <div className="mt-6 grid gap-5 md:grid-cols-3 relative z-10">
-          <div className="md:col-span-2 rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="md:col-span-2 space-y-2">
             <label htmlFor="lag-metric-name" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
               <Target className="h-4 w-4 text-indigo-500" />
               <span>Chỉ số kết quả chính</span>
@@ -353,7 +353,7 @@ export function ScheduleStepLab({
             />
             <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Đây là chỉ số kết quả cuối chu kỳ, khác với việc hằng tuần.</p>
           </div>
-          <div className="rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="lag-metric-target" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
               <Hash className="h-4 w-4 text-indigo-500" />
               <span>Con số mục tiêu</span>
@@ -367,7 +367,7 @@ export function ScheduleStepLab({
             />
             <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Con số cụ thể giúp biết 12 tuần đã về đích hay chưa.</p>
           </div>
-          <div className="md:col-span-3 rounded-xl border border-white/10 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="md:col-span-3 space-y-2">
             <label htmlFor="lag-metric-unit" className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-2")}>
               <Tag className="h-4 w-4 text-indigo-500" />
               <span>Đơn vị của chỉ số</span>

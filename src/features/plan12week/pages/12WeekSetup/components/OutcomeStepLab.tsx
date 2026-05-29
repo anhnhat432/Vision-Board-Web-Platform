@@ -131,10 +131,10 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
           className="absolute flex flex-col items-center z-10"
           style={{ left: "12.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
         >
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-full border border-indigo-500 bg-white dark:bg-slate-900 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 shadow-sm select-none">
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-indigo-500 bg-white dark:bg-slate-900 text-xs font-bold text-indigo-600 dark:text-indigo-400 shadow-sm select-none">
             W1
           </div>
-          <span className="mt-2 text-[9px] font-bold text-slate-600 dark:text-slate-300 tracking-wide uppercase">Khởi đầu</span>
+          <span className="mt-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 tracking-wide uppercase">Khởi đầu</span>
         </div>
 
         <div 
@@ -142,14 +142,14 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
           style={{ left: "37.5%", top: "26.09%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
-            "relative flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
+            "relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
             isW4Filled 
               ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm" 
               : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
             W4
           </div>
-          <span className={cn("mt-2 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW4Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 1</span>
+          <span className={cn("mt-2 text-[11px] font-bold tracking-wide uppercase transition-colors duration-300", isW4Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 1</span>
         </div>
 
         <div 
@@ -157,14 +157,14 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
           style={{ left: "62.5%", top: "43.48%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
-            "relative flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
+            "relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
             isW8Filled 
               ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm" 
               : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
             W8
           </div>
-          <span className={cn("mt-2 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW8Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 2</span>
+          <span className={cn("mt-2 text-[11px] font-bold tracking-wide uppercase transition-colors duration-300", isW8Filled ? "text-slate-600 dark:text-slate-300" : "text-slate-400")}>Chặng 2</span>
         </div>
 
         <div 
@@ -172,14 +172,14 @@ function MilestoneRoadmap({ week4, week8, week12 }: MilestoneRoadmapProps) {
           style={{ left: "87.5%", top: "34.78%", transform: "translate(-50%, -50%)" }}
         >
           <div className={cn(
-            "relative flex h-9 w-9 items-center justify-center rounded-full border text-[10px] font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
+            "relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold bg-white dark:bg-slate-900 select-none transition-all duration-300",
             isW12Filled 
               ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm" 
               : "border-slate-200 dark:border-slate-800 text-slate-400 opacity-60"
           )}>
             W12
           </div>
-          <span className={cn("mt-2 text-[9px] font-bold tracking-wide uppercase transition-colors duration-300", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")}>Đích đến</span>
+          <span className={cn("mt-2 text-[11px] font-bold tracking-wide uppercase transition-colors duration-300", isW12Filled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")}>Đích đến</span>
         </div>
       </div>
     </div>
@@ -265,7 +265,7 @@ export function OutcomeStepLab({
 
         <div className="mt-6 space-y-5 relative z-10">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <div className="space-y-2">
               <label htmlFor="milestone-week-4" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
                 <Target className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
                 <span>Cột mốc sau 4 tuần</span>
@@ -279,7 +279,7 @@ export function OutcomeStepLab({
               />
               <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Mục tiêu đạt được sau 1/3 chặng đường.</p>
             </div>
-            <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+            <div className="space-y-2">
               <label htmlFor="milestone-week-8" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
                 <Flag className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
                 <span>Cột mốc sau 8 tuần</span>
@@ -295,7 +295,7 @@ export function OutcomeStepLab({
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="week-12-outcome" className={cn(labelClass, "flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold mb-2")}>
               <Award className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Đích đến sau 12 tuần (Tuần 12)</span>
@@ -326,7 +326,7 @@ export function OutcomeStepLab({
             )}
           </div>
 
-          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="vision-12-week" className={cn(labelClass, "flex items-center gap-1.5 text-slate-850 dark:text-slate-200 font-bold mb-2")}>
               <Lightbulb className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Vì sao mục tiêu này quan trọng?</span>
@@ -342,7 +342,7 @@ export function OutcomeStepLab({
             <p className={cn(helperTextClass, "mt-1.5 text-[11px] font-semibold text-slate-450")}>Một câu đủ thật giúp bạn giữ nhịp khi tuần bận lên.</p>
           </div>
 
-          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="lag-metric-name" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
               <Activity className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Tên chỉ số cần theo dõi</span>
@@ -361,7 +361,7 @@ export function OutcomeStepLab({
             ) : null}
           </div>
 
-          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_140px]">
               <div>
                 <label htmlFor="lag-metric-target" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
@@ -394,7 +394,7 @@ export function OutcomeStepLab({
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 dark:border-slate-800/20 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+          <div className="space-y-2">
             <label htmlFor="goal-type" className={cn(labelClass, "flex items-center gap-1.5 text-slate-855 dark:text-slate-200 font-bold mb-2")}>
               <ClipboardCheck className="h-4.5 w-4.5 text-indigo-500 shrink-0" aria-hidden="true" />
               <span>Loại mục tiêu</span>

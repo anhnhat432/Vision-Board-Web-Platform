@@ -398,28 +398,30 @@ export function FeasibilityCheck() {
             Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.
           </p>
 
-          <div className="mt-5 rounded-[14px] border border-app-line bg-app-surface p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="mt-6 rounded-2xl border border-indigo-500/10 bg-indigo-50/50 dark:bg-indigo-950/20 p-5 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                <p className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-500/80 dark:text-indigo-400/80 mb-2">
                   Mục tiêu đang kiểm tra
                 </p>
-                <p className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-app-ink">
+                <p className="line-clamp-2 text-sm font-bold leading-relaxed text-indigo-900 dark:text-indigo-100">
                   {pendingGoal.specific}
                 </p>
               </div>
               <Link
                 to="/smart-goal-setup"
-                className="shrink-0 text-xs font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="shrink-0 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 transition-colors"
               >
                 Sửa mục tiêu
               </Link>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2 text-xs text-app-ink-muted">
-              <span className="rounded-full bg-app-accent-soft px-2.5 py-1 font-medium text-app-accent">
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+              <span className="rounded-full bg-indigo-500 text-white px-3 py-1 font-bold shadow-sm">
                 {getLifeAreaLabel(focusArea)}
               </span>
-              <span className="rounded-full border border-app-line px-2.5 py-1">Điểm hiện tại: {wheelScore}/10</span>
+              <span className="rounded-full border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 px-3 py-1 font-semibold text-indigo-700 dark:text-indigo-300">
+                Điểm nền tảng: {wheelScore}/10
+              </span>
             </div>
           </div>
         </section>

@@ -309,7 +309,7 @@ export function LeadIndicatorsStepLab({
                 </div>
 
                 <div className="mt-5 grid gap-5">
-                  <div className="rounded-xl border border-slate-200/40 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+                  <div className="space-y-2">
                     <label htmlFor={`tactic-name-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2")}>
                       <Activity className="h-4 w-4 text-indigo-500" />
                       <span>Mô tả hành động lặp lại</span>
@@ -334,7 +334,7 @@ export function LeadIndicatorsStepLab({
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200/40 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+                    <div className="space-y-2">
                       <label htmlFor={`tactic-target-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2")}>
                         <Hash className="h-4 w-4 text-indigo-500" />
                         <span>Tần suất / Tuần</span>
@@ -398,7 +398,7 @@ export function LeadIndicatorsStepLab({
                       )}
                     </div>
 
-                    <div className="rounded-xl border border-slate-200/40 dark:border-slate-850/30 bg-slate-50/20 dark:bg-slate-950/10 p-4">
+                    <div className="space-y-2">
                       <label htmlFor={`tactic-unit-${index}`} className={cn(labelClass, "font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2")}>
                         <Tag className="h-4 w-4 text-indigo-500" />
                         <span>Đơn vị đo lường</span>
