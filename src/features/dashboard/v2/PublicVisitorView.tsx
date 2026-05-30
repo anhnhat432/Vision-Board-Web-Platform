@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ArrowRight,
   CalendarRange,
@@ -15,8 +16,67 @@ import {
 import { Link } from "react-router";
 
 import { RevealOnScroll } from "@/app/components/motion";
+import { trackAnalyticsEvent } from "@/app/utils/analytics";
 
-import { HeroMockupAnimated } from "./HeroMockupAnimated";
+import { HeroMockupAnimated, type GoalPreviewData } from "./HeroMockupAnimated";
+
+const GOAL_PREVIEWS: GoalPreviewData[] = [
+  {
+    id: "reading",
+    goalTitle: "Đọc 12 cuốn sách trong năm",
+    visionIcons: [
+      { emoji: "📚", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
+      { emoji: "✍️", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
+      { emoji: "🧠", bgClass: "bg-violet-800/10", borderClass: "border-violet-800/20" },
+    ],
+    visionLabel: "\"Phát triển tri thức\"",
+    todayTasks: ["Đọc 30 trang \"Atomic Habits\"", "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
+    weekLabel: "Tuần 4/12",
+  },
+  {
+    id: "ielts",
+    goalTitle: "Đạt IELTS 7.0 trước tháng 9",
+    visionIcons: [
+      { emoji: "🎧", bgClass: "bg-sky-800/10", borderClass: "border-sky-800/20" },
+      { emoji: "📝", bgClass: "bg-rose-800/10", borderClass: "border-rose-800/20" },
+      { emoji: "🌍", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
+    ],
+    visionLabel: "\"Tự tin giao tiếp quốc tế\"",
+    todayTasks: ["Làm 1 bài Listening Practice", "Viết 1 essay Task 2", "Review 50 từ vựng"],
+    weekLabel: "Tuần 3/12",
+  },
+  {
+    id: "gym",
+    goalTitle: "Tập gym đều 3 buổi/tuần",
+    visionIcons: [
+      { emoji: "🏋️", bgClass: "bg-orange-800/10", borderClass: "border-orange-800/20" },
+      { emoji: "🥗", bgClass: "bg-green-800/10", borderClass: "border-green-800/20" },
+      { emoji: "😴", bgClass: "bg-indigo-800/10", borderClass: "border-indigo-800/20" },
+    ],
+    visionLabel: "\"Sức khoẻ bền vững\"",
+    todayTasks: ["Tập Upper Body 45 phút", "Uống 2L nước", "Ngủ trước 23h"],
+    weekLabel: "Tuần 6/12",
+  },
+  {
+    id: "portfolio",
+    goalTitle: "Hoàn thành Portfolio xin việc",
+    visionIcons: [
+      { emoji: "💻", bgClass: "bg-blue-800/10", borderClass: "border-blue-800/20" },
+      { emoji: "📄", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
+      { emoji: "🤝", bgClass: "bg-teal-800/10", borderClass: "border-teal-800/20" },
+    ],
+    visionLabel: "\"Sẵn sàng bước vào sự nghiệp\"",
+    todayTasks: ["Code 1 feature project", "Viết 1 case study", "Update LinkedIn"],
+    weekLabel: "Tuần 2/12",
+  },
+];
+
+const PREVIEW_CHIPS = [
+  { id: "reading", label: "📚 Đọc sách" },
+  { id: "ielts", label: "🎧 IELTS 7.0" },
+  { id: "gym", label: "🏋️ Gym" },
+  { id: "portfolio", label: "💻 Portfolio" },
+] as const;
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -95,6 +155,14 @@ const FEATURE_ROWS = [
 export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onSignUp }: PublicVisitorViewProps) {
   const primaryLabel = "Tạo kế hoạch 12 tuần đầu tiên";
   const heroStartLabel = "Tạo kế hoạch 12 tuần đầu tiên";
+  const [selectedPreviewId, setSelectedPreviewId] = useState(GOAL_PREVIEWS[0].id);
+  const selectedPreview = GOAL_PREVIEWS.find((p) => p.id === selectedPreviewId) ?? GOAL_PREVIEWS[0];
+
+  const handlePreviewSelect = (id: string) => {
+    setSelectedPreviewId(id);
+    trackAnalyticsEvent("landing_goal_preview_selected", { preview_id: id, source: "dashboard" });
+  };
+
   const scrollToHowItWorks = () => {
     document.getElementById("dashboard-how-it-works-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -136,6 +204,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <p className="mt-4 max-w-[55ch] text-xs font-semibold leading-relaxed text-app-ink-soft">
               Đừng để mục tiêu chỉ là mong muốn. Chúng tôi dẫn bạn từng bước: Chấm điểm cuộc sống, lập mục tiêu SMART thực tế, và tự động chia thành việc cụ thể hôm nay.
             </p>
+            <p className="mt-2 max-w-[50ch] text-xs italic leading-relaxed text-app-ink-muted">
+              Dành cho những lúc bạn có nhiều mục tiêu nhưng không biết bắt đầu từ đâu.
+            </p>
 
             <div className="mt-5 space-y-2 border-l-2 border-app-accent/30 pl-4 py-0.5">
               <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent">Bản kế hoạch của bạn bao gồm:</p>
@@ -150,6 +221,28 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   <span className="text-app-accent font-extrabold">✓</span> Danh sách việc làm hôm nay
                 </li>
               </ul>
+            </div>
+
+            {/* Interactive Goal Preview Chips */}
+            <div className="mt-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-2">Thử hình dung mục tiêu của bạn:</p>
+              <div className="flex flex-wrap gap-2">
+                {PREVIEW_CHIPS.map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    aria-pressed={selectedPreviewId === chip.id}
+                    onClick={() => handlePreviewSelect(chip.id)}
+                    className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg ${
+                      selectedPreviewId === chip.id
+                        ? "bg-app-accent text-white shadow-md shadow-app-accent/20"
+                        : "border border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row">
@@ -195,7 +288,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </div>
 
         {/* Mockup preview card */}
-        <HeroMockupAnimated />
+        <HeroMockupAnimated previewData={selectedPreview} />
         </div>
       </section>
 
@@ -239,6 +332,50 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           </div>
         </section>
       ) : null}
+
+      {/* Before → After Clarity Section */}
+      <RevealOnScroll
+        as="section"
+        className="grid gap-4 sm:grid-cols-2"
+        aria-label="So sánh trước và sau"
+      >
+        <div className="rounded-xl border border-dashed border-app-line bg-app-bg p-5 opacity-75">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">😶 Trước</p>
+          <h3 className="mt-2 text-sm font-bold text-app-ink">Mục tiêu mơ hồ</h3>
+          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-app-ink-soft">
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-app-ink-muted">✗</span>
+              "Muốn khoẻ hơn" — không biết bắt đầu từ đâu
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-app-ink-muted">✗</span>
+              Viết to-do rồi quên sau 2 tuần
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-app-ink-muted">✗</span>
+              Không có ai nhắc hay review tiến độ
+            </li>
+          </ul>
+        </div>
+        <div className="rounded-xl border border-app-accent/30 bg-app-accent-soft/20 p-5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">🎯 Sau 12 tuần</p>
+          <h3 className="mt-2 text-sm font-bold text-app-ink">Kế hoạch hành động rõ ràng</h3>
+          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-app-ink-soft">
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-app-accent font-bold">✓</span>
+              1 mục tiêu SMART cụ thể, đo được
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-app-accent font-bold">✓</span>
+              Kế hoạch 12 tuần với checkpoint hàng tuần
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-app-accent font-bold">✓</span>
+              Mỗi sáng biết ngay việc cần làm hôm nay
+            </li>
+          </ul>
+        </div>
+      </RevealOnScroll>
 
       <RevealOnScroll
         as="section"

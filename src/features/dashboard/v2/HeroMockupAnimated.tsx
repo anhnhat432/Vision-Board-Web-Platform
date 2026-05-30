@@ -17,10 +17,37 @@ import { useReducedMotion } from "@/app/hooks/useReducedMotion";
  * Reduced motion: render the final state (phase 3) statically, no loop.
  */
 
+export interface GoalPreviewData {
+  id: string;
+  goalTitle: string;
+  visionIcons: { emoji: string; bgClass: string; borderClass: string }[];
+  visionLabel: string;
+  todayTasks: [string, string, string];
+  weekLabel: string;
+}
+
 const PHASE_SCHEDULE = [700, 1500, 2400, 4000] as const;
 const RESET_DELAY = 5800;
 
-export function HeroMockupAnimated() {
+const DEFAULT_PREVIEW: GoalPreviewData = {
+  id: "default",
+  goalTitle: "Đọc 12 cuốn sách trong năm",
+  visionIcons: [
+    { emoji: "📚", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
+    { emoji: "🏃‍♂️", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
+    { emoji: "💼", bgClass: "bg-blue-800/10", borderClass: "border-blue-800/20" },
+  ],
+  visionLabel: "\"Khát vọng tương lai\"",
+  todayTasks: ["Đọc 30 trang \"Atomic Habits\"", "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
+  weekLabel: "Tuần 4/12",
+};
+
+interface HeroMockupAnimatedProps {
+  previewData?: GoalPreviewData;
+}
+
+export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
+  const data = previewData ?? DEFAULT_PREVIEW;
   const reduced = useReducedMotion();
   const [phase, setPhase] = useState(0);
 
@@ -90,13 +117,16 @@ export function HeroMockupAnimated() {
         {/* Inspiration Vision Board Snippet */}
         <div className="mb-4 rounded-xl border border-app-line bg-app-bg-subtle/40 dark:bg-neutral-900/30 p-3 flex items-center gap-3">
           <div className="flex -space-x-2 shrink-0 select-none">
-            <div className="h-9 w-9 rounded-lg bg-emerald-800/10 border border-emerald-800/20 flex items-center justify-center text-sm shadow-sm">📚</div>
-            <div className="h-9 w-9 rounded-lg bg-amber-800/10 border border-amber-800/20 flex items-center justify-center text-sm shadow-sm rotate-3">🏃‍♂️</div>
-            <div className="h-9 w-9 rounded-lg bg-blue-800/10 border border-blue-800/20 flex items-center justify-center text-sm shadow-sm -rotate-3">💼</div>
+            {data.visionIcons.map((icon, i) => (
+              <div
+                key={icon.emoji}
+                className={`h-9 w-9 rounded-lg ${icon.bgClass} border ${icon.borderClass} flex items-center justify-center text-sm shadow-sm ${i === 1 ? "rotate-3" : i === 2 ? "-rotate-3" : ""}`}
+              >{icon.emoji}</div>
+            ))}
           </div>
           <div className="min-w-0">
             <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-accent">Bảng tầm nhìn</p>
-            <p className="truncate text-xs font-bold text-app-ink-soft">"Khát vọng tương lai"</p>
+            <p className="truncate text-xs font-bold text-app-ink-soft">{data.visionLabel}</p>
           </div>
         </div>
 
@@ -107,11 +137,11 @@ export function HeroMockupAnimated() {
             </span>
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mục tiêu</p>
-              <p className="truncate text-xs font-medium text-app-ink">Đọc 12 cuốn sách trong năm</p>
+              <p className="truncate text-xs font-medium text-app-ink">{data.goalTitle}</p>
             </div>
           </div>
           <span className="shrink-0 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-xs font-semibold text-app-accent">
-            Tuần 4/12
+            {data.weekLabel}
           </span>
         </div>
 
@@ -140,7 +170,7 @@ export function HeroMockupAnimated() {
               <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] bg-app-accent text-white">
                 <Check className="h-2.5 w-2.5" />
               </span>
-              <span className="text-xs text-app-ink-muted line-through">Đọc 30 trang "Atomic Habits"</span>
+              <span className="text-xs text-app-ink-muted line-through">{data.todayTasks[0]}</span>
             </div>
 
             {/* Task 2 — ticks at phase 1 */}
@@ -163,14 +193,14 @@ export function HeroMockupAnimated() {
                   taskTwoChecked ? "text-app-ink-muted line-through" : "text-app-ink"
                 }`}
               >
-                Ghi 3 dòng phản tư
+                {data.todayTasks[1]}
               </span>
             </div>
 
             {/* Task 3 — never ticks in this loop */}
             <div className="flex items-center gap-2">
               <span className="h-4 w-4 shrink-0 rounded-[4px] border border-app-line" aria-hidden="true" />
-              <span className="text-xs text-app-ink">Review tuần lúc 21h</span>
+              <span className="text-xs text-app-ink">{data.todayTasks[2]}</span>
             </div>
           </div>
         </div>

@@ -26,6 +26,13 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
           Đã hoàn thành <span className="text-app-accent font-extrabold">{completedCount}</span> trên tổng số <span className="text-app-ink font-extrabold">{totalCount}</span> việc
         </p>
+        {completedCount > 0 && totalCount > 0 && (
+          <p className="text-[10px] font-semibold text-app-accent mt-1">
+            {completedCount >= totalCount
+              ? "🎯 Hoàn thành tất cả! Tuyệt vời."
+              : "Tiếp tục phát huy, bạn đang trên đà tốt!"}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">

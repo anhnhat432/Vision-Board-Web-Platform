@@ -225,6 +225,10 @@ export interface AnalyticsEventPayloads {
     unsupported_field_count: number;
     unresolved_local_mutation_count: number;
   };
+  landing_goal_preview_selected: {
+    preview_id: string;
+    source: AnalyticsSource;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventPayloads;
@@ -327,6 +331,7 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
     "unsupported_field_count",
     "unresolved_local_mutation_count",
   ],
+  landing_goal_preview_selected: ["preview_id", "source"],
 };
 
 const REMOTE_ANALYTICS_AREAS = new Set(["core_funnel", "12_week", "monetization"]);
