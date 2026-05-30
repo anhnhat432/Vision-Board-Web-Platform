@@ -22,6 +22,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 import { Button } from "../components/ui/button";
 import { CountUp } from "../components/ui/count-up";
 import { Skeleton } from "../components/ui/skeleton";
@@ -1060,7 +1068,9 @@ function GoalCard({
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
-            <FutureSelfLetter goalId={goal.id} progress={progress} system={system} />
+            {system ? (
+              <FutureSelfLetter goalId={goal.id} progress={progress} system={system} />
+            ) : null}
           </div>
         </div>
 
@@ -1469,6 +1479,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
 
   const handleOpenWrite = () => {
     setTempText(letterText || "");
+    setIsReadOpen(false);
     setIsWriteOpen(true);
   };
 
@@ -1502,7 +1513,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
   const handleReadClick = () => {
     if (!isUnlocked) {
       toast.info("Thư đang được niêm phong 🔒", {
-        description: "Hãy nỗ lực hoàn thành 100% mục tiêu hoặc kết thúc 12 tuần để mở phong thư này nhé!",
+        description: "Đạt 100% tiến độ hoặc hoàn thành tuần 12 để mở.",
       });
       return;
     }
@@ -1522,41 +1533,54 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           Viết thư gửi tuần 12
         </Button>
 
-        {isWriteOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-neutral-950 rounded-[18px] border border-app-line max-w-md w-full p-6 space-y-4 shadow-app-lg animate-in fade-in zoom-in-95 duration-200">
-              <div className="space-y-1.5">
-                <h4 className="font-serif text-lg font-bold text-app-ink flex items-center gap-2">
-                  <Mail className="h-5 w-5 text-app-accent" />
+        <Dialog open={isWriteOpen} onOpenChange={setIsWriteOpen}>
+          <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
+            <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-app-accent shrink-0" />
+                <DialogTitle className="font-serif text-lg font-bold text-app-ink">
                   Gửi tôi ở tuần thứ 12
-                </h4>
-                <p className="text-xs text-app-ink-soft leading-relaxed font-sans">
-                  Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
-                </p>
+                </DialogTitle>
               </div>
+            </DialogHeader>
+            <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
+              Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
+            </DialogDescription>
 
+            <div className="pt-2">
               <textarea
-                className="w-full h-36 rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
+                className="w-full min-h-[160px] rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
                 placeholder="Gửi bản thân thân mến ở tuần 12..."
                 value={tempText}
                 onChange={(e) => setTempText(e.target.value)}
                 maxLength={500}
               />
-              
-              <div className="flex justify-between items-center text-xs text-app-ink-muted font-sans font-medium">
-                <span>{tempText.length}/500 ký tự</span>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setIsWriteOpen(false)} className="rounded-lg">
-                    Hủy
-                  </Button>
-                  <Button size="sm" onClick={handleSave} className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover font-bold">
-                    Niêm phong thư
-                  </Button>
-                </div>
-              </div>
             </div>
-          </div>
-        )}
+            
+            <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
+              <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
+                {tempText.length}/500 ký tự
+              </span>
+              <div className="flex gap-2.5 w-full sm:w-auto justify-end shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsWriteOpen(false)}
+                  className="rounded-lg border border-app-line bg-app-surface text-app-ink hover:bg-app-bg h-9 px-4 py-2 font-bold text-xs sm:text-sm"
+                >
+                  Hủy
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover font-bold h-9 px-4 py-2 text-xs sm:text-sm"
+                >
+                  Niêm phong thư
+                </Button>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
@@ -1581,83 +1605,100 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
         ) : (
           <>
             <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-            Thư gửi tương lai (Khóa)
+            Thư tuần 12 đang khóa
           </>
         )}
       </button>
 
       {/* Dialog Đọc thư */}
-      {isReadOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-neutral-950 rounded-[18px] border border-app-line max-w-md w-full p-6 space-y-4 shadow-app-lg animate-in fade-in zoom-in-95 duration-200">
-            <div className="space-y-1.5 border-b border-app-line pb-3">
-              <h4 className="font-serif text-lg font-bold text-app-ink flex items-center gap-2">
-                <MailOpen className="h-5 w-5 text-emerald-600" />
+      <Dialog open={isReadOpen} onOpenChange={setIsReadOpen}>
+        <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
+          <DialogHeader className="space-y-1.5 text-left border-b border-app-line pb-3">
+            <div className="flex items-center gap-2">
+              <MailOpen className="h-5 w-5 text-emerald-600 shrink-0" />
+              <DialogTitle className="font-serif text-lg font-bold text-app-ink">
                 Thư gửi từ quá khứ
-              </h4>
-              <p className="text-xs text-app-ink-soft font-sans">
-                Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
-              </p>
+              </DialogTitle>
             </div>
+          </DialogHeader>
+          <DialogDescription className="text-sm text-app-ink-soft font-sans mt-2">
+            Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
+          </DialogDescription>
 
-            <div className="bg-app-warm-soft/40 dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60">
-              <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">
-                “{letterText}”
-              </p>
-            </div>
-
-            <div className="flex justify-between items-center font-sans">
-              <button
-                type="button"
-                onClick={handleOpenWrite}
-                className="text-xs text-app-accent hover:underline font-bold"
-              >
-                Chỉnh sửa thư
-              </button>
-              <Button size="sm" onClick={() => setIsReadOpen(false)} className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-                Tuyệt vời
-              </Button>
-            </div>
+          <div className="bg-app-warm-soft/40 dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60 my-2">
+            <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">
+              “{letterText}”
+            </p>
           </div>
-        </div>
-      )}
 
-      {/* Dialog Chỉnh sửa khi đã có thư (tương tự như viết mới) */}
-      {isWriteOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-neutral-950 rounded-[18px] border border-app-line max-w-md w-full p-6 space-y-4 shadow-app-lg animate-in fade-in zoom-in-95 duration-200">
-            <div className="space-y-1.5">
-              <h4 className="font-serif text-lg font-bold text-app-ink flex items-center gap-2">
-                <Mail className="h-5 w-5 text-app-accent" />
+          <DialogFooter className="flex flex-row justify-between items-center gap-3 font-sans w-full mt-2">
+            <button
+              type="button"
+              onClick={handleOpenWrite}
+              className="text-xs sm:text-sm text-app-accent hover:underline font-bold"
+            >
+              Chỉnh sửa thư
+            </button>
+            <Button
+              size="sm"
+              onClick={() => setIsReadOpen(false)}
+              className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 px-4 py-2 text-xs sm:text-sm"
+            >
+              Tuyệt vời
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Chỉnh sửa khi đã có thư */}
+      <Dialog open={isWriteOpen} onOpenChange={setIsWriteOpen}>
+        <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
+          <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
+            <div className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-app-accent shrink-0" />
+              <DialogTitle className="font-serif text-lg font-bold text-app-ink">
                 Chỉnh sửa thư gửi tuần 12
-              </h4>
-              <p className="text-xs text-app-ink-soft leading-relaxed font-sans">
-                Chỉnh sửa hoặc xóa bức thư gửi cho chính bạn ở cuối hành trình mục tiêu.
-              </p>
+              </DialogTitle>
             </div>
+          </DialogHeader>
+          <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
+            Chỉnh sửa hoặc xóa bức thư gửi cho chính bạn ở cuối hành trình mục tiêu.
+          </DialogDescription>
 
+          <div className="pt-2">
             <textarea
-              className="w-full h-36 rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
+              className="w-full min-h-[160px] rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
               placeholder="Gửi bản thân thân mến..."
               value={tempText}
               onChange={(e) => setTempText(e.target.value)}
               maxLength={500}
             />
-            
-            <div className="flex justify-between items-center text-xs text-app-ink-muted font-sans font-medium">
-              <span>{tempText.length}/500 ký tự</span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setIsWriteOpen(false)} className="rounded-lg">
-                  Hủy
-                </Button>
-                <Button size="sm" onClick={handleSave} className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover font-bold">
-                  Lưu thay đổi
-                </Button>
-              </div>
-            </div>
           </div>
-        </div>
-      )}
+          
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
+            <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
+              {tempText.length}/500 ký tự
+            </span>
+            <div className="flex gap-2.5 w-full sm:w-auto justify-end shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsWriteOpen(false)}
+                className="rounded-lg border border-app-line bg-app-surface text-app-ink hover:bg-app-bg h-9 px-4 py-2 font-bold text-xs sm:text-sm"
+              >
+                Hủy
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover font-bold h-9 px-4 py-2 text-xs sm:text-sm"
+              >
+                Lưu thay đổi
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
