@@ -142,15 +142,15 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
 
 function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
   if (!isActive) {
-    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:border-app-line-strong transition-all duration-200 rounded-xl shadow-sm";
+    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:border-app-line-strong transition-all duration-150 rounded-xl shadow-none";
   }
   switch (value) {
     case "low":
-      return "border-indigo-300 bg-indigo-50/50 text-indigo-900 dark:border-indigo-950/40 dark:bg-indigo-950/30 dark:text-indigo-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
+      return "border-indigo-200 bg-indigo-50/30 text-indigo-950 dark:border-indigo-900/50 dark:bg-indigo-950/20 dark:text-indigo-300 font-medium shadow-none transition-all duration-150 rounded-xl";
     case "high":
-      return "border-amber-300 bg-amber-50/50 text-amber-900 dark:border-amber-950/40 dark:bg-amber-950/30 dark:text-amber-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
+      return "border-amber-200 bg-amber-50/30 text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300 font-medium shadow-none transition-all duration-150 rounded-xl";
     default:
-      return "border-emerald-300 bg-emerald-50/50 text-emerald-900 dark:border-emerald-950/40 dark:bg-emerald-950/30 dark:text-emerald-300 font-semibold shadow-sm transition-all duration-200 rounded-xl";
+      return "border-emerald-200 bg-emerald-50/30 text-emerald-950 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300 font-medium shadow-none transition-all duration-150 rounded-xl";
   }
 }
 
@@ -384,7 +384,7 @@ export function TwelveWeekTodayTab({
   const reviewDuePrompt = reviewDueToday ? (
     <div
       data-testid="today-review-due-prompt"
-      className="surface-raised order-2 rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-app-warm sm:p-5"
+      className="order-2 rounded-xl border border-app-warm-border bg-app-warm-soft/40 p-4 text-app-warm sm:p-5 transition-all duration-150"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
@@ -400,7 +400,7 @@ export function TwelveWeekTodayTab({
         {onOpenWeekTab ? (
           <Button
             variant="outline"
-            className="w-full border-app-warm-border bg-app-surface text-app-warm hover:bg-app-bg sm:w-auto"
+            className="w-full border-app-warm-border bg-app-surface text-app-warm hover:bg-app-bg sm:w-auto shadow-none"
             onClick={onOpenWeekTab}
           >
             Mở review tuần
@@ -415,23 +415,23 @@ export function TwelveWeekTodayTab({
     <div className="flex min-w-0 flex-col gap-3 sm:gap-5">
       <div
         data-testid="today-mobile-compact-strip"
-        className="surface-flat order-0 grid grid-cols-3 gap-2 rounded-xl border border-app-line bg-app-surface p-2.5 sm:hidden"
+        className="order-0 grid grid-cols-3 gap-2 rounded-xl border border-app-line bg-app-surface p-2 sm:hidden"
       >
-        <div className="min-w-0 rounded-lg bg-app-bg px-2 py-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
-          <p className="mt-0.5 text-lg font-bold text-app-ink">{todayRemainingCount}</p>
+        <div className="min-w-0 rounded-lg bg-app-bg/50 px-2 py-1.5 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
+          <p className="mt-0.5 text-base font-bold text-app-ink">{todayRemainingCount}</p>
         </div>
-        <div className="min-w-0 rounded-lg bg-app-bg px-2 py-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tuần</p>
-          <p className="mt-0.5 text-lg font-bold text-app-ink">{weekCompletion.percent}%</p>
+        <div className="min-w-0 rounded-lg bg-app-bg/50 px-2 py-1.5 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tuần</p>
+          <p className="mt-0.5 text-base font-bold text-app-ink">{weekCompletion.percent}%</p>
         </div>
-        <div className={`min-w-0 rounded-lg px-2 py-2 ${reviewDueToday ? "bg-app-warm-soft" : "bg-app-accent-soft"}`}>
+        <div className={`min-w-0 rounded-lg px-2 py-1.5 text-center ${reviewDueToday ? "bg-app-warm-soft/60" : "bg-app-accent-soft/60"}`}>
           <p
-            className={`text-xs font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}
+            className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}
           >
             {reviewDueToday ? "Review" : "Xong"}
           </p>
-          <p className="mt-0.5 truncate text-lg font-bold text-app-ink">
+          <p className="mt-0.5 truncate text-base font-bold text-app-ink">
             {reviewDueToday ? "Hôm nay" : `${todayCompletedCount}/${checkInTotal}`}
           </p>
         </div>
@@ -440,7 +440,7 @@ export function TwelveWeekTodayTab({
       {upcomingStrategicBlock ? (
         <div
           data-testid="strategic-block-nudge"
-          className="surface-raised order-1 rounded-xl border border-app-accent/20 bg-app-accent-soft p-4 text-app-accent sm:p-5"
+          className="order-1 rounded-xl border border-app-accent/20 bg-app-accent-soft p-4 text-app-accent sm:p-5 transition-all duration-150"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -452,218 +452,217 @@ export function TwelveWeekTodayTab({
                 Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi.
               </p>
             </div>
-            <Badge variant="outline" className="w-fit border-app-accent/20 bg-app-surface text-app-accent">
+            <Badge variant="outline" className="w-fit border-app-accent/20 bg-app-surface text-app-accent shadow-none">
               {upcomingStrategicBlock.startTime} · {upcomingStrategicBlock.durationMinutes} phút
             </Badge>
           </div>
         </div>
       ) : null}
 
-      <div
-        data-testid="today-next-action-panel"
-        data-state={nextActionState.key}
-        className="surface-raised order-1 rounded-xl border border-app-line bg-app-surface p-4 sm:p-5"
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-              <Sparkles className="h-3.5 w-3.5 text-app-accent" />
-              Bước tiếp theo
-            </p>
-            <p className="mt-2 text-base font-semibold text-app-ink sm:text-lg">{nextActionState.title}</p>
-            <p className="mt-1 text-sm leading-6 text-app-ink-soft">{nextActionState.description}</p>
-          </div>
-          {nextActionState.onAction && nextActionState.actionLabel ? (
-            <Button variant="secondary" className="w-full shrink-0 sm:w-auto" onClick={nextActionState.onAction}>
-              {nextActionState.actionLabel}
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          ) : null}
+      {primaryTask ? (
+        <div
+          data-testid="today-next-action-panel"
+          data-state={nextActionState.key}
+          className="order-1 text-[11px] text-app-ink-muted flex items-center gap-1.5 px-1 py-0.5"
+        >
+          <Sparkles className="h-3 w-3 text-app-accent shrink-0" />
+          <span>{nextActionState.title}: {nextActionState.description}</span>
         </div>
-      </div>
+      ) : (
+        <div
+          data-testid="today-next-action-panel"
+          data-state={nextActionState.key}
+          className="order-1 bg-app-surface border border-app-line rounded-xl p-5 sm:p-7 flex flex-col gap-4 relative overflow-hidden transition-all duration-150"
+        >
+          <div className="flex flex-col gap-1">
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-app-accent/80">
+              <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+              Hôm nay · {nextActionState.key === "setup-needed" ? "Kế hoạch" : "Hành động"}
+            </p>
+            <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-app-ink mt-2">
+              {nextActionState.title}
+            </h1>
+            <p className="text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl">
+              {nextActionState.description}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-2 pt-4 border-t border-app-line/40">
+            {nextActionState.onAction && nextActionState.actionLabel ? (
+              <Button
+                variant="default"
+                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent/90 text-white font-medium shadow-none transition-colors"
+                onClick={nextActionState.onAction}
+              >
+                {nextActionState.actionLabel}
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-app-ink-muted">
+              <span>Tuần {currentWeek}/12</span>
+              <span className="text-app-line/60">•</span>
+              <span>Đã xong {todayCompletedCount}/{checkInTotal}</span>
+              <span className="text-app-line/60">•</span>
+              <span>Tiến độ {weekCompletion.percent}%</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {reviewDuePrompt}
 
       {missedTasks.length > 0 && (
-        <Card data-testid="today-overdue-recovery" className="order-4 border border-app-line bg-app-surface">
-          <CardHeader>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <CardTitle as="h2" className="flex items-center gap-2 text-app-ink">
-                  <AlertTriangle className="h-5 w-5 text-app-warm" />
-                  Quay lại nhịp tuần này
-                </CardTitle>
-                <CardDescription className="mt-2 max-w-3xl text-app-ink-soft">
-                  Có {missedTasks.length} việc bị trễ. Không cần làm hết — chọn cách quay lại nhịp gọn nhất.
-                </CardDescription>
+        <div
+          data-testid="today-overdue-recovery"
+          className="order-4 border border-amber-200/50 bg-amber-50/15 dark:border-amber-950/30 dark:bg-amber-950/10 rounded-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-150"
+        >
+          <div className="flex flex-col gap-1">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+              <AlertTriangle className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              Có {missedTasks.length} việc trễ — chọn một cách quay lại nhịp gọn nhẹ
+            </h2>
+            <p className="text-xs text-app-ink-soft leading-relaxed max-w-3xl">
+              Không cần áp lực làm hết. Chọn hành động phù hợp dưới đây để giảm tải và đưa kế hoạch về trạng thái cân bằng.
+            </p>
+          </div>
+
+          {hasSmartRescue && rescuePlanSummary && (
+            <div className="flex items-start gap-2.5 rounded-lg bg-app-accent-soft/40 border border-app-accent/10 px-3 py-2 text-xs">
+              <Crown className="h-3.5 w-3.5 text-app-accent shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <span className="font-semibold text-app-ink">Plus đề xuất: </span>
+                <span className="text-app-ink-soft">{rescuePlanSummary.headline}. {rescuePlanSummary.firstMove}</span>
               </div>
-              <Badge variant="outline" className="border-app-warm-border bg-app-warm-soft text-app-warm">
-                {overdueOpenCount} việc trễ
-              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-0 text-app-accent hover:text-app-accent/80 font-semibold"
+                onClick={onApplyRecommendedReentry}
+              >
+                Áp dụng ngay
+              </Button>
             </div>
-          </CardHeader>
-          <CardContent className="stack-stack">
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
-              <div className="stack-tight">
-                <div className="rounded-xl border border-app-line bg-app-bg p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-                    Tình trạng hiện tại
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-app-ink-soft">
-                    {overdueOpenCount} việc đang trễ, {optionalOpenThisWeekCount} việc tùy chọn còn mở, và{" "}
-                    {currentWeekTasksCount} việc còn mở trong tuần này.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">
-                        Gợi ý quay lại nhịp từ Plus
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-app-ink">
-                        {hasSmartRescue && rescuePlanSummary
-                          ? rescuePlanSummary.headline
-                          : "Plus gợi ý nên dàn lại tuần, giảm tải hay dời lịch — không cần tự đoán."}
-                      </p>
-                      <p className="mt-2 text-sm leading-7 text-app-ink-soft">
-                        {hasSmartRescue && rescuePlanSummary
-                          ? rescuePlanSummary.reason
-                          : "Plus không thêm việc, mà chỉ rõ cách quay lại nhịp nhẹ nhất ngay khi bạn bắt đầu trễ."}
-                      </p>
-                      {hasSmartRescue && rescuePlanSummary && (
-                        <p className="mt-2 text-sm leading-7 text-app-ink-soft">
-                          Bước đầu nên làm: {rescuePlanSummary.firstMove}
-                        </p>
-                      )}
-                    </div>
-                    <Badge className="bg-app-accent text-white hover:bg-app-accent">
-                      <Crown className="mr-1 h-3.5 w-3.5" />
-                      Plus
-                    </Badge>
-                  </div>
-                  {hasSmartRescue && rescuePlanSummary ? (
-                    <Button variant="secondary" className="mt-4 w-full sm:w-auto" onClick={onApplyRecommendedReentry}>
-                      {getReentryModeLabel(rescuePlanSummary.recommendedMode)}
-                    </Button>
-                  ) : (
-                    <Button variant="secondary" className="mt-4 w-full sm:w-auto" onClick={onOpenSmartRescue}>
-                      Mở Plus để có gợi ý phù hợp
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="rounded-xl border border-app-line bg-app-surface p-4">
-                <p className="text-sm font-semibold text-app-ink">Đề xuất nhanh</p>
-                <p className="mt-2 text-sm leading-7 text-app-ink-soft">
-                  Gom việc trễ sang một nhịp dễ làm hơn trước. Hai lựa chọn còn lại nằm trong phần mở rộng để tránh quá tải.
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-3 w-full justify-between bg-app-surface"
-                  onClick={() => onReentry("push")}
-                  aria-label="Áp dụng dời việc trễ sang tuần sau"
-                >
-                  Dời việc trễ sang tuần sau
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <details className="group mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-app-ink">
-                    Lựa chọn khác
-                    <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform group-open:rotate-180" />
-                  </summary>
-                  <div className="mt-3 grid gap-2">
-                    {rescueModes
-                      .filter((mode) => mode !== "push")
-                      .map((mode) => (
-                        <Button
-                          key={mode}
-                          variant="ghost"
-                          className="h-auto justify-start whitespace-normal px-3 py-2 text-left text-app-ink-soft hover:text-app-ink"
-                          onClick={() => onReentry(mode)}
-                          aria-label={`Áp dụng ${getReentryModeLabel(mode)}`}
-                        >
-                          <span>
-                            <span className="block text-sm font-semibold text-app-ink">{getReentryModeLabel(mode)}</span>
-                            <span className="mt-0.5 block text-xs leading-5 text-app-ink-muted">
-                              {getReentryModeDescription(mode, {
-                                overdueOpenCount,
-                                optionalOpenThisWeekCount,
-                                currentWeekOpenCount: currentWeekTasksCount,
-                              })}
-                            </span>
-                          </span>
-                        </Button>
-                      ))}
-                  </div>
-                </details>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-app-surface border-app-line text-app-ink hover:bg-app-bg text-xs py-1.5 h-8 shadow-none"
+              onClick={() => onReentry("push")}
+            >
+              Dời việc trễ sang tuần sau
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-app-ink-soft hover:text-app-ink text-xs py-1.5 h-8"
+              onClick={() => onReentry("lighten")}
+            >
+              Giảm tải tuần này
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-app-ink-soft hover:text-app-ink text-xs py-1.5 h-8"
+              onClick={() => onReentry("restart")}
+            >
+              Khởi động lại nhịp
+            </Button>
+            {!hasSmartRescue && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-app-accent hover:text-app-accent/80 text-xs py-1.5 h-8 ml-auto font-medium"
+                onClick={onOpenSmartRescue}
+              >
+                <Crown className="mr-1 h-3 w-3" />
+                Nhận gợi ý từ Plus
+              </Button>
+            )}
+          </div>
+        </div>
       )}
 
       {primaryTask && (
-        <PrimaryActionCard
+        <div
           data-testid="today-primary-hero"
-          hero
-          tone={primaryTaskOverdue ? "amber" : "emerald"}
-          eyebrow={isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
-          icon={<Sparkles className="h-3.5 w-3.5" />}
-          title={primaryTask.title}
-          description={
+          className={`order-2 bg-app-surface border ${
             primaryTaskOverdue
-              ? `Việc này đang trễ — hôm nay làm phiên bản gọn nhất, đừng bỏ luôn. Làm đều '${primaryTask.leadIndicatorName}' quan trọng hơn làm hết.`
-              : isFirstWeek
-                ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
-                : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`
-          }
-          titleClassName="break-words text-lg font-semibold text-app-ink sm:text-xl"
-          descriptionClassName="text-sm leading-6 text-app-ink-soft"
-          contentClassName="stack-tight"
-          actionClassName="flex flex-wrap gap-2"
-          className={`order-2 ${primaryTaskOverdue ? "bg-app-warm-soft" : ""}`}
-          action={
-            <>
+              ? "border-amber-200 bg-amber-50/5 dark:border-amber-950/40 dark:bg-amber-950/5"
+              : "border-app-line"
+          } rounded-xl p-5 sm:p-7 flex flex-col gap-4 relative overflow-hidden transition-all duration-150`}
+        >
+          <div className="flex flex-col gap-1">
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-app-accent/80">
+              <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+              {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Hôm nay · Việc quan trọng nhất"}
+              {primaryTaskOverdue && (
+                <span className="ml-2 rounded border border-amber-300/40 bg-amber-50/50 px-1.5 py-0.5 text-[10px] font-medium tracking-normal text-amber-700 dark:border-amber-950/40 dark:bg-amber-950/30 dark:text-amber-400 uppercase">
+                  Đang trễ
+                </span>
+              )}
+            </p>
+            <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-app-ink mt-2">
+              {primaryTask.title}
+            </h1>
+            <p className="text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl">
+              {primaryTaskOverdue
+                ? `Việc này đang trễ — hôm nay làm phiên bản gọn nhất, đừng bỏ luôn. Làm đều '${primaryTask.leadIndicatorName}' quan trọng hơn làm hết.`
+                : isFirstWeek
+                  ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
+                  : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`}
+            </p>
+          </div>
+
+          {primaryTaskCommitmentQuote && (
+            <p className="text-sm italic leading-relaxed text-app-ink-muted border-l-2 border-app-line/60 pl-3 my-1">
+              {primaryTaskCommitmentQuote}
+            </p>
+          )}
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-2 pt-4 border-t border-app-line/40">
+            <div className="flex flex-wrap gap-2">
               <Button
                 data-testid="today-primary-mark-done"
                 size="lg"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent/90 text-white font-medium shadow-none transition-colors"
                 onClick={() => handleTaskCompletionChange(primaryTask.id, true)}
               >
-                <Check className="h-4 w-4" />
+                <Check className="mr-1.5 h-4 w-4" />
                 Đánh dấu xong
               </Button>
               {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
                 <Button
                   variant="outline"
                   size="lg"
-                  className="bg-app-surface"
+                  className="w-full sm:w-auto border-app-line bg-app-surface text-app-ink hover:bg-app-bg transition-colors shadow-none"
                   onClick={() => onRescheduleTaskWithinWeek(primaryTask.id)}
                 >
-                  <CalendarClock className="h-4 w-4" />
+                  <CalendarClock className="mr-1.5 h-4 w-4 text-app-ink-soft" />
                   Dời sang ngày khác trong tuần
                 </Button>
               )}
-            </>
-          }
-        >
-          {primaryTaskOverdue && (
-            <Badge variant="outline" className="border-app-warm-border bg-app-surface text-app-warm">
-              Đang trễ
-            </Badge>
-          )}
-          {primaryTaskCommitmentQuote ? (
-            <p className="text-sm italic leading-6 text-app-ink-soft">{primaryTaskCommitmentQuote}</p>
-          ) : null}
-          <p className="text-sm font-medium text-app-ink">
-            Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
-          </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-app-ink-muted">
+              <span>Tuần {currentWeek}/12</span>
+              <span className="text-app-line/60">•</span>
+              <span>Còn {todayRemainingCount} việc</span>
+              <span className="text-app-line/60">•</span>
+              <span>Tiến độ {weekCompletion.percent}%</span>
+            </div>
+          </div>
+          
           {isFirstWeek && (
-            <p data-testid="today-first-week-encouragement" className="text-sm leading-6 text-app-ink-soft">
+            <p data-testid="today-first-week-encouragement" className="text-xs leading-relaxed text-app-ink-muted mt-1">
               Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
             </p>
           )}
-        </PrimaryActionCard>
+        </div>
       )}
 
       <SectionBlock title="Hàng việc và check-in hôm nay" headerVisuallyHidden className="order-3">
@@ -742,10 +741,10 @@ export function TwelveWeekTodayTab({
                       const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
                       const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
                       const TaskStateIcon = taskCompleted
-                        ? TaskDoneIcon
-                        : isPrimaryTask
-                          ? TaskInProgressIcon
-                          : TaskTodoIcon;
+                         ? TaskDoneIcon
+                         : isPrimaryTask
+                           ? TaskInProgressIcon
+                           : TaskTodoIcon;
                       const statusLabel = taskCompleted
                         ? "Đã chốt"
                         : isOverdue
@@ -761,8 +760,12 @@ export function TwelveWeekTodayTab({
                       return (
                         <MotionStaggerItem
                           key={task.id}
-                          className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 transition-all duration-200 hover:translate-x-0.5 hover:shadow-sm ${
-                            isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface hover:border-app-line-strong"
+                          className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 transition-all duration-150 ${
+                            isPrimaryTask
+                              ? "border-app-accent bg-app-accent"
+                              : `border-app-line bg-app-surface hover:border-app-line-strong hover:bg-app-bg/10 ${
+                                  !task.isCore && !taskCompleted ? "opacity-75 hover:opacity-100" : ""
+                                }`
                           }`}
                         >
                           <Checkbox
@@ -811,8 +814,8 @@ export function TwelveWeekTodayTab({
                                     variant={task.isCore ? "success" : "warning"}
                                     className={
                                       isPrimaryTask && !taskCompleted
-                                        ? "border-white/20 bg-white/10 text-white hover:bg-white/10"
-                                        : ""
+                                        ? "border-white/20 bg-white/10 text-white hover:bg-white/10 shadow-none"
+                                        : "shadow-none"
                                     }
                                   >
                                     {task.isCore ? "Cốt lõi" : "Tùy chọn"}
@@ -841,12 +844,12 @@ export function TwelveWeekTodayTab({
                                 variant="outline"
                                 className={
                                   isOverdue
-                                    ? "border-app-warm-border bg-app-warm-soft text-app-warm"
+                                    ? "border-app-warm-border bg-app-warm-soft text-app-warm shadow-none"
                                     : taskCompleted
-                                      ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                                      ? "border-app-accent/20 bg-app-accent-soft text-app-accent shadow-none"
                                       : isPrimaryTask
-                                        ? "border-white/30 bg-white/10 text-white/90"
-                                        : "border-app-line bg-app-bg text-app-ink-muted"
+                                        ? "border-white/30 bg-white/10 text-white/90 shadow-none"
+                                        : "border-app-line bg-app-bg text-app-ink-muted shadow-none"
                                 }
                               >
                                 {statusLabel}
@@ -860,8 +863,8 @@ export function TwelveWeekTodayTab({
                                     variant="outline"
                                     className={
                                       isPrimaryTask
-                                        ? "w-full justify-between border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto"
-                                        : "w-full justify-between bg-app-surface sm:w-auto"
+                                        ? "w-full justify-between border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto shadow-none text-xs"
+                                        : "w-full justify-between bg-app-surface sm:w-auto shadow-none text-xs border-app-line hover:bg-app-bg"
                                     }
                                     onClick={() => onRescheduleTaskWithinWeek(task.id)}
                                     data-action="reschedule-within-week"
@@ -875,9 +878,9 @@ export function TwelveWeekTodayTab({
                                   </Button>
                                 ) : null}
                                 {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
-                                  <details className="group rounded-lg border border-app-line/70 bg-app-bg/70 px-3 py-2">
+                                  <details className="group rounded-lg border border-app-line bg-app-bg/40 px-3 py-1.5 transition-all duration-150">
                                     <summary
-                                      className={`flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium ${
+                                      className={`flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-medium ${
                                         isPrimaryTask ? "text-white/75" : "text-app-ink-muted"
                                       }`}
                                     >
@@ -891,8 +894,8 @@ export function TwelveWeekTodayTab({
                                           variant="outline"
                                           className={
                                             isPrimaryTask
-                                              ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                                              : "bg-app-surface"
+                                              ? "border-white/20 bg-white/10 text-white hover:bg-white/20 shadow-none text-xs"
+                                              : "bg-app-surface border-app-line text-xs hover:bg-app-bg shadow-none text-app-ink"
                                           }
                                           onClick={() => onRescheduleTaskToNextWeek(task.id)}
                                           data-action="reschedule-next-week"
@@ -907,7 +910,7 @@ export function TwelveWeekTodayTab({
                                           size="sm"
                                           variant="ghost"
                                           className={
-                                            isPrimaryTask ? "text-white/80 hover:bg-white/10" : "text-app-ink-muted"
+                                            isPrimaryTask ? "text-white/80 hover:bg-white/10 text-xs" : "text-app-ink-muted hover:text-app-ink text-xs"
                                           }
                                           onClick={() => onSkipNonCoreTask(task.id)}
                                           data-action="skip-non-core"
@@ -923,7 +926,7 @@ export function TwelveWeekTodayTab({
                                 {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) ? (
                                   <span
                                     data-testid={`overdue-core-note-${task.id}`}
-                                    className={`block text-xs ${isPrimaryTask ? "text-white/60" : "text-app-ink-muted"}`}
+                                    className={`block text-[11px] ${isPrimaryTask ? "text-white/60" : "text-app-ink-muted"}`}
                                   >
                                     Việc cốt lõi không thể bỏ — chỉ dời lịch.
                                   </span>
@@ -937,48 +940,53 @@ export function TwelveWeekTodayTab({
                   </MotionStaggerList>
                 )}
                 {secondaryTodayTasks.length > 0 && (
-                  <details className="group min-w-0 rounded-lg border border-app-line bg-app-bg px-4 py-3">
+                  <details className="group min-w-0 rounded-xl border border-app-line/60 bg-app-surface px-4 py-3.5 transition-all duration-150">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-app-ink">
                       <span>Sau việc đầu tiên</span>
-                      <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-xs font-medium text-app-ink-muted">
+                      <span className="rounded-full border border-app-line/80 bg-app-bg px-2.5 py-0.5 text-xs font-medium text-app-ink-soft">
                         {secondaryTodayTasks.length} việc
                       </span>
                     </summary>
-                    <p className="mt-2 text-sm text-app-ink-muted">Xong việc số 1 rồi mới mở danh sách này.</p>
-                    <div className="mt-3 stack-tight">
+                    <p className="mt-2 text-xs text-app-ink-muted leading-relaxed">
+                      Tập trung xong việc ưu tiên số 1 trước khi mở rộng năng lượng sang các việc phụ dưới đây.
+                    </p>
+                    <div className="mt-3.5 space-y-2">
                       {secondaryPreviewTasks.map((task, index) => (
                         <div
                           key={task.id}
-                          className="flex min-w-0 items-center gap-3 rounded-xl border border-app-line bg-app-surface px-3 py-3"
+                          className="flex min-w-0 items-center gap-3 rounded-lg border border-app-line/50 bg-app-bg/30 px-3 py-2.5"
                         >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent text-xs font-semibold text-white">
+                          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-app-line text-[11px] font-bold text-app-ink-soft">
                             {index + 2}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-app-ink">{task.title}</p>
-                            <p className="mt-0.5 text-xs text-app-ink-muted">{task.leadIndicatorName}</p>
+                            <p className="truncate text-xs font-medium text-app-ink">{task.title}</p>
+                            <p className="mt-0.5 text-[10px] text-app-ink-muted">{task.leadIndicatorName}</p>
                           </div>
+                          <Badge variant={task.isCore ? "success" : "warning"} className="text-[10px] px-1.5 py-0 shadow-none">
+                            {task.isCore ? "Cốt lõi" : "Tùy chọn"}
+                          </Badge>
                         </div>
                       ))}
                     </div>
                     {remainingSecondaryTasks > 0 && (
-                      <p className="mt-3 text-sm text-app-ink-muted">
-                        Còn {remainingSecondaryTasks} việc mở phía sau, chưa cần nghĩ tới ngay.
+                      <p className="mt-2.5 text-xs text-app-ink-muted italic pl-1">
+                        + {remainingSecondaryTasks} việc phụ khác đang được xếp hàng phía sau...
                       </p>
                     )}
                   </details>
                 )}
-                <div className="rounded-xl border border-app-line bg-app-bg p-4">
-                  <div className="flex items-center justify-between text-sm text-app-ink-muted">
+                <div className="rounded-xl border border-app-line bg-app-bg/50 p-4">
+                  <div className="flex items-center justify-between text-sm text-app-ink-soft">
                     <span>Tiến độ tuần {currentWeek}</span>
-                    <span className="font-semibold text-app-ink-muted">{weekCompletion.percent}%</span>
+                    <span className="font-semibold text-app-ink">{weekCompletion.percent}%</span>
                   </div>
-                  <Progress value={weekCompletion.percent} className="mt-3 h-2.5" />
+                  <Progress value={weekCompletion.percent} className="mt-3 h-2 shadow-none" />
                 </div>
                 {primaryTaskCompletedToday && (
                   <p
                     data-testid="today-primary-done-nudge"
-                    className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm leading-6 text-app-accent"
+                    className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm leading-relaxed text-app-accent"
                   >
                     Việc chính đã xong — lưu check-in để chốt hôm nay.
                   </p>
@@ -1008,20 +1016,17 @@ export function TwelveWeekTodayTab({
                 {todayCheckIn && (
                   <div
                     data-testid="today-check-in-saved"
-                    className="flex items-start gap-3 rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-sm text-app-accent"
+                    className="flex items-center gap-2 rounded-lg border border-emerald-200/50 bg-emerald-50/15 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400"
                   >
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
-                    <div>
-                      <p className="font-semibold">Check-in hôm nay đã lưu</p>
-                      <p className="mt-1 leading-6">
-                        {formatCalendarDate(todayCheckIn.date)} - năng lượng{" "}
-                        {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
-                      </p>
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
+                    <div className="flex-1">
+                      <span className="font-semibold">Check-in đã lưu:</span> Năng lượng{" "}
+                      <span className="font-medium">{getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}</span>
                     </div>
                   </div>
                 )}
                 <div className="stack-tight">
-                  <Label id="daily-mood-label">Năng lượng hôm nay</Label>
+                  <Label id="daily-mood-label" className="text-xs font-semibold text-app-ink-soft">Năng lượng hôm nay</Label>
                   <div
                     role="radiogroup"
                     aria-labelledby="daily-mood-label"
@@ -1060,19 +1065,20 @@ export function TwelveWeekTodayTab({
                   </div>
                 </div>
                 <div className="stack-tight">
-                  <Label htmlFor="daily-note">Note tùy chọn</Label>
+                  <Label htmlFor="daily-note" className="text-xs font-semibold text-app-ink-soft">Note tùy chọn</Label>
                   <Textarea
                     id="daily-note"
                     rows={2}
                     value={dailyNote}
                     onChange={(event) => onDailyNoteChange(event.target.value)}
                     placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
+                    className="border-app-line bg-app-surface text-app-ink placeholder:text-app-ink-muted focus:border-app-line-strong rounded-xl shadow-none text-sm transition-all duration-150"
                   />
                 </div>
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="w-full py-3 text-base sm:w-auto sm:py-4 sm:text-lg"
+                  className="w-full py-2.5 text-sm sm:w-auto sm:py-3 shadow-none border-app-line hover:bg-app-bg transition-colors"
                   onClick={handleSaveCheckInClick}
                   disabled={isSavingCheckIn}
                   aria-busy={isSavingCheckIn}
@@ -1092,11 +1098,11 @@ export function TwelveWeekTodayTab({
                   <Button
                     data-testid="today-check-in-open-week"
                     variant="outline"
-                    className="w-full bg-app-surface sm:w-auto"
+                    className="w-full bg-app-surface sm:w-auto shadow-none border-app-line hover:bg-app-bg text-sm"
                     onClick={onOpenWeekTab}
                   >
                     Mở tab Tuần để review
-                    <ArrowRight className="ml-1 h-4 w-4" />
+                    <ArrowRight className="ml-1.5 h-4 w-4 text-app-ink-soft" />
                   </Button>
                 )}
                 <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false}>
