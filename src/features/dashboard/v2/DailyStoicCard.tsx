@@ -37,7 +37,7 @@ const STOIC_QUOTES: StoicQuote[] = [
   {
     quote: "Hãy coi mỗi ngày mới là một cuộc đời độc lập và trọn vẹn.",
     author: "Seneca",
-    question: "Nếu hôm nay là ngày duy nhất để sống ý nghĩa, bạn muốn dành trọn vẹn sự tập trung cho điều gì?"
+    question: "If hôm nay là ngày duy nhất để sống ý nghĩa, bạn muốn dành trọn vẹn sự tập trung cho điều gì?"
   },
   {
     quote: "Bất cứ nơi nào có con người, ở đó có cơ hội cho sự tử tế.",
@@ -116,9 +116,12 @@ export function DailyStoicCard() {
 
   return (
     <div 
-      className="w-full aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] select-none"
+      className="w-full aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] select-none relative"
       style={{ perspective: "1000px", WebkitPerspective: "1000px" }}
     >
+      {/* 📌 Floating wood pin at the top center of Stoic card framework */}
+      <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 text-xl z-30 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+
       <div
         className="relative w-full h-full transition-transform duration-700"
         style={{
@@ -130,7 +133,7 @@ export function DailyStoicCard() {
         {/* MẶT SAU THẺ BÀI (CARD BACK) - Nhìn thấy đầu tiên */}
         <button
           type="button"
-          className="absolute inset-0 w-full h-full rounded-2xl border border-amber-900/30 bg-gradient-to-br from-amber-950 via-amber-900 to-amber-950 text-amber-100 p-6 flex flex-col items-center justify-between shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+          className="absolute inset-0 w-full h-full rounded-3xl border border-amber-900/30 bg-gradient-to-br from-amber-950 via-neutral-900 to-amber-950 text-amber-100 p-6 flex flex-col items-center justify-between shadow-[0_8px_30px_rgba(0,0,0,0.12)] cursor-pointer hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)] hover:-translate-y-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
@@ -142,10 +145,10 @@ export function DailyStoicCard() {
           onKeyDown={handleKeyDown}
         >
           {/* Họa tiết góc cổ điển */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-amber-300/30 rounded-tl" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-amber-300/30 rounded-tr" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-amber-300/30 rounded-bl" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-amber-300/30 rounded-br" />
+          <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-amber-300/20 rounded-tl" />
+          <div className="absolute top-4 right-4 w-4 h-4 border-t border-r border-amber-300/20 rounded-tr" />
+          <div className="absolute bottom-4 left-4 w-4 h-4 border-b border-l border-amber-300/20 rounded-bl" />
+          <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-amber-300/20 rounded-br" />
 
           <div className="flex items-center gap-1.5 opacity-60 mt-2">
             <Bookmark className="h-4 w-4 text-amber-400" />
@@ -153,26 +156,26 @@ export function DailyStoicCard() {
           </div>
 
           <div className="flex flex-col items-center gap-4 text-center my-auto">
-            <div className="relative flex items-center justify-center w-16 h-16 rounded-full border border-amber-200/20 bg-amber-900/40">
-              <Sparkles className="h-7 w-7 text-amber-300 animate-pulse" />
-              <div className="absolute inset-0 rounded-full border border-dashed border-amber-400/30 animate-spin" style={{ animationDuration: "12s" }} />
+            <div className="relative flex items-center justify-center w-16 h-16 rounded-full border border-amber-200/20 bg-amber-900/30">
+              <Sparkles className="h-6 w-6 text-amber-300 animate-pulse" />
+              <div className="absolute inset-0 rounded-full border border-dashed border-amber-400/20 animate-spin" style={{ animationDuration: "16s" }} />
             </div>
             <div>
-              <h3 className="font-serif text-lg font-medium text-amber-100 tracking-wide">Lá Bài Trí Tuệ</h3>
-              <p className="text-xs text-amber-200/60 mt-1 max-w-[200px] leading-relaxed">
+              <h3 className="font-serif text-lg font-normal text-amber-100 tracking-wide">Lá Bài Trí Tuệ</h3>
+              <p className="text-xs text-amber-200/60 mt-1.5 max-w-[200px] leading-relaxed font-serif italic">
                 Chạm để lật mở châm ngôn Stoic và câu hỏi suy ngẫm dành riêng cho hôm nay
               </p>
             </div>
           </div>
 
-          <span className="text-[10px] font-bold text-amber-400/40 mb-2 tracking-wider">
+          <span className="text-[9px] font-extrabold text-amber-400/30 mb-2 tracking-widest uppercase">
             TAP TO REFLECT
           </span>
         </button>
 
         {/* MẶT TRƯỚC THẺ BÀI (CARD FRONT) - Hiển thị sau khi lật */}
         <div
-          className="absolute inset-0 w-full h-full rounded-2xl border border-app-line bg-app-surface text-app-ink p-5 flex flex-col justify-between shadow-lg"
+          className="absolute inset-0 w-full h-full rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white text-neutral-800 dark:bg-neutral-950 dark:text-neutral-200 p-5 flex flex-col justify-between shadow-lg"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
@@ -182,15 +185,15 @@ export function DailyStoicCard() {
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-app-line/60 pb-3">
+          <div className="flex items-center justify-between border-b border-neutral-200/80 dark:border-neutral-800/60 pb-3 pt-2">
             <div className="flex items-center gap-1.5">
               <HelpCircle className="h-4 w-4 text-app-accent" />
-              <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-app-ink-muted">
+              <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-neutral-400">
                 Suy ngẫm hôm nay
               </span>
             </div>
             {isSaved && (
-              <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200/50">
+              <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200/30">
                 <Check className="h-3 w-3" /> Đã ghi nhận
               </span>
             )}
@@ -198,16 +201,16 @@ export function DailyStoicCard() {
 
           {/* Nội dung chính */}
           <div className="flex-1 flex flex-col justify-center py-3 overflow-y-auto min-h-0">
-            <blockquote className="font-serif text-base italic leading-relaxed text-app-ink-soft text-center select-none">
+            <blockquote className="font-serif text-sm italic leading-relaxed text-neutral-600 dark:text-neutral-400 text-center select-none">
               “{currentQuote.quote}”
             </blockquote>
             
-            <p className="text-[10px] font-bold text-center uppercase tracking-[0.15em] text-app-accent mt-2">
+            <p className="text-[9px] font-bold text-center uppercase tracking-[0.15em] text-app-accent mt-2.5">
               — {currentQuote.author}
             </p>
 
-            <div className="mt-4 pt-3 border-t border-app-line/40">
-              <p className="text-xs font-semibold text-app-ink leading-relaxed mb-2">
+            <div className="mt-4 pt-3 border-t border-neutral-200/80 dark:border-neutral-800/80">
+              <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200 leading-relaxed mb-2">
                 💡 {currentQuote.question}
               </p>
               
@@ -215,20 +218,20 @@ export function DailyStoicCard() {
                 value={reflection}
                 onChange={handleTextChange}
                 placeholder="Ghi lại câu trả lời hoặc suy ngẫm của bạn tại đây..."
-                className="w-full h-20 text-xs p-2.5 rounded-lg border border-app-line bg-app-bg/50 focus:bg-app-surface focus:outline-none focus:ring-1 focus:ring-app-accent/30 text-app-ink leading-relaxed placeholder:text-app-ink-muted resize-none"
+                className="w-full h-20 text-xs p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 focus:bg-white dark:focus:bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-app-accent/30 text-neutral-800 dark:text-neutral-200 leading-relaxed placeholder:text-neutral-400 resize-none font-semibold"
               />
             </div>
           </div>
 
           {/* Footer nút hành động */}
-          <div className="mt-3 pt-2 border-t border-app-line/40">
+          <div className="mt-3 pt-2 border-t border-neutral-200/80 dark:border-neutral-800/80">
             <Button
               onClick={handleSave}
               disabled={!reflection.trim() || isSaved}
-              className={`w-full text-xs font-medium py-2 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`w-full text-xs font-bold py-2.5 rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 isSaved 
-                  ? "bg-app-line text-app-ink-muted cursor-not-allowed" 
-                  : "bg-app-accent text-white hover:bg-app-accent/90"
+                  ? "bg-neutral-100 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-600 cursor-not-allowed border border-neutral-200 dark:border-neutral-800" 
+                  : "bg-emerald-700 text-white hover:bg-emerald-800 shadow-sm"
               }`}
             >
               {isSaved ? "Đã lưu suy ngẫm" : "Lưu suy ngẫm"}

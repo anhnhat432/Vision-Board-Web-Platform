@@ -50,20 +50,20 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-white/50 dark:bg-neutral-950/20 border-app-line/80 hover:border-app-accent/20 hover:bg-white dark:hover:bg-neutral-950",
-    iconBg: "bg-neutral-100 dark:bg-neutral-900 text-app-ink-soft border border-app-line/50",
+    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 -rotate-[0.8deg] hover:rotate-0",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
   },
   "Tỷ lệ lead": {
-    bg: "bg-white/50 dark:bg-neutral-950/20 border-app-line/80 hover:border-app-accent/20 hover:bg-white dark:hover:bg-neutral-950",
-    iconBg: "bg-neutral-100 dark:bg-neutral-900 text-app-ink-soft border border-app-line/50",
+    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 rotate-[0.6deg] hover:rotate-0",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
   },
   Nhịp: {
-    bg: "bg-white/50 dark:bg-neutral-950/20 border-app-line/80 hover:border-app-accent/20 hover:bg-white dark:hover:bg-neutral-950",
-    iconBg: "bg-neutral-100 dark:bg-neutral-900 text-app-ink-soft border border-app-line/50",
+    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 -rotate-[0.6deg] hover:rotate-0",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
   },
   Chuỗi: {
-    bg: "bg-white/50 dark:bg-neutral-950/20 border-app-line/80 hover:border-app-accent/20 hover:bg-white dark:hover:bg-neutral-950",
-    iconBg: "bg-neutral-100 dark:bg-neutral-900 text-app-ink-soft border border-app-line/50",
+    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 rotate-[0.8deg] hover:rotate-0",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
   },
 };
 
@@ -123,7 +123,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
           className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-app-accent/40"
           aria-hidden="true"
         >
-          <div className="w-full rounded-full bg-app-accent" style={{ height: `${fillHeight}%` }} />
+          <div className="w-full rounded-full bg-app-accent animate-pulse" style={{ height: `${fillHeight}%` }} />
         </div>
       );
     }
@@ -145,12 +145,12 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
 
   return (
     <div className="group flex flex-col items-center gap-1.5 text-center transition-all duration-300 hover:scale-105">
-      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}>
+      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent" : "text-neutral-400"}`}>
         {day.label}
       </span>
       {barContent}
       <span
-        className={`text-[9px] tabular-nums font-semibold ${day.isToday ? "text-app-accent font-bold" : "text-app-ink-soft/80"}`}
+        className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent" : "text-neutral-500"}`}
       >
         {day.completed}/{day.total}
       </span>
@@ -211,54 +211,63 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-2xl border border-app-line bg-white/40 dark:bg-neutral-900/10 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all duration-300 hover:border-app-accent/20"
+      className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white/40 dark:bg-neutral-900/10 backdrop-blur-sm p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/20 relative select-none"
       aria-labelledby="dashboard-week-rhythm-title"
     >
-      <div className="flex flex-col gap-1 border-b border-app-line/65 pb-4 mb-5">
-        <h2 id="dashboard-week-rhythm-title" className="text-sm font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2">
+      {/* 📌 Floating wood pin at the header */}
+      <span className="absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+
+      <div className="flex flex-col gap-1 border-b border-neutral-200/80 dark:border-neutral-800/60 pb-4 mb-6 pt-2">
+        <h2 id="dashboard-week-rhythm-title" className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2">
           <Zap className="h-4.5 w-4.5 text-app-accent/80" />
           Nhịp tuần {safeWeek}
         </h2>
-        <p className="text-xs font-semibold tracking-wide text-app-ink-soft">
-          Đã hoàn thành <span className="text-app-accent font-bold">{completedCount}</span> trên tổng số{" "}
-          <span className="text-app-ink font-bold">{totalCount}</span> việc tuần này
+        <p className="text-xs font-semibold tracking-wide text-neutral-500">
+          Đã hoàn thành <span className="text-app-accent font-extrabold">{completedCount}</span> trên tổng số{" "}
+          <span className="text-neutral-700 dark:text-neutral-300 font-extrabold">{totalCount}</span> việc tuần này
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {stats.map((item) => {
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 relative">
+        {stats.map((item, index) => {
           const Icon = item.icon;
           const styles = KPI_CARD_STYLES[item.caption];
 
           return (
             <div
               key={item.caption}
-              className={`rounded-xl border ${styles.bg} p-4 shadow-sm hover:-translate-y-0.5 transition-all duration-350`}
+              className={`rounded-2xl border ${styles.bg} p-4 shadow-sm hover:-translate-y-0.5 transition-all duration-350 relative`}
             >
+              {/* 📌 Small tape/pin element on top corner of KPI cards */}
+              <span className="absolute -top-2.5 left-4 text-xs select-none opacity-80 filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.02)]">📌</span>
+
               <div className="flex items-center justify-between">
-                <div className={`p-1.5 rounded-lg ${styles.iconBg}`}>
+                <div className={`p-1.5 rounded-xl ${styles.iconBg}`}>
                   <Icon className="h-3.5 w-3.5" />
                 </div>
               </div>
-              <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+              
+              <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.16em] text-neutral-400">
                 {item.caption}
               </p>
-              <p className="mt-1 font-serif text-2xl font-semibold leading-none text-app-ink">
+              
+              <p className="mt-1 font-serif text-2xl font-semibold leading-none text-neutral-800 dark:text-neutral-200">
                 {item.numericValue !== undefined ? (
                   <CountUp value={item.numericValue} suffix={item.suffix ?? ""} precision={item.precision ?? 0} />
                 ) : (
                   item.value
                 )}
               </p>
-              <p className="mt-2 text-[9px] font-medium text-app-ink-muted">{item.subLine}</p>
+              
+              <p className="mt-2 text-[9px] font-semibold text-neutral-400">{item.subLine}</p>
             </div>
           );
         })}
       </div>
 
       {/* Daily Checkins dots */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-app-line/75 bg-white/60 dark:bg-neutral-900/20 px-5 py-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]">
-        <span className="text-xs font-semibold text-app-ink-soft">Nhịp check-in hàng ngày:</span>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/60 dark:bg-neutral-900/20 px-5 py-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.005)]">
+        <span className="text-xs font-semibold text-neutral-500">Nhịp check-in hàng ngày:</span>
         <div className="flex items-center gap-3">
           {days.map((day) => {
             const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
@@ -272,7 +281,7 @@ export function WeekRhythmCard({
               dotClass = "bg-app-accent border-transparent shadow-[0_2px_6px_rgba(47,93,80,0.2)]";
               tooltipText = `${day.label}: Đã check-in`;
             } else {
-              dotClass = "bg-transparent border border-app-line dark:border-neutral-700";
+              dotClass = "bg-transparent border border-neutral-200 dark:border-neutral-800";
               tooltipText = `${day.label}: Chưa check-in`;
             }
 
@@ -292,15 +301,15 @@ export function WeekRhythmCard({
                     }`}
                   />
                 </div>
-                <span className={`text-[9px] font-semibold uppercase tracking-wider ${day.isToday ? "text-app-accent font-bold" : "text-app-ink-muted/80"}`}>{day.label}</span>
+                <span className={`text-[9px] font-extrabold uppercase tracking-wider ${day.isToday ? "text-app-accent" : "text-neutral-400"}`}>{day.label}</span>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="mt-6 border-t border-app-line/65 pt-6">
-        <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
+      <div className="mt-6 border-t border-neutral-200/80 dark:border-neutral-800/80 pt-6">
+        <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
           <Clock3 className="h-4 w-4 text-app-accent/80" />
           Nhịp độ thực thi hàng ngày
         </div>
