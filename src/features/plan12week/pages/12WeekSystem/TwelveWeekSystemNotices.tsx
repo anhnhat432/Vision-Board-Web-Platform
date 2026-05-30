@@ -75,21 +75,21 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-app-warm px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-1.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={markWeeklyReviewCompleted}
           >
             Đã đánh giá xong
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-1.5 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={handleSnoozeWeeklyReview}
           >
             Nhắc lại sau 24h
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-accent hover:bg-app-accent-soft/30 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-1.5 text-xs font-semibold text-app-accent hover:bg-app-accent-soft/30 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => handleTabChange("week")}
           >
             Mở review tuần
@@ -111,14 +111,14 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-app-warm px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-1.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
             Thiết lập lại chu kỳ
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-1.5 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Mở cài đặt
@@ -134,7 +134,7 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-app-status-error px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-status-error/95 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-status-error px-4 py-1.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-status-error/95 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
           >
@@ -142,7 +142,7 @@ export function TwelveWeekSystemNotices({
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-1.5 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Xem trạng thái sync

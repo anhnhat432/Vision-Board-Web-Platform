@@ -34,7 +34,6 @@ import { hapticLight } from "../../utils/haptics";
 import { playZenBell } from "../../utils/zen-bell";
 import { triggerSparkles } from "../../utils/sparkles";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
-import { PrimaryActionCard } from "@/app/components/layout/PrimaryActionCard";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import {
@@ -42,8 +41,6 @@ import {
   type RescuePlanSummary,
   type ReentryMode,
   type DailyMood,
-  getReentryModeDescription,
-  getReentryModeLabel,
   getMoodLabel,
 } from "../../utils/twelve-week-system-ui";
 
@@ -384,7 +381,7 @@ export function TwelveWeekTodayTab({
   const reviewDuePrompt = reviewDueToday ? (
     <div
       data-testid="today-review-due-prompt"
-      className="order-2 rounded-xl border border-app-warm-border bg-app-warm-soft/40 p-4 text-app-warm sm:p-5 transition-all duration-150"
+      className="order-2 rounded-lg border border-app-warm-border bg-app-warm-soft/40 p-4 text-app-warm sm:p-5 transition-all duration-150"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
@@ -412,10 +409,10 @@ export function TwelveWeekTodayTab({
   ) : null;
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 sm:gap-5">
+    <div className="flex min-w-0 flex-col gap-4 sm:gap-6">
       <div
         data-testid="today-mobile-compact-strip"
-        className="order-0 grid grid-cols-3 gap-2 rounded-xl border border-app-line bg-app-surface p-2 sm:hidden"
+        className="order-0 grid grid-cols-3 gap-2 rounded-lg border border-app-line bg-app-surface p-2 sm:hidden"
       >
         <div className="min-w-0 rounded-lg bg-app-bg/50 px-2 py-1.5 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
@@ -440,7 +437,7 @@ export function TwelveWeekTodayTab({
       {upcomingStrategicBlock ? (
         <div
           data-testid="strategic-block-nudge"
-          className="order-1 rounded-xl border border-app-accent/20 bg-app-accent-soft p-4 text-app-accent sm:p-5 transition-all duration-150"
+          className="order-1 rounded-lg border border-app-accent/20 bg-app-accent-soft p-4 text-app-accent sm:p-5 transition-all duration-150"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -472,7 +469,7 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 bg-app-surface border border-app-line rounded-xl p-5 sm:p-7 flex flex-col gap-4 relative overflow-hidden transition-all duration-150"
+          className="order-1 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/5 border border-app-line rounded-xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-150"
         >
           <div className="flex flex-col gap-1">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-app-accent/80">
@@ -501,7 +498,7 @@ export function TwelveWeekTodayTab({
               <div />
             )}
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-app-ink-muted">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-app-ink-muted">
               <span>Tuần {currentWeek}/12</span>
               <span className="text-app-line/60">•</span>
               <span>Đã xong {todayCompletedCount}/{checkInTotal}</span>
@@ -517,7 +514,7 @@ export function TwelveWeekTodayTab({
       {missedTasks.length > 0 && (
         <div
           data-testid="today-overdue-recovery"
-          className="order-4 border border-amber-200/50 bg-amber-50/15 dark:border-amber-950/30 dark:bg-amber-950/10 rounded-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-150"
+          className="order-4 border border-amber-200/50 bg-amber-50/15 dark:border-amber-950/30 dark:bg-amber-950/10 rounded-xl p-5 sm:p-6 flex flex-col gap-3 transition-all duration-150"
         >
           <div className="flex flex-col gap-1">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-app-ink">
@@ -551,7 +548,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="sm"
               variant="outline"
-              className="bg-app-surface border-app-line text-app-ink hover:bg-app-bg text-xs py-1.5 h-8 shadow-none"
+              className="bg-app-surface border-app-line text-app-ink hover:bg-app-bg text-xs py-1.5 h-8 shadow-none rounded-lg"
               onClick={() => onReentry("push")}
             >
               Dời việc trễ sang tuần sau
@@ -559,7 +556,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="sm"
               variant="ghost"
-              className="text-app-ink-soft hover:text-app-ink text-xs py-1.5 h-8"
+              className="text-app-ink-soft hover:text-app-ink text-xs py-1.5 h-8 rounded-lg"
               onClick={() => onReentry("lighten")}
             >
               Giảm tải tuần này
@@ -567,7 +564,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="sm"
               variant="ghost"
-              className="text-app-ink-soft hover:text-app-ink text-xs py-1.5 h-8"
+              className="text-app-ink-soft hover:text-app-ink text-xs py-1.5 h-8 rounded-lg"
               onClick={() => onReentry("restart")}
             >
               Khởi động lại nhịp
@@ -590,11 +587,11 @@ export function TwelveWeekTodayTab({
       {primaryTask && (
         <div
           data-testid="today-primary-hero"
-          className={`order-2 bg-app-surface border ${
+          className={`order-2 border ${
             primaryTaskOverdue
-              ? "border-amber-200 bg-amber-50/5 dark:border-amber-950/40 dark:bg-amber-950/5"
-              : "border-app-line"
-          } rounded-xl p-5 sm:p-7 flex flex-col gap-4 relative overflow-hidden transition-all duration-150`}
+              ? "border-amber-200 bg-gradient-to-br from-app-surface via-app-surface to-amber-50/10 dark:border-amber-950/40 dark:to-amber-950/5"
+              : "border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/5"
+          } rounded-xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-150`}
         >
           <div className="flex flex-col gap-1">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-app-accent/80">
@@ -629,7 +626,7 @@ export function TwelveWeekTodayTab({
               <Button
                 data-testid="today-primary-mark-done"
                 size="lg"
-                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent/90 text-white font-medium shadow-none transition-colors"
+                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent/90 text-white font-medium shadow-none transition-colors rounded-lg"
                 onClick={() => handleTaskCompletionChange(primaryTask.id, true)}
               >
                 <Check className="mr-1.5 h-4 w-4" />
@@ -648,7 +645,7 @@ export function TwelveWeekTodayTab({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-app-ink-muted">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-app-ink-muted">
               <span>Tuần {currentWeek}/12</span>
               <span className="text-app-line/60">•</span>
               <span>Còn {todayRemainingCount} việc</span>
@@ -668,7 +665,7 @@ export function TwelveWeekTodayTab({
       <SectionBlock title="Hàng việc và check-in hôm nay" headerVisuallyHidden className="order-3">
         <div
           data-testid="today-main-work-grid"
-          className="grid min-w-0 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.12fr)_380px]"
+          className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]"
         >
           <div className={fadeInClassName}>
             <Card
@@ -760,10 +757,10 @@ export function TwelveWeekTodayTab({
                       return (
                         <MotionStaggerItem
                           key={task.id}
-                          className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 transition-all duration-150 ${
+                          className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 transition-all duration-150 ${
                             isPrimaryTask
                               ? "border-app-accent bg-app-accent"
-                              : `border-app-line bg-app-surface hover:border-app-line-strong hover:bg-app-bg/10 ${
+                              : `border-app-line bg-app-surface hover:bg-app-bg/10 ${
                                   !task.isCore && !taskCompleted ? "opacity-75 hover:opacity-100" : ""
                                 }`
                           }`}
@@ -940,7 +937,7 @@ export function TwelveWeekTodayTab({
                   </MotionStaggerList>
                 )}
                 {secondaryTodayTasks.length > 0 && (
-                  <details className="group min-w-0 rounded-xl border border-app-line/60 bg-app-surface px-4 py-3.5 transition-all duration-150">
+                  <details className="group min-w-0 rounded-lg border border-app-line/60 bg-app-surface px-4 py-3.5 transition-all duration-150">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-app-ink">
                       <span>Sau việc đầu tiên</span>
                       <span className="rounded-full border border-app-line/80 bg-app-bg px-2.5 py-0.5 text-xs font-medium text-app-ink-soft">
@@ -976,7 +973,7 @@ export function TwelveWeekTodayTab({
                     )}
                   </details>
                 )}
-                <div className="rounded-xl border border-app-line bg-app-bg/50 p-4">
+                <div className="rounded-lg border border-app-line bg-app-bg/50 p-4">
                   <div className="flex items-center justify-between text-sm text-app-ink-soft">
                     <span>Tiến độ tuần {currentWeek}</span>
                     <span className="font-semibold text-app-ink">{weekCompletion.percent}%</span>
@@ -1072,7 +1069,7 @@ export function TwelveWeekTodayTab({
                     value={dailyNote}
                     onChange={(event) => onDailyNoteChange(event.target.value)}
                     placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
-                    className="border-app-line bg-app-surface text-app-ink placeholder:text-app-ink-muted focus:border-app-line-strong rounded-xl shadow-none text-sm transition-all duration-150"
+                    className="border-app-line bg-app-surface text-app-ink placeholder:text-app-ink-muted focus:border-app-line-strong rounded-lg shadow-none text-sm transition-all duration-150"
                   />
                 </div>
                 <Button
