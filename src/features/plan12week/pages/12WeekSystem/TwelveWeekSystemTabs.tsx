@@ -185,7 +185,7 @@ interface TwelveWeekSystemTabsProps {
   handleDeleteCloudWorkspace: () => void;
   handleBrowserNotificationToggle: (value: boolean) => Promise<void>;
   handleRunOutboxSync: () => void;
-  handleOutboxItemToggle: (item: any) => void;
+  handleOutboxItemToggle: (item: SyncOutboxItem) => void;
   handleClearEventLog: () => void;
   handleClearArchivedOutbox: () => void;
   setIsClearLocalDialogOpen: (open: boolean) => void;
