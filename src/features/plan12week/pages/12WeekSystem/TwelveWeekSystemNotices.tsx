@@ -66,30 +66,30 @@ export function TwelveWeekSystemNotices({
   const activeTrigger = activeTriggers.filter((trigger) => trigger.kind !== dismissedTriggerKind)[0] ?? null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {shouldShowWeeklyReviewBanner && (
         <TwelveWeekDashboardNotice
           tone="warning"
-          title="Đến lúc chốt đánh giá (Review) tuần"
-          description="Đã đến hạn đánh giá tuần này. Hãy ghi lại những bài học kinh nghiệm và kết quả thực thi của bạn trước khi bắt đầu tuần mới nhé."
+          title="Đến hạn đánh giá (Review) tuần"
+          description="Hãy đúc kết bài học thực thi và kết quả tuần này trước khi sang tuần mới."
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full bg-app-warm px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-app-warm/90 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl bg-app-warm px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={markWeeklyReviewCompleted}
           >
-            Đã chốt đánh giá xong
+            Đã đánh giá xong
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={handleSnoozeWeeklyReview}
           >
             Nhắc lại sau 24h
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-accent hover:bg-app-accent-soft/40 transition-all duration-150 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-accent hover:bg-app-accent-soft/30 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => handleTabChange("week")}
           >
             Mở review tuần
@@ -100,28 +100,28 @@ export function TwelveWeekSystemNotices({
       {hasIncompletePlanStructure && (
         <TwelveWeekDashboardNotice
           tone="warning"
-          title="Chu kỳ 12 tuần chưa đầy đủ cấu trúc"
+          title="Chu kỳ chưa đầy đủ cấu trúc"
           description={
             planHasNoLeadMetrics
-              ? "Hệ thống chưa tìm thấy các hành động lặp lại (Lead Indicators) trong chu kỳ này để tự động tạo công việc mỗi tuần. Hãy thiết lập chu kỳ đầy đủ để bắt đầu thực thi tốt nhất."
+              ? "Chưa có hành động lặp lại (Lead Indicators) để tạo việc mỗi tuần. Hãy cấu hình lại chu kỳ."
               : planHasNoTasks
-                ? "Chu kỳ của bạn đã có hành động lặp lại nhưng chưa có công việc cụ thể. Hãy kiểm tra hoặc cấu hình lại chu kỳ của mình."
-                : "Chỉ số kết quả chính (Lag Metric) đang trống. Hãy bổ sung chỉ số để đo lường tiến độ chính xác nhất."
+                ? "Đã có hành động lặp lại nhưng chưa có công việc cụ thể. Hãy kiểm tra lại chu kỳ."
+                : "Chỉ số kết quả chính (Lag Metric) đang trống. Hãy bổ sung để đo lường tiến độ."
           }
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full bg-app-warm px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-app-warm/90 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl bg-app-warm px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
-            Tạo lại chu kỳ
+            Thiết lập lại chu kỳ
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
-            Mở cài đặt chu kỳ
+            Mở cài đặt
           </button>
         </TwelveWeekDashboardNotice>
       )}
@@ -129,20 +129,20 @@ export function TwelveWeekSystemNotices({
       {hasBackendSyncIssue && (
         <TwelveWeekDashboardNotice
           tone="error"
-          title="Chưa đồng bộ được dữ liệu lên đám mây"
-          description={`${backendSyncIssueMessage || "Kết nối mạng không ổn định."} Tiến trình thực thi của bạn vẫn đang được lưu an toàn trên thiết bị này.`}
+          title="Chưa sao lưu được dữ liệu đám mây"
+          description={`Lỗi: ${backendSyncIssueMessage || "Mất kết nối mạng"}. Tiến trình đang được lưu an toàn trên máy.`}
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full bg-app-status-error px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-app-status-error/90 hover:scale-[1.02] active:scale-95 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl bg-app-status-error px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-status-error/95 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
           >
-            {isBackendSyncing ? "Đang sao lưu..." : "Thử sao lưu ngay"}
+            {isBackendSyncing ? "Đang sao lưu..." : "Thử lại"}
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Xem trạng thái sync
