@@ -50,19 +50,19 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-app-surface border-app-line hover:border-blue-300 dark:hover:border-blue-900",
+    bg: "bg-app-surface border-app-line hover:border-blue-300 dark:hover:border-blue-900 border-b-2 border-b-blue-400 dark:border-b-blue-600",
     iconBg: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100/50 dark:border-blue-950/30",
   },
   "Tỷ lệ lead": {
-    bg: "bg-app-surface border-app-line hover:border-emerald-300 dark:hover:border-emerald-900",
+    bg: "bg-app-surface border-app-line hover:border-emerald-300 dark:hover:border-emerald-900 border-b-2 border-b-emerald-400 dark:border-b-emerald-600",
     iconBg: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-950/30",
   },
   Nhịp: {
-    bg: "bg-app-surface border-app-line hover:border-amber-300 dark:hover:border-amber-900",
+    bg: "bg-app-surface border-app-line hover:border-amber-300 dark:hover:border-amber-900 border-b-2 border-b-amber-400 dark:border-b-amber-600",
     iconBg: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100/50 dark:border-amber-950/30",
   },
   Chuỗi: {
-    bg: "bg-app-surface border-app-line hover:border-rose-300 dark:hover:border-rose-900",
+    bg: "bg-app-surface border-app-line hover:border-rose-300 dark:hover:border-rose-900 border-b-2 border-b-rose-400 dark:border-b-rose-600",
     iconBg: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-950/30",
   },
 };
@@ -257,9 +257,9 @@ export function WeekRhythmCard({
       </div>
 
       {/* Things 3 style consistency dots */}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-app-line bg-app-bg/40 px-4 py-3">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-app-line/80 bg-app-bg/60 dark:bg-neutral-900/30 px-5 py-3.5 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.01)]">
         <span className="text-xs font-bold text-app-ink-soft">Nhịp check-in hàng ngày:</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {days.map((day) => {
             const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
             let dotClass = "";
@@ -269,10 +269,10 @@ export function WeekRhythmCard({
               dotClass = "bg-app-line/25 border-transparent";
               tooltipText = `${day.label}: Tương lai`;
             } else if (hasCheckIn) {
-              dotClass = "bg-app-accent border-transparent";
+              dotClass = "bg-app-accent border-transparent shadow-[0_2px_6px_rgba(47,93,80,0.25)]";
               tooltipText = `${day.label}: Đã check-in`;
             } else {
-              dotClass = "bg-transparent border border-app-line dark:border-neutral-700";
+              dotClass = "bg-transparent border border-app-line/80 dark:border-neutral-700";
               tooltipText = `${day.label}: Chưa check-in`;
             }
 
@@ -287,12 +287,12 @@ export function WeekRhythmCard({
                     <span className="absolute inline-flex h-full w-full rounded-full bg-app-accent/20 animate-ping" />
                   )}
                   <div
-                    className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${dotClass} ${
+                    className={`h-2.5 w-2.5 rounded-full transition-all duration-350 ${dotClass} ${
                       day.isToday ? "ring-2 ring-app-accent/30" : ""
                     }`}
                   />
                 </div>
-                <span className={`text-[9px] font-bold uppercase tracking-wider ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted"}`}>{day.label}</span>
+                <span className={`text-[9px] font-bold uppercase tracking-wider ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted/80"}`}>{day.label}</span>
               </div>
             );
           })}

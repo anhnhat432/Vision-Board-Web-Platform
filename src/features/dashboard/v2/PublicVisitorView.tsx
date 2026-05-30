@@ -168,16 +168,25 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
   };
 
   return (
-    <div className="space-y-6">
-      <section className="relative -mx-4 overflow-hidden bg-app-bg px-4 pb-2 pt-6 sm:-mx-6 sm:px-6 md:pt-12 lg:min-h-[80vh] lg:items-center lg:py-16">
+    <div className="space-y-8 md:space-y-12">
+      <section className="relative -mx-4 overflow-hidden bg-app-bg px-4 pb-8 pt-10 sm:-mx-6 sm:px-6 md:pt-16 lg:min-h-[80vh] lg:items-center lg:py-24">
+        {/* Layered decorative gradient blobs for premium visual depth */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-2/3 bg-gradient-to-b from-transparent to-app-warm-soft/30"
+          className="pointer-events-none absolute -left-12 -top-12 -z-0 h-72 w-72 rounded-full bg-app-accent/10 blur-[100px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 top-1/4 -z-0 h-96 w-96 rounded-full bg-app-warm/10 blur-[120px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-2/3 bg-gradient-to-b from-transparent to-app-warm-soft/20"
         />
         <div className="relative z-10 grid gap-10 lg:grid-cols-[55fr_45fr] lg:items-center lg:gap-12">
         <div className="appear-fade-up">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-app-accent">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent/90">
               Dear Our Future · Lập kế hoạch cá nhân 12 tuần
             </p>
             <h1 className="mt-4 max-w-[20ch] font-serif text-4xl font-medium leading-[1.25] tracking-tight text-app-ink md:text-display">
@@ -188,7 +197,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   aria-hidden="true"
                   viewBox="0 0 200 12"
                   preserveAspectRatio="none"
-                  className="absolute inset-x-0 -bottom-1 h-2.5 w-full text-app-warm"
+                  className="absolute inset-x-0 -bottom-1 h-2.5 w-full text-app-warm/90"
                 >
                   <path
                     d="M2 8 C 40 2, 80 10, 120 4 S 180 8, 198 5"
@@ -204,12 +213,12 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <p className="mt-4 max-w-[55ch] text-xs font-semibold leading-relaxed text-app-ink-soft">
               Đừng để mục tiêu chỉ là mong muốn. Chúng tôi dẫn bạn từng bước: Chấm điểm cuộc sống, lập mục tiêu SMART thực tế, và tự động chia thành việc cụ thể hôm nay.
             </p>
-            <p className="mt-2 max-w-[50ch] text-xs italic leading-relaxed text-app-ink-muted">
+            <p className="mt-2 max-w-[50ch] text-[11px] italic leading-relaxed text-app-ink-muted/80">
               Dành cho những lúc bạn có nhiều mục tiêu nhưng không biết bắt đầu từ đâu.
             </p>
 
-            <div className="mt-5 space-y-2 border-l-2 border-app-accent/30 pl-4 py-0.5">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent">Bản kế hoạch của bạn bao gồm:</p>
+            <div className="mt-5 space-y-2 border-l-2 border-app-accent/20 pl-4 py-0.5 bg-app-accent-soft/10 rounded-r-lg max-w-[550px]">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-app-accent">Bản kế hoạch của bạn bao gồm:</p>
               <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-semibold text-app-ink-soft">
                 <li className="flex items-center gap-1.5">
                   <span className="text-app-accent font-extrabold">✓</span> 1 Mục tiêu SMART thực tế
@@ -235,8 +244,8 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                     onClick={() => handlePreviewSelect(chip.id)}
                     className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg ${
                       selectedPreviewId === chip.id
-                        ? "bg-app-accent text-white shadow-md shadow-app-accent/20"
-                        : "border border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent"
+                        ? "bg-app-accent text-white shadow-md shadow-app-accent/30 scale-[1.02]"
+                        : "border border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent hover:-translate-y-px"
                     }`}
                   >
                     {chip.label}
@@ -245,11 +254,11 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
                 onClick={onStart}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_8px_24px_-12px_rgba(47,93,80,0.55)] transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_8px_30px_rgb(47,93,80,0.3)] transition-all duration-200 hover:bg-app-accent-hover hover:shadow-[0_12px_36px_rgba(47,93,80,0.4)] hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
               >
                 {heroStartLabel}
                 <ArrowRight className="h-4 w-4" />
@@ -257,29 +266,29 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={scrollToHowItWorks}
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-colors duration-150 hover:border-app-accent/40 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink shadow-app-xs transition-all duration-200 hover:border-app-accent/30 hover:bg-app-accent-soft hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
               >
                 Xem cách hoạt động
               </button>
             </div>
 
             <div className="mt-4">
-              <p className="text-[10px] font-semibold text-app-ink-muted flex items-center gap-1">
-                <span>⚡</span>
+              <p className="text-[10px] font-semibold text-app-ink-muted/90 flex items-center gap-1.5">
+                <span className="text-app-accent">⚡</span>
                 Bạn sẽ đi qua 4 bước thiết lập trong khoảng 10–15 phút, sau đó nhận ngay việc hôm nay để bắt đầu.
               </p>
             </div>
 
-            <ul className="mt-5 flex flex-wrap gap-2">
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs text-app-ink-soft">
+            <ul className="mt-6 flex flex-wrap gap-2">
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line/80 bg-app-surface/60 backdrop-blur-md px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-app-xs">
                 <Lock className="h-3.5 w-3.5 text-app-accent" />
                 Mở trang là dùng được, không cần email
               </li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs text-app-ink-soft">
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line/80 bg-app-surface/60 backdrop-blur-md px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-app-xs">
                 <RefreshCw className="h-3.5 w-3.5 text-app-accent" />
                 Đồng bộ khi sẵn sàng
               </li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs text-app-ink-soft">
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-app-line/80 bg-app-surface/60 backdrop-blur-md px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-app-xs">
                 <Smartphone className="h-3.5 w-3.5 text-app-accent" />
                 Hoạt động trên mobile
               </li>
@@ -336,42 +345,46 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
       {/* Before → After Clarity Section */}
       <RevealOnScroll
         as="section"
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid gap-6 sm:grid-cols-2"
         aria-label="So sánh trước và sau"
       >
-        <div className="rounded-xl border border-dashed border-app-line bg-app-bg p-5 opacity-75">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">😶 Trước</p>
-          <h3 className="mt-2 text-sm font-bold text-app-ink">Mục tiêu mơ hồ</h3>
-          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-app-ink-soft">
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-app-ink-muted">✗</span>
-              "Muốn khoẻ hơn" — không biết bắt đầu từ đâu
+        <div className="rounded-xl border border-dashed border-app-line/80 bg-app-bg/60 p-6 transition-all duration-300 hover:border-app-ink-muted/30">
+          <p className="inline-flex items-center gap-1.5 rounded-full bg-app-line/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+            <span>😶</span> Trước
+          </p>
+          <h3 className="mt-3 text-sm font-bold text-app-ink">Mục tiêu mơ hồ</h3>
+          <ul className="mt-4 space-y-2.5 text-xs font-semibold leading-relaxed text-app-ink-soft">
+            <li className="flex items-start gap-2.5">
+              <span className="mt-0.5 shrink-0 text-app-ink-muted font-bold">✕</span>
+              <span>"Muốn khoẻ hơn" — không biết bắt đầu từ đâu</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-app-ink-muted">✗</span>
-              Viết to-do rồi quên sau 2 tuần
+            <li className="flex items-start gap-2.5">
+              <span className="mt-0.5 shrink-0 text-app-ink-muted font-bold">✕</span>
+              <span>Viết to-do rồi quên sau 2 tuần</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-app-ink-muted">✗</span>
-              Không có ai nhắc hay review tiến độ
+            <li className="flex items-start gap-2.5">
+              <span className="mt-0.5 shrink-0 text-app-ink-muted font-bold">✕</span>
+              <span>Không có ai nhắc hay review tiến độ</span>
             </li>
           </ul>
         </div>
-        <div className="rounded-xl border border-app-accent/30 bg-app-accent-soft/20 p-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">🎯 Sau 12 tuần</p>
-          <h3 className="mt-2 text-sm font-bold text-app-ink">Kế hoạch hành động rõ ràng</h3>
-          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-app-ink-soft">
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-app-accent font-bold">✓</span>
-              1 mục tiêu SMART cụ thể, đo được
+        <div className="relative rounded-xl border border-app-accent/15 border-t-2 border-t-app-accent bg-app-accent-soft/15 p-6 shadow-[0_10px_30px_-10px_rgba(47,93,80,0.05)] transition-all duration-300 hover:shadow-[0_12px_36px_-10px_rgba(47,93,80,0.08)]">
+          <p className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent border border-app-accent/10">
+            <span>🎯</span> Sau 12 tuần
+          </p>
+          <h3 className="mt-3 text-sm font-bold text-app-ink">Kế hoạch hành động rõ ràng</h3>
+          <ul className="mt-4 space-y-2.5 text-xs font-semibold leading-relaxed text-app-ink-soft">
+            <li className="flex items-start gap-2.5">
+              <span className="mt-0.5 shrink-0 text-app-accent font-extrabold">✓</span>
+              <span>1 mục tiêu SMART cụ thể, đo được</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-app-accent font-bold">✓</span>
-              Kế hoạch 12 tuần với checkpoint hàng tuần
+            <li className="flex items-start gap-2.5">
+              <span className="mt-0.5 shrink-0 text-app-accent font-extrabold">✓</span>
+              <span>Kế hoạch 12 tuần với checkpoint hàng tuần</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-app-accent font-bold">✓</span>
-              Mỗi sáng biết ngay việc cần làm hôm nay
+            <li className="flex items-start gap-2.5">
+              <span className="mt-0.5 shrink-0 text-app-accent font-extrabold">✓</span>
+              <span>Mỗi sáng biết ngay việc cần làm hôm nay</span>
             </li>
           </ul>
         </div>
@@ -379,46 +392,46 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
       <RevealOnScroll
         as="section"
-        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
+        className="surface-raised rounded-xl border border-app-line/80 bg-gradient-to-b from-app-surface to-app-bg-subtle/10 p-5 md:p-8 shadow-app-sm"
         aria-labelledby="dashboard-how-it-works-title"
       >
-        <div className="flex flex-col gap-1">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-app-ink-muted">Cách hoạt động</p>
-          <h2 id="dashboard-how-it-works-title" className="font-serif text-2xl font-medium leading-8 text-app-ink">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">Cách hoạt động</p>
+          <h2 id="dashboard-how-it-works-title" className="font-serif text-2xl font-medium leading-8 text-app-ink sm:text-3xl">
             Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước.
           </h2>
         </div>
 
-        <ol className="relative mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="relative mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {HOW_IT_WORKS_STEPS.map((step, idx) => {
             const Icon = step.icon;
             return (
               <li
                 key={step.step}
-                className="relative rounded-xl border border-app-line bg-app-bg p-5 shadow-app-sm hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-app-md transition-all duration-300 z-10"
+                className="relative rounded-xl border border-app-line bg-app-bg/40 p-5 shadow-app-sm hover:-translate-y-1 hover:border-app-accent/20 hover:bg-app-surface hover:shadow-[0_12px_30px_rgba(47,93,80,0.06)] border-t-2 border-t-transparent hover:border-t-app-accent transition-all duration-300 z-10"
               >
                 {/* Connector line for desktop */}
                 {idx < HOW_IT_WORKS_STEPS.length - 1 && (
                   <div
                     aria-hidden="true"
-                    className="hidden lg:block absolute top-[2.25rem] left-[calc(100%-0.5rem)] w-[calc(100%-1rem)] h-[1px] border-t border-dashed border-app-line z-0"
+                    className="hidden lg:block absolute top-[2.25rem] left-[calc(100%-0.5rem)] w-[calc(100%-1rem)] h-[1px] border-t border-dashed border-app-line/60 z-0"
                   />
                 )}
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent shadow-sm border border-app-accent/5">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
+                  <span className="rounded-full bg-app-accent-soft/60 px-2 py-0.5 text-[9px] font-bold text-app-accent border border-app-accent/5">
                     Bước {step.step}
                   </span>
                 </div>
                 <h3 className="mt-4 text-sm font-bold text-app-ink">{step.title}</h3>
                 <p className="mt-1.5 text-xs font-semibold leading-relaxed text-app-ink-soft">{step.description}</p>
-                <p className="mt-2 text-[10px] font-bold text-app-accent flex items-center gap-1">
+                <p className="mt-3 text-[10px] font-bold text-app-accent flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-pulse" />
-                  Nhận: {step.result}
+                  <span>Nhận: {step.result}</span>
                 </p>
-                <p className="mt-4 inline-block rounded-full bg-app-surface px-2.5 py-1 text-[10px] font-bold text-app-accent">
+                <p className="mt-4 inline-block rounded-full bg-app-bg px-2.5 py-0.5 text-[9px] font-bold text-app-ink-muted border border-app-line/40">
                   {step.duration}
                 </p>
               </li>
@@ -427,7 +440,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         </ol>
       </RevealOnScroll>
 
-      <RevealOnScroll as="section" className="grid gap-5 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
+      <RevealOnScroll as="section" className="grid gap-6 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
         {FEATURE_ROWS.map((feature) => {
           const Icon = feature.icon;
 
@@ -435,14 +448,14 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <Link
               key={feature.title}
               to={feature.href}
-              className="group rounded-xl border border-app-line bg-app-surface p-5 shadow-app-sm hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-app-md transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="group rounded-xl border border-app-line/80 bg-app-surface p-6 shadow-[0_4px_16px_rgba(0,0,0,0.015)] hover:-translate-y-1 hover:border-app-accent/25 hover:bg-gradient-to-br hover:from-app-surface hover:to-app-accent-soft/10 hover:shadow-[0_12px_30px_-8px_rgba(47,93,80,0.06)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-app-accent group-hover:text-white group-hover:shadow-md group-hover:shadow-app-accent-soft/50">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-app-accent group-hover:to-app-accent/90 group-hover:text-white group-hover:shadow-md group-hover:shadow-app-accent-soft/40">
                   <Icon className="h-5 w-5" />
                 </div>
-                <div className="min-w-0 space-y-1">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">{feature.tag}</p>
+                <div className="min-w-0 space-y-1.5">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-accent">{feature.tag}</p>
                   <h2 className="text-base font-bold text-app-ink transition-colors duration-200 group-hover:text-app-accent">{feature.title}</h2>
                   <p className="text-xs font-semibold leading-relaxed text-app-ink-soft">{feature.description}</p>
                   <span className="inline-flex items-center gap-0.5 text-xs font-bold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
@@ -458,35 +471,37 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
       <RevealOnScroll
         as="section"
-        className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6"
+        className="relative overflow-hidden rounded-xl border border-app-accent/15 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/20 p-6 md:p-8 shadow-[0_12px_36px_-10px_rgba(47,93,80,0.04)]"
         aria-labelledby="dashboard-public-cta-title"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+        <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-app-accent/5 blur-[50px]" />
+        <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
               Bắt đầu đúng thứ tự
             </p>
             <h2
               id="dashboard-public-cta-title"
-              className="mt-2 font-serif text-3xl font-medium leading-8 text-app-ink"
+              className="font-serif text-3xl font-medium leading-8 text-app-ink sm:text-4xl"
             >
               Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?
             </h2>
-            <p className="mt-2 text-sm leading-6 text-app-ink-soft">
+            <p className="text-xs font-semibold leading-relaxed text-app-ink-soft">
               Đăng ký miễn phí trong 30 giây. Dữ liệu của bạn tự đồng bộ giữa điện thoại và máy tính.
             </p>
           </div>
-          <div className="shrink-0 flex flex-col items-center sm:items-end gap-2">
+          <div className="shrink-0 flex flex-col items-center sm:items-end gap-2.5">
             <button
               type="button"
               onClick={onStart}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_6px_20px_rgba(47,93,80,0.22)] transition-all duration-200 hover:bg-app-accent-hover hover:shadow-[0_10px_28px_rgba(47,93,80,0.32)] hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <UserPlus className="h-4 w-4" />
               {primaryLabel}
             </button>
-            <p className="text-[10px] font-semibold text-app-ink-muted">
-              ⚡ Đi qua 4 bước (10–15 phút), có việc làm ngay
+            <p className="text-[9px] font-bold text-app-ink-muted flex items-center gap-1">
+              <span className="text-app-accent">⚡</span>
+              Đi qua 4 bước (10–15 phút), có việc làm ngay
             </p>
           </div>
         </div>

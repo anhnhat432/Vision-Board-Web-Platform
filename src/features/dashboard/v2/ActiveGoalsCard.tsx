@@ -101,10 +101,10 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                     onSelectGoal(goal);
                   }
                 }}
-                className="group flex gap-4 rounded-[14px] border border-app-line bg-app-surface p-4 hover:border-app-accent/30 hover:bg-app-bg-subtle/20 hover:shadow-app-md transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="group flex gap-4 rounded-[14px] border border-app-line/80 bg-app-surface p-4 hover:border-app-accent/25 hover:bg-gradient-to-br hover:from-app-surface hover:to-app-accent-soft/10 hover:shadow-[0_8px_24px_-8px_rgba(47,93,80,0.05)] transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
                 <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] ${theme.bg} shadow-sm group-hover:scale-105 transition-all duration-300`}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] ${theme.bg} shadow-[0_2px_8px_-2px_rgba(47,93,80,0.15)] border border-app-accent/10 group-hover:scale-105 transition-all duration-300`}
                 >
                   <GoalIcon className="h-5 w-5" />
                 </div>
@@ -116,7 +116,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                   <p className="text-[10px] font-semibold tracking-wide text-app-ink-muted">
                     {getWeekLabel(goal)} · <span className={`${theme.accentText} font-bold`}>{domain}</span>
                   </p>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800/60" aria-hidden="true">
+                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]" aria-hidden="true">
                     <div
                       className={`h-full rounded-full ${theme.bar} transition-all duration-500 ease-out`}
                       style={{ width: `${progress}%` }}
@@ -126,14 +126,12 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
                 <div className="flex shrink-0 flex-col items-end justify-between gap-3 text-right">
                   <span className={`text-xs font-extrabold tabular-nums ${theme.accentText}`}>{progress}%</span>
-                  <button
-                    type="button"
-                    className={`inline-flex items-center gap-1 text-[10px] font-bold ${theme.accentText} focus-visible:outline-none group-hover:translate-x-0.5 transition-transform duration-200`}
-                    aria-label={goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`}
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] font-bold ${theme.accentText} group-hover:translate-x-0.5 transition-transform duration-200`}
                   >
                     Chi tiết
                     <ArrowRight className="h-3 w-3" />
-                  </button>
+                  </span>
                 </div>
               </div>
             );
