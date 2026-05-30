@@ -1083,7 +1083,7 @@ function GoalCard({
                     <GoalArchetypeIcon className="h-5.5 w-5.5" />
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
-                    <h3 className="font-serif text-lg md:text-xl font-bold text-app-ink leading-snug break-words pr-8 line-clamp-2">
+                    <h3 className="font-serif text-lg md:text-xl font-bold text-app-ink leading-snug break-words pr-8 line-clamp-3">
                       {goal.title}
                     </h3>
                     <p className="text-xs text-app-ink-soft font-semibold">
@@ -1269,7 +1269,7 @@ function GoalCard({
 
               {/* Goal Title & Completion Metadata */}
               <div className="space-y-2">
-                <h3 className="font-serif text-lg sm:text-xl font-bold text-app-ink leading-snug break-words line-clamp-2">
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-app-ink leading-snug break-words line-clamp-3">
                   {goal.title}
                 </h3>
                 
