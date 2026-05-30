@@ -12,6 +12,8 @@ import {
   UserPlus,
 } from "lucide-react";
 
+import { Link } from "react-router";
+
 import { RevealOnScroll } from "@/app/components/motion";
 
 import { HeroMockupAnimated } from "./HeroMockupAnimated";
@@ -150,7 +152,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={onStart}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_8px_24px_-12px_rgba(47,93,80,0.55)] transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_8px_24px_-12px_rgba(47,93,80,0.55)] transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
               >
                 {heroStartLabel}
                 <ArrowRight className="h-4 w-4" />
@@ -210,7 +212,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={onSignIn}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
               >
                 <LogIn className="h-4 w-4" />
                 Đăng nhập để khôi phục
@@ -266,9 +268,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
           const Icon = feature.icon;
 
           return (
-            <a
+            <Link
               key={feature.title}
-              href={feature.href}
+              to={feature.href}
               className="surface-raised surface-clickable-raised group rounded-xl border border-app-line bg-app-surface p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <div className="flex items-start gap-3">
@@ -284,7 +286,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           );
         })}
       </RevealOnScroll>
@@ -313,7 +315,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <button
               type="button"
               onClick={onStart}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <UserPlus className="h-4 w-4" />
               {primaryLabel}

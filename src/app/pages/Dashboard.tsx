@@ -59,6 +59,7 @@ import {
   type TwelveWeekSystem,
   type TwelveWeekTaskInstance,
   type UserData,
+  type PricingPlanCode,
 } from "../utils/storage";
 import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
 import { formatDisplayDate } from "../utils/storage-date-utils";
@@ -378,10 +379,79 @@ function useDashboardDerivedData({
     hasLocalTwelveWeekSystem,
     hasWorkspaceSignals,
     showMobileStickyCTA,
+    shouldShowMainDashboardCard,
     shouldShowSetupGuide,
     shouldShowWorkspaceDetailGrid,
     radarData,
   };
+}
+
+function useDashboardAnalytics({
+  signedIn,
+  demoMode,
+  isConfigured,
+  hasLocalTwelveWeekSystem,
+  visibleActiveTwelveWeekGoal,
+  activeSystemWeek,
+  effectiveSystem,
+  currentPlanCode,
+  topTrigger,
+}: {
+  signedIn: boolean;
+  demoMode: boolean;
+  isConfigured: boolean;
+  hasLocalTwelveWeekSystem: boolean;
+  visibleActiveTwelveWeekGoal: Goal | null;
+  activeSystemWeek: number | null;
+  effectiveSystem: TwelveWeekSystem | null;
+  currentPlanCode: PricingPlanCode;
+  topTrigger: ReturnType<typeof evaluateRescueTriggers>[number] | null;
+}) {
+  const landingViewedRef = useRef(false);
+  const progressViewedGoalIdRef = useRef<string | null>(null);
+  const firedTriggerKindRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (landingViewedRef.current) return;
+
+    landingViewedRef.current = true;
+    trackAnalyticsEvent("landing_viewed", {
+      source: "dashboard",
+      app_mode: demoMode ? "demo" : "real",
+      signed_in: signedIn,
+      auth_configured: isConfigured,
+      has_local_12_week_system: hasLocalTwelveWeekSystem,
+    });
+  }, [hasLocalTwelveWeekSystem, demoMode, isConfigured, signedIn]);
+
+  useEffect(() => {
+    if (!visibleActiveTwelveWeekGoal || !effectiveSystem || !activeSystemWeek) return;
+    if (progressViewedGoalIdRef.current === visibleActiveTwelveWeekGoal.id) return;
+
+    progressViewedGoalIdRef.current = visibleActiveTwelveWeekGoal.id;
+    trackAnalyticsEvent(
+      "progress_viewed",
+      {
+        source: "dashboard",
+        week_number: activeSystemWeek,
+        total_weeks: effectiveSystem.totalWeeks,
+        current_plan: currentPlanCode,
+      },
+      { goalId: visibleActiveTwelveWeekGoal.id },
+    );
+  }, [currentPlanCode, activeSystemWeek, effectiveSystem, visibleActiveTwelveWeekGoal]);
+
+  useEffect(() => {
+    if (!topTrigger) return;
+    if (firedTriggerKindRef.current === topTrigger.kind) return;
+
+    firedTriggerKindRef.current = topTrigger.kind;
+    trackRescueTriggerFired({
+      kind: topTrigger.kind,
+      severity: topTrigger.severity,
+      currentPlan: currentPlanCode,
+    });
+  }, [currentPlanCode, topTrigger]);
 }
 
 function DashboardContent({
@@ -402,9 +472,6 @@ function DashboardContent({
   const location = useLocation();
   const { isConfigured, user } = useAuthContext();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
-  const landingViewedRef = useRef(false);
-  const progressViewedGoalIdRef = useRef<string | null>(null);
-  const firedTriggerKindRef = useRef<string | null>(null);
   const { currentPlanCode } = usePlanEntitlements(userData);
   const demoMode = isDemoMode();
   const isSignedOut = !user;
@@ -483,36 +550,6 @@ function DashboardContent({
   const lastSavedLabel = getLastSavedLabel(userData, dashboardData.activeSystemTodayTasks);
   const balanceRows = getLifeBalanceRows(visibleWheelOfLife);
 
-  useEffect(() => {
-    if (landingViewedRef.current) return;
-
-    landingViewedRef.current = true;
-    trackAnalyticsEvent("landing_viewed", {
-      source: "dashboard",
-      app_mode: demoMode ? "demo" : "real",
-      signed_in: signedIn,
-      auth_configured: isConfigured,
-      has_local_12_week_system: dashboardData.hasLocalTwelveWeekSystem,
-    });
-  }, [dashboardData.hasLocalTwelveWeekSystem, demoMode, isConfigured, signedIn]);
-
-  useEffect(() => {
-    if (!visibleActiveTwelveWeekGoal || !dashboardData.effectiveSystem || !dashboardData.activeSystemWeek) return;
-    if (progressViewedGoalIdRef.current === visibleActiveTwelveWeekGoal.id) return;
-
-    progressViewedGoalIdRef.current = visibleActiveTwelveWeekGoal.id;
-    trackAnalyticsEvent(
-      "progress_viewed",
-      {
-        source: "dashboard",
-        week_number: dashboardData.activeSystemWeek,
-        total_weeks: dashboardData.effectiveSystem.totalWeeks,
-        current_plan: currentPlanCode,
-      },
-      { goalId: visibleActiveTwelveWeekGoal.id },
-    );
-  }, [currentPlanCode, dashboardData.activeSystemWeek, dashboardData.effectiveSystem, visibleActiveTwelveWeekGoal]);
-
   const overdueCount = dashboardData.activeSystem
     ? dashboardData.activeSystemTodayTasks.filter((task) => !task.completed).length
     : 0;
@@ -524,17 +561,17 @@ function DashboardContent({
   }).filter((trigger) => trigger.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
 
-  useEffect(() => {
-    if (!topTrigger) return;
-    if (firedTriggerKindRef.current === topTrigger.kind) return;
-
-    firedTriggerKindRef.current = topTrigger.kind;
-    trackRescueTriggerFired({
-      kind: topTrigger.kind,
-      severity: topTrigger.severity,
-      currentPlan: currentPlanCode,
-    });
-  }, [currentPlanCode, topTrigger]);
+  useDashboardAnalytics({
+    signedIn,
+    demoMode,
+    isConfigured,
+    hasLocalTwelveWeekSystem: dashboardData.hasLocalTwelveWeekSystem,
+    visibleActiveTwelveWeekGoal,
+    activeSystemWeek: dashboardData.activeSystemWeek,
+    effectiveSystem: dashboardData.effectiveSystem,
+    currentPlanCode,
+    topTrigger,
+  });
 
   const dashboardTourSteps = isSignedOut ? [] : DASHBOARD_TOUR_STEPS;
   const showMobileStickyCTA = !isDesktopViewport && dashboardData.showMobileStickyCTA;
@@ -879,7 +916,7 @@ function DemoDataNotice({ onOpenLifeBalance }: { onOpenLifeBalance: () => void }
         <button
           type="button"
           onClick={onOpenLifeBalance}
-          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Cập nhật ngay
         </button>

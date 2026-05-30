@@ -30,25 +30,36 @@ export function HeroMockupAnimated() {
       return;
     }
 
-    const timers: number[] = [];
-    PHASE_SCHEDULE.forEach((delay, i) => {
-      timers.push(window.setTimeout(() => setPhase(i + 1), delay));
-    });
-    timers.push(window.setTimeout(() => setPhase(0), RESET_DELAY));
+    let activeTimers: number[] = [];
 
-    const loop = window.setInterval(() => {
-      // Re-run the schedule by toggling state through a fresh cycle.
-      // The cleanup below will clear pending timers, so this only fires
-      // once the previous cycle has finished.
+    const runCycle = () => {
+      // Clear any timers from the previous cycle
+      activeTimers.forEach(window.clearTimeout);
+      activeTimers = [];
+
       setPhase(0);
+
       PHASE_SCHEDULE.forEach((delay, i) => {
-        timers.push(window.setTimeout(() => setPhase(i + 1), delay));
+        activeTimers.push(
+          window.setTimeout(() => setPhase(i + 1), delay)
+        );
       });
-    }, RESET_DELAY + 200);
+
+      // Reset to phase 0 at 5800ms
+      activeTimers.push(
+        window.setTimeout(() => setPhase(0), RESET_DELAY)
+      );
+
+      // Start next cycle at 6000ms (RESET_DELAY + 200)
+      activeTimers.push(
+        window.setTimeout(() => runCycle(), RESET_DELAY + 200)
+      );
+    };
+
+    runCycle();
 
     return () => {
-      timers.forEach(window.clearTimeout);
-      window.clearInterval(loop);
+      activeTimers.forEach(window.clearTimeout);
     };
   }, [reduced]);
 
