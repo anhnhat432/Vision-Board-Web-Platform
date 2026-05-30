@@ -96,49 +96,49 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
   return (
     <div className="appear-fade-up mx-auto w-full max-w-[360px] lg:mx-0 lg:max-w-none lg:[animation-delay:120ms]">
-      <div className="p-[1px] bg-app-line/80 rounded-2xl shadow-md transition-all duration-medium hover:shadow-lg">
+      <div className="p-[1.5px] bg-gradient-to-br from-app-accent/15 via-app-line/50 to-app-warm/15 rounded-2xl shadow-[0_20px_40px_-12px_rgba(47,93,80,0.15),0_6px_16px_-8px_rgba(0,0,0,0.02)] transition-all duration-300">
         <div className="relative rounded-2xl bg-app-surface/95 backdrop-blur-xl p-5">
           {/* Streak badge — slides in from right around phase 3. */}
           <div
             aria-hidden="true"
-            className={`absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full bg-app-surface px-2.5 py-1 text-[10px] font-semibold text-app-accent border border-app-line shadow-sm transition-all duration-medium ${
+            className={`absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full bg-app-accent-soft px-2.5 py-1 text-[10px] font-medium text-app-accent shadow-[0_2px_8px_rgba(47,93,80,0.15)] ring-1 ring-app-accent/10 transition-all duration-medium ${
               badgeVisible ? "translate-x-0 scale-100 opacity-100" : "translate-x-3 scale-95 opacity-0"
             }`}
             style={{
               transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in"
             }}
           >
-            <Sparkles className="size-2.5" />
+            <Sparkles className="size-2.5 text-app-accent/80" />
             Streak +1
           </div>
 
           {/* Inspiration Vision Board Snippet */}
-          <div className="mb-4 rounded-xl border border-app-line bg-app-bg/30 p-3 flex items-center gap-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]">
-            <div className="flex -space-x-2 shrink-0 select-none">
+          <div className="mb-4 rounded-xl border border-app-line/50 bg-app-bg/40 p-3 flex items-center gap-3">
+            <div className="flex -space-x-1.5 shrink-0 select-none">
               {data.visionIcons.map((icon) => (
                 <div
                   key={icon.emoji}
-                  className={`h-9 w-9 rounded-xl ${icon.bgClass} border ${icon.borderClass} flex items-center justify-center text-sm shadow-sm`}
+                  className={`h-8 w-8 rounded-lg ${icon.bgClass} border ${icon.borderClass} flex items-center justify-center text-xs shadow-sm`}
                 >{icon.emoji}</div>
               ))}
             </div>
             <div className="min-w-0">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-app-accent/80">Bảng tầm nhìn</p>
+              <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-app-accent/80">Bảng tầm nhìn</p>
               <p className="truncate text-xs font-semibold text-app-ink-soft">{data.visionLabel}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
                 <Target className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-app-ink-muted">Mục tiêu</p>
-                <p className="truncate text-xs font-bold text-app-ink">{data.goalTitle}</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mục tiêu</p>
+                <p className="truncate text-xs font-medium text-app-ink">{data.goalTitle}</p>
               </div>
             </div>
-            <span className="shrink-0 rounded-full bg-app-accent-soft/75 px-2 py-0.5 text-[10px] font-semibold text-app-accent border border-app-accent/10">
+            <span className="shrink-0 rounded-full bg-app-accent-soft px-2 py-0.5 text-[10px] font-medium text-app-accent border border-app-accent/10">
               {data.weekLabel}
             </span>
           </div>
@@ -148,7 +148,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
               <span className="font-medium">Tiến độ chu kỳ</span>
               <span className="font-semibold tabular-nums text-app-accent">{progressFilled ? 67 : 33}%</span>
             </div>
-            <div className="mt-2 h-1 overflow-hidden rounded-full bg-app-bg/80">
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-app-line/30">
               <div
                 className="h-full rounded-full bg-app-accent transition-all duration-slow ease-decelerate"
                 style={{ width: progressFilled ? "67%" : "33%" }}
@@ -156,38 +156,38 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
             </div>
           </div>
 
-          <div className="mt-5 space-y-2.5">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-app-ink-muted">
+          <div className="mt-4 space-y-2.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               Việc hôm nay · {taskTwoChecked ? "8" : "7"}/14
             </p>
             <div className="space-y-2">
               {/* Task 1 — always done */}
               <div className="flex items-center gap-2.5">
-                <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm">
-                  <Check className="h-2 w-2" strokeWidth={3} />
+                <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm">
+                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
                 </span>
-                <span className="text-xs text-app-ink-muted line-through font-normal opacity-75">{data.todayTasks[0]}</span>
+                <span className="text-xs text-app-ink-muted line-through font-medium opacity-65">{data.todayTasks[0]}</span>
               </div>
 
               {/* Task 2 — ticks at phase 1 */}
               <div className="flex items-center gap-2.5">
                 <span
-                  className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-all duration-base ease-decelerate ${
+                  className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full transition-all duration-base ease-decelerate ${
                     taskTwoChecked
-                      ? "border-0 bg-app-accent text-white shadow-sm"
-                      : "border border-app-line bg-transparent text-transparent"
+                      ? "border-transparent bg-app-accent text-white shadow-sm"
+                      : "border border-app-line bg-app-surface text-transparent"
                   }`}
                 >
                   <Check
-                    className={`h-2 w-2 transition-transform duration-base ease-decelerate ${
+                    className={`h-2.5 w-2.5 transition-transform duration-base ease-decelerate ${
                       taskTwoChecked ? "scale-100" : "scale-50"
                     }`}
                     strokeWidth={3}
                   />
                 </span>
                 <span
-                  className={`text-xs font-normal transition-colors duration-base ease-standard ${
-                    taskTwoChecked ? "text-app-ink-muted line-through opacity-75" : "text-app-ink"
+                  className={`text-xs font-medium transition-colors duration-base ease-standard ${
+                    taskTwoChecked ? "text-app-ink-muted line-through opacity-65" : "text-app-ink"
                   }`}
                 >
                   {data.todayTasks[1]}
@@ -196,14 +196,14 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
               {/* Task 3 — never ticks in this loop */}
               <div className="flex items-center gap-2.5">
-                <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-app-line bg-transparent" aria-hidden="true" />
-                <span className="text-xs font-normal text-app-ink">{data.todayTasks[2]}</span>
+                <span className="h-4.5 w-4.5 shrink-0 rounded-full border border-app-line bg-app-surface" aria-hidden="true" />
+                <span className="text-xs font-medium text-app-ink">{data.todayTasks[2]}</span>
               </div>
             </div>
           </div>
 
-          <p className="mt-4 border-t border-app-line/60 pt-3 text-[9px] font-medium tracking-wide uppercase text-app-ink-muted/80">
-            Ảnh chụp giao diện · dữ liệu mô phỏng
+          <p className="mt-5 border-t border-app-line/45 pt-3.5 text-[9px] uppercase tracking-wider text-app-ink-muted/50 text-center">
+            Giao diện thực thi tối giản
           </p>
         </div>
       </div>

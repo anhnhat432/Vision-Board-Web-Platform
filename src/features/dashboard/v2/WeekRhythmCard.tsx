@@ -50,20 +50,20 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-app-surface border-app-line/80 hover:border-app-accent/25 hover:shadow-md",
-    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/40",
+    bg: "bg-app-surface border-app-line/65 hover:border-app-accent/25 hover:shadow-[0_4px_16px_rgba(47,93,80,0.01)]",
+    iconBg: "bg-app-accent-soft/30 text-app-accent border border-app-accent/5",
   },
   "Tỷ lệ lead": {
-    bg: "bg-app-surface border-app-line/80 hover:border-app-accent/25 hover:shadow-md",
-    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/40",
+    bg: "bg-app-surface border-app-line/65 hover:border-app-accent/25 hover:shadow-[0_4px_16px_rgba(47,93,80,0.01)]",
+    iconBg: "bg-app-accent-soft/30 text-app-accent border border-app-accent/5",
   },
   Nhịp: {
-    bg: "bg-app-surface border-app-line/80 hover:border-app-accent/25 hover:shadow-md",
-    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/40",
+    bg: "bg-app-surface border-app-line/65 hover:border-app-accent/25 hover:shadow-[0_4px_16px_rgba(47,93,80,0.01)]",
+    iconBg: "bg-app-accent-soft/30 text-app-accent border border-app-accent/5",
   },
   Chuỗi: {
-    bg: "bg-app-surface border-app-line/80 hover:border-app-accent/25 hover:shadow-md",
-    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/40",
+    bg: "bg-app-surface border-app-line/65 hover:border-app-accent/25 hover:shadow-[0_4px_16px_rgba(47,93,80,0.01)]",
+    iconBg: "bg-app-accent-soft/30 text-app-accent border border-app-accent/5",
   },
 };
 
@@ -113,14 +113,14 @@ function buildWeekDays(system: TwelveWeekSystem | null, currentWeek: number | nu
 function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const barContent = (() => {
     if (day.isFuture) {
-      return <div className="h-16 w-3.5 rounded-full bg-app-line/10" aria-hidden="true" />;
+      return <div className="h-16 w-5.5 rounded-full bg-app-line/10 border border-transparent" aria-hidden="true" />;
     }
 
     if (day.isToday) {
       const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
       return (
         <div
-          className="flex h-16 w-3.5 items-end rounded-full bg-app-accent-soft/30 border border-app-accent/50"
+          className="flex h-16 w-5.5 items-end rounded-full bg-app-accent-soft/30 border border-app-accent/65"
           aria-hidden="true"
         >
           <div className="w-full rounded-full bg-app-accent" style={{ height: `${fillHeight}%` }} />
@@ -128,14 +128,16 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
       );
     }
 
+
+
     const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
     return (
-      <div className="flex h-16 w-3.5 items-end rounded-full bg-app-line/15" aria-hidden="true">
+      <div className="flex h-16 w-5.5 items-end rounded-full bg-app-line/15 border border-transparent" aria-hidden="true">
         <div
-          className={`w-full rounded-full transition-all duration-medium ${
+          className={`w-full rounded-full transition-all duration-300 ${
             day.percent === 100
               ? "bg-app-accent/80 group-hover:bg-app-accent"
-              : "bg-app-accent/40 group-hover:bg-app-accent/60"
+              : "bg-app-accent/40 group-hover:bg-app-accent/65"
           }`}
           style={{ height: `${fillHeight}%` }}
         />
@@ -144,13 +146,13 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   })();
 
   return (
-    <div className="group flex flex-col items-center gap-1.5 text-center transition-all duration-medium">
-      <span className={`text-[10px] font-semibold ${day.isToday ? "text-app-accent font-bold" : "text-app-ink-muted"}`}>
+    <div className="group flex flex-col items-center gap-1.5 text-center transition-all duration-300 hover:scale-105">
+      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted"}`}>
         {day.label}
       </span>
       {barContent}
       <span
-        className={`text-[9px] tabular-nums font-semibold ${day.isToday ? "text-app-accent font-bold" : "text-app-ink-soft"}`}
+        className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-soft"}`}
       >
         {day.completed}/{day.total}
       </span>
@@ -211,12 +213,12 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-sm transition-all duration-medium hover:border-app-accent/20"
+      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:border-app-accent/20"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
         <h2 id="dashboard-week-rhythm-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <Zap className="h-4.5 w-4.5 text-app-accent/80" />
+          <Zap className="h-5 w-5 text-app-accent/80" />
           Nhịp tuần {safeWeek}
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
@@ -233,7 +235,7 @@ export function WeekRhythmCard({
           return (
             <div
               key={item.caption}
-              className={`rounded-2xl border ${styles.bg} p-4 shadow-sm hover:-translate-y-0.5 transition-all duration-medium`}
+              className={`rounded-[16px] border ${styles.bg} p-4 shadow-app-sm hover:-translate-y-0.5 hover:shadow-app-md transition-all duration-300`}
             >
               <div className="flex items-center justify-between">
                 <div className={`p-2 rounded-xl ${styles.iconBg}`}>
@@ -257,8 +259,8 @@ export function WeekRhythmCard({
       </div>
 
       {/* Things 3 style consistency dots */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-app-line/80 bg-app-bg/30 px-5 py-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.005)]">
-        <span className="text-xs font-semibold text-app-ink-soft">Nhịp check-in hàng ngày:</span>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-app-line/80 bg-app-bg/60 dark:bg-neutral-900/30 px-5 py-3.5 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.01)]">
+        <span className="text-xs font-bold text-app-ink-soft">Nhịp check-in hàng ngày:</span>
         <div className="flex items-center gap-3">
           {days.map((day) => {
             const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
@@ -284,11 +286,11 @@ export function WeekRhythmCard({
               >
                 <div className="relative flex items-center justify-center h-4 w-4">
                   {day.isToday && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-app-accent/10 ring-1 ring-app-accent/20" />
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-app-accent/15 scale-125" />
                   )}
                   <div
-                    className={`h-2.5 w-2.5 rounded-full transition-all duration-medium ${dotClass} ${
-                      day.isToday ? "ring-1 ring-app-accent/40" : ""
+                    className={`h-2.5 w-2.5 rounded-full transition-all duration-350 ${dotClass} ${
+                      day.isToday ? "ring-1 ring-app-accent/35" : ""
                     }`}
                   />
                 </div>
@@ -299,9 +301,9 @@ export function WeekRhythmCard({
         </div>
       </div>
 
-      <div className="mt-6 border-t border-app-line/60 pt-6">
-        <div className="flex items-center gap-2 mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-app-ink-muted/80">
-          <Clock3 className="h-4 w-4 text-app-accent/70" />
+      <div className="mt-6 border-t border-app-line pt-6">
+        <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-app-ink-muted">
+          <Clock3 className="h-4 w-4 text-app-accent/80" />
           Nhịp độ thực thi hàng ngày
         </div>
         <div className="grid grid-cols-7 gap-2 sm:gap-4 max-w-md mx-auto pt-2">
