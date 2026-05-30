@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CheckCircle2, Circle, Plus, Search, Target, Trash2, Zap } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Circle, Lock, Mail, MailOpen, Plus, Search, Target, Trash2, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -52,6 +52,7 @@ import {
   type UserData,
   updateGoal,
   type PricingPlanCode,
+  type TwelveWeekSystem,
 } from "../utils/storage";
 import { getPlanLabel } from "../utils/twelve-week-premium";
 
@@ -1021,6 +1022,13 @@ function GoalCard({
             )}
           </div>
 
+          {/* Streak Heatmap (chỉ cho mục tiêu 12 tuần) */}
+          {system && (
+            <div className="pt-1">
+              <StreakHeatmap system={system} />
+            </div>
+          )}
+
           {/* Progress Bar */}
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center justify-between text-xs font-bold">
@@ -1041,18 +1049,19 @@ function GoalCard({
           </div>
 
           {/* Action chính */}
-          {system && (
-            <div className="pt-1.5">
+          <div className="pt-1.5 flex flex-wrap items-center gap-3">
+            {system && (
               <Button
                 type="button"
-                className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover px-4 py-2 text-xs sm:text-sm font-bold shadow-app-sm transition-all duration-200 inline-flex items-center gap-1.5"
+                className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover px-4 py-2 text-xs sm:text-sm font-bold shadow-app-sm transition-all duration-200 inline-flex items-center gap-1.5 h-9"
                 onClick={() => openTwelveWeekCenter(goal.id)}
               >
                 Tiếp tục chu kỳ
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </div>
-          )}
+            )}
+            <FutureSelfLetter goalId={goal.id} progress={progress} system={system} />
+          </div>
         </div>
 
         {/* Divider dọc */}
@@ -1296,5 +1305,359 @@ function GoalTrackerSkeleton() {
         ))}
       </div>
     </div>
+  );
+}
+
+// -------------------------------------------------------------
+// STREAK HEATMAP & FUTURE SELF CAPSULE FOR GOAL COMMAND CENTER
+// -------------------------------------------------------------
+
+interface StreakHeatmapProps {
+  system: TwelveWeekSystem;
+}
+
+const parseDateStr = (str: string) => {
+  const [year, month, day] = str.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const formatDateStr = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const r = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${r}`;
+};
+
+const formatDayLabel = (dateStr: string) => {
+  const [y, m, d] = dateStr.split("-");
+  return `${d}/${m}/${y}`;
+};
+
+function StreakHeatmap({ system }: StreakHeatmapProps) {
+  const startDate = useMemo(() => {
+    try {
+      return parseDateStr(system.startDate);
+    } catch {
+      return new Date();
+    }
+  }, [system.startDate]);
+
+  const weeks = useMemo(() => {
+    const weeksList: Array<Array<{
+      dateStr: string;
+      total: number;
+      completed: number;
+      colorClass: string;
+      label: string;
+    }>> = [];
+
+    const tasksMap = new Map<string, { total: number; completed: number }>();
+    for (const task of system.taskInstances) {
+      if (!task.scheduledDate) continue;
+      const current = tasksMap.get(task.scheduledDate) || { total: 0, completed: 0 };
+      current.total += 1;
+      if (task.completed) {
+        current.completed += 1;
+      }
+      tasksMap.set(task.scheduledDate, current);
+    }
+
+    for (let w = 0; w < 12; w++) {
+      const days: Array<{
+        dateStr: string;
+        total: number;
+        completed: number;
+        colorClass: string;
+        label: string;
+      }> = [];
+
+      for (let d = 0; d < 7; d++) {
+        const dayIdx = w * 7 + d;
+        const targetDate = new Date(startDate);
+        targetDate.setDate(startDate.getDate() + dayIdx);
+        const dateKey = formatDateStr(targetDate);
+        const stats = tasksMap.get(dateKey) || { total: 0, completed: 0 };
+
+        let colorClass = "bg-slate-100 dark:bg-neutral-800/40 border border-transparent";
+        if (stats.total > 0) {
+          if (stats.completed === stats.total) {
+            colorClass = "bg-emerald-500 border border-emerald-600/10";
+          } else if (stats.completed > 0) {
+            colorClass = "bg-emerald-300 border border-emerald-400/10";
+          } else {
+            colorClass = "bg-rose-100/80 border border-rose-200/20 dark:bg-rose-950/20 dark:border-rose-900/10";
+          }
+        }
+
+        const formattedDate = formatDayLabel(dateKey);
+        const label = stats.total > 0 
+          ? `${formattedDate}: Chốt ${stats.completed}/${stats.total} việc`
+          : `${formattedDate}: Không có việc lên lịch`;
+
+        days.push({
+          dateStr: dateKey,
+          total: stats.total,
+          completed: stats.completed,
+          colorClass,
+          label,
+        });
+      }
+      weeksList.push(days);
+    }
+    return weeksList;
+  }, [startDate, system.taskInstances]);
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      <div className="flex items-center justify-between text-xs font-bold text-app-ink-soft">
+        <span>Nhịp độ hành động (12 tuần)</span>
+        <span className="text-[10px] text-app-ink-muted font-normal font-sans">Di chuột xem chi tiết</span>
+      </div>
+      
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+        {/* Nhãn hàng Thứ 2 - CN */}
+        <div className="flex flex-col justify-between h-[96px] text-[9px] font-bold text-app-ink-muted pr-1 select-none leading-none pt-0.5 pb-0.5">
+          <span>T2</span>
+          <span>T4</span>
+          <span>T6</span>
+          <span>CN</span>
+        </div>
+
+        {/* Cột tuần */}
+        <div className="flex gap-1">
+          {weeks.map((weekDays) => (
+            <div key={`week-${weekDays[0].dateStr}`} className="flex flex-col gap-1">
+              {weekDays.map((day) => (
+                <div key={day.dateStr} className="relative group flex justify-center">
+                  <div 
+                    className={cn(
+                      "w-3 h-3 rounded-[2.5px] transition-all duration-150 cursor-pointer hover:scale-110", 
+                      day.colorClass
+                    )} 
+                  />
+                  {/* Custom CSS Tooltip */}
+                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-neutral-900 dark:bg-neutral-800 text-white text-[10px] font-sans rounded px-2 py-1 whitespace-nowrap shadow-md pointer-events-none transform -translate-y-0.5 border border-neutral-800/80 leading-normal">
+                    {day.label}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-neutral-900 dark:border-t-neutral-800" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface FutureSelfLetterProps {
+  goalId: string;
+  progress: number;
+  system?: TwelveWeekSystem;
+}
+
+function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
+  const [letterText, setLetterText] = useState<string | null>(null);
+  const [isWriteOpen, setIsWriteOpen] = useState(false);
+  const [isReadOpen, setIsReadOpen] = useState(false);
+  const [tempText, setTempText] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`future_letter_${goalId}`);
+    setLetterText(saved);
+  }, [goalId]);
+
+  const handleOpenWrite = () => {
+    setTempText(letterText || "");
+    setIsWriteOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!tempText.trim()) {
+      localStorage.removeItem(`future_letter_${goalId}`);
+      setLetterText(null);
+      toast.info("Đã xóa thư nháp.");
+    } else {
+      localStorage.setItem(`future_letter_${goalId}`, tempText);
+      setLetterText(tempText);
+      toast.success("Bức thư gửi tương lai đã được niêm phong!");
+    }
+    setIsWriteOpen(false);
+  };
+
+  const isUnlocked = useMemo(() => {
+    if (progress === 100) return true;
+    if (!system) return false;
+    
+    if (system.currentWeek >= 12) return true;
+    try {
+      const today = new Date();
+      const end = new Date(system.endDate);
+      if (today > end) return true;
+    } catch {}
+    
+    return false;
+  }, [progress, system]);
+
+  const handleReadClick = () => {
+    if (!isUnlocked) {
+      toast.info("Thư đang được niêm phong 🔒", {
+        description: "Hãy nỗ lực hoàn thành 100% mục tiêu hoặc kết thúc 12 tuần để mở phong thư này nhé!",
+      });
+      return;
+    }
+    setIsReadOpen(true);
+  };
+
+  if (!letterText) {
+    return (
+      <>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleOpenWrite}
+          className="rounded-lg border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg px-3.5 py-2 text-xs font-bold transition-all inline-flex items-center gap-1.5 h-9"
+        >
+          <Mail className="h-4 w-4 text-app-accent" />
+          Viết thư gửi tuần 12
+        </Button>
+
+        {isWriteOpen && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-neutral-950 rounded-[18px] border border-app-line max-w-md w-full p-6 space-y-4 shadow-app-lg animate-in fade-in zoom-in-95 duration-200">
+              <div className="space-y-1.5">
+                <h4 className="font-serif text-lg font-bold text-app-ink flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-app-accent" />
+                  Gửi tôi ở tuần thứ 12
+                </h4>
+                <p className="text-xs text-app-ink-soft leading-relaxed font-sans">
+                  Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
+                </p>
+              </div>
+
+              <textarea
+                className="w-full h-36 rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
+                placeholder="Gửi bản thân thân mến ở tuần 12..."
+                value={tempText}
+                onChange={(e) => setTempText(e.target.value)}
+                maxLength={500}
+              />
+              
+              <div className="flex justify-between items-center text-xs text-app-ink-muted font-sans font-medium">
+                <span>{tempText.length}/500 ký tự</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setIsWriteOpen(false)} className="rounded-lg">
+                    Hủy
+                  </Button>
+                  <Button size="sm" onClick={handleSave} className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover font-bold">
+                    Niêm phong thư
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={isUnlocked ? () => setIsReadOpen(true) : handleReadClick}
+        className={cn(
+          "rounded-lg border px-3.5 py-2 text-xs font-bold transition-all inline-flex items-center gap-1.5 h-9",
+          isUnlocked
+            ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/75 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-400"
+            : "border-amber-200 bg-amber-50/70 text-amber-700 hover:bg-amber-100/70 dark:border-amber-900/40 dark:bg-amber-950/10 dark:text-amber-400"
+        )}
+      >
+        {isUnlocked ? (
+          <>
+            <MailOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            Đọc thư từ quá khứ
+          </>
+        ) : (
+          <>
+            <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            Thư gửi tương lai (Khóa)
+          </>
+        )}
+      </button>
+
+      {/* Dialog Đọc thư */}
+      {isReadOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-neutral-950 rounded-[18px] border border-app-line max-w-md w-full p-6 space-y-4 shadow-app-lg animate-in fade-in zoom-in-95 duration-200">
+            <div className="space-y-1.5 border-b border-app-line pb-3">
+              <h4 className="font-serif text-lg font-bold text-app-ink flex items-center gap-2">
+                <MailOpen className="h-5 w-5 text-emerald-600" />
+                Thư gửi từ quá khứ
+              </h4>
+              <p className="text-xs text-app-ink-soft font-sans">
+                Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
+              </p>
+            </div>
+
+            <div className="bg-app-warm-soft/40 dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60">
+              <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">
+                “{letterText}”
+              </p>
+            </div>
+
+            <div className="flex justify-between items-center font-sans">
+              <button
+                type="button"
+                onClick={handleOpenWrite}
+                className="text-xs text-app-accent hover:underline font-bold"
+              >
+                Chỉnh sửa thư
+              </button>
+              <Button size="sm" onClick={() => setIsReadOpen(false)} className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+                Tuyệt vời
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog Chỉnh sửa khi đã có thư (tương tự như viết mới) */}
+      {isWriteOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-neutral-950 rounded-[18px] border border-app-line max-w-md w-full p-6 space-y-4 shadow-app-lg animate-in fade-in zoom-in-95 duration-200">
+            <div className="space-y-1.5">
+              <h4 className="font-serif text-lg font-bold text-app-ink flex items-center gap-2">
+                <Mail className="h-5 w-5 text-app-accent" />
+                Chỉnh sửa thư gửi tuần 12
+              </h4>
+              <p className="text-xs text-app-ink-soft leading-relaxed font-sans">
+                Chỉnh sửa hoặc xóa bức thư gửi cho chính bạn ở cuối hành trình mục tiêu.
+              </p>
+            </div>
+
+            <textarea
+              className="w-full h-36 rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
+              placeholder="Gửi bản thân thân mến..."
+              value={tempText}
+              onChange={(e) => setTempText(e.target.value)}
+              maxLength={500}
+            />
+            
+            <div className="flex justify-between items-center text-xs text-app-ink-muted font-sans font-medium">
+              <span>{tempText.length}/500 ký tự</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setIsWriteOpen(false)} className="rounded-lg">
+                  Hủy
+                </Button>
+                <Button size="sm" onClick={handleSave} className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover font-bold">
+                  Lưu thay đổi
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
