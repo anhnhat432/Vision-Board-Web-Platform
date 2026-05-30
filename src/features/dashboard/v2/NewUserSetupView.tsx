@@ -72,44 +72,22 @@ interface CardStepTheme {
 }
 
 const getStepTheme = (index: number): CardStepTheme => {
-  switch (index) {
-    case 0: // Cân bằng cuộc sống
-      return {
-        border: "border-app-line/65",
-        hoverBg: "hover:bg-app-bg/40 hover:border-app-accent/30",
-        iconBgPending: "bg-app-accent-soft/30",
-        iconTextPending: "text-app-accent",
-        badgeText: "Bước 1 · Nhìn nhận",
-        badgeBg: "bg-app-accent-soft/40 text-app-accent",
-      };
-    case 1: // Trọng tâm chu kỳ
-      return {
-        border: "border-app-line/65",
-        hoverBg: "hover:bg-app-bg/40 hover:border-app-accent/30",
-        iconBgPending: "bg-app-accent-soft/30",
-        iconTextPending: "text-app-accent",
-        badgeText: "Bước 2 · Định vị",
-        badgeBg: "bg-app-accent-soft/40 text-app-accent",
-      };
-    case 2: // Mục tiêu SMART
-      return {
-        border: "border-app-line/65",
-        hoverBg: "hover:bg-app-bg/40 hover:border-app-accent/30",
-        iconBgPending: "bg-app-accent-soft/30",
-        iconTextPending: "text-app-accent",
-        badgeText: "Bước 3 · Thiết lập",
-        badgeBg: "bg-app-accent-soft/40 text-app-accent",
-      };
-    default: // Kế hoạch 12 tuần
-      return {
-        border: "border-app-line/65",
-        hoverBg: "hover:bg-app-bg/40 hover:border-app-accent/30",
-        iconBgPending: "bg-app-accent-soft/30",
-        iconTextPending: "text-app-accent",
-        badgeText: "Bước 4 · Hành động",
-        badgeBg: "bg-app-accent-soft/40 text-app-accent",
-      };
-  }
+  const stepsMeta = [
+    { badgeText: "Khám phá bản thân", stage: "Nhìn nhận" },
+    { badgeText: "Tìm kiếm điểm cốt lõi", stage: "Định vị" },
+    { badgeText: "Đóng gói ý chí", stage: "Thiết lập" },
+    { badgeText: "Hành trình thực thi", stage: "Hành động" }
+  ];
+  const meta = stepsMeta[index] || { badgeText: "Hành động", stage: "Thiết lập" };
+
+  return {
+    border: "border-app-line/60",
+    hoverBg: "hover:bg-neutral-50/40 dark:hover:bg-neutral-900/30 hover:border-app-accent/30",
+    iconBgPending: "bg-neutral-100 dark:bg-neutral-900",
+    iconTextPending: "text-app-ink-soft",
+    badgeText: `Bước ${index + 1} · ${meta.stage}`,
+    badgeBg: "bg-neutral-100 dark:bg-neutral-900 text-app-ink-soft",
+  };
 };
 
 export function NewUserSetupView({ userData, displayName, onContinue }: NewUserSetupViewProps) {
@@ -117,56 +95,60 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
   const nextStep = steps.find((step) => !step.completed) ?? steps[steps.length - 1];
 
   return (
-    <div className="space-y-6">
-      {/* Greeting Banner */}
-      <section className="relative overflow-hidden rounded-[18px] border border-app-line bg-gradient-to-br from-app-accent-soft/20 via-app-surface to-app-accent-soft/5 p-6 md:p-8 shadow-[0_8px_24px_-10px_rgba(47,93,80,0.03)] backdrop-blur-sm">
-        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-app-accent/80">Không gian của bạn</p>
-        <h1 className="mt-4 max-w-3xl font-serif text-3xl font-normal leading-[1.3] tracking-normal text-app-ink sm:text-[2.25rem]">
-          Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu chu kỳ 12 tuần đầu tiên
-        </h1>
-        <p className="mt-3.5 max-w-2xl text-xs font-medium leading-relaxed text-app-ink-soft/90">
-          Trang chính sẽ sáng rõ và đầy ắp số liệu trực quan sau khi bạn hoàn thành một mục tiêu thật, một lịch biểu tuần và vài việc hôm nay.
-        </p>
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-app-line/60 bg-app-surface px-3.5 py-1 text-[11px] font-medium text-app-ink-soft shadow-sm">
-          <Sparkles className="h-3.5 w-3.5 text-app-accent/80" />
-          <span>Cần hướng dẫn 6 bước chi tiết?</span>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
-            className="ml-1 font-bold text-app-accent hover:text-app-accent-hover underline underline-offset-2 transition-colors"
-          >
-            Mở ngay →
-          </button>
+    <div className="space-y-8">
+      {/* Editorial Greeting Banner */}
+      <section className="relative overflow-hidden rounded-2xl border border-app-line/80 bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/10 dark:from-emerald-950/15 dark:via-neutral-900/40 dark:to-neutral-950 p-6 md:p-10 shadow-[0_12px_36px_rgba(47,93,80,0.02)] backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px]" />
+        <div className="relative z-10 space-y-4">
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-app-accent">Bảng điều khiển của bạn</span>
+          <h1 className="max-w-3xl font-serif text-3xl font-normal leading-[1.2] tracking-normal text-app-ink sm:text-[2.5rem]">
+            Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu chu kỳ 12 tuần đầu tiên
+          </h1>
+          <p className="max-w-2xl text-xs font-normal leading-relaxed text-app-ink-soft/90">
+            Dear Our Future sẽ giúp bạn chuyển dịch từ những mong muốn mơ hồ thành hành động cụ thể mỗi ngày. Hãy đi qua các bước thiết lập dưới đây để thắp sáng bản đồ mục tiêu của bạn.
+          </p>
+          <div className="pt-2 flex items-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-app-line/60 bg-white/80 dark:bg-neutral-900/80 px-3.5 py-1 text-[11px] font-medium text-app-ink-soft shadow-sm">
+              <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+              <span>Cần xem tài liệu hướng dẫn nhanh?</span>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
+                className="ml-1 font-bold text-app-accent hover:text-app-accent-hover underline underline-offset-2 transition-colors"
+              >
+                Mở cẩm nang →
+              </button>
+            </div>
+          </div>
         </div>
       </section>
-
 
       {/* Setup Steps Panel V2 */}
       <section
         data-testid="fresh-workspace-empty-state"
-        className="surface-empty rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6"
+        className="rounded-2xl border border-app-line/80 bg-white/40 dark:bg-neutral-900/10 backdrop-blur-sm p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.01)]"
         aria-labelledby="dashboard-new-user-title"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-app-line pb-4 mb-6">
-          <div>
-            <h2 id="dashboard-new-user-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-app-accent/80" />
-              Thiết lập chu kỳ đầu tiên
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-app-line/65 pb-6 mb-6">
+          <div className="space-y-1">
+            <h2 id="dashboard-new-user-title" className="text-base font-bold text-app-ink flex items-center gap-2.5">
+              <BookOpen className="h-4.5 w-4.5 text-app-accent" />
+              Bản đồ thiết lập chu kỳ
             </h2>
-            <p className="text-xs font-medium text-app-ink-muted mt-0.5">
-              Hãy đi qua 4 bước hành động cốt lõi này để khởi động chu kỳ của bạn.
+            <p className="text-xs font-medium text-app-ink-soft">
+              Đi qua 4 bước hành trình cốt lõi để chuẩn hóa mục tiêu và lên kế hoạch thực thi 12 tuần.
             </p>
           </div>
           <button
             type="button"
             onClick={() => onContinue(nextStep.href)}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-app-accent px-4 py-2 text-xs font-medium text-white transition-all duration-150 hover:bg-app-accent-hover shadow-sm"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-200 hover:bg-app-accent-hover shadow-sm hover:-translate-y-px active:translate-y-0"
           >
-            Tiếp tục thiết lập →
+            Tiếp tục thiết lập
           </button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {steps.map((step, index) => {
             const theme = getStepTheme(index);
             const isNextStep = step.title === nextStep.title;
@@ -175,42 +157,44 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                 key={step.title}
                 type="button"
                 onClick={() => onContinue(step.href)}
-                className={`flex text-left gap-4 rounded-[16px] border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
+                className={`flex text-left gap-4 rounded-xl border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
                   step.completed
-                    ? "border-app-line bg-app-surface/40 opacity-70 hover:opacity-90 hover:border-app-accent/35"
+                    ? "border-app-line bg-neutral-50/20 dark:bg-neutral-900/5 opacity-60 hover:opacity-85 hover:border-app-line/80"
                     : isNextStep
-                    ? "bg-app-surface shadow-[0_6px_20px_-4px_rgba(47,93,80,0.04)] border-app-accent/60 ring-1 ring-app-accent/10 hover:border-app-accent hover:shadow-[0_8px_24px_-4px_rgba(47,93,80,0.06)]"
-                    : `bg-app-surface shadow-[0_4px_16px_rgba(0,0,0,0.01)] ${theme.border} ${theme.hoverBg}`
+                    ? "bg-white dark:bg-neutral-900 border-app-accent/50 shadow-[0_8px_24px_-6px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/10 hover:border-app-accent hover:shadow-[0_12px_28px_-6px_rgba(47,93,80,0.08)]"
+                    : `bg-white/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg}`
                 }`}
               >
                 <div className="relative shrink-0">
                   <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold transition-all duration-300 ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                       step.completed
                         ? "bg-app-accent text-white shadow-sm"
                         : isNextStep
-                        ? "bg-app-accent text-white shadow-sm"
-                        : `${theme.iconBgPending} border border-transparent ${theme.iconTextPending}`
+                        ? "border border-app-accent bg-app-accent-soft text-app-accent font-semibold"
+                        : `border border-app-line bg-white dark:bg-neutral-900 text-app-ink-soft`
                     }`}
                   >
-                    {step.completed ? <Check className="h-4 w-4" strokeWidth={3} /> : index + 1}
+                    {step.completed ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : index + 1}
                   </span>
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <h3 className={`text-sm font-bold ${step.completed ? "text-app-ink-muted line-through opacity-85" : "text-app-ink"}`}>
+                    <h3 className={`text-sm font-bold ${step.completed ? "text-app-ink-muted line-through opacity-80" : "text-app-ink"}`}>
                       {step.title}
                     </h3>
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${theme.badgeBg}`}>
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-medium tracking-wide ${
+                      isNextStep && !step.completed ? "bg-app-accent/10 text-app-accent" : "bg-neutral-100 dark:bg-neutral-800 text-app-ink-soft"
+                    }`}>
                       {theme.badgeText}
                     </span>
                     {isNextStep && !step.completed && (
-                      <span className="inline-block rounded-full bg-app-accent px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                      <span className="inline-block rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">
                         Đề xuất
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs font-medium leading-relaxed text-app-ink-muted">{step.description}</p>
+                  <p className="text-xs font-medium leading-relaxed text-app-ink-soft">{step.description}</p>
                 </div>
               </button>
             );

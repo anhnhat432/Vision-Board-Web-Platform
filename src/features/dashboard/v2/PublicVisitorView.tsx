@@ -78,6 +78,13 @@ const PREVIEW_CHIPS = [
   { id: "portfolio", label: "💻 Portfolio" },
 ] as const;
 
+const DREAM_CARDS = [
+  { emoji: "✈️", label: "Du học Singapore", rotate: "-rotate-2", bg: "bg-sky-50 dark:bg-sky-950/20" },
+  { emoji: "💻", label: "Học lập trình React", rotate: "rotate-3", bg: "bg-emerald-50 dark:bg-emerald-950/20" },
+  { emoji: "🧘", label: "Thư thái tâm trí", rotate: "-rotate-3", bg: "bg-purple-50 dark:bg-purple-950/20" },
+  { emoji: "🏃‍♂️", label: "Chạy bộ 10km", rotate: "rotate-2", bg: "bg-amber-50 dark:bg-amber-950/20" },
+];
+
 interface PublicVisitorViewProps {
   isDemo: boolean;
   hasLocalData: boolean;
@@ -168,41 +175,41 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
   };
 
   return (
-    <div className="space-y-8 md:space-y-12">
-      <section className="relative -mx-4 overflow-hidden bg-app-bg px-4 pb-8 pt-10 sm:-mx-6 sm:px-6 md:pt-16 lg:min-h-[80vh] lg:items-center lg:py-24">
+    <div className="space-y-12 md:space-y-20">
+      <section className="relative -mx-4 overflow-hidden bg-app-bg px-4 pb-12 pt-10 sm:-mx-6 sm:px-6 md:pt-16 lg:min-h-[85vh] lg:items-center lg:py-24">
         {/* Layered decorative gradient blobs for premium visual depth */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-12 -top-12 -z-0 h-72 w-72 rounded-full bg-app-accent/10 blur-[100px]"
+          className="pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/10 blur-[120px]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-16 top-1/4 -z-0 h-96 w-96 rounded-full bg-app-warm/10 blur-[120px]"
+          className="pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-app-warm/5 blur-[150px]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-2/3 bg-gradient-to-b from-transparent to-app-warm-soft/20"
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-2/3 bg-gradient-to-b from-transparent to-app-warm-soft/15"
         />
-        <div className="relative z-10 grid gap-10 lg:grid-cols-[55fr_45fr] lg:items-center lg:gap-12">
+        <div className="relative z-10 grid gap-12 lg:grid-cols-[55fr_45fr] lg:items-center lg:gap-12">
         <div className="appear-fade-up">
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-app-accent/80">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-app-accent/80">
               Dear Our Future · Lập kế hoạch cá nhân 12 tuần
             </p>
-            <h1 className="mt-4 max-w-[20ch] font-serif text-4xl font-normal leading-[1.3] tracking-normal text-app-ink md:text-[2.75rem]">
+            <h1 className="mt-4 max-w-[18ch] font-serif text-4xl font-medium leading-[1.18] tracking-tight text-app-ink md:text-[3.25rem]">
               Đạt mục tiêu lớn sau{" "}
-              <span className="relative inline-block">
+              <span className="relative inline-block text-app-accent font-bold">
                 <span className="relative z-10">12 tuần</span>
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 200 12"
                   preserveAspectRatio="none"
-                  className="absolute inset-x-0 -bottom-1.5 h-2 w-full text-app-accent/25"
+                  className="absolute inset-x-0 -bottom-2 h-2.5 w-full text-app-accent/20"
                 >
                   <path
                     d="M2 8 C 40 2, 80 10, 120 4 S 180 8, 198 5"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="3.5"
                     strokeLinecap="round"
                     fill="none"
                   />
@@ -210,34 +217,29 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               </span>{" "}
               nhờ kế hoạch rõ ràng mỗi ngày.
             </h1>
-            <p className="mt-4 max-w-[52ch] text-sm font-normal leading-relaxed text-app-ink-soft/90">
-              Đừng để mục tiêu chỉ là mong muốn. Chúng tôi dẫn dắt bạn từng bước: Chấm điểm cuộc sống, lập mục tiêu SMART thực tế, và tự động chia thành việc cụ thể hôm nay.
+            <p className="mt-4 max-w-[50ch] text-sm font-normal leading-relaxed text-app-ink-soft/90">
+              Đừng để mục tiêu chỉ là mong muốn mơ hồ. Chúng tôi dẫn dắt bạn qua lộ trình bài bản khoa học: Tự chấm điểm bánh xe cuộc sống, lập mục tiêu SMART thực tế và chia nhỏ thành hành động cụ thể cho từng ngày.
             </p>
             <p className="mt-2.5 max-w-[50ch] text-xs font-normal leading-relaxed text-app-ink-muted/70">
-              Giải pháp tối giản cho những lúc bạn có nhiều mục tiêu nhưng không biết nên bắt đầu từ đâu.
+              Bắt đầu thiết kế tương lai của bạn một cách rõ nét và có nhịp điệu.
             </p>
 
-            <div className="mt-6 pl-0.5 max-w-[550px]">
-              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-app-accent/80">Bản kế hoạch của bạn bao gồm:</p>
-              <ul className="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-medium text-app-ink-soft">
-                <li className="flex items-center gap-2">
-                  <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-app-accent-soft/40 text-app-accent text-[9px] font-extrabold">✓</span>
-                  <span>1 Mục tiêu SMART thực tế</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-app-accent-soft/40 text-app-accent text-[9px] font-extrabold">✓</span>
-                  <span>Kế hoạch chi tiết 12 tuần</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-app-accent-soft/40 text-app-accent text-[9px] font-extrabold">✓</span>
-                  <span>Việc cụ thể ngày hôm nay</span>
-                </li>
-              </ul>
+            {/* Visual Polaroid Goal Cards (Vision Board atmosphere) */}
+            <div className="mt-8 flex flex-wrap gap-3 py-1">
+              {DREAM_CARDS.map((card) => (
+                <div
+                  key={card.label}
+                  className={`inline-flex items-center gap-2 rounded-xl border border-app-line/50 bg-app-surface px-3.5 py-2 shadow-[0_4px_12px_rgba(0,0,0,0.015)] transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-xs ${card.rotate} hover:rotate-0`}
+                >
+                  <span className="text-sm shrink-0">{card.emoji}</span>
+                  <span className="text-xs font-medium text-app-ink-soft">{card.label}</span>
+                </div>
+              ))}
             </div>
 
             {/* Interactive Goal Preview Chips */}
-            <div className="mt-6">
-              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-app-ink-muted/80 mb-2">Hình dung mục tiêu của bạn:</p>
+            <div className="mt-8">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted/80 mb-2">Hình dung mục tiêu của bạn:</p>
               <div className="flex flex-wrap gap-2">
                 {PREVIEW_CHIPS.map((chip) => (
                   <button
@@ -396,52 +398,51 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
       <RevealOnScroll
         as="section"
-        className="surface-raised rounded-xl border border-app-line/80 bg-gradient-to-b from-app-surface to-app-bg-subtle/10 p-5 md:p-8 shadow-app-sm"
+        className="surface-raised rounded-2xl border border-app-line/75 bg-app-surface/50 p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.01)]"
         aria-labelledby="dashboard-how-it-works-title"
       >
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">Cách hoạt động</p>
-          <h2 id="dashboard-how-it-works-title" className="font-serif text-2xl font-medium leading-8 text-app-ink sm:text-3xl">
-            Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước.
+        <div className="flex flex-col gap-2.5 max-w-2xl">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-app-accent/80">Hành trình 12 tuần</p>
+          <h2 id="dashboard-how-it-works-title" className="font-serif text-3xl font-medium leading-[1.25] text-app-ink sm:text-[2.25rem]">
+            Đóng gói ước mơ mơ hồ thành chu kỳ hành động, trong 4 bước.
           </h2>
         </div>
 
-        <ol className="relative mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {HOW_IT_WORKS_STEPS.map((step, idx) => {
-            const Icon = step.icon;
-            return (
-              <li
-                key={step.step}
-                className="relative rounded-xl border border-app-line bg-app-bg/40 p-5 shadow-app-sm hover:-translate-y-1 hover:border-app-accent/20 hover:bg-app-surface hover:shadow-[0_12px_30px_rgba(47,93,80,0.06)] border-t-2 border-t-transparent hover:border-t-app-accent transition-all duration-300 z-10"
-              >
-                {/* Connector line for desktop */}
-                {idx < HOW_IT_WORKS_STEPS.length - 1 && (
-                  <div
-                    aria-hidden="true"
-                    className="hidden lg:block absolute top-[2.25rem] left-[calc(100%-0.5rem)] w-[calc(100%-1rem)] h-[1px] border-t border-dashed border-app-line/60 z-0"
-                  />
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent shadow-sm border border-app-accent/5">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="rounded-full bg-app-accent-soft/60 px-2 py-0.5 text-[9px] font-bold text-app-accent border border-app-accent/5">
-                    Bước {step.step}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-sm font-bold text-app-ink">{step.title}</h3>
-                <p className="mt-1.5 text-xs font-semibold leading-relaxed text-app-ink-soft">{step.description}</p>
-                <p className="mt-3 text-[10px] font-bold text-app-accent flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-pulse" />
-                  <span>Nhận: {step.result}</span>
-                </p>
-                <p className="mt-4 inline-block rounded-full bg-app-bg px-2.5 py-0.5 text-[9px] font-bold text-app-ink-muted border border-app-line/40">
-                  {step.duration}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
+        <div className="relative mt-12">
+          {/* Connecting line for desktop */}
+          <div aria-hidden="true" className="hidden lg:block absolute top-[44px] left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-app-accent/20 to-transparent z-0" />
+          
+          <ol className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4 z-10">
+            {HOW_IT_WORKS_STEPS.map((step) => {
+              const Icon = step.icon;
+              return (
+                <li
+                  key={step.step}
+                  className="group relative flex flex-col items-center lg:items-start text-center lg:text-left rounded-2xl border border-app-line bg-white/45 dark:bg-neutral-900/25 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-[0_8px_24px_rgba(47,93,80,0.03)] transition-all duration-300"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent group-hover:bg-app-accent group-hover:text-white transition-all duration-300 shadow-sm border border-app-accent/5">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="absolute top-4 right-6 text-3xl font-serif font-semibold text-app-accent/15 select-none transition-colors duration-300 group-hover:text-app-accent/25">
+                    {step.step}
+                  </div>
+                  <h3 className="mt-5 text-sm font-bold text-app-ink group-hover:text-app-accent transition-colors duration-200">{step.title}</h3>
+                  <p className="mt-2 text-xs font-medium leading-relaxed text-app-ink-soft/90">{step.description}</p>
+                  
+                  <div className="mt-4 pt-3 border-t border-app-line/45 w-full flex items-center justify-between">
+                    <span className="text-[10px] font-medium text-app-accent flex items-center gap-1.5">
+                      <span className="h-1 w-1 rounded-full bg-app-accent shrink-0 animate-pulse" />
+                      {step.result}
+                    </span>
+                    <span className="rounded-full bg-app-bg px-2.5 py-0.5 text-[9px] font-medium text-app-ink-muted border border-app-line/45">
+                      {step.duration}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </RevealOnScroll>
 
       <RevealOnScroll as="section" className="grid gap-6 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
@@ -452,18 +453,18 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <Link
               key={feature.title}
               to={feature.href}
-              className="group rounded-xl border border-app-line/80 bg-app-surface p-6 shadow-[0_4px_16px_rgba(0,0,0,0.015)] hover:-translate-y-1 hover:border-app-accent/25 hover:bg-gradient-to-br hover:from-app-surface hover:to-app-accent-soft/10 hover:shadow-[0_12px_30px_-8px_rgba(47,93,80,0.06)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="group relative rounded-2xl border border-app-line bg-white/40 dark:bg-neutral-900/20 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:-translate-y-px hover:border-app-accent/35 hover:shadow-[0_10px_28px_-8px_rgba(47,93,80,0.04)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-app-accent group-hover:to-app-accent/90 group-hover:text-white group-hover:shadow-md group-hover:shadow-app-accent-soft/40">
-                  <Icon className="h-5 w-5" />
+              <div className="flex flex-col gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-app-accent group-hover:text-white">
+                  <Icon className="h-4.5 w-4.5" />
                 </div>
-                <div className="min-w-0 space-y-1.5">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-accent">{feature.tag}</p>
+                <div className="space-y-2">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-app-accent/80">{feature.tag}</p>
                   <h2 className="text-base font-bold text-app-ink transition-colors duration-200 group-hover:text-app-accent">{feature.title}</h2>
-                  <p className="text-xs font-semibold leading-relaxed text-app-ink-soft">{feature.description}</p>
-                  <span className="inline-flex items-center gap-0.5 text-xs font-bold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
-                    Tìm hiểu
+                  <p className="text-xs font-medium leading-relaxed text-app-ink-soft/90">{feature.description}</p>
+                  <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
+                    Tìm hiểu thêm
                     <ArrowRight className="h-3 w-3" />
                   </span>
                 </div>
@@ -475,37 +476,38 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
 
       <RevealOnScroll
         as="section"
-        className="relative overflow-hidden rounded-[18px] border border-app-accent/10 bg-gradient-to-br from-app-surface to-app-accent-soft/10 p-6 md:p-8 shadow-[0_8px_24px_-10px_rgba(47,93,80,0.03)]"
+        className="relative overflow-hidden rounded-[20px] border border-app-accent/15 bg-gradient-to-br from-app-ink via-app-ink to-emerald-950/80 p-8 md:p-12 shadow-[0_12px_36px_rgba(47,93,80,0.1)] text-white"
         aria-labelledby="dashboard-public-cta-title"
       >
-        <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-app-accent/5 blur-[50px]" />
-        <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-app-accent/80">
+        <div className="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-app-accent/10 blur-[80px]" />
+        <div className="pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full bg-app-warm/5 blur-[80px]" />
+        <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-3 max-w-2xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-app-accent/80">
               Bắt đầu đúng thứ tự
             </p>
             <h2
               id="dashboard-public-cta-title"
-              className="font-serif text-2xl font-normal leading-[1.3] text-app-ink sm:text-[2rem]"
+              className="font-serif text-3xl font-normal leading-[1.25] text-white sm:text-4xl"
             >
               Sẵn sàng dựng chu kỳ 12 tuần đầu tiên?
             </h2>
-            <p className="text-xs font-medium leading-relaxed text-app-ink-soft/90">
-              Thiết lập nhanh chóng. Dữ liệu của bạn tự đồng bộ an toàn giữa điện thoại và máy tính.
+            <p className="text-xs font-normal leading-relaxed text-slate-300">
+              Thiết lập nhanh chóng trong 10 phút. Toàn bộ dữ liệu của bạn sẽ được mã hóa và tự động đồng bộ an toàn giữa các thiết bị cá nhân.
             </p>
           </div>
-          <div className="shrink-0 flex flex-col items-center sm:items-end gap-2.5">
+          <div className="shrink-0 flex flex-col items-center lg:items-end gap-3">
             <button
               type="button"
               onClick={onStart}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white shadow-[0_4px_14px_rgba(47,93,80,0.15)] transition-all duration-200 hover:bg-app-accent-hover hover:shadow-[0_6px_20px_rgba(47,93,80,0.22)] hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-medium text-app-ink shadow-md hover:bg-slate-50 transition-all duration-200 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
             >
-              <UserPlus className="h-4 w-4" />
+              <UserPlus className="h-4 w-4 text-app-accent" />
               {primaryLabel}
             </button>
-            <p className="text-[9px] font-medium text-app-ink-muted/80 flex items-center gap-1.5">
+            <p className="text-[10px] font-normal text-slate-400 flex items-center gap-1.5">
               <span>✦</span>
-              Nhận bản kế hoạch và danh sách việc hôm nay sau 10 phút
+              Nhận ngay việc làm hôm nay để bắt đầu
             </p>
           </div>
         </div>
@@ -513,3 +515,4 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
     </div>
   );
 }
+

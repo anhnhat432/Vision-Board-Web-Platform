@@ -3,20 +3,6 @@ import { Check, Sparkles, Target } from "lucide-react";
 
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 
-/**
- * P2-04 Hero Mockup Live Animation.
- *
- * Loops a 4-phase narrative every ~6s on the public landing hero:
- *  - phase 0 (0ms)    : initial state, 1/3 task done, progress 33%
- *  - phase 1 (700ms)  : task #2 ticks, line-through animates in
- *  - phase 2 (1500ms) : progress fills 33% → 67%
- *  - phase 3 (2400ms) : "Streak +1" badge slides in from right
- *  - phase 4 (4000ms) : badge fades out
- *  - reset (5800ms)   : back to phase 0
- *
- * Reduced motion: render the final state (phase 3) statically, no loop.
- */
-
 export interface GoalPreviewData {
   id: string;
   goalTitle: string;
@@ -95,116 +81,169 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
   const badgeVisible = phase >= 3 && phase < 4;
 
   return (
-    <div className="appear-fade-up mx-auto w-full max-w-[360px] lg:mx-0 lg:max-w-none lg:[animation-delay:120ms]">
-      <div className="p-[1.5px] bg-gradient-to-br from-app-accent/15 via-app-line/50 to-app-warm/15 rounded-2xl shadow-[0_20px_40px_-12px_rgba(47,93,80,0.15),0_6px_16px_-8px_rgba(0,0,0,0.02)] transition-all duration-300">
-        <div className="relative rounded-2xl bg-app-surface/95 backdrop-blur-xl p-5">
-          {/* Streak badge — slides in from right around phase 3. */}
+    <div className="appear-fade-up mx-auto w-full max-w-[440px] lg:mx-0 lg:max-w-md lg:[animation-delay:120ms]">
+      {/* SaaS Browser Shell Container */}
+      <div className="relative rounded-2xl border border-app-line/80 bg-white dark:bg-neutral-950 shadow-[0_24px_50px_-12px_rgba(47,93,80,0.12),0_8px_24px_-8px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-300">
+        
+        {/* Browser Header Bar */}
+        <div className="flex items-center justify-between bg-neutral-50/80 dark:bg-neutral-900/60 backdrop-blur-md px-4 py-3 border-b border-app-line/65 select-none">
+          {/* Mac-style Window Dot Controls */}
+          <div className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full bg-[#FF5F56]/90 shadow-sm" />
+            <span className="h-3 w-3 rounded-full bg-[#FFBD2E]/90 shadow-sm" />
+            <span className="h-3 w-3 rounded-full bg-[#27C93F]/90 shadow-sm" />
+          </div>
+          {/* Fake URL Bar */}
+          <div className="bg-white dark:bg-neutral-950 border border-app-line/60 rounded-md px-4 py-0.5 text-[10px] text-app-ink-muted/80 font-mono tracking-wide text-center w-48 truncate">
+            dearourfuture.com/dashboard
+          </div>
+          {/* Small Empty Space to Balance Dot controls */}
+          <div className="w-12" />
+        </div>
+
+        {/* Browser Page Body: Dashboard Mockup */}
+        <div className="relative p-6 bg-gradient-to-b from-app-surface/40 via-white to-white dark:from-neutral-950 dark:to-neutral-950 min-h-[340px]">
+          
+          {/* Floating Streak Badge - elegant glass badge popping from the corner */}
           <div
             aria-hidden="true"
-            className={`absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full bg-app-accent-soft px-2.5 py-1 text-[10px] font-medium text-app-accent shadow-[0_2px_8px_rgba(47,93,80,0.15)] ring-1 ring-app-accent/10 transition-all duration-medium ${
-              badgeVisible ? "translate-x-0 scale-100 opacity-100" : "translate-x-3 scale-95 opacity-0"
+            className={`absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 shadow-sm border border-emerald-500/20 transition-all duration-500 ${
+              badgeVisible ? "translate-y-0 scale-100 opacity-100" : "-translate-y-2 scale-95 opacity-0"
             }`}
             style={{
               transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in"
             }}
           >
-            <Sparkles className="size-2.5 text-app-accent/80" />
-            Streak +1
+            <Sparkles className="size-3 text-emerald-500 animate-spin-slow" />
+            Streak +1 Ngày!
           </div>
 
-          {/* Inspiration Vision Board Snippet */}
-          <div className="mb-4 rounded-xl border border-app-line/50 bg-app-bg/40 p-3 flex items-center gap-3">
-            <div className="flex -space-x-1.5 shrink-0 select-none">
-              {data.visionIcons.map((icon) => (
-                <div
-                  key={icon.emoji}
-                  className={`h-8 w-8 rounded-lg ${icon.bgClass} border ${icon.borderClass} flex items-center justify-center text-xs shadow-sm`}
-                >{icon.emoji}</div>
-              ))}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-app-accent/80">Bảng tầm nhìn</p>
-              <p className="truncate text-xs font-semibold text-app-ink-soft">{data.visionLabel}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">
-                <Target className="h-3.5 w-3.5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mục tiêu</p>
-                <p className="truncate text-xs font-medium text-app-ink">{data.goalTitle}</p>
+          {/* Grid Layout: Vision Canvas & Focus Plan */}
+          <div className="grid grid-cols-1 xs:grid-cols-12 gap-5">
+            
+            {/* Left Column (Span 5): Mini Vision Board Pins (Polaroid Vibe) */}
+            <div className="xs:col-span-5 flex flex-col justify-between">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-app-accent mb-3">Tầm nhìn của tôi</p>
+                <div className="relative h-32 w-full select-none">
+                  {/* Polaroid Card 1: Books */}
+                  <div className="absolute top-0 left-0 w-28 bg-white dark:bg-neutral-900 p-2 rounded shadow-md border border-app-line/50 -rotate-[6deg] transition-transform hover:rotate-0 duration-300">
+                    <div className="h-16 w-full rounded bg-emerald-800/10 flex items-center justify-center text-xl">
+                      📚
+                    </div>
+                    <p className="text-[9px] text-center font-medium mt-1.5 text-app-ink-soft">12 cuốn sách</p>
+                  </div>
+                  {/* Polaroid Card 2: Runner */}
+                  <div className="absolute top-4 left-6 w-28 bg-white dark:bg-neutral-900 p-2 rounded shadow-lg border border-app-line/60 rotate-[4deg] transition-transform hover:rotate-0 duration-300">
+                    <div className="h-16 w-full rounded bg-amber-800/10 flex items-center justify-center text-xl">
+                      🏃‍♂️
+                    </div>
+                    <p className="text-[9px] text-center font-medium mt-1.5 text-app-ink-soft">Chạy bộ 5km</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 p-2 bg-app-accent-soft/30 dark:bg-app-accent-soft/5 border border-app-accent/15 rounded-lg">
+                <span className="text-[8px] font-semibold uppercase text-app-accent tracking-wider block">Châm ngôn</span>
+                <p className="text-[10px] font-serif italic text-app-ink-soft leading-snug mt-0.5">
+                  {data.visionLabel}
+                </p>
               </div>
             </div>
-            <span className="shrink-0 rounded-full bg-app-accent-soft px-2 py-0.5 text-[10px] font-medium text-app-accent border border-app-accent/10">
-              {data.weekLabel}
-            </span>
-          </div>
 
-          <div className="mt-4 border-t border-dashed border-app-line/60 pt-3">
-            <div className="flex items-center justify-between text-xs text-app-ink-soft">
-              <span className="font-medium">Tiến độ chu kỳ</span>
-              <span className="font-semibold tabular-nums text-app-accent">{progressFilled ? 67 : 33}%</span>
-            </div>
-            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-app-line/30">
-              <div
-                className="h-full rounded-full bg-app-accent transition-all duration-slow ease-decelerate"
-                style={{ width: progressFilled ? "67%" : "33%" }}
-              />
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-2.5">
-            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
-              Việc hôm nay · {taskTwoChecked ? "8" : "7"}/14
-            </p>
-            <div className="space-y-2">
-              {/* Task 1 — always done */}
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm">
-                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                </span>
-                <span className="text-xs text-app-ink-muted line-through font-medium opacity-65">{data.todayTasks[0]}</span>
+            {/* Right Column (Span 7): Today Focus Execution */}
+            <div className="xs:col-span-7 space-y-4">
+              {/* Target & Week progress */}
+              <div className="p-3.5 bg-neutral-50 dark:bg-neutral-900/40 border border-app-line/65 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-app-ink-muted">Chu kỳ hiện tại</span>
+                  <span className="rounded-full bg-app-accent/10 px-2 py-0.5 text-[9px] font-semibold text-app-accent border border-app-accent/10">
+                    {data.weekLabel}
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-app-ink mt-1.5 truncate flex items-center gap-1.5">
+                  <Target className="h-3.5 w-3.5 text-app-accent shrink-0" />
+                  {data.goalTitle}
+                </h4>
+                
+                {/* 12-Week Mini Progress Bar */}
+                <div className="mt-3.5 pt-2 border-t border-app-line/45">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-semibold text-app-ink-soft">Tiến độ</span>
+                    <span className="font-bold text-app-accent tabular-nums">{progressFilled ? 67 : 33}%</span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-neutral-200/70 dark:bg-neutral-800 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-app-accent transition-all duration-1000 ease-out"
+                      style={{ width: progressFilled ? "67%" : "33%" }}
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Task 2 — ticks at phase 1 */}
-              <div className="flex items-center gap-2.5">
-                <span
-                  className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full transition-all duration-base ease-decelerate ${
-                    taskTwoChecked
-                      ? "border-transparent bg-app-accent text-white shadow-sm"
-                      : "border border-app-line bg-app-surface text-transparent"
-                  }`}
-                >
-                  <Check
-                    className={`h-2.5 w-2.5 transition-transform duration-base ease-decelerate ${
-                      taskTwoChecked ? "scale-100" : "scale-50"
-                    }`}
-                    strokeWidth={3}
-                  />
-                </span>
-                <span
-                  className={`text-xs font-medium transition-colors duration-base ease-standard ${
-                    taskTwoChecked ? "text-app-ink-muted line-through opacity-65" : "text-app-ink"
-                  }`}
-                >
-                  {data.todayTasks[1]}
-                </span>
-              </div>
+              {/* Tasks Checklist */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                    Hành động hôm nay
+                  </p>
+                  <span className="text-[9px] font-semibold text-app-accent tabular-nums bg-app-accent-soft px-1.5 py-0.5 rounded">
+                    {taskTwoChecked ? "2" : "1"}/3 Hoàn thành
+                  </span>
+                </div>
+                
+                <div className="space-y-2">
+                  {/* Task 1: Always completed */}
+                  <div className="flex items-center gap-2.5 p-2 bg-neutral-50/50 dark:bg-neutral-900/20 border border-app-line/40 rounded-lg">
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm">
+                      <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                    </span>
+                    <span className="text-xs text-app-ink-muted line-through font-medium opacity-65 truncate">
+                      {data.todayTasks[0]}
+                    </span>
+                  </div>
 
-              {/* Task 3 — never ticks in this loop */}
-              <div className="flex items-center gap-2.5">
-                <span className="h-4.5 w-4.5 shrink-0 rounded-full border border-app-line bg-app-surface" aria-hidden="true" />
-                <span className="text-xs font-medium text-app-ink">{data.todayTasks[2]}</span>
+                  {/* Task 2: Animates checking in/out */}
+                  <div className="flex items-center gap-2.5 p-2 bg-white dark:bg-neutral-950 border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-300">
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
+                        taskTwoChecked
+                          ? "border-transparent bg-app-accent text-white shadow-sm"
+                          : "border-app-line bg-app-surface text-transparent"
+                      }`}
+                    >
+                      <Check
+                        className={`h-2.5 w-2.5 transition-transform duration-500 ${
+                          taskTwoChecked ? "scale-100" : "scale-50"
+                        }`}
+                        strokeWidth={3}
+                      />
+                    </span>
+                    <span
+                      className={`text-xs font-semibold truncate transition-colors duration-500 ${
+                        taskTwoChecked ? "text-app-ink-muted line-through opacity-65" : "text-app-ink"
+                      }`}
+                    >
+                      {data.todayTasks[1]}
+                    </span>
+                  </div>
+
+                  {/* Task 3: Uncompleted */}
+                  <div className="flex items-center gap-2.5 p-2 bg-white dark:bg-neutral-950 border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
+                    <span className="h-4 w-4 shrink-0 rounded-full border border-app-line bg-app-surface" aria-hidden="true" />
+                    <span className="text-xs font-medium text-app-ink truncate">{data.todayTasks[2]}</span>
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
 
-          <p className="mt-5 border-t border-app-line/45 pt-3.5 text-[9px] uppercase tracking-wider text-app-ink-muted/50 text-center">
-            Giao diện thực thi tối giản
-          </p>
+          {/* Minimalist status bar footer */}
+          <div className="mt-6 pt-3 border-t border-app-line/45 flex items-center justify-between text-[9px] text-app-ink-muted/65 font-medium">
+            <span>● Đồng bộ đám mây cục bộ</span>
+            <span>Vite SPA v2.1</span>
+          </div>
+
         </div>
       </div>
     </div>
