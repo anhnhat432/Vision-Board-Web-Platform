@@ -346,7 +346,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-xl border border-app-line bg-app-surface p-1 shadow-2xs"
+            className="inline-flex min-h-0 rounded-xl border border-app-line/60 bg-app-surface p-1 shadow-2xs"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger

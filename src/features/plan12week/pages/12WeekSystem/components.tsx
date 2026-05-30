@@ -90,7 +90,7 @@ export function TwelveWeekDashboardState({
         {description}
       </p>
 
-      {/* 3 Step Onboarding Visual - Flat and structured */}
+      {/* 3 Step Onboarding Visual - Flat and structured, no wooden pins, no rotate */}
       <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3 text-left">
         <div className="bg-app-bg border border-app-line/60 rounded-xl p-4 transition-colors hover:border-app-line">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-app-accent/15 text-xs font-bold text-app-accent">1</span>
@@ -216,7 +216,7 @@ export function TwelveWeekDashboardHeader({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 flex-1 space-y-1.5">
           <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-app-ink-muted bg-app-bg px-2.5 py-0.5 rounded border border-app-line/60">
-            Execution Command Center
+            Hệ thống 12 tuần
           </span>
 
           <span className="sr-only">Nhịp 12 tuần</span>
@@ -240,8 +240,8 @@ export function TwelveWeekDashboardHeader({
           </div>
 
           {/* Next Best Action: highly integrated, clean and flat border-l style */}
-          <div className="text-xs sm:text-sm text-app-ink leading-relaxed border-l-2 border-app-accent pl-3 mt-2">
-            <span className="font-semibold text-app-accent uppercase tracking-wider text-[10px] block mb-0.5">Tiêu điểm tiếp theo</span>
+          <div className="text-xs sm:text-sm text-app-ink leading-relaxed border-l-2 border-app-accent pl-3.5 mt-2">
+            <span className="font-semibold text-app-accent uppercase tracking-wider text-[10px] block mb-0.5">Tiêu điểm hành động</span>
             {nextActionLabel}
           </div>
         </div>
@@ -267,7 +267,7 @@ export function TwelveWeekDashboardHeader({
       </div>
 
       {/* Subtle metadata at footer of header to reduce noise */}
-      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-app-ink-muted border-t border-app-line/30 pt-3">
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-app-ink-muted border-t border-app-line/30 pt-3.5">
         {domainLabel && <span>Lĩnh vực: {domainLabel}</span>}
         {domainLabel && <span className="opacity-40">•</span>}
         <span className="flex items-center gap-1">
@@ -284,7 +284,7 @@ export function TwelveWeekDashboardHeader({
         {reviewDueToday ? (
           <span>{reviewStatusLabel}</span>
         ) : (
-          <span>Còn {todayRemainingCount} việc hôm nay · Xong {todayCompletedCount}/{weekCompletion.total} việc tuần ({weekCompletion.percent}%)</span>
+          <span>Còn {todayRemainingCount} việc hôm nay · Xong {todayCompletedCount}/{weekCompletion.total} việc tuần này</span>
         )}
       </div>
     </header>
