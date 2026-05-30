@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toastSuccess } from "@/app/utils/toast";
 import { Skeleton } from "@/app/components/ui/skeleton";
@@ -14,9 +14,6 @@ import {
 } from "@/app/utils/app-mode";
 import {
   trackPremiumInsightOpened,
-  trackRescueActionTaken,
-  trackRescueTriggerDismissed,
-  trackRescueTriggerFired,
 } from "@/app/utils/monetization-analytics";
 import {
   APP_STORAGE_KEYS,
@@ -40,7 +37,6 @@ import {
   syncWeeklyPlans,
 } from "@/app/utils/storage-twelve-week";
 import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from "@/app/utils/storage-types";
-import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useBackendSyncIssueState } from "@/features/plan12week/hooks/useBackendSyncIssueState";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
@@ -55,7 +51,6 @@ import {
   TwelveWeekDashboardHeader,
   TwelveWeekDashboardState,
   TwelveWeekGoalSwitcher,
-  TwelveWeekTabFallback,
 } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
 import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
@@ -799,7 +794,7 @@ export function TwelveWeekSystem() {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
     if (!isBackendProfileReady || !activeGoal || !localSystem) return;
     const hasPendingBackendConflict = lastBackendHydrationResult?.conflicts.some(
-      (conflict: any) => conflict.goalId === activeGoal.id,
+      (conflict: { goalId: string }) => conflict.goalId === activeGoal.id,
     );
     if (hasPendingBackendConflict) return;
 
@@ -1186,5 +1181,3 @@ export function TwelveWeekSystem() {
     </div>
   );
 }
-
-export function TwelveWeekSystemSettings() {}

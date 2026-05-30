@@ -14,14 +14,50 @@ import type {
   TimeBlock,
   AppPreferences,
   EntitlementKey,
+  UniversalDailyCheckIn,
+  LeadIndicator,
+  FunnelStepSummary,
+  InAppReminder,
+  SyncOutboxItem,
 } from "@/app/utils/storage-types";
 import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { PlanOverview, WeekEditor, WeeklyReview } from "./lazyTabs";
 import { TwelveWeekTabFallback } from "./components";
-import type { ReentryMode, DailyMood } from "@/app/utils/twelve-week-system-ui";
+import type {
+  ReentryMode,
+  DailyMood,
+  RescuePlanSummary,
+  HeatmapCell,
+  WeekTrendPoint,
+  TacticBreakdownItem,
+} from "@/app/utils/twelve-week-system-ui";
 import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
 import type { TwelveWeekWeeklyReviewForm } from "@/app/components/twelve-week/TwelveWeekWeekTab";
+import type {
+  BackendConnectionStatus,
+  MutationQueueManualSyncStatus,
+} from "@/app/components/twelve-week/TwelveWeekSettingsShared";
+import type {
+  RescueModeStatus,
+  NextWeekRecommendation,
+  ExecutionInsight,
+} from "@/features/plan12week/logic";
+import type {
+  SuggestedNextWeekPlan,
+  WeeklyReviewPremiumInsight,
+} from "@/app/utils/twelve-week-premium/types";
+import type {
+  BrowserNotificationStatus,
+  OutboxSyncSnapshot,
+} from "@/app/utils/production";
+import type {
+  BillingActionSnapshot,
+  BillingProviderStatus,
+} from "@/app/utils/billing-contract";
+import type {
+  BackendPlanHydrationResult,
+} from "@/app/hooks/useBackendPlanHydration";
 
 const TWELVE_WEEK_SECTION_TABS = [
   { value: "today", label: "Hôm nay", icon: ListTodo },
@@ -65,10 +101,10 @@ interface TwelveWeekSystemTabsProps {
   firstPriorityTask: TwelveWeekTaskInstance | null;
   secondaryTodayTasks: TwelveWeekTaskInstance[];
   hasSmartRescue: boolean;
-  rescuePlanSummary: any;
+  rescuePlanSummary: RescuePlanSummary | null;
   dailyMood: DailyMood;
   dailyNote: string;
-  latestCheckIn: any;
+  latestCheckIn: UniversalDailyCheckIn | null;
   onReentry: (mode: ReentryMode) => void;
   onApplyRecommendedReentry: () => void;
   onOpenSmartRescue: () => void;
@@ -78,61 +114,61 @@ interface TwelveWeekSystemTabsProps {
   onSaveCheckIn: () => void;
   onOpenWeekTab?: () => void;
   onNavigateToSetup?: () => void;
-  rescueStatus: any;
+  rescueStatus: RescueModeStatus | null;
   onPickTinyTask?: () => void;
   onReviewPlan?: () => void;
   onRescheduleTaskWithinWeek: (taskInstanceId: string) => void;
   onRescheduleTaskToNextWeek: (taskInstanceId: string) => void;
   onSkipNonCoreTask: (taskInstanceId: string) => void;
   currentLagMetricValue: string;
-  coreIndicators: any[];
-  optionalIndicators: any[];
+  coreIndicators: LeadIndicator[];
+  optionalIndicators: LeadIndicator[];
   activePlanCode: PricingPlanCode;
   hasPremiumReviewInsights: boolean;
-  premiumReviewInsight: any;
-  suggestedNextWeekPlan: any;
-  weeklyForm: any;
+  premiumReviewInsight: WeeklyReviewPremiumInsight | null;
+  suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
+  weeklyForm: TwelveWeekWeeklyReviewForm;
   currentReview: UniversalWeeklyReview | null;
   onWeeklyFormChange: <K extends keyof TwelveWeekWeeklyReviewForm>(field: K, value: TwelveWeekWeeklyReviewForm[K]) => void;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
   onSaveWeeklyReview: () => void;
   onOpenTodayTab?: () => void;
-  nextWeekRecommendation: any;
+  nextWeekRecommendation: NextWeekRecommendation | null;
   onAcceptNextWeekRecommendation?: () => void;
-  weeklyReflectionInsights: any;
+  weeklyReflectionInsights: ReadonlyArray<ExecutionInsight>;
   showFullProgress: boolean;
   setShowFullProgress: (show: boolean) => void;
   averageScore: number;
   reviewDoneCount: number;
-  milestoneItems: any[];
+  milestoneItems: Array<{ label: string; value: string }>;
   hasAdvancedAnalytics: boolean;
-  executionHeatmap: any;
-  weeklyTrend: any;
-  tacticBreakdown: any;
-  executionInsights: any;
+  executionHeatmap: HeatmapCell[];
+  weeklyTrend: WeekTrendPoint[];
+  tacticBreakdown: TacticBreakdownItem[];
+  executionInsights: ReadonlyArray<ExecutionInsight>;
   navigate: NavigateFunction;
-  backendConnectionStatus: any;
+  backendConnectionStatus: BackendConnectionStatus;
   activeEntitlementKeys: EntitlementKey[];
-  billingProviderStatus: any;
-  lastEntitlementSyncSnapshot: any;
-  lastRestoreAccessSnapshot: any;
-  lastBackendHydrationResult: any;
-  appPreferences: any;
-  funnelSteps: any;
-  monetizationSteps: any;
-  browserNotificationStatus: any;
-  lastSyncSnapshot: any;
+  billingProviderStatus: BillingProviderStatus;
+  lastEntitlementSyncSnapshot: BillingActionSnapshot | null;
+  lastRestoreAccessSnapshot: BillingActionSnapshot | null;
+  lastBackendHydrationResult: BackendPlanHydrationResult | null;
+  appPreferences: AppPreferences;
+  funnelSteps: FunnelStepSummary[];
+  monetizationSteps: FunnelStepSummary[];
+  browserNotificationStatus: BrowserNotificationStatus;
+  lastSyncSnapshot: OutboxSyncSnapshot | null;
   pendingOutboxCount: number;
   archivedOutboxCount: number;
   eventCount: number;
-  activeReminders: any;
-  recentOutboxItems: any;
+  activeReminders: InAppReminder[];
+  recentOutboxItems: SyncOutboxItem[];
   isSyncingEntitlements: boolean;
   isRestoringPlanAccess: boolean;
   isHydratingBackendPlans: boolean;
   isResolvingBackendPlanConflicts: boolean;
-  mutationQueueSyncStatus: any;
+  mutationQueueSyncStatus: MutationQueueManualSyncStatus;
   handleReviewDayChange: (day: string) => void;
   handleReminderTimeChange: (time: string) => void;
   handleLoadPreferenceChange: (pref: string) => void;
@@ -143,7 +179,7 @@ interface TwelveWeekSystemTabsProps {
   handlePreferenceToggle: <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => void;
   handleArchivePendingOutbox: () => void;
   handleRestoreArchivedOutbox: () => void;
-  handleOpenReminder: (reminder: any) => void;
+  handleOpenReminder: (reminder: InAppReminder) => void;
   handleExportLocalData: () => void;
   handleExportCloudWorkspace: () => void;
   handleDeleteCloudWorkspace: () => void;
