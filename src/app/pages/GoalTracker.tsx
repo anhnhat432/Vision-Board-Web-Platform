@@ -1,5 +1,6 @@
-import { AlertTriangle, ArrowRight, CheckCircle2, Circle, Lock, Mail, MailOpen, Plus, Search, Target, Trash2, Zap } from "lucide-react";
+import { AlertTriangle, ArrowRight, Award, CheckCircle2, Circle, Lock, Mail, MailOpen, Plus, RotateCcw, Search, Target, Trash2, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { EmptyState } from "@/app/components/states/EmptyState";
@@ -79,6 +80,91 @@ const CATEGORY_STYLES: Record<
     border: "border-app-accent/15",
     bar: "from-app-accent/80 to-app-accent",
   },
+};
+
+const completedGoalStyle = `
+  @keyframes completedBorderGlow {
+    0%, 100% {
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.08), inset 0 0 4px rgba(16, 185, 129, 0.02);
+    }
+    50% {
+      border-color: rgba(52, 211, 153, 0.7);
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.22), inset 0 0 6px rgba(52, 211, 153, 0.04);
+    }
+  }
+  .completed-goal-glow {
+    animation: completedBorderGlow 4s infinite ease-in-out;
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  .card-transition {
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+`;
+
+interface GoalCompletionDetails {
+  completedAtStr: string;
+  completedTasks: number;
+  totalTasks: number;
+}
+
+const getGoalCompletionDetails = (goal: Goal): GoalCompletionDetails => {
+  const stats = getGoalExecutionStats(goal);
+  let latestDate: Date | null = null;
+
+  if (goal.twelveWeekSystem) {
+    for (const task of goal.twelveWeekSystem.taskInstances) {
+      if (task.completed && task.completedAt) {
+        try {
+          const d = new Date(task.completedAt);
+          if (!Number.isNaN(d.getTime())) {
+            if (!latestDate || d > latestDate) {
+              latestDate = d;
+            }
+          }
+        } catch {}
+      }
+    }
+  } else {
+    for (const task of goal.tasks) {
+      if (task.completed && task.lastModifiedAt) {
+        try {
+          const d = new Date(task.lastModifiedAt);
+          if (!Number.isNaN(d.getTime())) {
+            if (!latestDate || d > latestDate) {
+              latestDate = d;
+            }
+          }
+        } catch {}
+      }
+    }
+  }
+
+  let completedAtStr = "Vừa hoàn thành";
+  if (latestDate) {
+    const day = String(latestDate.getDate()).padStart(2, "0");
+    const month = String(latestDate.getMonth() + 1).padStart(2, "0");
+    const year = latestDate.getFullYear();
+    completedAtStr = `${day}/${month}/${year}`;
+  }
+
+  return {
+    completedAtStr,
+    completedTasks: stats.completed,
+    totalTasks: stats.total,
+  };
 };
 
 export function GoalTracker() {
@@ -529,6 +615,7 @@ function GoalTrackerContent({
 
   return (
     <div className="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+      <style>{completedGoalStyle}</style>
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}
@@ -953,194 +1040,285 @@ function GoalCard({
   const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
   const areaStyle = CATEGORY_STYLES.default;
 
+  const [isFlipped, setIsFlipped] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const completionDetails = useMemo(() => getGoalCompletionDetails(goal), [goal]);
+
+  const glowClass = progress === 100
+    ? (prefersReducedMotion 
+        ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)] bg-emerald-50/15 dark:bg-emerald-950/5" 
+        : "completed-goal-glow bg-emerald-50/15 dark:bg-emerald-950/5 border-emerald-500/25 dark:border-emerald-500/15")
+    : "bg-app-surface border-app-line/70";
+
   return (
-    <SpotlightCard
-      className={cn(
-        "rounded-[18px] border p-6 sm:p-7 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md bg-app-surface border-app-line/70 relative overflow-hidden",
-        progress === 100 && "bg-emerald-50/15 dark:bg-emerald-950/5 border-emerald-500/25 dark:border-emerald-500/15",
-      )}
-    >
-      {/* Nút xóa thùng rác nhỏ ở góc trên bên phải, visually quieter */}
-      <button
-        type="button"
-        className="absolute top-4 right-4 h-7.5 w-7.5 rounded-lg text-app-ink-muted/30 hover:text-app-status-error hover:bg-app-status-error/5 transition-all duration-200 flex items-center justify-center z-20"
-        onClick={() => setGoalToDelete(goal.id)}
-        aria-label={`Xóa mục tiêu ${goal.title}`}
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_1px_280px] lg:gap-8">
-        {/* Cột trái: Goal Info */}
-        <div className="space-y-4 pr-2">
-          <div className="flex items-start gap-3.5">
-            <div
-              className={cn(
-                "flex h-11 w-11 shrink-0 rounded-xl items-center justify-center shadow-app-sm mt-0.5",
-                areaStyle.bg,
-                areaStyle.text,
-              )}
-            >
-              <GoalArchetypeIcon className="h-5.5 w-5.5" />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <h3 className="font-serif text-lg md:text-xl font-bold text-app-ink leading-snug break-words pr-8">
-                {goal.title}
-              </h3>
-              <p className="text-xs text-app-ink-soft font-semibold">
-                {system ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
-                <span className={cn("font-bold", areaStyle.text)}>{getLifeAreaLabel(goal.category)}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Description */}
-          {goal.description && (
-            <p className="text-sm text-app-ink-soft leading-relaxed line-clamp-2">
-              {goal.description}
-            </p>
-          )}
-
-          {/* Badges */}
-          <div className="flex flex-wrap gap-2 pt-0.5">
-            <span
-              className={cn(
-                "border text-xs font-bold rounded-full px-3 py-0.5 inline-flex items-center gap-1 shadow-app-sm",
-                areaStyle.bg,
-                areaStyle.border,
-                areaStyle.text,
-              )}
-            >
-              {getLifeAreaLabel(goal.category)}
-            </span>
-            {isNearDeadline && (
-              <span className="bg-app-warm-soft border border-app-warm-border text-app-warm text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
-                Sắp đến hạn
-              </span>
-            )}
-            {isOverdue && (
-              <span className="bg-app-status-error/10 text-app-status-error border border-app-status-error/20 text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
-                Quá hạn
-              </span>
-            )}
-            {system && (
-              <span className="bg-app-bg border border-app-line text-app-ink-soft text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
-                {getPlanLabel(currentPlanCode)}
-              </span>
-            )}
-          </div>
-
-          {/* Streak Heatmap (chỉ cho mục tiêu 12 tuần) */}
-          {system && (
-            <div className="pt-1">
-              <StreakHeatmap system={system} />
-            </div>
-          )}
-
-          {/* Progress Bar */}
-          <div className="space-y-1.5 pt-1">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-app-ink-soft">Tiến độ</span>
-              <span className={cn("tabular-nums text-sm", areaStyle.text)}>
-                <CountUp value={progress} suffix="%" />
-              </span>
-            </div>
-            <div className="h-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 overflow-hidden" aria-hidden="true">
-              <div
-                className={cn(
-                  "h-full rounded-full bg-gradient-to-r transition-all duration-500 ease-out",
-                  areaStyle.bar,
-                )}
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Action chính */}
-          <div className="pt-1.5 flex flex-wrap items-center gap-3">
-            {system && (
-              <Button
-                type="button"
-                className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover px-4 py-2 text-xs sm:text-sm font-bold shadow-app-sm transition-all duration-200 inline-flex items-center gap-1.5 h-9"
-                onClick={() => openTwelveWeekCenter(goal.id)}
-              >
-                Tiếp tục chu kỳ
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            )}
-            {system ? (
-              <FutureSelfLetter goalId={goal.id} progress={progress} system={system} />
-            ) : null}
-          </div>
-        </div>
-
-        {/* Divider dọc */}
-        <div className="hidden lg:block w-px bg-app-line/60 my-1" aria-hidden="true" />
-
-        {/* Cột phải: Tasks hôm nay */}
-        <div className="lg:pl-2 flex flex-col justify-between min-w-0 pt-0.5">
-          <div>
-            <div className="flex items-center justify-between border-b border-app-line/50 pb-2 mb-3">
-              <p className="text-xs font-bold uppercase tracking-[0.08em] text-app-ink-muted">
-                Việc hôm nay
-              </p>
-              {system && (
-                <span className="text-xs font-black tabular-nums text-app-accent">
-                  {completedTodayCount}/{totalTodayCount}
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-2.5">
-              {systemTodayOpenTasks.slice(0, 2).map((task) => (
-                <div
-                  key={task.id}
-                  className="group/task flex items-center gap-2.5 rounded-lg border border-app-line/40 bg-app-bg-subtle/30 px-3 py-2 hover:border-app-accent/20 hover:bg-app-accent-subtle/20 transition-all duration-300"
-                >
-                  <button
-                    type="button"
-                    onClick={() => handleToggleTask(goal.id, task.id)}
-                    className="flex size-4.5 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-white transition-all duration-200 hover:border-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                    aria-label={task.completed ? "Hủy chốt việc" : "Chốt việc"}
-                  >
-                    {task.completed ? (
-                      <CheckCircle2 className="size-4.5 text-app-accent shrink-0" />
-                    ) : (
-                      <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
-                    )}
-                  </button>
-                  <span
-                    className={cn(
-                      "text-sm font-medium truncate transition-all duration-200",
-                      task.completed ? "line-through text-app-ink-muted opacity-70" : "text-app-ink",
-                    )}
-                  >
-                    {task.title}
-                  </span>
-                </div>
-              ))}
-
-              {systemTodayOpenTasks.length === 0 && (
-                <p className="text-xs sm:text-sm italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1 font-sans">
-                  Hôm nay không có nhiệm vụ nào cần thực hiện.
-                </p>
-              )}
-            </div>
-          </div>
-
-          {system && (
+    <div className="perspective-1000 w-full relative">
+      <div className={cn(
+        "preserve-3d card-transition w-full relative",
+        isFlipped ? "rotate-y-180" : ""
+      )}>
+        {/* FRONT SIDE */}
+        <div className="backface-hidden w-full">
+          <SpotlightCard className={cn("rounded-[18px] border p-5 sm:p-6 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md", glowClass)}>
+            {/* Nút xóa thùng rác nhỏ ở góc trên bên phải, visually quieter */}
             <button
               type="button"
-              className="group/more mt-3 text-app-accent text-xs sm:text-sm font-bold hover:text-app-accent-hover transition-colors duration-150 inline-flex items-center gap-0.5 self-start"
-              onClick={() => openTwelveWeekCenter(goal.id)}
+              className="absolute top-4 right-4 h-7.5 w-7.5 rounded-lg text-app-ink-muted/30 hover:text-app-status-error hover:bg-app-status-error/5 transition-all duration-200 flex items-center justify-center z-20"
+              onClick={() => setGoalToDelete(goal.id)}
+              aria-label={`Xóa mục tiêu ${goal.title}`}
             >
-              <span>Xem toàn bộ</span>
-              <ArrowRight className="h-3 w-3 transform transition-transform duration-200 group-hover/more:translate-x-0.5" />
+              <Trash2 className="h-4 w-4" />
             </button>
-          )}
+
+            <div className="grid gap-6 lg:grid-cols-[1fr_1px_280px] lg:gap-8">
+              {/* Cột trái: Goal Info */}
+              <div className="space-y-3.5 pr-2">
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className={cn(
+                      "flex h-11 w-11 shrink-0 rounded-xl items-center justify-center shadow-app-sm mt-0.5",
+                      areaStyle.bg,
+                      areaStyle.text,
+                    )}
+                  >
+                    <GoalArchetypeIcon className="h-5.5 w-5.5" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <h3 className="font-serif text-lg md:text-xl font-bold text-app-ink leading-snug break-words pr-8 line-clamp-2">
+                      {goal.title}
+                    </h3>
+                    <p className="text-xs text-app-ink-soft font-semibold">
+                      {system ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
+                      <span className={cn("font-bold", areaStyle.text)}>{getLifeAreaLabel(goal.category)}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 pt-0.5">
+                  <span
+                    className={cn(
+                      "border text-xs font-bold rounded-full px-3 py-0.5 inline-flex items-center gap-1 shadow-app-sm",
+                      areaStyle.bg,
+                      areaStyle.border,
+                      areaStyle.text,
+                    )}
+                  >
+                    {getLifeAreaLabel(goal.category)}
+                  </span>
+                  {isNearDeadline && (
+                    <span className="bg-app-warm-soft border border-app-warm-border text-app-warm text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
+                      Sắp đến hạn
+                    </span>
+                  )}
+                  {isOverdue && (
+                    <span className="bg-app-status-error/10 text-app-status-error border border-app-status-error/20 text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
+                      Quá hạn
+                    </span>
+                  )}
+                  {system && (
+                    <span className="bg-app-bg border border-app-line text-app-ink-soft text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
+                      {getPlanLabel(currentPlanCode)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Streak Heatmap (chỉ cho mục tiêu 12 tuần) */}
+                {system && (
+                  <div className="pt-1">
+                    <StreakHeatmap system={system} />
+                  </div>
+                )}
+
+                {/* Progress Bar */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-app-ink-soft">Tiến độ</span>
+                    <span className={cn("tabular-nums text-sm", areaStyle.text)}>
+                      <CountUp value={progress} suffix="%" />
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 overflow-hidden" aria-hidden="true">
+                    <div
+                      className={cn(
+                        "h-full rounded-full bg-gradient-to-r transition-all duration-500 ease-out",
+                        areaStyle.bar,
+                      )}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Action chính */}
+                <div className="pt-1.5 flex flex-wrap items-center gap-3">
+                  {system && (
+                    <Button
+                      type="button"
+                      className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover px-4 py-2 text-xs sm:text-sm font-bold shadow-app-sm transition-all duration-200 inline-flex items-center gap-1.5 h-9"
+                      onClick={() => openTwelveWeekCenter(goal.id)}
+                    >
+                      Tiếp tục chu kỳ
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {system ? (
+                    <FutureSelfLetter goalId={goal.id} progress={progress} system={system} />
+                  ) : null}
+                  {progress === 100 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsFlipped(true)}
+                      className="rounded-lg border border-emerald-200 text-emerald-700 hover:bg-emerald-50/50 dark:border-emerald-900/40 dark:text-emerald-400 px-3.5 py-2 text-xs font-bold transition-all h-9 flex items-center gap-1.5"
+                      aria-pressed={isFlipped}
+                    >
+                      <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      Vinh danh
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Divider dọc */}
+              <div className="hidden lg:block w-px bg-app-line/60 my-1" aria-hidden="true" />
+
+              {/* Cột phải: Tasks hôm nay */}
+              <div className="lg:pl-2 flex flex-col justify-between min-w-0 pt-0.5">
+                <div>
+                  <div className="flex items-center justify-between border-b border-app-line/50 pb-2 mb-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.08em] text-app-ink-muted">
+                      Việc hôm nay
+                    </p>
+                    {system && (
+                      <span className="text-xs font-black tabular-nums text-app-accent">
+                        {completedTodayCount}/{totalTodayCount}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {systemTodayOpenTasks.slice(0, 2).map((task) => (
+                      <div
+                        key={task.id}
+                        className="group/task flex items-center gap-2.5 rounded-lg border border-app-line/40 bg-app-bg-subtle/30 px-3 py-2 hover:border-app-accent/20 hover:bg-app-accent-subtle/20 transition-all duration-300"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleToggleTask(goal.id, task.id)}
+                          className="flex size-4.5 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-white transition-all duration-200 hover:border-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          aria-label={task.completed ? "Hủy chốt việc" : "Chốt việc"}
+                        >
+                          {task.completed ? (
+                            <CheckCircle2 className="size-4.5 text-app-accent shrink-0" />
+                          ) : (
+                            <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
+                          )}
+                        </button>
+                        <span
+                          className={cn(
+                            "text-sm font-medium truncate transition-all duration-200",
+                            task.completed ? "line-through text-app-ink-muted opacity-70" : "text-app-ink",
+                          )}
+                        >
+                          {task.title}
+                        </span>
+                      </div>
+                    ))}
+
+                    {systemTodayOpenTasks.length === 0 && (
+                      <p className="text-xs italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1 font-sans">
+                        Không có việc hôm nay.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {system && (
+                  <button
+                    type="button"
+                    className="group/more mt-3 text-app-accent text-xs sm:text-sm font-bold hover:text-app-accent-hover transition-colors duration-150 inline-flex items-center gap-0.5 self-start"
+                    onClick={() => openTwelveWeekCenter(goal.id)}
+                  >
+                    <span>Xem toàn bộ</span>
+                    <ArrowRight className="h-3 w-3 transform transition-transform duration-200 group-hover/more:translate-x-0.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </SpotlightCard>
+        </div>
+
+        {/* BACK SIDE */}
+        <div className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10">
+          <SpotlightCard className={cn("h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto", progress === 100 && (prefersReducedMotion ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]" : "completed-goal-glow"))}>
+            <div className="space-y-4">
+              {/* Certificate Header */}
+              <div className="flex items-center gap-3 border-b border-app-line pb-3">
+                <div className="flex h-10 w-10 shrink-0 rounded-xl items-center justify-center bg-amber-500/10 text-amber-500 shadow-sm">
+                  <Award className="h-5.5 w-5.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-amber-600 dark:text-amber-400">
+                    Thành tích xuất sắc
+                  </h4>
+                  <p className="text-sm font-semibold text-app-ink-soft">
+                    Mục tiêu đã hoàn thành
+                  </p>
+                </div>
+              </div>
+
+              {/* Goal Title & Completion Metadata */}
+              <div className="space-y-2">
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-app-ink leading-snug break-words line-clamp-2">
+                  {goal.title}
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-4 pt-1 text-xs">
+                  <div className="bg-app-bg/50 rounded-lg p-2.5 border border-app-line/40">
+                    <p className="text-app-ink-muted font-medium">Hoàn thành ngày</p>
+                    <p className="mt-1 font-bold text-app-ink text-sm">{completionDetails.completedAtStr}</p>
+                  </div>
+                  <div className="bg-app-bg/50 rounded-lg p-2.5 border border-app-line/40">
+                    <p className="text-app-ink-muted font-medium">Nhiệm vụ đã chốt</p>
+                    <p className="mt-1 font-bold text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">
+                      {completionDetails.completedTasks}/{completionDetails.totalTasks} việc
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Encouragement message */}
+              <p className="text-sm italic leading-relaxed text-app-ink-soft bg-emerald-50/15 dark:bg-emerald-950/5 border border-emerald-500/10 rounded-xl p-3 font-serif">
+                “Bạn đã biến một mục tiêu lớn thành kết quả cụ thể. Hãy ghi nhận nỗ lực này.”
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-4 border-t border-app-line/50 flex flex-wrap gap-2.5 justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsFlipped(false)}
+                className="rounded-lg border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg px-4 py-2 text-xs sm:text-sm font-bold transition-all h-9 flex items-center gap-1.5"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Quay lại mục tiêu
+              </Button>
+              {system && (
+                <Button
+                  size="sm"
+                  onClick={() => openTwelveWeekCenter(goal.id)}
+                  className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs sm:text-sm font-bold transition-all h-9 flex items-center gap-1.5"
+                >
+                  Mở chu kỳ
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+          </SpotlightCard>
         </div>
       </div>
-    </SpotlightCard>
+    </div>
   );
 }
 
@@ -1420,8 +1598,8 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
   return (
     <div className="space-y-1.5 pt-1">
       <div className="flex items-center justify-between text-xs font-bold text-app-ink-soft">
-        <span>Nhịp độ hành động (12 tuần)</span>
-        <span className="text-[10px] text-app-ink-muted font-normal font-sans">Di chuột xem chi tiết</span>
+        <span>Nhịp độ hành động</span>
+        <span className="text-xs text-app-ink-muted font-normal font-sans">Hover xem chi tiết</span>
       </div>
       
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
@@ -1530,7 +1708,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           className="rounded-lg border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg px-3.5 py-2 text-xs font-bold transition-all inline-flex items-center gap-1.5 h-9"
         >
           <Mail className="h-4 w-4 text-app-accent" />
-          Viết thư gửi tuần 12
+          Viết thư tuần 12
         </Button>
 
         <Dialog open={isWriteOpen} onOpenChange={setIsWriteOpen}>
@@ -1600,12 +1778,12 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
         {isUnlocked ? (
           <>
             <MailOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            Đọc thư từ quá khứ
+            Đọc thư
           </>
         ) : (
           <>
             <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-            Thư tuần 12 đang khóa
+            Thư tuần 12 (Khóa)
           </>
         )}
       </button>
