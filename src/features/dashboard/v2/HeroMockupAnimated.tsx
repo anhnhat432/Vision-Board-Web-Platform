@@ -87,6 +87,19 @@ export function HeroMockupAnimated() {
           Streak +1
         </div>
 
+        {/* Inspiration Vision Board Snippet */}
+        <div className="mb-4 rounded-xl border border-app-line bg-app-bg-subtle/40 dark:bg-neutral-900/30 p-3 flex items-center gap-3">
+          <div className="flex -space-x-2 shrink-0 select-none">
+            <div className="h-9 w-9 rounded-lg bg-emerald-800/10 border border-emerald-800/20 flex items-center justify-center text-sm shadow-sm">📚</div>
+            <div className="h-9 w-9 rounded-lg bg-amber-800/10 border border-amber-800/20 flex items-center justify-center text-sm shadow-sm rotate-3">🏃‍♂️</div>
+            <div className="h-9 w-9 rounded-lg bg-blue-800/10 border border-blue-800/20 flex items-center justify-center text-sm shadow-sm -rotate-3">💼</div>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-accent">Bảng tầm nhìn</p>
+            <p className="truncate text-xs font-bold text-app-ink-soft">"Khát vọng tương lai"</p>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-app-accent">

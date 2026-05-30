@@ -762,18 +762,15 @@ function DashboardActiveLayout({
         />
       ) : null}
 
-      <div className="lg:hidden">
-        <TodayMiniCard
-          title={data.todayPreviewTitle}
-          tasks={data.activeSystemTaskPreview}
-          completedCount={data.todayPreviewCompleted}
-          totalCount={data.todayPreviewTotal}
-        />
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
+          <TodayMiniCard
+            title={data.todayPreviewTitle}
+            tasks={data.activeSystemTaskPreview}
+            completedCount={data.todayPreviewCompleted}
+            totalCount={data.todayPreviewTotal}
+          />
           <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
           <WeekRhythmCard
             system={data.activeSystem}
@@ -797,14 +794,6 @@ function DashboardActiveLayout({
               reviewHref={data.dashboardNextAction.ctaTarget}
             />
           ) : null}
-          <div className="hidden lg:block">
-            <TodayMiniCard
-              title={data.todayPreviewTitle}
-              tasks={data.activeSystemTaskPreview}
-              completedCount={data.todayPreviewCompleted}
-              totalCount={data.todayPreviewTotal}
-            />
-          </div>
           <BalanceCard rows={balanceRows} />
           <DailyStoicCard />
           <QuoteBlock />

@@ -30,29 +30,33 @@ const HOW_IT_WORKS_STEPS = [
   {
     step: "01",
     icon: Compass,
-    title: "Chấm điểm hiện tại",
-    description: "Nhìn nhanh các lĩnh vực sống để biết điểm nào đang kéo bạn xuống.",
+    title: "Chấm điểm cuộc sống",
+    description: "Tự đánh giá 8 khía cạnh cốt lõi để nhận diện phần lệch nhịp cần ưu tiên sửa đổi.",
+    result: "Bản đồ cân bằng cuộc sống",
     duration: "≈3 phút",
   },
   {
     step: "02",
     icon: Target,
-    title: "Chọn một mục tiêu đáng làm",
-    description: "Viết mục tiêu đo được, có hạn rõ ràng, rồi kiểm tra tính khả thi.",
+    title: "Chọn một mục tiêu SMART",
+    description: "Biến mong muốn mơ hồ thành 1 mục tiêu SMART rõ nét và thực sự khả thi.",
+    result: "1 mục tiêu lớn sắc nét",
     duration: "≈5 phút",
   },
   {
     step: "03",
     icon: CalendarRange,
-    title: "Dựng chu kỳ 12 tuần",
-    description: "Chia mục tiêu thành 2-4 thói quen tuần và cột mốc tuần 4/8/12.",
-    duration: "≈10 phút",
+    title: "Dựng kế hoạch 12 tuần",
+    description: "Chia nhỏ mục tiêu thành các tactics thói quen tuần, mốc checkpoint và ngày khóa review.",
+    result: "Kế hoạch hành động chi tiết",
+    duration: "≈5 phút",
   },
   {
     step: "04",
     icon: Sun,
-    title: "Today + Review tuần",
-    description: "Mở Today biết việc hôm nay, cuối tuần review để chỉnh tải.",
+    title: "Hành động & Đánh giá",
+    description: "Mở danh sách Today để làm việc mỗi ngày, cuối tuần review để giữ kỷ luật và chỉnh tải.",
+    result: "Việc hôm nay & Kỷ luật",
     duration: "Mỗi ngày 1-2 phút",
   },
 ] as const;
@@ -89,8 +93,8 @@ const FEATURE_ROWS = [
 ] as const;
 
 export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onSignUp }: PublicVisitorViewProps) {
-  const primaryLabel = isDemo ? "Đăng ký miễn phí" : "Tạo tài khoản để bắt đầu";
-  const heroStartLabel = isDemo ? "Dùng thử lộ trình 4 bước" : "Bắt đầu với mục tiêu của bạn";
+  const primaryLabel = "Tạo kế hoạch 12 tuần đầu tiên";
+  const heroStartLabel = "Tạo kế hoạch 12 tuần đầu tiên";
   const scrollToHowItWorks = () => {
     document.getElementById("dashboard-how-it-works-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -105,13 +109,13 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         <div className="relative z-10 grid gap-10 lg:grid-cols-[55fr_45fr] lg:items-center lg:gap-12">
         <div className="appear-fade-up">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-app-accent">
               Dear Our Future · Lập kế hoạch cá nhân 12 tuần
             </p>
-            <h1 className="mt-4 max-w-[18ch] font-serif text-4xl font-medium leading-[1.12] tracking-tight text-app-ink md:text-display">
-              Biến mục tiêu lớn thành{" "}
+            <h1 className="mt-4 max-w-[20ch] font-serif text-4xl font-medium leading-[1.25] tracking-tight text-app-ink md:text-display">
+              Đạt mục tiêu lớn sau{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">kế hoạch 12 tuần</span>
+                <span className="relative z-10">12 tuần</span>
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 200 12"
@@ -127,26 +131,26 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   />
                 </svg>
               </span>{" "}
-              và việc hôm nay.
+              nhờ kế hoạch rõ ràng mỗi ngày.
             </h1>
-            <p className="mt-4 max-w-[60ch] text-base leading-7 text-app-ink-soft md:text-lg">
-              Dear Our Future dẫn bạn qua một luồng cố định: nhìn lại cuộc sống, chọn một mục tiêu chính, kiểm tra tính
-              khả thi, rồi chia thành việc cần làm theo tuần và theo ngày.
+            <p className="mt-4 max-w-[55ch] text-xs font-semibold leading-relaxed text-app-ink-soft">
+              Đừng để mục tiêu chỉ là mong muốn. Chúng tôi dẫn bạn từng bước: Chấm điểm cuộc sống, lập mục tiêu SMART thực tế, và tự động chia thành việc cụ thể hôm nay.
             </p>
 
-            <ol className="mt-6 grid grid-cols-2 gap-2">
-              {FIRST_RUN_FLOW.map((step, index) => (
-                <li
-                  key={step}
-                  className="flex min-h-10 items-center gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs text-app-ink-soft"
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-app-accent-soft text-xs font-semibold text-app-accent">
-                    {index + 1}
-                  </span>
-                  <span className="min-w-0 leading-5">{step}</span>
+            <div className="mt-5 space-y-2 border-l-2 border-app-accent/30 pl-4 py-0.5">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent">Bản kế hoạch của bạn bao gồm:</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-semibold text-app-ink-soft">
+                <li className="flex items-center gap-1.5">
+                  <span className="text-app-accent font-extrabold">✓</span> 1 Mục tiêu SMART thực tế
                 </li>
-              ))}
-            </ol>
+                <li className="flex items-center gap-1.5">
+                  <span className="text-app-accent font-extrabold">✓</span> Kế hoạch chi tiết 12 tuần
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <span className="text-app-accent font-extrabold">✓</span> Danh sách việc làm hôm nay
+                </li>
+              </ul>
+            </div>
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row">
               <button
@@ -164,6 +168,13 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               >
                 Xem cách hoạt động
               </button>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-[10px] font-semibold text-app-ink-muted flex items-center gap-1">
+                <span>⚡</span>
+                Bạn sẽ đi qua 4 bước thiết lập trong khoảng 10–15 phút, sau đó nhận ngay việc hôm nay để bắt đầu.
+              </p>
             </div>
 
             <ul className="mt-5 flex flex-wrap gap-2">
@@ -266,6 +277,10 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                 </div>
                 <h3 className="mt-4 text-sm font-bold text-app-ink">{step.title}</h3>
                 <p className="mt-1.5 text-xs font-semibold leading-relaxed text-app-ink-soft">{step.description}</p>
+                <p className="mt-2 text-[10px] font-bold text-app-accent flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-pulse" />
+                  Nhận: {step.result}
+                </p>
                 <p className="mt-4 inline-block rounded-full bg-app-surface px-2.5 py-1 text-[10px] font-bold text-app-accent">
                   {step.duration}
                 </p>
@@ -324,7 +339,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               Đăng ký miễn phí trong 30 giây. Dữ liệu của bạn tự đồng bộ giữa điện thoại và máy tính.
             </p>
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 flex flex-col items-center sm:items-end gap-2">
             <button
               type="button"
               onClick={onStart}
@@ -333,6 +348,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <UserPlus className="h-4 w-4" />
               {primaryLabel}
             </button>
+            <p className="text-[10px] font-semibold text-app-ink-muted">
+              ⚡ Đi qua 4 bước (10–15 phút), có việc làm ngay
+            </p>
           </div>
         </div>
       </RevealOnScroll>
