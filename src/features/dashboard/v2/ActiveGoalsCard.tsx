@@ -55,13 +55,13 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
   return (
     <section
-      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm transition-all duration-300 hover:border-app-accent/20"
+      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 shadow-sm transition-all duration-medium hover:border-app-accent/20"
       aria-labelledby="dashboard-active-goals-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-app-line pb-4 mb-5">
         <div>
           <h2 id="dashboard-active-goals-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-            <Target className="h-5 w-5 text-app-accent/80" />
+            <Target className="h-4.5 w-4.5 text-app-accent/80" />
             Mục tiêu đang chạy
           </h2>
           <p className="mt-1 text-xs font-semibold tracking-wide text-app-ink-muted">
@@ -72,7 +72,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
           type="button"
           onClick={onAddGoal}
           disabled={isAtLimit}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-xs font-bold text-app-accent/90 hover:bg-app-accent hover:text-white disabled:cursor-not-allowed disabled:bg-app-bg-subtle disabled:text-app-ink-muted disabled:border-app-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-all duration-250 shadow-sm"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-accent hover:bg-app-accent hover:text-white disabled:cursor-not-allowed disabled:bg-app-bg-subtle disabled:text-app-ink-muted disabled:border-app-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-all duration-medium shadow-sm"
           title={isAtLimit ? "Đã đạt giới hạn 3 mục tiêu trong chu kỳ" : "Thêm mục tiêu"}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -101,33 +101,33 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                     onSelectGoal(goal);
                   }
                 }}
-                className="group flex gap-4 rounded-[14px] border border-app-line/80 bg-app-surface p-4 hover:border-app-accent/25 hover:bg-gradient-to-br hover:from-app-surface hover:to-app-accent-soft/10 hover:shadow-[0_8px_24px_-8px_rgba(47,93,80,0.05)] transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="group flex gap-4 rounded-[14px] border border-app-line/80 bg-app-surface p-4 hover:border-app-accent/20 hover:bg-app-bg-subtle/20 shadow-sm transition-all duration-medium cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
                 <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] ${theme.bg} shadow-[0_2px_8px_-2px_rgba(47,93,80,0.15)] border border-app-accent/10 group-hover:scale-105 transition-all duration-300`}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-bg-subtle text-app-accent border border-app-line/50 transition-colors duration-medium"
                 >
-                  <GoalIcon className="h-5 w-5" />
+                  <GoalIcon className="h-4.5 w-4.5" />
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-2">
-                  <h3 className="line-clamp-2 break-words text-xs font-bold leading-relaxed text-app-ink group-hover:text-app-accent transition-colors duration-200">
+                  <h3 className="line-clamp-2 break-words text-xs font-bold leading-relaxed text-app-ink group-hover:text-app-accent transition-colors duration-medium">
                     {goal.title}
                   </h3>
                   <p className="text-[10px] font-semibold tracking-wide text-app-ink-muted">
-                    {getWeekLabel(goal)} · <span className={`${theme.accentText} font-bold`}>{domain}</span>
+                    {getWeekLabel(goal)} · <span className="text-app-accent font-semibold">{domain}</span>
                   </p>
-                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]" aria-hidden="true">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-app-bg/85" aria-hidden="true">
                     <div
-                      className={`h-full rounded-full ${theme.bar} transition-all duration-500 ease-out`}
+                      className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end justify-between gap-3 text-right">
-                  <span className={`text-xs font-extrabold tabular-nums ${theme.accentText}`}>{progress}%</span>
+                  <span className="text-xs font-bold tabular-nums text-app-accent">{progress}%</span>
                   <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-bold ${theme.accentText} group-hover:translate-x-0.5 transition-transform duration-200`}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium text-app-accent group-hover:translate-x-0.5 transition-transform duration-medium"
                   >
                     Chi tiết
                     <ArrowRight className="h-3 w-3" />
