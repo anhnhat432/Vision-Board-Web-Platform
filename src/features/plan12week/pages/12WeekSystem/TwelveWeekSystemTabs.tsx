@@ -346,7 +346,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-lg border border-app-line/60 bg-app-surface p-1 shadow-2xs"
+            className="inline-flex min-h-0 rounded-full border border-app-line/60 bg-app-surface p-1 shadow-2xs"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -355,8 +355,8 @@ export function TwelveWeekSystemTabs({
                 value={value}
                 aria-controls={tabPanelId}
                 aria-label={`Mở tab ${label}`}
-                className={`flex-none rounded-lg px-4 py-1.5 text-sm transition-colors duration-150 gap-2 flex items-center justify-center
-                  data-[state=active]:bg-app-accent-soft data-[state=active]:text-app-accent data-[state=active]:font-semibold
+                className={`flex-none rounded-full px-5 py-2 text-sm transition-all duration-150 gap-2 flex items-center justify-center border border-transparent
+                  data-[state=active]:bg-app-accent-soft data-[state=active]:text-app-accent data-[state=active]:font-semibold data-[state=active]:shadow-3xs data-[state=active]:border-app-accent/10
                   data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-bg/50`}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />

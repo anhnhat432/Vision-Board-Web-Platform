@@ -80,38 +80,54 @@ export function TwelveWeekDashboardState({
   }
 
   return (
-    <div className="mx-auto mt-6 max-w-3xl rounded-2xl border border-app-line bg-app-surface p-6 md:p-8 text-center shadow-xs relative">
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent">
+    <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-app-line bg-app-surface p-8 md:p-10 text-center shadow-sm relative overflow-hidden">
+      {/* Wooden Pin Decorator */}
+      <div className="absolute top-4 left-4 text-2xl select-none" aria-hidden="true">📌</div>
+      <div className="absolute top-4 right-4 text-2xl select-none" aria-hidden="true">📌</div>
+
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent shadow-2xs">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
-      <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-app-accent">{eyebrow}</p>
-      <h1 className="mt-1 font-serif text-2xl font-bold text-app-ink">{title}</h1>
-      <p className="mx-auto mt-2 max-w-xl text-sm text-app-ink-soft">
+      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-app-accent">{eyebrow}</p>
+      <h1 className="mt-2 font-serif text-3xl font-bold leading-tight text-app-ink">{title}</h1>
+      <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-app-ink-soft">
         {description}
       </p>
 
-      {/* 3 Step Onboarding Visual - Flat and structured, no wooden pins, no rotate */}
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3 text-left">
-        <div className="bg-app-bg border border-app-line/60 rounded-xl p-4 transition-colors hover:border-app-line">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-app-accent/15 text-xs font-bold text-app-accent">1</span>
-          <h3 className="mt-2 font-serif text-sm font-bold text-app-ink">Lĩnh vực ưu tiên</h3>
+      {/* 3 Step Onboarding Visual - Paper note cards with subtle rotate */}
+      <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3 text-left">
+        <div 
+          className="relative bg-app-accent-soft/15 border border-app-accent-soft/30 rounded-2xl p-5 shadow-2xs transition-transform duration-300 hover:scale-[1.02] hover:rotate-0"
+          style={{ transform: "rotate(-1deg)" }}
+        >
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-lg select-none">📌</div>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-app-accent/20 text-xs font-bold text-app-accent">1</span>
+          <h3 className="mt-3 font-serif text-base font-bold text-app-ink">Lĩnh vực ưu tiên</h3>
           <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">Chọn khía cạnh cuộc sống bạn muốn bứt phá trong chu kỳ này.</p>
         </div>
 
-        <div className="bg-app-bg border border-app-line/60 rounded-xl p-4 transition-colors hover:border-app-line">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-app-warm/15 text-xs font-bold text-app-warm-strong">2</span>
-          <h3 className="mt-2 font-serif text-sm font-bold text-app-ink">Mục tiêu SMART</h3>
+        <div 
+          className="relative bg-app-warm-soft/20 border border-app-warm-border/30 rounded-2xl p-5 shadow-2xs transition-transform duration-300 hover:scale-[1.02] hover:rotate-0"
+          style={{ transform: "rotate(0.8deg)" }}
+        >
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-lg select-none">📌</div>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-app-warm/20 text-xs font-bold text-app-warm-strong">2</span>
+          <h3 className="mt-3 font-serif text-base font-bold text-app-ink">Mục tiêu SMART</h3>
           <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">Xác định mục tiêu rõ ràng, đo lường được và khả thi cao.</p>
         </div>
 
-        <div className="bg-app-bg border border-app-line/60 rounded-xl p-4 transition-colors hover:border-app-line">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-app-accent/15 text-xs font-bold text-app-accent">3</span>
-          <h3 className="mt-2 font-serif text-sm font-bold text-app-ink">Kế hoạch 12 tuần</h3>
+        <div 
+          className="relative bg-app-accent-soft/15 border border-app-accent-soft/30 rounded-2xl p-5 shadow-2xs transition-transform duration-300 hover:scale-[1.02] hover:rotate-0"
+          style={{ transform: "rotate(-0.5deg)" }}
+        >
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-lg select-none">📌</div>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-app-accent/20 text-xs font-bold text-app-accent">3</span>
+          <h3 className="mt-3 font-serif text-base font-bold text-app-ink">Kế hoạch 12 tuần</h3>
           <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">Bẻ nhỏ thành các hành động tuần tự và chỉ số thực tế.</p>
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col items-center justify-center gap-2.5 sm:flex-row">
+      <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
         {children}
       </div>
     </div>
@@ -132,32 +148,32 @@ export function TwelveWeekDashboardNotice({
   const Icon = tone === "success" ? CheckCircle2 : AlertTriangle;
   const toneClass =
     tone === "success"
-      ? "border-app-line bg-app-surface"
+      ? "border-app-line bg-app-surface/90 shadow-sm"
       : tone === "error"
-        ? "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)]/10"
-        : "border-app-warm-border/40 bg-app-warm-soft/20";
+        ? "border-red-200/50 bg-red-50/10 dark:border-red-950/30 dark:bg-red-950/10"
+        : "border-app-warm-border/30 bg-app-warm-soft/20";
   const iconClass =
-    tone === "success" ? "text-app-accent" : tone === "error" ? "text-[color:var(--color-danger-fg)]" : "text-app-warm";
+    tone === "success" ? "text-app-accent" : tone === "error" ? "text-red-600 dark:text-red-400" : "text-app-warm";
   const titleClass =
     tone === "warning"
       ? "font-serif text-app-warm-strong font-bold"
       : tone === "error"
-        ? "text-[color:var(--color-danger-fg)] font-bold"
+        ? "font-serif text-red-700 dark:text-red-400 font-bold"
         : "text-app-ink font-bold";
   const role = tone === "success" ? "status" : "alert";
 
   return (
-    <div role={role} className={`rounded-xl border p-4 transition-colors ${toneClass}`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-bg/50 border border-app-line/40">
-          <Icon className={`h-4.5 w-4.5 ${iconClass}`} aria-hidden="true" />
+    <div role={role} className={`rounded-2xl border p-5 md:p-6 transition-all duration-150 ${toneClass}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-bg/60 border border-app-line/40 shadow-3xs">
+          <Icon className={`h-5 w-5 ${iconClass}`} aria-hidden="true" />
         </div>
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <p className={`text-sm font-semibold ${titleClass}`}>{title}</p>
-          <p className="text-xs leading-relaxed text-app-ink-soft">{description}</p>
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className={`text-base font-semibold ${titleClass}`}>{title}</p>
+          <p className="text-sm leading-relaxed text-app-ink-soft">{description}</p>
         </div>
         {children ? (
-          <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center pt-1 sm:pt-0">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center pt-2 sm:pt-0">
             {children}
           </div>
         ) : null}
@@ -213,14 +229,19 @@ export function TwelveWeekDashboardHeader({
       : "Hôm nay đang gọn. Hãy lưu check-in hoặc xem tab Tuần.";
 
   return (
-    <header className="border border-app-line/40 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/5 rounded-2xl p-5 sm:p-7 transition-all duration-150 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0 flex-1 space-y-2">
+    <header className="relative border border-app-line/40 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl p-6 sm:p-8 transition-all duration-150 space-y-6">
+      {/* Background decoration */}
+      <div className="absolute -top-4 -left-4 hidden md:block text-2xl select-none" aria-hidden="true">
+        📌
+      </div>
+
+      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0 flex-1 space-y-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent bg-app-accent-soft px-2.5 py-0.5 rounded border border-app-accent/10">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent bg-app-accent-soft px-2.5 py-1 rounded border border-app-accent/10">
               Hệ thống 12 tuần
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-soft bg-app-bg px-2.5 py-0.5 rounded border border-app-line/60">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-soft bg-app-bg px-2.5 py-1 rounded border border-app-line/60">
               Tuần {currentWeek}/{system.totalWeeks}
             </span>
           </div>
@@ -231,8 +252,8 @@ export function TwelveWeekDashboardHeader({
             fallbackTitle="Kế hoạch hiện tại"
             onSave={onRenameGoal}
             headingLevel={1}
-            titleClassName="break-words font-serif text-2xl font-semibold leading-tight tracking-tight text-app-ink sm:text-3xl"
-            inputClassName="h-auto rounded-lg px-2 py-1 font-serif text-2xl font-semibold leading-tight tracking-tight text-app-ink sm:text-3xl"
+            titleClassName="break-words font-serif text-3xl font-bold leading-tight tracking-tight text-app-ink sm:text-4xl"
+            inputClassName="h-auto rounded-xl px-3 py-2 font-serif text-3xl font-bold leading-tight tracking-tight text-app-ink sm:text-4xl"
           />
 
           {/* Rhythm Status Indicator */}
@@ -242,19 +263,13 @@ export function TwelveWeekDashboardHeader({
               Nhịp {phaseInfo.label}
             </span>
           </div>
-
-          {/* Tiêu điểm hành động: elegant layout */}
-          <div className="text-xs sm:text-sm text-app-ink leading-relaxed border-l-2 border-app-accent pl-3.5 mt-2">
-            <span className="font-semibold text-app-accent text-[10px] block mb-0.5">Tiêu điểm hành động</span>
-            {nextActionLabel}
-          </div>
         </div>
 
-        {/* Action Button: Flat Segmented-style and rounded-xl */}
-        <div className="flex flex-col gap-2 sm:flex-row md:shrink-0 pt-2 md:pt-0">
+        {/* Action Button: Rounded-full premium buttons */}
+        <div className="flex flex-col gap-2.5 sm:flex-row md:shrink-0 pt-2 md:pt-0">
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-none"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-app-accent px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-app-accent/90 hover:scale-[1.01] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-sm"
             onClick={onOpenFocusTab}
           >
             <span>{reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}</span>
@@ -262,11 +277,40 @@ export function TwelveWeekDashboardHeader({
           </button>
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-none"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:scale-[1.01] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
             onClick={onOpenGoals}
           >
             Mở mục tiêu
           </button>
+        </div>
+      </div>
+
+      {/* Next Best Action Card: Paper note card style, tilted slightly */}
+      <div 
+        className="relative overflow-hidden rounded-2xl border border-app-accent-soft/40 bg-app-accent-soft/10 p-5 transition-all duration-200 hover:shadow-sm"
+        style={{ transform: "rotate(-0.2deg)" }}
+      >
+        <div className="absolute top-2 right-2 text-base opacity-40 select-none hidden sm:block">📌</div>
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent shadow-2xs">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="space-y-1 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-app-accent/90">Hành động tốt nhất tiếp theo</p>
+            <p className="text-sm font-medium leading-relaxed text-app-ink">
+              {reviewDueToday ? (
+                <>
+                  <span className="font-semibold text-app-warm-strong">Đến hạn review tuần:</span> Chốt review tuần trước khi mở việc mới để giữ nhịp thực thi.
+                </>
+              ) : firstPriorityTask ? (
+                <>
+                  <span className="font-semibold text-app-accent">Việc quan trọng nhất hôm nay:</span> {firstPriorityTask.title}
+                </>
+              ) : (
+                "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần để chuẩn bị."
+              )}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -372,22 +416,24 @@ export function TwelveWeekRescueTriggerBanner({
   return (
     <div 
       role="alert" 
-      className="rounded-xl border border-app-warm-border/50 bg-app-warm-soft/30 p-4 transition-colors"
+      className="relative overflow-hidden rounded-2xl border border-app-warm-border/60 bg-app-warm-soft/40 p-5 md:p-6 transition-all duration-200 hover:shadow-sm"
+      style={{ transform: "rotate(0.2deg)" }}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-bg/50 border border-app-line/40 text-app-warm">
-            <AlertTriangle className="h-4.5 w-4.5" aria-hidden="true" />
+      <div className="absolute top-2 right-2 text-base opacity-30 select-none">📌</div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-bg/60 border border-app-line/40 text-app-warm shadow-3xs">
+            <AlertTriangle className="h-5 w-5" aria-hidden="true" />
           </div>
-          <div className="min-w-0 flex-1 space-y-0.5">
-            <p className="font-serif text-sm font-bold text-app-warm-strong leading-snug">{trigger.headline}</p>
-            <p className="text-xs leading-relaxed text-app-ink-soft">{trigger.detail}</p>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="font-serif text-base font-bold text-app-warm-strong leading-snug">{trigger.headline}</p>
+            <p className="text-sm leading-relaxed text-app-ink-soft">{trigger.detail}</p>
           </div>
         </div>
-        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto pt-1 sm:pt-0">
+        <div className="flex w-full shrink-0 items-center gap-2.5 sm:w-auto pt-2 sm:pt-0">
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm hover:opacity-90 sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center rounded-full bg-app-warm px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-app-warm hover:opacity-90 hover:scale-[1.01] active:scale-95 sm:flex-none"
             onClick={() => {
               const action = isUpgradeTrigger ? "upgrade" : "navigate_system";
               onActionTaken(trigger, action);
@@ -399,7 +445,7 @@ export function TwelveWeekRescueTriggerBanner({
           </button>
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-bg hover:text-app-ink sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center rounded-full border border-app-line bg-app-surface/80 px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg hover:text-app-ink hover:scale-[1.01] active:scale-95 sm:flex-none"
             onClick={() => onDismiss(trigger.kind)}
           >
             Bỏ qua
