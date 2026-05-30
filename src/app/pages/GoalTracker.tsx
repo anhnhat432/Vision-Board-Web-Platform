@@ -54,6 +54,7 @@ import {
   getLifeAreaLabel,
   getTwelveWeekCurrentWeek,
   getTwelveWeekTodayTasks,
+  getTwelveWeekTasksForWeek,
   getUserData,
   recomputeGoalProgressFromWeeks,
   saveUserData,
@@ -62,6 +63,7 @@ import {
   updateGoal,
   type PricingPlanCode,
   type TwelveWeekSystem,
+  type TwelveWeekTaskInstance,
 } from "../utils/storage";
 import { getPlanLabel } from "../utils/twelve-week-premium";
 
@@ -166,6 +168,326 @@ const getGoalCompletionDetails = (goal: Goal): GoalCompletionDetails => {
     totalTasks: stats.total,
   };
 };
+
+interface HealthStatus {
+  label: string;
+  bgClass: string;
+}
+
+const getGoalHealthStatus = (
+  goal: Goal,
+  progress: number,
+  isOverdue: boolean,
+  isNearDeadline: boolean
+): HealthStatus => {
+  const stats = getGoalExecutionStats(goal);
+
+  if (progress === 100) {
+    return {
+      label: "Hoàn thành",
+      bgClass: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
+    };
+  }
+  if (isOverdue) {
+    return {
+      label: "Rủi ro",
+      bgClass: "bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40",
+    };
+  }
+  if (stats.reviewDueToday) {
+    return {
+      label: "Cần review",
+      bgClass: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40",
+    };
+  }
+  if (isNearDeadline) {
+    return {
+      label: "Sắp đến hạn",
+      bgClass: "bg-app-warm-soft text-app-warm border border-app-warm-border",
+    };
+  }
+  return {
+    label: "Đúng tiến độ",
+    bgClass: "bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/40",
+  };
+};
+
+interface FocusGoalData {
+  goal: Goal;
+  progress: number;
+  isOverdue: boolean;
+  isNearDeadline: boolean;
+  isTwelveWeek: boolean;
+  type: "today_tasks" | "review_due" | "due_warning" | "first_active_12week";
+}
+
+interface GoalMetadata {
+  goal: Goal;
+  progress: number;
+  daysLeft: number | null;
+  isOverdue: boolean;
+  isNearDeadline: boolean;
+  isAtRisk: boolean;
+  isCompleted: boolean;
+  isTwelveWeek: boolean;
+  isSimple: boolean;
+}
+
+const getTodayFocusGoal = (goalsWithMetadata: GoalMetadata[]): FocusGoalData | null => {
+  const activeGoals = goalsWithMetadata.filter((m) => !m.isCompleted);
+  if (activeGoals.length === 0) return null;
+
+  const p1 = activeGoals.find((m) => {
+    if (!m.isTwelveWeek || !m.goal.twelveWeekSystem) return false;
+    const todayTasks = getTwelveWeekTodayTasks(m.goal.twelveWeekSystem);
+    return todayTasks.some((t) => !t.completed);
+  });
+  if (p1) {
+    return {
+      goal: p1.goal,
+      progress: p1.progress,
+      isOverdue: p1.isOverdue,
+      isNearDeadline: p1.isNearDeadline,
+      isTwelveWeek: p1.isTwelveWeek,
+      type: "today_tasks",
+    };
+  }
+
+  const p2 = activeGoals.find((m) => getGoalExecutionStats(m.goal).reviewDueToday);
+  if (p2) {
+    return {
+      goal: p2.goal,
+      progress: p2.progress,
+      isOverdue: p2.isOverdue,
+      isNearDeadline: p2.isNearDeadline,
+      isTwelveWeek: p2.isTwelveWeek,
+      type: "review_due",
+    };
+  }
+
+  const p3 = activeGoals.find((m) => m.isOverdue || m.isNearDeadline);
+  if (p3) {
+    return {
+      goal: p3.goal,
+      progress: p3.progress,
+      isOverdue: p3.isOverdue,
+      isNearDeadline: p3.isNearDeadline,
+      isTwelveWeek: p3.isTwelveWeek,
+      type: "due_warning",
+    };
+  }
+
+  const p4 = activeGoals.find(
+    (m) => m.isTwelveWeek && m.goal.twelveWeekSystem?.status === "active"
+  );
+  if (p4) {
+    return {
+      goal: p4.goal,
+      progress: p4.progress,
+      isOverdue: p4.isOverdue,
+      isNearDeadline: p4.isNearDeadline,
+      isTwelveWeek: p4.isTwelveWeek,
+      type: "first_active_12week",
+    };
+  }
+
+  return null;
+};
+
+interface WeeklyQuestDetails {
+  completedDays: number;
+  targetDays: number;
+  hasSchedule: boolean;
+}
+
+const getWeeklyQuestDetails = (system: TwelveWeekSystem): WeeklyQuestDetails => {
+  const currentWeek = getTwelveWeekCurrentWeek(system);
+  const weekTasks = getTwelveWeekTasksForWeek(system, currentWeek);
+  const activeTasks = weekTasks.filter((t) => !t.skipped);
+  const uniqueScheduledDays = Array.from(
+    new Set(activeTasks.map((t) => t.scheduledDate).filter(Boolean))
+  );
+  const completedDays = uniqueScheduledDays.filter((date) =>
+    activeTasks.some((t) => t.scheduledDate === date && t.completed)
+  ).length;
+  const targetDays = Math.min(3, uniqueScheduledDays.length);
+
+  return {
+    completedDays,
+    targetDays,
+    hasSchedule: uniqueScheduledDays.length > 0,
+  };
+};
+
+interface TodayFocusCardProps {
+  focusData: FocusGoalData | null;
+  openTwelveWeekCenter: (goalId: string) => void;
+  handleToggleTask: (goalId: string, taskId: string) => void;
+  onStartGuidedGoalFlow: () => void;
+}
+
+function TodayFocusCard({
+  focusData,
+  openTwelveWeekCenter,
+  handleToggleTask,
+  onStartGuidedGoalFlow,
+}: TodayFocusCardProps) {
+  if (!focusData) {
+    return (
+      <div className="rounded-[18px] border border-app-line bg-app-surface p-5 shadow-app-sm text-center py-6 space-y-3">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+          <Target className="h-5 w-5" />
+        </div>
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold text-app-ink">Tất cả mục tiêu đã hoàn tất!</h4>
+          <p className="text-xs text-app-ink-soft leading-relaxed max-w-md mx-auto">
+            Không có tiêu điểm hành động cần xử lý. Hãy thiết lập một chu kỳ 12 tuần mới hoặc thêm mục tiêu thường để tiếp tục hành trình.
+          </p>
+        </div>
+        <Button
+          onClick={onStartGuidedGoalFlow}
+          className="bg-app-accent hover:bg-app-accent-hover text-white text-xs font-bold rounded-lg px-4 py-2"
+        >
+          Thiết lập mục tiêu mới
+        </Button>
+      </div>
+    );
+  }
+
+  const { goal, isTwelveWeek, type } = focusData;
+  const system = goal.twelveWeekSystem;
+  const systemCurrentWeek = system ? getTwelveWeekCurrentWeek(system) : null;
+  const areaStyle = CATEGORY_STYLES.default;
+
+  let recommendedAction = "";
+  let ctaLabel = "Tiếp tục chu kỳ";
+  let showTaskCheckbox = false;
+  let firstOpenTask: TwelveWeekTaskInstance | null = null;
+
+  if (isTwelveWeek && system) {
+    const todayTasks = getTwelveWeekTodayTasks(system);
+    firstOpenTask = todayTasks.find((t) => !t.completed) || null;
+  }
+
+  if (type === "today_tasks" && firstOpenTask) {
+    recommendedAction = `Nhiệm vụ tiếp theo: ${firstOpenTask.title}`;
+    showTaskCheckbox = true;
+  } else if (type === "review_due") {
+    recommendedAction = "Đã đến ngày đánh giá. Hãy hoàn thành review tuần này để đúc kết bài học.";
+    ctaLabel = "Đánh giá tuần";
+  } else if (type === "due_warning") {
+    recommendedAction = "Mục tiêu sắp hoặc đã trễ hạn. Hãy rà soát lại các hành động để tránh trễ hạn.";
+    ctaLabel = isTwelveWeek ? "Tiếp tục chu kỳ" : "Xem chi tiết";
+  } else {
+    recommendedAction = isTwelveWeek
+      ? "Lên kế hoạch các hành động tiếp theo cho tuần này."
+      : "Cập nhật các nhiệm vụ của bạn.";
+    ctaLabel = isTwelveWeek ? "Tiếp tục chu kỳ" : "Xem chi tiết";
+  }
+
+  const handleCtaClick = () => {
+    if (isTwelveWeek) {
+      openTwelveWeekCenter(goal.id);
+    } else {
+      const el = document.getElementById(`goal-card-${goal.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-app-accent/40");
+        setTimeout(() => el.classList.remove("ring-2", "ring-app-accent/40"), 2000);
+      }
+    }
+  };
+
+  return (
+    <div className="rounded-[18px] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/30 via-white to-white dark:via-neutral-950 dark:to-neutral-950 p-5 shadow-app-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
+      <div className="absolute -left-12 -bottom-12 w-28 h-28 rounded-full bg-app-accent/5 blur-2xl pointer-events-none" />
+
+      <div className="space-y-3 min-w-0 flex-1 z-10">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent"></span>
+          </span>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-accent">
+            Tiêu điểm hôm nay
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <h4 className="font-serif text-base sm:text-lg font-bold text-app-ink leading-snug break-words">
+            {goal.title}
+          </h4>
+          <p className="text-xs text-app-ink-soft font-semibold">
+            {isTwelveWeek ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
+            <span className={cn("font-bold", areaStyle.text)}>{getLifeAreaLabel(goal.category)}</span>
+          </p>
+        </div>
+
+        <div className="flex items-start gap-2 pt-0.5 min-w-0">
+          {showTaskCheckbox && firstOpenTask ? (
+            <div className="flex items-center gap-2.5 rounded-lg border border-app-accent/25 bg-app-accent-soft/30 px-3 py-2 w-full max-w-lg transition-all duration-300">
+              <button
+                type="button"
+                onClick={() => handleToggleTask(goal.id, firstOpenTask.id)}
+                className="flex size-4.5 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-white transition-all duration-200 hover:border-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                aria-label="Chốt việc"
+              >
+                <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
+              </button>
+              <span className="text-sm font-medium truncate text-app-ink">
+                {firstOpenTask.title}
+              </span>
+            </div>
+          ) : (
+            <p className="text-sm text-app-ink-soft leading-relaxed font-medium">
+              💡 {recommendedAction}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="shrink-0 z-10 self-end sm:self-center">
+        <Button
+          onClick={handleCtaClick}
+          className="bg-app-accent text-white hover:bg-app-accent-hover font-bold rounded-lg px-4.5 py-2.5 text-xs sm:text-sm shadow-app-sm transition-all duration-200 flex items-center gap-1.5"
+        >
+          {ctaLabel}
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface WeeklyQuestLineProps {
+  system: TwelveWeekSystem;
+}
+
+function WeeklyQuestLine({ system }: WeeklyQuestLineProps) {
+  const quest = useMemo(() => getWeeklyQuestDetails(system), [system]);
+
+  if (!quest.hasSchedule) {
+    return (
+      <div className="bg-app-bg-subtle/20 rounded-lg p-2.5 border border-app-line/20 text-[11px] text-app-ink-muted/80 italic font-sans">
+        Không có lịch trình tuần này.
+      </div>
+    );
+  }
+
+  const { completedDays, targetDays } = quest;
+
+  return (
+    <div className="bg-app-bg-subtle/30 rounded-lg p-2.5 border border-app-line/30 text-xs flex justify-between items-center transition-all duration-300">
+      <div className="min-w-0 flex-1 truncate">
+        <span className="font-bold text-app-ink-soft">Nhiệm vụ tuần:</span>{" "}
+        <span className="text-app-ink-muted">Hoàn thành {targetDays} ngày hành động</span>
+      </div>
+      <div className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0 pl-2 tabular-nums">
+        {completedDays}/{targetDays} ngày đã chốt
+      </div>
+    </div>
+  );
+}
 
 export function GoalTracker() {
   const { userData, reloadUserData } = useSyncedUserData();
@@ -322,6 +644,7 @@ function GoalTrackerContent({
     return result;
   }, [goalsWithMetadata, searchQuery, activeFilter]);
 
+  const focusGoal = useMemo(() => getTodayFocusGoal(goalsWithMetadata), [goalsWithMetadata]);
   const hasGoals = effectiveGoals.length > 0;
   const hasRealLifeBalance =
     viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
@@ -709,6 +1032,14 @@ function GoalTrackerContent({
             needsAttention={summary.needsAttention}
           />
 
+          {/* Tiêu điểm hôm nay / Next Best Action */}
+          <TodayFocusCard
+            focusData={focusGoal}
+            openTwelveWeekCenter={openTwelveWeekCenter}
+            handleToggleTask={handleToggleTask}
+            onStartGuidedGoalFlow={handleStartGuidedGoalFlow}
+          />
+
           {/* Search + Filter Container dạng Toolbar sạch sẽ */}
           <div className="rounded-[18px] border border-app-line/75 bg-app-surface p-4 shadow-app-sm flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
             {/* Search Input */}
@@ -1043,6 +1374,10 @@ function GoalCard({
   const [isFlipped, setIsFlipped] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const completionDetails = useMemo(() => getGoalCompletionDetails(goal), [goal]);
+  const health = useMemo(
+    () => getGoalHealthStatus(goal, progress, isOverdue, isNearDeadline),
+    [goal, progress, isOverdue, isNearDeadline]
+  );
 
   const glowClass = progress === 100
     ? (prefersReducedMotion 
@@ -1051,7 +1386,7 @@ function GoalCard({
     : "bg-app-surface border-app-line/70";
 
   return (
-    <div className="perspective-1000 w-full relative">
+    <div id={`goal-card-${goal.id}`} className="perspective-1000 w-full relative">
       <div className={cn(
         "preserve-3d card-transition w-full relative",
         isFlipped ? "rotate-y-180" : ""
@@ -1105,16 +1440,17 @@ function GoalCard({
                   >
                     {getLifeAreaLabel(goal.category)}
                   </span>
-                  {isNearDeadline && (
-                    <span className="bg-app-warm-soft border border-app-warm-border text-app-warm text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
-                      Sắp đến hạn
-                    </span>
-                  )}
-                  {isOverdue && (
-                    <span className="bg-app-status-error/10 text-app-status-error border border-app-status-error/20 text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
-                      Quá hạn
-                    </span>
-                  )}
+                  
+                  {/* Health status badge */}
+                  <span
+                    className={cn(
+                      "border text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm",
+                      health.bgClass
+                    )}
+                  >
+                    {health.label}
+                  </span>
+                  
                   {system && (
                     <span className="bg-app-bg border border-app-line text-app-ink-soft text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
                       {getPlanLabel(currentPlanCode)}
@@ -1124,8 +1460,9 @@ function GoalCard({
 
                 {/* Streak Heatmap (chỉ cho mục tiêu 12 tuần) */}
                 {system && (
-                  <div className="pt-1">
+                  <div className="pt-1 space-y-2.5">
                     <StreakHeatmap system={system} />
+                    <WeeklyQuestLine system={system} />
                   </div>
                 )}
 
