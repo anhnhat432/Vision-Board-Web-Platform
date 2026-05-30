@@ -50,24 +50,20 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-white dark:bg-neutral-900 border-app-line",
-    text: "text-app-ink",
-    iconBg: "bg-app-accent-soft text-app-accent",
+    bg: "bg-app-surface border-app-line hover:border-blue-300 dark:hover:border-blue-900",
+    iconBg: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100/50 dark:border-blue-950/30",
   },
   "Tỷ lệ lead": {
-    bg: "bg-white dark:bg-neutral-900 border-app-line",
-    text: "text-app-ink",
-    iconBg: "bg-app-accent-soft text-app-accent",
+    bg: "bg-app-surface border-app-line hover:border-emerald-300 dark:hover:border-emerald-900",
+    iconBg: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-950/30",
   },
   Nhịp: {
-    bg: "bg-white dark:bg-neutral-900 border-app-line",
-    text: "text-app-ink",
-    iconBg: "bg-app-accent-soft text-app-accent",
+    bg: "bg-app-surface border-app-line hover:border-amber-300 dark:hover:border-amber-900",
+    iconBg: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100/50 dark:border-amber-950/30",
   },
   Chuỗi: {
-    bg: "bg-white dark:bg-neutral-900 border-app-line",
-    text: "text-app-ink",
-    iconBg: "bg-app-accent-soft text-app-accent",
+    bg: "bg-app-surface border-app-line hover:border-rose-300 dark:hover:border-rose-900",
+    iconBg: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-950/30",
   },
 };
 
@@ -117,26 +113,30 @@ function buildWeekDays(system: TwelveWeekSystem | null, currentWeek: number | nu
 function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const barContent = (() => {
     if (day.isFuture) {
-      return <div className="h-16 w-6 rounded-full bg-app-line/15 border border-transparent" aria-hidden="true" />;
+      return <div className="h-16 w-5.5 rounded-full bg-app-line/10 border border-transparent" aria-hidden="true" />;
     }
 
     if (day.isToday) {
-      const fillHeight = day.total === 0 ? 18 : clamp(day.percent, 18, 100);
+      const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
       return (
         <div
-          className="flex h-16 w-6 items-end rounded-full bg-app-accent-soft/30 border border-app-accent/50"
+          className="flex h-16 w-5.5 items-end rounded-full bg-app-accent-soft/40 border border-app-accent ring-2 ring-app-accent/15 shadow-[0_0_8px_rgba(47,93,80,0.25)]"
           aria-hidden="true"
         >
-          <div className="w-full rounded-full bg-app-accent/70" style={{ height: `${fillHeight}%` }} />
+          <div className="w-full rounded-full bg-app-accent" style={{ height: `${fillHeight}%` }} />
         </div>
       );
     }
 
-    const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 10, 100);
+    const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
     return (
-      <div className="flex h-16 w-6 items-end rounded-full bg-app-line/20 border border-transparent" aria-hidden="true">
+      <div className="flex h-16 w-5.5 items-end rounded-full bg-app-line/15 border border-transparent" aria-hidden="true">
         <div
-          className="w-full rounded-full bg-app-accent/40 group-hover:bg-app-accent/60 transition-all duration-300"
+          className={`w-full rounded-full transition-all duration-300 ${
+            day.percent === 100
+              ? "bg-app-accent/80 group-hover:bg-app-accent"
+              : "bg-app-accent/40 group-hover:bg-app-accent/65"
+          }`}
           style={{ height: `${fillHeight}%` }}
         />
       </div>
@@ -144,13 +144,13 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   })();
 
   return (
-    <div className="group flex flex-col items-center gap-2 text-center transition-all duration-300 hover:scale-105">
-      <span className={`text-xs font-extrabold ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted"}`}>
+    <div className="group flex flex-col items-center gap-1.5 text-center transition-all duration-300 hover:scale-105">
+      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted"}`}>
         {day.label}
       </span>
       {barContent}
       <span
-        className={`text-[10px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-soft"}`}
+        className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-soft"}`}
       >
         {day.completed}/{day.total}
       </span>
@@ -233,7 +233,7 @@ export function WeekRhythmCard({
           return (
             <div
               key={item.caption}
-              className={`rounded-[16px] border ${styles.bg} p-4 shadow-app-sm hover:border-app-accent/25 transition-all duration-300`}
+              className={`rounded-[16px] border ${styles.bg} p-4 shadow-app-sm hover:-translate-y-0.5 hover:shadow-app-md transition-all duration-300`}
             >
               <div className="flex items-center justify-between">
                 <div className={`p-2 rounded-xl ${styles.iconBg}`}>
@@ -279,11 +279,20 @@ export function WeekRhythmCard({
             return (
               <div
                 key={day.key}
-                className="flex flex-col items-center gap-1"
+                className="flex flex-col items-center gap-1.5"
                 title={tooltipText}
               >
-                <div className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${dotClass}`} />
-                <span className="text-[9px] font-extrabold text-app-ink-muted uppercase">{day.label}</span>
+                <div className="relative flex items-center justify-center h-4 w-4">
+                  {day.isToday && (
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-app-accent/20 animate-ping" />
+                  )}
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${dotClass} ${
+                      day.isToday ? "ring-2 ring-app-accent/30" : ""
+                    }`}
+                  />
+                </div>
+                <span className={`text-[9px] font-bold uppercase tracking-wider ${day.isToday ? "text-app-accent font-black" : "text-app-ink-muted"}`}>{day.label}</span>
               </div>
             );
           })}

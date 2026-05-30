@@ -119,26 +119,26 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
   return (
     <div className="space-y-6">
       {/* Greeting Banner */}
-      <section className="relative overflow-hidden rounded-[14px] border border-app-line/70 bg-gradient-to-br from-emerald-500/10 via-app-accent-soft/40 to-teal-500/10 p-6 md:p-8 shadow-sm">
+      <section className="relative overflow-hidden rounded-[14px] border border-app-line bg-gradient-to-br from-app-accent-soft/40 via-app-surface/90 to-app-accent-soft/20 p-6 md:p-8 shadow-app-md backdrop-blur-sm">
         {/* Các sticker trang trí bay bổng */}
-        <div className="absolute top-2 right-12 text-2xl animate-[float_4s_ease-in-out_infinite] opacity-60">🌟</div>
-        <div className="absolute bottom-2 right-4 text-3xl animate-[float_5s_ease-in-out_infinite] opacity-50 delay-500">🌱</div>
-        <div className="absolute top-1/3 right-1/4 text-2xl animate-[float_6s_ease-in-out_infinite] opacity-40 delay-1000">🚀</div>
+        <div className="absolute top-4 right-12 text-2xl animate-[float_4s_ease-in-out_infinite] opacity-50">🌟</div>
+        <div className="absolute bottom-4 right-6 text-3xl animate-[float_5s_ease-in-out_infinite] opacity-40 delay-500">🌱</div>
+        <div className="absolute top-1/3 right-1/4 text-2xl animate-[float_6s_ease-in-out_infinite] opacity-30 delay-1000">🚀</div>
 
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">Không gian mới</p>
-        <h1 className="mt-4 max-w-3xl font-serif text-3xl font-medium leading-[1.2] tracking-tight text-app-ink sm:text-4xl">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">Không gian của bạn</p>
+        <h1 className="mt-4 max-w-3xl font-serif text-3xl font-medium leading-[1.25] tracking-tight text-app-ink sm:text-4xl">
           Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu chu kỳ 12 tuần đầu tiên ✨
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-ink-soft">
+        <p className="mt-3 max-w-2xl text-xs font-semibold leading-relaxed text-app-ink-soft">
           Trang chính sẽ sáng rõ và đầy ắp số liệu trực quan sau khi bạn hoàn thành một mục tiêu thật, một lịch biểu tuần và vài việc hôm nay.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-bold text-app-accent">
+        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-bold text-app-accent shadow-sm">
           <Sparkles className="h-3.5 w-3.5 text-app-accent" />
           <span>Cần hướng dẫn 6 bước chi tiết?</span>
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
-            className="ml-1 font-extrabold underline underline-offset-2 hover:underline transition-colors"
+            className="ml-1 font-bold underline underline-offset-2 hover:text-app-accent-hover transition-colors"
           >
             Mở ngay →
           </button>
@@ -173,6 +173,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
         <div className="grid gap-4 sm:grid-cols-2">
           {steps.map((step, index) => {
             const theme = getStepTheme(index);
+            const isNextStep = step.title === nextStep.title;
             return (
               <button
                 key={step.title}
@@ -180,7 +181,9 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                 onClick={() => onContinue(step.href)}
                 className={`flex text-left gap-4 rounded-[14px] border p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
                   step.completed
-                    ? "border-app-line bg-app-surface/60 opacity-85 hover:bg-app-accent-soft/45"
+                    ? "border-app-line bg-app-surface/50 opacity-75 hover:bg-app-accent-soft/30 hover:opacity-90"
+                    : isNextStep
+                    ? `bg-app-surface shadow-md border-app-accent/60 ring-1 ring-app-accent/15 scale-[1.01] hover:scale-[1.02] hover:shadow-lg hover:border-app-accent`
                     : `bg-app-surface shadow-sm ${theme.border} ${theme.hoverBg}`
                 }`}
               >
@@ -189,6 +192,8 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                     className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-300 ${
                       step.completed
                         ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
+                        : isNextStep
+                        ? "bg-app-accent text-white shadow-md shadow-app-accent/20 animate-pulse"
                         : `${theme.iconBgPending} border border-transparent ${theme.iconTextPending}`
                     }`}
                   >
@@ -208,6 +213,11 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                     <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-wide ${theme.badgeBg}`}>
                       {theme.badgeText}
                     </span>
+                    {isNextStep && !step.completed && (
+                      <span className="inline-block rounded-full bg-app-accent px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                        Đề xuất làm tiếp
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-xs font-semibold leading-relaxed text-app-ink-muted">{step.description}</p>
                 </div>

@@ -76,9 +76,12 @@ export function HeroMockupAnimated() {
          * terracotta exclusively for reflection surfaces. */}
         <div
           aria-hidden="true"
-          className={`absolute -top-2 right-3 inline-flex items-center gap-1 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent shadow-[0_4px_12px_-4px_rgba(47,93,80,0.22)] transition-all duration-medium ease-emphasized ${
+          className={`absolute -top-2 right-3 inline-flex items-center gap-1 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent shadow-[0_4px_12px_-4px_rgba(47,93,80,0.22)] transition-all duration-medium ${
             badgeVisible ? "translate-x-0 scale-100 opacity-100" : "translate-x-3 scale-95 opacity-0"
           }`}
+          style={{
+            transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in"
+          }}
         >
           <Sparkles className="size-3" />
           Streak +1
@@ -106,7 +109,9 @@ export function HeroMockupAnimated() {
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-app-bg">
             <div
-              className="h-full rounded-full bg-app-accent transition-[width] duration-slow ease-decelerate"
+              className={`h-full rounded-full bg-app-accent transition-[width,box-shadow] duration-slow ease-decelerate ${
+                progressFilled ? "shadow-[0_0_8px_rgba(47,93,80,0.4)]" : ""
+              }`}
               style={{ width: progressFilled ? "67%" : "33%" }}
             />
           </div>

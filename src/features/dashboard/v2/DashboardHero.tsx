@@ -66,13 +66,15 @@ export function DashboardHero({
         <h1 className="font-serif text-3xl font-medium leading-[1.25] tracking-normal text-app-ink sm:text-4xl md:text-5xl">
           Đây là bức tranh tuần <span className="text-app-accent font-bold">{currentWeek ?? "--"}</span>, {displayName}.
         </h1>
-        <p className="text-sm text-app-ink-soft max-w-xl leading-relaxed font-sans">
+        <p className="text-xs font-semibold text-app-ink-soft max-w-xl leading-relaxed font-sans">
           Chào ngày mới! Hãy theo sát kế hoạch 12 tuần của bạn, tập trung vào các cam kết cốt lõi để tạo ra bước chuyển
           dịch thực sự.
         </p>
-        <p className="font-serif italic text-app-warm text-sm mt-3 opacity-90 block">
-          “{selectedQuote}”
-        </p>
+        <div className="bg-app-bg-subtle/50 dark:bg-neutral-900/30 border-l-2 border-app-warm/60 pl-4 py-2 mt-4 max-w-xl rounded-r-lg">
+          <p className="font-serif italic text-app-warm text-xs leading-relaxed opacity-95">
+            “{selectedQuote}”
+          </p>
+        </div>
       </div>
 
       <div
@@ -97,7 +99,7 @@ export function DashboardHero({
         </div>
         <Link
           to={planHref}
-          className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group"
+          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-app-accent px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-app-accent-hover hover:shadow-md transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group"
         >
           <span>Mở kế hoạch tuần</span>
           <ArrowRight className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover:translate-x-0.5" />

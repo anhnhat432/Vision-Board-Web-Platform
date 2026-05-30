@@ -33,23 +33,28 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
           visibleTasks.map((task) => (
             <div
               key={task.id}
-              className="group flex items-center gap-3 rounded-[12px] border border-app-line bg-app-surface px-4 py-3 hover:border-app-accent/25 hover:bg-app-accent-subtle/30 hover:shadow-app-sm transition-all duration-300"
+              className="group flex items-center gap-3 rounded-[12px] border border-app-line bg-app-surface px-4 py-3 hover:border-app-accent/30 hover:bg-app-accent-subtle/20 hover:shadow-app-sm transition-all duration-300"
             >
               {task.completed ? (
-                <CheckCircle2 className="h-4.5 w-4.5 text-app-accent shrink-0 scale-105 transition-transform duration-200" />
+                <CheckCircle2 className="h-4.5 w-4.5 text-app-accent shrink-0 group-hover:scale-110 transition-transform duration-200" />
               ) : (
-                <Circle className="h-4.5 w-4.5 text-app-ink-muted hover:text-app-accent group-hover:scale-105 transition-all duration-200 shrink-0" />
+                <Circle className="h-4.5 w-4.5 text-app-ink-muted shrink-0 group-hover:text-app-accent group-hover:scale-110 transition-all duration-200" />
               )}
               <p
-                className={`min-w-0 flex-1 line-clamp-1 text-sm font-semibold leading-relaxed transition-all duration-200 ${task.completed ? "text-app-ink-muted line-through opacity-70" : "text-app-ink"}`}
+                className={`min-w-0 flex-1 line-clamp-1 text-xs font-semibold leading-relaxed transition-all duration-200 ${
+                  task.completed ? "text-app-ink-muted line-through opacity-60" : "text-app-ink group-hover:text-app-accent"
+                }`}
               >
                 {task.title}
               </p>
             </div>
           ))
         ) : (
-          <div className="surface-empty rounded-[12px] border border-dashed border-app-line bg-app-bg-subtle/50 p-6 text-sm leading-relaxed text-app-ink-muted text-center italic">
-            Hôm nay chưa có việc mở. Mở Today để thêm hoặc xem lại tuần.
+          <div className="rounded-[12px] border border-dashed border-app-line bg-app-bg-subtle/30 p-6 text-center flex flex-col items-center justify-center gap-2.5">
+            <ListTodo className="h-7 w-7 text-app-ink-muted/40 stroke-[1.25]" />
+            <p className="text-xs font-semibold leading-relaxed text-app-ink-soft max-w-[24ch]">
+              Hôm nay chưa có việc mở. Hãy mở Today để lên lịch thói quen hoặc nhiệm vụ mới!
+            </p>
           </div>
         )}
       </div>

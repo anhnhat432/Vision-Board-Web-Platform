@@ -235,35 +235,47 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
         aria-labelledby="dashboard-how-it-works-title"
       >
         <div className="flex flex-col gap-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Cách hoạt động</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-app-ink-muted">Cách hoạt động</p>
           <h2 id="dashboard-how-it-works-title" className="font-serif text-2xl font-medium leading-8 text-app-ink">
             Từ mục tiêu mơ hồ đến việc hôm nay, trong 4 bước.
           </h2>
         </div>
 
-        <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {HOW_IT_WORKS_STEPS.map((step) => {
+        <ol className="relative mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {HOW_IT_WORKS_STEPS.map((step, idx) => {
             const Icon = step.icon;
             return (
-              <li key={step.step} className="rounded-xl border border-app-line bg-app-bg p-4">
+              <li
+                key={step.step}
+                className="relative rounded-xl border border-app-line bg-app-bg p-5 shadow-app-sm hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-app-md transition-all duration-300 z-10"
+              >
+                {/* Connector line for desktop */}
+                {idx < HOW_IT_WORKS_STEPS.length - 1 && (
+                  <div
+                    aria-hidden="true"
+                    className="hidden lg:block absolute top-[2.25rem] left-[calc(100%-0.5rem)] w-[calc(100%-1rem)] h-[1px] border-t border-dashed border-app-line z-0"
+                  />
+                )}
                 <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent shadow-sm">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
                     Bước {step.step}
                   </span>
                 </div>
-                <h3 className="mt-3 text-sm font-semibold text-app-ink">{step.title}</h3>
-                <p className="mt-1 text-sm leading-6 text-app-ink-muted">{step.description}</p>
-                <p className="mt-3 text-xs font-medium text-app-ink-soft">{step.duration}</p>
+                <h3 className="mt-4 text-sm font-bold text-app-ink">{step.title}</h3>
+                <p className="mt-1.5 text-xs font-semibold leading-relaxed text-app-ink-soft">{step.description}</p>
+                <p className="mt-4 inline-block rounded-full bg-app-surface px-2.5 py-1 text-[10px] font-bold text-app-accent">
+                  {step.duration}
+                </p>
               </li>
             );
           })}
         </ol>
       </RevealOnScroll>
 
-      <RevealOnScroll as="section" className="grid gap-4 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
+      <RevealOnScroll as="section" className="grid gap-5 lg:grid-cols-3" aria-label="Vì sao chọn Dear Our Future">
         {FEATURE_ROWS.map((feature) => {
           const Icon = feature.icon;
 
@@ -271,18 +283,19 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <Link
               key={feature.title}
               to={feature.href}
-              className="surface-raised surface-clickable-raised group rounded-xl border border-app-line bg-app-surface p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="group rounded-xl border border-app-line bg-app-surface p-5 shadow-app-sm hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-app-md transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
-              <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent transition-colors duration-200 group-hover:bg-app-accent group-hover:text-white">
-                  <Icon className="h-4 w-4" />
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-app-accent group-hover:text-white group-hover:shadow-md group-hover:shadow-app-accent-soft/50">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">{feature.tag}</p>
-                  <h2 className="mt-1 text-base font-semibold text-app-ink">{feature.title}</h2>
-                  <p className="mt-1 text-sm leading-6 text-app-ink-muted">{feature.description}</p>
-                  <span className="mt-3 inline-flex text-sm font-medium text-app-accent transition-transform duration-200 group-hover:translate-x-0.5">
-                    Tìm hiểu →
+                <div className="min-w-0 space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">{feature.tag}</p>
+                  <h2 className="text-base font-bold text-app-ink transition-colors duration-200 group-hover:text-app-accent">{feature.title}</h2>
+                  <p className="text-xs font-semibold leading-relaxed text-app-ink-soft">{feature.description}</p>
+                  <span className="inline-flex items-center gap-0.5 text-xs font-bold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
+                    Tìm hiểu
+                    <ArrowRight className="h-3 w-3" />
                   </span>
                 </div>
               </div>
