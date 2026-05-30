@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { type NavigateFunction } from "react-router";
+import type { NavigateFunction } from "react-router";
 import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
@@ -342,11 +342,14 @@ export function TwelveWeekSystemTabs({
 
   return (
     <>
-      <nav className="mt-5" aria-label="Điều hướng hệ 12 tuần">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto">
+      <nav 
+        className="mt-6 sticky top-0 z-30 bg-app-bg/85 backdrop-blur-md py-3 -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-app-line/40 sm:border-none" 
+        aria-label="Điều hướng hệ 12 tuần"
+      >
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-full border border-app-line bg-app-bg p-1"
+            className="inline-flex min-h-0 rounded-full border border-app-line bg-app-surface/90 p-1.5 shadow-xs"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -355,9 +358,12 @@ export function TwelveWeekSystemTabs({
                 value={value}
                 aria-controls={tabPanelId}
                 aria-label={`Mở tab ${label}`}
-                className="flex-none rounded-full px-3.5 py-1.5 text-sm sm:px-4"
+                className={`flex-none rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 gap-2 flex items-center justify-center
+                  data-[state=active]:bg-app-accent-soft data-[state=active]:text-app-accent data-[state=active]:shadow-2xs
+                  data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-bg/50
+                  active:scale-95`}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>{label}</span>
               </TabsTrigger>
             ))}
@@ -367,7 +373,7 @@ export function TwelveWeekSystemTabs({
 
       {/* Main content sections */}
       <div
-        className="mt-5"
+        className="mt-6 space-y-6"
         role="tabpanel"
         id={tabPanelId}
         aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
@@ -512,7 +518,7 @@ export function TwelveWeekSystemTabs({
                   <div className="mb-4 flex justify-end">
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="inline-flex items-center justify-center rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                       onClick={() => setShowFullProgress(false)}
                     >
                       Quay lại tóm tắt
