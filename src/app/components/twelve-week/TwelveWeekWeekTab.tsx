@@ -61,7 +61,7 @@ interface WeekCompletionSummary {
   isEmpty?: boolean;
 }
 
-interface TwelveWeekWeeklyReviewForm {
+export interface TwelveWeekWeeklyReviewForm {
   lagProgressValue: string;
   biggestOutputThisWeek: string;
   mainObstacle: string;

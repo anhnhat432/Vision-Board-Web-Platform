@@ -1,26 +1,7 @@
-import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toastSuccess } from "@/app/utils/toast";
-import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
-import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
-import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
-import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
-import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/app/components/ui/alert-dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
-import { Checkbox } from "@/app/components/ui/checkbox";
-import { Label } from "@/app/components/ui/label";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
@@ -60,7 +41,6 @@ import {
 } from "@/app/utils/storage-twelve-week";
 import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from "@/app/utils/storage-types";
 import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
-import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useBackendSyncIssueState } from "@/features/plan12week/hooks/useBackendSyncIssueState";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
@@ -73,19 +53,21 @@ import { celebrateLarge } from "@/lib/effects/celebrate";
 import { claimCelebrationOnce, getCycleCelebrationStorageKey } from "@/lib/effects/celebrationTriggers";
 import {
   TwelveWeekDashboardHeader,
-  TwelveWeekDashboardNotice,
   TwelveWeekDashboardState,
   TwelveWeekGoalSwitcher,
-  TwelveWeekRescueTriggerBanner,
   TwelveWeekTabFallback,
 } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
-import { PlanOverview, WeekEditor, WeeklyReview } from "./12WeekSystem/lazyTabs";
 import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
 import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
 import { useTwelveWeekExecutionActions } from "./12WeekSystem/useTwelveWeekExecutionActions";
 import { useTwelveWeekSettingsActions } from "./12WeekSystem/useTwelveWeekSettingsActions";
 import { useWeeklyReviewFormState } from "./12WeekSystem/useWeeklyReviewFormState";
+
+// Import refactored subcomponents
+import { TwelveWeekSystemDialogs } from "./12WeekSystem/TwelveWeekSystemDialogs";
+import { TwelveWeekSystemNotices } from "./12WeekSystem/TwelveWeekSystemNotices";
+import { TwelveWeekSystemTabs } from "./12WeekSystem/TwelveWeekSystemTabs";
 
 const emptyMutationQueueSummary = {
   totalCount: 0,
@@ -99,13 +81,6 @@ const emptyMutationQueueSummary = {
 
 export const WEEKLY_REVIEW_SNOOZE_STORAGE_KEY = "weekly_review_snooze";
 const WEEKLY_REVIEW_SNOOZE_MS = 24 * 60 * 60 * 1000;
-
-const TWELVE_WEEK_SECTION_TABS = [
-  { value: "today", label: "Hôm nay", icon: ListTodo },
-  { value: "week", label: "Tuần", icon: CalendarDays },
-  { value: "progress", label: "Tiến độ", icon: BarChart3 },
-  { value: "settings", label: "Cài đặt", icon: Settings2 },
-] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
 
 function readWeeklyReviewSnoozeUntil(): number {
   if (typeof window === "undefined") return 0;
@@ -824,7 +799,7 @@ export function TwelveWeekSystem() {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
     if (!isBackendProfileReady || !activeGoal || !localSystem) return;
     const hasPendingBackendConflict = lastBackendHydrationResult?.conflicts.some(
-      (conflict) => conflict.goalId === activeGoal.id,
+      (conflict: any) => conflict.goalId === activeGoal.id,
     );
     if (hasPendingBackendConflict) return;
 
@@ -987,113 +962,37 @@ export function TwelveWeekSystem() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-      <UpgradePaywallDialog
-        open={isUpgradeDialogOpen}
-        onOpenChange={setIsUpgradeDialogOpen}
-        context={upgradeContext}
-        currentPlan={activePlanCode}
-        goalId={activeGoal.id}
-        recommendedPlan={upgradeRecommendedPlan}
-        source={
-          activeTab === "settings" ? "settings" : upgradeContext === "review" ? "review_teaser" : "12_week_system"
-        }
-        onCheckoutComplete={handleCheckoutComplete}
-      />
-
-      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif text-app-ink">Làm mới chu kỳ 12 tuần?</AlertDialogTitle>
-            <AlertDialogDescription className="text-app-ink-soft">
-              Hành động này sẽ bắt đầu lại tuần 1 từ tuần hiện tại, xóa việc đã hoàn thành, check-in hằng ngày, review
-              tuần và nhật ký review tuần đã liên kết của chu kỳ đang chạy.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
-              Quay lại
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-app-status-error text-white hover:bg-app-status-error/90"
-              onClick={handleResetCycle}
-            >
-              Làm mới từ tuần này
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isClearLocalDialogOpen} onOpenChange={setIsClearLocalDialogOpen}>
-        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif text-app-ink">Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
-            <AlertDialogDescription className="text-app-ink-soft">
-              Hành động này chỉ xóa nhật ký sự kiện, việc đang chờ đồng bộ và trạng thái nhắc việc trên thiết bị. Mục
-              tiêu, review tuần, nhật ký và bảng tầm nhìn của bạn vẫn được giữ nguyên.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
-              Giữ lại
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-app-status-error text-white hover:bg-app-status-error/90"
-              onClick={handleClearLocalSignals}
-            >
-              Xóa dấu vết trên thiết bị
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isDeleteCloudDialogOpen} onOpenChange={setIsDeleteCloudDialogOpen}>
-        <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif text-app-ink">Xóa dữ liệu 12 tuần đã đồng bộ?</AlertDialogTitle>
-            <AlertDialogDescription className="text-app-ink-soft">
-              Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review). Không
-              xóa dữ liệu trên thiết bị này. Không xóa gói Plus, đăng ký hay tài khoản. Hành động này không thể hoàn
-              tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex items-start gap-2.5 px-1 py-1">
-            <Checkbox
-              id="cloud-delete-confirm-checkbox"
-              checked={isCloudDeleteConfirmed}
-              onCheckedChange={(checked) => setIsCloudDeleteConfirmed(checked === true)}
-            />
-            <Label
-              htmlFor="cloud-delete-confirm-checkbox"
-              className="text-sm font-medium leading-relaxed text-app-ink-soft select-none cursor-pointer pt-3"
-            >
-              Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.
-            </Label>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
-              Quay lại
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-app-status-error text-white hover:bg-app-status-error/90 disabled:opacity-50"
-              onClick={handleConfirmDeleteCloudWorkspace}
-              disabled={!isCloudDeleteConfirmed}
-            >
-              Xóa dữ liệu đã đồng bộ
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <DeleteDataConfirmationDialog
-        open={isDeleteDataDialogOpen}
-        onOpenChange={setIsDeleteDataDialogOpen}
-        isDemoMode={demoMode}
+      {/* 1. Subcomponent Dialogs Container */}
+      <TwelveWeekSystemDialogs
+        isUpgradeDialogOpen={isUpgradeDialogOpen}
+        setIsUpgradeDialogOpen={setIsUpgradeDialogOpen}
+        upgradeContext={upgradeContext}
+        activePlanCode={activePlanCode}
+        activeGoal={activeGoal}
+        upgradeRecommendedPlan={upgradeRecommendedPlan}
+        activeTab={activeTab}
+        handleCheckoutComplete={handleCheckoutComplete}
+        isResetDialogOpen={isResetDialogOpen}
+        setIsResetDialogOpen={setIsResetDialogOpen}
+        handleResetCycle={handleResetCycle}
+        isClearLocalDialogOpen={isClearLocalDialogOpen}
+        setIsClearLocalDialogOpen={setIsClearLocalDialogOpen}
+        handleClearLocalSignals={handleClearLocalSignals}
+        isDeleteCloudDialogOpen={isDeleteCloudDialogOpen}
+        setIsDeleteCloudDialogOpen={setIsDeleteCloudDialogOpen}
+        isCloudDeleteConfirmed={isCloudDeleteConfirmed}
+        setIsCloudDeleteConfirmed={setIsCloudDeleteConfirmed}
+        handleConfirmDeleteCloudWorkspace={handleConfirmDeleteCloudWorkspace}
+        isDeleteDataDialogOpen={isDeleteDataDialogOpen}
+        setIsDeleteDataDialogOpen={setIsDeleteDataDialogOpen}
+        demoMode={demoMode}
         isSignedIn={Boolean(user)}
-        onConfirm={handleDeleteAllData}
-        isLoading={isDeletingData}
+        handleDeleteAllData={handleDeleteAllData}
+        isDeletingData={isDeletingData}
       />
 
       <div className="space-y-5">
+        {/* 2. Page Header component */}
         <TwelveWeekDashboardHeader
           activeGoal={activeGoal}
           system={system}
@@ -1112,410 +1011,178 @@ export function TwelveWeekSystem() {
           onRenameGoal={handleRenameActiveGoal}
         />
 
+        {/* 3. Goal Switcher select list */}
         <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
 
-        {shouldShowWeeklyReviewBanner && (
-          <TwelveWeekDashboardNotice
-            tone="warning"
-            title="Đến lúc chốt review tuần"
-            description="Review tuần đang đến hạn. Bạn có thể mở tab Tuần, đánh dấu đã xong, hoặc nhắc lại sau."
-          >
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-              onClick={markWeeklyReviewCompleted}
-            >
-              Đã đánh giá xong tuần này
-            </button>
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-              onClick={handleSnoozeWeeklyReview}
-            >
-              Nhắc lại sau 24h
-            </button>
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-              onClick={() => handleTabChange("week")}
-            >
-              Mở review tuần
-            </button>
-          </TwelveWeekDashboardNotice>
-        )}
-
-        {hasIncompletePlanStructure && (
-          <TwelveWeekDashboardNotice
-            tone="warning"
-            title="Chu kỳ này chưa có việc hoặc chỉ số đủ rõ"
-            description={
-              planHasNoLeadMetrics
-                ? "Trang chính đã thấy kế hoạch, nhưng chưa có việc lặp lại trong tuần để tạo hàng việc mỗi tuần. Hãy tạo lại chu kỳ từ luồng mục tiêu để có việc và review rõ ràng."
-                : planHasNoTasks
-                  ? "Kế hoạch đã có việc lặp lại trong tuần nhưng chưa có việc nào trong chu kỳ. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ để Trang chính có hàng việc hôm nay."
-                  : "Chỉ số kết quả chính đang trống, nên phần tiến độ và review sẽ khó hiểu hơn. Hãy bổ sung chỉ số khi chỉnh lại chu kỳ."
-            }
-          >
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-              onClick={() => navigate("/life-insight")}
-            >
-              Tạo lại chu kỳ
-            </button>
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-              onClick={() => handleTabChange("settings")}
-            >
-              Mở cài đặt chu kỳ
-            </button>
-          </TwelveWeekDashboardNotice>
-        )}
-
-        {hasBackendSyncIssue && (
-          <TwelveWeekDashboardNotice
-            tone="error"
-            title="Chưa sao lưu được vào tài khoản"
-            description={`${backendSyncIssueMessage} Tiến trình vẫn được lưu trên thiết bị này.`}
-          >
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-app-status-error px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-status-error/90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
-              disabled={isBackendSyncing}
-              onClick={handleRunOutboxSync}
-            >
-              {isBackendSyncing ? "Đang thử lại..." : "Thử sao lưu lại"}
-            </button>
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
-              onClick={() => handleTabChange("settings")}
-            >
-              Xem trạng thái
-            </button>
-          </TwelveWeekDashboardNotice>
-        )}
-
-        <TwelveWeekRescueTriggerBanner
-          trigger={activeTriggers.filter((trigger) => trigger.kind !== dismissedTriggerKind)[0] ?? null}
-          onTriggerFired={(trigger) => {
-            trackRescueTriggerFired({
-              kind: trigger.kind,
-              severity: trigger.severity,
-              currentPlan: activePlanCode,
-            });
-          }}
-          onActionTaken={(trigger, action) => {
-            trackRescueActionTaken({
-              kind: trigger.kind,
-              action,
-              currentPlan: activePlanCode,
-            });
-          }}
-          onOpenUpgrade={() => navigate("/billing/plan")}
-          onOpenToday={() => setActiveTab("today")}
-          onDismiss={(kind) => {
-            dismissRescueTrigger(kind);
-            trackRescueTriggerDismissed({ kind, currentPlan: activePlanCode });
-            setDismissedTriggerKind(kind);
-          }}
+        {/* 4. Subcomponent Notifications & Notices Container */}
+        <TwelveWeekSystemNotices
+          navigate={navigate}
+          handleTabChange={handleTabChange}
+          setActiveTab={setActiveTab}
+          activePlanCode={activePlanCode}
+          shouldShowWeeklyReviewBanner={shouldShowWeeklyReviewBanner}
+          markWeeklyReviewCompleted={markWeeklyReviewCompleted}
+          handleSnoozeWeeklyReview={handleSnoozeWeeklyReview}
+          hasIncompletePlanStructure={hasIncompletePlanStructure}
+          planHasNoLeadMetrics={planHasNoLeadMetrics}
+          planHasNoTasks={planHasNoTasks}
+          hasBackendSyncIssue={hasBackendSyncIssue}
+          backendSyncIssueMessage={backendSyncIssueMessage}
+          isBackendSyncing={isBackendSyncing}
+          handleRunOutboxSync={handleRunOutboxSync}
+          activeTriggers={activeTriggers}
+          dismissedTriggerKind={dismissedTriggerKind}
+          setDismissedTriggerKind={setDismissedTriggerKind}
+          handleOpenUpgradeDialog={handleOpenUpgradeDialog}
         />
       </div>
 
-      <nav className="mt-5" aria-label="Điều hướng hệ 12 tuần">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto">
-          <TabsList
-            aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-full border border-app-line bg-app-bg p-1"
-          >
-            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
-              <TabsTrigger
-                key={value}
-                id={`${tabPanelId}-${value}-tab`}
-                value={value}
-                aria-controls={tabPanelId}
-                aria-label={`Mở tab ${label}`}
-                className="flex-none rounded-full px-3.5 py-1.5 text-sm sm:px-4"
-              >
-                <Icon className="h-4 w-4" aria-hidden="true" />
-                <span>{label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </nav>
-
-      {/* Main content sections */}
-      <div
-        ref={tabsTopRef}
-        className="mt-5"
-        role="tabpanel"
-        id={tabPanelId}
-        aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
-      >
-        {isCycleReviewMode && activeTab !== "settings" && (
-          <CycleReviewPanel
-            goal={activeGoal}
-            system={system}
-            onSaveCycleReview={handleSaveCycleReview}
-            onStartNewCycle={handleStartNewCycle}
-            onOpenSettings={() => handleTabChange("settings")}
-            aspirationalVisionSummary={aspirationalVisionSummary}
-          />
-        )}
-
-        {/* TODAY SECTION */}
-        {!isCycleReviewMode && activeTab === "today" && (
-          <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
-            <TaskBoard
-              system={system}
-              currentWeek={currentWeek}
-              currentWeekRange={currentWeekRange}
-              currentPlanFocus={currentPlanFocus}
-              reviewDueToday={reviewDueToday}
-              reviewStatusLabel={reviewStatusLabel}
-              currentWeekScoreValue={currentWeekScoreValue}
-              weekCompletion={weekCompletion}
-              coreTacticCount={coreTacticCount}
-              optionalTacticCount={optionalTacticCount}
-              missedTasks={missedTasks}
-              todayQueue={todayQueue}
-              currentWeekTasksCount={currentWeekOpenTasks.length}
-              todayDateKey={todayDateKey}
-              todayCompletedCount={todayCompletedCount}
-              todayRemainingCount={todayRemainingCount}
-              overdueOpenCount={overdueOpenCount}
-              optionalOpenThisWeekCount={optionalOpenThisWeekCount}
-              hasPlanTasks={!planHasNoTasks}
-              hasLeadMetrics={!planHasNoLeadMetrics}
-              firstPriorityTask={firstPriorityTask}
-              secondaryTodayTasks={secondaryTodayTasks}
-              hasSmartRescue={hasSmartRescue}
-              rescuePlanSummary={rescuePlanSummary}
-              dailyMood={dailyMood}
-              dailyNote={dailyNote}
-              latestCheckIn={latestCheckIn}
-              onReentry={handleReentry}
-              onApplyRecommendedReentry={handleApplyRecommendedReentry}
-              onOpenSmartRescue={() => handleOpenUpgradeDialog("plan", "PLUS")}
-              onToggleTask={handleToggleTask}
-              onDailyMoodChange={setDailyMood}
-              onDailyNoteChange={setDailyNote}
-              onSaveCheckIn={handleSaveCheckIn}
-              onOpenWeekTab={() => handleTabChange("week")}
-              onNavigateToSetup={() => navigate("/life-insight")}
-              rescueStatus={rescueStatus}
-              onPickTinyTask={() => handleTabChange("today")}
-              onReviewPlan={() => navigate("/life-insight")}
-              onRescheduleTaskWithinWeek={handleRescheduleTaskWithinWeek}
-              onRescheduleTaskToNextWeek={handleRescheduleTaskToNextWeek}
-              onSkipNonCoreTask={handleSkipNonCoreTask}
-            />
-          </TabErrorBoundary>
-        )}
-
-        {/* WEEK SECTION */}
-        {!isCycleReviewMode && activeTab === "week" && (
-          <TabErrorBoundary fallbackTitle="Tab Tuần gặp lỗi">
-            <Suspense
-              fallback={
-                <TwelveWeekTabFallback
-                  title="Đang mở tab Tuần"
-                  description="Phần review tuần và gợi ý cho tuần sau sẽ hiện ra ngay sau khi tải xong."
-                />
-              }
-            >
-              <WeeklyReview
-                system={system}
-                currentWeekNumber={currentWeek}
-                currentWeekRange={currentWeekRange}
-                currentPlanFocus={currentPlanFocus}
-                currentPlanMilestone={currentPlanMilestone}
-                reviewDueToday={reviewDueToday}
-                reviewStatusLabel={reviewStatusLabel}
-                currentScoreValue={currentWeekScoreValue}
-                weekCompletion={weekCompletion}
-                currentLagMetricValue={currentLagMetricValue}
-                coreIndicators={coreIndicators}
-                optionalIndicators={optionalIndicators}
-                currentPlanCode={activePlanCode}
-                hasPremiumInsights={hasPremiumReviewInsights}
-                premiumInsight={premiumReviewInsight}
-                suggestedNextWeekPlan={suggestedNextWeekPlan}
-                weeklyForm={weeklyForm}
-                currentReview={currentReview}
-                onWeeklyFormChange={(field, value) =>
-                  setWeeklyForm((previousForm) => ({
-                    ...previousForm,
-                    [field]: value,
-                  }))
-                }
-                onApplySuggestedPlan={handleApplySuggestedPlan}
-                onOpenPremiumInsights={() => handleOpenUpgradeDialog("review", "PLUS")}
-                onSaveWeeklyReview={handleSaveWeeklyReview}
-                onOpenTodayTab={() => handleTabChange("today")}
-                rescueStatus={rescueStatus}
-                onPickTinyTask={() => handleTabChange("today")}
-                onReducePlan={handleApplySuggestedPlan}
-                nextWeekRecommendation={nextWeekRecommendation}
-                onAcceptNextWeekRecommendation={handleApplySuggestedPlan}
-                weeklyReflectionInsights={weeklyReflectionInsights}
-              />
-            </Suspense>
-          </TabErrorBoundary>
-        )}
-
-        {/* PROGRESS SECTION */}
-        {!isCycleReviewMode && activeTab === "progress" && (
-          <TabErrorBoundary fallbackTitle="Tab Tiến độ gặp lỗi">
-            <Suspense
-              fallback={
-                <TwelveWeekTabFallback
-                  title="Đang mở tab Tiến độ"
-                  description="Bảng điểm và cột mốc của chu kỳ đang được chuẩn bị cho bạn."
-                />
-              }
-            >
-              {!showFullProgress ? (
-                <ProgressSummaryCard
-                  system={system}
-                  currentWeek={currentWeek}
-                  currentWeekRange={currentWeekRange}
-                  currentWeekScoreValue={currentWeekScoreValue}
-                  averageScore={averageScore}
-                  reviewDoneCount={reviewDoneCount}
-                  weekCompletion={weekCompletion}
-                  reviewDueToday={reviewDueToday}
-                  onOpenTodayTab={() => setActiveTab("today")}
-                  onOpenWeekTab={() => setActiveTab("week")}
-                  onOpenSettingsTab={() => setActiveTab("settings")}
-                  onOpenCycleReview={() => setActiveTab("progress")}
-                  onNavigateToSetup={() => navigate("/life-insight")}
-                  onViewFull={() => setShowFullProgress(true)}
-                />
-              ) : (
-                <>
-                  <div className="mb-4 flex justify-end">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                      onClick={() => setShowFullProgress(false)}
-                    >
-                      Quay lại tóm tắt
-                    </button>
-                  </div>
-                  <PlanOverview
-                    system={system}
-                    goalTitle={activeGoal.title}
-                    currentWeek={currentWeek}
-                    currentWeekRange={currentWeekRange}
-                    currentWeekScoreValue={currentWeekScoreValue}
-                    averageScore={averageScore}
-                    reviewDoneCount={reviewDoneCount}
-                    weekCompletion={weekCompletion}
-                    milestoneItems={milestoneItems}
-                    hasAdvancedAnalytics={hasAdvancedAnalytics}
-                    executionHeatmap={executionHeatmap}
-                    weeklyTrend={weeklyTrend}
-                    tacticBreakdown={tacticBreakdown}
-                    reviewDueToday={reviewDueToday}
-                    onRenameGoal={handleRenameActiveGoal}
-                    onOpenTodayTab={() => setActiveTab("today")}
-                    onOpenWeekTab={() => setActiveTab("week")}
-                    onOpenSettingsTab={() => setActiveTab("settings")}
-                    onOpenCycleReview={() => setActiveTab("progress")}
-                    onNavigateToSetup={() => navigate("/life-insight")}
-                    executionInsights={executionInsights}
-                  />
-                </>
-              )}
-            </Suspense>
-          </TabErrorBoundary>
-        )}
-
-        {/* SETTINGS SECTION */}
-        {activeTab === "settings" && (
-          <TabErrorBoundary fallbackTitle="Tab Cài đặt chu kỳ gặp lỗi">
-            <Suspense
-              fallback={
-                <TwelveWeekTabFallback
-                  title="Đang mở cài đặt chu kỳ"
-                  description="Phần chỉnh nhịp chu kỳ, dữ liệu trên thiết bị và quyền gói đang được tải."
-                />
-              }
-            >
-              <WeekEditor
-                system={system}
-                activeGoalId={activeGoal.id}
-                backendConnectionStatus={backendConnectionStatus}
-                currentPlanCode={activePlanCode}
-                entitlementKeys={activeEntitlementKeys}
-                billingProviderStatus={billingProviderStatus}
-                lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
-                lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
-                lastBackendHydrationResult={lastBackendHydrationResult}
-                appPreferences={appPreferences}
-                funnelSteps={funnelSteps}
-                monetizationSteps={monetizationSteps}
-                browserNotificationStatus={browserNotificationStatus}
-                lastSyncSnapshot={lastSyncSnapshot}
-                pendingOutboxCount={pendingOutboxCount}
-                archivedOutboxCount={archivedOutboxCount}
-                eventCount={eventCount}
-                activeReminders={activeReminders}
-                recentOutboxItems={recentOutboxItems}
-                isSyncingEntitlements={isSyncingEntitlements}
-                isRestoringPlanAccess={isRestoringPlanAccess}
-                isHydratingBackendPlans={isHydratingBackendPlans}
-                isResolvingBackendPlanConflicts={isResolvingBackendPlanConflicts}
-                mutationQueueSyncStatus={mutationQueueSyncStatus}
-                onReviewDayChange={handleReviewDayChange}
-                onReminderTimeChange={handleReminderTimeChange}
-                onLoadPreferenceChange={handleLoadPreferenceChange}
-                onStatusChange={handleStatusChange}
-                onTacticPriorityChange={handleTacticPriorityChange}
-                onTacticTypeChange={handleTacticTypeChange}
-                onTimeBlocksChange={handleTimeBlocksChange}
-                onPreferenceToggle={handlePreferenceToggle}
-                onArchivePendingOutbox={handleArchivePendingOutbox}
-                onRestoreArchivedOutbox={handleRestoreArchivedOutbox}
-                onOpenReminder={handleOpenReminder}
-                onExportLocalData={handleExportLocalData}
-                onExportCloudWorkspace={handleExportCloudWorkspace}
-                onDeleteCloudWorkspace={handleDeleteCloudWorkspace}
-                onBrowserNotificationToggle={handleBrowserNotificationToggle}
-                onRunOutboxSync={handleRunOutboxSync}
-                onOutboxItemToggle={handleOutboxItemToggle}
-                onClearEventLog={() => {
-                  clearEventLog();
-                  refreshSnapshotMeta();
-                }}
-                onClearArchivedOutbox={() => {
-                  clearArchivedOutbox();
-                  refreshSnapshotMeta();
-                }}
-                onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
-                onDeleteAllData={handleDeleteAllData}
-                onOpenDeleteDataDialog={() => setIsDeleteDataDialogOpen(true)}
-                onOpenResetDialog={() => setIsResetDialogOpen(true)}
-                onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
-                onSyncEntitlements={handleSyncEntitlements}
-                onRestorePlanAccess={handleRestorePlanAccess}
-                onHydrateBackendPlans={handleHydrateBackendPlans}
-                onRunMutationQueueSync={handleRunMutationQueueSync}
-                onKeepLocalPlanForConflicts={handleKeepLocalPlanForConflicts}
-                onUseBackendPlanForConflicts={handleUseBackendPlanForConflicts}
-                onUseCloudVersion={handleUseCloudVersion}
-                onOpenBillingPortal={handleOpenBillingPortal}
-                onNavigateGoals={() => navigate("/goals")}
-                onNavigateJournal={() => navigate("/journal")}
-                onNavigateSetup={() => navigate("/life-insight")}
-              />
-            </Suspense>
-          </TabErrorBoundary>
-        )}
-      </div>
+      {/* 5. Subcomponent Tabs and Main Tab Panels Container */}
+      <TwelveWeekSystemTabs
+        activeTab={activeTab}
+        handleTabChange={handleTabChange}
+        setActiveTab={setActiveTab}
+        tabPanelId={tabPanelId}
+        isCycleReviewMode={isCycleReviewMode}
+        activeGoal={activeGoal}
+        system={system}
+        handleSaveCycleReview={handleSaveCycleReview}
+        handleStartNewCycle={handleStartNewCycle}
+        handleRenameActiveGoal={handleRenameActiveGoal}
+        aspirationalVisionSummary={aspirationalVisionSummary}
+        currentWeek={currentWeek}
+        currentWeekRange={currentWeekRange}
+        currentPlanFocus={currentPlanFocus}
+        currentPlanMilestone={currentPlanMilestone}
+        reviewDueToday={reviewDueToday}
+        reviewStatusLabel={reviewStatusLabel}
+        currentWeekScoreValue={currentWeekScoreValue}
+        weekCompletion={weekCompletion}
+        coreTacticCount={coreTacticCount}
+        optionalTacticCount={optionalTacticCount}
+        missedTasks={missedTasks}
+        todayQueue={todayQueue}
+        currentWeekOpenTasks={currentWeekOpenTasks}
+        todayDateKey={todayDateKey}
+        todayCompletedCount={todayCompletedCount}
+        todayRemainingCount={todayRemainingCount}
+        overdueOpenCount={overdueOpenCount}
+        optionalOpenThisWeekCount={optionalOpenThisWeekCount}
+        firstPriorityTask={firstPriorityTask}
+        secondaryTodayTasks={secondaryTodayTasks}
+        hasSmartRescue={hasSmartRescue}
+        rescuePlanSummary={rescuePlanSummary}
+        dailyMood={dailyMood}
+        dailyNote={dailyNote}
+        latestCheckIn={latestCheckIn}
+        onReentry={handleReentry}
+        onApplyRecommendedReentry={handleApplyRecommendedReentry}
+        onOpenSmartRescue={() => handleOpenUpgradeDialog("plan", "PLUS")}
+        onToggleTask={handleToggleTask}
+        onDailyMoodChange={(mood) => setDailyMood(mood)}
+        onDailyNoteChange={setDailyNote}
+        onSaveCheckIn={handleSaveCheckIn}
+        onOpenWeekTab={() => handleTabChange("week")}
+        onNavigateToSetup={() => navigate("/life-insight")}
+        rescueStatus={rescueStatus}
+        onPickTinyTask={() => handleTabChange("today")}
+        onReviewPlan={() => navigate("/life-insight")}
+        onRescheduleTaskWithinWeek={handleRescheduleTaskWithinWeek}
+        onRescheduleTaskToNextWeek={handleRescheduleTaskToNextWeek}
+        onSkipNonCoreTask={handleSkipNonCoreTask}
+        currentLagMetricValue={currentLagMetricValue}
+        coreIndicators={coreIndicators}
+        optionalIndicators={optionalIndicators}
+        activePlanCode={activePlanCode}
+        hasPremiumReviewInsights={hasPremiumReviewInsights}
+        premiumReviewInsight={premiumReviewInsight}
+        suggestedNextWeekPlan={suggestedNextWeekPlan}
+        weeklyForm={weeklyForm}
+        currentReview={currentReview}
+        onWeeklyFormChange={(field, value) =>
+          setWeeklyForm((previousForm) => ({
+            ...previousForm,
+            [field]: value,
+          }))
+        }
+        onApplySuggestedPlan={handleApplySuggestedPlan}
+        onOpenPremiumInsights={() => handleOpenUpgradeDialog("review", "PLUS")}
+        onSaveWeeklyReview={handleSaveWeeklyReview}
+        onOpenTodayTab={() => handleTabChange("today")}
+        nextWeekRecommendation={nextWeekRecommendation}
+        onAcceptNextWeekRecommendation={handleApplySuggestedPlan}
+        weeklyReflectionInsights={weeklyReflectionInsights}
+        showFullProgress={showFullProgress}
+        setShowFullProgress={setShowFullProgress}
+        averageScore={averageScore}
+        reviewDoneCount={reviewDoneCount}
+        milestoneItems={milestoneItems}
+        hasAdvancedAnalytics={hasAdvancedAnalytics}
+        executionHeatmap={executionHeatmap}
+        weeklyTrend={weeklyTrend}
+        tacticBreakdown={tacticBreakdown}
+        executionInsights={executionInsights}
+        navigate={navigate}
+        backendConnectionStatus={backendConnectionStatus}
+        activeEntitlementKeys={activeEntitlementKeys}
+        billingProviderStatus={billingProviderStatus}
+        lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
+        lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
+        lastBackendHydrationResult={lastBackendHydrationResult}
+        appPreferences={appPreferences}
+        funnelSteps={funnelSteps}
+        monetizationSteps={monetizationSteps}
+        browserNotificationStatus={browserNotificationStatus}
+        lastSyncSnapshot={lastSyncSnapshot}
+        pendingOutboxCount={pendingOutboxCount}
+        archivedOutboxCount={archivedOutboxCount}
+        eventCount={eventCount}
+        activeReminders={activeReminders}
+        recentOutboxItems={recentOutboxItems}
+        isSyncingEntitlements={isSyncingEntitlements}
+        isRestoringPlanAccess={isRestoringPlanAccess}
+        isHydratingBackendPlans={isHydratingBackendPlans}
+        isResolvingBackendPlanConflicts={isResolvingBackendPlanConflicts}
+        mutationQueueSyncStatus={mutationQueueSyncStatus}
+        handleReviewDayChange={handleReviewDayChange}
+        handleReminderTimeChange={handleReminderTimeChange}
+        handleLoadPreferenceChange={handleLoadPreferenceChange}
+        handleStatusChange={handleStatusChange}
+        handleTacticPriorityChange={handleTacticPriorityChange}
+        handleTacticTypeChange={handleTacticTypeChange}
+        handleTimeBlocksChange={handleTimeBlocksChange}
+        handlePreferenceToggle={handlePreferenceToggle}
+        handleArchivePendingOutbox={handleArchivePendingOutbox}
+        handleRestoreArchivedOutbox={handleRestoreArchivedOutbox}
+        handleOpenReminder={handleOpenReminder}
+        handleExportLocalData={handleExportLocalData}
+        handleExportCloudWorkspace={handleExportCloudWorkspace}
+        handleDeleteCloudWorkspace={handleDeleteCloudWorkspace}
+        handleBrowserNotificationToggle={handleBrowserNotificationToggle}
+        handleRunOutboxSync={handleRunOutboxSync}
+        handleOutboxItemToggle={handleOutboxItemToggle}
+        handleClearEventLog={() => {
+          clearEventLog();
+          refreshSnapshotMeta();
+        }}
+        handleClearArchivedOutbox={() => {
+          clearArchivedOutbox();
+          refreshSnapshotMeta();
+        }}
+        setIsClearLocalDialogOpen={setIsClearLocalDialogOpen}
+        handleDeleteAllData={handleDeleteAllData}
+        setIsDeleteDataDialogOpen={setIsDeleteDataDialogOpen}
+        setIsResetDialogOpen={setIsResetDialogOpen}
+        handleOpenUpgradeDialog={handleOpenUpgradeDialog}
+        handleSyncEntitlements={handleSyncEntitlements}
+        handleRestorePlanAccess={handleRestorePlanAccess}
+        handleHydrateBackendPlans={handleHydrateBackendPlans}
+        handleRunMutationQueueSync={handleRunMutationQueueSync}
+        handleKeepLocalPlanForConflicts={handleKeepLocalPlanForConflicts}
+        handleUseBackendPlanForConflicts={handleUseBackendPlanForConflicts}
+        handleUseCloudVersion={handleUseCloudVersion}
+        handleOpenBillingPortal={handleOpenBillingPortal}
+      />
     </div>
   );
 }
