@@ -268,6 +268,7 @@ export function Onboarding() {
   const autosaveTimerRef = useRef<number | null>(null);
   const [showBreathing, setShowBreathing] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isRadarExpanded, setIsRadarExpanded] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState<number | null>(0);
 
   const radarData = useMemo(
@@ -909,7 +910,8 @@ export function Onboarding() {
           </div>
 
           <div className="order-2 lg:order-2 lg:sticky lg:top-6 space-y-4">
-            <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/10 p-6 shadow-app-md text-center relative overflow-hidden transition-all duration-300">
+            {/* Trên Desktop: Luôn hiển thị đầy đủ bản đồ Radar và Summary */}
+            <div className="hidden lg:block surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/10 p-6 shadow-app-md text-center relative overflow-hidden">
               <div className="absolute top-0 right-0 w-36 h-36 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
               
               <div className="flex items-center justify-between pb-2 border-b border-app-line/60">
@@ -962,6 +964,79 @@ export function Onboarding() {
                 <Sparkles className="h-3.5 w-3.5 text-app-accent opacity-70" />
                 <span>“Điểm càng thật, insight càng đúng.”</span>
               </div>
+            </div>
+
+            {/* Trên Mobile: Thiết kế dạng Collapsible/Accordion để giải phóng diện tích màn hình */}
+            <div className="block lg:hidden surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/5 p-4 shadow-sm relative overflow-hidden transition-all duration-300">
+              <button
+                type="button"
+                className="flex items-center justify-between w-full text-left"
+                onClick={() => setIsRadarExpanded(!isRadarExpanded)}
+              >
+                <div className="space-y-0.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5">
+                    📊 Bản đồ Cân bằng & Thống kê
+                  </h3>
+                  <p className="text-[10px] text-app-ink-soft">
+                    Đã rà soát: <strong className="text-app-accent">{reviewedAreaCount}/8</strong> · Trung bình: <strong className="text-app-accent">{averageScore.toFixed(1)}đ</strong>
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 bg-app-bg-subtle hover:bg-app-bg px-2.5 py-1.5 rounded-lg border border-app-line text-xs font-semibold text-app-ink transition-colors">
+                  {isRadarExpanded ? (
+                    <>
+                      Thu gọn
+                      <ChevronUp className="h-3.5 w-3.5 text-app-ink-muted" />
+                    </>
+                  ) : (
+                    <>
+                      Xem bản đồ
+                      <ChevronDown className="h-3.5 w-3.5 text-app-ink-muted" />
+                    </>
+                  )}
+                </div>
+              </button>
+
+              {isRadarExpanded && (
+                <div className="mt-4 pt-4 border-t border-app-line/60 animate-fade-in space-y-4">
+                  <div className="flex items-center justify-center min-h-[260px] my-1">
+                    <SimpleRadarChart 
+                      data={radarData} 
+                      height={260} 
+                      fill="var(--app-accent)"
+                      stroke="var(--app-accent)"
+                      fillOpacity={0.15}
+                      className="w-full max-w-[280px]" 
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-left" data-testid="onboarding-assessment-summary-mobile">
+                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                      <span className="text-[9px] text-app-ink-muted uppercase font-bold tracking-wider">Điểm TB</span>
+                      <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
+                        {averageScore.toFixed(1)}<span className="text-[10px] font-normal text-app-ink-muted">/10</span>
+                      </p>
+                    </div>
+                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                      <span className="text-[9px] text-app-ink-muted uppercase font-bold tracking-wider">Tiến trình</span>
+                      <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
+                        {Math.round((reviewedAreaCount / 8) * 100)}%
+                      </p>
+                    </div>
+                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                      <span className="text-[9px] text-app-ink-muted uppercase font-bold tracking-wider">Cần tập trung</span>
+                      <p className="text-[10px] font-bold text-app-warm truncate mt-0.5">
+                        {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
+                      </p>
+                    </div>
+                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                      <span className="text-[9px] text-app-ink-muted uppercase font-bold tracking-wider">Mạnh nhất</span>
+                      <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 truncate mt-0.5">
+                        {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
