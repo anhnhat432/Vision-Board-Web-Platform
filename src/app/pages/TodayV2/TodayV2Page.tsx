@@ -1,4 +1,4 @@
-import { Calendar, Check, Plus } from "lucide-react";
+import { Calendar, Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
@@ -291,13 +291,15 @@ function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
         </h1>
       </div>
 
-      <div className="surface-raised hidden rounded-2xl border border-app-line bg-app-surface p-5 md:block">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">12-Week Goal</p>
-        <p className="mt-2 line-clamp-3 break-words text-sm font-medium leading-5 text-app-ink">
+      <div className="relative hidden rounded-xl border border-app-line/60 bg-[#faf6ee] dark:bg-[#1a1c17] p-5 md:block shadow-md rotate-[-0.7deg] transition-transform hover:rotate-0 duration-300">
+        {/* Washi tape effect */}
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-16 h-5 bg-app-accent/15 dark:bg-app-accent/25 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/20" />
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">🎯 MỤC TIÊU 12 TUẦN</p>
+        <p className="mt-2.5 line-clamp-3 break-words font-serif text-sm font-medium leading-relaxed text-app-ink">
           {viewModel.goalTitle}
         </p>
-        <div className="mt-4 flex items-center gap-3">
-          <div className="h-1.5 w-[160px] overflow-hidden rounded-full bg-app-accent-soft" aria-hidden="true">
+        <div className="mt-4.5 flex items-center gap-3">
+          <div className="h-1.5 w-[160px] overflow-hidden rounded-full bg-app-accent-soft/50" aria-hidden="true">
             <div className="h-full rounded-full bg-app-accent" style={{ width: `${viewModel.goalProgressPercent}%` }} />
           </div>
           <span className="text-xs font-semibold text-app-accent">{viewModel.goalProgressPercent}%</span>
@@ -352,10 +354,9 @@ function TodayTasksCard({
         </div>
         <Link
           to="/12-week-system?tab=week"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 items-center rounded-full border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
-          <Plus className="h-3.5 w-3.5" />
-          Thêm việc
+          Xem kế hoạch tuần
         </Link>
       </div>
 
@@ -392,6 +393,12 @@ function TodayTasksCard({
           </div>
         ))}
       </div>
+
+      {totalCount > 0 && completedCount === totalCount && (
+        <div className="mt-4 rounded-xl border border-app-accent-soft bg-app-accent-soft/20 p-4 text-center text-sm font-medium text-app-accent animate-fade-in">
+          ✨ Bạn đã hoàn thành tất cả công việc của ngày hôm nay! Hãy nghỉ ngơi thật thoải mái nhé.
+        </div>
+      )}
     </section>
   );
 }

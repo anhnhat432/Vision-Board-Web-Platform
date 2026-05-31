@@ -246,7 +246,7 @@ export function SetupStepShellLab({
           {isLastStep ? (
             <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:py-2" onClick={handleSubmitClick} disabled={isSubmitting || isSubmitDisabled} aria-busy={isSubmitting}>
               {isSubmitting ? <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
-              {isSubmitting ? "Đang lưu..." : "Lưu kế hoạch"}
+              {isSubmitting ? "Đang lưu..." : "Bắt đầu kế hoạch"}
             </button>
           ) : (
             <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:py-2" onClick={onNext} disabled={isNextDisabled}>

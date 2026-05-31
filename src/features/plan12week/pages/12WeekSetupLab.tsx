@@ -1159,7 +1159,7 @@ export function TwelveWeekSetupLab() {
   };
 
   return (
-    <PageShell maxWidth="lg">
+    <PageShell maxWidth="xl">
       <div className="space-y-5 sm:space-y-6">
         <UpgradePaywallDialog
           open={isPaywallOpen}

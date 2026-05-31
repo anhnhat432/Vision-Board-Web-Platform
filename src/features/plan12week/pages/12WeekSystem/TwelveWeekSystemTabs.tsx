@@ -346,7 +346,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-lg bg-app-bg p-0.5 border border-app-line/20"
+            className="inline-flex min-h-0 rounded-xl bg-app-bg/60 p-1 border border-app-line/30 backdrop-blur-md"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -355,9 +355,9 @@ export function TwelveWeekSystemTabs({
                 value={value}
                 aria-controls={tabPanelId}
                 aria-label={`Mở tab ${label}`}
-                className={`flex-none rounded-md px-3.5 py-1 text-xs transition-all duration-150 gap-1.5 flex items-center justify-center border border-transparent
-                  data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:font-semibold data-[state=active]:border-app-line/10
-                  data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/30`}
+                className={`flex-none rounded-lg px-4 py-1.5 text-xs transition-all duration-300 gap-1.5 flex items-center justify-center border border-transparent
+                  data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:font-medium data-[state=active]:shadow-sm data-[state=active]:border-app-line/20
+                  data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-normal hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/40`}
               >
                 <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>{label}</span>
