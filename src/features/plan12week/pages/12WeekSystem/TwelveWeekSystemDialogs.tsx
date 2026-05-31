@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,7 @@ import {
 } from "@/app/components/ui/alert-dialog";
 import { Checkbox } from "@/app/components/ui/checkbox";
 import { Label } from "@/app/components/ui/label";
+import { Input } from "@/app/components/ui/input";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
 import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
@@ -83,6 +85,13 @@ export function TwelveWeekSystemDialogs({
   handleDeleteAllData,
   isDeletingData,
 }: TwelveWeekSystemDialogsProps) {
+  const [cloudDeleteText, setCloudDeleteText] = useState("");
+
+  useEffect(() => {
+    if (!isDeleteCloudDialogOpen) {
+      setCloudDeleteText("");
+    }
+  }, [isDeleteCloudDialogOpen]);
   return (
     <>
       <UpgradePaywallDialog
@@ -154,18 +163,33 @@ export function TwelveWeekSystemDialogs({
               tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex items-start gap-2.5 px-1 py-1">
-            <Checkbox
-              id="cloud-delete-confirm-checkbox"
-              checked={isCloudDeleteConfirmed}
-              onCheckedChange={(checked) => setIsCloudDeleteConfirmed(checked === true)}
-            />
-            <Label
-              htmlFor="cloud-delete-confirm-checkbox"
-              className="text-sm font-medium leading-relaxed text-app-ink-soft select-none cursor-pointer pt-3"
-            >
-              Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.
-            </Label>
+          <div className="flex flex-col gap-3 px-1 py-1">
+            <div className="flex items-start gap-2.5">
+              <Checkbox
+                id="cloud-delete-confirm-checkbox"
+                checked={isCloudDeleteConfirmed}
+                onCheckedChange={(checked) => setIsCloudDeleteConfirmed(checked === true)}
+              />
+              <Label
+                htmlFor="cloud-delete-confirm-checkbox"
+                className="text-sm font-medium leading-relaxed text-app-ink-soft select-none cursor-pointer pt-3"
+              >
+                Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.
+              </Label>
+            </div>
+            <div className="space-y-1.5 pt-2">
+              <Label htmlFor="cloud-delete-text-input" className="text-xs font-semibold text-app-ink-soft">
+                Nhập chữ <span className="font-bold text-app-warm">XOACLOUD</span> để xác nhận:
+              </Label>
+              <Input
+                id="cloud-delete-text-input"
+                type="text"
+                placeholder="XOACLOUD"
+                className="border-app-line/60 rounded-xl"
+                value={cloudDeleteText}
+                onChange={(e) => setCloudDeleteText(e.target.value)}
+              />
+            </div>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">
@@ -174,7 +198,7 @@ export function TwelveWeekSystemDialogs({
             <AlertDialogAction
               className="bg-app-status-error text-white hover:bg-app-status-error/90 disabled:opacity-50"
               onClick={handleConfirmDeleteCloudWorkspace}
-              disabled={!isCloudDeleteConfirmed}
+              disabled={!isCloudDeleteConfirmed || cloudDeleteText !== "XOACLOUD"}
             >
               Xóa dữ liệu đã đồng bộ
             </AlertDialogAction>

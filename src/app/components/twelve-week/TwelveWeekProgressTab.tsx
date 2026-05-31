@@ -393,7 +393,7 @@ export function TwelveWeekProgressTab({
                 </Tooltip>
               </div>
               <p className="mt-1.5 text-xs font-medium text-app-ink-soft">
-                Tuần này: {currentWeekScoreValue}% · Điểm hệ cũ: {averageScore}
+                Tuần này: {currentWeekScoreValue}% · Điểm trung bình: {averageScore}%
               </p>
             </CardContent>
           </Card>
@@ -554,6 +554,9 @@ export function TwelveWeekProgressTab({
                         <span className="inline-block h-3.5 w-3.5 rounded border border-app-line/20 bg-app-bg shadow-3xs" /> Trống
                       </span>
                     </div>
+                    <p className="mt-3.5 text-[11px] italic text-app-ink-muted">
+                      * Chạm vào ô ngày để xem số việc đã hoàn thành.
+                    </p>
                   </div>
                 </div>
               </CardContent>

@@ -414,19 +414,19 @@ export function TwelveWeekTodayTab({
         data-testid="today-mobile-compact-strip"
         className="order-0 grid grid-cols-3 gap-2 rounded-xl border border-app-line bg-app-surface p-2 sm:hidden shadow-3xs"
       >
-        <div className="min-w-0 rounded-lg bg-app-bg/50 px-2 py-1.5 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
+        <div className="min-w-0 rounded-xl bg-app-bg/50 px-2 py-1.5 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Chờ làm</p>
           <p className="mt-0.5 text-base font-bold text-app-ink">{todayRemainingCount}</p>
         </div>
-        <div className="min-w-0 rounded-lg bg-app-bg/50 px-2 py-1.5 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tuần</p>
+        <div className="min-w-0 rounded-xl bg-app-bg/50 px-2 py-1.5 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tiến độ</p>
           <p className="mt-0.5 text-base font-bold text-app-ink">{weekCompletion.percent}%</p>
         </div>
-        <div className={`min-w-0 rounded-lg px-2 py-1.5 text-center ${reviewDueToday ? "bg-app-warm-soft/60" : "bg-app-accent-soft/60"}`}>
+        <div className={`min-w-0 rounded-xl px-2 py-1.5 text-center ${reviewDueToday ? "bg-app-warm-soft/60" : "bg-app-accent-soft/60"}`}>
           <p
             className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}
           >
-            {reviewDueToday ? "Review" : "Xong"}
+            {reviewDueToday ? "Review" : "Đã chốt"}
           </p>
           <p className="mt-0.5 truncate text-base font-bold text-app-ink">
             {reviewDueToday ? "Hôm nay" : `${todayCompletedCount}/${checkInTotal}`}
@@ -443,7 +443,7 @@ export function TwelveWeekTodayTab({
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-app-accent">
                 <CalendarClock className="h-3.5 w-3.5" />
-                Performance Time Blocking
+                Khung giờ tập trung chiến lược
               </p>
               <p className="mt-1.5 text-sm font-semibold leading-6 font-serif">
                 Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi.
@@ -1046,9 +1046,9 @@ export function TwelveWeekTodayTab({
                       Đang lưu check-in...
                     </>
                   ) : hasSavedTodayCheckIn ? (
-                    "Cập nhật check-in"
+                    "Cập nhật ngày của bạn"
                   ) : (
-                    "Lưu check-in ngày"
+                    "Ghi dấu ngày hôm nay"
                   )}
                 </Button>
                 {reviewDueToday && onOpenWeekTab && (
@@ -1111,7 +1111,7 @@ export function TwelveWeekTodayTab({
                 Đang lưu check-in...
               </>
             ) : (
-              "Lưu check-in hôm nay"
+              "Ghi dấu ngày hôm nay"
             )}
           </Button>
         </div>

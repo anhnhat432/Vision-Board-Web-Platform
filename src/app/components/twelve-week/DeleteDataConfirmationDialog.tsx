@@ -11,6 +11,7 @@ import {
 } from "../ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 import { Trash2 } from "lucide-react";
 
 interface DeleteDataConfirmationDialogProps {
@@ -31,12 +32,16 @@ export function DeleteDataConfirmationDialog({
   isLoading = false,
 }: DeleteDataConfirmationDialogProps) {
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [confirmationText, setConfirmationText] = useState("");
 
   useEffect(() => {
     if (!open) {
       setIsConfirmed(false);
+      setConfirmationText("");
     }
   }, [open]);
+
+  const expectedText = (isSignedIn && !isDemoMode) ? "XOATAIKHOAN" : "XOADULIEU";
 
   const title = isDemoMode
     ? "Xóa dữ liệu trên thiết bị?"
@@ -111,6 +116,21 @@ export function DeleteDataConfirmationDialog({
           </Label>
         </div>
 
+        <div className="space-y-1.5 px-1 py-1">
+          <Label htmlFor="delete-confirm-text-input" className="text-xs font-semibold text-app-ink-soft">
+            Nhập chữ <span className="font-bold text-[color:var(--color-danger-fg)]">{expectedText}</span> để xác nhận:
+          </Label>
+          <Input
+            id="delete-confirm-text-input"
+            type="text"
+            placeholder={expectedText}
+            className="border-app-line/60 rounded-xl"
+            value={confirmationText}
+            onChange={(e) => setConfirmationText(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+
         <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
           <AlertDialogCancel
             disabled={isLoading}
@@ -120,7 +140,7 @@ export function DeleteDataConfirmationDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             className="w-full bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90 focus:bg-[color:var(--color-danger-fg)]/90 disabled:opacity-50"
-            disabled={isLoading || !isConfirmed}
+            disabled={isLoading || !isConfirmed || confirmationText !== expectedText}
             onClick={(event) => {
               event.preventDefault();
               void onConfirm();

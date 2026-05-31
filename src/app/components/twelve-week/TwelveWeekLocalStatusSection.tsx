@@ -1,5 +1,5 @@
 import { type SyntheticEvent, useCallback, useState } from "react";
-import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
+import { AlertTriangle, ChevronDown, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
 import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -774,70 +774,78 @@ export function TwelveWeekLocalStatusSection({
                 {mutationQueueBlocker ??
                   "Gửi các việc đang chờ đồng bộ, lấy dữ liệu tài khoản, rồi chỉ cập nhật thiết bị nếu an toàn. Dữ liệu trên thiết bị vẫn được ưu tiên."}
               </p>
-              <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
-                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chờ đồng bộ</p>
-                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.pendingCount}</p>
+              <details className="group border border-app-line/60 rounded-xl bg-app-bg/10 p-3 transition-all duration-200">
+                <summary className="flex items-center justify-between cursor-pointer text-xs font-bold text-app-ink-soft select-none">
+                  <span>Xem chi tiết kỹ thuật đồng bộ</span>
+                  <ChevronDown className="h-4 w-4 text-app-ink-muted group-open:rotate-180 transition-transform duration-200" />
+                </summary>
+                <div className="mt-3 space-y-3">
+                  <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
+                    <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chờ đồng bộ</p>
+                      <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.pendingCount}</p>
+                    </div>
+                    <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đang gửi</p>
+                      <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.inFlightCount}</p>
+                    </div>
+                    <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lỗi/thử lại</p>
+                      <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.failedOrRetryableCount}</p>
+                    </div>
+                    <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đã nhận</p>
+                      <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.succeededCount}</p>
+                    </div>
+                  </div>
+                  <div className="grid gap-2 pt-2 text-xs leading-5 text-app-ink-muted sm:grid-cols-2">
+                    <p>
+                      <span className="font-semibold text-app-ink-soft">Bắt đầu đồng bộ gần nhất:</span>{" "}
+                      {formatMutationQueueTimestamp(queueSummary.lastDrainStartedAt)}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-app-ink-soft">Kết thúc đồng bộ gần nhất:</span>{" "}
+                      {formatMutationQueueTimestamp(queueSummary.lastDrainFinishedAt)}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-3">
+                    <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mạng</p>
+                      <p
+                        className={`mt-1 text-sm font-semibold ${
+                          mutationQueueSyncStatus.networkStatus === "offline"
+                            ? "text-app-warm"
+                            : mutationQueueSyncStatus.networkStatus === "online"
+                              ? "text-app-accent"
+                              : "text-app-ink-muted"
+                        }`}
+                      >
+                        {mutationQueueSyncStatus.networkStatus === "offline"
+                          ? "Mất mạng"
+                          : mutationQueueSyncStatus.networkStatus === "online"
+                            ? "Có mạng"
+                            : "Không rõ"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                        Tự thử lại khi có mạng
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-app-ink">
+                        {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
+                      </p>
+                    </div>
+                  </div>
+                  {mutationQueueSyncStatus.networkStatus === "offline" ? (
+                    <div className="flex items-start gap-2 rounded-xl border border-app-warm/30 bg-app-warm-soft px-3 py-2">
+                      <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
+                      <p className="text-xs leading-5 text-app-warm">
+                        Trình duyệt đang mất mạng. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đang gửi</p>
-                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.inFlightCount}</p>
-                </div>
-                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lỗi/thử lại</p>
-                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.failedOrRetryableCount}</p>
-                </div>
-                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đã nhận</p>
-                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.succeededCount}</p>
-                </div>
-              </div>
-              <div className="grid gap-2 pt-2 text-xs leading-5 text-app-ink-muted sm:grid-cols-2">
-                <p>
-                  <span className="font-semibold text-app-ink-soft">Bắt đầu đồng bộ gần nhất:</span>{" "}
-                  {formatMutationQueueTimestamp(queueSummary.lastDrainStartedAt)}
-                </p>
-                <p>
-                  <span className="font-semibold text-app-ink-soft">Kết thúc đồng bộ gần nhất:</span>{" "}
-                  {formatMutationQueueTimestamp(queueSummary.lastDrainFinishedAt)}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-3">
-                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mạng</p>
-                  <p
-                     className={`mt-1 text-sm font-semibold ${
-                       mutationQueueSyncStatus.networkStatus === "offline"
-                         ? "text-app-warm"
-                         : mutationQueueSyncStatus.networkStatus === "online"
-                           ? "text-app-accent"
-                           : "text-app-ink-muted"
-                     }`}
-                  >
-                    {mutationQueueSyncStatus.networkStatus === "offline"
-                      ? "Mất mạng"
-                      : mutationQueueSyncStatus.networkStatus === "online"
-                        ? "Có mạng"
-                        : "Không rõ"}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-                    Tự thử lại khi có mạng
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-app-ink">
-                    {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
-                  </p>
-                </div>
-              </div>
-              {mutationQueueSyncStatus.networkStatus === "offline" ? (
-                <div className="flex items-start gap-2 rounded-xl border border-app-warm/30 bg-app-warm-soft px-3 py-2">
-                  <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
-                  <p className="text-xs leading-5 text-app-warm">
-                    Trình duyệt đang mất mạng. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
-                  </p>
-                </div>
-              ) : null}
+              </details>
               <p className="text-xs leading-5 text-app-ink-muted">
                 Dữ liệu trên thiết bị vẫn an toàn nếu đồng bộ lỗi; phần này chỉ dành cho kiểm thử nội bộ.
               </p>

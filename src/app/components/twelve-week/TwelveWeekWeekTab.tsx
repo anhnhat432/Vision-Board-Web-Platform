@@ -555,7 +555,7 @@ export function TwelveWeekWeekTab({
 
       {/* Review Form (khi showForm và đồng thời canShowFormReview) */}
       {showForm && (
-        <div className={cn("rounded-3xl border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-6", !canShowFormReview && "hidden")}>
+        <div className={cn("rounded-3xl border border-app-line/45 bg-app-surface p-5 sm:p-8 shadow-xs space-y-6", !canShowFormReview && "hidden")}>
           <div className="space-y-1">
             <h3 className="font-serif text-lg sm:text-xl font-bold text-app-ink">Đánh giá và cam kết tuần</h3>
             <p className="text-xs text-app-ink-soft">
@@ -690,7 +690,7 @@ export function TwelveWeekWeekTab({
                   rows={3}
                   className="mt-2 text-xs sm:text-sm bg-app-surface border-app-line/60 rounded-xl placeholder:text-app-ink-muted/50 p-3 focus:ring-1 focus:ring-app-accent/20"
                   value={weeklyForm.insights}
-                  placeholder="Ghi lại bài học rút ra để tinh chỉnh nhịp độ..."
+                  placeholder="Ví dụ: Tuần qua mình nhận ra học sâu 90 phút buổi sáng hiệu quả hơn học lắt nhắt buổi tối. Tuần sau sẽ dời khung giờ..."
                   onChange={(event) => onWeeklyFormChange("insights", event.target.value)}
                 />
               </div>
@@ -732,7 +732,7 @@ export function TwelveWeekWeekTab({
                   }`}
                 />
               ))}
-              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">Sẵn sàng</span>
+              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">Tiến độ review</span>
             </div>
           </div>
 
@@ -757,7 +757,7 @@ export function TwelveWeekWeekTab({
               disabled={isSavingReview || !canSubmitWeeklyReview}
               aria-busy={isSavingReview}
             >
-              {isSavingReview ? "Đang lưu..." : "Lưu review tuần"}
+              {isSavingReview ? "Đang lưu..." : "Chốt review tuần này"}
             </Button>
           </div>
         </div>
@@ -995,10 +995,10 @@ export function TwelveWeekWeekTab({
             {isSavingReview ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-1.5" aria-hidden="true" />
-                Đang lưu review tuần...
+                Đang lưu...
               </>
             ) : (
-              "Lưu review tuần"
+              "Chốt review tuần này"
             )}
           </Button>
         </div>
