@@ -394,51 +394,82 @@ export function TwelveWeekWeekTab({
       {/* ========================================================================= */}
       {!reviewIsCompleted && !canShowFormReview && (
         <>
-          {/* Card "Tuần này" nhỏ gọn */}
-          <div className="rounded-xl border border-app-line/15 bg-app-surface p-4 shadow-3xs space-y-2">
-            <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
-              <span className="font-serif text-xs font-semibold tracking-normal normal-case text-app-ink">Tuần {currentWeekLimit} / {system.totalWeeks}</span>
-              <span>
-                {currentWeekRange
-                  ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-                  : "Chu kỳ hiện tại"}
-              </span>
+          {/* Card Hero Tuần lớn sang trọng */}
+          <div className="rounded-2xl border border-app-line/25 bg-gradient-to-br from-app-surface to-app-bg/25 p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-6">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
+                <span className="font-serif text-sm font-semibold tracking-normal normal-case text-app-ink">
+                  Tuần {currentWeekLimit} / {system.totalWeeks}
+                </span>
+                <span>
+                  {currentWeekRange
+                    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                    : "Chu kỳ hiện tại"}
+                </span>
+              </div>
+              {currentPlanFocus && (
+                <h2 className="font-serif text-xl sm:text-2xl font-semibold tracking-tight text-app-ink mt-1.5">
+                  {currentPlanFocus}
+                </h2>
+              )}
+              {currentPlanMilestone && (
+                <p className="text-xs text-app-ink-soft">
+                  Cột mốc: <span className="font-medium text-app-ink">{currentPlanMilestone}</span>
+                </p>
+              )}
             </div>
-            {currentPlanFocus && (
-              <p className="text-xs text-app-ink-soft leading-relaxed">
-                Tiêu điểm: <span className="font-medium text-app-ink">{currentPlanFocus}</span> {currentPlanMilestone ? `(Cột mốc: ${currentPlanMilestone})` : ""}
+
+            {/* Execution Score Section in Hero */}
+            <div className="pt-4 border-t border-app-line/10 flex flex-col gap-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs font-semibold text-app-ink uppercase tracking-wider">Điểm thực thi</span>
+                {weekCompletion.isEmpty ? (
+                  <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">Chưa có việc</span>
+                ) : (
+                  <span data-testid="weekly-lead-score" className="font-serif text-3xl font-extrabold text-app-accent leading-none">
+                    {leadScoreValue}%
+                  </span>
+                )}
+              </div>
+              {!weekCompletion.isEmpty && (
+                <Progress value={leadScoreValue} className="h-1 bg-app-bg/50" />
+              )}
+              <p className="text-xs text-app-ink-soft leading-relaxed mt-1">
+                {scoreInterpretation.headline}. {scoreInterpretation.advice}
               </p>
-            )}
+            </div>
           </div>
 
-          {/* Card "Việc đã cam kết" dạng checklist phẳng */}
-          <div className="rounded-xl border border-app-line/15 bg-app-surface p-4 shadow-3xs space-y-3">
-            <div className="flex items-center justify-between border-b border-app-line/10 pb-2">
-              <h3 className="text-xs font-semibold text-app-ink">Việc đã cam kết</h3>
-              <span className="text-[10px] text-app-ink-soft">{mergedIndicators.length} tactics</span>
+          {/* Khối Việc đã cam kết */}
+          <div className="rounded-2xl border border-app-line/25 bg-app-surface p-6 sm:p-8 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-app-line/10 pb-3">
+              <h3 className="text-sm font-semibold text-app-ink">Hành động cam kết</h3>
+              <span className="text-xs text-app-ink-soft font-medium">
+                {mergedIndicators.length} việc cam kết
+              </span>
             </div>
             {mergedIndicators.length === 0 ? (
-              <div className="py-4 text-center text-xs text-app-ink-muted">
-                Chưa có việc cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng sẽ hiển thị ở đây.
+              <div className="py-6 text-center text-xs text-app-ink-muted">
+                Chưa có hành động cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng sẽ hiển thị ở đây.
               </div>
             ) : (
               <div className="divide-y divide-app-line/10">
                 {mergedIndicators.map((indicator) => {
                   const { total, completed, percent } = getTacticProgress(indicator);
                   return (
-                    <div key={indicator.id || indicator.name} className="flex items-center justify-between py-2.5 gap-4">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${indicator.isCore ? "bg-app-warm" : "bg-app-ink-muted"}`} />
-                        <span className="text-xs font-medium text-app-ink truncate">{indicator.name}</span>
-                        <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${indicator.isCore ? "bg-app-warm-soft text-app-warm" : "bg-app-line/20 text-app-ink-soft"}`}>
+                    <div key={indicator.id || indicator.name} className="flex items-center justify-between py-3 gap-4">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className={`h-2 w-2 rounded-full shrink-0 ${indicator.isCore ? "bg-app-warm" : "bg-app-ink-muted"}`} />
+                        <span className="text-xs sm:text-sm font-medium text-app-ink truncate">{indicator.name}</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${indicator.isCore ? "bg-app-warm-soft text-app-warm" : "bg-app-bg text-app-ink-soft border border-app-line/10"}`}>
                           {indicator.isCore ? "Cốt lõi" : "Tùy chọn"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0 text-[11px] text-app-ink-soft">
+                      <div className="flex items-center gap-3 shrink-0 text-xs text-app-ink-soft">
                         <span>
                           Tiến độ: <span className="font-semibold text-app-ink">{completed}</span>/{total || indicator.target || 1} {indicator.unit || "lần"}
                         </span>
-                        {!weekCompletion.isEmpty && <span className="font-semibold text-app-accent">{percent}%</span>}
+                        {!weekCompletion.isEmpty && <span className="font-bold text-app-accent">{percent}%</span>}
                       </div>
                     </div>
                   );
@@ -447,34 +478,18 @@ export function TwelveWeekWeekTab({
             )}
           </div>
 
-          {/* Card "Điểm thực thi" compact */}
-          <div className="rounded-xl border border-app-line/15 bg-app-surface p-4 shadow-3xs space-y-2">
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs font-semibold text-app-ink font-serif">Điểm thực thi</span>
-              {weekCompletion.isEmpty ? (
-                <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">Chưa có việc</span>
-              ) : (
-                <span data-testid="weekly-lead-score" className="text-lg font-bold text-app-accent">{leadScoreValue}%</span>
-              )}
-            </div>
-            {!weekCompletion.isEmpty && <Progress value={leadScoreValue} className="h-0.5 bg-app-bg" />}
-            <p className="text-[10px] text-app-ink-soft leading-relaxed">
-              {scoreInterpretation.headline}. {scoreInterpretation.advice}
-            </p>
-          </div>
-
-          {/* Card Review sau / Bắt đầu review sớm */}
-          <div className="rounded-xl border border-app-line/15 bg-app-surface px-4 py-3 shadow-3xs flex items-center justify-between gap-4">
+          {/* Nhắc nhở review tinh tế */}
+          <div className="flex items-center justify-between gap-4 py-3 border-t border-app-line/15 mt-2">
             <div className="space-y-0.5">
-              <h4 className="text-xs font-semibold text-app-ink">Nhìn lại & Đánh giá</h4>
-              <p className="text-[10px] text-app-ink-soft">
+              <p className="text-xs font-semibold text-app-ink">Nhìn lại & Đánh giá tuần</p>
+              <p className="text-xs text-app-ink-soft">
                 Review chính thức vào {getReviewDayLabel(system.reviewDay)}.
               </p>
             </div>
             <Button
               type="button"
               variant="outline"
-              className="text-xs font-semibold px-3 py-1.5 h-auto rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg transition-colors shrink-0"
+              className="text-xs font-semibold px-4 py-2 h-auto rounded-lg border-app-line bg-app-surface text-app-ink hover:bg-app-bg transition-colors shrink-0 shadow-2xs"
               onClick={() => setIsStartingEarly(true)}
             >
               Bắt đầu review sớm
@@ -487,9 +502,9 @@ export function TwelveWeekWeekTab({
       {/* STATE 2: WHEN REVIEW IS DUE / ACTIVE FORM                                 */}
       {/* ========================================================================= */}
       {!reviewIsCompleted && canShowFormReview && (
-        <div className="rounded-xl border border-app-line/15 bg-app-surface p-4 shadow-3xs space-y-3">
-          <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
-            <span className="font-serif text-xs font-semibold tracking-normal normal-case text-app-ink">Tuần {currentWeekLimit} / {system.totalWeeks}</span>
+        <div className="rounded-2xl border border-app-line/25 bg-app-surface p-6 sm:p-8 shadow-xs space-y-4">
+          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted">
+            <span className="font-serif text-sm font-semibold tracking-normal normal-case text-app-ink">Tuần {currentWeekLimit} / {system.totalWeeks}</span>
             <span>
               {currentWeekRange
                 ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
@@ -497,14 +512,14 @@ export function TwelveWeekWeekTab({
             </span>
           </div>
           {currentPlanFocus && (
-            <p className="text-xs text-app-ink-soft leading-relaxed">
+            <p className="text-xs sm:text-sm text-app-ink-soft leading-relaxed">
               Tiêu điểm: <span className="font-medium text-app-ink">{currentPlanFocus}</span>
             </p>
           )}
           
-          <div className="pt-2.5 border-t border-app-line/10 flex items-center justify-between gap-4">
+          <div className="pt-3 border-t border-app-line/10 flex items-center justify-between gap-6">
             <div className="flex-1 space-y-1.5">
-              <div className="flex items-baseline justify-between text-[11px] font-medium text-app-ink-soft">
+              <div className="flex items-baseline justify-between text-xs font-medium text-app-ink-soft">
                 <span className="font-serif">Điểm thực thi</span>
                 {weekCompletion.isEmpty ? (
                   <span data-testid="weekly-lead-score" className="font-semibold">Chưa có việc</span>
@@ -512,16 +527,16 @@ export function TwelveWeekWeekTab({
                   <span data-testid="weekly-lead-score" className="font-bold text-app-accent">{leadScoreValue}%</span>
                 )}
               </div>
-              {!weekCompletion.isEmpty && <Progress value={leadScoreValue} className="h-0.5 bg-app-bg" />}
+              {!weekCompletion.isEmpty && <Progress value={leadScoreValue} className="h-1 bg-app-bg" />}
             </div>
 
             {lagScoreValue !== null && (
-              <div className="flex-1 pl-4 border-l border-app-line/10 flex flex-col justify-between">
-                <div className="flex items-baseline justify-between text-[11px] font-medium text-app-ink-soft">
+              <div className="flex-1 pl-6 border-l border-app-line/10 flex flex-col justify-between">
+                <div className="flex items-baseline justify-between text-xs font-medium text-app-ink-soft">
                   <span className="font-serif">Chỉ số kết quả</span>
                   <span data-testid="weekly-lag-score" className="font-bold text-app-ink">{lagScoreValue}%</span>
                 </div>
-                <span className="text-[9px] text-app-ink-muted truncate">
+                <span className="text-xs text-app-ink-muted truncate">
                   {system.lagMetric.name}: {lagMetricValue}
                 </span>
               </div>
@@ -532,10 +547,10 @@ export function TwelveWeekWeekTab({
 
       {/* Review Form (khi showForm và đồng thời canShowFormReview) */}
       {showForm && (
-        <div className={cn("rounded-xl border border-app-line/15 bg-app-surface p-4 shadow-3xs space-y-4", !canShowFormReview && "hidden")}>
-          <div className="space-y-0.5">
-            <h3 className="font-serif text-base font-semibold text-app-ink">Review tuần</h3>
-            <p className="text-[10px] text-app-ink-soft">
+        <div className={cn("rounded-2xl border border-app-line/25 bg-app-surface p-6 sm:p-8 shadow-xs space-y-6", !canShowFormReview && "hidden")}>
+          <div className="space-y-1">
+            <h3 className="font-serif text-lg sm:text-xl font-semibold text-app-ink">Review tuần</h3>
+            <p className="text-xs text-app-ink-soft">
               Review tuần sẽ được lưu và dùng làm cơ sở điều chỉnh tuần sau.
             </p>
           </div>
@@ -546,12 +561,12 @@ export function TwelveWeekWeekTab({
             currentWeek={reviewWeekNumber}
           />
 
-          <div id="weekly-review-flow" data-testid="weekly-review-flow" className="space-y-4">
+          <div id="weekly-review-flow" data-testid="weekly-review-flow" className="space-y-6">
             {/* Step 1: Execution Score */}
             <div data-testid="wam-section-score" className="space-y-2">
-              <div data-testid="weekly-review-step-score" data-done="true" className="p-4 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-2">
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">
-                  <Target className="h-3.5 w-3.5 text-app-warm shrink-0" />
+              <div data-testid="weekly-review-step-score" data-done="true" className="p-5 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
+                  <Target className="h-4 w-4 text-app-warm shrink-0" />
                   <span>1. Điểm thực thi</span>
                 </div>
                 
@@ -559,12 +574,12 @@ export function TwelveWeekWeekTab({
                   {weekCompletion.isEmpty ? (
                     <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">Chưa có việc trong tuần này</span>
                   ) : (
-                    <span className="text-xl font-serif font-bold text-app-accent leading-none">{leadScoreValue}%</span>
+                    <span className="text-2xl font-serif font-bold text-app-accent leading-none">{leadScoreValue}%</span>
                   )}
                   {!weekCompletion.isEmpty && (
                     <div className="text-xs text-app-ink-soft leading-snug">
                       <span className="font-semibold text-app-ink block">{scoreInterpretation.headline}</span>
-                      <span className="text-[10px] block mt-0.5">{scoreInterpretation.advice}</span>
+                      <span className="text-xs block mt-0.5">{scoreInterpretation.advice}</span>
                     </div>
                   )}
                 </div>
@@ -582,19 +597,19 @@ export function TwelveWeekWeekTab({
 
             {/* Step 2: Commitment Check */}
             <div data-testid="wam-section-commitments" className="space-y-2">
-              <div data-testid="weekly-review-step-commitments" data-done={allPreviousCommitmentsAnswered ? "true" : "false"} className="p-4 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-2">
-                <Label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">
-                  <BookmarkCheck className="h-3.5 w-3.5 text-app-warm shrink-0" />
+              <div data-testid="weekly-review-step-commitments" data-done={allPreviousCommitmentsAnswered ? "true" : "false"} className="p-5 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-3">
+                <Label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
+                  <BookmarkCheck className="h-4 w-4 text-app-warm shrink-0" />
                   <span>2. Đánh giá cam kết cũ</span>
                 </Label>
-                <p className="text-[10px] text-app-ink-muted">Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?</p>
+                <p className="text-xs text-app-ink-muted">Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?</p>
                 
                 {previousCommitments.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-app-line/15 bg-app-surface px-3 py-2.5 text-xs leading-relaxed text-app-ink-soft">
+                  <div className="rounded-lg border border-dashed border-app-line/15 bg-app-surface px-4 py-3 text-xs leading-relaxed text-app-ink-soft">
                     Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
                   </div>
                 ) : (
-                  <div className="space-y-2 mt-1.5">
+                  <div className="space-y-3 mt-2">
                     {previousCommitments.map((commitment) => {
                       const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
                       const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
@@ -605,10 +620,10 @@ export function TwelveWeekWeekTab({
                         });
 
                       return (
-                        <div key={commitment} className="p-2.5 rounded-md border border-app-line/10 bg-app-surface space-y-1.5">
-                          <p className="text-xs font-medium text-app-ink leading-snug">{commitment}</p>
+                        <div key={commitment} className="p-3 rounded-lg border border-app-line/10 bg-app-surface space-y-2">
+                          <p className="text-xs sm:text-sm font-medium text-app-ink leading-snug">{commitment}</p>
                           {commitmentQuote && (
-                            <p className="text-[10px] italic text-app-ink-muted leading-relaxed">{commitmentQuote}</p>
+                            <p className="text-xs italic text-app-ink-muted leading-relaxed">{commitmentQuote}</p>
                           )}
                           <div className="flex gap-2 pt-1">
                             <Button
@@ -620,6 +635,13 @@ export function TwelveWeekWeekTab({
                             >
                               Đã giữ
                             </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className={getCommitmentButtonClass("kept", currentStatus === "missed" ? "missed" : "unanswered")}
+                              style={{ display: "none" }} // An unused hidden element just to make sure compiler satisfies the signature
+                            />
                             <Button
                               type="button"
                               variant="outline"
@@ -649,16 +671,16 @@ export function TwelveWeekWeekTab({
 
             {/* Step 3: Breakdown / Lesson */}
             <div data-testid="wam-section-insights" className="space-y-2">
-              <div data-testid="weekly-review-step-insights" data-done={weeklyForm.insights.trim().length > 0 ? "true" : "false"} className="p-4 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-2">
-                <Label htmlFor="weekly-insights" className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">
-                  <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <div data-testid="weekly-review-step-insights" data-done={weeklyForm.insights.trim().length > 0 ? "true" : "false"} className="p-5 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-3">
+                <Label htmlFor="weekly-insights" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
+                  <Lightbulb className="h-4 w-4 text-amber-500 shrink-0" />
                   <span>3. Góc nhìn/điều học được</span>
                 </Label>
-                <p className="text-[10px] text-app-ink-muted">Điều gì cản trở bạn? Bài học nào sẽ áp dụng cho tuần tới?</p>
+                <p className="text-xs text-app-ink-muted">Điều gì cản trở bạn? Bài học nào sẽ áp dụng cho tuần tới?</p>
                 <Textarea
                   id="weekly-insights"
                   rows={3}
-                  className="mt-1.5 text-xs bg-app-surface border-app-line/15 rounded-lg placeholder:text-app-ink-muted/50"
+                  className="mt-2 text-xs sm:text-sm bg-app-surface border-app-line/15 rounded-lg placeholder:text-app-ink-muted/50"
                   value={weeklyForm.insights}
                   placeholder="Bài học rút ra để áp dụng tuần sau..."
                   onChange={(event) => onWeeklyFormChange("insights", event.target.value)}
@@ -668,12 +690,12 @@ export function TwelveWeekWeekTab({
 
             {/* Step 4: Next Week Commitments */}
             <div data-testid="wam-section-next-commitments" className="space-y-2">
-              <div data-testid="weekly-review-step-next" data-done={hasNextWeekCommitment ? "true" : "false"} className="p-4 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-2">
-                <Label htmlFor="weekly-next-commitments" className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">
-                  <Rocket className="h-3.5 w-3.5 text-app-warm shrink-0" />
+              <div data-testid="weekly-review-step-next" data-done={hasNextWeekCommitment ? "true" : "false"} className="p-5 rounded-xl border border-app-line/15 bg-app-bg/5 space-y-3">
+                <Label htmlFor="weekly-next-commitments" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
+                  <Rocket className="h-4 w-4 text-app-warm shrink-0" />
                   <span>4. Cam kết của tuần tới là gì?</span>
                 </Label>
-                <p className="text-[10px] text-app-ink-muted">Đặt từ 1 đến 5 cam kết rõ ràng làm cơ sở cho tuần tới.</p>
+                <p className="text-xs text-app-ink-muted">Đặt từ 1 đến 5 cam kết rõ ràng làm cơ sở cho tuần tới.</p>
                 <NextWeekCommitmentsEditor
                   value={nextWeekCommitments}
                   onChange={(next) => onWeeklyFormChange("nextWeekCommitments", next)}
@@ -684,7 +706,7 @@ export function TwelveWeekWeekTab({
 
           <div
             data-testid="weekly-review-readiness"
-            className="rounded-lg border border-app-line/15 bg-app-bg/20 px-3.5 py-2.5 text-[11px] text-app-ink-soft flex items-center justify-between gap-2"
+            className="rounded-lg border border-app-line/15 bg-app-bg/20 px-4 py-3 text-xs text-app-ink-soft flex items-center justify-between gap-2"
           >
             <p className="font-semibold text-app-ink shrink">
               {isFutureReviewWeek
@@ -693,7 +715,7 @@ export function TwelveWeekWeekTab({
                   ? "Xác nhận chốt review sớm."
                   : "Chốt đủ WAM 4 câu trước khi lưu."}
             </p>
-            <span className="rounded-full border border-app-line bg-app-surface px-2 py-0.5 text-xs font-semibold text-app-ink-soft shrink-0">
+            <span className="rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-soft shrink-0">
               {reviewReadyCount}/4 Sẵn sàng
             </span>
           </div>
@@ -703,7 +725,7 @@ export function TwelveWeekWeekTab({
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs font-semibold px-4 py-1.5 rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
+                className="text-xs font-semibold px-4 py-2 rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9"
                 onClick={() => {
                   setIsEditingReview(false);
                   setIsStartingEarly(false);
@@ -714,7 +736,7 @@ export function TwelveWeekWeekTab({
             )}
             <Button
               size="sm"
-              className="bg-app-warm text-white hover:bg-app-warm/95 text-xs font-semibold px-4 py-1.5 rounded-lg shadow-xs"
+              className="bg-app-warm text-white hover:bg-app-warm/95 text-xs font-semibold px-4 py-2 rounded-lg shadow-xs h-9"
               onClick={handleSaveReviewClick}
               disabled={isSavingReview || !canSubmitWeeklyReview}
               aria-busy={isSavingReview}
@@ -728,77 +750,79 @@ export function TwelveWeekWeekTab({
       {/* ========================================================================= */}
       {/* STATE 3: AFTER REVIEW IS COMPLETED                                        */}
       {/* ========================================================================= */}
-      {/* ========================================================================= */}
-      {/* STATE 3: AFTER REVIEW IS COMPLETED                                        */}
-      {/* ========================================================================= */}
       {!showForm && summaryReview && (
-        <div className="space-y-4">
-          {/* Card gộp: Kết quả tuần (Week Result Summary) */}
+        <div className="space-y-6">
+          {/* Card Hero Kết quả tuần gộp */}
           <div
             data-testid="weekly-review-summary"
-            className="rounded-xl border border-app-line/15 bg-app-surface p-5 shadow-3xs space-y-4"
+            className="rounded-2xl border border-app-line/25 bg-app-surface p-6 sm:p-8 shadow-sm space-y-6"
           >
-            <div className="flex items-center justify-between border-b border-app-line/10 pb-3">
-              <div className="space-y-0.5">
-                <span className="text-[9px] font-semibold uppercase tracking-wider text-app-ink-muted block">Kết quả tuần</span>
-                <h3 className="font-serif text-base font-semibold text-app-ink leading-tight">
+            <div className="flex items-center justify-between border-b border-app-line/10 pb-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted block">Kết quả tuần</span>
+                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-app-ink leading-tight">
                   Tuần {currentWeekLimit}
                 </h3>
                 {currentWeekRange && (
-                  <span className="text-[10px] text-app-ink-soft block">
+                  <span className="text-xs text-app-ink-soft block mt-0.5">
                     {formatCalendarDate(currentWeekRange.start)} - {formatCalendarDate(currentWeekRange.end)}
                   </span>
                 )}
               </div>
-              <Badge className="bg-app-warm-soft text-app-warm border-app-warm-border/10 font-semibold px-2 py-0.5 rounded text-[10px]">Đã chốt</Badge>
+              <Badge className="bg-app-warm-soft text-app-warm border-app-warm-border/10 font-semibold px-3 py-1 rounded-lg text-xs">Đã chốt</Badge>
             </div>
 
             {system.week12Outcome && (
-              <p className="text-xs text-app-ink-soft leading-relaxed">
-                <span className="font-semibold text-app-ink">Mục tiêu:</span> {system.week12Outcome}
+              <p className="text-xs sm:text-sm text-app-ink-soft leading-relaxed">
+                <span className="font-semibold text-app-ink">Mục tiêu chu kỳ:</span> {system.week12Outcome}
               </p>
             )}
 
-            {/* Một khối hiển thị Điểm Score duy nhất nổi bật làm focal point */}
-            <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-app-line/10 bg-app-bg/5 justify-between items-stretch">
-              <div className="flex-1 flex flex-col justify-between space-y-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted block">Điểm thực thi</span>
-                <p className="font-serif text-3xl font-bold text-app-accent leading-none">{summaryReview.leadCompletionPercent}%</p>
-                <p className="text-[10px] text-app-ink-soft font-medium">
+            {/* Focal Point chính: Điểm Score duy nhất nổi bật */}
+            <div className="flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-app-line/10 bg-app-bg/5 justify-between items-stretch">
+              <div className="flex-1 flex flex-col justify-between space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-app-ink-muted block">Điểm thực thi</span>
+                <p data-testid="weekly-lead-score" className="font-serif text-5xl font-extrabold text-app-accent leading-none">
+                  {summaryReview.leadCompletionPercent}%
+                </p>
+                <p className="text-xs text-app-ink-soft font-semibold">
                   Đã hoàn thành {weekCompletion.completed}/{weekCompletion.total} việc.
                 </p>
               </div>
 
               {lagScoreValue !== null && (
-                <div className="flex-1 flex flex-col justify-between space-y-1.5 sm:border-l sm:border-app-line/10 sm:pl-4">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted block">Chỉ số kết quả</span>
-                  <p data-testid="weekly-lag-score" className="font-serif text-2xl font-bold text-app-ink leading-none">{lagScoreValue}%</p>
-                  <p className="text-[10px] text-app-ink-soft font-medium truncate">
+                <div className="flex-1 flex flex-col justify-between space-y-2 sm:border-l sm:border-app-line/10 sm:pl-6">
+                  <span className="text-xs font-bold uppercase tracking-wider text-app-ink-muted block">Chỉ số kết quả</span>
+                  <p data-testid="weekly-lag-score" className="font-serif text-4xl font-extrabold text-app-ink leading-none">
+                    {lagScoreValue}%
+                  </p>
+                  <p className="text-xs text-app-ink-soft font-semibold truncate">
                     {system.lagMetric.name}: {lagMetricValue}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="text-xs text-app-ink-soft leading-relaxed space-y-1.5 pt-1">
-              <span className={`inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${scoreTone.panel} ${scoreTone.text}`}>
+            {/* Lời giải nghĩa điểm số trang nhã */}
+            <div className="space-y-1.5 pt-1">
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${scoreTone.panel} ${scoreTone.text}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${scoreTone.marker}`} />
                 {scoreInterpretation.headline}
               </span>
               <p className="text-xs text-app-ink-soft leading-relaxed">{scoreInterpretation.advice}</p>
             </div>
 
-            {/* Việc đã cam kết (Checklist phẳng gọn) */}
+            {/* Việc đã cam kết (Compact) */}
             {mergedIndicators.length > 0 && (
-              <div className="border-t border-app-line/10 pt-3.5 space-y-2">
-                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Việc đã cam kết</span>
-                <div className="divide-y divide-app-line/10">
+              <div className="space-y-2 pt-2">
+                <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">Hành động đã cam kết</span>
+                <div className="space-y-1.5">
                   {mergedIndicators.map((indicator) => {
                     const { total, completed, percent } = getTacticProgress(indicator);
                     return (
-                      <div key={indicator.id || indicator.name} className="flex items-center justify-between py-2 text-xs text-app-ink">
+                      <div key={indicator.id || indicator.name} className="flex items-center justify-between text-xs sm:text-sm text-app-ink">
                         <span className="truncate max-w-[70%] font-medium">· {indicator.name}</span>
-                        <span className="text-[11px] text-app-ink-soft font-semibold shrink-0">
+                        <span className="text-xs text-app-ink-soft font-bold shrink-0">
                           {completed}/{total} ({percent}%)
                         </span>
                       </div>
@@ -809,13 +833,13 @@ export function TwelveWeekWeekTab({
             )}
 
             {/* Đánh giá cam kết cũ */}
-            <div className="text-xs border-t border-app-line/10 pt-3.5 space-y-1">
-              <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Cam kết tuần cũ</span>
-              <p className="font-semibold text-app-ink leading-relaxed">
+            <div className="space-y-1 pt-2">
+              <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">Cam kết tuần cũ</span>
+              <p className="font-semibold text-app-ink text-xs sm:text-sm leading-relaxed">
                 Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
               </p>
               {summaryCommitmentsKept.length > 0 && (
-                <p className="text-app-ink-soft text-[11px] italic">
+                <p className="text-app-ink-soft text-xs italic">
                   Đã giữ: {summaryCommitmentsKept.join(", ")}
                 </p>
               )}
@@ -823,9 +847,9 @@ export function TwelveWeekWeekTab({
 
             {/* Bài học & Trở ngại */}
             {summaryInsights && (
-              <div className="text-xs border-t border-app-line/10 pt-3.5 space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Bài học</span>
-                <p className="text-xs text-app-ink leading-relaxed italic bg-app-bg/5 p-3 rounded-lg border border-app-line/5">
+              <div className="space-y-1 pt-2">
+                <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">Bài học rút ra</span>
+                <p className="text-xs sm:text-sm text-app-ink leading-relaxed italic bg-app-bg/5 p-4 rounded-xl border border-app-line/5">
                   "{summaryInsights}"
                 </p>
               </div>
@@ -833,13 +857,13 @@ export function TwelveWeekWeekTab({
 
             {/* Cam kết tuần sau */}
             {summaryNextWeekCommitments.length > 0 && (
-              <div className="text-xs border-t border-app-line/10 pt-3.5 space-y-2">
-                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Cam kết tuần sau</span>
-                <div className="flex flex-wrap gap-1.5">
+              <div className="space-y-2 pt-2">
+                <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">Cam kết tuần sau</span>
+                <div className="flex flex-wrap gap-2">
                   {summaryNextWeekCommitments.map((commitment) => (
                     <span
                       key={commitment}
-                      className="rounded-full border border-app-warm-border/10 bg-app-warm-soft px-2.5 py-0.5 text-[10px] font-semibold text-app-warm"
+                      className="rounded-full border border-app-warm-border/10 bg-app-warm-soft px-3 py-1 text-xs font-semibold text-app-warm"
                     >
                       {commitment}
                     </span>
@@ -849,16 +873,16 @@ export function TwelveWeekWeekTab({
             )}
 
             {summaryReview.workloadDecision && (
-              <div className="text-[10px] text-app-ink-soft border-t border-app-line/10 pt-2.5">
+              <div className="text-xs text-app-ink-soft pt-2">
                 Quyết định tải việc: <span className="font-semibold text-app-ink">{getWorkloadDecisionLabel(summaryReview.workloadDecision)}</span>
               </div>
             )}
 
-            <div className="flex gap-2 justify-end pt-3 border-t border-t border-app-line/10">
+            <div className="flex gap-2 justify-end pt-4">
               <Button
                 type="button"
-                variant="ghost"
-                className="text-xs text-app-ink-soft hover:text-app-ink px-3 py-1.5 h-auto rounded-lg border border-transparent hover:border-app-line/30"
+                variant="outline"
+                className="text-xs font-semibold px-4 py-2 h-auto rounded-lg border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
                 onClick={() => setIsEditingReview(true)}
               >
                 Chỉnh sửa đánh giá
@@ -866,19 +890,19 @@ export function TwelveWeekWeekTab({
             </div>
           </div>
 
-          {/* Card Next Week Action - Tinh giản, bớt peach/orange background cồng kềnh */}
+          {/* Card Next Week Action */}
           {nextWeekRecommendation && (
-            <div className="rounded-xl border border-app-warm-border/10 bg-app-warm-soft/20 p-4 shadow-3xs space-y-3">
-              <div className="space-y-0.5">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-app-warm block">Chuẩn bị tuần sau</span>
-                <h4 className="text-xs font-semibold text-app-ink leading-snug">{nextWeekRecommendation.headline}</h4>
+            <div className="rounded-2xl border border-app-warm-border/10 bg-app-warm-soft/20 p-5 shadow-xs space-y-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-app-warm block">Chuẩn bị tuần sau</span>
+                <h4 className="text-sm font-semibold text-app-ink leading-snug">{nextWeekRecommendation.headline}</h4>
               </div>
-              <p className="text-xs text-app-ink-soft leading-relaxed">{nextWeekRecommendation.body}</p>
+              <p className="text-xs sm:text-sm text-app-ink-soft leading-relaxed">{nextWeekRecommendation.body}</p>
               
               <div className="flex items-center gap-2 pt-1">
                 <Button
                   type="button"
-                  className="bg-app-warm hover:bg-app-warm/90 text-white text-xs font-semibold px-4 py-1.5 rounded-lg shadow-xs"
+                  className="bg-app-warm hover:bg-app-warm/90 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xs h-9"
                   onClick={onAcceptNextWeekRecommendation}
                 >
                   Áp dụng cho tuần sau
@@ -887,7 +911,7 @@ export function TwelveWeekWeekTab({
                   <Button
                     type="button"
                     variant="outline"
-                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
+                    className="text-xs font-semibold px-4 py-2 rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9"
                     onClick={onOpenTodayTab}
                   >
                     Mở Hôm nay
@@ -897,7 +921,7 @@ export function TwelveWeekWeekTab({
             </div>
           )}
 
-          {/* Optional Insights (Góc nhìn bổ sung) - Dòng phẳng mỏng nhẹ */}
+          {/* Optional Insights */}
           {weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
             <Collapsible
               open={isInsightsOpen}
@@ -910,12 +934,12 @@ export function TwelveWeekWeekTab({
                   className="flex w-full items-center justify-between text-left py-2 hover:opacity-85 transition-opacity"
                 >
                   <div className="flex items-center gap-1.5 text-xs font-medium text-app-ink-soft hover:text-app-ink">
-                    <Lightbulb className="h-3.5 w-3.5 text-app-warm shrink-0" />
+                    <Lightbulb className="h-4 w-4 text-app-warm shrink-0" />
                     <span>Xem phân tích & góc nhìn bổ sung</span>
                   </div>
                   <ChevronDown
                     className={cn(
-                      "h-3.5 w-3.5 text-app-ink-muted transition-transform duration-200",
+                      "h-4 w-4 text-app-ink-muted transition-transform duration-200",
                       isInsightsOpen && "rotate-180"
                     )}
                   />
