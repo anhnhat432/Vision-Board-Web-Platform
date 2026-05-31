@@ -360,7 +360,7 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex-none rounded-xl px-5 py-2.5 text-xs transition-all duration-200 gap-2 flex items-center justify-center border border-transparent min-h-[40px]
+                  className={`relative flex-none rounded-xl px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm transition-all duration-200 gap-2 flex items-center justify-center border border-transparent min-h-[40px]
                     data-[state=active]:bg-gradient-to-b data-[state=active]:from-app-surface data-[state=active]:to-app-surface/90 data-[state=active]:text-app-accent data-[state=active]:font-bold data-[state=active]:shadow-xs data-[state=active]:border-app-line/20
                     data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/40`}
                 >

@@ -69,7 +69,7 @@ export function TwelveWeekCycleSettingsPanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <Card data-tour-id="system-settings-panel" className="border border-app-line bg-app-surface shadow-lg hover:shadow-xl transition-all duration-300">
+      <Card data-tour-id="system-settings-panel" className="border border-app-line bg-app-surface shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-app-ink text-xl font-bold">
             <SlidersHorizontal className="h-5 w-5 text-app-accent animate-pulse" />

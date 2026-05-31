@@ -1,25 +1,43 @@
-import { SlidersHorizontal, CalendarClock, Database, MessageSquare } from "lucide-react";
+import {
+  SlidersHorizontal,
+  CalendarClock,
+  Database,
+  MessageSquare,
+  Bell,
+  Settings2,
+  Crown,
+  AlertTriangle,
+  Zap,
+} from "lucide-react";
 
 import { FeedbackDialog } from "../FeedbackDialog";
-import { DataStorageInfo } from "../DataStorageInfo";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
 import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
-import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
+import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
+import { isRealMode } from "../../utils/app-mode";
+import {
+  TwelveWeekRemindersSettings,
+  TwelveWeekExecutionPreferences,
+  TwelveWeekDataSafety,
+  TwelveWeekDangerZone,
+  TwelveWeekQuickShortcuts,
+} from "./TwelveWeekDeviceDetailsSection";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
   return (
-    <div className="stack-section pt-4 space-y-8">
+    <div className="stack-section pt-4 space-y-8 pb-12">
+      {/* 1. Nhịp kế hoạch (Plan Rhythm) */}
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
             <SlidersHorizontal className="h-5 w-5 text-emerald-500" />
-            Cài đặt mục tiêu
+            Nhịp kế hoạch
           </span>
         }
-        description="Tên mục tiêu, chu kỳ 12 tuần, ngày review, thời gian nhắc nhở"
+        description="Điều chỉnh chu kỳ 12 tuần, ngày review, mức tải, sắp xếp tactics và lịch tuần tham chiếu."
       >
         <TwelveWeekCycleSettingsPanel
           system={props.system}
@@ -30,85 +48,169 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onTacticPriorityChange={props.onTacticPriorityChange}
           onTacticTypeChange={props.onTacticTypeChange}
         />
+        <div className="mt-6 border-t border-app-line pt-6">
+          <p className="text-sm font-semibold text-app-ink mb-3 flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-sky-500" />
+            Lịch tuần tham chiếu
+          </p>
+          <WeeklyTimeBlocksPanel value={props.system.weeklyTimeBlocks ?? []} onChange={props.onTimeBlocksChange} />
+        </div>
       </SectionBlock>
 
+      {/* 2. Đăng ký & Quyền truy cập (Billing & Access) - Chỉ hiển thị trong Real Mode */}
+      {isRealMode() && (
+        <SectionBlock
+          title={
+            <span className="flex items-center gap-2 text-app-ink">
+              <Crown className="h-5 w-5 text-amber-500" />
+              Đăng ký & Quyền truy cập
+            </span>
+          }
+          description="Quản lý gói dịch vụ Plus, khôi phục quyền truy cập hoặc đồng bộ hóa trạng thái tài khoản."
+        >
+          <TwelveWeekPlanAccessSection
+            currentPlanCode={props.currentPlanCode}
+            entitlementKeys={props.entitlementKeys}
+            billingProviderStatus={props.billingProviderStatus}
+            lastEntitlementSyncSnapshot={props.lastEntitlementSyncSnapshot}
+            lastRestoreAccessSnapshot={props.lastRestoreAccessSnapshot}
+            isSyncingEntitlements={props.isSyncingEntitlements}
+            isRestoringPlanAccess={props.isRestoringPlanAccess}
+            onOpenUpgradePlan={props.onOpenUpgradePlan}
+            onSyncEntitlements={props.onSyncEntitlements}
+            onRestorePlanAccess={props.onRestorePlanAccess}
+            onOpenBillingPortal={props.onOpenBillingPortal}
+          />
+        </SectionBlock>
+      )}
+
+      {/* 3. Nhắc nhở & Thiết bị (Reminders) */}
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <CalendarClock className="h-5 w-5 text-sky-500" />
-            Lịch tuần tham chiếu
+            <Bell className="h-5 w-5 text-sky-500" />
+            Nhắc nhở & Thiết bị
           </span>
         }
-        description="Khung làm việc tối ưu (bản gọn): chuyên sâu, dự phòng và nghỉ chủ động trong tuần."
+        description="Cấu hình thông báo trình duyệt, push notification ngoài ứng dụng và theo dõi nhắc nhở đang hoạt động."
       >
-        <WeeklyTimeBlocksPanel value={props.system.weeklyTimeBlocks ?? []} onChange={props.onTimeBlocksChange} />
+        <TwelveWeekRemindersSettings
+          appPreferences={props.appPreferences}
+          browserNotificationStatus={props.browserNotificationStatus}
+          onPreferenceToggle={props.onPreferenceToggle}
+          onBrowserNotificationToggle={props.onBrowserNotificationToggle}
+          activeReminders={props.activeReminders}
+          onOpenReminder={props.onOpenReminder}
+        />
       </SectionBlock>
 
+      {/* 4. Tùy chọn thực thi (Execution Preferences) */}
+      <SectionBlock
+        title={
+          <span className="flex items-center gap-2 text-app-ink">
+            <Settings2 className="h-5 w-5 text-purple-500" />
+            Tùy chọn thực thi
+          </span>
+        }
+        description="Tinh chỉnh hành vi ứng dụng và theo dõi hành trình thực hiện mục tiêu trên thiết bị này."
+      >
+        <TwelveWeekExecutionPreferences
+          appPreferences={props.appPreferences}
+          funnelSteps={props.funnelSteps}
+          monetizationSteps={props.monetizationSteps}
+          onPreferenceToggle={props.onPreferenceToggle}
+        />
+      </SectionBlock>
+
+      {/* 5. Đồng bộ & An toàn dữ liệu (Sync & Data Safety) */}
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
             <Database className="h-5 w-5 text-indigo-500" />
-            Sao lưu dữ liệu
+            Đồng bộ & An toàn dữ liệu
           </span>
         }
-        description="Xuất hoặc nhập bản sao trên thiết bị của chu kỳ khi bạn cần đổi trình duyệt hoặc giữ bản dự phòng."
+        description="Kiểm tra đồng bộ đám mây, sao lưu dữ liệu thiết bị và quản lý hàng chờ gửi."
       >
-        <DataStorageInfo variant="inline" />
+        <TwelveWeekLocalStatusSection
+          activeGoalId={props.activeGoalId}
+          appPreferences={props.appPreferences}
+          backendConnectionStatus={props.backendConnectionStatus}
+          isHydratingBackendPlans={props.isHydratingBackendPlans}
+          isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
+          lastBackendHydrationResult={props.lastBackendHydrationResult}
+          mutationQueueSyncStatus={props.mutationQueueSyncStatus}
+          onExportLocalData={props.onExportLocalData}
+          onExportCloudWorkspace={props.onExportCloudWorkspace}
+          onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
+          onHydrateBackendPlans={props.onHydrateBackendPlans}
+          onRunMutationQueueSync={props.onRunMutationQueueSync}
+          onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
+          onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
+          onUseCloudVersion={props.onUseCloudVersion}
+          pendingOutboxCount={props.pendingOutboxCount}
+        />
+        <div className="mt-6 border-t border-app-line pt-6">
+          <TwelveWeekDataSafety
+            onExportLocalData={props.onExportLocalData}
+            backendConnectionStatus={props.backendConnectionStatus}
+            eventCount={props.eventCount}
+            onClearEventLog={props.onClearEventLog}
+            pendingOutboxCount={props.pendingOutboxCount}
+            archivedOutboxCount={props.archivedOutboxCount}
+            lastSyncSnapshot={props.lastSyncSnapshot}
+            onRunOutboxSync={props.onRunOutboxSync}
+            onArchivePendingOutbox={props.onArchivePendingOutbox}
+            onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
+            onClearArchivedOutbox={props.onClearArchivedOutbox}
+            recentOutboxItems={props.recentOutboxItems}
+            onOutboxItemToggle={props.onOutboxItemToggle}
+          />
+        </div>
       </SectionBlock>
 
-      <TwelveWeekLocalStatusSection
-        activeGoalId={props.activeGoalId}
-        appPreferences={props.appPreferences}
-        backendConnectionStatus={props.backendConnectionStatus}
-        isHydratingBackendPlans={props.isHydratingBackendPlans}
-        isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
-        lastBackendHydrationResult={props.lastBackendHydrationResult}
-        mutationQueueSyncStatus={props.mutationQueueSyncStatus}
-        onExportLocalData={props.onExportLocalData}
-        onExportCloudWorkspace={props.onExportCloudWorkspace}
-        onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
-        onHydrateBackendPlans={props.onHydrateBackendPlans}
-        onRunMutationQueueSync={props.onRunMutationQueueSync}
-        onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
-        onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
-        onUseCloudVersion={props.onUseCloudVersion}
-        pendingOutboxCount={props.pendingOutboxCount}
-      />
+      {/* 6. Lối tắt nhanh & Vùng nguy hiểm */}
+      <div className="grid gap-6 md:grid-cols-2 items-start">
+        <SectionBlock
+          title={
+            <span className="flex items-center gap-2 text-app-ink">
+              <Zap className="h-5 w-5 text-amber-500" />
+              Lối tắt nhanh
+            </span>
+          }
+          description="Chuyển nhanh sang các màn hình liên quan của chu kỳ 12 tuần."
+        >
+          <TwelveWeekQuickShortcuts
+            onNavigateGoals={props.onNavigateGoals}
+            onNavigateJournal={props.onNavigateJournal}
+            onNavigateSetup={props.onNavigateSetup}
+          />
+        </SectionBlock>
 
-      <TwelveWeekDeviceDetailsSection
-        appPreferences={props.appPreferences}
-        backendConnectionStatus={props.backendConnectionStatus}
-        funnelSteps={props.funnelSteps}
-        monetizationSteps={props.monetizationSteps}
-        browserNotificationStatus={props.browserNotificationStatus}
-        lastSyncSnapshot={props.lastSyncSnapshot}
-        pendingOutboxCount={props.pendingOutboxCount}
-        archivedOutboxCount={props.archivedOutboxCount}
-        eventCount={props.eventCount}
-        activeReminders={props.activeReminders}
-        recentOutboxItems={props.recentOutboxItems}
-        onPreferenceToggle={props.onPreferenceToggle}
-        onArchivePendingOutbox={props.onArchivePendingOutbox}
-        onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
-        onOpenReminder={props.onOpenReminder}
-        onExportLocalData={props.onExportLocalData}
-        onBrowserNotificationToggle={props.onBrowserNotificationToggle}
-        onRunOutboxSync={props.onRunOutboxSync}
-        onOutboxItemToggle={props.onOutboxItemToggle}
-        onClearEventLog={props.onClearEventLog}
-        onClearArchivedOutbox={props.onClearArchivedOutbox}
-        onOpenClearLocalDialog={props.onOpenClearLocalDialog}
-        onOpenDeleteDataDialog={props.onOpenDeleteDataDialog}
-        onOpenResetDialog={props.onOpenResetDialog}
-        onNavigateGoals={props.onNavigateGoals}
-        onNavigateJournal={props.onNavigateJournal}
-        onNavigateSetup={props.onNavigateSetup}
-      />
+        <SectionBlock
+          title={
+            <span className="flex items-center gap-2 text-app-warm">
+              <AlertTriangle className="h-5 w-5 text-app-warm" />
+              Vùng nguy hiểm
+            </span>
+          }
+          description="Các hành động thay đổi hoặc xóa dữ liệu vĩnh viễn."
+        >
+          <TwelveWeekDangerZone
+            backendConnectionStatus={props.backendConnectionStatus}
+            onOpenResetDialog={props.onOpenResetDialog}
+            onOpenClearLocalDialog={props.onOpenClearLocalDialog}
+            onOpenDeleteDataDialog={props.onOpenDeleteDataDialog}
+            onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
+          />
+        </SectionBlock>
+      </div>
 
+      {/* Góp ý */}
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <MessageSquare className="h-5 w-5 text-amber-500" />
+            <MessageSquare className="h-5 w-5 text-emerald-500" />
             Góp ý
           </span>
         }

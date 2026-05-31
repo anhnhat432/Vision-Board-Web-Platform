@@ -1,4 +1,4 @@
-﻿import { type SyntheticEvent, useCallback, useState } from "react";
+import { type SyntheticEvent, useCallback, useState } from "react";
 import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
 import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
 import { Badge } from "../ui/badge";
@@ -397,7 +397,7 @@ function MutationQueueConflictResolutionPanel({
   };
 
   return (
-    <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft p-3">
+    <div className="rounded-xl border border-app-warm/30 bg-app-warm-soft p-3">
       <div className="flex items-start gap-2">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
         <div className="min-w-0">
@@ -409,29 +409,29 @@ function MutationQueueConflictResolutionPanel({
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
-        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
+        <div className="rounded-xl border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Khác biệt</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.conflictCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
+        <div className="rounded-xl border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Chỉ trên máy</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.localOnlyCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
+        <div className="rounded-xl border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Chỉ tài khoản</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.cloudOnlyCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
+        <div className="rounded-xl border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Thiếu liên kết</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.missingClientIdCount}</p>
         </div>
-        <div className="rounded-lg border border-app-warm/30 bg-app-surface px-3 py-2">
+        <div className="rounded-xl border border-app-warm/30 bg-app-surface px-3 py-2">
           <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Cần kiểm tra</p>
           <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.unsupportedFieldCount}</p>
         </div>
       </div>
 
-      <details className="mt-3 rounded-lg border border-app-warm/30 bg-app-surface p-3" onToggle={handleDetailsToggle}>
+      <details className="mt-3 rounded-xl border border-app-warm/30 bg-app-surface p-3" onToggle={handleDetailsToggle}>
         <summary className="cursor-pointer text-sm font-semibold text-app-ink">Xem chi tiết</summary>
         <div className="mt-3 stack-tight text-xs leading-5 text-app-ink-soft">
           <p>
@@ -752,7 +752,7 @@ export function TwelveWeekLocalStatusSection({
             })}
           </div>
         ) : null}
-        <div className="mt-4 rounded-lg border border-app-line bg-app-surface p-3">
+        <div className="mt-4 rounded-xl border border-app-line bg-app-surface p-3">
           <div className="flex flex-col gap-3">
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -775,19 +775,19 @@ export function TwelveWeekLocalStatusSection({
                   "Gửi các việc đang chờ đồng bộ, lấy dữ liệu tài khoản, rồi chỉ cập nhật thiết bị nếu an toàn. Dữ liệu trên thiết bị vẫn được ưu tiên."}
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
-                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chờ đồng bộ</p>
                   <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.pendingCount}</p>
                 </div>
-                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đang gửi</p>
                   <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.inFlightCount}</p>
                 </div>
-                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lỗi/thử lại</p>
                   <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.failedOrRetryableCount}</p>
                 </div>
-                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đã nhận</p>
                   <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.succeededCount}</p>
                 </div>
@@ -803,16 +803,16 @@ export function TwelveWeekLocalStatusSection({
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-3">
-                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mạng</p>
                   <p
-                    className={`mt-1 text-sm font-semibold ${
-                      mutationQueueSyncStatus.networkStatus === "offline"
-                        ? "text-app-warm"
-                        : mutationQueueSyncStatus.networkStatus === "online"
-                          ? "text-app-accent"
-                          : "text-app-ink-muted"
-                    }`}
+                     className={`mt-1 text-sm font-semibold ${
+                       mutationQueueSyncStatus.networkStatus === "offline"
+                         ? "text-app-warm"
+                         : mutationQueueSyncStatus.networkStatus === "online"
+                           ? "text-app-accent"
+                           : "text-app-ink-muted"
+                     }`}
                   >
                     {mutationQueueSyncStatus.networkStatus === "offline"
                       ? "Mất mạng"
@@ -821,7 +821,7 @@ export function TwelveWeekLocalStatusSection({
                         : "Không rõ"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                     Tự thử lại khi có mạng
                   </p>
@@ -831,7 +831,7 @@ export function TwelveWeekLocalStatusSection({
                 </div>
               </div>
               {mutationQueueSyncStatus.networkStatus === "offline" ? (
-                <div className="flex items-start gap-2 rounded-lg border border-app-warm/30 bg-app-warm-soft px-3 py-2">
+                <div className="flex items-start gap-2 rounded-xl border border-app-warm/30 bg-app-warm-soft px-3 py-2">
                   <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
                   <p className="text-xs leading-5 text-app-warm">
                     Trình duyệt đang mất mạng. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
@@ -856,62 +856,51 @@ export function TwelveWeekLocalStatusSection({
             <Button
               type="button"
               variant="outline"
-              className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg"
+              className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg rounded-xl"
               disabled={!canRunMutationQueueSync}
               onClick={onRunMutationQueueSync}
             >
               <RefreshCw className={`mr-2 h-4 w-4 ${mutationQueueSyncStatus.loading ? "animate-spin" : ""}`} />
               {mutationQueueSyncStatus.loading ? "Đang đồng bộ..." : "Đồng bộ tài khoản"}
             </Button>
-            <div className="grid grid-cols-2 gap-2 pt-2">
+            <div className="pt-2">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg"
+                className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg rounded-xl"
                 disabled={!canRunMutationQueueSync}
                 onClick={onExportCloudWorkspace}
               >
                 <FileDown className="mr-2 h-4 w-4" />
                 Tải bản sao tài khoản
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full whitespace-normal border-red-200 bg-app-surface text-center text-red-700 hover:bg-red-50"
-                disabled={!canRunMutationQueueSync}
-                onClick={onDeleteCloudWorkspace}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Xóa dữ liệu tài khoản
-              </Button>
             </div>
             <p className="text-xs leading-5 text-app-ink-muted">
-              Tải bản sao dữ liệu tài khoản về thiết bị. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên tài khoản,
-              không xóa dữ liệu trên thiết bị, gói Plus hay tài khoản đăng nhập.
+              Tải bản sao dữ liệu 12 tuần trên đám mây về thiết bị dưới dạng tệp tin sao lưu.
             </p>
           </div>
         </div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+        <div className="rounded-xl border border-app-line bg-app-bg px-3 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Nhắc việc</p>
           <p className="mt-2 text-sm font-semibold text-app-ink">
             {appPreferences.enableInAppReminders ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+        <div className="rounded-xl border border-app-line bg-app-bg px-3 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Thiết bị</p>
           <p className="mt-2 text-sm font-semibold text-app-ink">
             {appPreferences.enableBrowserNotifications ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+        <div className="rounded-xl border border-app-line bg-app-bg px-3 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Phân tích</p>
           <p className="mt-2 text-sm font-semibold text-app-ink">
             {appPreferences.allowLocalAnalytics ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+        <div className="rounded-xl border border-app-line bg-app-bg px-3 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Việc đang chờ đồng bộ</p>
           <p className="mt-2 text-sm font-semibold text-app-ink">{pendingOutboxCount} chờ</p>
         </div>

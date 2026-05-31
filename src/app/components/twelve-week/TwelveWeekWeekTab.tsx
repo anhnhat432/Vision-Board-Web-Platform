@@ -747,7 +747,7 @@ export function TwelveWeekWeekTab({
                   setIsStartingEarly(false);
                 }}
               >
-                Tiếp tục thực thi
+                Quay lại hôm nay
               </Button>
             )}
             <Button
@@ -757,7 +757,7 @@ export function TwelveWeekWeekTab({
               disabled={isSavingReview || !canSubmitWeeklyReview}
               aria-busy={isSavingReview}
             >
-              {isSavingReview ? "Đang chốt..." : "Chốt review tuần này"}
+              {isSavingReview ? "Đang lưu..." : "Lưu review tuần"}
             </Button>
           </div>
         </div>
@@ -918,19 +918,19 @@ export function TwelveWeekWeekTab({
               <div className="flex items-center gap-2 pt-1">
                 <Button
                   type="button"
-                  className="bg-app-warm hover:bg-app-warm/90 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xs h-9"
+                  className="bg-app-warm hover:bg-app-warm/90 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs h-9"
                   onClick={onAcceptNextWeekRecommendation}
                 >
-                  Áp dụng cho tuần sau
+                  Áp dụng gợi ý tuần sau
                 </Button>
                 {onOpenTodayTab && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="text-xs font-semibold px-4 py-2 rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9"
+                    className="text-xs font-semibold px-4 py-2 rounded-xl border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9"
                     onClick={onOpenTodayTab}
                   >
-                    Mở Hôm nay
+                    Quay lại hôm nay
                   </Button>
                 )}
               </div>
@@ -983,11 +983,11 @@ export function TwelveWeekWeekTab({
       {showForm && canShowFormReview && (
         <div
           data-testid="weekly-review-mobile-sticky-cta"
-          className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-lg md:border md:shadow-lg"
+          className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-xl md:border md:shadow-lg"
         >
           <Button
             size="lg"
-            className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm"
+            className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm rounded-xl"
             onClick={handleSaveReviewClick}
             disabled={isSavingReview || !canSubmitWeeklyReview}
             aria-busy={isSavingReview}
@@ -995,10 +995,10 @@ export function TwelveWeekWeekTab({
             {isSavingReview ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-1.5" aria-hidden="true" />
-                Đang chốt review...
+                Đang lưu review tuần...
               </>
             ) : (
-              "Chốt review tuần này"
+              "Lưu review tuần"
             )}
           </Button>
         </div>

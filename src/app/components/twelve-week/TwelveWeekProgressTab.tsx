@@ -111,7 +111,7 @@ export function getProgressNextActionSuggestion(
     return {
       target: "today",
       label: "Hoàn thành việc cốt lõi hôm nay",
-      buttonLabel: "Mở tab Hôm nay",
+      buttonLabel: "Quay lại hôm nay",
     };
   }
 
@@ -119,7 +119,7 @@ export function getProgressNextActionSuggestion(
     return {
       target: "week",
       label: "Mở review tuần",
-      buttonLabel: "Mở tab Tuần",
+      buttonLabel: "Review tuần này",
     };
   }
 
@@ -127,14 +127,14 @@ export function getProgressNextActionSuggestion(
     return {
       target: "week",
       label: "Chuẩn bị tuần sau",
-      buttonLabel: "Mở tab Tuần",
+      buttonLabel: "Review tuần này",
     };
   }
 
   return {
     target: "settings",
     label: input.hasAnyTasks ? "Hoàn thành việc cốt lõi hôm nay" : "Hoàn tất setup trong Cài đặt",
-    buttonLabel: input.hasAnyTasks ? "Mở tab Hôm nay" : "Mở Cài đặt",
+    buttonLabel: input.hasAnyTasks ? "Quay lại hôm nay" : "Mở Cài đặt",
   };
 }
 

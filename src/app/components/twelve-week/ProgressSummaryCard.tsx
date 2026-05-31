@@ -355,7 +355,7 @@ export function ProgressSummaryCard({
             onClick={onViewFull}
             className="rounded-xl border-app-line/80 hover:bg-app-bg transition-colors px-6 py-2 text-sm font-semibold"
           >
-            Xem bảng điểm đầy đủ
+            Xem đầy đủ tiến độ
           </Button>
         </div>
       )}
