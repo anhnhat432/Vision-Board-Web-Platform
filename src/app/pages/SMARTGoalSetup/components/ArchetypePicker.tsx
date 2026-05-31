@@ -45,28 +45,28 @@ export function ArchetypePicker({
   onResetToInferred,
 }: ArchetypePickerProps) {
   return (
-    <div className="rounded-[14px] border border-app-line bg-app-surface p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="rounded-[14px] border border-app-line bg-app-surface p-3.5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-app-line/40">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Chọn loại mục tiêu</p>
-          <p className="text-xs leading-5 text-app-ink-soft">
-            Hệ thống đoán loại để gợi ý chính xác hơn. Bạn có thể tự thay đổi nếu chưa đúng.
+          <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">Chọn loại mục tiêu</p>
+          <p className="text-[11px] text-app-ink-soft mt-0.5">
+            Hệ thống tự động đoán loại để gợi ý chính xác hơn. Bạn có thể tự thay đổi nếu chưa đúng.
           </p>
         </div>
         {isUserOverridden ? (
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.97]"
+            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[10px] font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.97] cursor-pointer"
             onClick={onResetToInferred}
             aria-label={`Quay lại đoán tự động (${getGoalArchetypeLabel(inferredArchetype)})`}
           >
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            <RotateCcw className="h-3 w-3" aria-hidden="true" />
             Dùng đoán tự động
           </button>
         ) : null}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+      <div className="mt-3 flex flex-wrap gap-1.5">
         {ARCHETYPE_ORDER.map((option) => {
           const Icon = option.icon;
           const active = archetype === option.value;
@@ -76,25 +76,19 @@ export function ArchetypePicker({
               key={option.value}
               type="button"
               className={cn(
-                "group flex flex-col items-start gap-1.5 rounded-[14px] border p-3.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+                "group inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
                 active
-                  ? "border-app-accent bg-app-accent-soft/30 text-app-accent font-semibold"
-                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-accent-soft/5 hover:text-app-accent"
+                  ? "border-app-accent bg-app-accent-soft/30 text-app-accent shadow-sm"
+                  : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/10 hover:text-app-accent"
               )}
               onClick={() => onChange(option.value)}
               aria-pressed={active}
             >
               <Icon className={cn(
-                "h-4.5 w-4.5 transition-colors duration-200",
+                "h-3.5 w-3.5 transition-colors duration-150",
                 active ? "text-app-accent" : "text-app-ink-muted group-hover:text-app-accent"
               )} aria-hidden="true" />
-              <span className="text-sm font-semibold leading-5">{getGoalArchetypeLabel(option.value)}</span>
-              <span className={cn(
-                "text-xs leading-normal transition-colors duration-200",
-                active ? "text-app-accent/80" : "text-app-ink-muted group-hover:text-app-accent/70"
-              )}>
-                {option.sub}
-              </span>
+              <span className="leading-none">{getGoalArchetypeLabel(option.value)}</span>
             </button>
           );
         })}
