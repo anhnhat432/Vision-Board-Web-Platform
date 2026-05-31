@@ -110,6 +110,7 @@ export function SMARTGoalSetup() {
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const stepTopRef = useRef<HTMLDivElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
@@ -232,7 +233,11 @@ export function SMARTGoalSetup() {
   const currentStepHasDraftContent = hasStepDraftContent(currentStepKey, smartData);
   const currentStarterPreview = getSmartGoalStarterPreview(currentStepKey, smartGoalStarter);
   const shouldShowCurrentStepError =
-    currentStepError !== null && (currentStepKey === "specific" || currentStepHasDraftContent);
+    currentStepError !== null &&
+    (attemptedSubmit ||
+      (currentStepKey === "specific"
+        ? smartData.specific.goal_statement.trim().length > 0
+        : currentStepHasDraftContent));
   const liveSmartGoal = useMemo(() => buildSmartGoalFromFormData(smartData, focusArea), [smartData, focusArea]);
   const qualityResult = useMemo(() => evaluateSmartGoalQuality(liveSmartGoal), [liveSmartGoal]);
   const currentStepSoftWarning =
@@ -349,7 +354,13 @@ export function SMARTGoalSetup() {
   };
 
   const handleNext = () => {
+    if (!isCurrentStepValid) {
+      setAttemptedSubmit(true);
+      return;
+    }
+
     if (currentStep < totalSteps - 1) {
+      setAttemptedSubmit(false);
       setCurrentStep(currentStep + 1);
       return;
     }
@@ -358,6 +369,7 @@ export function SMARTGoalSetup() {
   };
 
   const handleBack = () => {
+    setAttemptedSubmit(false);
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
       return;
@@ -371,7 +383,10 @@ export function SMARTGoalSetup() {
 
   const handleJumpToStep = (stepKey: SmartStepKey) => {
     const nextStep = SMART_STEPS.findIndex((step) => step.key === stepKey);
-    if (nextStep >= 0) setCurrentStep(nextStep);
+    if (nextStep >= 0) {
+      setAttemptedSubmit(false);
+      setCurrentStep(nextStep);
+    }
   };
 
   const handleApplyStarterForStep = (stepKey: SmartStepKey, customText?: string) => {

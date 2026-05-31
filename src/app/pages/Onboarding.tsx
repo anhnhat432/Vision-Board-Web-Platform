@@ -267,6 +267,7 @@ export function Onboarding() {
   const flowTopRef = useRef<HTMLDivElement | null>(null);
   const autosaveTimerRef = useRef<number | null>(null);
   const [showBreathing, setShowBreathing] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState<number | null>(0);
 
   const radarData = useMemo(
@@ -527,41 +528,95 @@ export function Onboarding() {
                     </p>
                   </div>
 
-                  {/* Thẻ Lộ Trình Hành Trình 10 Giây Trực Quan */}
-                  <div className="bg-app-bg-subtle/60 rounded-xl border border-app-line/80 p-5 space-y-4 shadow-3xs">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5 border-b border-app-line pb-2">
-                      <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
-                      Hành trình bứt phá (10 giây tóm tắt)
-                    </h3>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">1. Ứng dụng giúp gì?</span>
-                        <p className="text-xs text-app-ink-soft leading-normal">
-                          Biến mục tiêu lớn thành hành động nhỏ thực tế trong chu kỳ 12 tuần.
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">2. Bạn cần làm gì lúc này?</span>
-                        <p className="text-xs text-app-ink-soft leading-normal">
-                          Chấm điểm 8 khía cạnh để phác thảo <strong>Bản đồ Cân bằng Cuộc sống</strong> (3 phút).
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">3. Lộ trình còn bao nhiêu bước?</span>
-                        <p className="text-xs text-app-ink-soft leading-normal">
-                          Gồm 3 chặng ngắn gọn: <strong>Đánh giá</strong> ➔ <strong>Chọn trọng tâm</strong> ➔ <strong>Lên kế hoạch</strong>.
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">4. Nhận được gì khi hoàn thành?</span>
-                        <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold leading-normal">
-                          Bản đồ bánh xe cuộc sống trực quan & Kế hoạch hành động 12 tuần được cá nhân hóa.
-                        </p>
+                  {/* Nút bấm CTA chính và phụ trên Mobile (hiển thị ngay sau câu mô tả ngắn) */}
+                  <div className="block lg:hidden space-y-4 pt-2">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-8 py-3.5 text-base font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm w-full sm:w-auto"
+                        onClick={handleStartAssessment}
+                      >
+                        Bắt đầu Đánh giá ngay (3 phút)
+                        <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                      
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
+                          onClick={() => setShowBreathing(true)}
+                        >
+                          <Sparkles className="h-3.5 w-3.5 text-app-accent" aria-hidden="true" />
+                          Tập thở thư giãn
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
+                          onClick={handleDefer}
+                        >
+                          Để sau
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  {/* Phần lộ trình: Collapsible trên Mobile, Hiện cố định trên Desktop */}
+                  <div className="space-y-2">
+                    {/* Nút bấm Collapsible trợ giúp trên di động */}
+                    <button
+                      type="button"
+                      className="flex lg:hidden items-center justify-between w-full bg-app-bg-subtle/50 hover:bg-app-bg-subtle/80 border border-app-line rounded-xl px-4 py-3 text-xs font-bold text-app-accent transition-colors"
+                      onClick={() => setIsHelpOpen(!isHelpOpen)}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
+                        Xem nhanh app sẽ làm gì
+                      </span>
+                      {isHelpOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+
+                    {/* Khối Lộ Trình Hành Trình 10 Giây Trực Quan */}
+                    <div 
+                      className={cn(
+                        "bg-app-bg-subtle/60 rounded-xl border border-app-line/80 p-5 space-y-4 shadow-3xs transition-all duration-200",
+                        isHelpOpen ? "block animate-fade-in" : "hidden lg:block"
+                      )}
+                    >
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5 border-b border-app-line pb-2">
+                        <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
+                        Hành trình bứt phá (10 giây tóm tắt)
+                      </h3>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-app-ink-muted block">1. Ứng dụng giúp gì?</span>
+                          <p className="text-xs text-app-ink-soft leading-normal">
+                            Biến mục tiêu lớn thành hành động nhỏ thực tế trong chu kỳ 12 tuần.
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-app-ink-muted block">2. Bạn cần làm gì lúc này?</span>
+                          <p className="text-xs text-app-ink-soft leading-normal">
+                            Chấm điểm 8 khía cạnh để phác thảo <strong>Bản đồ Cân bằng Cuộc sống</strong> (3 phút).
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-app-ink-muted block">3. Lộ trình còn bao nhiêu bước?</span>
+                          <p className="text-xs text-app-ink-soft leading-normal">
+                            Gồm 3 chặng ngắn gọn: <strong>Đánh giá</strong> ➔ <strong>Chọn trọng tâm</strong> ➔ <strong>Lên kế hoạch</strong>.
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-app-ink-muted block">4. Nhận được gì khi hoàn thành?</span>
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold leading-normal">
+                            Bản đồ bánh xe cuộc sống trực quan & Kế hoạch hành động 12 tuần được cá nhân hóa.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nút bấm CTA chính và phụ trên Desktop */}
+                  <div className="hidden lg:flex flex-col gap-3 sm:flex-row sm:items-center pt-2">
                     <button
                       type="button"
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-8 py-3.5 text-base font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm w-full sm:w-auto"

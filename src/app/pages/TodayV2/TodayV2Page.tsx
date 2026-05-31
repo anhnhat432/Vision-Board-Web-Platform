@@ -360,39 +360,57 @@ function TodayTasksCard({
         </Link>
       </div>
 
-      <div className="mt-5 space-y-1">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className={`flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3 ${
-              task.isCurrent ? "bg-app-bg ring-1 ring-app-accent/15" : ""
-            }`}
-          >
-            <TaskCheckbox
-              checked={task.completed}
-              onToggle={() => {
-                if (!task.canToggle || !activeGoalId) return;
-                onTaskToggle(task.id, !task.completed);
-              }}
-            />
-            <div className="min-w-0 flex-1">
-              <p
-                className={`text-sm font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
-              >
-                {task.title}
-              </p>
-              <p className="mt-0.5 text-xs text-app-ink-muted">
-                {task.domain} · {task.meta}
-              </p>
-            </div>
-            {task.isCurrent ? (
-              <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
-                Đang làm
-              </span>
-            ) : null}
+      {totalCount === 0 ? (
+        <div className="mt-5 rounded-xl border border-dashed border-app-line bg-app-bg-subtle/30 p-6 text-center animate-fade-in">
+          <p className="text-sm font-bold text-app-ink">Hôm nay chưa có việc được lên lịch.</p>
+          <p className="mt-1.5 text-xs text-app-ink-soft leading-relaxed max-w-sm mx-auto">
+            Chọn một việc nhẹ từ kế hoạch tuần hoặc lên lịch lại để bắt đầu.
+          </p>
+          <div className="mt-4">
+            <Link
+              to="/12-week-system?tab=week"
+              className="inline-flex items-center justify-center rounded-xl bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.98] shadow-sm hover:shadow-md"
+              style={{ backgroundColor: "var(--app-accent)" }}
+            >
+              Chọn việc từ tuần này →
+            </Link>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="mt-5 space-y-1">
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className={`flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3 ${
+                task.isCurrent ? "bg-app-bg ring-1 ring-app-accent/15" : ""
+              }`}
+            >
+              <TaskCheckbox
+                checked={task.completed}
+                onToggle={() => {
+                  if (!task.canToggle || !activeGoalId) return;
+                  onTaskToggle(task.id, !task.completed);
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-sm font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
+                >
+                  {task.title}
+                </p>
+                <p className="mt-0.5 text-xs text-app-ink-muted">
+                  {task.domain} · {task.meta}
+                </p>
+              </div>
+              {task.isCurrent ? (
+                <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
+                  Đang làm
+                </span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
 
       {totalCount > 0 && completedCount === totalCount && (
         <div className="mt-4 rounded-xl border border-app-accent-soft bg-app-accent-soft/20 p-4 text-center text-sm font-medium text-app-accent animate-fade-in">

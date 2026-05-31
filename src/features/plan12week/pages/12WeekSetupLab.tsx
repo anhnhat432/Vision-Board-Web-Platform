@@ -1195,10 +1195,21 @@ export function TwelveWeekSetupLab() {
             id="twelve-week-setup-title"
             className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
           >
-            Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
+            Tạo kế hoạch 12 tuần
           </h1>
+
+          <div className="mt-3.5 max-w-2xl bg-app-bg-subtle/50 dark:bg-app-bg-subtle/10 border border-app-line/60 rounded-xl p-3.5 flex items-start gap-2.5 shadow-3xs">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-xs" aria-hidden="true">🎯</span>
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase font-bold text-app-accent tracking-wider">Mục tiêu đang thiết lập</p>
+              <p className="mt-0.5 text-xs font-medium text-app-ink leading-relaxed line-clamp-2 md:line-clamp-3">
+                {smartGoal.specific.trim() || "mục tiêu của bạn"}
+              </p>
+            </div>
+          </div>
+
           {aspirationalVision && (
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
+            <p className="mt-3.5 max-w-2xl text-sm leading-6 text-app-ink-soft">
               Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
             </p>
           )}

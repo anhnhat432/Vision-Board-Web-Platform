@@ -45,7 +45,7 @@ export function SpecificStep({
   const specificLength = smartData.specific.goal_statement.trim().length;
   const activeArchetype = archetype ?? intentArchetype ?? "other";
   const goalStatementInvalid = specificLength < 10;
-  const showInlineError = goalStatementInvalid && (hasBlurredGoalStatement || showError);
+  const showInlineError = goalStatementInvalid && (hasBlurredGoalStatement || showError || specificLength > 0);
   const specificDescribedBy = ["smart-specific-hint", "smart-specific-counter", showInlineError ? "smart-specific-error" : null]
     .filter(Boolean)
     .join(" ");
