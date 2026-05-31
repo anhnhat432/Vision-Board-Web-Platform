@@ -1,0 +1,595 @@
+---
+description: Dear Our Future UX/UI North Star for AI-assisted frontend, layout, copy, and product experience work
+globs:
+  - "src/app/pages/**/*.tsx"
+  - "src/app/components/**/*.tsx"
+  - "src/features/**/*.tsx"
+  - "src/styles/**/*.css"
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+alwaysApply: true
+---
+
+# Dear Our Future — UX/UI North Star
+
+## 1. Product identity
+
+Dear Our Future is not a dry productivity dashboard.
+It is a dreamy guided self-discovery studio that helps Gen Z users move from vague dreams to clear vision boards, SMART goals, 12-week action plans, and weekly progress tracking.
+
+The product journey is:
+
+```text
+Vague dream
+-> Understand current life balance
+-> Choose one focus area
+-> Create a SMART goal
+-> Build a 12-week action plan
+-> Track weekly progress
+-> Reflect and improve
+```
+
+Every UI decision must support this transformation.
+
+The product should make users feel:
+
+```text
+Clearer, calmer, more inspired, and closer to action.
+```
+
+Avoid making the product feel like:
+
+```text
+A long survey, a corporate SaaS dashboard, an admin panel, a generic AI-generated app, or a text-heavy planning tool.
+```
+
+---
+
+## 2. Visual direction
+
+The official visual direction is:
+
+```text
+Dreamy Guided Productivity
+```
+
+Meaning:
+
+- Dreamy: emotional, soft, visual, personal, vision-board-like.
+- Guided: users always know where they are, why the step matters, and what to do next.
+- Productivity: the final output must be practical, structured, and action-oriented.
+
+The product should combine:
+
+```text
+Pinterest / Studygram aesthetic
++ Notion-like clarity
++ Personal growth workshop guidance
+```
+
+---
+
+## 3. Core UX principles
+
+### Principle 1 — First meaningful result within 3 minutes
+
+A new user must get a useful outcome quickly.
+
+A first meaningful result can be:
+
+- A visible life-balance insight.
+- A chosen focus area.
+- A basic SMART goal draft.
+- A first 12-week plan draft.
+- A first vision board preview.
+
+Do not force users to complete too many setup steps before seeing value.
+Advanced customization should come later.
+
+### Principle 2 — Visual first, text second
+
+Dear Our Future is a vision-board product, so every important screen should have a meaningful visual element.
+
+Good visual elements include:
+
+- Life balance wheel / radar map.
+- Vision board preview.
+- Moodboard.
+- Goal card.
+- 12-week roadmap.
+- Progress map.
+- Weekly cards.
+- Physical kit mockup.
+- Soft illustration.
+
+Avoid screens that are only text, forms, tables, sliders, or plain cards.
+
+### Principle 3 — One screen, one main action
+
+Every screen must have one clear primary CTA.
+Secondary actions must be visually quieter.
+
+Good CTA labels should describe the outcome, not just the action.
+
+Prefer:
+
+```text
+Reveal my Life Insight
+Create my 12-week plan
+Build my vision board
+Start this week
+Order my vision kit
+```
+
+Avoid generic labels when a clearer outcome is possible:
+
+```text
+Continue
+Next
+Submit
+Done
+```
+
+### Principle 4 — Reduce cognitive load
+
+Every screen must answer:
+
+```text
+1. What am I doing?
+2. Why does this matter?
+3. What should I do next?
+```
+
+If users have to guess the purpose of a screen, the UX is wrong.
+
+### Principle 5 — Progressive disclosure
+
+Simple first. Advanced later.
+
+Use:
+
+- See example.
+- Customize later.
+- Advanced settings.
+- More details.
+- AI suggestion.
+- Tooltip.
+- Expand/collapse section.
+
+Do not show every option, explanation, or configuration at once.
+
+### Principle 6 — Mobile-first for Gen Z
+
+Design for mobile usage first.
+
+Mobile UI must have:
+
+- Large tappable buttons.
+- Clear card hierarchy.
+- Short forms.
+- Sticky bottom CTA when helpful.
+- No wide tables.
+- No tiny text.
+- No overloaded horizontal layouts.
+
+---
+
+## 4. Visual design rules
+
+### Color direction
+
+Default mode should be light, warm, and calm.
+
+Use the existing design tokens whenever possible.
+Do not introduce random primitive colors directly in components.
+Prefer semantic tokens from `src/styles/tokens.css`.
+
+Preferred color feeling:
+
+```text
+Cream / off-white background
+Forest green primary action
+Sage green secondary surfaces
+Soft pastel accents: lavender, blush pink, sky blue, soft yellow, terracotta
+Dark neutral text
+Soft gray-brown muted text
+```
+
+The interface should feel:
+
+```text
+Calm, soft, warm, hopeful, personal, clean.
+```
+
+It must not feel:
+
+```text
+Corporate, financial, gaming-heavy, cold, overly dark, or visually noisy.
+```
+
+### Typography
+
+Use this rule:
+
+```text
+Serif headings = emotional, reflective, premium.
+Sans-serif body = clear, readable, modern.
+```
+
+Use emotional headings for important reflective moments:
+
+```text
+Map your current life balance
+Choose what matters most for the next 12 weeks
+Turn a vague goal into a clear plan
+Build the future you can see
+```
+
+Body copy must be short and concrete.
+Do not write academic, robotic, or overly explanatory text.
+
+### Cards
+
+Cards should generally use:
+
+- Rounded corners.
+- Soft border.
+- Warm white or very soft pastel background.
+- Gentle shadow.
+- Clear heading.
+- One main idea.
+- Icon, illustration, preview, or meaningful visual marker.
+
+Avoid:
+
+- Too many identical cards.
+- Dense text cards.
+- Card grids without visual hierarchy.
+- Heavy shadows.
+- Random bright colors.
+- Pure admin-dashboard styling.
+
+### Illustration and imagery
+
+The Vision Board identity should include physical and emotional cues.
+
+Good elements:
+
+- Stickers.
+- Paper texture.
+- Tape.
+- Pin.
+- Photo frame.
+- Moodboard preview.
+- Calendar.
+- Checklist.
+- Goal card.
+- Soft stars/sparkles.
+- Study desk / study corner feeling.
+
+Avoid relying only on generic SaaS icons.
+
+---
+
+## 5. Content rules
+
+### Voice and tone
+
+The writing style must be:
+
+```text
+Warm, clear, short, guided, non-judgmental.
+```
+
+Do not write like a textbook.
+Do not write like generic AI marketing copy.
+
+Bad example:
+
+```text
+Dear Our Future helps users transform long-term vision into SMART goals and specific 12-week action plans through a multidimensional assessment system.
+```
+
+Good example:
+
+```text
+Have many goals but not sure where to start?
+We help you choose one focus and turn it into a 12-week plan.
+```
+
+### Text length rules
+
+Use these limits by default:
+
+```text
+Title: 6–12 words
+Subtitle: 1–2 short lines
+Card description: 1 short line
+Button: 2–5 words
+Tooltip: 1 short sentence
+```
+
+If a concept needs more explanation, use examples, tooltip, or expandable content instead of long paragraphs.
+
+### Use examples instead of abstract explanation
+
+For forms and setup screens, always include concrete examples.
+
+Prefer:
+
+```text
+Example: Reach IELTS 6.5 in 12 weeks by studying 5 sessions per week.
+```
+
+Avoid:
+
+```text
+Enter your goal here.
+```
+
+---
+
+## 6. Screen-specific rules
+
+### Homepage / Dashboard entry
+
+The homepage or entry dashboard must quickly answer:
+
+```text
+What problem does Dear Our Future solve?
+What result will I get?
+Where should I start?
+```
+
+Recommended hero structure:
+
+```text
+Problem -> Promise -> Visual Preview -> CTA
+```
+
+Homepage should show:
+
+- Vision board preview.
+- 3-step journey.
+- Transformation from vague dream to clear 12-week plan.
+- Strong primary CTA.
+
+Avoid too many charts or dashboard widgets on the first impression.
+
+### Onboarding
+
+Onboarding must feel like a guided quest, not a survey.
+
+Each step should have:
+
+```text
+1 main question
+1 meaningful visual
+1 clear action
+1 visible result after completion
+```
+
+The user should always understand why this step matters.
+
+### Life Balance
+
+Life Balance must not be only sliders.
+It should include a visual representation such as a wheel or radar map.
+
+The user should see their scores become a visual shape.
+
+Good CTA:
+
+```text
+Reveal my Life Insight
+```
+
+or in Vietnamese:
+
+```text
+Xem insight của tôi
+```
+
+### Life Insight
+
+Life Insight should feel like a beautiful personal report, not an analytics dashboard.
+
+It should include:
+
+```text
+Current focus
+Why it matters
+Suggested next step
+```
+
+Keep explanations short and personal.
+
+### SMART Goal Setup
+
+SMART Goal Setup should feel like an AI-assisted goal builder, not a long form.
+
+Break it into small guided prompts:
+
+```text
+What do you want to achieve?
+Why does it matter?
+How will you measure it?
+When do you want to finish?
+```
+
+Every input should have an example.
+AI suggestions should be visible, useful, and easy to accept or edit.
+
+### Vision Board
+
+Vision Board should be the most visual and emotional part of the product.
+
+It should include:
+
+- Templates.
+- Themes.
+- Stickers.
+- Image gallery.
+- Moodboard preview.
+- Visual selection.
+- Personalization.
+
+It must feel like:
+
+```text
+I am building the future I can see.
+```
+
+It must not feel like a normal information form.
+
+### 12-Week Plan
+
+The 12-week plan can be more structured, but it still must be visually clear.
+
+Use:
+
+- Week cards.
+- This week focus.
+- Next action.
+- Progress bar.
+- Check-in.
+- Simple milestones.
+
+Avoid dense tables, spreadsheet-like layouts, and overloaded task lists.
+
+Each week should answer:
+
+```text
+What should I do this week?
+What is the most important action?
+How much progress have I made?
+```
+
+### Order Kit / Payment
+
+The order flow should make the physical kit feel tangible and desirable.
+
+It should include:
+
+- Product image or mockup.
+- What is inside the kit.
+- Delivery / receiving process.
+- Clear price.
+- Direct payment QR where relevant.
+- Strong CTA.
+
+Avoid a dry checkout-only feeling.
+
+---
+
+## 7. AI redesign workflow
+
+Before editing any screen, always do this:
+
+### Step 1 — Identify the screen purpose
+
+Answer internally:
+
+```text
+Where is this screen in the journey?
+What is the user's main job here?
+What result should the user get after this screen?
+What is the main CTA?
+```
+
+### Step 2 — Remove friction
+
+Check:
+
+```text
+Is there too much text?
+Are there too many choices?
+Is the main CTA obvious?
+Is there a meaningful visual?
+Is any advanced detail shown too early?
+Does the user need an example?
+Does the mobile layout remain easy?
+```
+
+### Step 3 — Redesign using the North Star
+
+The result must be:
+
+```text
+Dreamy
+Guided
+Visual
+Clear
+Action-oriented
+Mobile-friendly
+```
+
+### Step 4 — Preserve engineering safety
+
+Unless explicitly asked, preserve:
+
+- Existing routes.
+- Existing business logic.
+- Existing localStorage/sessionStorage behavior.
+- Existing analytics events.
+- Existing API contracts.
+- Existing TypeScript safety.
+- Existing tests where applicable.
+
+### Step 5 — Final checklist
+
+Before finishing, verify:
+
+```text
+[ ] There is one clear primary CTA.
+[ ] The user knows where they are in the journey.
+[ ] The screen has a meaningful visual element.
+[ ] Text is shorter and easier to scan.
+[ ] Forms include examples or just-in-time guidance.
+[ ] Mobile layout is comfortable.
+[ ] Existing tokens and design system are respected.
+[ ] The screen feels like Dear Our Future, not a generic SaaS app.
+```
+
+---
+
+## 8. Anti-patterns to avoid
+
+Do not:
+
+1. Add long explanations to fix confusion.
+2. Make the app look like an admin dashboard.
+3. Use dark mode as the default visual direction.
+4. Put too many charts on the first impression.
+5. Force users through too many setup steps before they get value.
+6. Hide the main CTA among many equal buttons.
+7. Use random colors outside the design system.
+8. Give each screen a different visual style.
+9. Use generic AI-generated layouts.
+10. Leave users unsure about the next step.
+11. Build dense table-first mobile UI.
+12. Make Vision Board screens feel like normal forms.
+
+---
+
+## 9. Implementation guidance
+
+When implementing UI changes:
+
+- Prefer existing components before adding new ones.
+- Use Tailwind classes that map to existing semantic tokens where available.
+- Keep accessibility: labels, aria attributes, focus states, contrast, keyboard flow.
+- Avoid large rewrites unless necessary.
+- Keep components readable and maintainable.
+- Do not break the product flow.
+- Run typecheck/lint/build after meaningful changes when available.
+
+Recommended commands after UI changes:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
+
+If a command does not exist, report it clearly instead of pretending it passed.
