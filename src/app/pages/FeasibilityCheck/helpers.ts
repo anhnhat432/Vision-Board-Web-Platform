@@ -50,7 +50,7 @@ function getSelectedOption(answers: Record<number, string>, question: Question) 
 function getBottleneckAction(axis: FeasibilityAxis | "wheel"): string {
   switch (axis) {
     case "time":
-      return "Giảm số việc, khóa ít khung giờ cố định và tránh làm tuần đầu quá dày.";
+      return "Phần khó nhất có thể là thời gian mỗi tuần. Hãy giảm số việc, khóa ít khung giờ cố định và tránh làm tuần đầu quá dày.";
     case "energy":
       return "Thiết kế tuần đầu nhẹ hơn, ưu tiên bước nhỏ dễ hoàn thành sau ngày bận.";
     case "resources":

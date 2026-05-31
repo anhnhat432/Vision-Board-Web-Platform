@@ -907,7 +907,7 @@ export function SmartGoalStepShell({
               onClick={onNext}
               disabled={!isCurrentStepValid}
             >
-              {stepIndex < totalSteps - 1 ? "Tiếp tục" : "Hoàn thành"}
+              {stepIndex < totalSteps - 1 ? "Tiếp tục" : "Kiểm tra độ khả thi"}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>

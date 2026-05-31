@@ -486,7 +486,7 @@ export function SMARTGoalSetup() {
 
   if (setupState === "checking") {
     return (
-      <PageShell maxWidth="md">
+      <PageShell maxWidth="xl">
         <div className="space-y-6">
           <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
           <FormSkeleton aria-label="Đang chuẩn bị bước viết mục tiêu" />
@@ -522,7 +522,7 @@ export function SMARTGoalSetup() {
   }
 
   return (
-    <PageShell maxWidth="md">
+    <PageShell maxWidth="xl">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}

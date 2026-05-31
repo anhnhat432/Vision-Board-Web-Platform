@@ -38,10 +38,10 @@ interface ResultCopy {
 
 const RESULT_COPY: Record<ResultType, ResultCopy> = {
   realistic: {
-    statusLabel: "Đủ thực tế để bắt đầu",
-    statusHint: "Nền tảng hiện tại đủ để bước vào chu kỳ 12 tuần gọn và rõ.",
-    guideTitle: "Đi tiếp, nhưng giữ cho tuần đầu thật vừa tay.",
-    guideBody: "Không cần kế hoạch lớn. Chỉ cần vài việc nhỏ, rõ, đo được và đủ nhẹ để duy trì đều mỗi tuần.",
+    statusLabel: "Mục tiêu này ổn, bước tiếp theo là chia nhỏ theo tuần",
+    statusHint: "Nền tảng của bạn rất vững vàng, sẵn sàng để bắt đầu kế hoạch 12 tuần.",
+    guideTitle: "Hãy đi tiếp và giữ cho tuần đầu tiên thật nhẹ nhàng.",
+    guideBody: "Bạn không cần lập một kế hoạch quá vĩ mô. Hãy bắt đầu bằng vài việc nhỏ, cụ thể, đo lường được và duy trì đều đặn.",
     highlights: [
       {
         title: "Nhịp nhỏ nhưng đều",
@@ -71,11 +71,11 @@ const RESULT_COPY: Record<ResultType, ResultCopy> = {
     ],
   },
   challenging: {
-    statusLabel: "Khó nhưng vẫn làm được",
-    statusHint: "Có thể đạt nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần nghiêm túc.",
-    guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa hơn.",
+    statusLabel: "Có thể làm được, nhưng cần điều chỉnh nhịp",
+    statusHint: "Mục tiêu đầy cảm hứng! Chỉ cần tinh chỉnh quỹ thời gian và các bước đi một chút là bạn sẽ làm được.",
+    guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa và bền bỉ hơn.",
     guideBody:
-      "Mục tiêu có sức bật nhưng không phù hợp nếu triển khai quá rộng. Giữ một hướng chính rõ và bỏ bớt phần gây nhiễu.",
+      "Mục tiêu có sức bật rất tốt nhưng có thể hơi rộng lúc này. Hãy giữ một hướng đi chính và tạm thời gác lại những điều phụ.",
     highlights: [
       {
         title: "Thu hẹp mục tiêu 12 tuần đầu",
@@ -108,12 +108,12 @@ const RESULT_COPY: Record<ResultType, ResultCopy> = {
     ],
   },
   too_ambitious: {
-    statusLabel: "Cần thu nhỏ trước khi tăng tốc",
+    statusLabel: "Mục tiêu này cần thu nhỏ một chút để dễ hoàn thành hơn",
     statusHint:
-      "Mục tiêu đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách giúp giữ động lực và xác suất hoàn thành cao hơn.",
-    guideTitle: "Không cần hạ tham vọng — chỉ cần hạ mức tải bước đầu.",
+      "Chúng mình khuyên bạn nên điều chỉnh để có một khởi đầu nhẹ nhàng và bền vững.",
+    guideTitle: "Không cần hạ thấp ước mơ — chỉ cần chia nhỏ chặng đường.",
     guideBody:
-      "Chưa cần từ bỏ mục tiêu lớn. Biến nó thành bước đệm vừa tầm để 12 tuần tới là chu kỳ thắng được, không phải lời hứa áp lực.",
+      "Hãy giữ ước mơ lớn, nhưng biến 12 tuần này thành một bước đệm vừa tầm để bạn có một hành trình đầy tự tin và chiến thắng.",
     highlights: [
       {
         title: "Thu nhỏ kết quả đầu tiên",
@@ -188,8 +188,8 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   const scoreCards = [
     {
       label: "Mức sẵn sàng tổng",
-      value: `${result.readinessScore}/20`,
-      note: `${result.diagnosticScore}/${result.maxDiagnosticScore} điểm trước khi tính nền lĩnh vực.`,
+      value: readinessPercent >= 75 ? "Sẵn sàng ✨" : readinessPercent >= 50 ? "Khá ổn 🌱" : "Cần lưu ý 🌊",
+      note: `Điểm số: ${result.readinessScore}/20 (${result.diagnosticScore}/${result.maxDiagnosticScore} điểm gốc).`,
       progress: readinessPercent,
     },
     {
@@ -258,9 +258,11 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   strokeLinecap="round"
                 />
               </svg>
-              <div className="relative flex flex-col items-center justify-center">
-                <span className="font-serif text-5.5xl font-extrabold leading-none bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-white dark:to-indigo-200 bg-clip-text text-transparent tracking-tight">{scoreOutOfTen}</span>
-                <span className="mt-1 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Điểm số</span>
+              <div className="relative flex flex-col items-center justify-center p-2">
+                <span className="font-serif text-[15px] font-bold leading-none bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-white dark:to-indigo-200 bg-clip-text text-transparent tracking-tight">
+                  {scorePercent >= 75 ? "Ổn định ✨" : scorePercent >= 50 ? "Khá tốt 🌱" : "Cần chỉnh 🌊"}
+                </span>
+                <span className="mt-1 text-[9px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Mức sẵn sàng</span>
               </div>
             </div>
             <p className="mt-3 text-sm font-extrabold text-indigo-500 dark:text-indigo-400">{statusLabel}</p>
@@ -493,14 +495,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           onClick={onAdjustGoal}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Sửa mục tiêu
+          Điều chỉnh mục tiêu
         </button>
         <button
           type="button"
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
           onClick={onContinue}
         >
-          Tiếp tục → Kế hoạch 12 tuần
+          {result.type === "realistic" ? "Tiếp tục với mục tiêu này" : "Tạo kế hoạch 12 tuần"}
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
