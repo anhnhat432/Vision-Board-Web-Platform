@@ -76,9 +76,9 @@ export function TwelveWeekSystemNotices({
           <button
             type="button"
             className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-1.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-            onClick={markWeeklyReviewCompleted}
+            onClick={() => handleTabChange("week")}
           >
-            Đã đánh giá xong
+            Mở review tuần
           </button>
           <button
             type="button"
@@ -86,13 +86,6 @@ export function TwelveWeekSystemNotices({
             onClick={handleSnoozeWeeklyReview}
           >
             Nhắc lại sau 24h
-          </button>
-          <button
-            type="button"
-            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-1.5 text-xs font-semibold text-app-accent hover:bg-app-accent-soft/30 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
-            onClick={() => handleTabChange("week")}
-          >
-            Mở review tuần
           </button>
         </TwelveWeekDashboardNotice>
       )}
