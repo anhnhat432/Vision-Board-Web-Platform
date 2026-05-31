@@ -500,10 +500,43 @@ export function SmartGoalStepShell({
 
   const handleApplyTransformedStarter = () => {
     onApplyStarter(coreTextToApply);
-    if (headingRef?.current) {
-      headingRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      headingRef.current.focus({ preventScroll: true });
-    }
+
+    setTimeout(() => {
+      const stepInputs: Record<SmartStepKey, string> = {
+        specific: "#smart-specific",
+        measurable: "#smart-metric-name",
+        achievable: "#smart-weekly-hours-slider",
+        relevant: "#smart-relevant-reason",
+        timeBound: "#smart-target-weeks-slider, #smart-target-date",
+      };
+
+      const targetSelector = stepInputs[step.key];
+      const targetElement = targetSelector ? (document.querySelector(targetSelector) as HTMLElement) : null;
+
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetElement.focus({ preventScroll: true });
+
+        const originalTransition = targetElement.style.transition;
+        const originalBorderColor = targetElement.style.borderColor;
+        const originalBoxShadow = targetElement.style.boxShadow;
+
+        targetElement.style.transition = "all 0.25s ease-in-out";
+        targetElement.style.borderColor = "rgb(20, 184, 166)"; // Teal-500
+        targetElement.style.boxShadow = "0 0 0 4px rgba(20, 184, 166, 0.35)";
+
+        setTimeout(() => {
+          targetElement.style.borderColor = originalBorderColor;
+          targetElement.style.boxShadow = originalBoxShadow;
+          setTimeout(() => {
+            targetElement.style.transition = originalTransition;
+          }, 250);
+        }, 1200);
+      } else if (headingRef?.current) {
+        headingRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        headingRef.current.focus({ preventScroll: true });
+      }
+    }, 80);
   };
 
   const renderPolaroidCard = (isMobile = false) => {
