@@ -1,0 +1,35 @@
+Read docs/DESIGN.md first and follow it as the design authority.
+
+Now audit and redesign this screen: [route/tên màn]
+
+Current problem:
+[ghi vấn đề bạn thấy]
+
+Goal:
+[ghi cảm giác mong muốn]
+
+Important:
+
+- Do not edit code immediately.
+- First, explain the screen's role in the product journey.
+- Then identify the user's main job on this screen.
+- Then identify the main CTA.
+- Then list the UX problems.
+- Then propose the redesign direction.
+- Wait for my approval before implementing.
+
+Constraints:
+
+- Keep existing business logic.
+- Keep existing routes.
+- Keep existing localStorage/sessionStorage behavior.
+- Keep existing analytics events.
+- Keep TypeScript safety.
+- Do not introduce unnecessary dependencies.
+- Improve UX/UI, layout, copy, visual hierarchy, responsive design, and user guidance.
+
+<!-- Mỗi lần chỉ sửa 1 màn.
+Mỗi màn tối đa 1–3 file chính.
+Không sửa toàn bộ design system nếu chưa cần.
+Không refactor logic trong lúc redesign UI.
+Không cho AI đổi flow nếu bạn chưa duyệt. -->

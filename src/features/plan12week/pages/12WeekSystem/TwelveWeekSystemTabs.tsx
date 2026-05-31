@@ -340,29 +340,41 @@ export function TwelveWeekSystemTabs({
   const planHasNoTasks = system.taskInstances.length === 0;
   const planHasNoLeadMetrics = system.leadIndicators.length === 0;
 
+  const showTodayDot = overdueOpenCount > 0;
+  const showWeekDot = reviewDueToday;
+
   return (
     <>
       <nav className="mt-4" aria-label="Điều hướng hệ 12 tuần">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-xl bg-app-bg/60 p-1 border border-app-line/30 backdrop-blur-md"
+            className="inline-flex min-h-[48px] rounded-2xl bg-gradient-to-r from-app-bg/85 to-app-surface/85 p-1 border border-app-line/40 backdrop-blur-md shadow-3xs"
           >
-            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
-              <TabsTrigger
-                key={value}
-                id={`${tabPanelId}-${value}-tab`}
-                value={value}
-                aria-controls={tabPanelId}
-                aria-label={`Mở tab ${label}`}
-                className={`flex-none rounded-lg px-4 py-1.5 text-xs transition-all duration-300 gap-1.5 flex items-center justify-center border border-transparent
-                  data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:font-medium data-[state=active]:shadow-sm data-[state=active]:border-app-line/20
-                  data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-normal hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/40`}
-              >
-                <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                <span>{label}</span>
-              </TabsTrigger>
-            ))}
+            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
+              const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
+              return (
+                <TabsTrigger
+                  key={value}
+                  id={`${tabPanelId}-${value}-tab`}
+                  value={value}
+                  aria-controls={tabPanelId}
+                  aria-label={`Mở tab ${label}`}
+                  className={`relative flex-none rounded-xl px-5 py-2.5 text-xs transition-all duration-200 gap-2 flex items-center justify-center border border-transparent min-h-[40px]
+                    data-[state=active]:bg-gradient-to-b data-[state=active]:from-app-surface data-[state=active]:to-app-surface/90 data-[state=active]:text-app-accent data-[state=active]:font-bold data-[state=active]:shadow-xs data-[state=active]:border-app-line/20
+                    data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/40`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{label}</span>
+                  {hasDot && (
+                    <span className="absolute top-1.5 right-2 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-warm opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-app-warm" />
+                    </span>
+                  )}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </Tabs>
       </nav>

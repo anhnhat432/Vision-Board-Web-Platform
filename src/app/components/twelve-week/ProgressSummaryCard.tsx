@@ -1,4 +1,4 @@
-﻿import {
+import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
@@ -50,32 +50,32 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
   switch (level) {
     case "on_track":
       return {
-        container: "border-app-line bg-app-surface",
-        badge: "border-app-accent/20 bg-app-accent-soft text-app-accent",
+        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
+        badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
-        container: "border-app-line bg-app-surface",
-        badge: "border-app-accent/20 bg-app-accent-soft text-app-accent",
+        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
+        badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
-        container: "border-app-line bg-app-surface",
-        badge: "border-app-warm/30 bg-app-warm-soft text-app-warm",
+        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-3xl shadow-xs",
+        badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
-        container: "border-app-line bg-app-surface",
-        badge: "border-app-warm/30 bg-app-warm-soft text-app-warm",
+        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-3xl shadow-xs",
+        badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-app-line bg-app-surface",
-        badge: "border-app-line bg-app-bg text-app-ink-soft",
+        container: "border-app-line/60 bg-app-surface rounded-3xl shadow-xs",
+        badge: "border-app-line bg-app-bg text-app-ink-soft px-3 py-1 rounded-full",
         badgeLabel: "Chưa có dữ liệu",
       };
   }
@@ -170,19 +170,19 @@ export function ProgressSummaryCard({
 
   return (
     <div className="stack-section pt-4">
-      <Card data-testid="progress-trend-hero" className={`border ${narrativeStyle.container}`}>
+      <Card data-testid="progress-trend-hero" className={`border ${narrativeStyle.container} overflow-hidden`}>
         <CardContent className="p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                 <Sparkles className="h-3.5 w-3.5 text-app-accent" />
                 Trạng thái nhịp tuần này
               </p>
-              <p className="mt-2 font-serif text-xl font-medium text-app-ink sm:text-2xl">{trend.headline}</p>
-              <p className="mt-1 text-sm leading-6 text-app-ink-soft">{trend.advice}</p>
+              <p className="mt-2 font-serif text-xl font-bold leading-snug text-app-ink sm:text-2xl">{trend.headline}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-app-ink-soft">{trend.advice}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {trend.weekOverWeekDelta !== null && (
-                  <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-xs font-medium text-app-ink-soft">
+                  <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-0.5 text-xs font-medium text-app-ink-soft">
                     {trend.trendDirection === "up" ? (
                       <ArrowUp className="mr-1 h-3 w-3 text-app-accent" />
                     ) : trend.trendDirection === "down" ? (
@@ -196,14 +196,14 @@ export function ProgressSummaryCard({
                 )}
               </div>
               {nextActionHandler && (
-                <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                <div className="mt-4.5 rounded-2xl border border-app-line/60 bg-app-bg/50 backdrop-blur-xs p-4 shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                     Tiếp theo nên làm
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-app-ink">{nextActionSuggestion.label}</p>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
                   <Button
                     size="lg"
-                    className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto"
+                    className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-xl sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
                     onClick={nextActionHandler}
                   >
                     {nextActionSuggestion.buttonLabel}
@@ -222,15 +222,15 @@ export function ProgressSummaryCard({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border border-app-line bg-app-surface">
+        <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              <CalendarDays className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+              <CalendarDays className="h-3.5 w-3.5 text-app-accent-soft-strong" />
               Tuần đang chạy
             </p>
-            <div className="mt-3">
-              <p className="font-serif text-2xl font-medium text-app-ink">Tuần {boundedCurrentWeek}</p>
-              <p className="mt-1 text-sm text-app-ink-muted">
+            <div className="mt-4">
+              <p className="font-serif text-3xl font-bold text-app-ink">Tuần {boundedCurrentWeek}</p>
+              <p className="mt-1.5 text-xs font-medium text-app-ink-soft">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang cập nhật phạm vi tuần"}
@@ -239,62 +239,62 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card className="border border-app-line bg-app-surface">
+        <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
               Điểm hiện tại
             </p>
-            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">{currentWeekScoreValue}</p>
-            <p className="mt-1 text-sm text-app-ink-muted">Trung bình toàn chu kỳ: {averageScore}</p>
+            <p className="mt-4 font-serif text-3xl font-bold text-app-ink">{currentWeekScoreValue}</p>
+            <p className="mt-1.5 text-xs font-medium text-app-ink-soft">Trung bình toàn chu kỳ: {averageScore}</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-app-line bg-app-surface">
+        <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <Flag className="h-3.5 w-3.5 text-app-accent" />
               Review đã khóa
             </p>
-            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">
+            <p className="mt-4 font-serif text-3xl font-bold text-app-ink">
               {isEarlyState
-                ? `Tuần ${boundedCurrentWeek}/${boundedTotalWeeks}`
+                ? `${boundedCurrentWeek}/${boundedTotalWeeks}`
                 : `${reviewDoneCount}/${boundedTotalWeeks}`}
             </p>
-            <p className="mt-1 text-sm text-app-ink-muted">
+            <p className="mt-1.5 text-xs font-medium text-app-ink-soft leading-relaxed">
               {isEarlyState
-                ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
-                : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
+                ? "Hết tuần này có review đầu tiên."
+                : `${weekCompletion.completed}/${weekCompletion.total} việc đã xong`}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border border-app-line bg-app-surface">
+      <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
         <CardContent className="stack-stack p-5 md:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                 <Target className="h-3.5 w-3.5 text-app-accent" />
                 Bản đồ chu kỳ
               </p>
-              <p className="mt-2 font-serif text-lg font-medium text-app-ink">Đường chạy {boundedTotalWeeks} tuần</p>
-              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
+              <p className="mt-2 font-serif text-lg font-bold text-app-ink">Đường chạy {boundedTotalWeeks} tuần</p>
+              <p className="mt-1 text-sm leading-relaxed text-app-ink-soft">
                 Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2.5">
               <div
                 data-testid="progress-current-milestone"
-                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm text-app-ink-soft"
+                className="rounded-xl border border-app-line/60 bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft shadow-3xs"
               >
-                Hiện tại: <span className="font-semibold text-app-ink">{currentPhaseLabel}</span>
+                Hiện tại: <span className="font-bold text-app-accent">{currentPhaseLabel}</span>
               </div>
               <div
                 data-testid="progress-next-milestone"
-                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm text-app-ink-soft"
+                className="rounded-xl border border-app-line/60 bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft shadow-3xs"
               >
-                Mốc tiếp theo: <span className="font-semibold text-app-ink">{nextMilestoneLabel}</span>
+                Mốc tiếp theo: <span className="font-bold text-app-accent">{nextMilestoneLabel}</span>
               </div>
             </div>
           </div>
@@ -320,27 +320,27 @@ export function ProgressSummaryCard({
                   data-milestone={isMilestone ? "true" : "false"}
                   aria-current={isCurrent ? "step" : undefined}
                   aria-label={weekLabel}
-                  className={`min-h-14 rounded-lg border px-2 py-2 text-center text-xs ${
+                  className={`min-h-14 rounded-xl border px-2 py-2 text-center text-xs transition-all duration-200 hover:scale-105 ${
                     isCurrent
-                      ? "border-app-ink bg-app-ink text-white"
+                      ? "border-app-accent bg-app-accent text-white shadow-2xs font-bold"
                       : isReviewed
-                        ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                        ? "border-app-accent/15 bg-app-accent-soft/80 text-app-accent"
                         : isMilestone
-                          ? "border-app-warm/30 bg-app-warm-soft text-app-warm"
-                          : "border-app-line bg-app-bg text-app-ink-soft"
+                          ? "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong font-semibold"
+                          : "border-app-line/60 bg-app-bg text-app-ink-soft"
                   }`}
                 >
                   <p className="font-semibold">W{weekNumber}</p>
-                  <p className="mt-1 flex items-center justify-center gap-1">
+                  <p className="mt-1 flex items-center justify-center gap-1 text-[10px]">
                     {isReviewed && <CheckCircle2 className="h-3 w-3" />}
-                    {isMilestone ? "M" : isReviewed ? "Xong" : isCurrent ? "Nay" : ""}
+                    {isMilestone ? "Mốc" : isReviewed ? "Xong" : isCurrent ? "Nay" : ""}
                   </p>
                 </li>
               );
             })}
           </ol>
 
-          <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
+          <div className="rounded-2xl border border-app-line/60 bg-app-bg/50 px-4 py-3.5 text-sm leading-relaxed text-app-ink-soft shadow-3xs">
             {reviewDueToday
               ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
               : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}
@@ -349,8 +349,12 @@ export function ProgressSummaryCard({
       </Card>
 
       {onViewFull && (
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={onViewFull}>
+        <div className="flex justify-center mt-2">
+          <Button 
+            variant="outline" 
+            onClick={onViewFull}
+            className="rounded-xl border-app-line/80 hover:bg-app-bg transition-colors px-6 py-2 text-sm font-semibold"
+          >
             Xem bảng điểm đầy đủ
           </Button>
         </div>

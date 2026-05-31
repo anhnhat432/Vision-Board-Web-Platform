@@ -41,11 +41,13 @@ function getHeaderPhaseInfo(currentWeek: number) {
 
 export function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
   return (
-    <div className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-6 text-center">
-      <Loader2 className="mx-auto h-5 w-5 animate-spin text-app-accent" aria-hidden="true" />
+    <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-gradient-to-br from-app-bg/30 to-app-surface/60 p-8 text-center shadow-xs">
+      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft/30 text-app-accent mb-3">
+        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+      </div>
       <p className="sr-only">{title}</p>
-      <p className="mt-2 text-xs text-app-ink-soft">Đang mở tab...</p>
-      <p className="mx-auto mt-1 max-w-xl text-xs leading-relaxed text-app-ink-muted">{description}</p>
+      <p className="text-sm font-medium text-app-ink-soft">Đang tải góc nhìn của bạn...</p>
+      <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-app-ink-muted">{description}</p>
     </div>
   );
 }
@@ -67,10 +69,11 @@ export function TwelveWeekDashboardState({
 
   if (kind === "loading") {
     return (
-      <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-app-line bg-app-surface p-8 text-center shadow-xs">
+      <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-app-line bg-gradient-to-br from-app-surface to-app-bg/30 p-8 text-center shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-app-accent-soft/10 rounded-full blur-3xl -z-10" />
         <Loader2 className="mx-auto h-8 w-8 animate-spin text-app-accent" aria-hidden="true" />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-app-ink-muted">{eyebrow}</p>
-        <h1 className="mt-1 font-serif text-xl font-bold text-app-ink">{title}</h1>
+        <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-app-ink-muted">{eyebrow}</p>
+        <h1 className="mt-1 font-serif text-xl font-semibold text-app-ink">{title}</h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft" role="status">
           {description}
         </p>
@@ -80,34 +83,38 @@ export function TwelveWeekDashboardState({
   }
 
   return (
-    <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-app-line bg-app-surface p-8 md:p-10 text-center shadow-xs relative overflow-hidden">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent">
+    <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-app-line/60 bg-app-surface p-8 md:p-12 text-center shadow-xs relative overflow-hidden">
+      {/* Soft decorative background glow circles */}
+      <div className="absolute -top-12 -right-12 w-48 h-48 bg-app-accent-soft/20 rounded-full blur-3xl -z-10" />
+      <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-app-warm-soft/30 rounded-full blur-3xl -z-10" />
+
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-app-accent-soft to-app-accent-soft/50 text-app-accent shadow-xs">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-app-accent">{eyebrow}</p>
-      <h1 className="mt-2 font-serif text-2xl sm:text-3xl font-semibold leading-tight text-app-ink">{title}</h1>
+      <h1 className="mt-2 font-serif text-2xl sm:text-3xl font-bold leading-tight text-app-ink tracking-tight">{title}</h1>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-app-ink-soft">
         {description}
       </p>
 
-      {/* 3 Step Onboarding Visual - Clean paper note cards */}
-      <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3 text-left">
-        <div className="relative bg-app-bg/50 border border-app-line/60 rounded-xl p-5 shadow-2xs transition-colors duration-200">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-app-accent-soft text-xs font-bold text-app-accent">1</span>
-          <h3 className="mt-3 font-serif text-base font-semibold text-app-ink">Lĩnh vực ưu tiên</h3>
-          <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">Chọn khía cạnh cuộc sống bạn muốn bứt phá trong chu kỳ này.</p>
+      {/* 3 Step Onboarding Visual - Warm soft cards */}
+      <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3 text-left">
+        <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">1</span>
+          <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Lĩnh vực ưu tiên</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">Tìm kiếm khía cạnh cuộc sống bạn khao khát được cải thiện lúc này.</p>
         </div>
 
-        <div className="relative bg-app-bg/50 border border-app-line/60 rounded-xl p-5 shadow-2xs transition-colors duration-200">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-app-warm-soft/60 text-xs font-bold text-app-warm-strong">2</span>
-          <h3 className="mt-3 font-serif text-base font-semibold text-app-ink">Mục tiêu SMART</h3>
-          <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">Xác định mục tiêu rõ ràng, đo lường được và khả thi cao.</p>
+        <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-warm-soft text-xs font-bold text-app-warm-strong">2</span>
+          <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Mục tiêu SMART</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">Định hình ước mơ thành một đích đến rõ ràng, đo lường được.</p>
         </div>
 
-        <div className="relative bg-app-bg/50 border border-app-line/60 rounded-xl p-5 shadow-2xs transition-colors duration-200">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-app-accent-soft text-xs font-bold text-app-accent">3</span>
-          <h3 className="mt-3 font-serif text-base font-semibold text-app-ink">Kế hoạch 12 tuần</h3>
-          <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">Bẻ nhỏ thành các hành động tuần tự và chỉ số thực tế.</p>
+        <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">3</span>
+          <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Kế hoạch 12 tuần</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">Chia nhỏ hành động và cùng đồng hành qua từng tuần thực thi.</p>
         </div>
       </div>
 
@@ -132,28 +139,28 @@ export function TwelveWeekDashboardNotice({
   const Icon = tone === "success" ? CheckCircle2 : AlertTriangle;
   const toneClass =
     tone === "success"
-      ? "border-app-line bg-app-surface/90 shadow-sm"
+      ? "border-app-line/80 bg-app-surface/90 shadow-2xs"
       : tone === "error"
-        ? "border-red-200/50 bg-red-50/10 dark:border-red-950/30 dark:bg-red-950/10"
-        : "border-app-warm-border/30 bg-app-warm-soft/20";
+        ? "border-red-200/60 bg-red-50/40 dark:border-red-950/20 dark:bg-red-950/5"
+        : "border-app-warm-border/20 bg-app-warm-soft/10";
   const iconClass =
-    tone === "success" ? "text-app-accent" : tone === "error" ? "text-red-600 dark:text-red-400" : "text-app-warm";
+    tone === "success" ? "text-app-accent" : tone === "error" ? "text-red-500 dark:text-red-400" : "text-app-warm";
   const titleClass =
     tone === "warning"
-      ? "font-serif text-app-warm-strong font-bold"
+      ? "font-serif text-app-warm-strong font-semibold"
       : tone === "error"
-        ? "font-serif text-red-700 dark:text-red-400 font-bold"
-        : "text-app-ink font-bold";
+        ? "font-serif text-red-800 dark:text-red-400 font-semibold"
+        : "text-app-ink font-semibold";
   const role = tone === "success" ? "status" : "alert";
 
   return (
     <div role={role} className={`rounded-2xl border p-5 md:p-6 transition-all duration-150 ${toneClass}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-bg/60 border border-app-line/40 shadow-3xs">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-bg/50 border border-app-line/30 shadow-3xs">
           <Icon className={`h-5 w-5 ${iconClass}`} aria-hidden="true" />
         </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className={`text-base font-semibold ${titleClass}`}>{title}</p>
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <p className={`text-base ${titleClass}`}>{title}</p>
           <p className="text-sm leading-relaxed text-app-ink-soft">{description}</p>
         </div>
         {children ? (
@@ -207,44 +214,54 @@ export function TwelveWeekDashboardHeader({
   const domainLabel = activeGoal.focusArea || activeGoal.category;
 
   return (
-    <header className="relative border border-app-line/30 bg-app-surface rounded-xl p-4 sm:p-5 shadow-2xs">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-1">
+    <header className="relative border border-app-line/40 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/15 rounded-2xl p-5 md:p-6 shadow-xs overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between relative z-10">
+        <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
-            <span>Hệ thống 12 tuần</span>
+            <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">Hệ thống 12 tuần</span>
             <span>·</span>
-            <span>Tuần {currentWeek}/{system.totalWeeks}</span>
+            <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">Tuần {currentWeek}/{system.totalWeeks}</span>
             <span>·</span>
-            <span className="flex items-center gap-1">
-              <PhaseIcon className="h-3 w-3 text-app-accent shrink-0" />
-              Nhịp {phaseInfo.label}
+            <span className="inline-flex items-center gap-1 bg-app-accent-soft/60 px-2.5 py-0.5 rounded-full text-app-accent border border-app-accent/10">
+              <PhaseIcon className="h-3 w-3 shrink-0" />
+              <span>Nhịp {phaseInfo.label}</span>
             </span>
           </div>
 
-          <InlineGoalTitleEdit
-            title={activeGoal.title}
-            fallbackTitle="Kế hoạch hiện tại"
-            onSave={onRenameGoal}
-            headingLevel={1}
-            titleClassName="break-words font-serif text-lg font-semibold leading-snug tracking-tight text-app-ink sm:text-xl"
-            inputClassName="h-auto rounded-lg px-2 py-1 font-serif text-lg font-semibold leading-snug tracking-tight text-app-ink sm:text-xl"
-          />
+          <div className="space-y-1">
+            <InlineGoalTitleEdit
+              title={activeGoal.title}
+              fallbackTitle="Kế hoạch hiện tại"
+              onSave={onRenameGoal}
+              headingLevel={1}
+              titleClassName="break-words font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink"
+              inputClassName="h-auto rounded-lg px-2 py-1 font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink"
+            />
+            <div className="flex flex-wrap items-center gap-2 text-[10px] text-app-ink-soft">
+              <span className="bg-app-bg/40 px-1.5 py-0.5 rounded-md border border-app-line/20">Gói {getPlanLabel(activePlanCode)}</span>
+              <span>·</span>
+              <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}>
+                {syncBadgeLabel}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Action Button: Slimmer premium buttons */}
-        <div className="flex items-center gap-2 pt-1 sm:pt-0 shrink-0">
+        <div className="flex items-center gap-2.5 pt-1 sm:pt-0 shrink-0">
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-app-accent px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-xs"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent/95 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
             onClick={onOpenFocusTab}
           >
-            <span>{reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}</span>
+            <span>{reviewDueToday ? "Review tuần này →" : "Xem việc hôm nay →"}</span>
             <Target className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
           
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs font-medium text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
+            className="inline-flex items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-3xs"
             onClick={onOpenGoals}
           >
             Mở mục tiêu
@@ -270,17 +287,17 @@ export function TwelveWeekGoalSwitcher({
     <div className="flex">
       <Select value={activeGoalId} onValueChange={onLoadGoal}>
         <SelectTrigger
-          className="h-auto w-full max-w-full rounded-xl border-app-line bg-app-surface px-4 py-2.5 text-sm font-semibold text-app-ink shadow-xs hover:bg-app-bg focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md"
+          className="h-auto w-full max-w-full rounded-2xl border-app-line/60 bg-app-surface px-4 py-2.5 text-sm font-semibold text-app-ink shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
           aria-label="Chọn mục tiêu 12 tuần"
         >
           <SelectValue placeholder="Chọn mục tiêu" />
         </SelectTrigger>
-        <SelectContent className="surface-raised rounded-xl border border-app-line bg-app-surface p-1.5 shadow-md backdrop-blur-none">
+        <SelectContent className="surface-raised rounded-2xl border border-app-line/60 bg-app-surface p-1.5 shadow-md backdrop-blur-none">
           {allGoals.map((goal) => (
             <SelectItem
               key={goal.id}
               value={goal.id}
-              className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-medium ${
+              className={`cursor-pointer rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
                 goal.id === activeGoalId
                   ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft focus:text-app-accent"
                   : "text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink"
@@ -332,11 +349,11 @@ export function TwelveWeekRescueTriggerBanner({
   return (
     <div 
       role="alert" 
-      className="relative overflow-hidden rounded-xl border border-app-warm-border/30 bg-app-warm-soft/10 p-5 transition-colors"
+      className="relative overflow-hidden rounded-2xl border border-app-warm/20 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 p-5 shadow-2xs transition-colors"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex min-w-0 flex-1 items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-bg/60 border border-app-line/40 text-app-warm">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-bg/50 border border-app-line/30 text-app-warm shadow-3xs">
             <AlertTriangle className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
@@ -347,7 +364,7 @@ export function TwelveWeekRescueTriggerBanner({
         <div className="flex w-full shrink-0 items-center gap-2.5 sm:w-auto pt-2 sm:pt-0">
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm hover:opacity-90 sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center rounded-xl bg-app-warm px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-warm/90 hover:opacity-95 hover:shadow-2xs sm:flex-none"
             onClick={() => {
               const action = isUpgradeTrigger ? "upgrade" : "navigate_system";
               onActionTaken(trigger, action);
@@ -359,7 +376,7 @@ export function TwelveWeekRescueTriggerBanner({
           </button>
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-xs font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-bg hover:text-app-ink sm:flex-none"
+            className="inline-flex flex-1 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink hover:shadow-3xs sm:flex-none"
             onClick={() => onDismiss(trigger.kind)}
           >
             Bỏ qua
