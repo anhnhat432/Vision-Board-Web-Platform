@@ -45,18 +45,18 @@ type AutoSaveDraftStatus = "idle" | "saving" | "saved";
 const JOURNEY_STEPS = [
   {
     icon: Heart,
-    title: "🎯 Chấm 8 lĩnh vực",
-    description: "Nhìn nhanh sức khỏe hiện tại của từng phần trong cuộc sống.",
+    title: "🎯 8 Khía cạnh",
+    description: "Nhìn nhận nhanh chóng sức khỏe cuộc sống hiện tại.",
   },
   {
     icon: Compass,
     title: "💡 Chọn trọng tâm",
-    description: "Dữ liệu này mở Góc nhìn cuộc sống để chọn đúng nơi nên ưu tiên.",
+    description: "Xác định rõ nét khía cạnh cần ưu tiên phát triển.",
   },
   {
     icon: Target,
-    title: "🚀 Đi tiếp tới mục tiêu SMART",
-    description: "Trọng tâm được chuyển thành mục tiêu rõ và kế hoạch 12 tuần.",
+    title: "🚀 Kế hoạch 12 tuần",
+    description: "Chuyển trọng tâm thành mục tiêu SMART và hành động.",
   },
 ] satisfies Array<{ icon: LucideIcon; title: string; description: string }>;
 
@@ -533,12 +533,12 @@ export function Onboarding() {
                       LIFE BALANCE STUDIO
                     </div>
                     
-                    <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-app-ink leading-tight">
-                      Lắng nghe nhịp điệu <br className="hidden sm:inline" /> cuộc sống của bạn
+                    <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-app-ink leading-tight">
+                      Thiết kế tương lai <br className="hidden sm:inline" /> của bạn từ hôm nay
                     </h1>
                     
                     <p className="text-sm text-app-ink-soft leading-relaxed max-w-xl">
-                      Dear Our Future giúp bạn chuyển hóa những ước mơ mơ hồ thành một mục tiêu SMART rõ ràng và kế hoạch 12 tuần thực tế. Dành 3 phút đánh giá 8 khía cạnh để xem cuộc sống của bạn đang tròn hay lệch.
+                      Đánh giá 8 khía cạnh bánh xe cuộc sống để xác định trọng tâm ưu tiên và thiết lập hành động cho chu kỳ 12 tuần tiếp theo. Dành 3 phút để bắt đầu ngay.
                     </p>
                   </div>
 
@@ -569,22 +569,23 @@ export function Onboarding() {
                   <div className="pt-2 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm"
+                      onClick={handleStartAssessment}
+                    >
+                      Bắt đầu đánh giá (3 phút)
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-6 py-3 text-sm font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]"
                       onClick={() => setShowBreathing(true)}
                     >
                       <Sparkles className="h-4 w-4" aria-hidden="true" />
-                      Tập thở & Bắt đầu
+                      Tập thở thư giãn trước
                     </button>
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-6 py-3 text-sm font-medium text-app-ink transition-all duration-200 hover:bg-app-bg hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
-                      onClick={handleStartAssessment}
-                    >
-                      Bắt đầu nhanh
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2"
+                      className="inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
                       onClick={handleDefer}
                     >
                       Để sau
@@ -626,7 +627,7 @@ export function Onboarding() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
-          <div className="space-y-3 order-2 lg:order-1">
+          <div className="space-y-3 order-1 lg:order-1">
             <div className="space-y-2.5">
               {lifeAreas.map((area, index) => {
                 const AreaIcon = getCalmLifeAreaIcon(area.name);
@@ -648,13 +649,14 @@ export function Onboarding() {
                         setActiveAreaIndex(isActive ? null : index);
                       }
                     }}
-                    className={`cursor-pointer rounded-xl border transition-all duration-300 overflow-hidden ${
+                    className={`cursor-pointer rounded-xl border transition-all duration-200 overflow-hidden outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 ${
                       isActive 
-                        ? "border-app-accent bg-app-surface shadow-app-md ring-1 ring-app-accent/25" 
+                        ? "bg-app-surface"
                         : isAreaReviewed 
                           ? "border-app-line bg-app-surface/90 hover:bg-app-surface hover:border-app-line-strong hover:shadow-app-sm" 
                           : "border-app-line bg-app-surface/40 hover:bg-app-surface/60 hover:border-app-line-strong"
                     }`}
+                    style={isActive ? { borderColor: colorConfig.accent, boxShadow: `0 8px 24px -6px ${colorConfig.accent}18, 0 2px 8px -2px ${colorConfig.accent}12` } : {}}
                   >
                     <div className="p-4 flex items-center justify-between gap-4">
                       <div className="flex min-w-0 items-center gap-3">
@@ -743,17 +745,44 @@ export function Onboarding() {
                           </div>
                         </div>
 
-                        {!isAreaReviewed && (
-                          <div className="flex justify-end pt-1">
-                            <button
-                              type="button"
-                              className="text-[11px] font-semibold text-app-accent hover:underline flex items-center gap-1"
-                              onClick={() => handleSkipArea(index)}
-                            >
-                              Để sau
-                            </button>
-                          </div>
-                        )}
+                        <div className="pt-3 flex items-center justify-between gap-3 border-t border-app-line/20">
+                          <button
+                            type="button"
+                            className="text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 rounded-lg px-2.5 py-1.5 transition-colors"
+                            onClick={() => {
+                              handleSkipArea(index);
+                              if (index < 7) {
+                                setActiveAreaIndex(index + 1);
+                              } else {
+                                setActiveAreaIndex(null);
+                              }
+                            }}
+                          >
+                            Để sau
+                          </button>
+                          
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-4 py-2 text-xs font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 shadow-xs"
+                            onClick={() => {
+                              markAreaReviewed(index);
+                              if (index < 7) {
+                                setActiveAreaIndex(index + 1);
+                              } else {
+                                setActiveAreaIndex(null);
+                              }
+                            }}
+                          >
+                            {index < 7 ? (
+                              <>
+                                Lĩnh vực tiếp theo
+                                <ArrowRight className="h-3.5 w-3.5" />
+                              </>
+                            ) : (
+                              "Hoàn thành rà soát"
+                            )}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -771,7 +800,7 @@ export function Onboarding() {
             )}
           </div>
 
-          <div className="order-1 lg:order-2 lg:sticky lg:top-6 space-y-4">
+          <div className="order-2 lg:order-2 lg:sticky lg:top-6 space-y-4">
             <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/10 p-6 shadow-app-md text-center relative overflow-hidden transition-all duration-300">
               <div className="absolute top-0 right-0 w-36 h-36 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
               
@@ -795,25 +824,25 @@ export function Onboarding() {
 
               <div className="mt-4 pt-4 border-t border-app-line/60 grid grid-cols-2 gap-3 text-left" data-testid="onboarding-assessment-summary">
                 <span className="sr-only">Đã rà soát: {reviewedAreaCount}/8 Điểm trung bình</span>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
                   <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Điểm trung bình</span>
                   <p className="font-serif text-xl font-bold text-app-ink mt-0.5 tabular-nums">
                     {averageScore.toFixed(1)}<span className="text-xs font-normal text-app-ink-muted">/10</span>
                   </p>
                 </div>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
                   <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Đã hoàn thành</span>
                   <p className="font-serif text-xl font-bold text-app-ink mt-0.5 tabular-nums">
                     {Math.round((reviewedAreaCount / 8) * 100)}%
                   </p>
                 </div>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
                   <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Khía cạnh cần tập trung</span>
                   <p className="text-xs font-bold text-app-warm truncate mt-1">
                     {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
                   </p>
                 </div>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
                   <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Khía cạnh mạnh nhất</span>
                   <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 truncate mt-1">
                     {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
@@ -841,7 +870,7 @@ export function Onboarding() {
               <div className="flex items-center gap-3 order-2 sm:order-1">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
                   onClick={() => setStep("welcome")}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
@@ -849,7 +878,7 @@ export function Onboarding() {
                 </button>
                 <button
                   type="button"
-                  className="text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline px-2 py-2"
+                  className="text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline px-2 py-2 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 rounded-lg"
                   onClick={handleDefer}
                 >
                   Để sau
@@ -857,7 +886,7 @@ export function Onboarding() {
               </div>
               <button
                 type="button"
-                className="order-1 inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:brightness-105 hover:shadow-app-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent sm:order-2"
+                className="order-1 inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm sm:order-2"
                 onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
               >
                 Xem Góc nhìn cuộc sống của tôi

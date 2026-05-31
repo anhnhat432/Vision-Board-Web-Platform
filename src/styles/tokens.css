@@ -37,8 +37,8 @@
   --neutral-400: #8A8A8A;
   --neutral-300: #B8B2AA;
   --neutral-200: #D4CFC8;
-  --neutral-150: #E8E3DA;   /* slightly warmer, softer border */
-  --neutral-050: #FAF8F5;
+  --neutral-150: #EAE5DB;   /* slightly warmer, softer border */
+  --neutral-050: #FCFAF7;   /* brighter neutral background */
   --neutral-000: #FFFFFF;
 
   /* Status palette */
@@ -71,7 +71,7 @@
 
   /* — Background — */
   --app-bg:          var(--neutral-050);  /* nền trang chính */
-  --app-bg-subtle:   #F5F2EE;             /* section lồng trong card */
+  --app-bg-subtle:   #F8F6F2;             /* section lồng trong card */
   --app-surface:     var(--neutral-000);  /* card, panel, modal */
   --app-overlay:     rgba(26, 26, 26, 0.40); /* modal backdrop */
 
@@ -111,23 +111,23 @@
   --app-status-info:    var(--status-blue);
 
   /* — Focus Ring — */
-  --app-focus-ring: 0 0 0 3px rgba(47, 93, 80, 0.20);
-  --app-focus-ring-warm: 0 0 0 3px rgba(217, 119, 87, 0.20);
+  --app-focus-ring: 0 0 0 3px rgba(47, 93, 80, 0.28);
+  --app-focus-ring-warm: 0 0 0 3px rgba(217, 119, 87, 0.28);
 
   /* — Elevation / Shadow — */
-  /* Neutral shadows, không màu accent/warm — giữ calm feel */
+  /* Neutral shadows, không màu accent/warm — giữ cảm giác nhẹ nhàng, trẻ trung */
   --app-shadow-sm:
-    0 1px 3px rgba(26, 26, 26, 0.06),
-    0 1px 2px rgba(26, 26, 26, 0.04);
+    0 1px 2px rgba(26, 26, 26, 0.04),
+    0 0 0 1px rgba(26, 26, 26, 0.01);
   --app-shadow-md:
-    0 4px 12px rgba(26, 26, 26, 0.08),
-    0 2px 4px rgba(26, 26, 26, 0.04);
+    0 6px 16px -4px rgba(26, 26, 26, 0.06),
+    0 2px 6px -2px rgba(26, 26, 26, 0.03);
   --app-shadow-lg:
-    0 8px 24px rgba(26, 26, 26, 0.10),
-    0 4px 8px rgba(26, 26, 26, 0.06);
+    0 12px 32px -8px rgba(26, 26, 26, 0.08),
+    0 4px 12px -4px rgba(26, 26, 26, 0.03);
   --app-shadow-xl:
-    0 16px 40px rgba(26, 26, 26, 0.12),
-    0 8px 16px rgba(26, 26, 26, 0.06);
+    0 20px 48px -12px rgba(26, 26, 26, 0.10),
+    0 8px 20px -6px rgba(26, 26, 26, 0.04);
 }
 
 /* — Dark Mode Overrides — */

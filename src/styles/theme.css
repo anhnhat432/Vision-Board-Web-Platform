@@ -426,24 +426,24 @@
   h1 {
     font-size: var(--text-3xl);
     font-weight: 700;
-    line-height: 1.06;
-    letter-spacing: -0.022em;
+    line-height: 1.1;
+    letter-spacing: -0.018em;
     text-wrap: balance;
   }
 
   h2 {
     font-size: var(--text-2xl);
     font-weight: 700;
-    line-height: 1.12;
-    letter-spacing: -0.018em;
+    line-height: 1.15;
+    letter-spacing: -0.014em;
     text-wrap: balance;
   }
 
   h3 {
     font-size: var(--text-xl);
     font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.014em;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
 
@@ -545,7 +545,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 3px solid var(--ring);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
@@ -2020,9 +2020,9 @@
     background: var(--app-surface);
     border: 1px solid var(--app-line);
     border-bottom: none;
-    box-shadow: 0 -1px 0 rgba(26, 26, 26, 0.04);
-    border-radius: 1rem 1rem 0 0;
-    padding: 0.55rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0));
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.05), 0 -1px 0 rgba(26, 26, 26, 0.02);
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding: 0.65rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0));
   }
 
   .bottom-nav-item {

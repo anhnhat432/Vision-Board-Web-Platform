@@ -672,13 +672,13 @@ function DashboardContent({
       </div>
 
       {showMobileStickyCTA ? (
-        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line bg-app-surface/95 p-4 shadow-[0_-1px_2px_rgba(26,26,26,0.04)] backdrop-blur md:hidden">
+        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/85 p-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:hidden">
           <button
             type="button"
-            className="w-full rounded-lg border border-app-line bg-app-surface px-4 py-3 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="w-full rounded-xl bg-gradient-to-r from-app-accent to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
             onClick={() => navigate("/today-v2")}
           >
-            Mở Today - {dashboardData.dashboardOpenTaskCount} việc
+            Mở Today · {dashboardData.dashboardOpenTaskCount} việc hôm nay
           </button>
         </div>
       ) : null}

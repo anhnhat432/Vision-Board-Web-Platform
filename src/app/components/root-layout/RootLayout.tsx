@@ -888,17 +888,17 @@ export function RootLayout() {
 
           <div className={showSidebar ? "flex-1 lg:pl-[272px]" : "flex-1"}>
             <header
-              className={`sticky top-0 z-40 border-b border-app-line bg-app-bg/95 backdrop-blur-sm ${
+              className={`sticky top-0 z-40 border-b border-app-line/80 bg-app-bg/85 backdrop-blur-md transition-all duration-200 ${
                 showSidebar ? "lg:hidden" : ""
               }`}
             >
-              <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+              <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
                 <div className="flex w-full items-center justify-between gap-3">
                   <div className="flex min-w-0 shrink-0 items-center gap-2.5">
                     <button
                       type="button"
                       onClick={() => navigateAppRoute("/")}
-                      className="-mx-1 flex shrink-0 items-center gap-2.5 rounded-md px-1 py-1 text-left transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-app-ink/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+                      className="-mx-1.5 flex shrink-0 items-center gap-2.5 rounded-xl px-1.5 py-1 text-left transition-all duration-200 hover:bg-app-ink/5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
                       aria-label="Về trang chủ Dear Our Future"
                     >
                       <img
@@ -906,10 +906,10 @@ export function RootLayout() {
                         alt=""
                         aria-hidden="true"
                         loading="eager"
-                        className="size-10 rounded-lg object-cover shadow-sm ring-1 ring-app-accent/20"
+                        className="size-9 rounded-lg object-cover shadow-xs ring-1 ring-app-accent/20 transition-transform duration-200 group-hover:scale-105"
                       />
                       <div className="min-w-0">
-                        <span className="inline-block text-sm font-medium tracking-tight text-app-ink">
+                        <span className="inline-block text-sm font-semibold tracking-tight text-app-ink">
                           Dear Our Future
                         </span>
                       </div>
@@ -1422,7 +1422,7 @@ export function RootLayout() {
               aria-label="Điều hướng dưới"
               style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
             >
-              <div className="bottom-nav-inner">
+              <div className="bottom-nav-inner bg-app-surface/85 backdrop-blur-lg border-t border-app-line/75 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] rounded-t-2xl p-2 pb-[calc(0.4rem+env(safe-area-inset-bottom,0))]">
                 {bottomNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -1430,7 +1430,7 @@ export function RootLayout() {
                     <button
                       key={item.path}
                       type="button"
-                      className="bottom-nav-item"
+                      className="bottom-nav-item rounded-xl transition-all duration-200 active:scale-95"
                       aria-current={active ? "page" : undefined}
                       onClick={() => {
                         setMobileMenuOpen(false);
@@ -1439,13 +1439,13 @@ export function RootLayout() {
                       onPointerEnter={() => handlePrefetch(item.path)}
                       title={item.label}
                     >
-                      <div className="bottom-nav-icon">
+                      <div className={`bottom-nav-icon transition-all duration-200 ${active ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}>
                         <Icon
-                          className={`h-4 w-4 ${active ? "text-white" : "text-app-ink-muted"}`}
+                          className={`h-4.5 w-4.5 ${active ? "text-white" : "text-app-ink-soft group-hover:text-app-ink"}`}
                           strokeWidth={active ? 2.25 : 1.8}
                         />
                       </div>
-                      <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-app-ink-muted"}`}>
+                      <span className={`bottom-nav-label font-semibold text-[10px] tracking-tight ${active ? "text-app-accent font-bold" : "text-app-ink-soft/90"}`}>
                         {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
                       </span>
                     </button>
@@ -1453,20 +1453,20 @@ export function RootLayout() {
                 })}
                 <button
                   type="button"
-                  className="bottom-nav-item"
+                  className="bottom-nav-item rounded-xl transition-all duration-200 active:scale-95"
                   onClick={() => setMobileMenuOpen((open) => !open)}
                   aria-label="Khác"
                   aria-current={isMoreNavActive ? "page" : undefined}
                   aria-expanded={mobileMenuOpen}
                   aria-controls="mobile-nav-menu"
                 >
-                  <div className="bottom-nav-icon">
+                  <div className={`bottom-nav-icon transition-all duration-200 ${isMoreNavActive ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}>
                     <Menu
-                      className={`h-4 w-4 ${isMoreNavActive ? "text-white" : "text-app-ink-muted"}`}
+                      className={`h-4.5 w-4.5 ${isMoreNavActive ? "text-white" : "text-app-ink-soft"}`}
                       strokeWidth={isMoreNavActive ? 2.25 : 1.8}
                     />
                   </div>
-                  <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-app-ink-muted"}`}>
+                  <span className={`bottom-nav-label font-semibold text-[10px] tracking-tight ${isMoreNavActive ? "text-app-accent font-bold" : "text-app-ink-soft/90"}`}>
                     Khác
                   </span>
                 </button>

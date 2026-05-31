@@ -348,6 +348,36 @@ export function LifeInsight() {
     return lifeAreas.find((a) => a.name === selectedAreaName) ?? lowestArea;
   }, [lowestArea, selectedAreaName, lifeAreas]);
 
+  const lifePattern = useMemo(() => {
+    if (!strongestArea || !lowestArea) return null;
+    const diff = strongestArea.score - lowestArea.score;
+    if (diff <= 2) {
+      return {
+        title: "Bánh xe cuộc sống tương đối cân bằng",
+        description: "Các khía cạnh cuộc sống của bạn đang tiến triển khá đồng đều. Đây là nền tảng vững chắc để duy trì nhịp độ ổn định. Bạn có thể chọn bất kỳ lĩnh vực nào muốn tập trung bứt phá tiếp theo.",
+        tone: "success",
+        accentColor: "text-emerald-700 dark:text-emerald-300",
+        bgColor: "bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-100 dark:border-emerald-900/20"
+      };
+    }
+    if (diff <= 4) {
+      return {
+        title: "Bánh xe cuộc sống hơi lệch nhẹ",
+        description: "Có một số khía cạnh đang nhận được nhiều sự quan tâm hơn, trong khi một vài phần khác bắt đầu có dấu hiệu bị bỏ quên. Chăm sóc nhẹ các vùng trũng sẽ giúp bạn đi xa hơn mà không bị quá tải.",
+        tone: "warning",
+        accentColor: "text-amber-700 dark:text-amber-300",
+        bgColor: "bg-amber-50/50 dark:bg-amber-950/10 border-amber-100 dark:border-amber-900/20"
+      };
+    }
+    return {
+      title: "Bánh xe cuộc sống đang mất cân bằng lớn",
+      description: "Sự chênh lệch lớn giữa khía cạnh mạnh nhất và yếu nhất có thể đang tiêu hao năng lượng của bạn. Việc tập trung cải thiện và phục hồi lĩnh vực thấp điểm nhất là ưu tiên cấp thiết để tránh kiệt sức.",
+      tone: "danger",
+      accentColor: "text-rose-700 dark:text-rose-300",
+      bgColor: "bg-rose-50/50 dark:bg-rose-950/10 border-rose-100 dark:border-rose-900/20"
+    };
+  }, [strongestArea, lowestArea]);
+
   const radarData = useMemo(
     () =>
       lifeAreas.map((area) => ({
@@ -450,29 +480,94 @@ export function LifeInsight() {
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
               BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
             </p>
-            <h1 className="font-serif text-3xl md:text-4xl font-medium leading-tight tracking-tight text-app-ink">
+            <h1 className="font-serif text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-app-ink">
               Góc nhìn cuộc sống & Trọng tâm của bạn
             </h1>
             <p className="text-sm leading-relaxed text-app-ink-soft max-w-2xl">
-              Dựa trên bản đồ cân bằng, hãy chọn một lĩnh vực ưu tiên và định nghĩa mục đích của bạn để bắt đầu xây dựng mục tiêu SMART.
+              Chọn khía cạnh ưu tiên và mục đích cốt lõi dựa trên kết quả đánh giá để thiết lập mục tiêu SMART cho chu kỳ 12 tuần này.
             </p>
           </div>
 
+          {/* Life Pattern Summary Section */}
+          {lifePattern && strongestArea && lowestArea && (
+            <div className="grid gap-4 md:grid-cols-[1.5fr_1fr_1fr] items-stretch animate-fade-in">
+              {/* Life Pattern Card */}
+              <div className={`rounded-2xl border p-5 flex flex-col justify-center ${lifePattern.bgColor}`}>
+                <h3 className={`text-sm font-bold flex items-center gap-1.5 ${lifePattern.accentColor}`}>
+                  <Sparkles className="h-4 w-4 shrink-0 animate-pulse" />
+                  {lifePattern.title}
+                </h3>
+                <p className="mt-2 text-xs text-app-ink-soft leading-relaxed">
+                  {lifePattern.description}
+                </p>
+              </div>
+
+              {/* Strongest Area Card */}
+              <div className="rounded-2xl border border-emerald-100 dark:border-emerald-900/20 bg-emerald-50/20 dark:bg-emerald-950/5 p-4 flex flex-col justify-between">
+                <div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Điểm tựa vững chắc</span>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400">
+                      {(() => {
+                        const Icon = getLifeAreaIcon(strongestArea.name);
+                        return <Icon className="h-4 w-4" />;
+                      })()}
+                    </div>
+                    <span className="text-sm font-bold text-app-ink">{getLifeAreaLabel(strongestArea.name)}</span>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-baseline justify-between border-t border-app-line pt-2">
+                  <span className="text-[10px] text-app-ink-muted">Khía cạnh mạnh nhất</span>
+                  <span className="text-sm font-serif font-bold text-emerald-700 dark:text-emerald-400">{strongestArea.score}/10</span>
+                </div>
+              </div>
+
+              {/* Lowest Area Card */}
+              <div className="rounded-2xl border border-amber-100 dark:border-amber-900/20 bg-amber-50/20 dark:bg-amber-950/5 p-4 flex flex-col justify-between">
+                <div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 font-medium">Cơ hội bứt phá</span>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400">
+                      {(() => {
+                        const Icon = getLifeAreaIcon(lowestArea.name);
+                        return <Icon className="h-4 w-4" />;
+                      })()}
+                    </div>
+                    <span className="text-sm font-bold text-app-ink">{getLifeAreaLabel(lowestArea.name)}</span>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-baseline justify-between border-t border-app-line pt-2">
+                  <span className="text-[10px] text-app-ink-muted">Cần cải thiện nhất</span>
+                  <span className="text-sm font-serif font-bold text-amber-700 dark:text-amber-400">{lowestArea.score}/10</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Status pills row */}
           <div className="flex flex-wrap gap-2.5">
-            <span className="inline-flex items-center rounded-full bg-app-accent-soft px-3 py-1.5 text-xs font-semibold text-app-accent shadow-sm shadow-app-accent/5">
-              <Target className="mr-1.5 h-3.5 w-3.5" />
-              Đề xuất ưu tiên: {focusAreaLabel}
-            </span>
-            <span className="inline-flex items-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
-              <Compass className="mr-1.5 h-3.5 w-3.5 text-app-ink-muted" />
-              Đang chọn tự động
-            </span>
-            {isCustomSelection && (
-              <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 shadow-sm">
-                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                Bạn đã chọn thủ công
-              </span>
+            {isCustomSelection ? (
+              <>
+                <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 shadow-sm">
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                  Trọng tâm bạn chọn: {focusAreaLabel}
+                </span>
+                <span className="inline-flex items-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+                  <Target className="mr-1.5 h-3.5 w-3.5 text-app-ink-muted" />
+                  Đề xuất mặc định: {getLifeAreaLabel(lowestArea.name)}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="inline-flex items-center rounded-full bg-app-accent-soft px-3 py-1.5 text-xs font-semibold text-app-accent shadow-sm shadow-app-accent/5">
+                  <Target className="mr-1.5 h-3.5 w-3.5" />
+                  Đề xuất ưu tiên: {focusAreaLabel}
+                </span>
+                <span className="inline-flex items-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+                  <Compass className="mr-1.5 h-3.5 w-3.5 text-app-ink-muted" />
+                  Đang chọn tự động
+                </span>
+              </>
             )}
           </div>
 
@@ -500,7 +595,7 @@ export function LifeInsight() {
                   <button
                     type="button"
                     onClick={() => navigate("/onboarding")}
-                    className="group inline-flex items-center gap-1.5 text-xs font-semibold text-app-accent transition-colors hover:text-app-accent"
+                    className="group inline-flex items-center gap-1.5 text-xs font-semibold text-app-ink-soft hover:text-app-ink transition-all duration-200 px-3 py-1.5 rounded-xl border border-app-line bg-app-surface hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
                   >
                     <RotateCcw className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-[-45deg]" />
                     Chấm lại điểm
@@ -527,10 +622,10 @@ export function LifeInsight() {
                         key={area.name}
                         type="button"
                         onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
-                        className={`group rounded-xl border p-3 text-left transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
+                        className={`group rounded-xl border p-3 text-left transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 ${
                           isSelected
                             ? colors.selectedBg
-                            : `border-app-line bg-app-surface ${colors.hoverBg} hover:shadow-sm`
+                            : `border-app-line bg-app-surface ${colors.hoverBg} hover:shadow-xs active:scale-[0.97]`
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -574,21 +669,26 @@ export function LifeInsight() {
                   <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">BÁO CÁO GÓC NHÌN CÁ NHÂN</p>
                   
                   {/* Selected Focus Area Info */}
+                  {/* Selected Focus Area Info */}
                   <div className="mt-4 flex items-center gap-3.5">
                     <FocusLantern Icon={FocusAreaIcon} label={focusArea.name} />
                     <div>
-                      <h2 className="text-2xl font-serif font-medium text-app-ink leading-tight">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-app-accent">Khía cạnh trọng tâm</span>
+                      <h2 className="text-2xl font-serif font-bold text-app-ink leading-tight">
                         {focusAreaLabel}
                       </h2>
-                      <p className="mt-1 text-xs text-app-ink-soft">
-                        <span className="inline-flex items-center gap-1 font-semibold">
-                          {focusArea.score === lowestArea.score ? (
-                            <TrendingDown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                          ) : (
-                            <TrendingUp className="h-3.5 w-3.5 text-app-accent" />
-                          )}
-                          Điểm hiện tại: {focusArea.score}/10
-                        </span>
+                      <p className="mt-0.5 text-xs text-app-ink-soft flex items-center gap-1 font-semibold">
+                        {focusArea.score === lowestArea.score ? (
+                          <span className="inline-flex items-center text-amber-600 dark:text-amber-400 font-medium">
+                            <TrendingDown className="mr-1 h-3.5 w-3.5 shrink-0" />
+                            Khía cạnh thấp điểm nhất ({focusArea.score}/10)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center text-app-accent font-medium">
+                            <TrendingUp className="mr-1 h-3.5 w-3.5 shrink-0" />
+                            Khía cạnh bạn chọn tập trung ({focusArea.score}/10)
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -619,10 +719,10 @@ export function LifeInsight() {
                             key={option.id}
                             type="button"
                             onClick={() => handleIntentSelect(option.id)}
-                            className={`group flex flex-col items-start gap-1 rounded-xl border p-2.5 text-left w-full transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
+                            className={`group flex flex-col items-start gap-1 rounded-xl border p-2.5 text-left w-full transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 ${
                               isSelected
-                                ? `bg-app-accent-soft ${colors.selectedBg}`
-                                : `border-app-line bg-app-surface/60 text-app-ink ${colors.hoverBorder} ${colors.hoverBg} hover:shadow-sm`
+                                ? colors.selectedBg
+                                : `border-app-line bg-app-surface/60 text-app-ink ${colors.hoverBorder} ${colors.hoverBg} hover:shadow-xs active:scale-[0.97]`
                             }`}
                           >
                             <div className="flex w-full items-center justify-between gap-1">
@@ -673,9 +773,9 @@ export function LifeInsight() {
                     </div>
                     <Button
                       onClick={handleStartGoalSetup}
-                      className="group inline-flex items-center justify-center gap-2 bg-app-accent py-3 text-sm font-bold text-white shadow-lg shadow-app-accent/20 transition-all duration-150 hover:brightness-105 hover:shadow-xl active:scale-[0.98] w-full"
+                      className="group inline-flex items-center justify-center gap-2 bg-app-accent py-3.5 px-6 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] w-full transition-all duration-200"
                     >
-                      Tạo mục tiêu SMART
+                      Đặt mục tiêu {focusAreaLabel}
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </Button>
                   </div>

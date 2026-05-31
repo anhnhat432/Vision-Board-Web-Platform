@@ -349,7 +349,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-[48px] rounded-2xl bg-gradient-to-r from-app-bg/85 to-app-surface/85 p-1 border border-app-line/40 backdrop-blur-md shadow-3xs"
+            className="inline-flex min-h-[44px] rounded-xl bg-app-bg-subtle/60 p-1 border border-app-line backdrop-blur-md shadow-3xs"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
@@ -360,16 +360,16 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex-none rounded-xl px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm transition-all duration-200 gap-2 flex items-center justify-center border border-transparent min-h-[40px]
-                    data-[state=active]:bg-gradient-to-b data-[state=active]:from-app-surface data-[state=active]:to-app-surface/90 data-[state=active]:text-app-accent data-[state=active]:font-bold data-[state=active]:shadow-xs data-[state=active]:border-app-line/20
-                    data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/40`}
+                  className={`relative flex-none rounded-lg px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-semibold transition-all duration-200 gap-2 flex items-center justify-center border border-transparent min-h-[36px] cursor-pointer active:scale-[0.97]
+                    data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:shadow-xs data-[state=active]:border-app-line/60
+                    data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/30`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-105" aria-hidden="true" />
                   <span>{label}</span>
                   {hasDot && (
-                    <span className="absolute top-1.5 right-2 flex h-2 w-2">
+                    <span className="absolute top-1 right-1.5 flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-warm opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-app-warm" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-app-warm" />
                     </span>
                   )}
                 </TabsTrigger>
