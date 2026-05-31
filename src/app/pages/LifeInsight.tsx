@@ -446,18 +446,15 @@ export function LifeInsight() {
 
         <div className="space-y-6">
           {/* Header section */}
-          <div className="max-w-3xl animate-fade-in">
+          <div className="max-w-3xl animate-fade-in space-y-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
               BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
             </p>
-            <h1
-              className="mt-3 text-4xl font-medium leading-tight tracking-tight text-app-ink"
-              style={{ fontFamily: "var(--font-serif)" }}
-            >
-              Chọn nơi đáng ưu tiên trong 12 tuần tới.
+            <h1 className="font-serif text-3xl md:text-4xl font-medium leading-tight tracking-tight text-app-ink">
+              Góc nhìn cuộc sống & Trọng tâm của bạn
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">
-              Dữ liệu cân bằng cho thấy đâu là điểm mỏng và mạnh nhất. Chọn 1 lĩnh vực để biến thành mục tiêu SMART.
+            <p className="text-sm leading-relaxed text-app-ink-soft max-w-2xl">
+              Dựa trên bản đồ cân bằng, hãy chọn một lĩnh vực ưu tiên và định nghĩa mục đích của bạn để bắt đầu xây dựng mục tiêu SMART.
             </p>
           </div>
 
@@ -483,9 +480,9 @@ export function LifeInsight() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 items-start">
             
             {/* LEFT COLUMN: VISUALIZATION & AREA SWITCHER */}
-            <div className="space-y-6">
+            <div className="space-y-6 order-2 lg:order-1">
               {/* Radar chart */}
-              <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-300 hover:shadow-md">
+              <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/10 p-5 md:p-6 transition-all duration-300 hover:shadow-app-md">
                 <div className="flex items-center justify-between pb-3 border-b border-app-line/60">
                   <h3 className="text-sm font-bold tracking-wide text-app-ink">Bánh xe của bạn</h3>
                   <p className="text-xs font-semibold text-app-ink-muted">8 lĩnh vực hiện tại</p>
@@ -502,7 +499,7 @@ export function LifeInsight() {
                 <div className="mt-4 pt-3 border-t border-app-line/60 flex justify-between items-center">
                   <button
                     type="button"
-                    onClick={() => navigate("/life-balance")}
+                    onClick={() => navigate("/onboarding")}
                     className="group inline-flex items-center gap-1.5 text-xs font-semibold text-app-accent transition-colors hover:text-app-accent"
                   >
                     <RotateCcw className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-[-45deg]" />
@@ -515,7 +512,7 @@ export function LifeInsight() {
               </div>
 
               {/* Life areas grid switcher */}
-              <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm">
+              <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm">
                 <div className="pb-3 border-b border-app-line/60">
                   <h3 className="text-sm font-bold text-app-ink">Hoặc chọn lĩnh vực khác</h3>
                   <p className="mt-1 text-xs text-app-ink-muted">Click để đặt làm trọng tâm</p>
@@ -554,7 +551,6 @@ export function LifeInsight() {
                               {area.score}/10
                             </p>
                           </div>
-                          {isSelected && <Check className={`h-3.5 w-3.5 shrink-0 ${colors.text}`} />}
                         </div>
                       </button>
                     );
@@ -564,8 +560,8 @@ export function LifeInsight() {
             </div>
 
             {/* RIGHT COLUMN: INSIGHT REPORT & INTENT & CTA */}
-            <div className="lg:sticky lg:top-6 space-y-6">
-              <div className="surface-raised rounded-2xl border border-[#E6DFD3] dark:border-slate-800 bg-[#FCFAF6] dark:bg-slate-900/40 p-6 shadow-md relative overflow-hidden transition-all duration-300">
+            <div className="lg:sticky lg:top-6 space-y-6 order-1 lg:order-2">
+              <div className="surface-raised rounded-2xl border border-[#E6DFD3] dark:border-slate-800 bg-[#FCFAF6] dark:bg-slate-900/40 p-6 shadow-app-md relative overflow-hidden transition-all duration-300">
                 {/* Paperclip sticker mockup */}
                 <div className="absolute -top-1.5 right-6 z-10 rotate-[-12deg] text-amber-600/70 dark:text-amber-500/50">
                   <svg width="24" height="30" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md">
@@ -613,7 +609,7 @@ export function LifeInsight() {
                     <h3 className="text-sm font-bold text-app-ink">Mục đích chính của bạn với lĩnh vực này</h3>
                     <p className="mt-1 text-xs text-app-ink-muted">Chọn định hướng giúp gợi ý viết mục tiêu SMART</p>
                     
-                    <div className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                    <div className="mt-4 grid grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto pr-1">
                       {intentOptions.map((option) => {
                         const isSelected = selectedIntent === option.id;
                         const OptionIcon = INTENT_ICONS[option.id];
@@ -623,25 +619,25 @@ export function LifeInsight() {
                             key={option.id}
                             type="button"
                             onClick={() => handleIntentSelect(option.id)}
-                            className={`group flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left w-full transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
+                            className={`group flex flex-col items-start gap-1 rounded-xl border p-2.5 text-left w-full transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 ${
                               isSelected
                                 ? `bg-app-accent-soft ${colors.selectedBg}`
                                 : `border-app-line bg-app-surface/60 text-app-ink ${colors.hoverBorder} ${colors.hoverBg} hover:shadow-sm`
                             }`}
                           >
-                            <div className="flex w-full items-start justify-between gap-2">
-                              <span className="flex items-center gap-2 text-xs font-bold">
+                            <div className="flex w-full items-center justify-between gap-1">
+                              <span className="flex items-center gap-1.5 text-[11px] font-bold truncate">
                                 <span className={`p-1 rounded-md transition-colors ${
                                   isSelected ? colors.iconSelectedBg : colors.iconBg
                                 }`}>
-                                  <OptionIcon className="h-3.5 w-3.5" />
+                                  <OptionIcon className="h-3 w-3" />
                                 </span>
-                                {option.label}
+                                <span className="truncate">{option.label}</span>
                               </span>
-                              {isSelected && <Check className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${colors.selectedText}`} />}
+                              {isSelected && <Check className={`h-3 w-3 shrink-0 ${colors.selectedText}`} />}
                             </div>
                             <p
-                              className={`text-[11px] leading-normal pl-7 ${isSelected ? colors.selectedText : "text-app-ink-soft"}`}
+                              className={`text-[9px] leading-snug pl-1.5 ${isSelected ? colors.selectedText : "text-app-ink-soft"} line-clamp-2`}
                             >
                               {option.description}
                             </p>
@@ -679,7 +675,7 @@ export function LifeInsight() {
                       onClick={handleStartGoalSetup}
                       className="group inline-flex items-center justify-center gap-2 bg-app-accent py-3 text-sm font-bold text-white shadow-lg shadow-app-accent/20 transition-all duration-150 hover:brightness-105 hover:shadow-xl active:scale-[0.98] w-full"
                     >
-                      Tiếp → Viết mục tiêu
+                      Tạo mục tiêu SMART
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </Button>
                   </div>

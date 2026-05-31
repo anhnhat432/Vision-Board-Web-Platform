@@ -257,6 +257,18 @@ function createOnboardingDraft(
   };
 }
 
+function getScaleGuidance(score: number): string {
+  if (score <= 3) return "Cần chăm sóc";
+  if (score <= 7) return "Ổn định";
+  return "Đang phát triển";
+}
+
+function getScaleGuidanceColor(score: number): string {
+  if (score <= 3) return "text-rose-600 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/20";
+  if (score <= 7) return "text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/20";
+  return "text-emerald-600 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/20";
+}
+
 export function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<OnboardingStep>("welcome");
@@ -605,11 +617,11 @@ export function Onboarding() {
             <Sparkles className="h-3 w-3 animate-pulse" />
             Bước 1 / 6 · Cân bằng cuộc sống
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl font-medium tracking-tight text-app-ink">
-            Thiết lập Bánh xe Cuộc đời
+          <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-app-ink">
+            Vẽ bản đồ cân bằng hiện tại của bạn
           </h1>
-          <p className="text-xs text-app-ink-soft max-w-xl">
-            Hãy chấm điểm từ 0 đến 10 cho 8 khía cạnh dựa trên cảm nhận thực tế của bạn ngay lúc này. Bánh xe sẽ tự động cập nhật hình dạng.
+          <p className="text-sm text-app-ink-soft max-w-2xl leading-relaxed">
+            Chấm nhanh 8 lĩnh vực để Dear Our Future tìm ra nơi bạn nên ưu tiên trong chu kỳ 12 tuần tiếp theo.
           </p>
         </div>
 
@@ -638,10 +650,10 @@ export function Onboarding() {
                     }}
                     className={`cursor-pointer rounded-xl border transition-all duration-300 overflow-hidden ${
                       isActive 
-                        ? "border-app-accent bg-app-surface shadow-md ring-1 ring-app-accent/20" 
+                        ? "border-app-accent bg-app-surface shadow-app-md ring-1 ring-app-accent/25" 
                         : isAreaReviewed 
-                          ? "border-app-line bg-app-surface/80 hover:bg-app-surface" 
-                          : "border-app-line bg-app-surface/40 hover:bg-app-surface/60"
+                          ? "border-app-line bg-app-surface/90 hover:bg-app-surface hover:border-app-line-strong hover:shadow-app-sm" 
+                          : "border-app-line bg-app-surface/40 hover:bg-app-surface/60 hover:border-app-line-strong"
                     }`}
                   >
                     <div className="p-4 flex items-center justify-between gap-4">
@@ -661,23 +673,33 @@ export function Onboarding() {
                               </span>
                             )}
                           </div>
+                          {!isActive && isAreaReviewed && (
+                            <p className="text-[10px] text-app-ink-muted truncate max-w-[220px]">
+                              {LIFE_AREA_DETAILS[area.name]}
+                            </p>
+                          )}
+                          {!isActive && !isAreaReviewed && (
+                            <p className="text-[10px] text-app-ink-muted italic">
+                              Chưa đánh giá
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <div className="flex items-center gap-1">
-                          {area.score >= 9 ? (
-                            <span className="text-[10px] text-amber-500 font-bold" title="Xuất sắc">🌟</span>
-                          ) : area.score >= 8 ? (
-                            <span className="text-[10px] text-amber-500 font-bold" title="Đỉnh cao">⭐</span>
-                          ) : null}
+                        <div className="flex items-center gap-1.5">
+                          {isAreaReviewed && (
+                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getScaleGuidanceColor(area.score)}`}>
+                              {getScaleGuidance(area.score)}
+                            </span>
+                          )}
                           <span className={`font-serif text-2xl font-bold tabular-nums leading-none ${isAreaReviewed ? "text-app-ink" : "text-app-ink-muted"}`}>
                             {area.score}
                           </span>
                           <span className="text-xs text-app-ink-muted">/10</span>
                         </div>
                         {isActive ? (
-                          <ChevronUp className="h-4 w-4 text-app-ink-muted" />
+                          <ChevronUp className="h-4 w-4 text-app-ink-soft" />
                         ) : (
                           <ChevronDown className="h-4 w-4 text-app-ink-muted" />
                         )}
@@ -688,27 +710,36 @@ export function Onboarding() {
                       // biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation wrapper
                       // biome-ignore lint/a11y/noStaticElementInteractions: stop propagation wrapper
                       <div 
-                        className="px-4 pb-4 pt-1 border-t border-app-line/40 bg-app-bg/10 space-y-3 cursor-default"
+                        className="px-4 pb-4 pt-3 border-t border-app-line/40 bg-app-bg-subtle/30 space-y-4 cursor-default animate-fade-in"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <p className="text-xs text-app-ink-soft leading-relaxed">
                           {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống."}
                         </p>
                         
-                        <div className="pt-2">
-                          <Slider
-                            value={[area.score]}
-                            onValueChange={(value) => handleScoreChangeWrapped(index, value)}
-                            min={0}
-                            max={10}
-                            step={1}
-                            className={`w-full ${colorConfig.text}`}
-                            aria-label={`Điểm ${areaLabel}`}
-                          />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-app-ink-muted font-medium">Kéo thanh trượt để chấm điểm:</span>
+                            <span className={`inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full ${getScaleGuidanceColor(area.score)}`}>
+                              {area.score}/10 — {getScaleGuidance(area.score)}
+                            </span>
+                          </div>
+                          <div className="pt-2 px-1">
+                            <Slider
+                              value={[area.score]}
+                              onValueChange={(value) => handleScoreChangeWrapped(index, value)}
+                              min={0}
+                              max={10}
+                              step={1}
+                              trackColor={colorConfig.accent}
+                              className="w-full"
+                              aria-label={`Điểm ${areaLabel}`}
+                            />
+                          </div>
                           <div className="mt-1 flex items-center justify-between text-[10px] font-mono text-app-ink-muted">
-                            <span>0 (Rất kém)</span>
-                            <span>5 (Tạm ổn)</span>
-                            <span>10 (Tuyệt hảo)</span>
+                            <span>0 (Cần chăm sóc)</span>
+                            <span>5 (Ổn định)</span>
+                            <span>10 (Đang phát triển)</span>
                           </div>
                         </div>
 
@@ -734,72 +765,105 @@ export function Onboarding() {
               <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 flex items-start gap-2.5">
                 <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                  Còn {remainingAreaCount} lĩnh vực chưa được chạm vào. Bạn có thể nhấn từng mục để điều chỉnh hoặc bấm <strong>"Để sau"</strong> ở cuối trang để tiếp tục với các điểm số mặc định.
+                  Còn {remainingAreaCount} lĩnh vực chưa được chạm vào. Bạn có thể nhấn từng mục để điều chỉnh hoặc bấm nút chính để tiếp tục với các điểm số mặc định là 5.
                 </p>
               </div>
             )}
           </div>
 
           <div className="order-1 lg:order-2 lg:sticky lg:top-6 space-y-4">
-            <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-b from-app-surface to-app-bg/10 p-5 shadow-sm text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/10 p-6 shadow-app-md text-center relative overflow-hidden transition-all duration-300">
+              <div className="absolute top-0 right-0 w-36 h-36 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
               
-              <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink-muted mb-2">Bánh xe Cân bằng Động</h3>
+              <div className="flex items-center justify-between pb-2 border-b border-app-line/60">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent">Bản đồ Cân bằng</h3>
+                <span className="inline-flex items-center text-[10px] font-semibold text-app-ink-muted bg-app-bg-subtle px-2 py-0.5 rounded-full">
+                  Đã rà soát: {reviewedAreaCount}/8
+                </span>
+              </div>
               
-              <div className="flex items-center justify-center min-h-[280px]">
+              <div className="flex items-center justify-center min-h-[290px] my-2">
                 <SimpleRadarChart 
                   data={radarData} 
                   height={290} 
                   fill="var(--app-accent)"
                   stroke="var(--app-accent)"
-                  fillOpacity={0.12}
+                  fillOpacity={0.15}
                   className="w-full max-w-[340px]" 
                 />
               </div>
 
-              <div className="mt-4 pt-4 border-t border-app-line grid grid-cols-3 gap-2 text-left" data-testid="onboarding-assessment-summary">
-                <span className="sr-only">Đã rà soát: {reviewedAreaCount}/{lifeAreas.length} Điểm trung bình</span>
-                <div className="px-2 py-1 rounded bg-app-surface/50 border border-app-line/40">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Độ lệch</span>
-                  <p className="font-serif text-lg font-bold text-app-ink mt-0.5 tabular-nums">
+              <div className="mt-4 pt-4 border-t border-app-line/60 grid grid-cols-2 gap-3 text-left" data-testid="onboarding-assessment-summary">
+                <span className="sr-only">Đã rà soát: {reviewedAreaCount}/8 Điểm trung bình</span>
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Điểm trung bình</span>
+                  <p className="font-serif text-xl font-bold text-app-ink mt-0.5 tabular-nums">
                     {averageScore.toFixed(1)}<span className="text-xs font-normal text-app-ink-muted">/10</span>
                   </p>
                 </div>
-                <div className="px-2 py-1 rounded bg-app-surface/50 border border-app-line/40">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Ưu tiên</span>
-                  <p className="text-xs font-semibold text-app-warm truncate mt-1">
-                    {getLifeAreaLabel(growthArea.name)}
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Đã hoàn thành</span>
+                  <p className="font-serif text-xl font-bold text-app-ink mt-0.5 tabular-nums">
+                    {Math.round((reviewedAreaCount / 8) * 100)}%
                   </p>
                 </div>
-                <div className="px-2 py-1 rounded bg-app-surface/50 border border-app-line/40">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Mạnh nhất</span>
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 truncate mt-1">
-                    {getLifeAreaLabel(strongestArea.name)}
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Khía cạnh cần tập trung</span>
+                  <p className="text-xs font-bold text-app-warm truncate mt-1">
+                    {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
                   </p>
                 </div>
+                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Khía cạnh mạnh nhất</span>
+                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 truncate mt-1">
+                    {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 flex items-center justify-center gap-1.5 text-[11px] italic text-app-ink-muted">
+                <Sparkles className="h-3.5 w-3.5 text-app-accent opacity-70" />
+                <span>“Điểm càng thật, insight càng đúng.”</span>
               </div>
             </div>
           </div>
         </div>
 
-        <footer className="mt-8 flex flex-col gap-3 border-t border-app-line pt-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              className="order-2 inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-3 text-sm font-medium text-app-ink transition-all duration-200 hover:bg-app-bg hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 sm:order-1"
-              onClick={() => setStep("welcome")}
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Quay lại chào mừng
-            </button>
-            <button
-              type="button"
-              className="order-1 inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent sm:order-2"
-              onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
-            >
-              {canCompleteAssessment ? "Khám phá Góc nhìn cuộc sống →" : "Để sau"}
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </button>
+        <footer className="mt-8 border-t border-app-line pt-6">
+          <div className="flex flex-col gap-4">
+            {!canCompleteAssessment && (
+              <div className="flex items-center gap-2 text-xs text-app-ink-muted justify-end">
+                <Info className="h-3.5 w-3.5 text-app-ink-muted" />
+                <span>Các khía cạnh chưa rà sẽ tự động nhận điểm 5.</span>
+              </div>
+            )}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 order-2 sm:order-1">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 active:scale-[0.98]"
+                  onClick={() => setStep("welcome")}
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                  Quay lại
+                </button>
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline px-2 py-2"
+                  onClick={handleDefer}
+                >
+                  Để sau
+                </button>
+              </div>
+              <button
+                type="button"
+                className="order-1 inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:brightness-105 hover:shadow-app-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent sm:order-2"
+                onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
+              >
+                Xem Góc nhìn cuộc sống của tôi
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </footer>
       </div>
