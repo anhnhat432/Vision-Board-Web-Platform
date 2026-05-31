@@ -67,7 +67,6 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
   const [lastProcessResult, setLastProcessResult] = useState<ProcessQueueResult | null>(null);
 
   const goalId = propGoalId ?? null;
-  const now = propNow ?? new Date();
 
   const processingRef = useRef(false);
   const scheduledRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -110,7 +109,8 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
     const nextRetryItem = syncQueueStore.items.find((item) => item.status === "retry_scheduled" && item.nextRetryAt);
     if (nextRetryItem?.nextRetryAt) {
       const nextRetryTime = new Date(nextRetryItem.nextRetryAt).getTime();
-      const nowMs = now.getTime();
+      const currentNow = propNow ?? new Date();
+      const nowMs = currentNow.getTime();
       const seconds = Math.max(0, Math.floor((nextRetryTime - nowMs) / 1000));
       retryInSeconds = seconds;
     }
@@ -128,7 +128,7 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
       lastError,
       retryInSeconds,
     };
-  }, [syncQueueStore, loading, lastError, now]);
+  }, [syncQueueStore, loading, lastError, propNow]);
 
   // Process the queue
   const processQueue = useCallback(async (): Promise<ProcessQueueResult> => {
@@ -144,6 +144,8 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
     if (nowMs - lastProcessTimeRef.current < PROCESS_QUEUE_THROTTLE_MS) {
       return lastProcessResult ?? { attemptedCount: 0, succeededCount: 0, failedCount: 0 };
     }
+
+    const currentNow = propNow ?? new Date();
 
     processingRef.current = true;
     setLoading(true);
@@ -170,15 +172,15 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
       }
 
       for (const item of pending) {
-        if (!shouldProcessNow(item, now)) continue;
+        if (!shouldProcessNow(item, currentNow)) continue;
 
-        store = markSyncInFlight(store, item.id, { now: now.toISOString() });
+        store = markSyncInFlight(store, item.id, { now: currentNow.toISOString() });
         writeSyncQueueStore(store);
         setSyncQueueStore(store);
 
         try {
           await executeSync(item);
-          store = markSyncSucceeded(store, item.id, { now: now.toISOString() });
+          store = markSyncSucceeded(store, item.id, { now: currentNow.toISOString() });
           writeSyncQueueStore(store);
           setSyncQueueStore(store);
 
@@ -201,18 +203,18 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
             code: err.status?.toString() ?? "sync_error",
             message: err.message ?? "Không thể đồng bộ",
             retryable,
-            lastSeenAt: now.toISOString(),
+            lastSeenAt: currentNow.toISOString(),
           };
 
           const exponentialBackoffMs = getBackoffDelayMs(item.attemptCount);
           const retryAfterMs = rateLimited && typeof err.retryAfterMs === "number" ? err.retryAfterMs : 0;
           const nextRetryAt = retryable
             ? new Date(
-                now.getTime() + (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs),
+                currentNow.getTime() + (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs),
               )
             : undefined;
           store = markSyncFailed(store, item.id, failure, {
-            now: now.toISOString(),
+            now: currentNow.toISOString(),
             nextRetryAt: nextRetryAt?.toISOString(),
           });
           writeSyncQueueStore(store);
@@ -258,7 +260,7 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
     }
 
     return { attemptedCount, succeededCount, failedCount };
-  }, [goalId, enabled, now, executeSync, lastProcessResult]);
+  }, [goalId, enabled, propNow, executeSync, lastProcessResult]);
 
   // Enqueue a sync action
   const enqueueSyncAction = useCallback(
