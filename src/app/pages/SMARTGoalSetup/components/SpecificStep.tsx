@@ -78,7 +78,9 @@ export function SpecificStep({
         />
         <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
           <p id="smart-specific-hint" className={helperTextClass}>
-            Viết kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.
+            Nêu rõ hành động hoặc dự án cụ thể. 
+            Ví dụ tốt: <span className="font-semibold text-app-ink">"Hoàn thành khóa học React và xây dựng 1 dự án cá nhân"</span>. 
+            Ví dụ xấu: <span className="line-through text-app-ink-muted">"Giỏi lập trình hơn"</span>.
           </p>
           <p id="smart-specific-counter" className={helperTextClass}>
             {specificLength}/10 ký tự tối thiểu

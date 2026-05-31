@@ -107,7 +107,11 @@ export function RelevantStep({ smartData, setSmartData, placeholder, currentStep
           </div>
         </div>
 
-        <p className={helperTextClass}>Viết đủ cụ thể để khi mệt vẫn nhớ vì sao mục tiêu này đáng giữ.</p>
+        <p className={helperTextClass}>
+          Mô tả động lực sâu sắc từ bên trong. 
+          Ví dụ tốt: <span className="font-semibold text-app-ink">"Để có quỹ khẩn cấp giúp gia đình an tâm trước rủi ro phát sinh"</span>. 
+          Ví dụ xấu: <span className="line-through text-app-ink-muted">"Kiếm nhiều tiền hơn"</span>.
+        </p>
         {showMotivationError ? (
           <FieldError id="smart-relevant-reason-error" message="Viết ít nhất 15 ký tự để lý do đủ rõ." role="alert" />
         ) : null}

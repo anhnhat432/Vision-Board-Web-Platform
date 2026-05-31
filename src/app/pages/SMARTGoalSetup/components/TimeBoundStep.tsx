@@ -232,7 +232,13 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
             })}
           </div>
 
-          <p className={helperTextClass}>Hãy chọn một ngày rõ ràng trong tương lai để nhìn nhận lại kết quả mục tiêu.</p>
+          <p className={helperTextClass}>
+            Chọn một thời hạn thực tế. Ví dụ chu kỳ chuẩn 12 tuần sẽ rơi vào ngày: <span className="font-semibold text-app-ink">{(() => {
+              const d = new Date();
+              d.setDate(d.getDate() + 12 * 7);
+              return d.toLocaleDateString("vi-VN");
+            })()}</span>.
+          </p>
           {showTargetDateError ? (
             <FieldError id="smart-target-date-error" message="Chọn ngày mục tiêu cho kế hoạch này." role="alert" />
           ) : null}

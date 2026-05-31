@@ -189,7 +189,10 @@ export function MeasurableStep({
         </div>
 
         <p id="smart-metric-name-hint" className={helperTextClass}>
-          Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.
+          Tên chỉ số cần định lượng cụ thể kèm đơn vị đo lường. 
+          <br />
+          Ví dụ tốt: <span className="font-semibold text-app-ink">"Số buổi tập thể thao/tuần"</span>, <span className="font-semibold text-app-ink">"Số từ vựng học được"</span>. 
+          Ví dụ xấu: <span className="line-through text-app-ink-muted">"Tập thể dục nhiều"</span>, <span className="line-through text-app-ink-muted">"Học tiếng Anh"</span>.
         </p>
         {intentMetricHint && (
           <div

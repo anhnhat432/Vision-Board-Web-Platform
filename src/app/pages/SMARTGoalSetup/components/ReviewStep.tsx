@@ -50,6 +50,15 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
           </div>
         ))}
       </div>
+
+      <div className="mt-5 rounded-xl border border-teal-500/10 bg-teal-500/[0.02] p-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed space-y-1.5 select-none animate-[fade-in_0.3s_ease-out]">
+        <div className="flex items-center gap-1.5 font-bold text-teal-600 dark:text-teal-400">
+          <span>📌 Bước tiếp theo:</span>
+        </div>
+        <p>
+          Sau khi nhấn <strong>“Kiểm tra độ khả thi”</strong>, mục tiêu SMART của bạn sẽ được chẩn đoán chi tiết. Bạn sẽ bước sang giai đoạn đánh giá độ sẵn sàng, tìm ra điểm nghẽn tiềm ẩn và định hình 12 tuần hành động thực tế.
+        </p>
+      </div>
     </section>
   );
 }

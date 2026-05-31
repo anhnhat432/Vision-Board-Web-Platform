@@ -714,12 +714,12 @@ export function SmartGoalStepShell({
                       disabled={!canJump}
                       onClick={() => handleWizardJump(index)}
                       className={cn(
-                        "flex h-full w-full flex-col items-center gap-1.5 rounded-[16px] border p-2.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
+                        "flex h-full w-full flex-col items-center gap-1.5 rounded-[16px] border p-2.5 transition-all duration-205 outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 cursor-pointer",
                         isActive
                           ? "border-app-accent bg-app-accent-soft text-app-accent scale-[1.03] shadow-sm"
                           : isDone
-                            ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent hover:scale-[1.02]"
-                            : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent disabled:cursor-default"
+                            ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent hover:scale-[1.02] active:scale-[0.97]"
+                            : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent active:scale-[0.97] disabled:cursor-default"
                       )}
                     >
                       <span className={cn(
@@ -895,7 +895,7 @@ export function SmartGoalStepShell({
           <div className="mt-6 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto cursor-pointer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer"
               onClick={onBack}
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -903,7 +903,7 @@ export function SmartGoalStepShell({
             </button>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-app-accent/15 transition-all duration-150 hover:brightness-105 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto cursor-pointer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer"
               onClick={onNext}
               disabled={!isCurrentStepValid}
             >

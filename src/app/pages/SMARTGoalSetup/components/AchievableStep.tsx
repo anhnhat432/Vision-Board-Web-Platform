@@ -165,7 +165,7 @@ export function AchievableStep({
         </div>
 
         <p className={cn(helperTextClass, "mt-3")}>
-          Hãy chỉ đếm thời lượng bạn thực sự giữ vững được mỗi tuần trong vòng 12 tuần liên tục.
+          Cam kết thời gian thực tế bạn chắc chắn duy trì được mỗi tuần. Ví dụ: <span className="font-medium text-app-ink">4 giờ/tuần</span> tương đương khoảng <span className="font-medium text-app-ink">35 phút mỗi ngày</span>.
         </p>
         {showWeeklyHoursError ? (
           <FieldError id="smart-weekly-hours-error" message="Nhập số giờ mỗi tuần lớn hơn 0." role="alert" />
@@ -225,7 +225,9 @@ export function AchievableStep({
           ))}
         </div>
 
-        <p className={helperTextClass}>Liệt kê các kỹ năng thật sự cần thiết phục vụ giai đoạn này.</p>
+        <p className={helperTextClass}>
+          Ví dụ: <span className="font-medium text-app-ink">"Đọc tài liệu tiếng Anh, Lập trình React cơ bản"</span>. Giúp xác định xem bạn có cần dành thời gian học thêm kỹ năng mới hay không.
+        </p>
       </div>
 
       {/* Nguồn lực hỗ trợ */}
@@ -281,7 +283,9 @@ export function AchievableStep({
           ))}
         </div>
 
-        <p className={helperTextClass}>Điền những công cụ, con người bạn có thể tiếp cận được ngay.</p>
+        <p className={helperTextClass}>
+          Ví dụ: <span className="font-medium text-app-ink">"Tài khoản học Udemy, Sách hướng dẫn, Bạn học cùng"</span>. Đảm bảo bạn có đủ công cụ hỗ trợ để không bị tắc nghẽn khi bắt đầu.
+        </p>
       </div>
 
       <ArchetypeHint archetype={archetype} variant="leadAction" />

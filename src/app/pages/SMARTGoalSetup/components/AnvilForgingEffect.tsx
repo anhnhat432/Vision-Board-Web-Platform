@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Hammer, Sparkles } from "lucide-react";
+import { Hammer } from "lucide-react";
 
 interface AnvilForgingEffectProps {
   onComplete: () => void;
@@ -97,6 +97,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
 
     const getAudioContext = () => {
       if (!audioCtxRef.current) {
+        // biome-ignore lint/suspicious/noExplicitAny: webkitAudioContext fallback for older browsers
         const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
         if (AudioCtxClass) {
           audioCtxRef.current = new AudioCtxClass();
