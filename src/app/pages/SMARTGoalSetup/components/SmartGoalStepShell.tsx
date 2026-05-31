@@ -230,7 +230,7 @@ export function SmartGoalStepShell({
   const [showStickyMini, setShowStickyMini] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [selectedTone, setSelectedTone] = useState<"empathetic" | "pragmatic" | "strategic">("empathetic");
-  const [isCoachExpanded, setIsCoachExpanded] = useState(true);
+  const [isCoachExpanded, setIsCoachExpanded] = useState(false);
 
   const prevValidRef = useRef(isCurrentStepValid);
   const prevGoldRef = useRef(false);
@@ -500,6 +500,10 @@ export function SmartGoalStepShell({
 
   const handleApplyTransformedStarter = () => {
     onApplyStarter(coreTextToApply);
+    if (headingRef?.current) {
+      headingRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      headingRef.current.focus({ preventScroll: true });
+    }
   };
 
   const renderPolaroidCard = (isMobile = false) => {
