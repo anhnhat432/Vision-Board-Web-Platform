@@ -7,7 +7,7 @@ import { cn } from "./utils";
 
 const buttonVariants = cva(
   cn(
-    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight",
+    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:h-11 after:w-full after:min-w-[44px] sm:after:hidden",
     "shrink-0 [&_svg]:shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
     "transition-[transform,box-shadow,background-color,color,border-color,text-decoration-color] duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
     "active:duration-[100ms]",
@@ -32,8 +32,8 @@ const buttonVariants = cva(
         ),
         outline: cn(
           "border border-app-line bg-app-surface text-app-ink shadow-3xs",
-          "hover:border-app-accent/40 hover:bg-app-accent-soft/30 hover:shadow-2xs",
-          "active:scale-[0.97] active:bg-app-accent-soft/50",
+          "hover:border-app-accent/50 hover:bg-app-accent-soft/20 hover:shadow-2xs",
+          "active:scale-[0.97] active:bg-app-accent-soft/40",
           "focus-visible:ring-app-accent/35",
         ),
         secondary: cn(

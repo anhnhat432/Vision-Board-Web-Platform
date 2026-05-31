@@ -111,8 +111,8 @@
   --app-status-info:    var(--status-blue);
 
   /* — Focus Ring — */
-  --app-focus-ring: 0 0 0 3px rgba(47, 93, 80, 0.28);
-  --app-focus-ring-warm: 0 0 0 3px rgba(217, 119, 87, 0.28);
+  --app-focus-ring: 0 0 0 4px rgba(47, 93, 80, 0.2);
+  --app-focus-ring-warm: 0 0 0 4px rgba(217, 119, 87, 0.2);
 
   /* — Elevation / Shadow — */
   /* Neutral shadows, không màu accent/warm — giữ cảm giác nhẹ nhàng, trẻ trung */

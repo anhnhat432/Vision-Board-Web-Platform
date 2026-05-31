@@ -11,10 +11,10 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         type={type}
         data-slot="input"
         className={cn(
-          "file:text-app-ink placeholder:text-app-ink-muted selection:bg-app-accent selection:text-white text-app-ink border border-app-line flex h-11 w-full min-w-0 rounded-xl px-3 py-2 text-base leading-6 font-normal tracking-tight bg-app-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[color,box-shadow,border-color] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium md:text-sm hover:border-app-accent/30",
+          "file:text-app-ink placeholder:text-app-ink-muted selection:bg-app-accent selection:text-white text-app-ink border border-app-line flex h-11 w-full min-w-0 rounded-xl px-3 py-2 text-base leading-6 font-normal tracking-tight bg-app-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[color,box-shadow,border-color] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium md:text-sm hover:border-app-accent/50",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-app-bg/50 disabled:text-app-ink-muted disabled:opacity-100",
-          "focus-visible:border-app-accent focus-visible:ring-3 focus-visible:ring-app-accent/15 focus-visible:shadow-[0_1px_2px_rgba(15,23,42,0.04)]",
-          "aria-invalid:ring-3 aria-invalid:ring-destructive/15 dark:aria-invalid:ring-destructive/30 aria-invalid:border-destructive",
+          "focus-visible:border-app-accent focus-visible:ring-4 focus-visible:ring-app-accent/20 focus-visible:shadow-[0_1px_2px_rgba(15,23,42,0.04)]",
+          "aria-invalid:ring-4 aria-invalid:ring-rose-500/20 dark:aria-invalid:ring-rose-900/30 aria-invalid:border-rose-500 dark:aria-invalid:border-rose-800",
           className,
         )}
         {...props}
@@ -31,9 +31,9 @@ function FieldError({ id, message, className }: { id?: string; message?: string 
     <p
       id={id}
       role="alert"
-      className={cn("mt-2 flex items-start gap-2 text-sm leading-6 text-[color:var(--color-danger-fg)]", className)}
+      className={cn("mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-450", className)}
     >
-      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-500" aria-hidden="true" />
       <span>{message}</span>
     </p>
   );
