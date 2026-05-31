@@ -3,6 +3,8 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
+import { cn } from "@/app/components/ui/utils";
+import { Award, Calendar, Flag, Map as MapIcon, Target } from "lucide-react";
 import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { PageShell } from "@/app/components/PageShell";
 import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
@@ -1200,81 +1202,324 @@ export function TwelveWeekSetupLab() {
           </p>
         </section>
 
-        {/* Giao diện 1 cột tối giản sạch sẽ */}
-        <div className="max-w-4xl mx-auto">
-          <SetupStepShellLab
-            title={STEPS[currentStep].title}
-            description={currentStepDescription}
-            whyThisMatters={currentStepWhy}
-            currentStep={currentStep}
-            stepCount={STEPS.length}
-            onBack={handleBack}
-            onNext={handleNext}
-            onSubmit={handleSubmit}
-            onJumpToStep={handleJumpToStep}
-            stepError={currentStepValidationError}
-            isNextDisabled={false}
-            isSubmitDisabled={false}
-          >
-            {currentStep === 0 && (
-              <OutcomeStepLab
-                draft={draft}
-                onChange={handleChange}
-                feasibility={feasibility}
-                currentPlan={currentPlan}
-                smartGoal={smartGoal}
-                selectedTemplate={selectedTemplate}
-                recommendedTemplate={recommendedTemplate}
-                onTemplateSelect={handleTemplateSelect}
-              />
-            )}
+        {/* Giao diện 2 cột "12-Week Planning Studio" */}
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] items-start">
+            {/* Cột trái: Điều khiển các bước thiết lập */}
+            <div className="order-2 lg:order-1 space-y-6">
+              <SetupStepShellLab
+                title={STEPS[currentStep].title}
+                description={currentStepDescription}
+                whyThisMatters={currentStepWhy}
+                currentStep={currentStep}
+                stepCount={STEPS.length}
+                onBack={handleBack}
+                onNext={handleNext}
+                onSubmit={handleSubmit}
+                onJumpToStep={handleJumpToStep}
+                stepError={currentStepValidationError}
+                isNextDisabled={false}
+                isSubmitDisabled={false}
+              >
+                {currentStep === 0 && (
+                  <OutcomeStepLab
+                    draft={draft}
+                    onChange={handleChange}
+                    feasibility={feasibility}
+                    currentPlan={currentPlan}
+                    smartGoal={smartGoal}
+                    selectedTemplate={selectedTemplate}
+                    recommendedTemplate={recommendedTemplate}
+                    onTemplateSelect={handleTemplateSelect}
+                  />
+                )}
 
-            {currentStep === 1 && (
-              <LeadIndicatorsStepLab
-                draft={draft}
-                showValidationErrors={Boolean(attemptedStepIndexes[1])}
-                onAddIndicator={handleAddIndicator}
-                onRemoveIndicator={handleRemoveIndicator}
-                onIndicatorChange={handleIndicatorChange}
-                coreCount={coreCount}
-                optionalCount={optionalCount}
-                setupGuideSupport={setupGuideSupport}
-                setupGuideTemplate={setupGuideTemplate}
-                selectedTemplate={selectedTemplate}
-                weekOneTaskPreview={weekOneTaskPreview}
-                weekOneTaskWarning={weekOneTaskWarning}
-                weekOneTaskGroups={previewTaskGroups}
-              />
-            )}
+                {currentStep === 1 && (
+                  <LeadIndicatorsStepLab
+                    draft={draft}
+                    showValidationErrors={Boolean(attemptedStepIndexes[1])}
+                    onAddIndicator={handleAddIndicator}
+                    onRemoveIndicator={handleRemoveIndicator}
+                    onIndicatorChange={handleIndicatorChange}
+                    coreCount={coreCount}
+                    optionalCount={optionalCount}
+                    setupGuideSupport={setupGuideSupport}
+                    setupGuideTemplate={setupGuideTemplate}
+                    selectedTemplate={selectedTemplate}
+                    weekOneTaskPreview={weekOneTaskPreview}
+                    weekOneTaskWarning={weekOneTaskWarning}
+                    weekOneTaskGroups={previewTaskGroups}
+                  />
+                )}
 
-            {currentStep === 2 && (
-              <ScheduleStepLab
-                draft={draft}
-                cycleStartDate={cycleStartDate}
-                cycleEndDate={cycleEndDate}
-                onChange={handleChange}
-                setupGuideSupport={setupGuideSupport}
-                setupGuideTemplate={setupGuideTemplate}
-                hasPreviewTasks={previewTasks.length > 0}
-                weekOneTaskPreview={weekOneTaskPreview}
-                weekOneTaskWarning={weekOneTaskWarning}
-              />
-            )}
+                {currentStep === 2 && (
+                  <ScheduleStepLab
+                    draft={draft}
+                    cycleStartDate={cycleStartDate}
+                    cycleEndDate={cycleEndDate}
+                    onChange={handleChange}
+                    setupGuideSupport={setupGuideSupport}
+                    setupGuideTemplate={setupGuideTemplate}
+                    hasPreviewTasks={previewTasks.length > 0}
+                    weekOneTaskPreview={weekOneTaskPreview}
+                    weekOneTaskWarning={weekOneTaskWarning}
+                  />
+                )}
 
-            {currentStep === 3 && isRealMode() && !auth.user ? <RealModeLoginGate target="12WeekSetup" /> : null}
+                {currentStep === 3 && isRealMode() && !auth.user ? <RealModeLoginGate target="12WeekSetup" /> : null}
 
-            {currentStep === 3 && !(isRealMode() && !auth.user) ? (
-              <PlanPreviewStepLab
-                draft={draft}
-                smartGoal={smartGoal}
-                feasibility={feasibility}
-                focusArea={focusArea}
-                selectedTemplate={selectedTemplate}
-                validationMessage={currentStepValidationError}
-                canConfirm={!currentStepValidationError}
-              />
-            ) : null}
-          </SetupStepShellLab>
+                {currentStep === 3 && !(isRealMode() && !auth.user) ? (
+                  <PlanPreviewStepLab
+                    draft={draft}
+                    smartGoal={smartGoal}
+                    feasibility={feasibility}
+                    focusArea={focusArea}
+                    selectedTemplate={selectedTemplate}
+                    validationMessage={currentStepValidationError}
+                    canConfirm={!currentStepValidationError}
+                  />
+                ) : null}
+              </SetupStepShellLab>
+            </div>
+
+            {/* Cột phải: Bản đồ lộ trình 12 tuần trực quan */}
+            <aside className="order-1 lg:order-2 space-y-5 lg:sticky lg:top-6">
+              <div className="relative overflow-hidden rounded-2xl border border-app-line/60 bg-[#faf6ee] dark:bg-[#1a1c17] p-5 sm:p-6 shadow-md rotate-[0.5deg] transition-transform hover:rotate-0 duration-300">
+                {/* Washi Tape effect */}
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-app-accent/15 dark:bg-app-accent/25 backdrop-blur-[1px] rotate-[-1deg] border border-dashed border-app-accent/20" />
+                
+                <h3 className="font-serif text-lg font-medium text-app-ink flex items-center gap-2">
+                  <MapIcon className="h-4 w-4 text-app-accent" />
+                  <span>LỘ TRÌNH 12 TUẦN</span>
+                </h3>
+                <p className="mt-1.5 text-xs text-app-ink-muted leading-relaxed">
+                  Bản thiết kế hành trình tự động được đồng bộ khi bạn điều chỉnh.
+                </p>
+
+                {/* Sơ đồ SVG mini */}
+                <div className="mt-4 border-b border-app-line/40 pb-4">
+                  <div className="relative w-full aspect-[280/65] flex items-center justify-center">
+                    <svg
+                      viewBox="0 0 280 65"
+                      className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
+                      aria-hidden="true"
+                    >
+                      <defs>
+                        <linearGradient id="roadmap-grad-preview" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="var(--color-accent)" />
+                          <stop offset="50%" stopColor="#818cf8" />
+                          <stop offset="100%" stopColor="#10b981" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Đường nền */}
+                      <path
+                        d="M 25 32 H 255"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        className="text-app-line/60"
+                      />
+
+                      {/* Đường tiến trình */}
+                      <path
+                        d={`M 25 32 H ${draft.week12Outcome.trim().length > 0 ? 255 : draft.week8Milestone.trim().length > 0 ? 178 : draft.week4Milestone.trim().length > 0 ? 101 : 25}`}
+                        fill="none"
+                        stroke="url(#roadmap-grad-preview)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+
+                    {/* Các mốc điểm */}
+                    <div
+                      className="absolute flex flex-col items-center z-10"
+                      style={{ left: "8.9%", top: "45%", transform: "translate(-50%, -50%)" }}
+                    >
+                      <div className="relative flex h-7 w-7 items-center justify-center rounded-full border border-app-accent bg-app-surface text-[9px] font-bold text-app-accent shadow-sm">
+                        W1
+                      </div>
+                      <span className="mt-1 text-[8px] font-bold text-app-ink-muted tracking-wide uppercase">Bắt đầu</span>
+                    </div>
+
+                    <div
+                      className="absolute flex flex-col items-center z-10"
+                      style={{ left: "36.1%", top: "45%", transform: "translate(-50%, -50%)" }}
+                    >
+                      <div
+                        className={cn(
+                          "relative flex h-7 w-7 items-center justify-center rounded-full border text-[9px] font-bold bg-app-surface transition-all duration-300",
+                          draft.week4Milestone.trim().length > 0
+                            ? "border-app-accent text-app-accent shadow-sm scale-105"
+                            : "border-app-line text-app-ink-muted opacity-50",
+                        )}
+                      >
+                        W4
+                      </div>
+                      <span
+                        className={cn(
+                          "mt-1 text-[8px] font-bold tracking-wide uppercase transition-colors duration-300",
+                          draft.week4Milestone.trim().length > 0 ? "text-app-ink" : "text-app-ink-muted",
+                        )}
+                      >
+                        Chặng 1
+                      </span>
+                    </div>
+
+                    <div
+                      className="absolute flex flex-col items-center z-10"
+                      style={{ left: "63.5%", top: "45%", transform: "translate(-50%, -50%)" }}
+                    >
+                      <div
+                        className={cn(
+                          "relative flex h-7 w-7 items-center justify-center rounded-full border text-[9px] font-bold bg-app-surface transition-all duration-300",
+                          draft.week8Milestone.trim().length > 0
+                            ? "border-app-accent text-app-accent shadow-sm scale-105"
+                            : "border-app-line text-app-ink-muted opacity-50",
+                        )}
+                      >
+                        W8
+                      </div>
+                      <span
+                        className={cn(
+                          "mt-1 text-[8px] font-bold tracking-wide uppercase transition-colors duration-300",
+                          draft.week8Milestone.trim().length > 0 ? "text-app-ink" : "text-app-ink-muted",
+                        )}
+                      >
+                        Chặng 2
+                      </span>
+                    </div>
+
+                    <div
+                      className="absolute flex flex-col items-center z-10"
+                      style={{ left: "91.1%", top: "45%", transform: "translate(-50%, -50%)" }}
+                    >
+                      <div
+                        className={cn(
+                          "relative flex h-7 w-7 items-center justify-center rounded-full border text-[9px] font-bold bg-app-surface transition-all duration-300",
+                          draft.week12Outcome.trim().length > 0
+                            ? "border-emerald-500 text-emerald-600 dark:text-emerald-450 shadow-sm scale-110"
+                            : "border-app-line text-app-ink-muted opacity-50",
+                        )}
+                      >
+                        W12
+                      </div>
+                      <span
+                        className={cn(
+                          "mt-1 text-[8px] font-bold tracking-wide uppercase transition-colors duration-300",
+                          draft.week12Outcome.trim().length > 0 ? "text-emerald-650 dark:text-emerald-450" : "text-app-ink-muted",
+                        )}
+                      >
+                        Đích
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-4">
+                  {/* Mục tiêu chính */}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
+                      <Target className="h-3 w-3 shrink-0" />
+                      Mục tiêu SMART
+                    </span>
+                    <p className="mt-1 text-sm font-medium leading-snug text-app-ink break-words">
+                      {smartGoal?.specific}
+                    </p>
+                  </div>
+
+                  {/* Mức khả thi */}
+                  {feasibility && (
+                    <div className="rounded-lg bg-app-bg px-3 py-2 border border-app-line/40">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">Tính khả thi</span>
+                        <span className="text-[10px] font-bold text-app-accent uppercase">{feasibility.resultTitle}</span>
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-app-line/50">
+                          <div className="h-full bg-app-accent" style={{ width: `${feasibility.adjustedScore * 10}%` }} />
+                        </div>
+                        <span className="text-xs font-bold text-app-accent">{feasibility.adjustedScore}/10</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chu kỳ thời gian */}
+                  <div className="grid grid-cols-2 gap-4 border-t border-app-line/40 pt-3">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-soft flex items-center gap-1">
+                        <Calendar className="h-3 w-3 shrink-0" />
+                        Bắt đầu
+                      </span>
+                      <p className="mt-0.5 text-xs font-semibold text-app-ink">{cycleStartDate}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-soft flex items-center gap-1">
+                        <Flag className="h-3 w-3 shrink-0" />
+                        Kết thúc
+                      </span>
+                      <p className="mt-0.5 text-xs font-semibold text-app-ink">{cycleEndDate}</p>
+                    </div>
+                  </div>
+
+                  {/* Các chặng milestone */}
+                  <div className="space-y-2.5 border-t border-app-line/40 pt-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
+                      <Award className="h-3 w-3 shrink-0" />
+                      Mốc chặng lộ trình
+                    </span>
+                    
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded bg-indigo-100 dark:bg-indigo-950/40 text-[9px] font-extrabold text-indigo-650 dark:text-indigo-400">W4</span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold text-app-ink-muted uppercase">Chặng 1 (Tuần 4)</p>
+                        <p className="mt-0.5 text-xs font-semibold text-app-ink break-words line-clamp-2">
+                          {draft.week4Milestone.trim() || "Chưa điền..."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded bg-indigo-100 dark:bg-indigo-950/40 text-[9px] font-extrabold text-indigo-650 dark:text-indigo-400">W8</span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold text-app-ink-muted uppercase">Chặng 2 (Tuần 8)</p>
+                        <p className="mt-0.5 text-xs font-semibold text-app-ink break-words line-clamp-2">
+                          {draft.week8Milestone.trim() || "Chưa điền..."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded bg-emerald-100 dark:bg-emerald-950/40 text-[9px] font-extrabold text-emerald-650 dark:text-emerald-450">W12</span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold text-app-ink-muted uppercase">Đích đến cuối (Tuần 12)</p>
+                        <p className="mt-0.5 text-xs font-semibold text-app-ink break-words line-clamp-2">
+                          {draft.week12Outcome.trim() || "Chưa điền..."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tactics */}
+                  {draft.leadIndicators.length > 0 && (
+                    <div className="space-y-1.5 border-t border-app-line/40 pt-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
+                        Hành động lặp lại ({draft.leadIndicators.length})
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {draft.leadIndicators.map((ind) => (
+                          <span key={ind.id} className="inline-flex rounded-md border border-app-line bg-app-surface px-2 py-0.5 text-[10px] font-medium text-app-ink-soft max-w-full truncate">
+                            {ind.name} ({ind.target} {ind.unit})
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
       </div>
     </PageShell>
