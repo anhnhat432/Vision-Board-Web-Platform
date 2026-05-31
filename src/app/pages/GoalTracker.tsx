@@ -184,30 +184,30 @@ const getGoalHealthStatus = (
 
   if (progress === 100) {
     return {
-      label: "Hoàn thành",
+      label: "Hoàn thành ✨",
       bgClass: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
     };
   }
   if (isOverdue) {
     return {
-      label: "Rủi ro",
-      bgClass: "bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40",
+      label: "Cần chỉnh nhịp 🌊",
+      bgClass: "bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30",
     };
   }
   if (stats.reviewDueToday) {
     return {
-      label: "Cần review",
+      label: "Đến ngày review 📋",
       bgClass: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40",
     };
   }
   if (isNearDeadline) {
     return {
-      label: "Sắp đến hạn",
+      label: "Sắp đến hạn ⏳",
       bgClass: "bg-app-warm-soft text-app-warm border border-app-warm-border",
     };
   }
   return {
-    label: "Đúng tiến độ",
+    label: "Đang đi đều 🌱",
     bgClass: "bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/40",
   };
 };
@@ -334,7 +334,9 @@ function TodayFocusCard({
 }: TodayFocusCardProps) {
   if (!focusData) {
     return (
-      <div className="rounded-[18px] border border-app-line bg-app-surface p-5 shadow-app-sm text-center py-6 space-y-3">
+      <div className="rounded-[18px] border border-app-line bg-app-surface p-5 shadow-app-sm text-center py-6 space-y-3 relative overflow-hidden">
+        {/* Washi tape decoration */}
+        <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/10 dark:bg-app-accent/20 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/15 z-10" />
         <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
           <Target className="h-5 w-5" />
         </div>
@@ -400,6 +402,8 @@ function TodayFocusCard({
 
   return (
     <div className="rounded-[18px] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/30 via-white to-white dark:via-neutral-950 dark:to-neutral-950 p-5 shadow-app-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
+      {/* Washi tape decoration */}
+      <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/15 dark:bg-app-accent/25 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/20 z-10" />
       <div className="absolute -left-12 -bottom-12 w-28 h-28 rounded-full bg-app-accent/5 blur-2xl pointer-events-none" />
 
       <div className="space-y-3 min-w-0 flex-1 z-10">
@@ -1070,22 +1074,22 @@ function GoalTrackerContent({
               <EmptyState
                 variant="card"
                 illustration={<MountainMoonIllustration className="w-full text-app-ink-muted" />}
-                title="Chưa có mục tiêu"
-                description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng."
+                title="Bắt đầu với một trọng tâm"
+                description="Tạo mục tiêu đầu tiên của bạn để biến những mong muốn mơ hồ thành hành động cụ thể."
                 actions={
                   <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                     <Button
                       className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-app-sm hover:scale-[1.01] transition-all px-6 py-2.5 rounded-lg text-sm"
                       onClick={handleStartGuidedGoalFlow}
                     >
-                      Bắt đầu chu kỳ 12 tuần →
+                      Bắt đầu từ trọng tâm →
                     </Button>
                     <Button
                       variant="outline"
                       className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-6 py-2.5 rounded-lg font-bold text-sm"
                       onClick={handleStartGuidedGoalFlow}
                     >
-                      Thiết lập mục tiêu
+                      Tạo mục tiêu đầu tiên
                     </Button>
                   </div>
                 }
@@ -1252,7 +1256,7 @@ function GoalSummaryStrip({
       value: needsAttention,
       note: "quá hạn / review",
       icon: AlertTriangle,
-      colorClass: "text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/30",
+      colorClass: "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-950/30",
     },
   ];
 
@@ -1305,7 +1309,7 @@ function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalFilterCh
     { id: "12week", label: "12 tuần", count: counts.twelveWeek },
     { id: "simple", label: "Mục tiêu thường", count: counts.simple },
     { id: "dueSoon", label: "Sắp đến hạn", count: counts.dueSoon },
-    { id: "atRisk", label: "Rủi ro", count: counts.atRisk },
+    { id: "atRisk", label: "Cần chỉnh nhịp 🌊", count: counts.atRisk },
     { id: "completed", label: "Hoàn thành", count: counts.completed },
   ] as const;
 
@@ -1364,12 +1368,32 @@ function GoalCard({
 }: GoalCardProps) {
   const system = goal.twelveWeekSystem;
   const systemCurrentWeek = system ? getTwelveWeekCurrentWeek(system) : null;
-  const systemTodayTasks = system ? getTwelveWeekTodayTasks(system) : [];
-  const systemTodayOpenTasks = systemTodayTasks.filter((task) => !task.completed);
-  const completedTodayCount = systemTodayTasks.filter((t) => t.completed).length;
-  const totalTodayCount = systemTodayTasks.length;
   const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
   const areaStyle = CATEGORY_STYLES.default;
+
+  const displayTasks = useMemo(() => {
+    if (system) {
+      const todayTasks = getTwelveWeekTodayTasks(system);
+      return todayTasks.filter((task) => !task.completed).slice(0, 2);
+    }
+    return (goal.tasks || []).filter((task) => !task.completed).slice(0, 2);
+  }, [system, goal.tasks]);
+
+  const completedTasksCount = useMemo(() => {
+    if (system) {
+      const todayTasks = getTwelveWeekTodayTasks(system);
+      return todayTasks.filter((t) => t.completed).length;
+    }
+    return (goal.tasks || []).filter((t) => t.completed).length;
+  }, [system, goal.tasks]);
+
+  const totalTasksCount = useMemo(() => {
+    if (system) {
+      const todayTasks = getTwelveWeekTodayTasks(system);
+      return todayTasks.length;
+    }
+    return (goal.tasks || []).length;
+  }, [system, goal.tasks]);
 
   const [isFlipped, setIsFlipped] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -1393,7 +1417,9 @@ function GoalCard({
       )}>
         {/* FRONT SIDE */}
         <div className="backface-hidden w-full">
-          <SpotlightCard className={cn("rounded-[18px] border p-5 sm:p-6 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md", glowClass)}>
+          <SpotlightCard className={cn("rounded-[18px] border p-5 sm:p-6 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md relative", glowClass)}>
+            {/* Washi tape decoration */}
+            <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/10 dark:bg-app-accent/20 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/15 z-10" />
             {/* Nút xóa thùng rác nhỏ ở góc trên bên phải, visually quieter */}
             <button
               type="button"
@@ -1421,9 +1447,18 @@ function GoalCard({
                     <h3 className="font-serif text-lg md:text-xl font-bold text-app-ink leading-snug break-words pr-8 line-clamp-3">
                       {goal.title}
                     </h3>
-                    <p className="text-xs text-app-ink-soft font-semibold">
-                      {system ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
+                    <p className="text-xs text-app-ink-soft font-semibold flex flex-wrap items-center gap-1.5">
+                      <span>{system ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"}</span>
+                      <span>·</span>
                       <span className={cn("font-bold", areaStyle.text)}>{getLifeAreaLabel(goal.category)}</span>
+                      {goal.deadline && (
+                        <>
+                          <span>·</span>
+                          <span className="text-app-ink-muted font-normal">
+                            📅 Hạn: {new Date(goal.deadline).toLocaleDateString("vi-VN")}
+                          </span>
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1519,22 +1554,20 @@ function GoalCard({
               {/* Divider dọc */}
               <div className="hidden lg:block w-px bg-app-line/60 my-1" aria-hidden="true" />
 
-              {/* Cột phải: Tasks hôm nay */}
+              {/* Cột phải: Nhiệm vụ */}
               <div className="lg:pl-2 flex flex-col justify-between min-w-0 pt-0.5">
                 <div>
                   <div className="flex items-center justify-between border-b border-app-line/50 pb-2 mb-3">
                     <p className="text-xs font-bold uppercase tracking-[0.08em] text-app-ink-muted">
-                      Việc hôm nay
+                      {system ? "Việc hôm nay" : "Nhiệm vụ chưa xong"}
                     </p>
-                    {system && (
-                      <span className="text-xs font-black tabular-nums text-app-accent">
-                        {completedTodayCount}/{totalTodayCount}
-                      </span>
-                    )}
+                    <span className="text-xs font-black tabular-nums text-app-accent">
+                      {completedTasksCount}/{totalTasksCount}
+                    </span>
                   </div>
 
                   <div className="space-y-2.5">
-                    {systemTodayOpenTasks.slice(0, 2).map((task) => (
+                    {displayTasks.map((task) => (
                       <div
                         key={task.id}
                         className="group/task flex items-center gap-2.5 rounded-lg border border-app-line/40 bg-app-bg-subtle/30 px-3 py-2 hover:border-app-accent/20 hover:bg-app-accent-subtle/20 transition-all duration-300"
@@ -1562,9 +1595,9 @@ function GoalCard({
                       </div>
                     ))}
 
-                    {systemTodayOpenTasks.length === 0 && (
+                    {displayTasks.length === 0 && (
                       <p className="text-xs italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1 font-sans">
-                        Không có việc hôm nay.
+                        {system ? "Không có việc hôm nay." : "Đã chốt hết việc chưa xong."}
                       </p>
                     )}
                   </div>
@@ -1769,14 +1802,14 @@ function GoalsSidebar({
             </div>
           )}
 
-          {/* Widget 3: Mục tiêu gặp rủi ro (Quá hạn) */}
+          {/* Widget 3: Mục tiêu cần chỉnh nhịp */}
           {atRiskGoals.length > 0 && (
-            <div className="rounded-[18px] border border-app-line bg-rose-50/15 dark:bg-rose-950/5 border-rose-500/25 dark:border-rose-500/15 p-5 shadow-app-sm">
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-rose-600 dark:text-rose-400 mb-3.5 flex items-center gap-2">
+            <div className="rounded-[18px] border border-app-line bg-orange-50/15 dark:bg-orange-950/5 border-orange-500/20 dark:border-orange-850/20 p-5 shadow-app-sm">
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-orange-700 dark:text-orange-400 mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                 </span>
-                Gặp rủi ro (Quá hạn)
+                Cần chỉnh nhịp 🌊
               </h3>
               <div className="space-y-3">
                 {atRiskGoals.map((goal) => (
@@ -1785,7 +1818,7 @@ function GoalsSidebar({
                     {goal.twelveWeekSystem && (
                       <button
                         type="button"
-                        className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0"
+                        className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline shrink-0"
                         onClick={() => openTwelveWeekCenter(goal.id)}
                       >
                         Xem kế hoạch
