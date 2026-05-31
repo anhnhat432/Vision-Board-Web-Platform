@@ -7,6 +7,7 @@ import {
   Loader2,
   Rocket,
   Target,
+  ChevronDown,
 } from "lucide-react";
 
 import {
@@ -24,6 +25,7 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { cn } from "../ui/utils";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type {
@@ -263,9 +265,10 @@ export function TwelveWeekWeekTab({
   const [showEarlyReviewConfirm, setShowEarlyReviewConfirm] = useState(false);
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [isStartingEarly, setIsStartingEarly] = useState(false);
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
 
   const canShowFormReview = reviewDueToday || isStartingEarly || isEditingReview;
-  const showForm = !reviewIsCompleted || isEditingReview;
+  const showForm = (!reviewIsCompleted || isEditingReview);
 
   const reviewReadinessItems = [
     {
@@ -345,6 +348,11 @@ export function TwelveWeekWeekTab({
     return { total, completed, percent, status };
   };
 
+  const mergedIndicators = [
+    ...coreIndicators.map(ind => ({ ...ind, isCore: true })),
+    ...optionalIndicators.map(ind => ({ ...ind, isCore: false }))
+  ];
+
   return (
     <div className="flex flex-col gap-5 pt-4 pb-24 md:pb-0">
       <AlertDialog open={showEarlyReviewConfirm} onOpenChange={setShowEarlyReviewConfirm}>
@@ -382,203 +390,209 @@ export function TwelveWeekWeekTab({
         />
       )}
 
-      {/* SECTION 1: Weekly Execution Header (Tuần này) */}
-      <div className="rounded-xl border border-app-line/45 bg-app-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.012)]">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
-              Tuần {currentWeekLimit} / {system.totalWeeks}
-            </span>
-            <h2 className="font-serif text-xl font-semibold text-app-ink">
-              {currentWeekRange
-                ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-                : "Chu kỳ hiện tại"}
-            </h2>
-            {system.week12Outcome && (
-              <p className="text-xs text-app-ink-soft mt-1">
-                <span className="font-medium text-app-ink">Mục tiêu 12 tuần:</span> {system.week12Outcome}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            {reviewIsCompleted ? (
-              <Button
-                type="button"
-                className="bg-app-surface border border-app-line text-app-ink-soft hover:bg-app-bg text-xs font-semibold px-4 py-1.5 rounded-lg"
-                onClick={() => {
-                  setIsEditingReview(true);
-                  setTimeout(() => {
-                    document.getElementById("weekly-review-flow")?.scrollIntoView({ behavior: "smooth" });
-                  }, 100);
-                }}
-              >
-                Sửa review
-              </Button>
-            ) : reviewDueToday ? (
-              <Button
-                type="button"
-                className="bg-app-warm hover:bg-app-warm/95 text-white text-xs font-semibold px-4 py-1.5 rounded-lg"
-                onClick={() => {
-                  setTimeout(() => {
-                    document.getElementById("weekly-review-flow")?.scrollIntoView({ behavior: "smooth" });
-                  }, 100);
-                }}
-              >
-                Bắt đầu review tuần
-              </Button>
-            ) : !isStartingEarly ? (
-              <Button
-                type="button"
-                className="bg-app-warm hover:bg-app-warm/95 text-white text-xs font-semibold px-4 py-1.5 rounded-lg"
-                onClick={() => setIsStartingEarly(true)}
-              >
-                Bắt đầu review sớm
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="text-xs font-semibold px-4 py-1.5 rounded-lg"
-                onClick={() => setIsStartingEarly(false)}
-              >
-                Tiếp tục thực thi
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="grid gap-3 mt-4 pt-4 border-t border-app-line/25 sm:grid-cols-2">
-          <div className="bg-app-bg/20 p-3 rounded-lg border border-app-line/15">
-            <span className="text-[10px] uppercase tracking-wider text-app-ink-muted/80 block">Tiêu điểm tuần này</span>
-            <p className="mt-1 text-xs font-semibold text-app-ink">{currentPlanFocus || "Chưa thiết lập"}</p>
-          </div>
-          <div className="bg-app-bg/20 p-3 rounded-lg border border-app-line/15">
-            <span className="text-[10px] uppercase tracking-wider text-app-ink-muted/80 block">Cột mốc dự kiến</span>
-            <p className="mt-1 text-xs font-semibold text-app-ink">{currentPlanMilestone || "Chưa thiết lập"}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION 2: Committed Tactics (Việc đã cam kết) */}
-      <div className="space-y-3">
-        <h3 className="font-serif text-base font-semibold text-app-ink">Việc đã cam kết</h3>
-        
-        {coreIndicators.length === 0 && optionalIndicators.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-app-line/50 bg-app-surface p-6 text-center text-xs text-app-ink-muted">
-            Chưa có việc cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng sẽ hiển thị ở đây.
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[
-              ...coreIndicators.map(ind => ({ ...ind, isCore: true })),
-              ...optionalIndicators.map(ind => ({ ...ind, isCore: false }))
-            ].map((indicator) => {
-              const { total, completed, percent, status } = getTacticProgress(indicator);
-              
-              // Status Badge styles
-              const getStatusBadge = (statusVal: typeof status) => {
-                switch (statusVal) {
-                  case "Done":
-                    return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400">Done</Badge>;
-                  case "In Progress":
-                    return <Badge className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-50 dark:bg-blue-950/20 dark:text-blue-400">In Progress</Badge>;
-                  case "Behind":
-                    return <Badge className="bg-rose-50 text-rose-700 border-rose-100 hover:bg-rose-50 dark:bg-rose-950/20 dark:text-rose-400">Behind</Badge>;
-                  default:
-                    return <Badge className="bg-slate-50 text-slate-700 border-slate-100 hover:bg-slate-50 dark:bg-slate-900/20 dark:text-slate-400">Not started</Badge>;
-                }
-              };
-
-              return (
-                <div key={indicator.id || indicator.name} className="flex flex-col justify-between p-4 rounded-xl border border-app-line/40 bg-app-surface shadow-2xs">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${indicator.isCore ? "bg-app-warm-soft text-app-warm" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"}`}>
-                        {indicator.isCore ? "Core" : "Optional"}
-                      </span>
-                      {getStatusBadge(status)}
-                    </div>
-                    <h4 className="text-xs font-semibold text-app-ink leading-relaxed">
-                      {indicator.name}
-                    </h4>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-app-line/20 flex items-center justify-between text-xs text-app-ink-soft">
-                    <span>
-                      Tiến độ: <span className="font-semibold text-app-ink">{completed}</span> / <span className="font-medium">{total || indicator.target || 1}</span> {indicator.unit || "lần"}
-                    </span>
-                    {!weekCompletion.isEmpty && <span className="font-semibold text-app-accent">{percent}%</span>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* SECTION 3: Execution Scoreboard (Bảng điểm thực thi) */}
-      <div className="rounded-xl border border-app-line/40 bg-app-surface p-5 shadow-2xs space-y-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Điểm thực thi</h3>
-        
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* Lead Score */}
-          <div className="space-y-2 p-3.5 rounded-lg border border-app-line/30 bg-app-bg/25">
-            <div className="flex items-baseline justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted">Lead Score</span>
-              {weekCompletion.isEmpty ? (
-                <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">Chưa có việc trong tuần này</span>
-              ) : (
-                <span data-testid="weekly-lead-score" className="text-2xl font-bold text-app-accent">{leadScoreValue}%</span>
+      {/* ========================================================================= */}
+      {/* STATE 1: BEFORE REVIEW IS DUE                                             */}
+      {/* ========================================================================= */}
+      {!reviewIsCompleted && !canShowFormReview && (
+        <>
+          {/* Card "Tuần này" nhỏ gọn */}
+          <div className="rounded-xl border border-app-line/45 bg-app-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.012)]">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
+                Tuần này · Tuần {currentWeekLimit} / {system.totalWeeks}
+              </span>
+              <h2 className="font-serif text-lg font-semibold text-app-ink">
+                {currentWeekRange
+                  ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                  : "Chu kỳ hiện tại"}
+              </h2>
+              {system.week12Outcome && (
+                <p className="text-xs text-app-ink-soft mt-1 leading-relaxed">
+                  <span className="font-medium text-app-ink">Mục tiêu 12 tuần:</span> {system.week12Outcome}
+                </p>
               )}
             </div>
-            <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="h-1.5 bg-app-bg" />
-            <p className="text-[10px] text-app-ink-soft">
-              {weekCompletion.isEmpty
-                ? "Điểm sẽ tự tính khi tuần có việc lặp lại được cam kết."
-                : `Tự tính: ${weekCompletion.completed}/${weekCompletion.total} việc đã hoàn thành.`}
-            </p>
-          </div>
 
-          {/* Lag Score */}
-          {lagScoreValue !== null ? (
-            <div className="space-y-2 p-3.5 rounded-lg border border-app-line/30 bg-app-bg/25">
-              <div className="flex items-baseline justify-between">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted">Lag Score</span>
-                <span data-testid="weekly-lag-score" className="text-2xl font-bold text-app-ink">{lagScoreValue}%</span>
+            <div className="grid gap-3 mt-4 pt-4 border-t border-app-line/25 sm:grid-cols-2">
+              <div className="bg-app-bg/20 p-3 rounded-lg border border-app-line/15">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted/80 block">Tiêu điểm</span>
+                <p className="mt-1 text-xs font-semibold text-app-ink">{currentPlanFocus || "Chưa thiết lập"}</p>
               </div>
-              <Progress value={lagScoreValue} className="h-1.5 bg-app-bg" />
-              <p className="text-[10px] text-app-ink-soft">
-                Chỉ số chính ({system.lagMetric.name}): {lagMetricValue || "Chưa cập nhật"}
-              </p>
+              <div className="bg-app-bg/20 p-3 rounded-lg border border-app-line/15">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted/80 block">Cột mốc</span>
+                <p className="mt-1 text-xs font-semibold text-app-ink">{currentPlanMilestone || "Chưa thiết lập"}</p>
+              </div>
             </div>
-          ) : (
-            <div className="p-3.5 rounded-lg border border-app-line/30 bg-app-bg/25 flex flex-col justify-center">
-              <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block">Lag Score</span>
-              <p className="text-xs text-app-ink-soft mt-1 leading-relaxed">
-                Không đo lường kết quả cuối trong chu kỳ này.
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div
-          data-testid="weekly-score-interpretation"
-          className={`rounded-lg border px-4 py-3 ${scoreTone.panel}`}
-        >
-          <div className="flex items-center gap-2 text-xs font-semibold">
-            <span className={`h-2 w-2 rounded-full ${scoreTone.marker}`} />
-            <span className={scoreTone.text}>{scoreInterpretation.headline}</span>
           </div>
-          <p className="mt-1 text-xs text-app-ink-soft leading-relaxed">
-            {scoreInterpretation.advice}
-          </p>
-        </div>
-      </div>
 
-      {/* SECTION 4: Weekly Review Form (WAM 4 bước) */}
-      {(!reviewIsCompleted || isEditingReview) && (
+          {/* Card "Việc đã cam kết" */}
+          <div className="space-y-3">
+            <h3 className="font-serif text-sm font-semibold text-app-ink">Việc đã cam kết</h3>
+            {mergedIndicators.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-app-line/50 bg-app-surface p-6 text-center text-xs text-app-ink-muted">
+                Chưa có việc cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng sẽ hiển thị ở đây.
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {mergedIndicators.map((indicator) => {
+                  const { total, completed, percent, status } = getTacticProgress(indicator);
+                  
+                  const getStatusBadge = (statusVal: typeof status) => {
+                    switch (statusVal) {
+                      case "Done":
+                        return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400">Done</Badge>;
+                      case "In Progress":
+                        return <Badge className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-50 dark:bg-blue-950/20 dark:text-blue-400">In Progress</Badge>;
+                      case "Behind":
+                        return <Badge className="bg-rose-50 text-rose-700 border-rose-100 hover:bg-rose-50 dark:bg-rose-950/20 dark:text-rose-400">Behind</Badge>;
+                      default:
+                        return <Badge className="bg-slate-50 text-slate-700 border-slate-100 hover:bg-slate-50 dark:bg-slate-900/20 dark:text-slate-400">Not started</Badge>;
+                    }
+                  };
+
+                  return (
+                    <div key={indicator.id || indicator.name} className="flex flex-col justify-between p-4 rounded-xl border border-app-line/40 bg-app-surface shadow-2xs">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${indicator.isCore ? "bg-app-warm-soft text-app-warm" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"}`}>
+                            {indicator.isCore ? "Core" : "Optional"}
+                          </span>
+                          {getStatusBadge(status)}
+                        </div>
+                        <h4 className="text-xs font-semibold text-app-ink leading-relaxed">
+                          {indicator.name}
+                        </h4>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-app-line/20 flex items-center justify-between text-xs text-app-ink-soft">
+                        <span>
+                          Tiến độ: <span className="font-semibold text-app-ink">{completed}</span> / <span className="font-medium">{total || indicator.target || 1}</span> {indicator.unit || "lần"}
+                        </span>
+                        {!weekCompletion.isEmpty && <span className="font-semibold text-app-accent">{percent}%</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Card "Điểm thực thi" compact */}
+          <div className="rounded-xl border border-app-line/40 bg-app-surface p-5 shadow-2xs space-y-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Điểm thực thi</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 p-3.5 rounded-lg border border-app-line/30 bg-app-bg/25">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted">Lead Score</span>
+                  {weekCompletion.isEmpty ? (
+                    <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">Chưa có việc trong tuần này</span>
+                  ) : (
+                    <span data-testid="weekly-lead-score" className="text-2xl font-bold text-app-accent">{leadScoreValue}%</span>
+                  )}
+                </div>
+                <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="h-1.5 bg-app-bg" />
+              </div>
+              <div className={`p-3.5 rounded-lg border flex flex-col justify-center ${scoreTone.panel}`}>
+                <div className="flex items-center gap-2 text-xs font-semibold">
+                  <span className={`h-2 w-2 rounded-full ${scoreTone.marker}`} />
+                  <span className={scoreTone.text}>{scoreInterpretation.headline}</span>
+                </div>
+                <p className="mt-1 text-xs text-app-ink-soft leading-relaxed">
+                  {scoreInterpretation.advice}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Review sau / Bắt đầu review sớm */}
+          <div className="rounded-xl border border-app-line/40 bg-app-surface p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1">
+              <h4 className="text-xs font-semibold text-app-ink">Nhìn lại & Đánh giá tuần chưa đến hạn</h4>
+              <p className="text-xs text-app-ink-soft">
+                Review chính thức vào {getReviewDayLabel(system.reviewDay)}. Bạn có thể bắt đầu ghi trước các góc nhìn.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="text-xs font-semibold px-4 py-1.5 rounded-lg self-start sm:self-auto"
+              onClick={() => setIsStartingEarly(true)}
+            >
+              Bắt đầu review sớm
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* ========================================================================= */}
+      {/* STATE 2: WHEN REVIEW IS DUE / ACTIVE FORM                                 */}
+      {/* ========================================================================= */}
+      {!reviewIsCompleted && canShowFormReview && (
+        <>
+          {/* Card "Tuần này" nhỏ gọn */}
+          <div className="rounded-xl border border-app-line/45 bg-app-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.012)]">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
+                Tuần này · Tuần {currentWeekLimit} / {system.totalWeeks}
+              </span>
+              <h2 className="font-serif text-lg font-semibold text-app-ink">
+                {currentWeekRange
+                  ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                  : "Chu kỳ hiện tại"}
+              </h2>
+            </div>
+            <div className="grid gap-3 mt-4 pt-4 border-t border-app-line/25 sm:grid-cols-2">
+              <div className="bg-app-bg/20 p-3 rounded-lg border border-app-line/15">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted/80 block">Tiêu điểm</span>
+                <p className="mt-1 text-xs font-semibold text-app-ink">{currentPlanFocus || "Chưa thiết lập"}</p>
+              </div>
+              <div className="bg-app-bg/20 p-3 rounded-lg border border-app-line/15">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted/80 block">Cột mốc</span>
+                <p className="mt-1 text-xs font-semibold text-app-ink">{currentPlanMilestone || "Chưa thiết lập"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Điểm thực thi */}
+          <div className="rounded-xl border border-app-line/40 bg-app-surface p-5 shadow-2xs space-y-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Điểm thực thi</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 p-3.5 rounded-lg border border-app-line/30 bg-app-bg/25">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted">Lead Score</span>
+                  {weekCompletion.isEmpty ? (
+                    <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">Chưa có việc trong tuần này</span>
+                  ) : (
+                    <span data-testid="weekly-lead-score" className="text-2xl font-bold text-app-accent">{leadScoreValue}%</span>
+                  )}
+                </div>
+                <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="h-1.5 bg-app-bg" />
+              </div>
+              {lagScoreValue !== null ? (
+                <div className="space-y-2 p-3.5 rounded-lg border border-app-line/30 bg-app-bg/25">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted">Lag Score</span>
+                    <span data-testid="weekly-lag-score" className="text-2xl font-bold text-app-ink">{lagScoreValue}%</span>
+                  </div>
+                  <Progress value={lagScoreValue} className="h-1.5 bg-app-bg" />
+                </div>
+              ) : (
+                <div className={`p-3.5 rounded-lg border flex flex-col justify-center ${scoreTone.panel}`}>
+                  <div className="flex items-center gap-2 text-xs font-semibold">
+                    <span className={`h-2 w-2 rounded-full ${scoreTone.marker}`} />
+                    <span className={scoreTone.text}>{scoreInterpretation.headline}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Review Form (khi showForm và đồng thời canShowFormReview) */}
+      {showForm && (
         <div className={cn("rounded-xl border border-app-line/45 bg-app-surface p-5 shadow-2xs space-y-6", !canShowFormReview && "hidden")}>
           <div className="space-y-1">
-            <h3 className="font-serif text-base font-semibold text-app-ink">Review tuần {currentWeekLimit}</h3>
+            <h3 className="font-serif text-base font-semibold text-app-ink">Review tuần</h3>
             <p className="text-xs text-app-ink-soft">
               Review tuần sẽ được lưu và dùng làm cơ sở điều chỉnh tuần sau.
             </p>
@@ -744,14 +758,17 @@ export function TwelveWeekWeekTab({
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row w-full sm:w-auto shrink-0 justify-end">
-            {isEditingReview && (
+            {(isEditingReview || isStartingEarly) && (
               <Button
                 type="button"
                 variant="outline"
                 className="w-full sm:w-auto text-xs font-semibold px-4 py-1.5 rounded-lg border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
-                onClick={() => setIsEditingReview(false)}
+                onClick={() => {
+                  setIsEditingReview(false);
+                  setIsStartingEarly(false);
+                }}
               >
-                Hủy chỉnh sửa
+                Tiếp tục thực thi
               </Button>
             )}
             <Button
@@ -772,150 +789,204 @@ export function TwelveWeekWeekTab({
         </div>
       )}
 
-      {/* SECTION 5: Completed Review Summary */}
+      {/* ========================================================================= */}
+      {/* STATE 3: AFTER REVIEW IS COMPLETED                                        */}
+      {/* ========================================================================= */}
       {!showForm && summaryReview && (
-        <div
-          data-testid="weekly-review-summary"
-          className="rounded-xl border border-app-line/45 bg-app-surface p-5 shadow-2xs space-y-4"
-        >
-          <div className="flex items-center justify-between border-b border-app-line/20 pb-3">
-            <div>
-              <h3 className="font-serif text-base font-semibold text-app-ink">Đã hoàn thành đánh giá Tuần {summaryReview.weekNumber}</h3>
-              <p className="text-xs text-app-ink-soft mt-0.5">
-                Review tuần đã được lưu và dùng làm cơ sở điều chỉnh tuần sau.
-              </p>
-            </div>
-            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50">Đã hoàn thành</Badge>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {/* Cột trái: Kết quả */}
-            <div className="space-y-3 p-3.5 rounded-lg bg-app-bg/30 border border-app-line/20">
+        <div className="space-y-5">
+          {/* Card gộp: Kết quả tuần (Week Result Summary) */}
+          <div
+            data-testid="weekly-review-summary"
+            className="rounded-xl border border-app-line/45 bg-app-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.012)] space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-app-line/20 pb-3">
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted">Chỉ số thực thi (Score)</span>
-                <p className="text-xl font-bold text-app-ink mt-1">{summaryReview.leadCompletionPercent}%</p>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted block">Kết quả tuần</span>
+                <h3 className="font-serif text-base font-semibold text-app-ink mt-0.5">
+                  Tuần {currentWeekLimit} ({currentWeekRange ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}` : "Chu kỳ hiện tại"})
+                </h3>
               </div>
-              
-              <div className="text-xs text-app-ink-soft space-y-1">
-                <p className="font-semibold text-app-ink">{scoreInterpretation.headline}</p>
-                <p>{scoreInterpretation.advice}</p>
-              </div>
+              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400">Đã chốt</Badge>
+            </div>
 
-              <div className="text-xs border-t border-app-line/20 pt-2">
-                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block">Đánh giá cam kết cũ</span>
-                <p className="font-medium text-app-ink mt-0.5">
-                  Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
+            {system.week12Outcome && (
+              <p className="text-xs text-app-ink-soft">
+                <span className="font-medium text-app-ink">Mục tiêu 12 tuần:</span> {system.week12Outcome}
+              </p>
+            )}
+
+            {/* Một khối hiển thị Điểm Score duy nhất nổi bật */}
+            <div className="grid gap-3 sm:grid-cols-2 p-4 rounded-xl border border-app-line/30 bg-app-bg/25">
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted">Điểm thực thi (Score)</span>
+                <p className="text-2xl font-bold text-app-accent">{summaryReview.leadCompletionPercent}%</p>
+                <Progress value={summaryReview.leadCompletionPercent} className="h-1 bg-app-bg mt-1" />
+                <p className="text-[10px] text-app-ink-soft mt-1">
+                  Đã hoàn thành {weekCompletion.completed}/{weekCompletion.total} việc.
                 </p>
-                {summaryCommitmentsKept.length > 0 && (
-                  <p className="text-[11px] text-app-ink-soft mt-1">
-                    Đã giữ: {summaryCommitmentsKept.join(", ")}
-                  </p>
-                )}
               </div>
-            </div>
 
-            {/* Cột phải: Bài học & Tuần tới */}
-            <div className="space-y-3 p-3.5 rounded-lg bg-app-bg/30 border border-app-line/20">
-              {summaryInsights && (
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-app-ink-muted">Bài học & Trở ngại</span>
-                  <p className="text-xs text-app-ink leading-relaxed mt-1 italic">
-                    "{summaryInsights}"
+              {lagScoreValue !== null ? (
+                <div className="space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider text-app-ink-muted">Lag Score</span>
+                  <p data-testid="weekly-lag-score" className="text-2xl font-bold text-app-ink">{lagScoreValue}%</p>
+                  <Progress value={lagScoreValue} className="h-1 bg-app-bg mt-1" />
+                  <p className="text-[10px] text-app-ink-soft mt-1">
+                    {system.lagMetric.name}: {lagMetricValue}
                   </p>
                 </div>
-              )}
-
-              {summaryNextWeekCommitments.length > 0 && (
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block">Cam kết tuần tới</span>
-                  <div className="mt-1 flex flex-wrap gap-1.5">
-                    {summaryNextWeekCommitments.map((commitment) => (
-                      <span
-                        key={commitment}
-                        className="rounded-full border border-app-warm-border/50 bg-app-warm-soft px-2.5 py-0.5 text-[10px] font-medium text-app-warm"
-                      >
-                        {commitment}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {summaryReview.workloadDecision && (
-                <div className="text-[11px] text-app-ink-soft border-t border-app-line/20 pt-2">
-                  Quyết định tải việc: <span className="font-semibold text-app-ink">{getWorkloadDecisionLabel(summaryReview.workloadDecision)}</span>
+              ) : (
+                <div className="flex flex-col justify-center">
+                  <span className="text-[10px] uppercase tracking-wider text-app-ink-muted">Lag Score</span>
+                  <p className="text-[11px] text-app-ink-soft mt-1 leading-relaxed">Không yêu cầu đo lường kết quả cuối.</p>
                 </div>
               )}
             </div>
-          </div>
 
-          <div className="flex gap-2 justify-end pt-2 border-t border-app-line/20">
-            {onOpenTodayTab && (
+            <div className="text-xs text-app-ink-soft space-y-1.5 border-t border-app-line/20 pt-3">
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${scoreTone.panel} ${scoreTone.text}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${scoreTone.marker}`} />
+                {scoreInterpretation.headline}
+              </span>
+              <p className="text-app-ink-soft text-xs leading-relaxed">{scoreInterpretation.advice}</p>
+            </div>
+
+            {/* Việc đã cam kết (dạng danh sách compact) */}
+            {mergedIndicators.length > 0 && (
+              <div className="border-t border-app-line/20 pt-3 space-y-2">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Việc đã cam kết</span>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {mergedIndicators.map((indicator) => {
+                    const { total, completed, percent, status } = getTacticProgress(indicator);
+                    return (
+                      <div key={indicator.id || indicator.name} className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg border border-app-line/10 bg-app-bg/10">
+                        <span className="text-app-ink font-medium truncate max-w-[70%]">{indicator.name}</span>
+                        <span className="text-app-ink-soft shrink-0 text-[11px]">
+                          {completed}/{total} ({percent}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Đánh giá cam kết cũ */}
+            <div className="text-xs border-t border-app-line/20 pt-3 space-y-1">
+              <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Cam kết tuần cũ</span>
+              <p className="font-semibold text-app-ink">
+                Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
+              </p>
+              {summaryCommitmentsKept.length > 0 && (
+                <p className="text-app-ink-soft text-[11px]">
+                  Đã giữ: {summaryCommitmentsKept.join(", ")}
+                </p>
+              )}
+              {summaryCommitmentsMissed.length > 0 && (
+                <p className="text-app-ink-soft text-[11px]">
+                  Bỏ lỡ: {summaryCommitmentsMissed.join(", ")}
+                </p>
+              )}
+            </div>
+
+            {/* Bài học & Trở ngại */}
+            {summaryInsights && (
+              <div className="text-xs border-t border-app-line/20 pt-3 space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Bài học</span>
+                <p className="text-xs text-app-ink leading-relaxed italic">
+                  "{summaryInsights}"
+                </p>
+              </div>
+            )}
+
+            {/* Cam kết tuần sau */}
+            {summaryNextWeekCommitments.length > 0 && (
+              <div className="text-xs border-t border-app-line/20 pt-3 space-y-1.5">
+                <span className="text-[10px] uppercase tracking-wider text-app-ink-muted block font-semibold">Cam kết tuần sau</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {summaryNextWeekCommitments.map((commitment) => (
+                    <span
+                      key={commitment}
+                      className="rounded-full border border-app-warm-border/50 bg-app-warm-soft px-2.5 py-0.5 text-[10px] font-semibold text-app-warm"
+                    >
+                      {commitment}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {summaryReview.workloadDecision && (
+              <div className="text-[11px] text-app-ink-soft border-t border-app-line/20 pt-3">
+                Quyết định tải việc: <span className="font-semibold text-app-ink">{getWorkloadDecisionLabel(summaryReview.workloadDecision)}</span>
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-end pt-2 border-t border-app-line/20">
               <Button
                 type="button"
-                className="bg-app-warm hover:bg-app-warm/95 text-white text-xs font-semibold px-4 py-1.5 rounded-lg"
-                onClick={onOpenTodayTab}
+                variant="outline"
+                className="text-xs font-semibold px-4 py-1.5 rounded-lg"
+                onClick={() => setIsEditingReview(true)}
               >
-                Bắt đầu tuần mới ở Hôm nay
+                Chỉnh sửa đánh giá
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              className="text-xs font-medium px-4 py-1.5 rounded-lg"
-              onClick={() => setIsEditingReview(true)}
+            </div>
+          </div>
+
+          {/* Card Next Week Action */}
+          {nextWeekRecommendation && (
+            <TwelveWeekNextWeekRecommendationCard
+              recommendation={nextWeekRecommendation}
+              onAcceptRecommendation={onAcceptNextWeekRecommendation}
+              onOpenTodayTab={onOpenTodayTab}
+            />
+          )}
+
+          {/* Optional Insights (Góc nhìn bổ sung) - Thu gọn mặc định */}
+          {weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
+            <Collapsible
+              open={isInsightsOpen}
+              onOpenChange={setIsInsightsOpen}
+              className="border border-app-line/40 bg-app-surface rounded-xl overflow-hidden shadow-2xs"
             >
-              Chỉnh sửa đánh giá
-            </Button>
-          </div>
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between text-left p-4 hover:bg-app-bg/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-xs font-semibold text-app-ink">
+                    <Lightbulb className="h-4 w-4 text-app-warm" />
+                    Xem phân tích & góc nhìn bổ sung
+                  </div>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 text-app-ink-muted transition-transform duration-200",
+                      isInsightsOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="border-t border-app-line/20 p-4 bg-app-bg/10">
+                <TwelveWeekInsightsCard
+                  variant="reflection"
+                  insights={weeklyReflectionInsights}
+                  title="Đáng giữ và đáng điều chỉnh tuần sau"
+                  onOpenToday={onOpenTodayTab}
+                  onOpenWeekReview={undefined}
+                  onReduceLoad={onApplySuggestedPlan}
+                  onTightenScope={onApplySuggestedPlan}
+                  onResetFocus={onOpenTodayTab}
+                  onCelebrate={onOpenTodayTab}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </div>
-      )}
-
-      {/* SECTION 6: Early Review Preview Card (Nếu chưa đến hạn review) */}
-      {!reviewIsCompleted && !reviewDueToday && !isStartingEarly && (
-        <div className="rounded-xl border border-app-line/40 bg-app-surface p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1">
-            <h4 className="text-xs font-semibold text-app-ink">Nhìn lại & Đánh giá tuần chưa đến hạn</h4>
-            <p className="text-xs text-app-ink-soft">
-              Review chính thức vào {getReviewDayLabel(system.reviewDay)}. Bạn có thể bắt đầu ghi trước các góc nhìn.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="text-xs font-semibold px-4 py-1.5 rounded-lg self-start sm:self-auto"
-            onClick={() => setIsStartingEarly(true)}
-          >
-            Bắt đầu review sớm
-          </Button>
-        </div>
-      )}
-
-      {/* Premium and recommendation cards */}
-      {!showForm && summaryReview && nextWeekRecommendation && (
-        <TwelveWeekNextWeekRecommendationCard
-          recommendation={nextWeekRecommendation}
-          onAcceptRecommendation={onAcceptNextWeekRecommendation}
-          onOpenTodayTab={onOpenTodayTab}
-        />
-      )}
-
-      {!showForm && summaryReview && weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
-        <TwelveWeekInsightsCard
-          variant="reflection"
-          insights={weeklyReflectionInsights}
-          title="Đáng giữ và đáng điều chỉnh tuần sau"
-          onOpenToday={onOpenTodayTab}
-          onOpenWeekReview={undefined}
-          onReduceLoad={onApplySuggestedPlan}
-          onTightenScope={onApplySuggestedPlan}
-          onResetFocus={onOpenTodayTab}
-          onCelebrate={onOpenTodayTab}
-        />
       )}
 
       {/* Sticky Mobile Review CTA */}
-      {showForm && (
+      {showForm && canShowFormReview && (
         <div
           data-testid="weekly-review-mobile-sticky-cta"
           className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-lg md:border md:shadow-lg"
