@@ -1,10 +1,7 @@
-﻿import { CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 import { getLifeAreaLabel } from "../../../utils/storage";
-import { SMART_STEPS } from "../constants";
-import { getStepValidationError } from "../helpers";
-import type { SMARTData, SmartStepKey } from "../types";
 
 interface SmartGoalHeroProps {
   focusArea: string;
@@ -16,76 +13,59 @@ interface SmartGoalHeroProps {
   smartGoalStarter: SmartGoalStarter;
 }
 
-const STEP_LETTERS: Record<SmartStepKey, string> = {
-  specific: "S",
-  measurable: "M",
-  achievable: "A",
-  relevant: "R",
-  timeBound: "T",
-};
-
-const STEP_NAMES: Record<SmartStepKey, string> = {
-  specific: "Specific",
-  measurable: "Measurable",
-  achievable: "Achievable",
-  relevant: "Relevant",
-  timeBound: "Time-bound",
-};
+// In order to avoid unused variable errors, keep the TypeScript interfaces, but only destructure the props we actually use.
+import type { SMARTData } from "../types";
 
 export function SmartGoalHero({
   focusArea,
-  smartData,
   currentStep,
   completedCount,
   totalSteps,
-  progressPercentage,
   smartGoalStarter,
 }: SmartGoalHeroProps) {
   const focusAreaLabel = getLifeAreaLabel(focusArea);
+  const isCompact = currentStep > 0;
 
   return (
-    <section aria-labelledby="smart-goal-setup-title">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-        {focusAreaLabel} · Mục tiêu mới
-      </p>
-      <h1
-        id="smart-goal-setup-title"
-        className="mt-3 font-serif text-4xl font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-4xl"
-      >
-        Viết mục tiêu SMART đầu tiên cho {focusAreaLabel}.
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">{smartGoalStarter.specificGoalStatement}</p>
+    <section aria-labelledby="smart-goal-setup-title" className="transition-all duration-300">
+      <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-2 border-b border-app-line/40 pb-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
+            {focusAreaLabel} · Thiết lập mục tiêu mới
+          </p>
+          <motion.h1
+            id="smart-goal-setup-title"
+            layout="position"
+            className={`mt-2 font-serif font-medium leading-tight tracking-[-0.01em] text-app-ink transition-all duration-300 ${
+              isCompact ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl"
+            }`}
+          >
+            {isCompact ? `Đang rèn luyện mục tiêu cho ${focusAreaLabel}` : `Viết mục tiêu SMART đầu tiên cho ${focusAreaLabel}`}
+          </motion.h1>
+          
+          <AnimatePresence>
+            {!isCompact && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft overflow-hidden"
+              >
+                {smartGoalStarter.specificGoalStatement}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
 
-      <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tiến độ SMART">
-        {SMART_STEPS.map((step, index) => {
-          const stepKey = step.key as SmartStepKey;
-          const done = getStepValidationError(stepKey, smartData) === null;
-          const active = index === currentStep;
+        <div className="flex items-center gap-2 mt-2 md:mt-0 select-none">
+          <span className="text-xs font-semibold text-app-ink-muted">Tiến độ thiết lập:</span>
+          <span className="inline-flex rounded-full bg-app-accent/10 px-2.5 py-0.5 text-xs font-bold text-app-accent">
+            {completedCount}/{totalSteps} phần
+          </span>
+        </div>
+      </div>
 
-          return (
-            <li
-              key={step.key}
-              className={
-                active
-                  ? "inline-flex items-center gap-2 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent ring-2 ring-app-accent"
-                  : done
-                    ? "inline-flex items-center gap-2 rounded-full bg-app-accent px-2.5 py-1 text-xs font-medium text-white"
-                    : "inline-flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-xs font-medium text-app-ink-muted"
-              }
-              aria-current={active ? "step" : undefined}
-            >
-              <span className="inline-flex h-4 min-w-4 items-center justify-center" aria-hidden="true">
-                {done && !active ? <CheckCircle2 className="h-3.5 w-3.5" /> : STEP_LETTERS[stepKey]}
-              </span>
-              <span>{STEP_NAMES[stepKey]}</span>
-            </li>
-          );
-        })}
-      </ul>
-
-      <p className="sr-only">
-        Hoàn thành {completedCount}/{totalSteps} phần, tiến độ {Math.round(progressPercentage)}%.
-      </p>
       <div data-testid="smart-goal-handoff-card" className="sr-only">
         Liên kết với: {focusAreaLabel}. Chỉ số gợi ý: {smartGoalStarter.metricName}. Khung thực thi:{" "}
         {smartGoalStarter.targetWeeks} tuần.
@@ -93,3 +73,4 @@ export function SmartGoalHero({
     </section>
   );
 }
+

@@ -22,6 +22,7 @@ import { cn } from "@/app/components/ui/utils";
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
 import { SMART_STEPS } from "../constants";
+import { formatStepDraft } from "../helpers";
 import type { GoalClarityItem, SMARTData, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
 import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 
@@ -173,7 +174,7 @@ function ConfettiCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 z-50 pointer-events-none w-full h-full" />;
 }
 
-// Hook hiệu ứng gõ chữ sinh động được đặt bên ngoài component để tránh reset state và chạy song song
+// Hook hiệu ứng gõ chữ sinh động
 function useTypingEffect(text: string, speed = 6) {
   const [displayedText, setDisplayedText] = useState("");
 
@@ -229,13 +230,13 @@ export function SmartGoalStepShell({
   const [showStickyMini, setShowStickyMini] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [selectedTone, setSelectedTone] = useState<"empathetic" | "pragmatic" | "strategic">("empathetic");
+  const [isCoachExpanded, setIsCoachExpanded] = useState(true);
 
   const prevValidRef = useRef(isCurrentStepValid);
   const prevGoldRef = useRef(false);
 
   const isGoldStandard = clarityDoneCount === clarityItems.length;
 
-  // Lắng nghe trạng thái hoàn thành hợp lệ một bước để phát âm thanh chánh niệm
   useEffect(() => {
     if (!prevValidRef.current && isCurrentStepValid) {
       playMindfulStepSuccess();
@@ -243,7 +244,6 @@ export function SmartGoalStepShell({
     prevValidRef.current = isCurrentStepValid;
   }, [isCurrentStepValid]);
 
-  // Lắng nghe trạng thái chuẩn Vàng để kích hoạt pháo hoa giấy Confetti
   useEffect(() => {
     if (!prevGoldRef.current && isGoldStandard) {
       setShowConfetti(true);
@@ -253,7 +253,6 @@ export function SmartGoalStepShell({
     prevGoldRef.current = isGoldStandard;
   }, [isGoldStandard]);
 
-  // Lắng nghe hành vi cuộn để ghim mini-preview trên thiết bị di động
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 280) {
@@ -273,7 +272,6 @@ export function SmartGoalStepShell({
     }
   };
 
-  // Cấu hình xoay 3D vật lý đàn hồi Spring mượt mà từ Framer Motion
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -287,7 +285,7 @@ export function SmartGoalStepShell({
   const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["20%", "80%"]);
 
   const glareBg = useTransform([glareX, glareY], ([gX, gY]) => {
-    return `radial-gradient(circle at ${gX} ${gY}, rgba(255,255,255,0.22) 0%, transparent 60%)`;
+    return `radial-gradient(circle at ${gX} ${gY}, rgba(255,255,255,0.15) 0%, transparent 60%)`;
   });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -324,7 +322,6 @@ export function SmartGoalStepShell({
   const isRelFilled = relReason.length > 0;
   const isTimeFilled = timeDate.length > 0;
 
-  // Trích xuất các trường từ smartGoalStarter cho gọn
   const goalStr = smartGoalStarter.specificGoalStatement;
   const metric = smartGoalStarter.metricName;
   const baseVal = smartGoalStarter.baselineValue;
@@ -333,7 +330,6 @@ export function SmartGoalStepShell({
   const motivationReasonStr = smartGoalStarter.motivationReason;
   const weeksVal = smartGoalStarter.targetWeeks;
 
-  // Lấy câu gợi ý AI Coach và text cốt lõi đi kèm
   const getPersonaData = (tone: "empathetic" | "pragmatic" | "strategic"): {
     coachComment: string;
     goalDraft: string;
@@ -358,7 +354,7 @@ export function SmartGoalStepShell({
         .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Chủ động kết nối với những người quan trọng 2 lần mỗi tuần trong 12 tuần để gia tăng sự gắn kết.")
         .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Dành riêng 2 khoảng thời gian chất lượng cho gia đình mỗi tuần trong 12 tuần, gác lại công việc riêng.")
         .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Thực hiện thói quen phát triển bản thân đều đặn mỗi tuần trong 12 tuần để nâng cao nhận thức cá nhân.")
-        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.");
+        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc riêng.", "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.");
 
       if (tone === "pragmatic") {
         return {
@@ -376,7 +372,7 @@ export function SmartGoalStepShell({
         .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Hệ thống hóa lịch kết nối chất lượng 2 lần/tuần trong 12 tuần nhằm tối ưu hóa các mối quan hệ cốt lõi.")
         .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Thiết lập ranh giới công việc, dành 2 buổi sinh hoạt gia đình chất lượng mỗi tuần trong 12 tuần.")
         .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Chuẩn hóa quy trình tự phản tỉnh và thực hiện thói quen phát triển bản thân mỗi tuần trong 12 tuần.")
-        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc phải làm.", "Quản trị năng lượng bằng 2 khoảng nghỉ sâu mỗi tuần trong 12 tuần, ngăn chặn rủi ro kiệt sức.");
+        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc riêng.", "Quản trị năng lượng bằng 2 khoảng nghỉ sâu mỗi tuần trong 12 tuần, ngăn chặn rủi ro kiệt sức.");
       return {
         coachComment: "Phân tích chiến lược cho thấy đây là lộ trình tối ưu nhất. Hãy tham khảo cấu trúc mục tiêu:",
         goalDraft: strategicGoal,
@@ -489,14 +485,15 @@ export function SmartGoalStepShell({
   const typedCommentText = useTypingEffect(coachComment, 6);
   const typedDraftText = useTypingEffect(goalDraft, 6);
 
-  // Tính toán nhanh độ khả thi
+  const parsedWeeklyHours = Number.parseFloat(smartData.achievable.weekly_time_commitment_hours) || 0;
+
   const calculateFeasibilityScore = () => {
-    const hours = Number.parseFloat(smartData.achievable.weekly_time_commitment_hours) || 0;
+    const hours = parsedWeeklyHours;
     if (hours === 0) return 0;
-    if (hours >= 2 && hours <= 8) return 95; // Tối ưu cho người bận rộn
-    if (hours > 8 && hours <= 15) return 80; // Hơi nặng nhưng khả thi
-    if (hours > 15 && hours <= 25) return 60; // Nặng, cần nỗ lực lớn
-    return 40; // Quá tải, nguy cơ thất bại cao
+    if (hours >= 2 && hours <= 8) return 95;
+    if (hours > 8 && hours <= 15) return 80;
+    if (hours > 15 && hours <= 25) return 60;
+    return 40;
   };
 
   const feasibilityScore = calculateFeasibilityScore();
@@ -505,15 +502,112 @@ export function SmartGoalStepShell({
     onApplyStarter(coreTextToApply);
   };
 
+  const renderPolaroidCard = (isMobile = false) => {
+    const areaLabel = smartGoalStarter.specificGoalStatement ? "trọng tâm" : "mục tiêu";
+    return (
+      <motion.div
+        ref={isMobile ? undefined : cardRef}
+        onMouseMove={isMobile ? undefined : handleMouseMove}
+        onMouseLeave={isMobile ? undefined : handleMouseLeave}
+        style={isMobile ? {} : {
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+        }}
+        className={cn(
+          "group relative rounded-sm p-5 sm:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.05),0_2px_8px_rgba(0,0,0,0.02)] select-none border-[10px] border-white dark:border-slate-800 bg-[#faf6ee] dark:bg-[#1a1c17] transition-all duration-300 transform",
+          isMobile ? "max-w-md mx-auto my-4 rotate-[0.5deg]" : "rotate-[1deg] hover:rotate-0"
+        )}
+      >
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-yellow-100/40 dark:bg-yellow-950/20 border-b border-yellow-250/10 shadow-[0_1px_2px_rgba(0,0,0,0.02)] rotate-[-1.5deg] z-10 backdrop-blur-[0.5px]" />
+        
+        <AnimatePresence>
+          {isGoldStandard && (
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-3 py-1 text-[9px] font-extrabold text-slate-900 shadow-md animate-[pulse_2.2s_infinite] z-25 border border-yellow-200/20"
+            >
+              <span>🏆 Chuẩn Vàng</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <p className="text-[9px] font-extrabold uppercase tracking-[0.25em] text-amber-800/60 dark:text-amber-500/60 mb-3 flex items-center gap-1.5 select-none pointer-events-none">
+          <span>✨</span> BẢN PHÁC THẢO TƯƠNG LAI
+        </p>
+
+        <div className="text-[14px] sm:text-[15px] leading-loose text-slate-850 dark:text-slate-200 font-serif tracking-wide select-text relative z-20">
+          Tôi quyết tâm{" "}
+          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
+            isSpecFilled
+              ? "text-teal-800 dark:text-teal-300 font-bold bg-teal-500/5"
+              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
+          )}>
+            {isSpecFilled ? specText : "hành động cụ thể"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">🎯</span>. 
+          Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
+          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
+            isMeasFilled
+              ? "text-blue-800 dark:text-blue-300 font-bold bg-blue-500/5"
+              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
+          )}>
+            {isMeasFilled ? `${measTarget} ${measUnit || "đơn vị"}` : "chỉ số"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">📊</span>. 
+          Tôi cam kết dành ra{" "}
+          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
+            isAchFilled
+              ? "text-amber-800 dark:text-amber-300 font-bold bg-amber-500/5"
+              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
+          )}>
+            {isAchFilled ? `${achHours} giờ mỗi tuần` : "thời gian cam kết"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">⚡</span> để thực hiện. 
+          Việc này quan trọng vì{" "}
+          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
+            isRelFilled
+              ? "text-rose-800 dark:text-rose-350 font-bold bg-rose-500/5"
+              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
+          )}>
+            {isRelFilled ? relReason : "lý do của bạn"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">❤️</span> và hoàn thành trước{" "}
+          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
+            isTimeFilled
+              ? "text-purple-800 dark:text-purple-300 font-bold bg-purple-500/5"
+              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
+          )}>
+            {isTimeFilled ? timeDate : "ngày hoàn thành"}
+          </span>
+          <span className="text-xs opacity-75 ml-1 select-none">📅</span>.
+        </div>
+
+        {!isMobile && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-10"
+            style={{
+              background: glareBg,
+            }}
+          />
+        )}
+
+        <div className="border-t border-amber-900/10 dark:border-slate-700/30 pt-3 mt-4 flex items-center justify-between text-[10px] text-slate-450 dark:text-slate-500 font-sans tracking-wide">
+          <span>Dear Our Future</span>
+          <span className="font-serif italic text-amber-800/60 dark:text-amber-500/60 flex items-center gap-0.5 select-none">
+            <span>✦</span> {areaLabel} <span>✦</span>
+          </span>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
-    <section
-      className="rounded-[20px] border border-app-line bg-app-surface p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.02)]"
-      aria-labelledby="smart-step-title"
-    >
-      {/* Pháo hoa giấy Confetti */}
+    <div className="w-full animate-[fade-in_0.3s_ease-out]">
       {showConfetti && <ConfettiCanvas />}
 
-      {/* Sticky Mini-Preview Header trên Mobile/Scroll */}
       <AnimatePresence>
         {showStickyMini && (
           <motion.div
@@ -521,14 +615,14 @@ export function SmartGoalStepShell({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -65, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed top-0 left-0 right-0 z-40 bg-white/85 dark:bg-slate-900/85 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3"
+            className="fixed top-0 left-0 right-0 z-45 bg-white/90 dark:bg-slate-900/90 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3 lg:hidden"
           >
             <div className="min-w-0 flex-1">
               <p className="text-[9px] font-extrabold uppercase tracking-widest text-app-accent mb-0.5 select-none flex items-center gap-1">
-                <span>🎯</span> Mục tiêu hiện tại (Live Preview)
+                <span>🎯</span> Live Preview
               </p>
-              <p className="text-xs truncate font-serif italic text-slate-700 dark:text-slate-350 leading-normal">
-                Tôi quyết tâm {isSpecFilled ? specText : "..."} 🎯. Đo lường: {isMeasFilled ? `${measTarget} ${measUnit}` : "..."} 📊. Dành ra {isAchFilled ? `${achHours} giờ/tuần` : "..."} ⚡. Lý do: {isRelFilled ? relReason : "..."} ❤️. Thời hạn: {isTimeFilled ? timeDate : "..."} 📅.
+              <p className="text-xs truncate font-serif italic text-slate-700 dark:text-slate-300 leading-normal">
+                Quyết tâm {isSpecFilled ? specText : "..."} 🎯. Đo lường: {isMeasFilled ? `${measTarget} ${measUnit}` : "..."} 📊.
               </p>
             </div>
             <span className="shrink-0 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[10px] font-bold text-app-accent">
@@ -538,413 +632,327 @@ export function SmartGoalStepShell({
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-app-accent flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-app-accent animate-pulse" />
-            Bước {stepIndex + 1}: {STEP_NAMES[step.key]}
-          </p>
-          <h2
-            id="smart-step-title"
-            ref={headingRef}
-            tabIndex={-1}
-            className="mt-2 font-serif text-2xl sm:text-3xl font-medium leading-8 text-app-ink focus:outline-none"
-          >
-            {step.title}
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-app-ink-soft">{step.description}</p>
-        </div>
-        <span className="inline-flex w-fit rounded-full bg-app-accent-soft px-3 py-1 text-xs font-bold text-app-accent shadow-sm border border-app-accent/10">
-          {stepIndex + 1}/{totalSteps}
-        </span>
-      </div>
-
-      {/* Stepper dòng chảy năng lượng */}
-      <div className="relative mt-7">
-        <div className="absolute top-[22px] left-[10%] right-[10%] h-[3px] bg-app-line rounded-full z-0 overflow-hidden" aria-hidden="true">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-app-accent transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
-            style={{ width: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
-          />
-        </div>
-
-        <ol aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`} className="relative z-10 grid grid-cols-5 gap-2">
-          {SMART_STEPS.map((smartStep, index) => {
-            const isActive = index === stepIndex;
-            const isDone = index < stepIndex;
-            const canJump = index <= stepIndex;
-            const StepIcon = STEP_ICONS[smartStep.key];
-
-            return (
-              <li key={smartStep.key} aria-current={isActive ? "step" : undefined}>
-                <button
-                  type="button"
-                  disabled={!canJump}
-                  onClick={() => handleWizardJump(index)}
-                  className={cn(
-                    "flex h-full w-full flex-col items-center gap-1.5 rounded-[16px] border p-2.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
-                    isActive
-                      ? "border-app-accent bg-app-accent-soft text-app-accent shadow-[0_4px_12px_rgba(var(--color-accent-rgb),0.12)] scale-[1.03]"
-                      : isDone
-                        ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent hover:scale-[1.02]"
-                        : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent disabled:cursor-default"
-                  )}
-                >
-                  <span className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300",
-                    isActive
-                      ? "bg-app-accent text-white shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.4)]"
-                      : isDone
-                        ? "bg-white/20 text-white"
-                        : "bg-app-surface text-app-ink-muted border border-app-line"
-                  )}>
-                    <StepIcon className="h-4 w-4" />
-                  </span>
-                  <span className="text-[10px] font-bold tracking-widest uppercase">{STEP_LETTERS[smartStep.key]}</span>
-                  <span className="hidden truncate text-xs font-semibold sm:block">{STEP_NAMES[smartStep.key]}</span>
-                  {isDone ? <span className="sr-only">đã hoàn thành</span> : null}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-
-      <div className="my-6 h-px bg-app-line" aria-hidden="true" />
-
-      {/* Tấm thẻ Live Preview 3D Glassmorphism Spring Physics */}
-      <motion.div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          rotateX,
-          rotateY,
-          transformStyle: "preserve-3d",
-        }}
-        className="group relative mb-7 rounded-2xl border border-white/25 dark:border-white/5 bg-gradient-to-br from-white/70 to-white/40 dark:from-slate-900/60 dark:to-slate-900/30 p-6 sm:p-7 shadow-[0_10px_35px_rgba(31,38,135,0.04)] hover:shadow-[0_12px_45px_rgba(31,38,135,0.08)] overflow-hidden backdrop-blur-xl transition-shadow duration-300 select-none"
-      >
-        {/* Vòng tròn màu trừu tượng tạo chiều sâu kính mờ Glassmorphism */}
-        <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-emerald-400/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute -top-10 -right-10 w-44 h-44 bg-indigo-400/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-purple-400/5 dark:bg-purple-500/3 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Lớp bóng chiếu sáng 3D Glare bằng Spring */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            background: glareBg,
-          }}
-        />
-        
-        {/* Huy hiệu mục tiêu chuẩn Vàng */}
-        <AnimatePresence>
-          {isGoldStandard ? (
-            <motion.div
-              initial={{ scale: 0, rotate: -15 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0 }}
-              className="absolute top-3 right-4 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 px-3.5 py-1 text-[10px] font-extrabold text-slate-900 shadow-md shadow-amber-500/20 select-none animate-[pulse_2.2s_infinite] z-20 border border-yellow-300/30"
-            >
-              <span>🏆 Chuẩn Vàng</span>
-            </motion.div>
-          ) : (
-            <div className="absolute top-3.5 right-4 flex items-center gap-1.5 text-xs text-app-accent/80 font-bold select-none pointer-events-none z-20">
-              <span>🔮 Thẻ Bài Tương Lai</span>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.18fr_0.82fr] gap-6 lg:gap-8 items-start">
+        <div className="space-y-6 rounded-[20px] border border-app-line bg-app-surface p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-app-accent flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-app-accent animate-pulse" />
+                Bước {stepIndex + 1}: {STEP_NAMES[step.key]}
+              </p>
+              <h2
+                id="smart-step-title"
+                ref={headingRef}
+                tabIndex={-1}
+                className="mt-2 font-serif text-2xl sm:text-3xl font-medium leading-8 text-app-ink focus:outline-none"
+              >
+                {step.title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">{step.description}</p>
             </div>
-          )}
-        </AnimatePresence>
-
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-app-accent/70 mb-4 flex items-center gap-1.5 select-none pointer-events-none">
-          <span>✨</span> MỤC TIÊU CỦA BẠN (LIVE PREVIEW)
-        </p>
-
-        <div className="text-base sm:text-[18px] leading-loose text-slate-800 dark:text-slate-100 font-serif tracking-wide select-text relative z-20">
-          Tôi quyết tâm{" "}
-          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
-            isSpecFilled
-              ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-350 font-semibold border border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.08)]"
-              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
-          )}>
-            {isSpecFilled ? specText : "hành động cụ thể"}
-          </span>
-          <span className="text-xs opacity-75 ml-1 select-none">🎯</span>. 
-          Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
-          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
-            isMeasFilled
-              ? "bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-350 font-semibold border border-blue-500/20 shadow-[0_2px_8px_rgba(59,130,246,0.08)]"
-              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
-          )}>
-            {isMeasFilled ? `${measTarget} ${measUnit || "đơn vị"}` : "chỉ số mục tiêu"}
-          </span>
-          <span className="text-xs opacity-75 ml-1 select-none">📊</span>. 
-          Tôi cam kết dành ra{" "}
-          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
-            isAchFilled
-              ? "bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-350 font-semibold border border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.08)]"
-              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
-          )}>
-            {isAchFilled ? `${achHours} giờ mỗi tuần` : "thời gian cam kết"}
-          </span>
-          <span className="text-xs opacity-75 ml-1 select-none">⚡</span> để hành động. 
-          Việc này rất quan trọng vì{" "}
-          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
-            isRelFilled
-              ? "bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-350 font-semibold border border-rose-500/20 shadow-[0_2px_8px_rgba(244,63,94,0.08)]"
-              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
-          )}>
-            {isRelFilled ? relReason : "lý do sâu sắc của bạn"}
-          </span>
-          <span className="text-xs opacity-75 ml-1 select-none">❤️</span> và thời hạn hoàn thành trước{" "}
-          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg transition-all duration-300 mx-1 text-[15px] sm:text-[16.5px]",
-            isTimeFilled
-              ? "bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-350 font-semibold border border-purple-500/20 shadow-[0_2px_8px_rgba(168,85,247,0.08)]"
-              : "text-app-ink-muted/50 italic border border-dashed border-app-line bg-app-bg/40 animate-[pulse_2.0s_infinite]"
-          )}>
-            {isTimeFilled ? timeDate : "ngày hoàn thành"}
-          </span>
-          <span className="text-xs opacity-75 ml-1 select-none">📅</span>.
-        </div>
-      </motion.div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={stepIndex}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -15 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-5"
-        >
-          {children}
-
-          {/* AI Coach Hub - Giao diện Cố vấn Holographic Tương lai Siêu Cấp */}
-          <div className="relative overflow-hidden rounded-[24px] border border-teal-500/20 dark:border-teal-900/40 bg-gradient-to-br from-teal-500/[0.04] via-app-surface/98 to-indigo-500/[0.04] dark:from-teal-950/20 dark:via-slate-900/90 dark:to-indigo-950/20 p-5 sm:p-6 shadow-[0_16px_45px_rgba(13,148,136,0.04)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(13,148,136,0.08)] hover:border-teal-500/35">
-            {/* Background glowing decor */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:justify-between">
-              <div className="flex gap-4.5 items-start min-w-0 flex-1">
-                {/* Mindfulness Orb phát sáng nhịp thở 3D */}
-                <div className="flex-shrink-0 relative">
-                  <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 via-emerald-400 to-indigo-500 text-white shadow-[0_8px_25px_rgba(20,184,166,0.25)] border border-white/20 dark:border-white/5 transition-transform duration-300 hover:scale-105 overflow-hidden">
-                    {/* Breath animation overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-teal-500 to-emerald-400 opacity-60 animate-[pulse_3s_ease-in-out_infinite]" />
-                    
-                    {/* Floating light elements inside */}
-                    <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-white/30 blur-sm animate-[pulse_2s_ease-in-out_infinite]" />
-                    <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-teal-300/20 blur-md animate-[pulse_4s_ease-in-out_infinite]" />
-
-                    <Sparkles className="h-6 w-6 text-white relative z-10 animate-[spin_12s_linear_infinite]" />
-                  </div>
-                  {/* Chỉ báo hoạt động */}
-                  <span className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-white dark:bg-slate-900 border-2 border-white dark:border-slate-900 shadow-md" aria-hidden="true">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-[pulse_1.5s_ease-in-out_infinite]" />
-                  </span>
-                </div>
-
-                {/* Nội dung bong bóng thoại AI Coach */}
-                <div className="space-y-3.5 min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
-                      Cố vấn mục tiêu AI
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/5 px-2.5 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10 select-none">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      Trực tuyến
-                    </span>
-                  </div>
-
-                  <div className="relative bg-white/50 dark:bg-slate-900/60 border border-teal-500/10 rounded-2xl rounded-tl-none p-5 shadow-sm text-sm text-slate-800 dark:text-slate-200 backdrop-blur-md">
-                    {/* Đuôi bong bóng thoại */}
-                    <div className="absolute -left-2 top-0 w-2 h-2 bg-white/50 dark:bg-slate-900/60 border-l border-t border-teal-500/10 rotate-45 transform origin-top-right hidden sm:block" />
-                    
-                    {/* Lời dẫn dắt của Coach */}
-                    <p className="text-[13px] font-semibold text-slate-500 dark:text-slate-400 leading-relaxed mb-3.5 select-none">
-                      {typedCommentText}
-                    </p>
-
-                    {/* Câu mục tiêu gợi ý đặt trong Blockquote viền trái gradient */}
-                    {typedDraftText && (
-                      <div className="relative my-3 rounded-xl border-l-[4px] border-emerald-500/80 bg-gradient-to-r from-emerald-500/[0.04] to-indigo-500/[0.01] dark:from-emerald-500/[0.08] dark:to-indigo-500/[0.02] px-4.5 py-3.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.015)] transition-all duration-300">
-                        <p className="font-serif italic text-[15.5px] leading-relaxed text-slate-850 dark:text-slate-100 select-text">
-                          “{typedDraftText}”
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div className="mt-3.5 text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5 select-none border-t border-teal-500/5 pt-2.5">
-                      <Sparkles className="h-3.5 w-3.5 text-teal-400 dark:text-teal-500 animate-pulse" />
-                      <span>Gợi ý chánh niệm giúp bạn nhanh chóng điền chuẩn xác.</span>
-                    </div>
-
-                    {/* Thanh đo sức mạnh mục tiêu thời gian thực */}
-                    <div className="mt-5 pt-4 border-t border-teal-500/10 grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-[10px] font-bold">
-                          <span className="text-slate-400 dark:text-slate-500 uppercase tracking-wider">Độ rõ nét (Clarity)</span>
-                          <span className="text-teal-600 dark:text-teal-400">{Math.round(clarityProgress)}%</span>
-                        </div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden relative">
-                          <div 
-                            className="h-full rounded-full bg-gradient-to-r from-teal-400 to-indigo-500 transition-all duration-500 shadow-[0_0_8px_rgba(20,184,166,0.25)]" 
-                            style={{ width: `${clarityProgress}%` }} 
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between text-[10px] font-bold">
-                          <span className="text-slate-400 dark:text-slate-500 uppercase tracking-wider">Khả thi (Feasibility)</span>
-                          <span className="text-emerald-600 dark:text-emerald-400">{feasibilityScore}%</span>
-                        </div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden relative">
-                          <div 
-                            className={cn(
-                              "h-full rounded-full transition-all duration-500 bg-gradient-to-r shadow-sm",
-                              feasibilityScore >= 80 ? "from-emerald-400 to-teal-500 shadow-[0_0_8px_rgba(52,211,153,0.25)]" :
-                              feasibilityScore >= 60 ? "from-amber-400 to-emerald-500 shadow-[0_0_8px_rgba(251,191,36,0.25)]" : 
-                              "from-rose-400 to-amber-500 shadow-[0_0_8px_rgba(251,113,133,0.25)]"
-                            )} 
-                            style={{ width: `${feasibilityScore}%` }} 
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bảng điều khiển Giọng điệu cố vấn + Nút áp dụng gợi ý */}
-              <div className="flex flex-col gap-4 shrink-0 w-full lg:w-52 justify-between">
-                {/* Lựa chọn giọng điệu theo kiểu Segmented Control trượt cao cấp */}
-                <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] backdrop-blur-sm">
-                  <span className="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none">
-                    Giọng điệu Cố vấn:
-                  </span>
-                  
-                  <div className="relative flex items-center bg-slate-200/40 dark:bg-slate-900/65 p-1 rounded-xl w-full border border-slate-200/30 dark:border-slate-800/30">
-                    <div className="grid grid-cols-3 w-full relative z-10">
-                      {(["empathetic", "pragmatic", "strategic"] as const).map((tone) => {
-                        const isActive = selectedTone === tone;
-                        const toneLabels = {
-                          empathetic: { label: "Đồng cảm", icon: "✨", color: "text-teal-600 dark:text-teal-400" },
-                          pragmatic: { label: "Thực tế", icon: "⚡", color: "text-amber-600 dark:text-amber-400" },
-                          strategic: { label: "Chiến lược", icon: "🧠", color: "text-indigo-650 dark:text-indigo-400" },
-                        };
-                        const currentTone = toneLabels[tone];
-
-                        return (
-                          <button
-                            key={tone}
-                            type="button"
-                            onClick={() => setSelectedTone(tone)}
-                            className={cn(
-                              "relative flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-extrabold transition-all duration-300 focus-visible:outline-none",
-                              isActive 
-                                ? "text-slate-850 dark:text-white" 
-                                : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-350"
-                            )}
-                          >
-                            {isActive && (
-                              <motion.div
-                                layoutId="activeToneIndicator"
-                                transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                                className="absolute inset-0 bg-white dark:bg-slate-800 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200/40 dark:border-slate-700/30 z-0"
-                              />
-                            )}
-                            <span className="relative z-10 text-[13px] mb-0.5">{currentTone.icon}</span>
-                            <span className={cn("relative z-10", isActive ? currentTone.color : "")}>
-                              {currentTone.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Nút áp dụng gợi ý có shimmer lướt sáng cao cấp */}
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(20, 184, 166, 0.35)" }}
-                  whileTap={{ scale: 0.97 }}
-                  className="relative overflow-hidden inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600 px-4 py-3.5 text-xs font-bold text-white shadow-md shadow-teal-500/10 transition-all duration-200 active:scale-[0.97] group/shimmer"
-                  onClick={handleApplyTransformedStarter}
-                  aria-label={`Dùng gợi ý cho bước ${step.label}`}
-                >
-                  {/* Shimmer effect reflection */}
-                  <motion.div
-                    className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none"
-                    initial={{ left: "-100%" }}
-                    animate={{ left: "100%" }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear", repeatDelay: 1.5 }}
-                  />
-                  
-                  <Sparkles className="h-4 w-4 relative z-10 animate-[pulse_1.5s_infinite]" />
-                  <span className="relative z-10">Sử dụng gợi ý này</span>
-                </motion.button>
-              </div>
-            </div>
+            <span className="inline-flex w-fit rounded-full bg-app-accent-soft px-3 py-1 text-xs font-bold text-app-accent shadow-sm border border-app-accent/10">
+              {stepIndex + 1}/{totalSteps}
+            </span>
           </div>
 
-          <details className="group rounded-[16px] border border-app-line bg-app-surface p-4 transition-all duration-200 shadow-sm">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1 [&::-webkit-details-marker]:hidden">
-              <div className="space-y-1">
-                <p className="flex items-center gap-2 font-semibold">
-                  Kiểm tra độ rõ của mục tiêu (Clarity)
-                  <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
-                </p>
-                <p className="text-xs font-normal text-app-ink-muted">
-                  {clarityDoneCount}/{clarityItems.length} tiêu chí đã hoàn thành
-                </p>
+          <div className="relative mt-4">
+            <div className="absolute top-[22px] left-[10%] right-[10%] h-[3px] bg-app-line rounded-full z-0 overflow-hidden" aria-hidden="true">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-app-accent transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                style={{ width: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
+              />
+            </div>
+
+            <ol aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`} className="relative z-10 grid grid-cols-5 gap-2">
+              {SMART_STEPS.map((smartStep, index) => {
+                const isActive = index === stepIndex;
+                const isDone = index < stepIndex;
+                const canJump = index <= stepIndex;
+                const StepIcon = STEP_ICONS[smartStep.key];
+
+                return (
+                  <li key={smartStep.key} aria-current={isActive ? "step" : undefined}>
+                    <button
+                      type="button"
+                      disabled={!canJump}
+                      onClick={() => handleWizardJump(index)}
+                      className={cn(
+                        "flex h-full w-full flex-col items-center gap-1.5 rounded-[16px] border p-2.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
+                        isActive
+                          ? "border-app-accent bg-app-accent-soft text-app-accent scale-[1.03] shadow-sm"
+                          : isDone
+                            ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent hover:scale-[1.02]"
+                            : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent disabled:cursor-default"
+                      )}
+                    >
+                      <span className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300",
+                        isActive
+                          ? "bg-app-accent text-white shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.4)]"
+                          : isDone
+                            ? "bg-white/20 text-white"
+                            : "bg-app-surface text-app-ink-muted border border-app-line"
+                      )}>
+                        <StepIcon className="h-4 w-4" />
+                      </span>
+                      <span className="text-[10px] font-bold tracking-widest uppercase">{STEP_LETTERS[smartStep.key]}</span>
+                      <span className="hidden truncate text-xs font-semibold sm:block">{STEP_NAMES[smartStep.key]}</span>
+                      {isDone ? <span className="sr-only">đã hoàn thành</span> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          <div className="my-6 h-px bg-app-line" aria-hidden="true" />
+
+          <div className="block lg:hidden">
+            {renderPolaroidCard(true)}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={stepIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-5"
+            >
+              {children}
+
+              <div className="relative overflow-hidden rounded-[20px] border border-teal-500/15 dark:border-teal-900/30 bg-gradient-to-br from-teal-500/[0.03] via-app-surface/98 to-indigo-500/[0.02] dark:from-teal-950/15 dark:via-slate-900/90 dark:to-indigo-950/15 shadow-[0_10px_35px_rgba(13,148,136,0.03)] transition-all duration-300">
+                <button
+                  type="button"
+                  onClick={() => setIsCoachExpanded(!isCoachExpanded)}
+                  className="w-full flex items-center justify-between p-4.5 text-left border-b border-teal-500/5 select-none focus:outline-none cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-400 to-indigo-500 text-white shadow-sm border border-white/10 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-teal-400 opacity-60 animate-[pulse_3s_ease-in-out_infinite]" />
+                      <Sparkles className="h-4.5 w-4.5 text-white relative z-10 animate-[spin_10s_linear_infinite]" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-400 block mb-0.5">
+                        Cố vấn mục tiêu AI
+                      </span>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        {isCoachExpanded ? "Đang chuẩn bị ý kiến tư vấn chánh niệm" : "Bấm để xem phân tích và gợi ý nhanh"}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <span className={cn(
+                    "text-[11px] px-2.5 py-1 rounded-full font-bold transition-all duration-205 flex items-center gap-1 border border-teal-500/10",
+                    isCoachExpanded ? "text-slate-500 bg-slate-100/50 dark:bg-slate-800" : "text-teal-600 bg-teal-50 dark:bg-teal-950/40"
+                  )}>
+                    {isCoachExpanded ? "Thu gọn ✦" : "Xem gợi ý ✦"}
+                  </span>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isCoachExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-5 space-y-4 border-t border-teal-500/5">
+                        <div className="relative bg-white/70 dark:bg-slate-900/60 border border-teal-500/5 rounded-2xl rounded-tl-none p-4 shadow-[0_1px_2px_rgba(0,0,0,0.015)] text-sm text-slate-800 dark:text-slate-200">
+                          <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-3 select-none">
+                            {typedCommentText}
+                          </p>
+
+                          {typedDraftText && (
+                            <div className="relative my-3 rounded-xl border-l-[3px] border-emerald-500/80 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.06] px-4 py-3">
+                              <p className="font-serif italic text-[14.5px] leading-relaxed text-slate-800 dark:text-slate-100 select-text">
+                                “{typedDraftText}”
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="mt-3 text-[10px] text-slate-450 dark:text-slate-550 flex items-center gap-1.5 select-none pt-2 border-t border-teal-500/5">
+                            <Sparkles className="h-3 w-3 text-teal-400" />
+                            <span>Gợi ý chánh niệm giúp bạn tinh chỉnh chính xác.</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between border-t border-teal-500/5 pt-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none">
+                              Giọng điệu:
+                            </span>
+                            <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-850">
+                              {(["empathetic", "pragmatic", "strategic"] as const).map((tone) => {
+                                const isActive = selectedTone === tone;
+                                const toneLabel = tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
+                                return (
+                                  <button
+                                    key={tone}
+                                    type="button"
+                                    onClick={() => setSelectedTone(tone)}
+                                    className={cn(
+                                      "px-2.5 py-1 text-[10px] font-bold rounded-md transition-all duration-200 cursor-pointer",
+                                      isActive 
+                                        ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm" 
+                                        : "text-slate-450 dark:text-slate-550 hover:text-slate-700"
+                                    )}
+                                  >
+                                    {toneLabel}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <motion.button
+                            type="button"
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            onClick={handleApplyTransformedStarter}
+                            className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] group/shimmer w-full sm:w-auto cursor-pointer"
+                            aria-label={`Dùng gợi ý cho bước ${step.label}`}
+                          >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            <span>Sử dụng gợi ý này</span>
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-28 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
-                  <div className="h-full rounded-full bg-app-accent transition-all duration-305" style={{ width: `${clarityProgress}%` }} />
+
+              {currentStepError && (
+                <div
+                  className="rounded-xl border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-[color:var(--color-warning-fg)] shadow-sm"
+                  role="alert"
+                >
+                  <div className="flex items-start gap-2.5">
+                    <CircleAlert className="mt-0.5 h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+                    <div>
+                      <p className="text-sm font-semibold">Cần hoàn tất bước này</p>
+                      <p className="mt-1 text-sm leading-5 opacity-90">{currentStepError}</p>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-xs font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
+              )}
+
+              {currentStepSoftWarning && (
+                <div className="rounded-xl border border-app-line bg-app-bg p-4 text-app-ink-soft shadow-sm animate-[fade-in_0.3s_ease-out]" role="note">
+                  <div className="flex items-start gap-2.5">
+                    <Lightbulb className="mt-0.5 h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
+                    <div>
+                      <p className="text-sm font-semibold text-app-ink">Gợi ý để mục tiêu rõ hơn</p>
+                      <p className="mt-1 text-sm leading-5">{currentStepSoftWarning}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto cursor-pointer"
+              onClick={onBack}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Quay lại
+            </button>
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-app-accent/15 transition-all duration-150 hover:brightness-105 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto cursor-pointer"
+              onClick={onNext}
+              disabled={!isCurrentStepValid}
+            >
+              {stepIndex < totalSteps - 1 ? "Tiếp tục" : "Hoàn thành"}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden lg:block lg:sticky lg:top-6 space-y-6">
+          {renderPolaroidCard(false)}
+
+          <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-app-ink">Kiểm tra độ rõ mục tiêu (Clarity)</h3>
+              <div className="flex items-center justify-between text-xs text-app-ink-muted">
+                <span>{clarityDoneCount}/{clarityItems.length} tiêu chí hoàn thành</span>
+                <span className="font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
               </div>
-            </summary>
-            <div className="mt-4 grid gap-3 border-t border-app-line pt-4 sm:grid-cols-2">
+            </div>
+
+            <div className="h-2 w-full overflow-hidden rounded-full bg-app-line" aria-hidden="true">
+              <div className="h-full rounded-full bg-app-accent transition-all duration-305" style={{ width: `${clarityProgress}%` }} />
+            </div>
+
+            <div className="grid gap-2 pt-2">
               {clarityItems.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => onJumpToStep(item.stepKey)}
                   className={cn(
-                    "group/btn flex items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-all duration-200",
+                    "group/btn flex items-center justify-between rounded-xl border px-3 py-2 text-left transition-all duration-200 text-xs w-full cursor-pointer",
                     item.done
-                      ? "border-app-accent/20 bg-app-accent-soft/30 hover:border-app-accent hover:bg-app-accent-soft/60 shadow-sm"
-                      : "border-app-line bg-app-bg hover:border-app-ink-muted hover:bg-app-surface"
+                      ? "border-app-accent/15 bg-app-accent-soft/20 text-app-accent"
+                      : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-ink-muted"
                   )}
                 >
+                  <span className="font-medium group-hover/btn:underline">{item.label}</span>
                   <div className={cn(
-                    "mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border transition-all duration-200",
-                    item.done
-                      ? "border-app-accent bg-app-accent text-white"
-                      : "border-app-ink-muted/30 text-transparent group-hover/btn:border-app-ink-muted"
+                    "flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border",
+                    item.done ? "border-app-accent bg-app-accent text-white" : "border-app-ink-muted/30 text-transparent"
                   )}>
-                    {item.done ? <Check className="h-3 w-3" /> : <div className="h-1.5 w-1.5 rounded-full bg-app-ink-muted/30" />}
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="block text-sm font-semibold text-app-ink group-hover/btn:text-app-accent transition-colors duration-150">{item.label}</span>
-                    <span className="block text-xs leading-normal text-app-ink-soft">{item.detail}</span>
+                    {item.done ? <Check className="h-2.5 w-2.5" /> : null}
                   </div>
                 </button>
               ))}
             </div>
-          </details>
+          </div>
 
-          {showReview ? (
-            <>
+          {isAchFilled && (
+            <div className="rounded-2xl border border-teal-500/10 bg-teal-500/[0.02] p-4.5 shadow-sm space-y-2 select-none">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-500">Độ khả thi ước tính</span>
+                <span className="text-teal-600 font-extrabold">{feasibilityScore}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden">
+                <div 
+                  className={cn(
+                    "h-full rounded-full transition-all duration-500 bg-gradient-to-r shadow-sm",
+                    feasibilityScore >= 80 ? "from-emerald-400 to-teal-500" :
+                    feasibilityScore >= 60 ? "from-amber-400 to-emerald-500" : 
+                    "from-rose-400 to-amber-500"
+                  )} 
+                  style={{ width: `${feasibilityScore}%` }} 
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Dựa trên cam kết thời gian ({parsedWeeklyHours} giờ/tuần). Bạn có thể chỉnh lại bất cứ lúc nào.
+              </p>
+            </div>
+          )}
+
+          {showReview && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-4"
+            >
               <ReviewStep
                 clarityDoneCount={clarityDoneCount}
                 clarityItemCount={clarityItems.length}
                 summaryRows={summaryRows}
                 onJumpToStep={onJumpToStep}
               />
-              {qualityFeedback ? (
+              {qualityFeedback && (
                 <QualityFeedbackPanel
                   level={qualityFeedback.level}
                   overallScore={qualityFeedback.overallScore}
@@ -952,57 +960,32 @@ export function SmartGoalStepShell({
                   suggestions={qualityFeedback.suggestions}
                   canProceedToFeasibility={qualityFeedback.canProceedToFeasibility}
                 />
-              ) : null}
-            </>
-          ) : null}
-
-          {currentStepError ? (
-            <div
-              className="rounded-xl border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-[color:var(--color-warning-fg)] shadow-sm animate-[shake_0.5s_ease-in-out]"
-              role="alert"
-            >
-              <div className="flex items-start gap-2.5">
-                <CircleAlert className="mt-0.5 h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-                <div>
-                  <p className="text-sm font-semibold">Cần hoàn tất bước này</p>
-                  <p className="mt-1 text-sm leading-5 opacity-90">{currentStepError}</p>
-                </div>
-              </div>
-            </div>
-          ) : null}
-          {currentStepSoftWarning ? (
-            <div className="rounded-xl border border-app-line bg-app-bg p-4 text-app-ink-soft shadow-sm" role="note">
-              <div className="flex items-start gap-2.5">
-                <Lightbulb className="mt-0.5 h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
-                <div>
-                  <p className="text-sm font-semibold text-app-ink">Gợi ý để mục tiêu rõ hơn</p>
-                  <p className="mt-1 text-sm leading-5">{currentStepSoftWarning}</p>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </motion.div>
-      </AnimatePresence>
-
-      <div className="mt-7 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
-        <button
-          type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
-          onClick={onBack}
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Quay lại
-        </button>
-        <button
-          type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-app-accent/15 transition-all duration-150 hover:brightness-105 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
-          onClick={onNext}
-          disabled={!isCurrentStepValid}
-        >
-          {stepIndex < totalSteps - 1 ? "Tiếp" : "Hoàn thành"}
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </button>
+              )}
+            </motion.div>
+          )}
+        </div>
       </div>
-    </section>
+
+      {!showReview && (
+        <details className="mt-6 group rounded-[16px] border border-app-line bg-app-surface p-4 transition-all duration-200 shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 rounded-lg p-1 [&::-webkit-details-marker]:hidden">
+            <p className="flex items-center gap-2 font-semibold">
+              Xem chi tiết nội dung đang viết
+              <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+            </p>
+          </summary>
+          <div className="mt-4 grid gap-3 border-t border-app-line pt-4 sm:grid-cols-2 lg:grid-cols-3">
+            {SMART_STEPS.map((stepItem) => (
+              <div key={stepItem.key} className="rounded-xl border border-app-line bg-app-bg p-3.5 text-xs">
+                <p className="font-extrabold uppercase tracking-wider text-app-accent mb-1">{stepItem.label}</p>
+                <p className="leading-relaxed text-app-ink-soft">
+                  {formatStepDraft(stepItem.key, smartData) || "Chưa có nội dung..."}
+                </p>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
   );
 }
