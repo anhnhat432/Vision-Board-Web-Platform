@@ -283,27 +283,6 @@ export function TwelveWeekDashboardHeader({
         </div>
       </div>
 
-      {/* Subtle metadata at footer of header to reduce noise */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-app-ink-soft border-t border-app-line/30 pt-3.5">
-        {domainLabel && <span>Lĩnh vực: {domainLabel}</span>}
-        {domainLabel && <span className="opacity-40">•</span>}
-        <span className="flex items-center gap-1.5">
-          {syncBadgeLabel === "Đang đồng bộ" ? (
-            <Loader2 className="h-3 w-3 animate-spin text-app-accent" />
-          ) : (
-            <span className={`h-1.5 w-1.5 rounded-full ${syncBadgeLabel === "Đã lưu & đồng bộ" ? "bg-app-accent/70" : "bg-app-warm/70"}`} />
-          )}
-          Đồng bộ: {syncBadgeLabel}
-        </span>
-        <span className="opacity-40">•</span>
-        <span>Gói: {getPlanLabel(activePlanCode)}</span>
-        <span className="opacity-40">•</span>
-        {reviewDueToday ? (
-          <span>{reviewStatusLabel}</span>
-        ) : (
-          <span>Còn {todayRemainingCount} việc hôm nay · Xong {todayCompletedCount}/{weekCompletion.total} việc tuần này</span>
-        )}
-      </div>
     </header>
   );
 }
