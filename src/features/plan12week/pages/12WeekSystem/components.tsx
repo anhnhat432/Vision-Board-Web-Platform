@@ -284,7 +284,7 @@ export function TwelveWeekDashboardHeader({
       </div>
 
       {/* Subtle metadata at footer of header to reduce noise */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] tracking-wide text-app-ink-muted/80 border-t border-app-line/30 pt-3.5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-app-ink-soft border-t border-app-line/30 pt-3.5">
         {domainLabel && <span>Lĩnh vực: {domainLabel}</span>}
         {domainLabel && <span className="opacity-40">•</span>}
         <span className="flex items-center gap-1.5">
