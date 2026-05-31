@@ -1,5 +1,16 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { Gauge } from "lucide-react";
+import { Gauge, BookOpen, Wrench } from "lucide-react";
+
+const getDailyCommitmentString = (weeklyHours: number) => {
+  if (weeklyHours <= 0) return "";
+  const totalMinutes = weeklyHours * 60;
+  const dailyMinutes = Math.round(totalMinutes / 7);
+  if (dailyMinutes < 60) {
+    return `tương đương khoảng ~${dailyMinutes} phút mỗi ngày`;
+  }
+  const dailyHours = weeklyHours / 7;
+  return `tương đương khoảng ~${dailyHours.toFixed(1).replace(".0", "")} giờ mỗi ngày`;
+};
 
 import { parseNumberInput } from "@/lib/smart-goal";
 import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
@@ -83,11 +94,11 @@ export function AchievableStep({
 
   return (
     <div className="space-y-6">
-      {/* Khung tương tác nhập số giờ bằng Slider vật lý */}
-      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm">
-        <label htmlFor="smart-weekly-hours-slider" className={cn(labelClass, "flex items-center gap-1.5")}>
-          <Gauge className="h-4 w-4 text-app-accent" />
-          Thời gian cam kết mỗi tuần
+      {/* PHẦN 1: THỜI GIAN CAM KẾT */}
+      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
+        <label htmlFor="smart-weekly-hours-slider" className={cn(labelClass, "flex items-center gap-1.5 text-base font-bold text-app-ink border-b border-app-line/60 pb-2")}>
+          <Gauge className="h-4.5 w-4.5 text-app-accent" />
+          1. Thời gian cam kết thực hiện mỗi tuần
           <span className={requiredMarkerClass} aria-hidden="true">*</span>
           <span className="sr-only"> bắt buộc</span>
         </label>
@@ -165,21 +176,27 @@ export function AchievableStep({
         </div>
 
         <p className={cn(helperTextClass, "mt-3")}>
-          Cam kết thời gian thực tế bạn chắc chắn duy trì được mỗi tuần. Ví dụ: <span className="font-medium text-app-ink">4 giờ/tuần</span> tương đương khoảng <span className="font-medium text-app-ink">35 phút mỗi ngày</span>.
+          Cam kết thời gian thực tế bạn chắc chắn duy trì được mỗi tuần.
+          {parsedWeeklyHours > 0 && (
+            <>
+              {" "}Định mức: <span className="font-bold text-app-ink">{parsedWeeklyHours} giờ/tuần</span> ({getDailyCommitmentString(parsedWeeklyHours)}).
+            </>
+          )}
         </p>
         {showWeeklyHoursError ? (
           <FieldError id="smart-weekly-hours-error" message="Nhập số giờ mỗi tuần lớn hơn 0." role="alert" />
         ) : null}
       </div>
 
-      {/* Kỹ năng cần có */}
-      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm">
-        <label htmlFor="smart-required-skills" className={labelClass}>
-          Kỹ năng cần có
+      {/* PHẦN 2: KỸ NĂNG CẦN CÓ */}
+      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
+        <label htmlFor="smart-required-skills" className={cn(labelClass, "flex items-center gap-1.5 text-base font-bold text-app-ink border-b border-app-line/60 pb-2")}>
+          <BookOpen className="h-4.5 w-4.5 text-app-accent" />
+          2. Kỹ năng cần bổ sung hoặc rèn luyện (Skills Needed)
         </label>
         <Textarea
           id="smart-required-skills"
-          placeholder="Mỗi dòng một kỹ năng, hoặc ngăn cách bằng dấu phẩy."
+          placeholder="Ví dụ: Kỹ năng thuyết trình, Lập trình React cơ bản, Giao tiếp tiếng Anh, Đọc nhanh..."
           value={smartData.achievable.required_skills}
           onChange={(event) =>
             setSmartData((previous) => ({
@@ -230,14 +247,15 @@ export function AchievableStep({
         </p>
       </div>
 
-      {/* Nguồn lực hỗ trợ */}
-      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm">
-        <label htmlFor="smart-support-resources" className={labelClass}>
-          Nguồn lực hỗ trợ
+      {/* PHẦN 3: NGUỒN LỰC HỖ TRỢ */}
+      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
+        <label htmlFor="smart-support-resources" className={cn(labelClass, "flex items-center gap-1.5 text-base font-bold text-app-ink border-b border-app-line/60 pb-2")}>
+          <Wrench className="h-4.5 w-4.5 text-app-accent" />
+          3. Công cụ & Nguồn lực hỗ trợ (Tools & Resources)
         </label>
         <Textarea
           id="smart-support-resources"
-          placeholder="Ví dụ: mentor, khóa học, tài liệu, người đồng hành..."
+          placeholder="Ví dụ: Tài khoản Udemy, sách chuyên ngành, mentor định hướng, nhóm tự học..."
           value={smartData.achievable.support_resources}
           onChange={(event) =>
             setSmartData((previous) => ({

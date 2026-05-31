@@ -37,28 +37,13 @@ import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
+import { cn } from "../components/ui/utils";
 
 type OnboardingStep = "welcome" | "assessment";
 
 type AutoSaveDraftStatus = "idle" | "saving" | "saved";
 
-const JOURNEY_STEPS = [
-  {
-    icon: Heart,
-    title: "🎯 8 Khía cạnh",
-    description: "Nhìn nhận nhanh chóng sức khỏe cuộc sống hiện tại.",
-  },
-  {
-    icon: Compass,
-    title: "💡 Chọn trọng tâm",
-    description: "Xác định rõ nét khía cạnh cần ưu tiên phát triển.",
-  },
-  {
-    icon: Target,
-    title: "🚀 Kế hoạch 12 tuần",
-    description: "Chuyển trọng tâm thành mục tiêu SMART và hành động.",
-  },
-] satisfies Array<{ icon: LucideIcon; title: string; description: string }>;
+
 
 interface AreaColorConfig {
   bgLight: string;
@@ -525,8 +510,8 @@ export function Onboarding() {
 
               {draftBanner}
 
-              <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-stretch">
-                <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-emerald-500/[0.02] via-app-surface to-teal-500/[0.02] p-6 md:p-8 shadow-sm flex flex-col justify-between space-y-8">
+              <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-stretch animate-fade-in">
+                <div className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-emerald-500/[0.01] via-app-surface to-teal-500/[0.01] p-6 md:p-8 shadow-sm flex flex-col justify-between space-y-6">
                   <div className="space-y-4">
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 text-xs font-semibold tracking-wider text-emerald-700 dark:text-emerald-300 border border-emerald-100/50 dark:border-emerald-900/30">
                       <Compass className="h-3.5 w-3.5 animate-spin-slow" />
@@ -534,62 +519,75 @@ export function Onboarding() {
                     </div>
                     
                     <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-app-ink leading-tight">
-                      Thiết kế tương lai <br className="hidden sm:inline" /> của bạn từ hôm nay
+                      Thiết kế cuộc sống 12 tuần của bạn
                     </h1>
                     
                     <p className="text-sm text-app-ink-soft leading-relaxed max-w-xl">
-                      Đánh giá 8 khía cạnh bánh xe cuộc sống để xác định trọng tâm ưu tiên và thiết lập hành động cho chu kỳ 12 tuần tiếp theo. Dành 3 phút để bắt đầu ngay.
+                      Đánh giá và tối ưu hóa 8 khía cạnh cuộc sống để xác định điểm tựa ưu tiên và lập kế hoạch hành động thực tế tức thì.
                     </p>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {JOURNEY_STEPS.map((item, index) => {
-                      const Icon = item.icon;
-
-                      return (
-                        <div 
-                          key={item.title} 
-                          className="group rounded-xl border border-app-line/60 bg-app-surface/60 p-4 transition-all duration-300 hover:shadow-md hover:border-app-accent/30 hover:bg-app-surface"
-                        >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent group-hover:scale-110 transition-transform">
-                            <Icon className="h-4 w-4" aria-hidden="true" />
-                          </div>
-                          <h2 className="mt-3 text-xs font-semibold text-app-ink flex items-center gap-1">
-                            <span className="text-app-accent font-mono text-[10px] opacity-60">0{index + 1}.</span>
-                            {item.title.replace(/[^\w\s\dàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/gi, '').trim()}
-                          </h2>
-                          <p className="mt-1 text-[11px] leading-relaxed text-app-ink-soft">
-                            {item.description}
-                          </p>
-                        </div>
-                      );
-                    })}
+                  {/* Thẻ Lộ Trình Hành Trình 10 Giây Trực Quan */}
+                  <div className="bg-app-bg-subtle/60 rounded-xl border border-app-line/80 p-5 space-y-4 shadow-3xs">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5 border-b border-app-line pb-2">
+                      <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
+                      Hành trình bứt phá (10 giây tóm tắt)
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">1. Ứng dụng giúp gì?</span>
+                        <p className="text-xs text-app-ink-soft leading-normal">
+                          Biến mục tiêu lớn thành hành động nhỏ thực tế trong chu kỳ 12 tuần.
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">2. Bạn cần làm gì lúc này?</span>
+                        <p className="text-xs text-app-ink-soft leading-normal">
+                          Chấm điểm 8 khía cạnh để phác thảo <strong>Bản đồ Cân bằng Cuộc sống</strong> (3 phút).
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">3. Lộ trình còn bao nhiêu bước?</span>
+                        <p className="text-xs text-app-ink-soft leading-normal">
+                          Gồm 3 chặng ngắn gọn: <strong>Đánh giá</strong> ➔ <strong>Chọn trọng tâm</strong> ➔ <strong>Lên kế hoạch</strong>.
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-app-ink-muted block">4. Nhận được gì khi hoàn thành?</span>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold leading-normal">
+                          Bản đồ bánh xe cuộc sống trực quan & Kế hoạch hành động 12 tuần được cá nhân hóa.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <div className="pt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-8 py-3.5 text-base font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm w-full sm:w-auto"
                       onClick={handleStartAssessment}
                     >
-                      Bắt đầu đánh giá (3 phút)
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      Bắt đầu Đánh giá ngay (3 phút)
+                      <ArrowRight className="h-5 w-5" aria-hidden="true" />
                     </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-6 py-3 text-sm font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]"
-                      onClick={() => setShowBreathing(true)}
-                    >
-                      <Sparkles className="h-4 w-4" aria-hidden="true" />
-                      Tập thở thư giãn trước
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
-                      onClick={handleDefer}
-                    >
-                      Để sau
-                    </button>
+                    
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
+                        onClick={() => setShowBreathing(true)}
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-app-accent" aria-hidden="true" />
+                        Tập thở thư giãn
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
+                        onClick={handleDefer}
+                      >
+                        Để sau
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
@@ -619,10 +617,10 @@ export function Onboarding() {
             Bước 1 / 6 · Cân bằng cuộc sống
           </div>
           <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-app-ink">
-            Vẽ bản đồ cân bằng hiện tại của bạn
+            Đánh giá 8 khía cạnh cuộc sống
           </h1>
           <p className="text-sm text-app-ink-soft max-w-2xl leading-relaxed">
-            Chấm nhanh 8 lĩnh vực để Dear Our Future tìm ra nơi bạn nên ưu tiên trong chu kỳ 12 tuần tiếp theo.
+            Chấm điểm từ 0 đến 10 dựa trên mức độ hài lòng hiện tại của bạn trong từng khía cạnh cuộc sống.
           </p>
         </div>
 
@@ -631,55 +629,57 @@ export function Onboarding() {
             {/* Thanh điều hướng tiến trình 8 khía cạnh (Step Indicator) */}
             <div className="bg-app-surface border border-app-line rounded-2xl p-4 shadow-app-sm">
               <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted mb-3 text-center sm:text-left">
-                Nhấn để chuyển nhanh giữa các lĩnh vực:
+                Chuyển nhanh giữa các lĩnh vực:
               </p>
-              <div className="flex justify-between items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
                 {lifeAreas.map((area, index) => {
                   const AreaIcon = getCalmLifeAreaIcon(area.name);
                   const isSelected = activeAreaIndex === index;
                   const isReviewed = reviewedAreaIndices.has(index);
                   const colorConfig = getAreaColorConfig(area.name);
+                  const label = getLifeAreaLabel(area.name);
 
                   return (
                     <button
                       key={area.name}
                       type="button"
                       onClick={() => setActiveAreaIndex(index)}
-                      className={`relative flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shrink-0 ${
+                      className={cn(
+                        "relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 outline-none shrink-0 border select-none snap-start focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                        "after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
                         isSelected
-                          ? "bg-app-bg-subtle scale-105"
-                          : "hover:bg-app-bg-subtle/50"
-                      }`}
-                      title={getLifeAreaLabel(area.name)}
+                          ? "shadow-sm scale-[1.02] font-bold"
+                          : "hover:bg-app-bg-subtle/60"
+                      )}
+                      style={
+                        isSelected
+                          ? { 
+                              backgroundColor: colorConfig.accent, 
+                              borderColor: colorConfig.accent,
+                              color: "#FFFFFF" 
+                            }
+                          : {
+                              borderColor: isReviewed ? "rgba(16, 185, 129, 0.25)" : "var(--app-line)",
+                              backgroundColor: isReviewed ? "var(--green-050)" : "var(--app-surface)",
+                              color: isReviewed ? "var(--app-status-success)" : "var(--app-ink-soft)"
+                            }
+                      }
+                      title={label}
                     >
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                          isSelected
-                            ? "text-white"
-                            : isReviewed
-                              ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400"
-                              : "bg-app-bg text-app-ink-muted"
-                        }`}
-                        style={isSelected ? { backgroundColor: colorConfig.accent } : {}}
-                      >
-                        <AreaIcon className="h-5 w-5" />
-                      </div>
-                      <span
-                        className={`text-[9px] font-bold tracking-tight hidden sm:block ${
-                          isSelected
-                            ? "text-app-ink"
-                            : isReviewed
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-app-ink-muted"
-                        }`}
-                      >
-                        {getLifeAreaLabel(area.name)}
+                      <AreaIcon className="h-4 w-4 shrink-0" />
+                      <span className="text-xs font-semibold tracking-tight">
+                        {index + 1}. {label}
                       </span>
-                      {/* Badge hiển thị điểm hoặc tích xanh */}
-                      {isReviewed && !isSelected && (
-                        <div className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[8px] font-bold text-white shadow-sm">
+                      {isReviewed && (
+                        <span 
+                          className={cn(
+                            "flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-extrabold px-1 shrink-0",
+                            isSelected ? "bg-white text-app-accent" : "bg-emerald-500 text-white"
+                          )}
+                          style={isSelected ? { color: colorConfig.accent } : {}}
+                        >
                           {area.score}
-                        </div>
+                        </span>
                       )}
                     </button>
                   );
@@ -700,9 +700,9 @@ export function Onboarding() {
               return (
                 <div
                   className="rounded-2xl border bg-app-surface p-6 md:p-8 space-y-6 transition-all duration-300 shadow-app-md animate-fade-in"
-                  style={{ borderColor: colorConfig.accent, boxShadow: `0 12px 36px -12px ${colorConfig.accent}18` }}
+                  style={{ borderColor: colorConfig.accent, boxShadow: `0 12px 36px -12px ${colorConfig.accent}12` }}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-app-line/40 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-app-line/45 pb-4">
                     <div className="flex items-center gap-4">
                       <div
                         className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-md animate-pulse-slow"
@@ -720,7 +720,7 @@ export function Onboarding() {
                       </div>
                     </div>
 
-                    <div className="flex items-baseline gap-1.5 self-start sm:self-center">
+                    <div className="flex items-baseline gap-1.5 self-start sm:self-center bg-app-bg-subtle px-3 py-1.5 rounded-xl border border-app-line/60">
                       <span className="text-[10px] text-app-ink-muted font-bold uppercase">Điểm hiện tại:</span>
                       <span className="font-serif text-3xl font-extrabold tabular-nums leading-none" style={{ color: colorConfig.accent }}>
                         {area.score}
@@ -729,8 +729,8 @@ export function Onboarding() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl bg-app-bg-subtle/40 p-4 border border-app-line/30">
-                    <p className="text-sm text-app-ink-soft leading-relaxed">
+                  <div className="rounded-xl bg-app-bg-subtle/30 p-4 border border-app-line/20">
+                    <p className="text-xs sm:text-sm text-app-ink-soft leading-relaxed">
                       {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
                     </p>
                   </div>
@@ -744,27 +744,48 @@ export function Onboarding() {
                       </span>
                     </div>
 
-                    <div className="py-4 px-2">
-                      <Slider
-                        value={[area.score]}
-                        onValueChange={(value) => handleScoreChangeWrapped(index, value)}
-                        min={0}
-                        max={10}
-                        step={1}
-                        trackColor={colorConfig.accent}
-                        className="w-full"
-                        aria-label={`Điểm ${areaLabel}`}
-                      />
+                    {/* Slider kết hợp nút bấm tăng giảm điểm hỗ trợ Mobile */}
+                    <div className="flex items-center gap-4 py-2">
+                      <button
+                        type="button"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-line bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent/30 outline-none"
+                        onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
+                        aria-label="Giảm 1 điểm"
+                      >
+                        −
+                      </button>
+                      
+                      <div className="grow px-1">
+                        <Slider
+                          value={[area.score]}
+                          onValueChange={(value) => handleScoreChangeWrapped(index, value)}
+                          min={0}
+                          max={10}
+                          step={1}
+                          trackColor={colorConfig.accent}
+                          className="w-full cursor-pointer"
+                          aria-label={`Điểm ${areaLabel}`}
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-line bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent/30 outline-none"
+                        onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
+                        aria-label="Tăng 1 điểm"
+                      >
+                        +
+                      </button>
                     </div>
 
-                    <div className="flex justify-between text-[10px] font-bold text-app-ink-muted/80 uppercase tracking-wider px-1">
+                    <div className="flex justify-between text-[9px] sm:text-[10px] font-bold text-app-ink-muted/80 uppercase tracking-wider px-1">
                       <span className="flex items-center gap-1">😢 Cần chăm sóc (0-3)</span>
                       <span className="flex items-center gap-1">😐 Ổn định (4-7)</span>
                       <span className="flex items-center gap-1">😊 Phát triển (8-10)</span>
                     </div>
                   </div>
 
-                  {/* Nút điều hướng chân trang */}
+                  {/* Nút điều hướng chân Active Card */}
                   <div className="pt-6 border-t border-app-line/40 flex items-center justify-between gap-3">
                     <button
                       type="button"
@@ -895,11 +916,11 @@ export function Onboarding() {
             {!canCompleteAssessment && (
               <div className="flex items-center gap-2 text-xs text-app-ink-muted justify-end">
                 <Info className="h-3.5 w-3.5 text-app-ink-muted" />
-                <span>Các khía cạnh chưa rà sẽ tự động nhận điểm 5.</span>
+                <span>Các khía cạnh chưa rà soát sẽ nhận điểm mặc định (5).</span>
               </div>
             )}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3 order-2 sm:order-1">
+              <div className="flex items-center gap-3 order-2 sm:order-1 justify-center sm:justify-start">
                 <button
                   type="button"
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35"
@@ -921,7 +942,7 @@ export function Onboarding() {
                 className="order-1 inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] shadow-app-sm sm:order-2"
                 onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
               >
-                Xem Góc nhìn cuộc sống của tôi
+                {canCompleteAssessment ? "Xem Góc nhìn cuộc sống của tôi" : "Xem Góc nhìn ngay (Dùng điểm mặc định)"}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>

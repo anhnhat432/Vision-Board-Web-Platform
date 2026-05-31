@@ -432,7 +432,6 @@ export function SMARTGoalSetup() {
           <SpecificStep
             smartData={smartData}
             setSmartData={setSmartData}
-            placeholder={currentStepData.placeholder}
             showError={shouldShowCurrentStepError}
             archetype={archetype}
             inferredArchetype={inferredArchetype}
@@ -467,7 +466,6 @@ export function SMARTGoalSetup() {
           <RelevantStep
             smartData={smartData}
             setSmartData={setSmartData}
-            placeholder={currentStepData.placeholder}
             currentStepHasDraftContent={currentStepHasDraftContent}
           />
         );

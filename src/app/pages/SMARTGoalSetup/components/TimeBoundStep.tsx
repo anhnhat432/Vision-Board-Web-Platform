@@ -92,7 +92,7 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
       {smartData.timeBound.mode === "weeks" ? (
         <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
           <label htmlFor="smart-target-weeks-slider" className={labelClass}>
-            Số tuần mục tiêu
+            Thời hạn mục tiêu (Số tuần để hoàn thành)
             <span className={requiredMarkerClass} aria-hidden="true">*</span>
             <span className="sr-only"> bắt buộc</span>
           </label>
@@ -129,6 +129,15 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
                 <span>1 tuần</span>
                 <span className="text-purple-600 dark:text-purple-400 font-semibold">12 tuần (Chu kỳ chuẩn)</span>
                 <span>24 tuần</span>
+              </div>
+
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Dự kiến hoàn thành: <span className="font-bold underline">{(() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + parsedTargetWeeks * 7);
+                  return d.toLocaleDateString("vi-VN", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                })()}</span></span>
               </div>
 
               {parsedTargetWeeks === 12 && (
@@ -171,7 +180,7 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
       ) : (
         <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
           <label htmlFor="smart-target-date" className={labelClass}>
-            Ngày mục tiêu
+            Thời hạn mục tiêu (Chọn ngày cụ thể)
             <span className={requiredMarkerClass} aria-hidden="true">*</span>
             <span className="sr-only"> bắt buộc</span>
           </label>
@@ -231,6 +240,19 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
               );
             })}
           </div>
+
+          {smartData.timeBound.target_date && (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Thời gian thực hiện: <span className="font-bold underline">{(() => {
+                const diffTime = new Date(smartData.timeBound.target_date).getTime() - Date.now();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const diffWeeks = Math.ceil(diffDays / 7);
+                if (diffDays <= 0) return "Ngày đã chọn nằm ở quá khứ";
+                return `khoảng ~${diffWeeks} tuần (${diffDays} ngày)`;
+              })()}</span></span>
+            </div>
+          )}
 
           <p className={helperTextClass}>
             Chọn một thời hạn thực tế. Ví dụ chu kỳ chuẩn 12 tuần sẽ rơi vào ngày: <span className="font-semibold text-app-ink">{(() => {

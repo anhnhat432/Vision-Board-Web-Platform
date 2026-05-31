@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { Check, X } from "lucide-react";
 
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
@@ -10,12 +11,11 @@ import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 interface RelevantStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
-  placeholder: string;
   currentStepHasDraftContent: boolean;
   archetype?: GoalArchetype;
 }
 
-export function RelevantStep({ smartData, setSmartData, placeholder, currentStepHasDraftContent, archetype }: RelevantStepProps) {
+export function RelevantStep({ smartData, setSmartData, currentStepHasDraftContent, archetype }: RelevantStepProps) {
   const [hasBlurredMotivation, setHasBlurredMotivation] = useState(false);
   const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
   const showMotivationError = motivationInvalid && (hasBlurredMotivation || currentStepHasDraftContent);
@@ -24,13 +24,13 @@ export function RelevantStep({ smartData, setSmartData, placeholder, currentStep
     <div className="space-y-5">
       <div>
         <label htmlFor="smart-relevant-reason" className={labelClass}>
-          Lý do bạn thật sự muốn theo đuổi
+          Động lực cốt lõi (Lý do thực sự quan trọng với bạn)
           <span className={requiredMarkerClass} aria-hidden="true">*</span>
           <span className="sr-only"> bắt buộc</span>
         </label>
         <Textarea
           id="smart-relevant-reason"
-          placeholder={placeholder}
+          placeholder="Ví dụ: Để tích lũy đủ quỹ dự phòng giúp gia đình an tâm trước mọi biến cố, hoặc nâng cao kỹ năng giúp tự tin nhận các dự án lớn..."
           value={smartData.relevant.motivation_reason}
           onChange={(event) =>
             setSmartData((previous) => ({
@@ -107,22 +107,37 @@ export function RelevantStep({ smartData, setSmartData, placeholder, currentStep
           </div>
         </div>
 
-        <p className={helperTextClass}>
-          Mô tả động lực sâu sắc từ bên trong. 
-          Ví dụ tốt: <span className="font-semibold text-app-ink">"Để có quỹ khẩn cấp giúp gia đình an tâm trước rủi ro phát sinh"</span>. 
-          Ví dụ xấu: <span className="line-through text-app-ink-muted">"Kiếm nhiều tiền hơn"</span>.
-        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3 w-3" strokeWidth={3} />
+            </span>
+            <div>
+              <p className="font-bold text-emerald-700 dark:text-emerald-400">Ví dụ Tốt (Có động lực thực tế):</p>
+              <p className="text-app-ink-soft mt-0.5">"Để có quỹ khẩn cấp giúp gia đình an tâm trước rủi ro phát sinh."</p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3 w-3" strokeWidth={3} />
+            </span>
+            <div>
+              <p className="font-bold text-rose-750 dark:text-rose-400">Ví dụ Chưa tốt (Chung chung):</p>
+              <p className="text-app-ink-soft mt-0.5">"Kiếm nhiều tiền hơn" hoặc "Vì tôi thích thế."</p>
+            </div>
+          </div>
+        </div>
         {showMotivationError ? (
-          <FieldError id="smart-relevant-reason-error" message="Viết ít nhất 15 ký tự để lý do đủ rõ." role="alert" />
+          <FieldError id="smart-relevant-reason-error" message="Hãy viết chi tiết hơn một chút (tối thiểu 15 ký tự) để làm rõ động lực cốt lõi." role="alert" />
         ) : null}
       </div>
       <div>
         <label htmlFor="smart-life-alignment" className={labelClass}>
-          Lĩnh vực cuộc sống liên quan (tuỳ chọn)
+          Khía cạnh liên kết trong đời sống (Tùy chọn)
         </label>
         <Input
           id="smart-life-alignment"
-          placeholder="Ví dụ: sự nghiệp, tài chính, sức khỏe..."
+          placeholder="Ví dụ: Sự nghiệp, Tài chính, Sức khỏe, Gia đình..."
           value={smartData.relevant.life_dimension_alignment}
           onChange={(event) =>
             setSmartData((previous) => ({
@@ -135,7 +150,7 @@ export function RelevantStep({ smartData, setSmartData, placeholder, currentStep
           }
           className={inputClass}
         />
-        <p className={helperTextClass}>Bạn có thể bỏ qua nếu lý do ở trên đã đủ rõ.</p>
+        <p className={helperTextClass}>Bạn có thể bỏ trống nếu lý do động lực ở trên đã chỉ rõ khía cạnh liên quan.</p>
       </div>
     </div>
   );

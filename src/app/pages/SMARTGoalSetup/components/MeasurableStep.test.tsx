@@ -23,7 +23,7 @@ describe("MeasurableStep — intent metric hint", () => {
       <MeasurableStep smartData={makeSmartData()} setSmartData={setSmartData} currentStepHasDraftContent={false} />,
     );
     expect(screen.queryByTestId("smart-intent-metric-hint")).toBeNull();
-    const input = screen.getByLabelText(/Con số hoặc dấu hiệu theo dõi/i);
+    const input = screen.getByLabelText(/Tên chỉ số đo lường/i);
     expect(input.getAttribute("aria-describedby")).toBe("smart-metric-name-hint");
   });
 
@@ -38,9 +38,9 @@ describe("MeasurableStep — intent metric hint", () => {
       />,
     );
     const hint = screen.getByTestId("smart-intent-metric-hint");
-    expect(hint).toHaveTextContent(/Gợi ý theo hướng bạn chọn/i);
+    expect(hint).toHaveTextContent(/Gợi ý đo lường/i);
     expect(hint).toHaveTextContent(/đề thi thử/i);
-    const input = screen.getByLabelText(/Con số hoặc dấu hiệu theo dõi/i);
+    const input = screen.getByLabelText(/Tên chỉ số đo lường/i);
     const described = input.getAttribute("aria-describedby") ?? "";
     expect(described.split(/\s+/)).toEqual(
       expect.arrayContaining(["smart-metric-name-hint", "smart-metric-intent-hint"]),
@@ -63,7 +63,7 @@ describe("MeasurableStep — intent metric hint", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/Mốc mục tiêu/i)).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText(/Mức đích cần đạt/i)).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByText("Mục tiêu cần lớn hơn mốc hiện tại")).toBeInTheDocument();
   });
 
@@ -74,14 +74,14 @@ describe("MeasurableStep — intent metric hint", () => {
       <MeasurableStep smartData={makeSmartData()} setSmartData={setSmartData} currentStepHasDraftContent={false} />,
     );
 
-    const metricInput = screen.getByLabelText(/Con số hoặc dấu hiệu theo dõi/i);
-    expect(screen.queryByText("Chọn một chỉ số để theo dõi tiến độ.")).toBeNull();
+    const metricInput = screen.getByLabelText(/Tên chỉ số đo lường/i);
+    expect(screen.queryByText("Chọn một chỉ số cụ thể để bắt đầu đo lường.")).toBeNull();
 
     await user.click(metricInput);
     await user.tab();
 
     expect(metricInput).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("Chọn một chỉ số để theo dõi tiến độ.")).toBeInTheDocument();
+    expect(screen.getByText("Chọn một chỉ số cụ thể để bắt đầu đo lường.")).toBeInTheDocument();
     expect(metricInput.getAttribute("aria-describedby")).toContain("smart-metric-name-error");
   });
 });

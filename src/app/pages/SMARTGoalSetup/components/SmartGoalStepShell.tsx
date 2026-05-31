@@ -797,23 +797,23 @@ export function SmartGoalStepShell({
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="p-5 space-y-4 border-t border-teal-500/5">
-                        <div className="relative bg-white/70 dark:bg-slate-900/60 border border-teal-500/5 rounded-2xl rounded-tl-none p-4 shadow-[0_1px_2px_rgba(0,0,0,0.015)] text-sm text-slate-800 dark:text-slate-200">
-                          <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-3 select-none">
+                      <div className="p-4 space-y-3.5 border-t border-teal-500/5">
+                        <div className="relative bg-teal-50/30 dark:bg-teal-950/10 border border-teal-500/10 rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm text-slate-800 dark:text-slate-200">
+                          <p className="text-[12.5px] font-medium text-slate-600 dark:text-slate-350 leading-relaxed mb-2.5 select-none">
                             {typedCommentText}
                           </p>
 
                           {typedDraftText && (
-                            <div className="relative my-3 rounded-xl border-l-[3px] border-emerald-500/80 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.06] px-4 py-3">
-                              <p className="font-serif italic text-[14.5px] leading-relaxed text-slate-800 dark:text-slate-100 select-text">
+                            <div className="relative my-2 rounded-lg border-l-[3px] border-emerald-500/80 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.04] px-3.5 py-2">
+                              <p className="font-serif italic text-sm leading-relaxed text-slate-800 dark:text-slate-100 select-text">
                                 “{typedDraftText}”
                               </p>
                             </div>
                           )}
 
-                          <div className="mt-3 text-[10px] text-slate-450 dark:text-slate-550 flex items-center gap-1.5 select-none pt-2 border-t border-teal-500/5">
+                          <div className="mt-2 text-[9.5px] text-slate-450 dark:text-slate-500 flex items-center gap-1.5 select-none pt-2 border-t border-teal-500/5">
                             <Sparkles className="h-3 w-3 text-teal-400" />
-                            <span>Gợi ý chánh niệm giúp bạn tinh chỉnh chính xác.</span>
+                            <span>Gợi ý chánh niệm cá nhân hóa dựa trên khía cạnh trọng tâm.</span>
                           </div>
                         </div>
 
@@ -845,17 +845,15 @@ export function SmartGoalStepShell({
                             </div>
                           </div>
 
-                          <motion.button
+                          <button
                             type="button"
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
                             onClick={handleApplyTransformedStarter}
-                            className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] group/shimmer w-full sm:w-auto cursor-pointer"
+                            className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] group/shimmer w-full sm:w-auto cursor-pointer"
                             aria-label={`Dùng gợi ý cho bước ${step.label}`}
                           >
                             <Sparkles className="h-3.5 w-3.5" />
                             <span>Sử dụng gợi ý này</span>
-                          </motion.button>
+                          </button>
                         </div>
                       </div>
                     </motion.div>
@@ -865,10 +863,10 @@ export function SmartGoalStepShell({
 
               {currentStepError && (
                 <div
-                  className="rounded-xl border border-rose-200/60 dark:border-rose-900/30 bg-rose-50/30 dark:bg-rose-950/15 px-4 py-2.5 text-rose-600 dark:text-rose-400 text-xs shadow-sm flex items-center gap-2"
+                  className="rounded-xl border border-rose-200/20 bg-rose-50/50 dark:bg-rose-950/10 px-4 py-2 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2 select-none"
                   role="alert"
                 >
-                  <CircleAlert className="h-4 w-4 shrink-0 text-rose-500" aria-hidden="true" />
+                  <CircleAlert className="h-3.5 w-3.5 shrink-0 text-rose-500" aria-hidden="true" />
                   <span className="font-semibold">{currentStepError}</span>
                 </div>
               )}

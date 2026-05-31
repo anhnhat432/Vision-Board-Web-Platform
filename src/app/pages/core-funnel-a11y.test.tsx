@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 
@@ -247,8 +247,8 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { level: 2, name: "Đủ thực tế để bắt đầu" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Tiếp tục → Kế hoạch 12 tuần" }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { level: 2, name: "Mục tiêu này ổn, bước tiếp theo là chia nhỏ theo tuần" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Tiếp tục với mục tiêu này" }).length).toBeGreaterThan(0);
     const detailsTrigger = screen.getByRole("button", { name: "Mở chi tiết" });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");
     expect(screen.getAllByRole("button", { name: "Mở chi tiết" })).toHaveLength(1);
@@ -394,7 +394,7 @@ describe("SmartGoalStepShell — a11y", () => {
     completionHint: "",
   };
 
-  it("gives the 'Dùng gợi ý' button a step-specific accessible name", () => {
+  it("gives the 'Dùng gợi ý' button a step-specific accessible name", async () => {
     const headingRef = createRef<HTMLHeadingElement>();
     const mockStarter = {
       specificGoalStatement: "Statement",
@@ -435,6 +435,10 @@ describe("SmartGoalStepShell — a11y", () => {
         <div />
       </SmartGoalStepShell>,
     );
+
+    const coachButton = screen.getByRole("button", { name: /Cố vấn mục tiêu AI/i });
+    fireEvent.click(coachButton);
+
     const button = screen.getByRole("button", { name: /Dùng gợi ý cho bước Cụ thể/i });
     expect(button).toBeInTheDocument();
   });
@@ -446,7 +450,7 @@ describe("SpecificStep — a11y", () => {
     render(
       <SpecificStep smartData={makeSmartData()} setSmartData={setSmartData} placeholder="Ví dụ..." showError={false} />,
     );
-    const textarea = screen.getByLabelText(/Câu trả lời của bạn/i);
+    const textarea = screen.getByLabelText(/Mục tiêu cụ thể của bạn/i);
     const describedBy = textarea.getAttribute("aria-describedby") ?? "";
     expect(describedBy.split(/\s+/)).toEqual(expect.arrayContaining(["smart-specific-hint", "smart-specific-counter"]));
     expect(document.getElementById("smart-specific-hint")?.textContent).toMatch(/kiểm chứng/i);
@@ -460,7 +464,7 @@ describe("MeasurableStep — a11y", () => {
     render(
       <MeasurableStep smartData={makeSmartData()} setSmartData={setSmartData} currentStepHasDraftContent={false} />,
     );
-    const input = screen.getByLabelText(/Con số hoặc dấu hiệu theo dõi/i);
+    const input = screen.getByLabelText(/Tên chỉ số đo lường/i);
     expect(input.getAttribute("aria-describedby")).toBe("smart-metric-name-hint");
     expect(document.getElementById("smart-metric-name-hint")?.textContent).toMatch(/tăng hay đứng yên/i);
   });

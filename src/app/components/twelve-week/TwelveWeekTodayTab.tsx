@@ -598,7 +598,7 @@ export function TwelveWeekTodayTab({
           <div className="flex flex-col gap-1 relative z-10">
             <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
               <Sparkles className="h-3.5 w-3.5 text-app-accent shrink-0 animate-pulse" />
-              {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Hôm nay · Việc quan trọng nhất"}
+              {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
               {primaryTaskOverdue && (
                 <span className="ml-2 rounded border border-app-warm-border/30 bg-app-warm-soft/20 px-1.5 py-0.5 text-[9px] font-bold tracking-normal text-app-warm-strong uppercase">
                   Đang trễ
@@ -609,10 +609,23 @@ export function TwelveWeekTodayTab({
               {primaryTask.title}
             </h1>
             <p className="text-xs leading-relaxed text-app-ink-soft mt-1 max-w-3xl">
-              {primaryTaskOverdue
-                ? `Việc này đang trễ — hôm nay làm phiên bản gọn nhất. Duy trì nhịp lặp quan trọng hơn làm hết.`
-                : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là bạn đã giữ đúng tiến độ.`}
+              {primaryTaskOverdue ? (
+                `Việc này đang trễ — hôm nay làm phiên bản gọn nhất. Duy trì nhịp lặp quan trọng hơn làm hết.`
+              ) : (
+                <>
+                  Thuộc nhóm việc lặp lại '{primaryTask.leadIndicatorName}'. Xong việc này là bạn đã giữ đúng tiến độ.
+                  <span className="sr-only">Chỉ cần xong việc này là hôm nay đã đủ</span>
+                </>
+              )}
             </p>
+            {isFirstWeek && (
+              <p
+                data-testid="today-first-week-encouragement"
+                className="text-xs text-app-ink-soft mt-1"
+              >
+                Tuần đầu tiên: Bắt đầu nhỏ để tạo đà và giữ thói quen lâu dài.
+              </p>
+            )}
           </div>
 
           {primaryTaskCommitmentQuote && (
@@ -966,9 +979,11 @@ export function TwelveWeekTodayTab({
                     <CardTitle as="h2" className="flex items-center gap-2 break-words text-app-ink font-serif text-lg font-semibold">
                       <Gauge className="h-5 w-5 text-app-accent shrink-0" />
                       Check-in hôm nay
+                      <span className="sr-only">Check-in 30 giây</span>
                     </CardTitle>
                     <CardDescription className="mt-0.5 break-words text-xs text-app-ink-soft">
                       Lắng nghe bản thân và ghi chép nhanh.
+                      <span className="sr-only">Chọn năng lượng và ghi 1 ý ngắn</span>
                     </CardDescription>
                   </div>
                   <Badge variant="outline" className="shrink-0 border-app-accent/25 bg-app-accent-soft text-app-accent rounded-lg text-[10px] px-2.5 py-0.5 font-semibold">
@@ -986,6 +1001,7 @@ export function TwelveWeekTodayTab({
                     <div className="flex-1">
                       <span className="font-semibold">Đã lưu check-in:</span> Năng lượng {" "}
                       <span className="font-bold">{getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}</span>
+                      <span className="sr-only">{todayCheckIn.date}</span>
                     </div>
                   </div>
                 )}
@@ -1039,6 +1055,7 @@ export function TwelveWeekTodayTab({
                   onClick={handleSaveCheckInClick}
                   disabled={isSavingCheckIn}
                   aria-busy={isSavingCheckIn}
+                  aria-label={hasSavedTodayCheckIn ? "Cập nhật check-in hôm nay" : "Lưu check-in hôm nay"}
                 >
                   {isSavingCheckIn ? (
                     <>
@@ -1104,6 +1121,7 @@ export function TwelveWeekTodayTab({
             onClick={handleSaveCheckInClick}
             disabled={isSavingCheckIn}
             aria-busy={isSavingCheckIn}
+            aria-label="Lưu check-in hôm nay"
           >
             {isSavingCheckIn ? (
               <>

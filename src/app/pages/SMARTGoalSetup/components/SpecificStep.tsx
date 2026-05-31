@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { Check, X } from "lucide-react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 
@@ -8,12 +9,12 @@ import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
-import { helperTextClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
+import { labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
 interface SpecificStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
-  placeholder: string;
+  placeholder?: string;
   showError: boolean;
   archetype?: GoalArchetype;
   inferredArchetype?: GoalArchetype;
@@ -32,7 +33,6 @@ interface SpecificStepProps {
 export function SpecificStep({
   smartData,
   setSmartData,
-  placeholder,
   showError,
   archetype,
   inferredArchetype,
@@ -55,13 +55,13 @@ export function SpecificStep({
     <div className="space-y-5">
       <div>
         <label htmlFor="smart-specific" className={labelClass}>
-          Câu trả lời của bạn
+          Mục tiêu cụ thể của bạn (Hành động hoặc Dự án)
           <span className={requiredMarkerClass} aria-hidden="true">*</span>
           <span className="sr-only"> bắt buộc</span>
         </label>
         <Textarea
           id="smart-specific"
-          placeholder={placeholder}
+          placeholder="Ví dụ: Hoàn thành khóa học IELTS và đạt mục tiêu điểm số, hoặc Xây dựng ứng dụng di động cá nhân đầu tiên..."
           value={smartData.specific.goal_statement}
           onChange={(event) =>
             setSmartData((previous) => ({
@@ -76,16 +76,33 @@ export function SpecificStep({
           aria-invalid={showInlineError}
           aria-describedby={specificDescribedBy}
         />
-        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-          <p id="smart-specific-hint" className={helperTextClass}>
-            Nêu rõ hành động hoặc dự án cụ thể. 
-            Ví dụ tốt: <span className="font-semibold text-app-ink">"Hoàn thành khóa học React và xây dựng 1 dự án cá nhân"</span>. 
-            Ví dụ xấu: <span className="line-through text-app-ink-muted">"Giỏi lập trình hơn"</span>.
-          </p>
-          <p id="smart-specific-counter" className={helperTextClass}>
-            {specificLength}/10 ký tự tối thiểu
-          </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3 w-3" strokeWidth={3} />
+            </span>
+            <div>
+              <p className="font-bold text-emerald-700 dark:text-emerald-400">Ví dụ Tốt (Rõ việc):</p>
+              <p className="text-app-ink-soft mt-0.5">"Hoàn thành khóa học React và tự tay lập trình 1 trang web cá nhân."</p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3 w-3" strokeWidth={3} />
+            </span>
+            <div>
+              <p className="font-bold text-rose-750 dark:text-rose-400">Ví dụ Chưa tốt (Mơ hồ):</p>
+              <p className="text-app-ink-soft mt-0.5">"Học lập trình tốt hơn" hoặc "Trở thành lập trình viên giỏi."</p>
+            </div>
+          </div>
         </div>
+        <div className="mt-2 flex justify-between items-center text-[10px] text-app-ink-muted font-semibold px-1">
+          <span id="smart-specific-hint">Hãy viết rõ việc cụ thể bạn muốn làm hoặc hoàn thành để dễ kiểm chứng.</span>
+          <span id="smart-specific-counter" className={specificLength >= 10 ? "text-emerald-600 font-bold" : "text-app-ink-muted"}>
+            {specificLength}/10 ký tự tối thiểu
+          </span>
+        </div>
+
 
         {/* 1-Click Suggestions */}
         <div className="mt-3 bg-app-bg/40 p-3 rounded-xl border border-app-line/60">

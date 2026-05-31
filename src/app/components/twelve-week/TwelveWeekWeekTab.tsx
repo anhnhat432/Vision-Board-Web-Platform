@@ -820,7 +820,7 @@ export function TwelveWeekWeekTab({
             </div>
 
             {/* Lời giải nghĩa điểm số trang nhã */}
-            <div className="space-y-1.5 pt-1">
+            <div data-testid="weekly-score-interpretation" className="space-y-1.5 pt-1">
               <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${scoreTone.panel} ${scoreTone.text}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${scoreTone.marker}`} />
                 {scoreInterpretation.headline}

@@ -1197,6 +1197,11 @@ export function TwelveWeekSetupLab() {
           >
             Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
           </h1>
+          {aspirationalVision && (
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
+              Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
+            </p>
+          )}
           <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
             Dựa trên mục tiêu SMART của bạn, chúng tôi đã tự động chia nhỏ mốc lộ trình và điền sẵn kế hoạch. Bạn chỉ
             cần xem lại và bấm tiếp tục.

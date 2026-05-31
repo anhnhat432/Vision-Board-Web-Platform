@@ -1,7 +1,18 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
-import { Lightbulb } from "lucide-react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
+import { Lightbulb, Check, X } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/app/components/ui/utils";
+
+function parseMetricAndUnit(metricName: string) {
+  const openParenIndex = metricName.lastIndexOf("(");
+  const closeParenIndex = metricName.lastIndexOf(")");
+  if (openParenIndex !== -1 && closeParenIndex !== -1 && closeParenIndex > openParenIndex) {
+    const name = metricName.substring(0, openParenIndex).trim();
+    const unit = metricName.substring(openParenIndex + 1, closeParenIndex).trim();
+    return { name, unit };
+  }
+  return { name: metricName, unit: "" };
+}
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 import { parseNumberInput } from "@/lib/smart-goal";
@@ -42,6 +53,39 @@ export function MeasurableStep({
   archetype,
 }: MeasurableStepProps) {
   const [blurredFields, setBlurredFields] = useState({ metricName: false, targetValue: false });
+  const parsedInit = parseMetricAndUnit(smartData.measurable.metric_name);
+  const [metricNameInput, setMetricNameInput] = useState(parsedInit.name);
+  const [metricUnitInput, setMetricUnitInput] = useState(parsedInit.unit);
+
+  useEffect(() => {
+    const { name, unit } = parseMetricAndUnit(smartData.measurable.metric_name);
+    setMetricNameInput(name);
+    setMetricUnitInput(unit);
+  }, [smartData.measurable.metric_name]);
+
+  const handleNameChange = (newName: string) => {
+    setMetricNameInput(newName);
+    const newFullMetric = metricUnitInput ? `${newName} (${metricUnitInput})` : newName;
+    setSmartData((previous) => ({
+      ...previous,
+      measurable: {
+        ...previous.measurable,
+        metric_name: newFullMetric,
+      },
+    }));
+  };
+
+  const handleUnitChange = (newUnit: string) => {
+    setMetricUnitInput(newUnit);
+    const newFullMetric = newUnit ? `${metricNameInput} (${newUnit})` : metricNameInput;
+    setSmartData((previous) => ({
+      ...previous,
+      measurable: {
+        ...previous.measurable,
+        metric_name: newFullMetric,
+      },
+    }));
+  };
   const activeArchetype = archetype ?? intentArchetype ?? "other";
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
@@ -68,30 +112,43 @@ export function MeasurableStep({
 
   return (
     <div className="space-y-5">
-      <div>
-        <label htmlFor="smart-metric-name" className={labelClass}>
-          Con số hoặc dấu hiệu theo dõi
-          <span className={requiredMarkerClass} aria-hidden="true">*</span>
-          <span className="sr-only"> bắt buộc</span>
-        </label>
-        <Input
-          id="smart-metric-name"
-          placeholder="Ví dụ: điểm IELTS, số dự án hoàn thành, doanh thu..."
-          value={smartData.measurable.metric_name}
-          onChange={(event) =>
-            setSmartData((previous) => ({
-              ...previous,
-              measurable: {
-                ...previous.measurable,
-                metric_name: event.target.value,
-              },
-            }))
-          }
-          onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
-          className={inputClass}
-          aria-invalid={showMetricNameError}
-          aria-describedby={metricNameDescribedBy}
-        />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label htmlFor="smart-metric-name" className={labelClass}>
+            Tên chỉ số đo lường (Metric Name)
+            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className="sr-only"> bắt buộc</span>
+          </label>
+          <Input
+            id="smart-metric-name"
+            placeholder="Ví dụ: Số buổi chạy bộ, Số tiền tiết kiệm, Từ vựng tiếng Anh học được..."
+            value={metricNameInput}
+            onChange={(event) => handleNameChange(event.target.value)}
+            onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
+            className={inputClass}
+            aria-invalid={showMetricNameError}
+            aria-describedby={metricNameDescribedBy}
+          />
+          <p id="smart-metric-name-hint" className="mt-1 text-[11px] text-app-ink-muted leading-normal">
+            Chỉ số giúp bạn biết tiến độ của mình đang tăng hay đứng yên.
+          </p>
+        </div>
+        <div>
+          <label htmlFor="smart-metric-unit" className={labelClass}>
+            Đơn vị đo lường (Unit)
+            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className="sr-only"> bắt buộc</span>
+          </label>
+          <Input
+            id="smart-metric-unit"
+            placeholder="Ví dụ: buổi/tuần, triệu VNĐ, từ mới..."
+            value={metricUnitInput}
+            onChange={(event) => handleUnitChange(event.target.value)}
+            onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
+            className={inputClass}
+          />
+        </div>
+      </div>
         
         {/* 1-Click Metric Suggestions */}
         <div className="mt-3 bg-app-bg/40 p-3 rounded-xl border border-app-line/60">
@@ -188,12 +245,26 @@ export function MeasurableStep({
           </div>
         </div>
 
-        <p id="smart-metric-name-hint" className={helperTextClass}>
-          Tên chỉ số cần định lượng cụ thể kèm đơn vị đo lường. 
-          <br />
-          Ví dụ tốt: <span className="font-semibold text-app-ink">"Số buổi tập thể thao/tuần"</span>, <span className="font-semibold text-app-ink">"Số từ vựng học được"</span>. 
-          Ví dụ xấu: <span className="line-through text-app-ink-muted">"Tập thể dục nhiều"</span>, <span className="line-through text-app-ink-muted">"Học tiếng Anh"</span>.
-        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3 w-3" strokeWidth={3} />
+            </span>
+            <div>
+              <p className="font-bold text-emerald-700 dark:text-emerald-400">Ví dụ Tốt (Có thước đo):</p>
+              <p className="text-app-ink-soft mt-0.5">"Số buổi vận động/tuần" (đơn vị: buổi), hoặc "Số tiền tiết kiệm" (đơn vị: triệu VNĐ).</p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3 w-3" strokeWidth={3} />
+            </span>
+            <div>
+              <p className="font-bold text-rose-750 dark:text-rose-400">Ví dụ Chưa tốt (Chung chung):</p>
+              <p className="text-app-ink-soft mt-0.5">"Học chăm chỉ hơn" (không thể đếm) hoặc "Cải thiện bản thân."</p>
+            </div>
+          </div>
+        </div>
         {intentMetricHint && (
           <div
             data-testid="smart-intent-metric-hint"
@@ -203,26 +274,25 @@ export function MeasurableStep({
           >
             <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
             <span>
-              <span className="font-medium text-app-ink">Gợi ý theo hướng bạn chọn:</span> {intentMetricHint}
+              <span className="font-medium text-app-ink">Gợi ý đo lường:</span> {intentMetricHint}
             </span>
           </div>
         )}
         {showMetricNameError ? (
-          <FieldError id="smart-metric-name-error" message="Chọn một chỉ số để theo dõi tiến độ." role="alert" />
+          <FieldError id="smart-metric-name-error" message="Chọn một chỉ số cụ thể để bắt đầu đo lường." role="alert" />
         ) : null}
-      </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px]">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px] bg-app-surface p-4 rounded-xl border border-app-line/60">
         <div>
           <label htmlFor="smart-baseline" className={labelClass}>
-            Mốc hiện tại (tuỳ chọn)
+            Mức xuất phát (Mốc hiện tại - Tùy chọn)
           </label>
           <Input
             id="smart-baseline"
             type="number"
             inputMode="decimal"
             step="any"
-            placeholder="VD: 5.5"
+            placeholder="Ví dụ: 0, hoặc 5.5, hoặc 60..."
             value={smartData.measurable.baseline_value}
             onChange={(event) =>
               setSmartData((previous) => ({
@@ -237,13 +307,16 @@ export function MeasurableStep({
             aria-invalid={baselineInvalid}
             aria-describedby={baselineInvalid ? "smart-baseline-error" : undefined}
           />
+          <p className="mt-1 text-[10px] text-app-ink-muted leading-normal">
+            Điểm khởi đầu của bạn. Nếu bắt đầu từ đầu, hãy điền <span className="font-semibold text-app-ink">0</span>.
+          </p>
           {baselineInvalid ? (
             <FieldError id="smart-baseline-error" message="Nhập một con số hợp lệ." />
           ) : null}
         </div>
         <div>
           <label htmlFor="smart-target" className={labelClass}>
-            Mốc mục tiêu
+            Mức đích cần đạt (Mục tiêu)
             <span className={requiredMarkerClass} aria-hidden="true">*</span>
             <span className="sr-only"> bắt buộc</span>
           </label>
@@ -252,7 +325,7 @@ export function MeasurableStep({
             type="number"
             inputMode="decimal"
             step="any"
-            placeholder="VD: 7.0"
+            placeholder="Ví dụ: 3, hoặc 7.0, hoặc 75..."
             value={smartData.measurable.target_value}
             onChange={(event) =>
               setSmartData((previous) => ({
@@ -268,6 +341,9 @@ export function MeasurableStep({
             aria-invalid={showTargetError}
             aria-describedby={targetDescribedBy || undefined}
           />
+          <p className="mt-1 text-[10px] text-app-ink-muted leading-normal">
+            Mốc bạn muốn đạt tới sau 12 tuần.
+          </p>
           {targetNotAboveBaseline ? (
             <FieldError id="smart-target-error" message="Mục tiêu cần lớn hơn mốc hiện tại" role="alert" />
           ) : null}
@@ -276,7 +352,7 @@ export function MeasurableStep({
           ) : null}
         </div>
       </div>
-      <p className={helperTextClass}>Nhập cả hai mốc thì mốc mục tiêu phải lớn hơn mốc hiện tại.</p>
+      <p className={helperTextClass}>Nếu bạn điền cả hai mức, mục tiêu phải lớn hơn mức xuất phát để thể hiện sự tiến bộ.</p>
 
       {/* Thước đo tiến độ động (Interactive Goal Gauge) */}
       {(() => {

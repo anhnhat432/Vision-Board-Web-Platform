@@ -122,7 +122,7 @@ describe("12-week core flows", () => {
         expect(router.state.location.pathname).toBe("/12-week-system");
       });
 
-      await screen.findByText("Nhịp 12 tuần");
+      await screen.findByText("Hệ thống 12 tuần");
 
       const data = getUserData();
       const createdSystem = data.goals[0]?.twelveWeekSystem;
@@ -448,7 +448,7 @@ describe("12-week core flows", () => {
     expect(taskListCard).not.toBeNull();
 
     await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
-    await user.type(screen.getByLabelText("Note tùy chọn"), "Mai bắt đầu từ việc này trước.");
+    await user.type(screen.getByLabelText(/Nhật ký ngày/i), "Mai bắt đầu từ việc này trước.");
     await user.click(getPrimaryButton("Lưu check-in hôm nay"));
 
     await waitFor(() => {
@@ -521,7 +521,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      const noteInput = await screen.findByRole("textbox", { name: /note/i });
+      const noteInput = await screen.findByRole("textbox", { name: /Nhật ký ngày/i });
       await user.type(noteInput, "First local check-in.");
       await user.click(getPrimaryButton(/check-in/i));
 
@@ -581,7 +581,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      const noteInput = await screen.findByRole("textbox", { name: /note/i });
+      const noteInput = await screen.findByRole("textbox", { name: /Nhật ký ngày/i });
       await user.clear(noteInput);
       await user.type(noteInput, "Local check-in 7");
       await user.click(getPrimaryButton(/check-in/i));
@@ -615,7 +615,7 @@ describe("12-week core flows", () => {
       expect(taskListCard).not.toBeNull();
 
       await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
-      await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
+      await user.type(screen.getByLabelText(/Nhật ký ngày/i), "Giữ task đã tick khi review tuần.");
       await user.click(getPrimaryButton("Lưu check-in hôm nay"));
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {

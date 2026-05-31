@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -205,30 +205,33 @@ function _seedAnonymousStaleGoal() {
 
 async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   await user.type(
-    await screen.findByLabelText(/Câu trả lời của bạn/i, {}, { timeout: 5000 }),
+    await screen.findByLabelText(/Mục tiêu cụ thể của bạn/i, {}, { timeout: 5000 }),
     "Ra mắt hệ thống review cá nhân giúp tôi giữ nhịp thực thi mỗi tuần.",
   );
-  await user.click(screen.getByRole("button", { name: "Tiếp" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  await user.type(await screen.findByLabelText(/Con số hoặc dấu hiệu theo dõi/i, {}, { timeout: 5000 }), "Số tuần review hoàn chỉnh");
-  await user.type(screen.getByLabelText(/Mốc hiện tại/i), "0");
-  await user.type(screen.getByLabelText(/Mốc mục tiêu/i), "12");
-  await user.click(screen.getByRole("button", { name: "Tiếp" }));
+  await user.type(await screen.findByLabelText(/Tên chỉ số đo lường/i, {}, { timeout: 5000 }), "Số tuần review hoàn chỉnh");
+  await user.type(screen.getByLabelText(/Đơn vị đo lường/i), "tuần");
+  await user.type(screen.getByLabelText(/Mức xuất phát/i), "0");
+  await user.type(screen.getByLabelText(/Mức đích cần đạt/i), "12");
+  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  await user.type(await screen.findByLabelText(/Thời gian mỗi tuần/i, {}, { timeout: 5000 }), "6");
-  await user.type(screen.getByLabelText(/Kỹ năng cần có/i), "Lập kế hoạch\nReview tuần");
-  await user.type(screen.getByLabelText(/Nguồn lực hỗ trợ/i), "Lịch cá nhân và dashboard 12 tuần");
-  await user.click(screen.getByRole("button", { name: "Tiếp" }));
+  // Đối với AchievableStep, nhãn là "1. Thời gian cam kết thực hiện mỗi tuần"
+  const slider = await screen.findByLabelText(/Thời gian cam kết thực hiện/i, {}, { timeout: 5000 });
+  fireEvent.change(slider, { target: { value: "6" } });
+  await user.type(screen.getByLabelText(/Kỹ năng cần bổ sung/i), "Lập kế hoạch\nReview tuần");
+  await user.type(screen.getByLabelText(/Công cụ & Nguồn lực/i), "Lịch cá nhân và dashboard 12 tuần");
+  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
   await user.type(
-    await screen.findByLabelText(/Lý do bạn thật sự muốn theo đuổi/i, {}, { timeout: 5000 }),
+    await screen.findByLabelText(/Động lực cốt lõi/i, {}, { timeout: 5000 }),
     "Tôi cần một nhịp review đủ rõ để không bỏ dở mục tiêu dài hạn.",
   );
-  await user.type(screen.getByLabelText(/Lĩnh vực cuộc sống liên quan/i), "Sự nghiệp");
-  await user.click(screen.getByRole("button", { name: "Tiếp" }));
+  await user.type(screen.getByLabelText(/Khía cạnh liên kết/i), "Sự nghiệp");
+  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  await screen.findByLabelText(/Số tuần mục tiêu/i, {}, { timeout: 5000 });
-  await user.click(screen.getByRole("button", { name: "Hoàn thành" }));
+  await screen.findByLabelText(/Thời hạn mục tiêu/i, {}, { timeout: 5000 });
+  await user.click(screen.getByRole("button", { name: "Kiểm tra độ khả thi" }));
 }
 
 async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
@@ -246,27 +249,27 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
     await user.click(await screen.findByLabelText(answer, {}, { timeout: 5000 }));
     await user.click(
       screen.getByRole("button", {
-        name: index === answers.length - 1 ? "Xem kết quả →" : "Tiếp →",
+        name: index === answers.length - 1 ? "Xem phân tích khả thi" : "Tiếp theo",
       }),
     );
   }
 
-  await user.click(await screen.findByRole("button", { name: "Tiếp tục → Kế hoạch 12 tuần" }, { timeout: 5000 }));
+  await user.click(await screen.findByRole("button", { name: "Tiếp tục với mục tiêu này" }, { timeout: 5000 }));
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
   await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" }, { timeout: 5000 });
-  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+  await user.click(await screen.findByRole("button", { name: "Tiếp →" }, { timeout: 5000 }));
 
-  const tacticInputs = await screen.findAllByLabelText("Tên việc");
+  const tacticInputs = await screen.findAllByLabelText(/Mô tả hành động lặp lại/i);
   await user.clear(tacticInputs[0]);
   await user.type(tacticInputs[0], "Chốt review tuần");
   await user.clear(tacticInputs[1]);
   await user.type(tacticInputs[1], "Hoàn thành việc trọng tâm");
 
-  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
-  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
-  await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
+  await user.click(await screen.findByRole("button", { name: "Tiếp →" }, { timeout: 5000 }));
+  await user.click(await screen.findByRole("button", { name: "Tiếp →" }, { timeout: 5000 }));
+  await user.click(await screen.findByRole("button", { name: "Bắt đầu kế hoạch" }, { timeout: 5000 }));
 }
 
 describe("authenticated new user core flow", () => {
@@ -348,30 +351,33 @@ describe("authenticated new user core flow", () => {
     expect(
       await screen.findByText(
         (_content, element) =>
-          element?.tagName === "H1" && /Cùng xem bức tranh hiện tại của bạn/i.test(element.textContent ?? ""),
+          element?.tagName === "H1" && /Thiết kế cuộc sống 12 tuần của bạn/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu nhanh/i }));
-    for (const slider of await screen.findAllByRole("slider")) {
+    await user.click(screen.getByRole("button", { name: /Bắt đầu Đánh giá ngay/i }));
+    for (let i = 0; i < 8; i++) {
+      const slider = await screen.findByRole("slider");
       slider.focus();
       await user.keyboard("{ArrowRight}");
+      const nextBtnName = i < 7 ? "Lĩnh vực tiếp theo" : "Hoàn thành rà soát";
+      await user.click(screen.getByRole("button", { name: nextBtnName }));
     }
-    await user.click(await screen.findByRole("button", { name: /Tiếp → Chọn trọng tâm/i }));
+    await user.click(await screen.findByRole("button", { name: /Xem Góc nhìn cuộc sống của tôi/i }));
 
     expect(
       await screen.findByText(
         (_content, element) =>
-          element?.tagName === "H1" && /Chọn nơi đáng ưu tiên trong 12 tuần tới/i.test(element.textContent ?? ""),
+          element?.tagName === "H1" && /Góc nhìn cuộc sống & Trọng tâm của bạn/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     expect(getUserData().onboardingCompleted).toBe(true);
     expect(getUserData().goals).toEqual([]);
 
-    await user.click(screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i }));
+    await user.click(screen.getByRole("button", { name: /Bắt đầu đặt mục tiêu SMART/i }));
     await fillSmartGoal(user);
     await completeFeasibility(user);
     await completeTwelveWeekSetup(user);
@@ -379,7 +385,7 @@ describe("authenticated new user core flow", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/12-week-system");
     });
-    expect(await screen.findByText("Nhịp 12 tuần")).toBeInTheDocument();
+    expect(await screen.findByText(/Hệ thống 12 tuần/i)).toBeInTheDocument();
 
     const dataAfterSetup = getUserData();
     expect(dataAfterSetup.goals).toHaveLength(1);
@@ -405,7 +411,7 @@ describe("authenticated new user core flow", () => {
     ui.unmount();
 
     const reloadRender = renderAuthenticatedCoreFlow("/12-week-system");
-    expect(await screen.findByText("Nhịp 12 tuần")).toBeInTheDocument();
+    expect(await screen.findByText(/Hệ thống 12 tuần/i)).toBeInTheDocument();
     expect(screen.getByText(/Ra mắt hệ thống review cá nhân/i)).toBeInTheDocument();
     expect(getUserData().goals).toHaveLength(1);
 

@@ -35,6 +35,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           <span className="flex items-center gap-2 text-app-ink">
             <SlidersHorizontal className="h-5 w-5 text-emerald-500" />
             Nhịp kế hoạch
+            <span className="sr-only">Cài đặt mục tiêu</span>
           </span>
         }
         description="Điều chỉnh chu kỳ 12 tuần, ngày review, mức tải, sắp xếp tactics và lịch tuần tham chiếu."
