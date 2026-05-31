@@ -147,11 +147,12 @@ export function LifeBalance() {
   const historicalData = useMemo<LifeBalanceHistoryChartPoint[]>(() => {
     if (!userData) return [];
     return userData.wheelOfLifeHistory.slice(-6).map((record) => {
+      const dateObj = new Date(record.date);
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const year = dateObj.getFullYear();
       const dataPoint: LifeBalanceHistoryChartPoint = {
-        date: new Date(record.date).toLocaleDateString("vi-VN", {
-          month: "short",
-          day: "numeric",
-        }),
+        date: `${day}/${month}/${year}`,
       };
 
       record.areas.forEach((area) => {
@@ -161,6 +162,20 @@ export function LifeBalance() {
       return dataPoint;
     });
   }, [userData]);
+
+  const formattedLastSaved = useMemo(() => {
+    const lastHistoryRecord = userData?.wheelOfLifeHistory && userData.wheelOfLifeHistory.length > 0
+      ? userData.wheelOfLifeHistory[userData.wheelOfLifeHistory.length - 1]
+      : null;
+    const dateToFormat = lastSavedAt || (lastHistoryRecord ? new Date(lastHistoryRecord.date) : null);
+    if (!dateToFormat) return null;
+    const day = String(dateToFormat.getDate()).padStart(2, "0");
+    const month = String(dateToFormat.getMonth() + 1).padStart(2, "0");
+    const year = dateToFormat.getFullYear();
+    const hours = String(dateToFormat.getHours()).padStart(2, "0");
+    const minutes = String(dateToFormat.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} lúc ${hours}:${minutes}`;
+  }, [lastSavedAt, userData?.wheelOfLifeHistory]);
 
   const hasLifeBalanceData = Boolean(userData?.onboardingCompleted);
 
@@ -258,10 +273,6 @@ export function LifeBalance() {
   }
 
   if (!strongestArea || !weakestArea) return null;
-
-  const formattedLastSaved = lastSavedAt
-    ? lastSavedAt.toLocaleString("vi-VN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
-    : null;
   const historyCount = userData.wheelOfLifeHistory.length;
 
   return (

@@ -214,6 +214,18 @@ export function TwelveWeekSystem() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+
+  useEffect(() => {
+    if (isReady && activeGoal && localStorage.getItem("show_12week_setup_success") === "true") {
+      setShowSuccessOverlay(true);
+      localStorage.removeItem("show_12week_setup_success");
+      const timer = setTimeout(() => {
+        celebrateLarge();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isReady, activeGoal]);
   const [isDeletingData, setIsDeletingData] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
   const [weeklyReviewSnoozeUntil, setWeeklyReviewSnoozeUntil] = useState(readWeeklyReviewSnoozeUntil);
@@ -1172,6 +1184,55 @@ export function TwelveWeekSystem() {
         handleUseCloudVersion={handleUseCloudVersion}
         handleOpenBillingPortal={handleOpenBillingPortal}
       />
+
+      {/* Success Overlay */}
+      {showSuccessOverlay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-ink/40 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden animate-scale-up">
+            {/* Decorative soft gradient blobs inside the card */}
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-app-accent-soft/20 rounded-full blur-xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-warm-soft/20 rounded-full blur-xl pointer-events-none" />
+            
+            {/* Washi Tape effect */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-app-accent/15 backdrop-blur-[1px] rotate-[-1deg] border border-dashed border-app-accent/20" />
+            
+            {/* Celebrate Icon */}
+            <div className="mx-auto mt-4 mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-accent-soft text-app-accent animate-bounce">
+              <span className="text-3xl" role="img" aria-label="party popper">🎉</span>
+            </div>
+
+            <h2 className="font-serif text-2xl font-semibold text-app-ink">
+              Thiết lập kế hoạch thành công!
+            </h2>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-app-accent">
+              12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
+            </p>
+
+            <div className="my-5 p-4 rounded-xl bg-app-bg-subtle/50 border border-app-line/40 text-left">
+              <p className="text-[10px] font-bold text-app-ink-muted uppercase">Mục tiêu của bạn:</p>
+              <p className="mt-1 text-sm font-medium leading-snug text-app-ink break-words">
+                {activeGoal?.title}
+              </p>
+            </div>
+
+            <p className="text-xs text-app-ink-soft leading-relaxed max-w-xs mx-auto mb-6">
+              Hành trình vạn dặm khởi đầu từ một bước chân. Bạn đã sẵn sàng thực hiện những hành động nhỏ đầu tiên hôm nay chưa?
+            </p>
+
+            <button
+              type="button"
+              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5"
+              style={{ backgroundColor: "var(--color-accent)" }}
+              onClick={() => {
+                setShowSuccessOverlay(false);
+                handleTabChange("today");
+              }}
+            >
+              Bắt đầu hành động hôm nay 🚀
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

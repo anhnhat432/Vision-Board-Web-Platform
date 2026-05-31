@@ -14,6 +14,7 @@ import {
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../../components/ui/collapsible";
+import { cn } from "../../../components/ui/utils";
 import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { getLifeAreaLabel } from "../../../utils/storage";
 import type { PlanLoadRecommendation, ResultData, ResultType, WeeklyCapacity } from "../types";
@@ -234,39 +235,68 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       {/* Visual score gauge block */}
       <div className="mt-6 relative z-10 rounded-2xl border border-white/10 dark:border-slate-850/40 bg-slate-50/40 dark:bg-slate-950/20 p-5 sm:p-6 backdrop-blur-[2px]">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <div className="relative flex shrink-0 flex-col items-center justify-center text-center sm:w-48">
-            <div className="relative flex items-center justify-center h-32 w-32 drop-shadow-[0_0_15px_rgba(99,102,241,0.25)] dark:drop-shadow-[0_0_20px_rgba(99,102,241,0.35)]">
-              <svg className="absolute inset-0 w-full h-full transform -rotate-90" role="img" aria-label="Biểu đồ tiến trình độ khả thi">
-                <title>Biểu đồ tiến trình độ khả thi</title>
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="52"
-                  className="stroke-slate-200/60 dark:stroke-slate-800/60"
-                  strokeWidth="6"
-                  fill="transparent"
-                />
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="52"
-                  className="stroke-indigo-500 dark:stroke-indigo-400 transition-all duration-1000 ease-out"
-                  strokeWidth="8"
-                  fill="transparent"
-                  strokeDasharray={2 * Math.PI * 52}
-                  strokeDashoffset={2 * Math.PI * 52 - (scorePercent / 100) * (2 * Math.PI * 52)}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="relative flex flex-col items-center justify-center p-2">
-                <span className="font-serif text-[15px] font-bold leading-none bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-white dark:to-indigo-200 bg-clip-text text-transparent tracking-tight">
-                  {scorePercent >= 75 ? "Ổn định ✨" : scorePercent >= 50 ? "Khá tốt 🌱" : "Cần chỉnh 🌊"}
+          <div className="relative flex shrink-0 flex-col items-center justify-center text-center sm:w-48 gap-4">
+            <div className="relative flex flex-col items-center justify-center w-28 h-40 rounded-[20px] border-4 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/60 overflow-hidden shadow-inner group/container">
+              <style>{`
+                @keyframes wave-flow {
+                  0% { transform: translateX(0); }
+                  100% { transform: translateX(-50%); }
+                }
+                .wave-anim-1 {
+                  animation: wave-flow 3s linear infinite;
+                }
+                .wave-anim-2 {
+                  animation: wave-flow 5.5s linear infinite;
+                }
+              `}</style>
+              {/* Nắp chai hoặc cực pin nhỏ phía trên */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-2 bg-slate-400 dark:bg-slate-600 rounded-b" />
+              
+              {/* Lớp nước/năng lượng dâng vơi */}
+              <div 
+                className={cn(
+                  "absolute bottom-0 left-0 right-0 transition-all duration-1000 ease-out overflow-hidden",
+                  scorePercent >= 75 ? "bg-gradient-to-t from-emerald-500 to-teal-400" :
+                  scorePercent >= 50 ? "bg-gradient-to-t from-amber-500 to-yellow-400" :
+                  "bg-gradient-to-t from-rose-500 to-red-400"
+                )}
+                style={{ height: `${scorePercent}%` }}
+              >
+                {/* Sóng nước nhấp nhô chuyển động (Wave animation) */}
+                <div className="absolute top-0 left-0 right-0 h-4 overflow-hidden -mt-2">
+                  <svg 
+                    viewBox="0 0 120 28" 
+                    className="absolute left-0 w-[200%] h-full fill-current text-white/20 wave-anim-1"
+                    role="img"
+                  >
+                    <title>Sóng nước 1</title>
+                    <path d="M0 15 Q 30 0, 60 15 T 120 15 T 180 15 T 240 15 L 240 28 L 0 28 Z" />
+                  </svg>
+                  <svg 
+                    viewBox="0 0 120 28" 
+                    className="absolute left-0 w-[200%] h-full fill-current text-white/10 wave-anim-2 opacity-80"
+                    role="img"
+                  >
+                    <title>Sóng nước 2</title>
+                    <path d="M0 15 Q 30 25, 60 15 T 120 15 T 180 15 T 240 15 L 240 28 L 0 28 Z" />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Chỉ số hiển thị chìm bên trong bể */}
+              <div className="relative z-10 flex flex-col items-center justify-center p-2 text-center pointer-events-none mix-blend-difference">
+                <span className="font-serif text-3xl font-black text-white leading-none">
+                  {scorePercent}%
                 </span>
-                <span className="mt-1 text-[9px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Mức sẵn sàng</span>
+                <span className="mt-1.5 text-[8px] font-extrabold uppercase tracking-widest text-white/95">
+                  DUNG LƯỢNG
+                </span>
               </div>
             </div>
-            <p className="mt-3 text-sm font-extrabold text-indigo-500 dark:text-indigo-400">{statusLabel}</p>
-            <p className="mt-0.5 text-xs text-slate-450 dark:text-slate-500 font-medium">Mức độ khả thi</p>
+            <div>
+              <p className="text-sm font-extrabold text-indigo-500 dark:text-indigo-400">{statusLabel}</p>
+              <p className="mt-0.5 text-xs text-slate-450 dark:text-slate-500 font-medium">Mức độ khả thi</p>
+            </div>
           </div>
           
           <div className="min-w-0 flex-1 space-y-4">

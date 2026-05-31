@@ -627,168 +627,200 @@ export function Onboarding() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
-          <div className="space-y-3 order-1 lg:order-1">
-            <div className="space-y-2.5">
-              {lifeAreas.map((area, index) => {
-                const AreaIcon = getCalmLifeAreaIcon(area.name);
-                const areaLabel = getLifeAreaLabel(area.name);
-                const isAreaReviewed = reviewedAreaIndices.has(index);
-                const colorConfig = getAreaColorConfig(area.name);
-                const isActive = activeAreaIndex === index;
+          <div className="space-y-6 order-1 lg:order-1">
+            {/* Thanh điều hướng tiến trình 8 khía cạnh (Step Indicator) */}
+            <div className="bg-app-surface border border-app-line rounded-2xl p-4 shadow-app-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted mb-3 text-center sm:text-left">
+                Nhấn để chuyển nhanh giữa các lĩnh vực:
+              </p>
+              <div className="flex justify-between items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                {lifeAreas.map((area, index) => {
+                  const AreaIcon = getCalmLifeAreaIcon(area.name);
+                  const isSelected = activeAreaIndex === index;
+                  const isReviewed = reviewedAreaIndices.has(index);
+                  const colorConfig = getAreaColorConfig(area.name);
 
-                return (
-                  // biome-ignore lint/a11y/useSemanticElements: card container behaves as an interactive element
-                  <div
-                    key={area.name}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setActiveAreaIndex(isActive ? null : index)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setActiveAreaIndex(isActive ? null : index);
-                      }
-                    }}
-                    className={`cursor-pointer rounded-xl border transition-all duration-200 overflow-hidden outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 ${
-                      isActive 
-                        ? "bg-app-surface"
-                        : isAreaReviewed 
-                          ? "border-app-line bg-app-surface/90 hover:bg-app-surface hover:border-app-line-strong hover:shadow-app-sm" 
-                          : "border-app-line bg-app-surface/40 hover:bg-app-surface/60 hover:border-app-line-strong"
-                    }`}
-                    style={isActive ? { borderColor: colorConfig.accent, boxShadow: `0 8px 24px -6px ${colorConfig.accent}18, 0 2px 8px -2px ${colorConfig.accent}12` } : {}}
-                  >
-                    <div className="p-4 flex items-center justify-between gap-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform ${isActive ? "scale-110" : ""} ${colorConfig.bgLight} ${colorConfig.text}`}>
-                          <AreaIcon className="h-4 w-4" aria-hidden="true" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h2 className={`text-sm font-semibold truncate ${isActive ? "text-app-ink font-bold" : isAreaReviewed ? "text-app-ink" : "text-app-ink-soft"}`}>
-                              {areaLabel}
-                            </h2>
-                            {isAreaReviewed && (
-                              <span className="inline-flex items-center text-[9px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded-full">
-                                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
-                                Đã rà
-                              </span>
-                            )}
-                          </div>
-                          {!isActive && isAreaReviewed && (
-                            <p className="text-[10px] text-app-ink-muted truncate max-w-[220px]">
-                              {LIFE_AREA_DETAILS[area.name]}
-                            </p>
-                          )}
-                          {!isActive && !isAreaReviewed && (
-                            <p className="text-[10px] text-app-ink-muted italic">
-                              Chưa đánh giá
-                            </p>
-                          )}
-                        </div>
+                  return (
+                    <button
+                      key={area.name}
+                      type="button"
+                      onClick={() => setActiveAreaIndex(index)}
+                      className={`relative flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shrink-0 ${
+                        isSelected
+                          ? "bg-app-bg-subtle scale-105"
+                          : "hover:bg-app-bg-subtle/50"
+                      }`}
+                      title={getLifeAreaLabel(area.name)}
+                    >
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                          isSelected
+                            ? "text-white"
+                            : isReviewed
+                              ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400"
+                              : "bg-app-bg text-app-ink-muted"
+                        }`}
+                        style={isSelected ? { backgroundColor: colorConfig.accent } : {}}
+                      >
+                        <AreaIcon className="h-5 w-5" />
                       </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="flex items-center gap-1.5">
-                          {isAreaReviewed && (
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getScaleGuidanceColor(area.score)}`}>
-                              {getScaleGuidance(area.score)}
-                            </span>
-                          )}
-                          <span className={`font-serif text-2xl font-bold tabular-nums leading-none ${isAreaReviewed ? "text-app-ink" : "text-app-ink-muted"}`}>
-                            {area.score}
-                          </span>
-                          <span className="text-xs text-app-ink-muted">/10</span>
+                      <span
+                        className={`text-[9px] font-bold tracking-tight hidden sm:block ${
+                          isSelected
+                            ? "text-app-ink"
+                            : isReviewed
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-app-ink-muted"
+                        }`}
+                      >
+                        {getLifeAreaLabel(area.name)}
+                      </span>
+                      {/* Badge hiển thị điểm hoặc tích xanh */}
+                      {isReviewed && !isSelected && (
+                        <div className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[8px] font-bold text-white shadow-sm">
+                          {area.score}
                         </div>
-                        {isActive ? (
-                          <ChevronUp className="h-4 w-4 text-app-ink-soft" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-app-ink-muted" />
-                        )}
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Thẻ hiển thị khía cạnh hiện tại (Active Wizard Card) */}
+            {(() => {
+              const index = activeAreaIndex ?? 0;
+              const area = lifeAreas[index];
+              if (!area) return null;
+
+              const AreaIcon = getCalmLifeAreaIcon(area.name);
+              const areaLabel = getLifeAreaLabel(area.name);
+              const colorConfig = getAreaColorConfig(area.name);
+
+              return (
+                <div
+                  className="rounded-2xl border bg-app-surface p-6 md:p-8 space-y-6 transition-all duration-300 shadow-app-md animate-fade-in"
+                  style={{ borderColor: colorConfig.accent, boxShadow: `0 12px 36px -12px ${colorConfig.accent}18` }}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-app-line/40 pb-4">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-md animate-pulse-slow"
+                        style={{ backgroundColor: colorConfig.accent }}
+                      >
+                        <AreaIcon className="h-7 w-7" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: colorConfig.accent }}>
+                          LĨNH VỰC {index + 1} / 8
+                        </span>
+                        <h2 className="text-2xl font-serif font-bold text-app-ink mt-0.5">
+                          {areaLabel}
+                        </h2>
                       </div>
                     </div>
 
-                    {isActive && (
-                      // biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation wrapper
-                      // biome-ignore lint/a11y/noStaticElementInteractions: stop propagation wrapper
-                      <div 
-                        className="px-4 pb-4 pt-3 border-t border-app-line/40 bg-app-bg-subtle/30 space-y-4 cursor-default animate-fade-in"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <p className="text-xs text-app-ink-soft leading-relaxed">
-                          {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống."}
-                        </p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-app-ink-muted font-medium">Kéo thanh trượt để chấm điểm:</span>
-                            <span className={`inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full ${getScaleGuidanceColor(area.score)}`}>
-                              {area.score}/10 — {getScaleGuidance(area.score)}
-                            </span>
-                          </div>
-                          <div className="pt-2 px-1">
-                            <Slider
-                              value={[area.score]}
-                              onValueChange={(value) => handleScoreChangeWrapped(index, value)}
-                              min={0}
-                              max={10}
-                              step={1}
-                              trackColor={colorConfig.accent}
-                              className="w-full"
-                              aria-label={`Điểm ${areaLabel}`}
-                            />
-                          </div>
-                          <div className="mt-1 flex items-center justify-between text-[10px] font-mono text-app-ink-muted">
-                            <span>0 (Cần chăm sóc)</span>
-                            <span>5 (Ổn định)</span>
-                            <span>10 (Đang phát triển)</span>
-                          </div>
-                        </div>
-
-                        <div className="pt-3 flex items-center justify-between gap-3 border-t border-app-line/20">
-                          <button
-                            type="button"
-                            className="text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/30 rounded-lg px-2.5 py-1.5 transition-colors"
-                            onClick={() => {
-                              handleSkipArea(index);
-                              if (index < 7) {
-                                setActiveAreaIndex(index + 1);
-                              } else {
-                                setActiveAreaIndex(null);
-                              }
-                            }}
-                          >
-                            Để sau
-                          </button>
-                          
-                          <button
-                            type="button"
-                            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-4 py-2 text-xs font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 shadow-xs"
-                            onClick={() => {
-                              markAreaReviewed(index);
-                              if (index < 7) {
-                                setActiveAreaIndex(index + 1);
-                              } else {
-                                setActiveAreaIndex(null);
-                              }
-                            }}
-                          >
-                            {index < 7 ? (
-                              <>
-                                Lĩnh vực tiếp theo
-                                <ArrowRight className="h-3.5 w-3.5" />
-                              </>
-                            ) : (
-                              "Hoàn thành rà soát"
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex items-baseline gap-1.5 self-start sm:self-center">
+                      <span className="text-[10px] text-app-ink-muted font-bold uppercase">Điểm hiện tại:</span>
+                      <span className="font-serif text-3xl font-extrabold tabular-nums leading-none" style={{ color: colorConfig.accent }}>
+                        {area.score}
+                      </span>
+                      <span className="text-xs text-app-ink-muted font-semibold">/ 10</span>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="rounded-xl bg-app-bg-subtle/40 p-4 border border-app-line/30">
+                    <p className="text-sm text-app-ink-soft leading-relaxed">
+                      {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
+                    </p>
+                  </div>
+
+                  {/* Phần điều chỉnh điểm */}
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-app-ink-muted">Chấm điểm mức độ hài lòng của bạn:</span>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${getScaleGuidanceColor(area.score)}`}>
+                        {area.score}đ — {getScaleGuidance(area.score)}
+                      </span>
+                    </div>
+
+                    <div className="py-4 px-2">
+                      <Slider
+                        value={[area.score]}
+                        onValueChange={(value) => handleScoreChangeWrapped(index, value)}
+                        min={0}
+                        max={10}
+                        step={1}
+                        trackColor={colorConfig.accent}
+                        className="w-full"
+                        aria-label={`Điểm ${areaLabel}`}
+                      />
+                    </div>
+
+                    <div className="flex justify-between text-[10px] font-bold text-app-ink-muted/80 uppercase tracking-wider px-1">
+                      <span className="flex items-center gap-1">😢 Cần chăm sóc (0-3)</span>
+                      <span className="flex items-center gap-1">😐 Ổn định (4-7)</span>
+                      <span className="flex items-center gap-1">😊 Phát triển (8-10)</span>
+                    </div>
+                  </div>
+
+                  {/* Nút điều hướng chân trang */}
+                  <div className="pt-6 border-t border-app-line/40 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all disabled:opacity-40"
+                      disabled={index === 0}
+                      onClick={() => setActiveAreaIndex(index - 1)}
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      Lĩnh vực trước
+                    </button>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline px-3 py-2.5 transition-colors"
+                        onClick={() => {
+                          handleSkipArea(index);
+                          if (index < 7) {
+                            setActiveAreaIndex(index + 1);
+                          }
+                        }}
+                      >
+                        Bỏ qua
+                      </button>
+
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.97] shadow-sm"
+                        style={{ backgroundColor: colorConfig.accent }}
+                        onClick={() => {
+                          markAreaReviewed(index);
+                          if (index < 7) {
+                            setActiveAreaIndex(index + 1);
+                          } else {
+                            // Tự động cuộn xuống nút hoàn thành ở chân trang chính
+                            const footerButton = document.querySelector("button[onClick*='Complete']");
+                            if (footerButton) {
+                              footerButton.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }
+                        }}
+                      >
+                        {index < 7 ? (
+                          <>
+                            Lĩnh vực tiếp theo
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </>
+                        ) : (
+                          "Hoàn thành rà soát"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {!canCompleteAssessment && (
               <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 flex items-start gap-2.5">

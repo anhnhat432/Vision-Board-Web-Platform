@@ -1157,6 +1157,7 @@ export function TwelveWeekSetupLab() {
       description: "Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
     });
 
+    localStorage.setItem("show_12week_setup_success", "true");
     navigate("/12-week-system");
   };
 

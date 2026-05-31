@@ -865,16 +865,11 @@ export function SmartGoalStepShell({
 
               {currentStepError && (
                 <div
-                  className="rounded-xl border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-[color:var(--color-warning-fg)] shadow-sm"
+                  className="rounded-xl border border-rose-200/60 dark:border-rose-900/30 bg-rose-50/30 dark:bg-rose-950/15 px-4 py-2.5 text-rose-600 dark:text-rose-400 text-xs shadow-sm flex items-center gap-2"
                   role="alert"
                 >
-                  <div className="flex items-start gap-2.5">
-                    <CircleAlert className="mt-0.5 h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-                    <div>
-                      <p className="text-sm font-semibold">Cần hoàn tất bước này</p>
-                      <p className="mt-1 text-sm leading-5 opacity-90">{currentStepError}</p>
-                    </div>
-                  </div>
+                  <CircleAlert className="h-4 w-4 shrink-0 text-rose-500" aria-hidden="true" />
+                  <span className="font-semibold">{currentStepError}</span>
                 </div>
               )}
 

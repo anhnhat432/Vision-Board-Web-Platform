@@ -1,8 +1,8 @@
-import { Calendar, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { celebrateSmall } from "../../../lib/effects/celebrate";
 
-import { Button } from "../../components/ui/button";
 import { Skeleton } from "../../components/ui/skeleton";
 import { useSyncedUserData } from "../../hooks/useSyncedUserData";
 import { soundService } from "../../services/soundService";
@@ -316,7 +316,7 @@ function TaskCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () =>
       aria-label={checked ? "Đánh dấu chưa xong" : "Đánh dấu xong"}
       aria-pressed={checked}
       onClick={onToggle}
-      className={`mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
+      className={`relative mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 after:absolute after:w-11 after:h-11 after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 ${
         checked ? "border border-app-accent bg-app-accent text-white" : "border-[1.5px] border-app-line-strong bg-app-surface"
       }`}
     >
@@ -474,8 +474,8 @@ function WeekProgressCard({
         </p>
       </div>
 
-      <div className="-mx-1 mt-5 overflow-x-auto pb-2">
-        <div className="grid min-w-[420px] snap-x grid-cols-7 gap-2 px-1 max-[374px]:min-w-0 max-[374px]:grid-cols-4">
+      <div className="-mx-1 mt-5 pb-1">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 px-1 w-full min-w-0">
           {days.map((day) => (
             <WeekProgressDay key={day.key} day={day} />
           ))}
@@ -564,24 +564,82 @@ function TodayV2Footer({ lastSavedLabel }: { lastSavedLabel: string }) {
 
 function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void }) {
   return (
-    <div className="min-h-screen bg-app-bg text-app-ink">
-      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-        <section className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center md:p-12">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
-            <Calendar className="h-7 w-7" />
+    <div className="min-h-screen bg-[#FCFAF7] dark:bg-[#0F172A] text-app-ink flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-md w-full px-4 text-center">
+        <div className="relative overflow-hidden rounded-2xl border border-app-line/60 bg-app-surface p-6 sm:p-8 shadow-md rotate-[-0.5deg] hover:rotate-0 transition-transform duration-300">
+          {/* Washi Tape effect */}
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-app-accent/15 backdrop-blur-[1px] rotate-[1.5deg] border border-dashed border-app-accent/20" />
+
+          {/* Mindfulness Illustration */}
+          <div className="mb-4">
+            <svg viewBox="0 0 200 160" className="mx-auto h-36 w-auto overflow-visible" aria-hidden="true">
+              <defs>
+                <linearGradient id="sun-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="var(--color-accent, #7c3aed)" />
+                  <stop offset="100%" stopColor="#f472b6" />
+                </linearGradient>
+                <linearGradient id="hill-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#a7f3d0" />
+                  <stop offset="100%" stopColor="#34d399" />
+                </linearGradient>
+                <style>{`
+                  @keyframes float-svg {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-6px); }
+                  }
+                  @keyframes sway-svg {
+                    0%, 100% { transform: rotate(0deg); }
+                    50% { transform: rotate(4deg); }
+                  }
+                  .animate-float-svg { animation: float-svg 4s ease-in-out infinite; }
+                  .animate-sway-svg { animation: sway-svg 5s ease-in-out infinite; transform-origin: bottom center; }
+                `}</style>
+              </defs>
+              <circle cx="100" cy="70" r="32" fill="url(#sun-grad)" opacity="0.1" />
+              <circle cx="100" cy="70" r="22" fill="url(#sun-grad)" opacity="0.25" className="animate-float-svg" />
+              
+              <path d="M20 130 Q100 100 180 130 L180 150 L20 150 Z" fill="url(#hill-grad)" opacity="0.15" />
+              <path d="M40 135 Q100 115 160 135 L160 150 L40 150 Z" fill="url(#hill-grad)" opacity="0.25" />
+
+              <g className="animate-sway-svg" style={{ transformBox: "fill-box" }}>
+                <path d="M100 130 Q102 110 98 90" fill="none" stroke="var(--color-accent, #7c3aed)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+                <path d="M99 110 Q85 105 90 95 Q97 100 99 110" fill="#34d399" />
+                <path d="M100 100 Q115 95 110 85 Q103 90 100 100" fill="#10b981" />
+                <circle cx="98" cy="90" r="3.5" fill="#f472b6" />
+              </g>
+
+              <circle cx="45" cy="55" r="2.5" fill="var(--color-accent, #7c3aed)" opacity="0.4" className="animate-float-svg" style={{ animationDelay: "1s" }} />
+              <circle cx="155" cy="65" r="2" fill="#fbbf24" opacity="0.5" className="animate-float-svg" style={{ animationDelay: "2s" }} />
+              <path d="M140 105 L143 108 L140 111 L137 108 Z" fill="#ec4899" opacity="0.3" className="animate-float-svg" style={{ animationDelay: "0.5s" }} />
+            </svg>
           </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">HÔM NAY</p>
-          <h1 className="mt-3 font-serif text-3xl font-medium leading-tight text-app-ink">
-            Bạn chưa có chu kỳ 12 tuần đang chạy.
+
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">Hôm Nay</p>
+          <h1 className="mt-2 font-serif text-2xl font-semibold text-app-ink leading-snug">
+            Khởi đầu chu kỳ 12 tuần của bạn
           </h1>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-app-ink-soft">
-            Tạo một mục tiêu 12 tuần để Hôm nay biết bạn nên làm gì, tuần đang ở đâu và khi nào cần review.
+          <p className="mt-3 text-xs leading-relaxed text-app-ink-soft max-w-xs mx-auto">
+            Hệ thống 12 tuần giúp chuyển đổi những mong muốn mơ hồ thành hành động cụ thể cho từng ngày. Bắt đầu ngay hôm nay để thấy sự thay đổi.
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
-            <Button type="button" onClick={() => onNavigate("/12-week-setup")}>Tạo mục tiêu 12 tuần</Button>
-            <Button type="button" variant="outline" onClick={() => onNavigate("/")}>Về Trang chính</Button>
+          
+          <div className="mt-6 flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={() => onNavigate("/12-week-setup")}
+              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-4 rounded-xl shadow-sm active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5"
+              style={{ backgroundColor: "var(--color-accent)" }}
+            >
+              Thiết lập mục tiêu 12 tuần 🚀
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("/")}
+              className="w-full border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg font-semibold py-2.5 px-4 rounded-xl active:scale-[0.98] transition-all text-xs flex items-center justify-center"
+            >
+              Quay lại Trang chính
+            </button>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   );
@@ -671,9 +729,13 @@ export function TodayV2Page() {
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     if (!viewModel.activeGoalId) return;
+    const willBeAllCompleted = completed && viewModel.tasks.every(t => t.id === taskId ? true : t.completed);
     toggleTwelveWeekTask(viewModel.activeGoalId, taskId, completed);
     if (completed) {
       soundService.click();
+      if (willBeAllCompleted && viewModel.tasks.length > 0) {
+        celebrateSmall();
+      }
     }
     reloadUserData();
   };

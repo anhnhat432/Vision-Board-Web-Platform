@@ -28,6 +28,25 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="apple-touch-icon" href="/favicon-192.png" />
     <link rel="manifest" href="/manifest.json" />
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem("dof_theme");
+          var resolved = "light";
+          if (stored === "dark") {
+            resolved = "dark";
+          } else if (stored === "system") {
+            resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          if (resolved === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+          document.documentElement.style.colorScheme = resolved;
+        } catch (e) {}
+      })();
+    </script>
     <title>Dear Our Future</title>
   </head>
 

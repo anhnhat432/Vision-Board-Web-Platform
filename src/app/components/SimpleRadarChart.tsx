@@ -62,7 +62,7 @@ function splitLabel(label: string) {
 
 export function SimpleRadarChart({
   data,
-  height = 380,
+  height,
   stroke = "var(--app-accent)",
   fill = "var(--app-accent)",
   fillOpacity = 0.15,
@@ -91,7 +91,10 @@ export function SimpleRadarChart({
   });
 
   return (
-    <div className={className} style={{ height }}>
+    <div
+      className={`w-full h-auto aspect-square max-h-[360px] ${className || ""}`}
+      style={height ? { maxHeight: height } : undefined}
+    >
       <svg
         aria-label="Biểu đồ radar tổng quan"
         className="h-full w-full"

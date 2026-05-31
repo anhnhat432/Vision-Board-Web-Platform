@@ -525,10 +525,23 @@ describe("weekly review storage migration", () => {
   });
 
   it("normalizes week 13 systems into completed cycle-review state with cycle number", () => {
+    const testStartDate = new Date();
+    testStartDate.setDate(testStartDate.getDate() - 12 * 7);
+    const day = testStartDate.getDay();
+    const diff = testStartDate.getDate() - day + (day === 0 ? -6 : 1);
+    const startOfWeekDate = new Date(testStartDate.setDate(diff));
+    const endOfWeekDate = new Date(startOfWeekDate);
+    endOfWeekDate.setDate(startOfWeekDate.getDate() + 83);
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const format = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
     const goal = createGoal("week-13-cycle", "2026-05-01T00:00:00.000Z", {
       currentWeek: 13,
       status: "active",
       cycleNumber: undefined,
+      startDate: format(startOfWeekDate),
+      endDate: format(endOfWeekDate),
     });
 
     const normalized = normalizeGoal(goal);
