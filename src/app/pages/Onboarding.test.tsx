@@ -52,7 +52,7 @@ describe("Onboarding", () => {
     scrollToMock.mockClear();
     await user.click(startButton);
 
-    expect(await screen.findByRole("heading", { name: /Chấm 8 lĩnh vực của bạn/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Thiết lập Bánh xe Cuộc đời/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "smooth" });
     });
@@ -76,7 +76,7 @@ describe("Onboarding", () => {
     expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
 
     await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
-    expect(await screen.findByRole("button", { name: /Tiếp → Chọn trọng tâm/i })).toBeEnabled();
+    expect(await screen.findByRole("button", { name: /Khám phá Góc nhìn cuộc sống/i })).toBeEnabled();
   });
 
   it("frames onboarding as a short eight-area scoring step", async () => {
@@ -146,7 +146,7 @@ describe("Onboarding", () => {
     await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}"); // 5 → 8
 
     // Go back to welcome step and save
-    await user.click(await screen.findByRole("button", { name: /Quay lại welcome/i }));
+    await user.click(await screen.findByRole("button", { name: /Quay lại chào mừng/i }));
     await user.click(await screen.findByRole("button", { name: /Để sau/i }));
 
     // Verify the adjusted score was persisted
@@ -222,7 +222,7 @@ describe("Onboarding", () => {
 
     expect(summary).toHaveTextContent("1/8");
     expect(screen.getByText("Đã rà")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Để sau" })).toHaveLength(8);
+    expect(screen.getAllByRole("button", { name: "Để sau" })).toHaveLength(1);
   });
 
   it("lets users continue from assessment with default scores when areas remain unreviewed", async () => {
