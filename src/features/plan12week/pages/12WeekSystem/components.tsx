@@ -207,82 +207,50 @@ export function TwelveWeekDashboardHeader({
   const domainLabel = activeGoal.focusArea || activeGoal.category;
 
   return (
-    <header className="relative border border-app-line/40 bg-app-surface rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.015)] space-y-6">
-      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0 flex-1 space-y-2.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent bg-app-accent-soft px-2.5 py-1 rounded">
-              Hệ thống 12 tuần
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-soft bg-app-bg px-2.5 py-1 rounded">
-              Tuần {currentWeek}/{system.totalWeeks}
+    <header className="relative border border-app-line/30 bg-app-surface rounded-xl p-4 sm:p-5 shadow-2xs">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
+            <span>Hệ thống 12 tuần</span>
+            <span>·</span>
+            <span>Tuần {currentWeek}/{system.totalWeeks}</span>
+            <span>·</span>
+            <span className="flex items-center gap-1">
+              <PhaseIcon className="h-3 w-3 text-app-accent shrink-0" />
+              Nhịp {phaseInfo.label}
             </span>
           </div>
 
-          <span className="sr-only">Nhịp 12 tuần</span>
           <InlineGoalTitleEdit
             title={activeGoal.title}
             fallbackTitle="Kế hoạch hiện tại"
             onSave={onRenameGoal}
             headingLevel={1}
-            titleClassName="break-words font-serif text-2xl font-semibold leading-tight tracking-tight text-app-ink sm:text-3xl"
-            inputClassName="h-auto rounded-xl px-3 py-2 font-serif text-2xl font-semibold leading-tight tracking-tight text-app-ink sm:text-3xl"
+            titleClassName="break-words font-serif text-lg font-semibold leading-snug tracking-tight text-app-ink sm:text-xl"
+            inputClassName="h-auto rounded-lg px-2 py-1 font-serif text-lg font-semibold leading-snug tracking-tight text-app-ink sm:text-xl"
           />
-
-          {/* Rhythm Status Indicator */}
-          <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-app-ink-soft">
-            <span className="flex items-center gap-1.5 text-app-ink-soft/80">
-              <PhaseIcon className="h-4 w-4 text-app-accent shrink-0" />
-              Nhịp {phaseInfo.label}
-            </span>
-          </div>
         </div>
 
-        {/* Action Button: Rounded-xl premium buttons */}
-        <div className="flex flex-col gap-2.5 sm:flex-row md:shrink-0 pt-2 md:pt-0">
+        {/* Action Button: Slimmer premium buttons */}
+        <div className="flex items-center gap-2 pt-1 sm:pt-0 shrink-0">
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-sm"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-app-accent px-4 py-2 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-xs"
             onClick={onOpenFocusTab}
           >
             <span>{reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}</span>
-            <Target className="h-4 w-4" aria-hidden="true" />
+            <Target className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
+          
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-xs"
+            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs font-medium text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
             onClick={onOpenGoals}
           >
             Mở mục tiêu
           </button>
         </div>
       </div>
-
-      {/* Next Best Action Card: Clean paper note card style */}
-      <div className="relative overflow-hidden rounded-xl border-l-2 border-l-app-accent border-y border-r border-app-line/40 bg-app-bg/40 p-4 transition-colors duration-150">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div className="space-y-0.5 flex-1">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-app-accent/90">Hành động tốt nhất tiếp theo</p>
-            <p className="text-sm font-medium leading-relaxed text-app-ink">
-              {reviewDueToday ? (
-                <>
-                  <span className="font-semibold text-app-warm-strong">Đến hạn review tuần:</span> Chốt review tuần trước khi mở việc mới để giữ nhịp thực thi.
-                </>
-              ) : firstPriorityTask ? (
-                <>
-                  <span className="font-semibold text-app-accent">Việc quan trọng nhất hôm nay:</span> {firstPriorityTask.title}
-                </>
-              ) : (
-                "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần để chuẩn bị."
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
     </header>
   );
 }

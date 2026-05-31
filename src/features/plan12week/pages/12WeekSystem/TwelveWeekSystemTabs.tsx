@@ -342,11 +342,11 @@ export function TwelveWeekSystemTabs({
 
   return (
     <>
-      <nav className="mt-6" aria-label="Điều hướng hệ 12 tuần">
+      <nav className="mt-4" aria-label="Điều hướng hệ 12 tuần">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-0 rounded-xl border border-app-line/40 bg-app-bg p-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+            className="inline-flex min-h-0 rounded-lg bg-app-bg p-0.5 border border-app-line/20"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -355,11 +355,11 @@ export function TwelveWeekSystemTabs({
                 value={value}
                 aria-controls={tabPanelId}
                 aria-label={`Mở tab ${label}`}
-                className={`flex-none rounded-lg px-4.5 py-1.5 text-xs transition-all duration-150 gap-2 flex items-center justify-center border border-transparent
-                  data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:font-semibold data-[state=active]:shadow-2xs data-[state=active]:border-app-line/40
-                  data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/50`}
+                className={`flex-none rounded-md px-3.5 py-1 text-xs transition-all duration-150 gap-1.5 flex items-center justify-center border border-transparent
+                  data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:font-semibold data-[state=active]:border-app-line/10
+                  data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/30`}
               >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>{label}</span>
               </TabsTrigger>
             ))}
@@ -369,7 +369,7 @@ export function TwelveWeekSystemTabs({
 
       {/* Main content sections */}
       <div
-        className="mt-6 space-y-6"
+        className="mt-3 space-y-5"
         role="tabpanel"
         id={tabPanelId}
         aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
