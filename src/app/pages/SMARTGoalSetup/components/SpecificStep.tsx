@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
+import { cn } from "@/app/components/ui/utils";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
@@ -44,6 +45,7 @@ export function SpecificStep({
   focusArea,
 }: SpecificStepProps) {
   const [hasBlurredGoalStatement, setHasBlurredGoalStatement] = useState(false);
+  const [showTips, setShowTips] = useState(false);
   const specificLength = smartData.specific.goal_statement.trim().length;
   const activeArchetype = archetype ?? intentArchetype ?? "other";
   const goalStatementInvalid = specificLength < 10;
@@ -58,7 +60,7 @@ export function SpecificStep({
   const activeInferredArchetype = inferredArchetype ?? activeArchetype;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div>
         <label htmlFor="smart-specific" className={labelClass}>
           Mục tiêu cụ thể của bạn (Hành động hoặc Dự án)
@@ -80,37 +82,57 @@ export function SpecificStep({
             }))
           }
           onBlur={() => setHasBlurredGoalStatement(true)}
-          className={`${textareaClass} min-h-[140px]`} // Giảm nhẹ chiều cao để nhường chỗ cho suggestions
+          className={`${textareaClass} min-h-[120px] focus:ring-2 focus:ring-app-accent/20 transition-all`}
           aria-invalid={showInlineError}
           aria-describedby={specificDescribedBy}
         />
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
-          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
-              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết cụ thể (Rõ việc):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">
-                "Hoàn thành khóa học React và tự làm 1 trang web cá nhân."
-              </p>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
-              <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết mơ hồ (Chung chung):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">
-                "Học lập trình tốt hơn" hoặc "Trở thành coder giỏi."
-              </p>
+
+        {/* Mẹo viết mục tiêu sụp mở */}
+        <div className="mt-2.5 select-none">
+          <button
+            type="button"
+            onClick={() => setShowTips(!showTips)}
+            className="inline-flex items-center gap-1 text-xs text-app-accent hover:underline font-bold cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:rounded-sm"
+          >
+            <span>💡</span> {showTips ? "Thu gọn mẹo viết mục tiêu tốt ▲" : "Xem mẹo viết mục tiêu tốt ▼"}
+          </button>
+          
+          <div 
+            className={cn(
+              "transition-all duration-300 ease-in-out overflow-hidden origin-top",
+              showTips ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết cụ thể (Rõ việc):</p>
+                  <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                    "Hoàn thành khóa học React và tự làm 1 trang web cá nhân."
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
+                  <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết mơ hồ (Chung chung):</p>
+                  <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                    "Học lập trình tốt hơn" hoặc "Trở thành coder giỏi."
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="mt-2.5 flex justify-between items-center text-[10px] text-app-ink-muted font-bold px-1 select-none">
+
+        <div className="mt-2.5 flex justify-between items-center text-[11px] text-app-ink-muted font-bold px-1 select-none">
           <span id="smart-specific-hint">
-            Hãy mô tả rõ hành động hoặc dự án cụ thể để bạn dễ kiểm chứng khi hoàn thành.
+            Viết rõ kết quả bạn muốn đạt.
           </span>
           <span
             id="smart-specific-counter"
@@ -120,12 +142,12 @@ export function SpecificStep({
           </span>
         </div>
 
-        {/* 1-Click Suggestions */}
-        <div className="mt-4 bg-app-bg/50 p-4 rounded-2xl border border-app-line/60">
-          <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-2.5 flex items-center gap-1.5 select-none">
-            <span>💡</span> Gợi ý điền nhanh (1-Click Suggestions):
+        {/* 1-Click Suggestions trượt ngang */}
+        <div className="mt-4 bg-app-bg/50 p-3.5 rounded-2xl border border-app-line/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
+            <span>💡</span> Gợi ý điền nhanh:
           </p>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin select-none snap-x">
             {(() => {
               const suggestions = (() => {
                 if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
@@ -176,7 +198,7 @@ export function SpecificStep({
                     }));
                     setHasBlurredGoalStatement(true);
                   }}
-                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-lg border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] w-full block shadow-sm"
+                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none whitespace-nowrap snap-start shadow-sm flex-shrink-0 cursor-pointer"
                 >
                   ✨ <span className="font-medium">{suggestion}</span>
                 </button>
@@ -203,3 +225,4 @@ export function SpecificStep({
     </div>
   );
 }
+

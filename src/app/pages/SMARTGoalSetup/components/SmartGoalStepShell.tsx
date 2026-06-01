@@ -229,11 +229,43 @@ export function SmartGoalStepShell({
   const [showStickyMini, setShowStickyMini] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [selectedTone, setSelectedTone] = useState<"empathetic" | "pragmatic" | "strategic">("empathetic");
+  const [isAiCoachExpanded, setIsAiCoachExpanded] = useState(false);
 
   const prevValidRef = useRef(isCurrentStepValid);
   const prevGoldRef = useRef(false);
 
   const isGoldStandard = clarityDoneCount === clarityItems.length;
+
+  const handleNextClick = () => {
+    if (!isCurrentStepValid) {
+      onNext();
+
+      setTimeout(() => {
+        const stepInputs: Record<SmartStepKey, string> = {
+          specific: "#smart-specific",
+          measurable: "#smart-metric-name",
+          achievable: "#smart-weekly-hours-slider, #smart-weekly-hours-input",
+          relevant: "#smart-relevant-reason",
+          timeBound: "#smart-target-weeks-slider, #smart-target-date",
+        };
+
+        const targetSelector = stepInputs[step.key];
+        const targetElement = targetSelector ? (document.querySelector(targetSelector) as HTMLElement) : null;
+
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          targetElement.focus({ preventScroll: true });
+          
+          targetElement.classList.add("animate-shake");
+          setTimeout(() => {
+            targetElement.classList.remove("animate-shake");
+          }, 450);
+        }
+      }, 50);
+      return;
+    }
+    onNext();
+  };
 
   useEffect(() => {
     if (!prevValidRef.current && isCurrentStepValid) {
@@ -623,18 +655,18 @@ export function SmartGoalStepShell({
               initial={{ scale: 0, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0 }}
-              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-3 py-1 text-[9px] font-extrabold text-slate-900 shadow-md animate-[pulse_2.2s_infinite] z-25 border border-yellow-200/20"
+              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-3 py-1 text-[10px] font-extrabold text-slate-900 shadow-md animate-[pulse_2.2s_infinite] z-25 border border-yellow-200/20"
             >
               <span>🏆 Chuẩn Vàng</span>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <p className="text-[9px] font-extrabold uppercase tracking-[0.25em] text-amber-800/60 dark:text-amber-500/60 mb-3 flex items-center gap-1.5 select-none pointer-events-none">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-amber-800/60 dark:text-amber-500/60 mb-3 flex items-center gap-1.5 select-none pointer-events-none">
           <span>✨</span> BẢN PHÁC THẢO TƯƠNG LAI
         </p>
 
-        <div className="text-[14px] sm:text-[15px] leading-loose text-slate-850 dark:text-slate-200 font-serif tracking-wide select-text relative z-20">
+        <div className="text-[14px] sm:text-[15px] leading-relaxed text-slate-850 dark:text-slate-200 font-serif tracking-wide select-text relative z-20">
           Tôi quyết tâm{" "}
           <span
             className={cn(
@@ -703,7 +735,14 @@ export function SmartGoalStepShell({
         )}
 
         <div className="border-t border-amber-900/10 dark:border-slate-700/30 pt-3 mt-4 flex items-center justify-between text-[10px] text-slate-450 dark:text-slate-500 font-sans tracking-wide">
-          <span>Dear Our Future</span>
+          <a
+            href="https://deerflow.tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline opacity-60 hover:opacity-100 transition-opacity font-medium"
+          >
+            ✦ Deerflow
+          </a>
           <span className="font-serif italic text-amber-800/60 dark:text-amber-500/60 flex items-center gap-0.5 select-none">
             <span>✦</span> {areaLabel} <span>✦</span>
           </span>
@@ -714,6 +753,16 @@ export function SmartGoalStepShell({
 
   return (
     <div className="w-full animate-[fade-in_0.3s_ease-out]">
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-4px); }
+          40%, 80% { transform: translateX(4px); }
+        }
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
+      `}</style>
       {showConfetti && <ConfettiCanvas />}
 
       <AnimatePresence>
@@ -726,7 +775,7 @@ export function SmartGoalStepShell({
             className="fixed top-0 left-0 right-0 z-45 bg-white/90 dark:bg-slate-900/90 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3 lg:hidden"
           >
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-extrabold uppercase tracking-widest text-app-accent mb-0.5 select-none flex items-center gap-1">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-0.5 select-none flex items-center gap-1">
                 <span>🎯</span> Live Preview
               </p>
               <p className="text-xs truncate font-serif italic text-slate-700 dark:text-slate-300 leading-normal">
@@ -837,6 +886,11 @@ export function SmartGoalStepShell({
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-5"
             >
+              {/* Polaroid Live Preview hiển thị ở trên cùng trên mobile */}
+              <div className="block lg:hidden select-none mb-3">
+                {renderPolaroidCard(true)}
+              </div>
+
               {children}
 
               {/* Cố vấn mục tiêu AI tích hợp sẵn, hiển thị nhẹ nhàng */}
@@ -855,7 +909,7 @@ export function SmartGoalStepShell({
                   </div>
 
                   {/* Selector chọn giọng điệu nhỏ gọn */}
-                  <div className="flex items-center gap-1.5 text-[9px] text-app-ink-muted">
+                  <div className="flex items-center gap-1.5 text-app-ink-muted">
                     {(["empathetic", "pragmatic", "strategic"] as const).map((tone, idx) => {
                       const isActive = selectedTone === tone;
                       const toneLabel =
@@ -867,7 +921,7 @@ export function SmartGoalStepShell({
                             type="button"
                             onClick={() => setSelectedTone(tone)}
                             className={cn(
-                              "font-bold transition-all duration-150 hover:text-teal-600 cursor-pointer",
+                              "font-bold transition-all duration-150 hover:text-teal-600 cursor-pointer text-[10px] sm:text-[9px] py-1.5 sm:py-0 px-2 sm:px-0 focus-visible:ring-1 focus-visible:ring-teal-500/50 focus-visible:outline-none focus-visible:rounded-sm",
                               isActive
                                 ? "text-teal-600 dark:text-teal-400 underline decoration-2 underline-offset-2"
                                 : "text-app-ink-muted",
@@ -897,7 +951,7 @@ export function SmartGoalStepShell({
                   <button
                     type="button"
                     onClick={handleApplyTransformedStarter}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-[0.98] cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:outline-none"
                     aria-label={`Dùng gợi ý cho bước ${step.label}`}
                   >
                     <Sparkles className="h-3 w-3" />
@@ -944,9 +998,8 @@ export function SmartGoalStepShell({
             </button>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer"
-              onClick={onNext}
-              disabled={!isCurrentStepValid}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer"
+              onClick={handleNextClick}
             >
               {step.key === "timeBound" ? "Kiểm tra độ khả thi" : "Tiếp tục"}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -957,14 +1010,7 @@ export function SmartGoalStepShell({
         <div className="hidden lg:block lg:sticky lg:top-6 space-y-6">
           {renderPolaroidCard(false)}
 
-          <div className="overflow-hidden rounded-xl border border-app-line/45 aspect-[4/3] w-full bg-app-bg shadow-sm">
-            <img
-              src="/smart_goal_builder.png"
-              alt="Công cụ dựng mục tiêu SMART"
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
+          {/* Đã loại bỏ ảnh minh họa tĩnh để tối giản hóa thiết kế theo docs/DESIGN.md */}
 
           <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
             <div className="space-y-1">
@@ -1039,8 +1085,8 @@ export function SmartGoalStepShell({
                   style={{ width: `${feasibilityScore}%` }}
                 />
               </div>
-              <p className="text-[10px] text-slate-400 leading-normal">
-                Dựa trên cam kết thời gian ({parsedWeeklyHours} giờ/tuần). Bạn có thể chỉnh lại bất cứ lúc nào.
+              <p className="text-[11px] text-slate-400 leading-normal">
+                Cam kết {parsedWeeklyHours} giờ/tuần. Có thể chỉnh lại bất cứ lúc nào.
               </p>
             </div>
           )}

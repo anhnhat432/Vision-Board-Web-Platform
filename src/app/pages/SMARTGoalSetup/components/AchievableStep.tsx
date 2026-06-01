@@ -39,6 +39,8 @@ export function AchievableStep({
   focusArea,
 }: AchievableStepProps) {
   const [hasBlurredWeeklyHours, setHasBlurredWeeklyHours] = useState(false);
+  const [showTipsSkills, setShowTipsSkills] = useState(false);
+  const [showTipsResources, setShowTipsResources] = useState(false);
 
   const parsedWeeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours) ?? 0;
   const weeklyHoursInvalid = parsedWeeklyHours <= 0;
@@ -140,7 +142,7 @@ export function AchievableStep({
                 value={parsedWeeklyHours || 1}
                 onChange={(e) => handleHoursChange(e.target.value)}
                 onBlur={() => setHasBlurredWeeklyHours(true)}
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-app-line accent-app-accent focus:outline-none"
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-app-line accent-app-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
                 aria-invalid={showWeeklyHoursError}
                 aria-describedby={showWeeklyHoursError ? "smart-weekly-hours-error" : undefined}
               />
@@ -170,7 +172,7 @@ export function AchievableStep({
 
         {/* 1-Click Hours Suggestions */}
         <div className="mt-5 flex flex-wrap gap-2 items-center border-t border-app-line/60 pt-4">
-          <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
+          <span className="text-[11px] font-bold text-app-accent">Chọn nhanh:</span>
           {["2", "4", "8", "12"].map((hours) => (
             <button
               key={hours}
@@ -180,7 +182,7 @@ export function AchievableStep({
                 setHasBlurredWeeklyHours(true);
               }}
               className={cn(
-                "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
+                "text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                 parsedWeeklyHours === Number(hours)
                   ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
                   : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
@@ -234,37 +236,55 @@ export function AchievableStep({
           className={`${textareaClass} min-h-[90px]`}
         />
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
-          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
-              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên tập trung (Vừa sức 12 tuần):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">
-                "Tìm hiểu cú pháp React cơ bản" hoặc "Kỹ năng quản lý thời gian Pomodoro."
-              </p>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
-              <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-bold text-rose-750 dark:text-rose-455">Tránh đặt quá lớn (Khó đạt sớm):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">
-                "Master toàn bộ ngành khoa học máy tính" hoặc "Trở thành diễn giả xuất chúng."
-              </p>
+        {/* Mẹo rèn luyện kỹ năng sụp mở */}
+        <div className="mt-2 select-none">
+          <button
+            type="button"
+            onClick={() => setShowTipsSkills(!showTipsSkills)}
+            className="inline-flex items-center gap-1 text-xs text-app-accent hover:underline font-bold cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:rounded-sm"
+          >
+            <span>💡</span> {showTipsSkills ? "Thu gọn mẹo kỹ năng ▲" : "Xem mẹo kỹ năng ▼"}
+          </button>
+          
+          <div 
+            className={cn(
+              "transition-all duration-300 ease-in-out overflow-hidden origin-top",
+              showTipsSkills ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên tập trung (Vừa sức 12 tuần):</p>
+                  <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                    "Tìm hiểu cú pháp React cơ bản" hoặc "Kỹ năng quản lý thời gian Pomodoro."
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-455 mt-0.5">
+                  <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-bold text-rose-750 dark:text-rose-455">Tránh đặt quá lớn (Khó đạt sớm):</p>
+                  <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                    "Master toàn bộ ngành khoa học máy tính" hoặc "Trở thành diễn giả xuất chúng."
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 1-Click Skills Suggestions */}
-        <div className="mt-4 bg-app-bg/50 p-4 rounded-2xl border border-app-line/60">
-          <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-2.5 flex items-center gap-1.5 select-none">
-            <span>💡</span> Gợi ý nhanh (1-Click Suggestions):
+        <div className="mt-4 bg-app-bg/50 p-3.5 rounded-2xl border border-app-line/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
+            <span>💡</span> Gợi ý kỹ năng nhanh:
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin select-none snap-x">
             {(() => {
               const skillSuggestions = (() => {
                 if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
@@ -294,7 +314,7 @@ export function AchievableStep({
                       },
                     }));
                   }}
-                  className="text-xs bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-full border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.97] cursor-pointer shadow-sm"
+                  className="text-xs bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none cursor-pointer shadow-sm whitespace-nowrap snap-start flex-shrink-0"
                 >
                   + {skill}
                 </button>
@@ -337,39 +357,57 @@ export function AchievableStep({
           className={`${textareaClass} min-h-[90px]`}
         />
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
-          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
-              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-bold text-emerald-800 dark:text-emerald-400">
-                Nên chọn nguồn lực sẵn có (Dễ tiếp cận):
-              </p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">
-                "Khóa học Udemy đã mua" hoặc "1 người bạn cùng tham gia thử thách chạy bộ."
-              </p>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
-              <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-bold text-rose-750 dark:text-rose-455">Tránh dựa vào nguồn lực chưa chắc chắn:</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">
-                "Nhờ chuyên gia hàng đầu hướng dẫn trực tiếp" hoặc "Mua thiết bị đắt tiền chưa có ngân sách."
-              </p>
+        {/* Mẹo nguồn lực sụp mở */}
+        <div className="mt-2 select-none">
+          <button
+            type="button"
+            onClick={() => setShowTipsResources(!showTipsResources)}
+            className="inline-flex items-center gap-1 text-xs text-app-accent hover:underline font-bold cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:rounded-sm"
+          >
+            <span>💡</span> {showTipsResources ? "Thu gọn mẹo nguồn lực ▲" : "Xem mẹo nguồn lực ▼"}
+          </button>
+          
+          <div 
+            className={cn(
+              "transition-all duration-300 ease-in-out overflow-hidden origin-top",
+              showTipsResources ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-bold text-emerald-800 dark:text-emerald-400">
+                    Nên chọn nguồn lực sẵn có (Dễ tiếp cận):
+                  </p>
+                  <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                    "Khóa học Udemy đã mua" hoặc "1 người bạn cùng tham gia thử thách chạy bộ."
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-455 mt-0.5">
+                  <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-bold text-rose-750 dark:text-rose-455">Tránh dựa vào nguồn lực chưa chắc chắn:</p>
+                  <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                    "Nhờ chuyên gia hàng đầu hướng dẫn trực tiếp" hoặc "Mua thiết bị đắt tiền chưa có ngân sách."
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 1-Click Resources Suggestions */}
-        <div className="mt-4 bg-app-bg/50 p-4 rounded-2xl border border-app-line/60">
-          <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-2.5 flex items-center gap-1.5 select-none">
-            <span>💡</span> Gợi ý nhanh (1-Click Suggestions):
+        <div className="mt-4 bg-app-bg/50 p-3.5 rounded-2xl border border-app-line/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
+            <span>💡</span> Gợi ý nguồn lực nhanh:
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin select-none snap-x">
             {(() => {
               const resSuggestions = (() => {
                 if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
@@ -399,7 +437,7 @@ export function AchievableStep({
                       },
                     }));
                   }}
-                  className="text-xs bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-full border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.97] cursor-pointer shadow-sm"
+                  className="text-xs bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none cursor-pointer shadow-sm whitespace-nowrap snap-start flex-shrink-0"
                 >
                   + {res}
                 </button>

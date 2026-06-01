@@ -153,7 +153,7 @@ export function TimeBoundStep({
                 value={parsedTargetWeeks || 12}
                 onChange={(e) => handleWeeksChange(e.target.value)}
                 onBlur={() => setBlurredFields((previous) => ({ ...previous, targetWeeks: true }))}
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-app-line accent-app-accent focus:outline-none"
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-app-line accent-app-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2"
                 aria-invalid={showTargetWeeksError}
                 aria-describedby={showTargetWeeksError ? "smart-target-weeks-error" : undefined}
               />
@@ -218,26 +218,30 @@ export function TimeBoundStep({
           </div>
 
           {/* 1-Click Weeks Suggestions */}
-          <div className="mt-4 flex flex-wrap gap-2 items-center border-t border-app-line/60 pt-4">
-            <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
-            {["4", "8", "12", "16"].map((weeks) => (
-              <button
-                key={weeks}
-                type="button"
-                onClick={() => {
-                  handleWeeksChange(weeks);
-                  setBlurredFields((previous) => ({ ...previous, targetWeeks: true }));
-                }}
-                className={cn(
-                  "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
-                  parsedTargetWeeks === Number(weeks)
-                    ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
-                    : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
-                )}
-              >
-                {weeks} tuần {weeks === "12" ? " (Khuyên dùng)" : ""}
-              </button>
-            ))}
+          <div className="mt-4 bg-app-bg/50 p-3 rounded-2xl border border-app-line/60">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
+              <span>💡</span> Chọn nhanh số tuần:
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin select-none snap-x">
+              {["4", "8", "12", "16"].map((weeks) => (
+                <button
+                  key={weeks}
+                  type="button"
+                  onClick={() => {
+                    handleWeeksChange(weeks);
+                    setBlurredFields((previous) => ({ ...previous, targetWeeks: true }));
+                  }}
+                  className={cn(
+                    "text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer whitespace-nowrap snap-start flex-shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
+                    parsedTargetWeeks === Number(weeks)
+                      ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
+                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
+                  )}
+                >
+                  {weeks} tuần {weeks === "12" ? " (Khuyên dùng)" : ""}
+                </button>
+              ))}
+            </div>
           </div>
 
           <p className={helperTextClass}>
@@ -276,41 +280,45 @@ export function TimeBoundStep({
           />
 
           {/* 1-Click Date Suggestions */}
-          <div className="mt-4 flex flex-wrap gap-2 items-center border-t border-app-line/60 pt-4">
-            <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
-            {[4, 8, 12].map((weeks) => {
-              const getFutureDateString = (w: number): string => {
-                const date = new Date();
-                date.setDate(date.getDate() + w * 7);
-                return date.toISOString().split("T")[0];
-              };
-              const futureDate = getFutureDateString(weeks);
-              const isSelected = smartData.timeBound.target_date === futureDate;
-              return (
-                <button
-                  key={weeks}
-                  type="button"
-                  onClick={() => {
-                    setSmartData((previous) => ({
-                      ...previous,
-                      timeBound: {
-                        ...previous.timeBound,
-                        target_date: futureDate,
-                      },
-                    }));
-                    setBlurredFields((previous) => ({ ...previous, targetDate: true }));
-                  }}
-                  className={cn(
-                    "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
-                    isSelected
-                      ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
-                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
-                  )}
-                >
-                  Sau {weeks} tuần ({weeks === 12 ? "12 tuần" : `${weeks} tuần`})
-                </button>
-              );
-            })}
+          <div className="mt-4 bg-app-bg/50 p-3 rounded-2xl border border-app-line/60">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
+              <span>💡</span> Chọn nhanh mốc thời gian:
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin select-none snap-x">
+              {[4, 8, 12].map((weeks) => {
+                const getFutureDateString = (w: number): string => {
+                  const date = new Date();
+                  date.setDate(date.getDate() + w * 7);
+                  return date.toISOString().split("T")[0];
+                };
+                const futureDate = getFutureDateString(weeks);
+                const isSelected = smartData.timeBound.target_date === futureDate;
+                return (
+                  <button
+                    key={weeks}
+                    type="button"
+                    onClick={() => {
+                      setSmartData((previous) => ({
+                        ...previous,
+                        timeBound: {
+                          ...previous.timeBound,
+                          target_date: futureDate,
+                        },
+                      }));
+                      setBlurredFields((previous) => ({ ...previous, targetDate: true }));
+                    }}
+                    className={cn(
+                      "text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer whitespace-nowrap snap-start flex-shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
+                      isSelected
+                        ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
+                        : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
+                    )}
+                  >
+                    Sau {weeks} tuần ({weeks === 12 ? "12 tuần" : `${weeks} tuần`})
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng cho chế độ chọn ngày */}
