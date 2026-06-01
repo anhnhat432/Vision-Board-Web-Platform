@@ -62,7 +62,10 @@ export function isBlankLeadIndicatorList(indicators: LeadIndicatorDraft[]): bool
   });
 }
 
-export function getLeadIndicatorPlaceholder(profile: LeadIndicatorSuggestionProfile, field: "name" | keyof LeadIndicatorCommitment): string {
+export function getLeadIndicatorPlaceholder(
+  profile: LeadIndicatorSuggestionProfile,
+  field: "name" | keyof LeadIndicatorCommitment,
+): string {
   const placeholders = profile === "business_analyst" ? BUSINESS_ANALYST_PLACEHOLDERS : GENERIC_PLACEHOLDERS;
   return placeholders[field];
 }
@@ -161,7 +164,8 @@ const BUSINESS_ANALYST_SUGGESTIONS: readonly LeadIndicatorSuggestionSeed[] = [
       cost: "Tôi sẵn sàng chỉnh sửa tài liệu và trao đổi với nhóm nếu yêu cầu chưa rõ.",
       means: "Chọn một phần của dự án quản lý thư viện, phân tích yêu cầu và tạo tài liệu BA tương ứng.",
       tradeoff: "Tôi sẽ giảm việc nhảy thẳng vào code khi chưa rõ yêu cầu.",
-      reward: "Nếu có ít nhất một tài liệu BA hoàn chỉnh trong tuần, tôi sẽ tự thưởng một buổi xem phim hoặc nghỉ ngơi.",
+      reward:
+        "Nếu có ít nhất một tài liệu BA hoàn chỉnh trong tuần, tôi sẽ tự thưởng một buổi xem phim hoặc nghỉ ngơi.",
     },
   },
   {

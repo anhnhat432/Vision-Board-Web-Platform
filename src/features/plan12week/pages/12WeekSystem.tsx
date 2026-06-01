@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { toastSuccess } from "@/app/utils/toast";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
@@ -12,9 +11,7 @@ import {
   shouldEnable12WeekMutationSync,
   shouldEnable12WeekPullSync,
 } from "@/app/utils/app-mode";
-import {
-  trackPremiumInsightOpened,
-} from "@/app/utils/monetization-analytics";
+import { trackPremiumInsightOpened } from "@/app/utils/monetization-analytics";
 import {
   APP_STORAGE_KEYS,
   clearArchivedOutbox,
@@ -37,6 +34,7 @@ import {
   syncWeeklyPlans,
 } from "@/app/utils/storage-twelve-week";
 import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import { toastSuccess } from "@/app/utils/toast";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useBackendSyncIssueState } from "@/features/plan12week/hooks/useBackendSyncIssueState";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
@@ -47,22 +45,17 @@ import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { celebrateLarge } from "@/lib/effects/celebrate";
 import { claimCelebrationOnce, getCycleCelebrationStorageKey } from "@/lib/effects/celebrationTriggers";
-import {
-  TwelveWeekDashboardHeader,
-  TwelveWeekDashboardState,
-  TwelveWeekGoalSwitcher,
-} from "./12WeekSystem/components";
+import { TwelveWeekDashboardHeader, TwelveWeekDashboardState, TwelveWeekGoalSwitcher } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
+// Import refactored subcomponents
+import { TwelveWeekSystemDialogs } from "./12WeekSystem/TwelveWeekSystemDialogs";
+import { TwelveWeekSystemNotices } from "./12WeekSystem/TwelveWeekSystemNotices";
+import { TwelveWeekSystemTabs } from "./12WeekSystem/TwelveWeekSystemTabs";
 import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
 import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
 import { useTwelveWeekExecutionActions } from "./12WeekSystem/useTwelveWeekExecutionActions";
 import { useTwelveWeekSettingsActions } from "./12WeekSystem/useTwelveWeekSettingsActions";
 import { useWeeklyReviewFormState } from "./12WeekSystem/useWeeklyReviewFormState";
-
-// Import refactored subcomponents
-import { TwelveWeekSystemDialogs } from "./12WeekSystem/TwelveWeekSystemDialogs";
-import { TwelveWeekSystemNotices } from "./12WeekSystem/TwelveWeekSystemNotices";
-import { TwelveWeekSystemTabs } from "./12WeekSystem/TwelveWeekSystemTabs";
 
 const emptyMutationQueueSummary = {
   totalCount: 0,
@@ -960,8 +953,14 @@ export function TwelveWeekSystem() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 relative">
       {/* Decorative dreamy gradient blobs for execution center feeling */}
-      <div className="absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse" style={{ animationDuration: "8s" }} />
-      <div className="absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-warm-soft/15 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse" style={{ animationDuration: "12s" }} />
+      <div
+        className="absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        style={{ animationDuration: "8s" }}
+      />
+      <div
+        className="absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-warm-soft/15 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        style={{ animationDuration: "12s" }}
+      />
 
       {/* 1. Subcomponent Dialogs Container */}
       <TwelveWeekSystemDialogs
@@ -1192,18 +1191,18 @@ export function TwelveWeekSystem() {
             {/* Decorative soft gradient blobs inside the card */}
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-app-accent-soft/20 rounded-full blur-xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-warm-soft/20 rounded-full blur-xl pointer-events-none" />
-            
+
             {/* Washi Tape effect */}
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-app-accent/15 backdrop-blur-[1px] rotate-[-1deg] border border-dashed border-app-accent/20" />
-            
+
             {/* Celebrate Icon */}
             <div className="mx-auto mt-4 mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-accent-soft text-app-accent animate-bounce">
-              <span className="text-3xl" role="img" aria-label="party popper">🎉</span>
+              <span className="text-3xl" role="img" aria-label="party popper">
+                🎉
+              </span>
             </div>
 
-            <h2 className="font-serif text-2xl font-semibold text-app-ink">
-              Thiết lập kế hoạch thành công!
-            </h2>
+            <h2 className="font-serif text-2xl font-semibold text-app-ink">Thiết lập kế hoạch thành công!</h2>
             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-app-accent">
               12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
             </p>
@@ -1221,20 +1220,25 @@ export function TwelveWeekSystem() {
                 <span>📌</span>
                 <span>Bây giờ bạn cần làm gì tiếp theo?</span>
               </p>
-              
+
               <div className="space-y-3">
                 <div className="flex gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">1</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">
+                    1
+                  </span>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-app-ink leading-tight">Nhận nhiệm vụ ngày</p>
                     <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
-                      Vào ngay tab <span className="font-bold">"Hôm nay"</span> để xem các hành động lặp lại cần hoàn thành trong ngày.
+                      Vào ngay tab <span className="font-bold">"Hôm nay"</span> để xem các hành động lặp lại cần hoàn
+                      thành trong ngày.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">2</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">
+                    2
+                  </span>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-app-ink leading-tight">Tích lũy điểm kỷ luật</p>
                     <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
@@ -1244,17 +1248,25 @@ export function TwelveWeekSystem() {
                 </div>
 
                 <div className="flex gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">3</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">
+                    3
+                  </span>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-app-ink leading-tight">Nhìn lại &amp; Chấm điểm tuần</p>
                     <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
-                      Gặp nhau vào ngày <span className="font-bold underline">{
-                        system?.reviewDay === "Sunday" ? "Chủ Nhật" :
-                        system?.reviewDay === "Saturday" ? "Thứ Bảy" : 
-                        system?.reviewDay === "Friday" ? "Thứ Sáu" :
-                        system?.reviewDay === "Monday" ? "Thứ Hai" :
-                        "Cuối tuần"
-                      }</span> để chấm điểm tự phản tư, điều chỉnh nhịp tuần tới.
+                      Gặp nhau vào ngày{" "}
+                      <span className="font-bold underline">
+                        {system?.reviewDay === "Sunday"
+                          ? "Chủ Nhật"
+                          : system?.reviewDay === "Saturday"
+                            ? "Thứ Bảy"
+                            : system?.reviewDay === "Friday"
+                              ? "Thứ Sáu"
+                              : system?.reviewDay === "Monday"
+                                ? "Thứ Hai"
+                                : "Cuối tuần"}
+                      </span>{" "}
+                      để chấm điểm tự phản tư, điều chỉnh nhịp tuần tới.
                     </p>
                   </div>
                 </div>

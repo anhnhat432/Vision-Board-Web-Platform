@@ -1,3 +1,5 @@
+export type { GoalProgress } from "./goalProgress";
+export type { PlanInsights } from "./planInsights";
 export type {
   LeadMetric,
   LeadMetricLog,
@@ -7,5 +9,3 @@ export type {
   Week,
   WeekReview,
 } from "./planTypes";
-export type { GoalProgress } from "./goalProgress";
-export type { PlanInsights } from "./planInsights";

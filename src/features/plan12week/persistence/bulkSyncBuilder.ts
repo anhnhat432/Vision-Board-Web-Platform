@@ -1,4 +1,6 @@
-import type { PlanDetails, WeekDetails } from "@/types/plan";
+import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
+import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
+import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import type {
   BulkSyncMetricLogInput,
   BulkSyncRequest,
@@ -6,17 +8,15 @@ import type {
   BulkSyncTaskInput,
   BulkSyncWeekInput,
 } from "@/types/bulkSync";
-import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
-import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
-import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
+import type { PlanDetails, WeekDetails } from "@/types/plan";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
-import { getUniversalWeeklyReviewExecutionScore } from "./reviewExecutionScore";
 import {
   getRemoteTaskIdForGoal,
   getTaskRemoteRevision,
   getWeekIdForGoal,
   getWeekRemoteRevision,
 } from "./planLinkStore";
+import { getUniversalWeeklyReviewExecutionScore } from "./reviewExecutionScore";
 
 function toIsoDate(value: string | undefined): string | undefined {
   if (!value) return undefined;

@@ -1,12 +1,4 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  getExecutionInsights,
-  getNextActionFromInsights,
-  getWeeklyReflectionInsights,
-  type ExecutionInsight,
-  type ExecutionInsightId,
-} from "./executionInsights";
 import type {
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
@@ -14,6 +6,13 @@ import type {
   UniversalScoreboardWeek,
   UniversalWeeklyReview,
 } from "@/app/utils/storage-types";
+import {
+  type ExecutionInsight,
+  type ExecutionInsightId,
+  getExecutionInsights,
+  getNextActionFromInsights,
+  getWeeklyReflectionInsights,
+} from "./executionInsights";
 
 function makeScoreboard(overrides: Partial<UniversalScoreboardWeek> = {}): UniversalScoreboardWeek {
   return {

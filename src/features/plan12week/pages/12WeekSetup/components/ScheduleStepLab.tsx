@@ -1,4 +1,4 @@
-import { Calendar, CalendarDays, Clock, Flag, Play, Sliders, ChevronDown, Settings } from "lucide-react";
+import { Calendar, CalendarDays, ChevronDown, Clock, Flag, Play, Settings, Sliders } from "lucide-react";
 import { useState } from "react";
 
 import { Input } from "@/app/components/ui/input";
@@ -8,7 +8,7 @@ import { formatDateInputValue } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { helperTextClass, inputClass, labelClass } from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
 import { REVIEW_DAYS } from "../constants";
-import { getStartDateValidation } from "../helpers";
+import { buildLeadIndicatorSchedules, getStartDateValidation } from "../helpers";
 import type { TwelveWeekSetupDraft } from "../types";
 
 interface ScheduleStepProps {
@@ -46,9 +46,20 @@ const formatShortDateLabel = (dateStr: string) => {
   return d.toLocaleDateString("vi-VN", { day: "numeric", month: "numeric" });
 };
 
-export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleEndDate, todayDateKey, onChange }: ScheduleStepProps) {
+export function ScheduleStepLab({
+  draft,
+  cycleStartDate: _cycleStartDate,
+  cycleEndDate,
+  setupGuideSupport,
+  setupGuideTemplate: _setupGuideTemplate,
+  hasPreviewTasks: _hasPreviewTasks,
+  weekOneTaskPreview: _weekOneTaskPreview,
+  weekOneTaskWarning: _weekOneTaskWarning,
+  todayDateKey,
+  onChange,
+}: ScheduleStepProps) {
   const localTodayDateKey = todayDateKey ?? formatDateInputValue(new Date());
-  
+
   // Tính toán Thứ Hai tới
   const today = new Date(`${localTodayDateKey}T00:00:00`);
   const dayOfWeek = today.getDay();
@@ -57,9 +68,9 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
   const nextMondayKey = formatDateInputValue(nextMonday);
 
   const [isCustomDate, setIsCustomDate] = useState(
-    draft.startDate !== localTodayDateKey && draft.startDate !== nextMondayKey
+    draft.startDate !== localTodayDateKey && draft.startDate !== nextMondayKey,
   );
-  
+
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const referenceDate = new Date(`${localTodayDateKey}T00:00:00`);
@@ -77,29 +88,36 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
 
   const reflectionDayLabel = REVIEW_DAY_SHORT_LABEL[draft.reviewDay] ?? "Chủ Nhật";
 
-  // Phân bổ Indicators vào các ngày trong tuần (giả lập trực quan)
-  const getTacticsForDay = (dayName: string) => {
-    return draft.leadIndicators
-      .filter((ind) => ind.name.trim().length > 0)
-      .filter((ind) => {
-        const targetNum = parseInt(ind.target, 10) || 0;
-        if (targetNum >= 5) return true; // Hằng ngày
-        if (targetNum === 4) return ["Monday", "Wednesday", "Friday", "Saturday"].includes(dayName);
-        if (targetNum === 3) return ["Monday", "Wednesday", "Friday"].includes(dayName);
-        if (targetNum === 2) return ["Tuesday", "Thursday"].includes(dayName);
-        if (targetNum === 1) return ["Saturday"].includes(dayName);
-        return false;
-      });
+  // Phân bổ Indicators thực tế phản ứng thời gian thực (real-time reactive schedule)
+  const scheduledIndicators = buildLeadIndicatorSchedules(
+    draft.leadIndicators.filter((ind) => ind.name.trim().length > 0),
+    {
+      tacticLoadPreference: draft.tacticLoadPreference,
+      preferredDays: draft.preferredDays,
+    },
+  );
+
+  const getTacticsForDay = (dayIndex: number) => {
+    return scheduledIndicators.filter((ind) => ind.schedule.includes(dayIndex));
+  };
+
+  const handleDayClick = (dayIndex: number) => {
+    soundService.click();
+    const isActive = draft.preferredDays.includes(dayIndex);
+    const nextPreferredDays = isActive
+      ? draft.preferredDays.filter((d) => d !== dayIndex)
+      : [...draft.preferredDays, dayIndex];
+    onChange("preferredDays", nextPreferredDays);
   };
 
   const WEEK_DAYS = [
-    { key: "Monday", label: "T2", fullName: "Thứ Hai" },
-    { key: "Tuesday", label: "T3", fullName: "Thứ Ba" },
-    { key: "Wednesday", label: "T4", fullName: "Thứ Tư" },
-    { key: "Thursday", label: "T5", fullName: "Thứ Năm" },
-    { key: "Friday", label: "T6", fullName: "Thứ Sáu" },
-    { key: "Saturday", label: "T7", fullName: "Thứ Bảy" },
-    { key: "Sunday", label: "CN", fullName: "Chủ Nhật" },
+    { index: 0, key: "Monday", label: "T2", fullName: "Thứ Hai" },
+    { index: 1, key: "Tuesday", label: "T3", fullName: "Thứ Ba" },
+    { index: 2, key: "Wednesday", label: "T4", fullName: "Thứ Tư" },
+    { index: 3, key: "Thursday", label: "T5", fullName: "Thứ Năm" },
+    { index: 4, key: "Friday", label: "T6", fullName: "Thứ Sáu" },
+    { index: 5, key: "Saturday", label: "T7", fullName: "Thứ Bảy" },
+    { index: 6, key: "Sunday", label: "CN", fullName: "Chủ Nhật" },
   ];
 
   return (
@@ -123,6 +141,17 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
           </div>
         </div>
 
+        {/* Lời khuyên nhịp độ hành động từ Copilot */}
+        {setupGuideSupport?.week1CadenceHint && (
+          <div className="rounded-xl border border-indigo-200/50 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-950/20 p-3.5 text-xs text-indigo-950 dark:text-indigo-200 flex gap-2.5 items-start">
+            <span className="text-base shrink-0 select-none">💡</span>
+            <div>
+              <p className="font-bold">Đề xuất nhịp độ tối ưu:</p>
+              <p className="mt-0.5 leading-relaxed font-medium">{setupGuideSupport.week1CadenceHint}</p>
+            </div>
+          </div>
+        )}
+
         {/* Ngày bắt đầu - Nút chọn nhanh thông minh giúp giảm click */}
         <div className="space-y-3">
           <div className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1.5")}>
@@ -132,9 +161,12 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
 
           <div className="rounded-xl border border-blue-500/10 bg-blue-500/[0.02] px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1 mb-2 select-none">
             <div className="font-semibold text-blue-600 dark:text-blue-400">💡 Gợi ý chọn ngày bắt đầu:</div>
-            <p>Khuyên dùng chọn **Thứ 2 tuần tới** để bạn có trọn vẹn 1 tuần khởi động từ đầu. Nếu muốn làm ngay hôm nay để lấy đà, hãy chọn **Hôm nay**.</p>
+            <p>
+              Khuyên dùng chọn **Thứ 2 tuần tới** để bạn có trọn vẹn 1 tuần khởi động từ đầu. Nếu muốn làm ngay hôm nay
+              để lấy đà, hãy chọn **Hôm nay**.
+            </p>
           </div>
-          
+
           <div className="flex flex-wrap gap-2.5">
             <button
               type="button"
@@ -144,14 +176,16 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                 onChange("startDate", nextMondayKey);
               }}
               className={cn(
-                "flex-1 min-w-[130px] rounded-xl border px-3.5 py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95",
+                "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                 !isCustomDate && draft.startDate === nextMondayKey
                   ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-102"
-                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30"
+                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
               <span className="block font-bold text-xs">Thứ 2 tuần tới</span>
-              <span className="text-[10px] opacity-85 block mt-0.5">({formatShortDateLabel(nextMondayKey)} - Khuyên dùng)</span>
+              <span className="text-[10px] opacity-85 block mt-0.5">
+                ({formatShortDateLabel(nextMondayKey)} - Khuyên dùng)
+              </span>
             </button>
 
             <button
@@ -162,10 +196,10 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                 onChange("startDate", localTodayDateKey);
               }}
               className={cn(
-                "flex-1 min-w-[130px] rounded-xl border px-3.5 py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95",
+                "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                 !isCustomDate && draft.startDate === localTodayDateKey
                   ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-102"
-                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30"
+                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
               <span className="block font-bold text-xs">Hôm nay</span>
@@ -179,10 +213,10 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                 setIsCustomDate(true);
               }}
               className={cn(
-                "flex-1 min-w-[130px] rounded-xl border px-3.5 py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95",
+                "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                 isCustomDate
                   ? "border-indigo-500 bg-indigo-500 text-white shadow-sm scale-102"
-                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30"
+                  : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
               <span className="block font-bold text-xs">Chọn ngày khác</span>
@@ -199,11 +233,7 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                 min={localTodayDateKey}
                 aria-invalid={Boolean(startDateValidation.error)}
                 aria-describedby={startDateDescription}
-                className={cn(
-                  inputClass,
-                  "rounded-xl",
-                  startDateValidation.error && "border-red-400 focus-visible:border-red-500 focus-visible:ring-red-150",
-                )}
+                className={cn(inputClass, "rounded-xl h-11 sm:h-10")}
                 onChange={(event) => onChange("startDate", event.target.value)}
               />
               {startDateValidation.error && (
@@ -227,7 +257,7 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
               <Flag className="h-4 w-4 text-emerald-500" />
               <span>Ngày cán đích (Tự động 12 tuần)</span>
             </span>
-            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-450 bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/10">
+            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/10">
               {cycleEndDate}
             </span>
           </div>
@@ -244,8 +274,13 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
           </legend>
 
           <div className="rounded-xl border border-indigo-500/10 bg-indigo-500/[0.02] px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1.5 mb-2 select-none">
-            <div className="font-semibold text-indigo-600 dark:text-indigo-400">📊 Lựa chọn thời điểm phản tư tốt nhất:</div>
-            <p>Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: **9:00 - 10:00 sáng Chủ nhật** (thư thái nhâm nhi cà phê) hoặc **16:00 - 17:00 chiều thứ Bảy** để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.</p>
+            <div className="font-semibold text-indigo-600 dark:text-indigo-400">
+              📊 Lựa chọn thời điểm phản tư tốt nhất:
+            </div>
+            <p>
+              Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: **9:00 - 10:00 sáng Chủ nhật** (thư thái
+              nhâm nhi cà phê) hoặc **16:00 - 17:00 chiều thứ Bảy** để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -261,7 +296,7 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                     onChange("reviewDay", day.value);
                   }}
                   className={cn(
-                    "flex-1 min-w-[70px] h-10 items-center justify-center rounded-xl border text-xs font-bold transition-all duration-200 active:scale-95",
+                    "flex-1 min-w-[70px] h-11 sm:h-10 items-center justify-center rounded-xl border text-xs font-bold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                     isActive
                       ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-105"
                       : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30",
@@ -285,7 +320,7 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
               soundService.click();
               setIsAdvancedOpen(!isAdvancedOpen);
             }}
-            className="flex w-full items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400 py-1.5 px-3 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/10 hover:bg-indigo-50 transition-all select-none"
+            className="flex w-full items-center justify-between text-xs font-bold text-indigo-650 dark:text-indigo-400 py-1.5 px-3 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/10 hover:bg-indigo-50 transition-all select-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:outline-none"
           >
             <span className="flex items-center gap-1.5">
               <Settings className="h-4 w-4 animate-spin-slow" />
@@ -303,7 +338,8 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                   <span>Thời lượng dành cho mục tiêu mỗi ngày</span>
                 </legend>
                 <div className="rounded-xl border border-amber-500/10 bg-amber-500/[0.02] px-3 py-2 text-[10px] text-app-ink-soft leading-normal mb-1">
-                  * Ví dụ: Dành **30-60 phút** tập trung cao độ mỗi ngày (ví dụ khung giờ cố định **20:00 - 21:00 tối**) để xây dựng thói quen kỷ luật tự nhiên mà không gây căng thẳng.
+                  * Ví dụ: Dành **30-60 phút** tập trung cao độ mỗi ngày (ví dụ khung giờ cố định **20:00 - 21:00 tối**)
+                  để xây dựng thói quen kỷ luật tự nhiên mà không gây căng thẳng.
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {[
@@ -322,7 +358,7 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                           onChange("dailyTimeBudget", option.value);
                         }}
                         className={cn(
-                          "flex flex-col items-center justify-center rounded-xl border bg-app-surface p-2 text-center text-xs transition-all duration-200 active:scale-[0.98]",
+                          "flex flex-col items-center justify-center rounded-xl border bg-app-surface p-2.5 text-center text-xs transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",
                           isActive
                             ? "border-app-accent bg-app-accent-soft/20 text-app-accent shadow-sm"
                             : "border-app-line text-app-ink-soft hover:border-app-accent/30",
@@ -358,14 +394,16 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                           onChange("tacticLoadPreference", option.value);
                         }}
                         className={cn(
-                          "flex flex-col items-start rounded-xl border bg-app-surface p-2.5 text-left transition-all duration-200 active:scale-[0.98]",
+                          "flex flex-col items-start rounded-xl border bg-app-surface p-3 text-left transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",
                           isActive
                             ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-sm"
                             : "border-app-line text-app-ink-soft hover:border-app-accent/30",
                         )}
                       >
                         <span className="font-bold text-xs text-app-ink">{option.label}</span>
-                        <span className="text-[9px] text-app-ink-soft leading-normal mt-0.5">{LOAD_HINTS[option.value]}</span>
+                        <span className="text-[9px] text-app-ink-soft leading-normal mt-0.5">
+                          {LOAD_HINTS[option.value]}
+                        </span>
                       </button>
                     );
                   })}
@@ -378,63 +416,84 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
 
       {/* WIDGET LIVE PREVIEW: Xem trước tuần đầu tiên của bạn */}
       <section
-        className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-[#fafaff] dark:bg-[#1a1b24]/40 p-5 sm:p-6 shadow-sm space-y-4 select-none animate-in fade-in duration-400"
+        className="relative overflow-hidden rounded-2xl border border-indigo-150 bg-[#fafaff] dark:bg-[#1a1b24]/40 p-5 sm:p-6 shadow-sm space-y-4 select-none animate-in fade-in duration-400"
         aria-labelledby="week-preview-title"
       >
         <div className="flex items-center gap-2 mb-2 border-b border-indigo-150/40 pb-2">
           <span className="flex h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse" />
-          <h3 id="week-preview-title" className="text-xs font-extrabold uppercase tracking-wider text-indigo-650 dark:text-indigo-400">
-            👀 Xem trước tuần đầu tiên của bạn (Live Preview)
+          <h3
+            id="week-preview-title"
+            className="text-xs font-extrabold uppercase tracking-wider text-indigo-650 dark:text-indigo-400"
+          >
+            👀 Xem trước & Tự sắp xếp Lịch hành động (Interactive LWW Schedule)
           </h3>
         </div>
         <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-          Bản phân bổ hoạt động thực tế 7 ngày của Tuần 1. Nhịp điệu sẽ tự động thay đổi khi bạn điều chỉnh ngày bắt đầu, ngày nhìn lại hoặc hành động lặp lại.
+          Phân bổ hoạt động thực tế 7 ngày của Tuần 1.
+          <strong className="text-indigo-600 dark:text-indigo-400 block mt-1">
+            📌 Mẹo nhỏ: Chạm vào bất kỳ ngày nào bên dưới để bật/tắt ghim gán hành động lên ngày đó hằng tuần!
+          </strong>
         </p>
 
         {/* Lưới 7 ngày dọc trên di động, dàn ngang trên desktop */}
         <div className="grid gap-2.5 sm:grid-cols-7 pt-1">
           {WEEK_DAYS.map((day) => {
             const isReflectionDay = draft.reviewDay === day.key;
-            const dailyTactics = getTacticsForDay(day.key);
+            const isPreferredDay = draft.preferredDays.includes(day.index);
+            const dailyTactics = getTacticsForDay(day.index);
             const hasTactics = dailyTactics.length > 0;
 
             return (
-              <div
+              <button
                 key={day.key}
+                type="button"
+                onClick={() => handleDayClick(day.index)}
                 className={cn(
-                  "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[75px] transition-all duration-300",
+                  "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[85px] transition-all duration-300 hover:scale-102 hover:shadow-xs active:scale-[0.97] cursor-pointer text-left sm:text-center focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:outline-none",
                   isReflectionDay
                     ? "border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300 shadow-3xs"
-                    : hasTactics
-                      ? "border-indigo-100 bg-white dark:bg-slate-900 text-app-ink shadow-3xs hover:border-indigo-200"
-                      : "border-slate-100 bg-slate-50/40 dark:bg-slate-900/10 text-slate-400 opacity-60"
+                    : isPreferredDay
+                      ? "border-indigo-400 bg-indigo-500/[0.04] dark:bg-indigo-950/30 text-app-ink shadow-sm ring-2 ring-indigo-500/10"
+                      : hasTactics
+                        ? "border-indigo-100 bg-white dark:bg-slate-900 text-app-ink shadow-3xs hover:border-indigo-200"
+                        : "border-slate-100 bg-slate-50/40 dark:bg-slate-900/10 text-slate-400 opacity-60 hover:opacity-100 hover:border-slate-200",
                 )}
               >
                 {/* Ngày trong tuần */}
-                <div className="text-left sm:text-center sm:border-b sm:border-app-line/30 sm:pb-1 shrink-0">
+                <div className="text-left sm:text-center sm:border-b sm:border-app-line/30 sm:pb-1 shrink-0 w-full flex items-center justify-between sm:justify-center">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider block sm:hidden">
                     {day.fullName}
                   </span>
-                  <span className="text-sm font-extrabold hidden sm:block">
-                    {day.label}
-                  </span>
+                  <span className="text-sm font-extrabold hidden sm:block">{day.label}</span>
+
+                  {/* Nhãn Ghim cho ngày ưu tiên */}
+                  {isPreferredDay && (
+                    <span
+                      className="text-[9px] font-bold text-indigo-650 bg-indigo-100/50 px-1 rounded sm:ml-1 scale-95 shrink-0"
+                      title="Ngày được ghim ưu tiên"
+                    >
+                      📌
+                    </span>
+                  )}
                 </div>
 
                 {/* Nội dung ngày */}
-                <div className="flex-1 text-right sm:text-left space-y-1.5 min-w-0">
+                <div className="flex-1 text-right sm:text-left space-y-1.5 min-w-0 w-full">
                   {isReflectionDay && (
-                    <div className="inline-flex sm:flex flex-col gap-0.5 items-center sm:items-start text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/10 w-fit select-none">
-                      <span>📊 Nhìn lại tuần</span>
-                      <span className="text-[7.5px] uppercase font-bold tracking-wide hidden sm:inline-block mt-0.5">Hạn chốt {reflectionDayLabel}</span>
+                    <div className="inline-flex sm:flex flex-col gap-0.5 items-center sm:items-start text-[8px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/10 w-fit select-none mx-auto sm:mx-0">
+                      <span>📊 Báo cáo tuần</span>
+                      <span className="text-[8px] uppercase tracking-wide hidden sm:inline-block mt-0.5">
+                        Hạn chốt {reflectionDayLabel}
+                      </span>
                     </div>
                   )}
 
                   {hasTactics ? (
-                    <div className="flex flex-col gap-1 items-end sm:items-start overflow-hidden">
+                    <div className="flex flex-col gap-1 items-end sm:items-start overflow-hidden w-full">
                       {dailyTactics.map((tactic) => (
                         <div
                           key={tactic.id}
-                          className="text-[9px] font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-100/40 truncate max-w-full block"
+                          className="text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-100/40 truncate max-w-full block w-full text-right sm:text-left"
                           title={`${tactic.name} (${tactic.target} ${tactic.unit})`}
                         >
                           🏃 {tactic.name}
@@ -443,13 +502,13 @@ export function ScheduleStepLab({ draft, cycleStartDate: _cycleStartDate, cycleE
                     </div>
                   ) : (
                     !isReflectionDay && (
-                      <span className="text-[8px] font-medium text-slate-400 dark:text-slate-500 italic block mt-1">
-                        Không có lịch
+                      <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 italic block mt-1 text-center sm:text-left">
+                        Nghỉ ngơi
                       </span>
                     )
                   )}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

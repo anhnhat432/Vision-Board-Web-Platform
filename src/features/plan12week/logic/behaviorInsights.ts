@@ -1,7 +1,6 @@
+import type { Plan12Week } from "../types/planTypes";
 import { calculateExecutionScore } from "./executionScore";
 import { calculateMetricStreak } from "./streak";
-
-import type { Plan12Week } from "../types/planTypes";
 
 export type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday" | "unknown";
 

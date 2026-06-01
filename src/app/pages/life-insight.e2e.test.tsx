@@ -51,7 +51,7 @@ describe("life insight flow", () => {
     const user = userEvent.setup();
 
     expect(
-      await screen.findByRole("heading", { name: "Chọn nơi đáng ưu tiên trong 12 tuần tới." }),
+      await screen.findByRole("heading", { name: "Nhìn lại để bước tiếp" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Đề xuất ưu tiên: Sức khỏe")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sức khỏe" })).toBeInTheDocument();

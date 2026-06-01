@@ -230,7 +230,6 @@ export function SmartGoalStepShell({
   const [showStickyMini, setShowStickyMini] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [selectedTone, setSelectedTone] = useState<"empathetic" | "pragmatic" | "strategic">("empathetic");
-  const [isCoachExpanded, setIsCoachExpanded] = useState(false);
 
   const prevValidRef = useRef(isCurrentStepValid);
   const prevGoldRef = useRef(false);
@@ -744,9 +743,7 @@ export function SmartGoalStepShell({
 
           <div className="my-6 h-px bg-app-line" aria-hidden="true" />
 
-          <div className="block lg:hidden">
-            {renderPolaroidCard(true)}
-          </div>
+
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -759,106 +756,64 @@ export function SmartGoalStepShell({
             >
               {children}
 
-              <div className="relative overflow-hidden rounded-[20px] border border-teal-500/15 dark:border-teal-900/30 bg-gradient-to-br from-teal-500/[0.03] via-app-surface/98 to-indigo-500/[0.02] dark:from-teal-950/15 dark:via-slate-900/90 dark:to-indigo-950/15 shadow-[0_10px_35px_rgba(13,148,136,0.03)] transition-all duration-300">
-                <button
-                  type="button"
-                  onClick={() => setIsCoachExpanded(!isCoachExpanded)}
-                  className="w-full flex items-center justify-between p-4.5 text-left border-b border-teal-500/5 select-none focus:outline-none cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-400 to-indigo-500 text-white shadow-sm border border-white/10 overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-teal-400 opacity-60 animate-[pulse_3s_ease-in-out_infinite]" />
-                      <Sparkles className="h-4.5 w-4.5 text-white relative z-10 animate-[spin_10s_linear_infinite]" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-400 block mb-0.5">
-                        Cố vấn mục tiêu AI
-                      </span>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                        {isCoachExpanded ? "Đang chuẩn bị ý kiến tư vấn chánh niệm" : "Bấm để xem phân tích và gợi ý nhanh"}
-                      </p>
-                    </div>
+              {/* Cố vấn mục tiêu AI tích hợp sẵn, hiển thị nhẹ nhàng */}
+              <div className="relative overflow-hidden rounded-[18px] border border-teal-500/10 dark:border-teal-900/20 bg-teal-500/[0.015] dark:bg-teal-950/[0.03] p-4.5 space-y-3">
+                <div className="flex items-center justify-between border-b border-teal-500/5 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-teal-500 animate-[pulse_2s_infinite]" />
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+                      Cố vấn mục tiêu AI · {selectedTone === "empathetic" ? "Ấm áp" : selectedTone === "pragmatic" ? "Thực tế" : "Chiến lược"}
+                    </span>
                   </div>
                   
-                  <span className={cn(
-                    "text-[11px] px-2.5 py-1 rounded-full font-bold transition-all duration-205 flex items-center gap-1 border border-teal-500/10",
-                    isCoachExpanded ? "text-slate-500 bg-slate-100/50 dark:bg-slate-800" : "text-teal-600 bg-teal-50 dark:bg-teal-950/40"
-                  )}>
-                    {isCoachExpanded ? "Thu gọn ✦" : "Xem gợi ý ✦"}
-                  </span>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isCoachExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      <div className="p-4 space-y-3.5 border-t border-teal-500/5">
-                        <div className="relative bg-teal-50/30 dark:bg-teal-950/10 border border-teal-500/10 rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm text-slate-800 dark:text-slate-200">
-                          <p className="text-[12.5px] font-medium text-slate-600 dark:text-slate-350 leading-relaxed mb-2.5 select-none">
-                            {typedCommentText}
-                          </p>
-
-                          {typedDraftText && (
-                            <div className="relative my-2 rounded-lg border-l-[3px] border-emerald-500/80 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.04] px-3.5 py-2">
-                              <p className="font-serif italic text-sm leading-relaxed text-slate-800 dark:text-slate-100 select-text">
-                                “{typedDraftText}”
-                              </p>
-                            </div>
-                          )}
-
-                          <div className="mt-2 text-[9.5px] text-slate-450 dark:text-slate-500 flex items-center gap-1.5 select-none pt-2 border-t border-teal-500/5">
-                            <Sparkles className="h-3 w-3 text-teal-400" />
-                            <span>Gợi ý chánh niệm cá nhân hóa dựa trên khía cạnh trọng tâm.</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between border-t border-teal-500/5 pt-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none">
-                              Giọng điệu:
-                            </span>
-                            <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-850">
-                              {(["empathetic", "pragmatic", "strategic"] as const).map((tone) => {
-                                const isActive = selectedTone === tone;
-                                const toneLabel = tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
-                                return (
-                                  <button
-                                    key={tone}
-                                    type="button"
-                                    onClick={() => setSelectedTone(tone)}
-                                    className={cn(
-                                      "px-2.5 py-1 text-[10px] font-bold rounded-md transition-all duration-200 cursor-pointer",
-                                      isActive 
-                                        ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm" 
-                                        : "text-slate-450 dark:text-slate-550 hover:text-slate-700"
-                                    )}
-                                  >
-                                    {toneLabel}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
+                  {/* Selector chọn giọng điệu nhỏ gọn */}
+                  <div className="flex items-center gap-1.5 text-[9px] text-app-ink-muted">
+                    {(["empathetic", "pragmatic", "strategic"] as const).map((tone, idx) => {
+                      const isActive = selectedTone === tone;
+                      const toneLabel = tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
+                      return (
+                        <span key={tone} className="flex items-center">
+                          {idx > 0 && <span className="mr-1.5 opacity-40">|</span>}
                           <button
                             type="button"
-                            onClick={handleApplyTransformedStarter}
-                            className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] group/shimmer w-full sm:w-auto cursor-pointer"
-                            aria-label={`Dùng gợi ý cho bước ${step.label}`}
+                            onClick={() => setSelectedTone(tone)}
+                            className={cn(
+                              "font-bold transition-all duration-150 hover:text-teal-600 cursor-pointer",
+                              isActive ? "text-teal-600 dark:text-teal-400 underline decoration-2 underline-offset-2" : "text-app-ink-muted"
+                            )}
                           >
-                            <Sparkles className="h-3.5 w-3.5" />
-                            <span>Sử dụng gợi ý này</span>
+                            {toneLabel}
                           </button>
-                        </div>
-                      </div>
-                    </motion.div>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <p className="text-xs text-app-ink-soft leading-relaxed select-none italic">
+                    {typedCommentText}
+                  </p>
+
+                  {typedDraftText && (
+                    <div className="relative rounded-xl border-l-2 border-emerald-500/50 bg-emerald-500/[0.015] px-3.5 py-2">
+                      <p className="font-serif italic text-xs leading-relaxed text-slate-800 dark:text-slate-200 select-text">
+                        “{typedDraftText}”
+                      </p>
+                    </div>
                   )}
-                </AnimatePresence>
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={handleApplyTransformedStarter}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-[0.98] cursor-pointer"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Dùng gợi ý này
+                  </button>
+                </div>
               </div>
 
               {currentStepError && (
@@ -900,7 +855,9 @@ export function SmartGoalStepShell({
               onClick={onNext}
               disabled={!isCurrentStepValid}
             >
-              {stepIndex < totalSteps - 1 ? "Tiếp tục" : "Kiểm tra độ khả thi"}
+              {step.key === "timeBound"
+                ? "Kiểm tra độ khả thi"
+                : "Tiếp tục"}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
@@ -918,7 +875,14 @@ export function SmartGoalStepShell({
               </div>
             </div>
 
-            <div className="h-2 w-full overflow-hidden rounded-full bg-app-line" aria-hidden="true">
+            <div 
+              role="progressbar"
+              aria-valuenow={Math.round(clarityProgress)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Kiểm tra độ rõ mục tiêu"
+              className="h-2 w-full overflow-hidden rounded-full bg-app-line"
+            >
               <div className="h-full rounded-full bg-app-accent transition-all duration-305" style={{ width: `${clarityProgress}%` }} />
             </div>
 

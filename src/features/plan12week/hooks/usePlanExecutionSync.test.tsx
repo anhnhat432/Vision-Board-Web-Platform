@@ -99,9 +99,9 @@ vi.mock("@/app/utils/app-mode", () => ({
   shouldEnable12WeekCloudImport: () => true,
 }));
 
+import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
 import { detectBackendPlanConflicts } from "../persistence/backendConflictDetector";
-import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 import { usePlanExecutionSync } from "./usePlanExecutionSync";
 
 function buildPlanDetails() {

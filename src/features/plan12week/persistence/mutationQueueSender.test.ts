@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { enqueueStoredMutation, readMutationQueueStore, type DataMutationItem } from "./mutationQueue";
-import { sendPending12WeekMutations } from "./mutationQueueSender";
 import type { UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
 import type { TwelveWeekMutationBatchRequest, TwelveWeekMutationBatchResponse } from "@/services/syncService";
+import { type DataMutationItem, enqueueStoredMutation, readMutationQueueStore } from "./mutationQueue";
+import { sendPending12WeekMutations } from "./mutationQueueSender";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
 

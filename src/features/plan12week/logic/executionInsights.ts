@@ -16,13 +16,13 @@
  *   - Backwards compatible: every required input is read-with-default.
  */
 
+import { getCalendarDayDifference, parseCalendarDate } from "@/app/utils/storage-date-utils";
 import type {
   TwelveWeekSystem,
   UniversalDailyCheckIn,
   UniversalScoreboardWeek,
   UniversalWeeklyReview,
 } from "@/app/utils/storage-types";
-import { getCalendarDayDifference, parseCalendarDate } from "@/app/utils/storage-date-utils";
 
 // ---- Public types -----------------------------------------------------------
 

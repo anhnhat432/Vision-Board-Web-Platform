@@ -5,15 +5,15 @@ import { vi } from "vitest";
 
 vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
+import { startCheckoutFlow } from "@/app/utils/production";
 import {
   APP_STORAGE_KEYS,
   formatDateInputValue,
   getCurrentEntitlementKeys,
   getCurrentPlan,
-  isCalendarDateKeyOnOrAfter,
   getUserData,
+  isCalendarDateKeyOnOrAfter,
 } from "@/app/utils/storage";
-import { startCheckoutFlow } from "@/app/utils/production";
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import {
   readGoal,

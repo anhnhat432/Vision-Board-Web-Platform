@@ -1,13 +1,13 @@
 import type { NavigateFunction } from "react-router";
-import type { RescueTrigger, PricingPlanCode } from "@/app/utils/storage-types";
-import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
-import { TwelveWeekDashboardNotice, TwelveWeekRescueTriggerBanner } from "./components";
 import {
   trackRescueActionTaken,
   trackRescueTriggerDismissed,
   trackRescueTriggerFired,
 } from "@/app/utils/monetization-analytics";
+import type { PricingPlanCode, RescueTrigger } from "@/app/utils/storage-types";
+import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
 import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
+import { TwelveWeekDashboardNotice, TwelveWeekRescueTriggerBanner } from "./components";
 
 interface TwelveWeekSystemNoticesProps {
   // Navigation & Page routing

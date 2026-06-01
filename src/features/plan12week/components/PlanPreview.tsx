@@ -1,15 +1,14 @@
-import { useState, useCallback } from "react";
 import { CalendarDays, ChevronDown, ChevronRight, Edit2, Target, Zap } from "lucide-react";
+import { useCallback, useState } from "react";
+import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon } from "@/app/components/illustrations";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/app/components/ui/accordion";
+import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Badge } from "@/app/components/ui/badge";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/app/components/ui/accordion";
-import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon } from "@/app/components/illustrations";
 import { useBreakpoint } from "@/app/hooks/useBreakpoint";
+import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
 import { FEATURE_TERMS } from "@/app/utils/user-facing-copy";
 import { PlanQualityPanel } from "./PlanQualityPanel";
-import type { LeadIndicatorDraft } from "@/app/pages/12WeekSetup/types";
-import type { TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
 
 interface PlanPreviewProps {
   /** The current draft with all user inputs */

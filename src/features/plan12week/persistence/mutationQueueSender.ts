@@ -4,21 +4,21 @@ import { deleteGoal } from "@/services/goalService";
 import { deletePlan } from "@/services/planService";
 import {
   post12WeekMutations,
-  toTwelveWeekMutationRequestItem,
   type TwelveWeekMutationBatchResponse,
   type TwelveWeekMutationResult,
+  toTwelveWeekMutationRequestItem,
 } from "@/services/syncService";
 import {
   compactMutations,
+  type DataMutationItem,
+  type DataMutationQueueStore,
   listPendingMutations,
+  type MutationFailureInput,
   markMutationFailed,
   markMutationInFlight,
   markMutationSucceeded,
   readMutationQueueStore,
   writeMutationQueueStore,
-  type DataMutationItem,
-  type DataMutationQueueStore,
-  type MutationFailureInput,
 } from "./mutationQueue";
 
 export type MutationQueueSyncSkipReason =

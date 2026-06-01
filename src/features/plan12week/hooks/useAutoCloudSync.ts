@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
-import { USER_DATA_UPDATED_EVENT_NAME } from "@/app/utils/storage-constants";
 import { isRealMode, shouldEnable12WeekMutationSync, shouldEnable12WeekPullSync } from "@/app/utils/app-mode";
 import { getUserData, saveUserData } from "@/app/utils/storage";
+import { USER_DATA_UPDATED_EVENT_NAME } from "@/app/utils/storage-constants";
 import type { UserData } from "@/app/utils/storage-types";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -13,10 +13,10 @@ import {
   summarizeMutationQueueStore,
   writeMutationQueueStore,
 } from "../persistence/mutationQueue";
+import { type MutationQueueSyncResult, sendPending12WeekMutations } from "../persistence/mutationQueueSender";
 import { clearPullCursor } from "../persistence/pullCursorStore";
-import { getTwelveWeekSyncFeatureFlags, getTwelveWeekSyncReadiness } from "../persistence/syncContract";
 import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
-import { sendPending12WeekMutations, type MutationQueueSyncResult } from "../persistence/mutationQueueSender";
+import { getTwelveWeekSyncFeatureFlags, getTwelveWeekSyncReadiness } from "../persistence/syncContract";
 import { type TwelveWeekManualCloudSyncResult, useTwelveWeekManualCloudSync } from "./useTwelveWeekManualCloudSync";
 
 export interface FirstLoginRestoreSummary {

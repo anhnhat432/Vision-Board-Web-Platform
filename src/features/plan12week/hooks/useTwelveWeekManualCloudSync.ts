@@ -1,33 +1,27 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-
-import { getUserData, saveUserData } from "@/app/utils/storage";
 import { isRealMode, shouldEnable12WeekMutationSync, shouldEnable12WeekPullSync } from "@/app/utils/app-mode";
+import { getUserData, saveUserData } from "@/app/utils/storage";
+import type { UserData } from "@/app/utils/storage-types";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import {
-  type DataMutationItem,
-  type DataMutationStatus,
-  readMutationQueueStore,
-  archiveMutationsByIds,
-  requeueMutationsAsPending,
-} from "../persistence/mutationQueue";
-import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
-import {
-  createPulledWorkspaceMergeReport,
-  type PulledWorkspaceMergeReport,
-} from "../persistence/pulledWorkspaceMergeReport";
-import {
-  sendPending12WeekMutations,
-  type MutationQueueSyncResult,
-  type SendPending12WeekMutationsOptions,
-} from "../persistence/mutationQueueSender";
+import { isLocalDataUntouchedSeed } from "@/lib/sync/conflict-policy";
 import {
   pullTwelveWeekWorkspace,
   type TwelveWeekPullOptions,
   type TwelveWeekPullResponse,
 } from "@/services/syncService";
-import type { UserData } from "@/app/utils/storage-types";
-import { isLocalDataUntouchedSeed } from "@/lib/sync/conflict-policy";
+import {
+  archiveMutationsByIds,
+  type DataMutationItem,
+  type DataMutationStatus,
+  readMutationQueueStore,
+  requeueMutationsAsPending,
+} from "../persistence/mutationQueue";
+import {
+  type MutationQueueSyncResult,
+  type SendPending12WeekMutationsOptions,
+  sendPending12WeekMutations,
+} from "../persistence/mutationQueueSender";
 import {
   clearPullCursor,
   readPullCursorState,
@@ -35,6 +29,11 @@ import {
   recordErrorPull,
   recordSuccessfulPull,
 } from "../persistence/pullCursorStore";
+import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
+import {
+  createPulledWorkspaceMergeReport,
+  type PulledWorkspaceMergeReport,
+} from "../persistence/pulledWorkspaceMergeReport";
 
 export type TwelveWeekManualCloudSyncSkipReason =
   | "demo_mode"
@@ -191,7 +190,8 @@ export async function runTwelveWeekManualCloudSync(
   const pullFeatureEnabled = options.pullFeatureEnabled ?? shouldEnable12WeekPullSync();
   const apiConfigured = options.apiConfigured ?? isApiBaseUrlConfigured();
 
-  const isTestEnv = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || process.env.VITEST === "true");
+  const isTestEnv =
+    typeof process !== "undefined" && (process.env.NODE_ENV === "test" || process.env.VITEST === "true");
   const autoResolveAllConflicts = options.autoResolveAllConflicts ?? !isTestEnv;
 
   if (!realMode) {
@@ -283,11 +283,7 @@ export async function runTwelveWeekManualCloudSync(
     // with the cloud snapshot is a false-positive conflict. Apply the cloud
     // snapshot directly so the user does not see the "Cần chọn bản dữ liệu"
     // banner on a fresh login.
-    if (
-      !mergeReport.safeToApply &&
-      unresolvedLocalMutations.length === 0 &&
-      isLocalDataUntouchedSeed(localData)
-    ) {
+    if (!mergeReport.safeToApply && unresolvedLocalMutations.length === 0 && isLocalDataUntouchedSeed(localData)) {
       const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
       const didWrite = (options.writeUserData ?? saveUserData)(nextData);
       if (!didWrite) {

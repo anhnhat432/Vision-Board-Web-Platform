@@ -345,11 +345,11 @@ vi.mock("@/services/weekService", () => ({
   updateWeekReview: fakeBackend.updateWeekReview,
 }));
 
-import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
-import { getPlanLink } from "../persistence/planLinkStore";
 import { hydrateTwelveWeekPlansFromBackend } from "@/app/hooks/useBackendPlanHydration";
 import { APP_STORAGE_KEYS, getUserData, saveUserData } from "@/app/utils/storage";
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
+import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
+import { getPlanLink } from "../persistence/planLinkStore";
 import { usePlanExecutionSync } from "./usePlanExecutionSync";
 
 function resetLocalUserData(): void {

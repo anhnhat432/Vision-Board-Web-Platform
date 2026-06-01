@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { BackendConnectionStatus } from "@/app/components/twelve-week/TwelveWeekSettingsShared";
 import type { BackendPlanHydrationResult } from "@/app/hooks/useBackendPlanHydration";
-import { hasBackendSyncIssue, getBackendSyncIssueMessage } from "../pages/12WeekSystem/helpers";
+import { getBackendSyncIssueMessage, hasBackendSyncIssue } from "../pages/12WeekSystem/helpers";
 
 /** After this elapsed ms, a non-conflict sync error is promoted from transient → visible */
 const TRANSIENT_THRESHOLD_MS = 60_000;

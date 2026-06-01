@@ -1,11 +1,12 @@
-﻿import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { CheckCircle2, CircleAlert, CircleDot, TriangleAlert, Wrench, type LucideIcon } from "lucide-react";
+﻿import { CheckCircle2, CircleAlert, CircleDot, type LucideIcon, TriangleAlert, Wrench } from "lucide-react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
 import { cn } from "@/app/components/ui/utils";
 import { formatDateInputValue, getLifeAreaLabel } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
+import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 import { evaluateTwelveWeekPlanQuality, getPlanRationale, type PlanQualityLevel } from "@/features/plan12week/logic";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import {
@@ -24,7 +25,6 @@ import {
   getReviewDayLabel,
 } from "../helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
-import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 
 interface ReviewStepProps {
   smartGoal: PendingSMARTGoal;
@@ -497,10 +497,7 @@ export function ReviewStep({
               <p className="mt-2 text-xs leading-6 text-app-ink-soft">
                 Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc.
               </p>
-              <ul
-                data-testid="plan-rationale-reasons"
-                className="mt-3 space-y-2 text-sm leading-6 text-app-ink-soft"
-              >
+              <ul data-testid="plan-rationale-reasons" className="mt-3 space-y-2 text-sm leading-6 text-app-ink-soft">
                 {planRationale.reasons.map((reason) => (
                   <li
                     key={reason.id}

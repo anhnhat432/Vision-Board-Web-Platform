@@ -1,15 +1,13 @@
-import { useMemo, useState, useCallback } from "react";
-import { formatDateInputValue } from "@/app/utils/storage-date-utils";
-import { getUserIntentId, getArchetypeForIntent, hasActionableArchetypeHint } from "@/app/utils/user-intent";
-import { isLowFeasibility } from "../logic/generatePlan";
-import { getArchetypePlanFullDefaults, getArchetypeFirstAction } from "../logic/planArchetypeDefaults";
+import { useCallback, useMemo, useState } from "react";
 import { buildLeadIndicatorSchedules } from "@/app/pages/12WeekSetup/helpers";
+import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
+import { formatDateInputValue } from "@/app/utils/storage-date-utils";
+import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
+import type { GoalArchetype, PendingSMARTGoal } from "@/lib/smart-goal";
+import { isLowFeasibility } from "../logic/generatePlan";
+import { getArchetypeFirstAction, getArchetypePlanFullDefaults } from "../logic/planArchetypeDefaults";
 import { PlanPreview } from "./PlanPreview";
 import { TacticsEditor } from "./TacticsEditor";
-import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
-import type { GoalArchetype } from "@/lib/smart-goal";
-import type { PendingSMARTGoal } from "@/lib/smart-goal";
-import type { PendingFeasibilityResult } from "@/app/pages/12WeekSetup/types";
 
 interface PlanPreviewStepProps {
   draft: TwelveWeekSetupDraft;

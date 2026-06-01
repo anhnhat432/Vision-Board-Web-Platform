@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
+import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 import type { DataMutationItem } from "./mutationQueue";
 import { createPulledWorkspaceMergeReport } from "./pulledWorkspaceMergeReport";
-import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
 

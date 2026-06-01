@@ -158,6 +158,38 @@ export function FeasibilityCheck() {
       }
     }
 
+    const savedResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+    if (savedResult) {
+      try {
+        const parsedResult = JSON.parse(savedResult);
+        if (parsedResult && typeof parsedResult === "object") {
+          const resultData: ResultData = {
+            type: parsedResult.resultType ?? parsedResult.type,
+            title: parsedResult.resultTitle ?? parsedResult.title,
+            summary: parsedResult.resultSummary ?? parsedResult.summary,
+            recommendation: parsedResult.recommendation,
+            readinessScore: parsedResult.readinessScore,
+            adjustedScore: parsedResult.adjustedScore,
+            wheelScore: parsedResult.wheelScore,
+            diagnosticScore: parsedResult.diagnosticScore,
+            maxDiagnosticScore: parsedResult.maxDiagnosticScore,
+            axisScores: parsedResult.axisScores ?? [],
+            bottleneck: parsedResult.bottleneck,
+            planLoad: parsedResult.planLoad,
+            weeklyCapacity: parsedResult.weeklyCapacity,
+            firstWeekGuidance: parsedResult.firstWeekGuidance,
+            scopeRecommendation: parsedResult.scopeRecommendation,
+            smartGoalQualityLevel: parsedResult.smartGoalQualityLevel,
+            smartGoalQualityNote: parsedResult.smartGoalQualityNote,
+            savedAt: parsedResult.savedAt,
+          };
+          setResult(resultData);
+        }
+      } catch {
+        // Ignore malformed result.
+      }
+    }
+
     setFocusArea(storedFocusArea);
     setWheelScore(areaData.score);
     setPendingGoal(normalizedPendingGoal);
@@ -386,23 +418,23 @@ export function FeasibilityCheck() {
 
         <section aria-labelledby="feasibility-title">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-            {getLifeAreaLabel(focusArea)} · Kiểm tra tính thực tế
+            {getLifeAreaLabel(focusArea)} · Hiệu chuẩn khả thi
           </p>
           <h1
             id="feasibility-title"
-            className="mt-3 font-serif text-4xl font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-4xl"
+            className="mt-3 font-serif text-3xl font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-4xl"
           >
-            Mục tiêu của bạn đã đủ thực tế chưa?
+            Hiệu chuẩn cán cân khả thi
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
-            Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.
+            Cùng chuẩn bị hành trang phù hợp để đảm bảo kế hoạch 12 tuần của bạn chắc thắng.
           </p>
 
           <div className="mt-6 rounded-2xl border border-indigo-500/10 bg-indigo-50/50 dark:bg-indigo-950/20 p-5 shadow-sm">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-500/80 dark:text-indigo-400/80 mb-2">
-                  Mục tiêu đang kiểm tra
+                  Mục tiêu của bạn
                 </p>
                 <p className="line-clamp-2 text-sm font-bold leading-relaxed text-indigo-900 dark:text-indigo-100">
                   {pendingGoal.specific}
@@ -410,16 +442,16 @@ export function FeasibilityCheck() {
               </div>
               <Link
                 to="/smart-goal-setup"
-                className="shrink-0 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 transition-colors"
+                className="shrink-0 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 transition-colors p-2 -m-2"
               >
-                Sửa mục tiêu
+                Sửa mục tiêu ✏️
               </Link>
             </div>
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
               <span className="rounded-full bg-indigo-500 text-white px-3 py-1 font-bold shadow-sm">
                 {getLifeAreaLabel(focusArea)}
               </span>
-              <span className="rounded-full border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 px-3 py-1 font-semibold text-indigo-700 dark:text-indigo-300">
+              <span className="rounded-full border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 px-3 py-1 font-semibold text-indigo-750 dark:text-indigo-300">
                 Điểm nền tảng: {wheelScore}/10
               </span>
             </div>

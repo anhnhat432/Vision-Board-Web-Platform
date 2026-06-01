@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
+import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,12 +12,10 @@ import {
   AlertDialogTitle,
 } from "@/app/components/ui/alert-dialog";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { Label } from "@/app/components/ui/label";
 import { Input } from "@/app/components/ui/input";
-import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
-import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
-import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
+import { Label } from "@/app/components/ui/label";
 import type { PricingPlanCode } from "@/app/utils/storage-types";
+import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
 
 interface TwelveWeekSystemDialogsProps {
   // Upgrade Paywall

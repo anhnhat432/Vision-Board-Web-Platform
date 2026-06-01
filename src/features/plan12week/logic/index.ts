@@ -1,23 +1,43 @@
 export { generateAdaptiveSuggestion } from "./adaptivePlanning";
 export { analyzeExecutionPatterns } from "./behaviorInsights";
+export type { CycleSummary } from "./cycleReview";
+export { calculateCycleSummary } from "./cycleReview";
 export { generateExecutionSuggestion, interpretExecutionScore } from "./executionFeedback";
+export type {
+  ExecutionInsight,
+  ExecutionInsightId,
+  ExecutionInsightNextAction,
+  ExecutionInsightNextActionId,
+  ExecutionInsightSeverity,
+  ExecutionInsightsContext,
+} from "./executionInsights";
+export {
+  getExecutionInsights,
+  getNextActionFromInsights,
+  getWeeklyReflectionInsights,
+} from "./executionInsights";
 export { calculateExecutionScore, calculateLagScore, calculateLeadScore } from "./executionScore";
-export { calculateGoalProgress } from "./goalProgress";
-export { generate12WeekPlan } from "./generatePlan";
 export type { Generate12WeekPlanInput, Generate12WeekPlanOptions } from "./generatePlan";
+export { generate12WeekPlan } from "./generatePlan";
+export { calculateGoalProgress } from "./goalProgress";
+export { getWeeklyMetricProgress, logLeadMetric } from "./leadMetrics";
+export type {
+  FeasibilityPlanLoadInput,
+  NextWeekAdjustment,
+  NextWeekConfidence,
+  NextWeekReasonCode,
+  NextWeekRecommendation,
+  NextWeekRecommendationContext,
+  WorkloadDecisionInput,
+} from "./nextWeekRecommendation";
+export { getNextWeekAdjustmentRecommendation } from "./nextWeekRecommendation";
+export type { ArchetypePlanFullDefaults } from "./planArchetypeDefaults";
 export {
   getArchetypePlanFullDefaults,
   indicatorsMatchArchetype,
   milestonesMatchArchetype,
 } from "./planArchetypeDefaults";
-export type { ArchetypePlanFullDefaults } from "./planArchetypeDefaults";
-export { getWeeklyMetricProgress, logLeadMetric } from "./leadMetrics";
 export { calculatePlanInsights } from "./planInsights";
-export {
-  evaluateTwelveWeekPlanQuality,
-  getPlanImprovementSuggestions,
-  getPlanQualityWarnings,
-} from "./planQuality";
 export type {
   PlanQualityContext,
   PlanQualityDimensionId,
@@ -28,23 +48,19 @@ export type {
   PlanQualityLevel,
   PlanQualityResult,
 } from "./planQuality";
-export { calculateCycleCompletionRate, calculateLeadProgress, calculatePlanProgress } from "./progress";
-export { calculateCycleSummary } from "./cycleReview";
-export type { CycleSummary } from "./cycleReview";
 export {
-  getExecutionInsights,
-  getNextActionFromInsights,
-  getWeeklyReflectionInsights,
-} from "./executionInsights";
-export type {
-  ExecutionInsight,
-  ExecutionInsightId,
-  ExecutionInsightNextAction,
-  ExecutionInsightNextActionId,
-  ExecutionInsightSeverity,
-  ExecutionInsightsContext,
-} from "./executionInsights";
-export { getPlanRationale } from "./planRationale";
+  type AssessPlanQualityInput,
+  type AssessWeekOneLoadInput,
+  assessPlanQuality,
+  assessWeekOneLoad,
+  evaluateTwelveWeekPlanQuality,
+  getPlanImprovementSuggestions,
+  getPlanQualityWarnings,
+  type PlanQualityAssessment,
+  type WeeklyCapacityBand,
+  type WeekOneLoadAssessment,
+  type WeekOneLoadLevel,
+} from "./planQuality";
 export type {
   PlanRationaleAdjustment,
   PlanRationaleAdjustmentId,
@@ -58,21 +74,15 @@ export type {
   PlanRationaleWarning,
   PlanRationaleWarningId,
 } from "./planRationale";
-export { getNextWeekAdjustmentRecommendation } from "./nextWeekRecommendation";
+export { getPlanRationale } from "./planRationale";
+export { calculateCycleCompletionRate, calculateLeadProgress, calculatePlanProgress } from "./progress";
 export type {
-  FeasibilityPlanLoadInput,
-  NextWeekAdjustment,
-  NextWeekConfidence,
-  NextWeekReasonCode,
-  NextWeekRecommendation,
-  NextWeekRecommendationContext,
-  WorkloadDecisionInput,
-} from "./nextWeekRecommendation";
-export {
-  getRescueActionSuggestion,
-  getRescueModeMessage,
-  getRescueModeStatus,
-} from "./rescueMode";
+  ProgressTrendDirection,
+  ProgressTrendInput,
+  ProgressTrendInterpretation,
+  ProgressTrendLevel,
+} from "./progressNarrative";
+export { interpretProgressTrend } from "./progressNarrative";
 export type {
   RescueModeInput,
   RescueModeMessage,
@@ -82,32 +92,20 @@ export type {
   RescueSuggestionId,
   RescueTriggerId,
 } from "./rescueMode";
-export { interpretProgressTrend } from "./progressNarrative";
-export type {
-  ProgressTrendDirection,
-  ProgressTrendInput,
-  ProgressTrendInterpretation,
-  ProgressTrendLevel,
-} from "./progressNarrative";
+export {
+  getRescueActionSuggestion,
+  getRescueModeMessage,
+  getRescueModeStatus,
+} from "./rescueMode";
 export { calculateMetricStreak } from "./streak";
 export { getWeeklyTaskWarning, isTaskCountInRecommendedRange } from "./taskConstraints";
+export type { TimeBlockValidationResult } from "./timeBlocks";
 export {
   getDefaultTimeBlocks,
   getUpcomingStrategicBlock,
   TIME_BLOCK_DAYS,
   validateTimeBlocks,
 } from "./timeBlocks";
-export type { TimeBlockValidationResult } from "./timeBlocks";
-export {
-  assessPlanQuality,
-  assessWeekOneLoad,
-  type AssessPlanQualityInput,
-  type AssessWeekOneLoadInput,
-  type PlanQualityAssessment,
-  type WeekOneLoadAssessment,
-  type WeekOneLoadLevel,
-  type WeeklyCapacityBand,
-} from "./planQuality";
-export { createWeeklyReview } from "./weeklyReview";
-export { interpretWeeklyExecutionScore, WEEKLY_EXECUTION_TARGET } from "./weeklyExecutionInterpretation";
 export type { WeeklyExecutionInterpretation, WeeklyExecutionLevel } from "./weeklyExecutionInterpretation";
+export { interpretWeeklyExecutionScore, WEEKLY_EXECUTION_TARGET } from "./weeklyExecutionInterpretation";
+export { createWeeklyReview } from "./weeklyReview";

@@ -5,10 +5,9 @@
 
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-import { LeadIndicatorsStep } from "./LeadIndicatorsStep";
 import { setUserIntent } from "@/app/utils/user-intent";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
+import { LeadIndicatorsStep } from "./LeadIndicatorsStep";
 
 function makeIndicator(overrides: Partial<LeadIndicatorDraft> = {}): LeadIndicatorDraft {
   return {

@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
-import { TwelveWeekDashboardHeader } from "./components";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
+import { TwelveWeekDashboardHeader } from "./components";
 
 function makeGoal(): Goal {
   return {

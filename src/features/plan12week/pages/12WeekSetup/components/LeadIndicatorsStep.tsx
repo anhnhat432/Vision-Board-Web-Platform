@@ -1,5 +1,5 @@
-﻿import { useMemo, useState } from "react";
 import { AlertTriangle, GripVertical, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { GoalArchetypeExamples } from "@/app/components/GoalArchetypeExamples";
 import { Input } from "@/app/components/ui/input";
@@ -17,28 +17,34 @@ import {
   labelClass,
   textareaClass,
 } from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
+import type { IndicatorPreviewGroup } from "../helpers";
 import {
   formatScheduleDayLabels,
   getLeadIndicatorTargetValidationError,
   getLeadIndicatorUnitValidationError,
   validateLeadIndicatorDraft,
 } from "../helpers";
-import type { IndicatorPreviewGroup } from "../helpers";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
 
 interface LeadIndicatorsStepProps {
   draft: TwelveWeekSetupDraft;
-  coreCount: number;
-  optionalCount: number;
-  setupGuideSupport: AdaptiveTemplateSupport | null;
-  setupGuideTemplate: TwelveWeekTemplateDefinition | null;
-  selectedTemplate: TwelveWeekTemplateDefinition | null;
-  weekOneTaskPreview: string[];
-  weekOneTaskWarning: string | null;
-  weekOneTaskGroups: IndicatorPreviewGroup[];
+  coreCount?: number;
+  optionalCount?: number;
+  setupGuideSupport?: AdaptiveTemplateSupport | null;
+  setupGuideTemplate?: TwelveWeekTemplateDefinition | null;
+  selectedTemplate?: TwelveWeekTemplateDefinition | null;
+  weekOneTaskPreview?: string[];
+  weekOneTaskWarning?: string | null;
+  weekOneTaskGroups?: IndicatorPreviewGroup[];
   onAddIndicator: () => void;
   onRemoveIndicator: (index: number) => void;
-  onIndicatorChange: <K extends keyof LeadIndicatorDraft>(index: number, key: K, value: LeadIndicatorDraft[K]) => void;
+  onIndicatorChange: <K extends keyof LeadIndicatorDraft>(
+    index: number,
+    key: K,
+    value: LeadIndicatorDraft[K],
+  ) => void;
+  showValidationErrors?: boolean;
+  onPreferredDayToggle?: (dayIndex: number) => void;
 }
 
 const COMMITMENT_FIELDS = [
@@ -105,7 +111,7 @@ export function LeadIndicatorsStep({
   setupGuideTemplate,
   selectedTemplate,
   weekOneTaskWarning,
-  weekOneTaskGroups,
+  weekOneTaskGroups = [],
   onAddIndicator,
   onRemoveIndicator,
   onIndicatorChange,

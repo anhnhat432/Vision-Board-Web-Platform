@@ -1,9 +1,11 @@
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
-import { DeleteCloudWorkspaceDialog } from "@/app/components/twelve-week/DeleteCloudWorkspaceDialog";
 import { DataStorageInfo } from "@/app/components/DataStorageInfo";
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { DeleteCloudWorkspaceDialog } from "@/app/components/twelve-week/DeleteCloudWorkspaceDialog";
+import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
+import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,28 +16,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/app/components/ui/alert-dialog";
-import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
-import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
-import { TwelveWeekTabFallback } from "./12WeekSystem/components";
-import { WeekEditor } from "./12WeekSystem/lazyTabs";
-import { useTwelveWeekSettingsActions } from "./12WeekSystem/useTwelveWeekSettingsActions";
-import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
-import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
+import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
 import {
   isDemoMode,
   isRealMode,
   shouldEnable12WeekMutationSync,
   shouldEnable12WeekPullSync,
 } from "@/app/utils/app-mode";
-import { buildDerivedScoreboard, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
 import { clearArchivedOutbox, clearEventLog, updateGoal } from "@/app/utils/storage";
+import { buildDerivedScoreboard, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
+import type { TwelveWeekSystem as TwelveWeekSystemModel } from "@/app/utils/storage-types";
+import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
-import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
-import type { TwelveWeekSystem as TwelveWeekSystemModel } from "@/app/utils/storage-types";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { TwelveWeekTabFallback } from "./12WeekSystem/components";
+import { WeekEditor } from "./12WeekSystem/lazyTabs";
+import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
+import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
+import { useTwelveWeekSettingsActions } from "./12WeekSystem/useTwelveWeekSettingsActions";
 
 const emptyMutationQueueSummary = {
   totalCount: 0,

@@ -1,63 +1,51 @@
+import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
 import { Suspense } from "react";
 import type { NavigateFunction } from "react-router";
-import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
 import type {
-  Goal,
-  TwelveWeekSystem,
-  TwelveWeekTaskInstance,
-  PricingPlanCode,
-  UniversalWeeklyReview,
-  TimeBlock,
-  AppPreferences,
-  EntitlementKey,
-  UniversalDailyCheckIn,
-  LeadIndicator,
-  FunnelStepSummary,
-  InAppReminder,
-  SyncOutboxItem,
-} from "@/app/utils/storage-types";
-import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
-import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
-import { PlanOverview, WeekEditor, WeeklyReview } from "./lazyTabs";
-import { TwelveWeekTabFallback } from "./components";
-import type {
-  ReentryMode,
-  DailyMood,
-  RescuePlanSummary,
-  HeatmapCell,
-  WeekTrendPoint,
-  TacticBreakdownItem,
-} from "@/app/utils/twelve-week-system-ui";
-import type { PremiumFeatureContext } from "@/app/utils/twelve-week-premium/types";
-import type { TwelveWeekWeeklyReviewForm } from "@/app/components/twelve-week/TwelveWeekWeekTab";
-import type {
   BackendConnectionStatus,
   MutationQueueManualSyncStatus,
 } from "@/app/components/twelve-week/TwelveWeekSettingsShared";
+import type { TwelveWeekWeeklyReviewForm } from "@/app/components/twelve-week/TwelveWeekWeekTab";
+import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
+import type { BackendPlanHydrationResult } from "@/app/hooks/useBackendPlanHydration";
+import type { BillingActionSnapshot, BillingProviderStatus } from "@/app/utils/billing-contract";
+import type { BrowserNotificationStatus, OutboxSyncSnapshot } from "@/app/utils/production";
 import type {
-  RescueModeStatus,
-  NextWeekRecommendation,
-  ExecutionInsight,
-} from "@/features/plan12week/logic";
+  AppPreferences,
+  EntitlementKey,
+  FunnelStepSummary,
+  Goal,
+  InAppReminder,
+  LeadIndicator,
+  PricingPlanCode,
+  SyncOutboxItem,
+  TimeBlock,
+  TwelveWeekSystem,
+  TwelveWeekTaskInstance,
+  UniversalDailyCheckIn,
+  UniversalWeeklyReview,
+} from "@/app/utils/storage-types";
 import type {
+  PremiumFeatureContext,
   SuggestedNextWeekPlan,
   WeeklyReviewPremiumInsight,
 } from "@/app/utils/twelve-week-premium/types";
 import type {
-  BrowserNotificationStatus,
-  OutboxSyncSnapshot,
-} from "@/app/utils/production";
-import type {
-  BillingActionSnapshot,
-  BillingProviderStatus,
-} from "@/app/utils/billing-contract";
-import type {
-  BackendPlanHydrationResult,
-} from "@/app/hooks/useBackendPlanHydration";
+  DailyMood,
+  HeatmapCell,
+  ReentryMode,
+  RescuePlanSummary,
+  TacticBreakdownItem,
+  WeekTrendPoint,
+} from "@/app/utils/twelve-week-system-ui";
+import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
+import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
+import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
+import { TwelveWeekTabFallback } from "./components";
+import { PlanOverview, WeekEditor, WeeklyReview } from "./lazyTabs";
 
 const TWELVE_WEEK_SECTION_TABS = [
   { value: "today", label: "Hôm nay", icon: ListTodo },
@@ -129,7 +117,10 @@ interface TwelveWeekSystemTabsProps {
   suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
   weeklyForm: TwelveWeekWeeklyReviewForm;
   currentReview: UniversalWeeklyReview | null;
-  onWeeklyFormChange: <K extends keyof TwelveWeekWeeklyReviewForm>(field: K, value: TwelveWeekWeeklyReviewForm[K]) => void;
+  onWeeklyFormChange: <K extends keyof TwelveWeekWeeklyReviewForm>(
+    field: K,
+    value: TwelveWeekWeeklyReviewForm[K],
+  ) => void;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
   onSaveWeeklyReview: () => void;
@@ -364,7 +355,10 @@ export function TwelveWeekSystemTabs({
                     data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:shadow-xs data-[state=active]:border-app-line/60
                     data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/30`}
                 >
-                  <Icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-105" aria-hidden="true" />
+                  <Icon
+                    className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    aria-hidden="true"
+                  />
                   <span>{label}</span>
                   {hasDot && (
                     <span className="absolute top-1 right-1.5 flex h-2.5 w-2.5">

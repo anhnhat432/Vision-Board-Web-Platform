@@ -1,8 +1,7 @@
 export const STEPS = [
-  { id: "outcome", label: "Kết quả", title: "Chốt kết quả 12 tuần" },
-  { id: "tactics", label: "Việc lặp lại", title: "Chọn việc lặp lại hằng tuần" },
-  { id: "schedule", label: "Lịch", title: "Chốt lịch thực hiện" },
-  { id: "finish", label: "Xác nhận", title: "Xác nhận kế hoạch 12 tuần" },
+  { id: "outcome", label: "Đích đến", title: "Thiết kế Đích đến & Khung mẫu" },
+  { id: "schedule", label: "Lịch trình", title: "Thiết lập Hành động & Lịch 7 ngày" },
+  { id: "finish", label: "Hoàn tất", title: "Xác nhận & Kích hoạt" },
 ] as const;
 
-export { GOAL_TYPES, REVIEW_DAYS, LOAD_PREFERENCE_OPTIONS } from "./constants";
+export { GOAL_TYPES, LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS } from "./constants";

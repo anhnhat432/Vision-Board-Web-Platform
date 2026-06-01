@@ -65,11 +65,13 @@ export function TimeBoundStep({
 
       {/* Selector chọn chế độ */}
       <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Chọn cách chốt thời hạn">
+        {/* biome-ignore lint/a11y/useSemanticElements: using button with role="radio" is intentional for custom layout styling */}
         <button
           type="button"
-          aria-pressed={smartData.timeBound.mode === "weeks"}
+          role="radio"
+          aria-checked={smartData.timeBound.mode === "weeks"}
           className={cn(
-            "flex items-center justify-center gap-2 rounded-2xl border px-4 py-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+            "flex items-center justify-center gap-2 rounded-2xl border px-4 py-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
             smartData.timeBound.mode === "weeks"
               ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
               : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
@@ -89,11 +91,13 @@ export function TimeBoundStep({
           <Hourglass className="h-4 w-4" />
           Theo số tuần
         </button>
+        {/* biome-ignore lint/a11y/useSemanticElements: using button with role="radio" is intentional for custom layout styling */}
         <button
           type="button"
-          aria-pressed={smartData.timeBound.mode === "date"}
+          role="radio"
+          aria-checked={smartData.timeBound.mode === "date"}
           className={cn(
-            "flex items-center justify-center gap-2 rounded-2xl border px-4 py-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+            "flex items-center justify-center gap-2 rounded-2xl border px-4 py-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
             smartData.timeBound.mode === "date"
               ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
               : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
@@ -115,8 +119,8 @@ export function TimeBoundStep({
 
       {smartData.timeBound.mode === "weeks" ? (
         <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
-          <label htmlFor="smart-target-weeks-slider" className={labelClass}>
-            Thời hạn mục tiêu (Số tuần để hoàn thành)
+          <label htmlFor="smart-target-weeks-slider" className={cn(labelClass, "text-base font-bold text-app-ink")}>
+            Số tuần bạn cam kết hoàn thành mục tiêu
             <span className={requiredMarkerClass} aria-hidden="true">*</span>
             <span className="sr-only"> bắt buộc</span>
           </label>
@@ -126,8 +130,10 @@ export function TimeBoundStep({
             <div className={cn(
               "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-2xl border transition-all duration-300 shadow-sm",
               parsedTargetWeeks === 12
-                ? "border-purple-500/30 text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/30"
-                : "border-app-line text-app-ink bg-app-bg"
+                ? "border-purple-500/35 text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/30"
+                : parsedTargetWeeks <= 6
+                  ? "border-emerald-500/20 text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/30"
+                  : "border-indigo-500/20 text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30"
             )}>
               <span className="text-3xl font-extrabold tracking-tight">{parsedTargetWeeks}</span>
               <span className="text-[10px] font-bold uppercase tracking-wider">tuần</span>
@@ -155,21 +161,49 @@ export function TimeBoundStep({
                 <span>24 tuần</span>
               </div>
 
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Dự kiến hoàn thành: <span className="font-bold underline">{(() => {
-                  const d = new Date();
-                  d.setDate(d.getDate() + parsedTargetWeeks * 7);
-                  return d.toLocaleDateString("vi-VN", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                })()}</span></span>
+              {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng */}
+              <div className="rounded-xl border border-purple-500/15 bg-gradient-to-br from-purple-500/[0.01] to-indigo-500/[0.02] dark:from-purple-950/[0.04] dark:to-indigo-950/[0.02] px-4 py-3 flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+                <Calendar className="h-5 w-5 text-purple-500 shrink-0" />
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-purple-600 dark:text-purple-400 font-extrabold">Thời khắc cán đích dự kiến</p>
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                    {(() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + parsedTargetWeeks * 7);
+                      return d.toLocaleDateString("vi-VN", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    })()}
+                  </p>
+                </div>
               </div>
 
-              {parsedTargetWeeks === 12 && (
-                <div className="rounded-xl border border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/20 px-3 py-2 text-xs font-semibold text-purple-700 dark:text-purple-400 flex items-center gap-2 animate-[pulse_2s_infinite]">
-                  <span className="flex h-2 w-2 rounded-full bg-purple-500" />
-                  <span>Chu kỳ vàng 12 tuần giúp tối đa hóa khả năng thực thi và tập trung!</span>
-                </div>
-              )}
+              {/* Thông điệp chánh niệm theo số tuần đã chọn */}
+              {(() => {
+                if (parsedTargetWeeks === 12) {
+                  return (
+                    <div className="rounded-xl border border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/20 px-3 py-2 text-xs font-semibold text-purple-750 dark:text-purple-400 flex items-center gap-2 transition-all duration-300">
+                      <span className="flex h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                      <span>Chu kỳ vàng 12 tuần giúp tối đa hóa khả năng thực thi và giữ sự tập trung cao độ!</span>
+                    </div>
+                  );
+                }
+                if (parsedTargetWeeks <= 4) {
+                  return (
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+                      <span>Thử thách ngắn hạn giúp bạn tập trung tuyệt đối vào mục tiêu trước mắt!</span>
+                    </div>
+                  );
+                }
+                if (parsedTargetWeeks >= 16) {
+                  return (
+                    <div className="rounded-xl border border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/20 px-3 py-2 text-xs font-semibold text-indigo-700 dark:text-indigo-400 flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-indigo-500" />
+                      <span>Hành trình dài hơi đòi hỏi sự kiên trì và kỷ luật đều đặn mỗi tuần!</span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
@@ -185,7 +219,7 @@ export function TimeBoundStep({
                   setBlurredFields((previous) => ({ ...previous, targetWeeks: true }));
                 }}
                 className={cn(
-                  "text-xs px-3 py-1.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm",
+                  "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
                   parsedTargetWeeks === Number(weeks)
                     ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
                     : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10"
@@ -203,8 +237,8 @@ export function TimeBoundStep({
         </div>
       ) : (
         <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
-          <label htmlFor="smart-target-date" className={labelClass}>
-            Thời hạn mục tiêu (Chọn ngày cụ thể)
+          <label htmlFor="smart-target-date" className={cn(labelClass, "text-base font-bold text-app-ink")}>
+            Ngày bạn muốn hoàn thành mục tiêu
             <span className={requiredMarkerClass} aria-hidden="true">*</span>
             <span className="sr-only"> bắt buộc</span>
           </label>
@@ -253,7 +287,7 @@ export function TimeBoundStep({
                     setBlurredFields((previous) => ({ ...previous, targetDate: true }));
                   }}
                   className={cn(
-                    "text-xs px-3 py-1.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm",
+                    "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
                     isSelected
                       ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
                       : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10"
@@ -265,16 +299,22 @@ export function TimeBoundStep({
             })}
           </div>
 
+          {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng cho chế độ chọn ngày */}
           {smartData.timeBound.target_date && (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Thời gian thực hiện: <span className="font-bold underline">{(() => {
-                const diffTime = new Date(smartData.timeBound.target_date).getTime() - Date.now();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                const diffWeeks = Math.ceil(diffDays / 7);
-                if (diffDays <= 0) return "Ngày đã chọn nằm ở quá khứ";
-                return `khoảng ~${diffWeeks} tuần (${diffDays} ngày)`;
-              })()}</span></span>
+            <div className="rounded-xl border border-purple-500/15 bg-gradient-to-br from-purple-500/[0.01] to-indigo-500/[0.02] dark:from-purple-950/[0.04] dark:to-indigo-950/[0.02] px-4 py-3 flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+              <Calendar className="h-5 w-5 text-purple-500 shrink-0" />
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.12em] text-purple-600 dark:text-purple-400 font-extrabold">Thời gian thực thi dự kiến</p>
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                  {(() => {
+                    const diffTime = new Date(smartData.timeBound.target_date).getTime() - Date.now();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const diffWeeks = Math.ceil(diffDays / 7);
+                    if (diffDays <= 0) return "Ngày đã chọn nằm ở quá khứ";
+                    return `khoảng ~${diffWeeks} tuần (${diffDays} ngày)`;
+                  })()}
+                </p>
+              </div>
             </div>
           )}
 

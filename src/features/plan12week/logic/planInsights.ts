@@ -1,7 +1,6 @@
-import { calculateExecutionScore } from "./executionScore";
-
 import type { PlanInsights } from "../types/planInsights";
 import type { Plan12Week } from "../types/planTypes";
+import { calculateExecutionScore } from "./executionScore";
 
 const DEFAULT_PLAN_INSIGHTS: PlanInsights = {
   averageScore: 0,

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { calculateLagScore, calculateLeadScore } from "./executionScore";
 import type { Task } from "../types/planTypes";
+import { calculateLagScore, calculateLeadScore } from "./executionScore";
 
 function makeTask(status: Task["status"]): Task {
   return {

@@ -1,5 +1,5 @@
-import { useEffect, useRef, type ReactNode } from "react";
 import { AlertTriangle, Award, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { InlineGoalTitleEdit } from "@/app/components/twelve-week/InlineGoalTitleEdit";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
@@ -92,35 +92,45 @@ export function TwelveWeekDashboardState({
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-app-accent">{eyebrow}</p>
-      <h1 className="mt-2 font-serif text-2xl sm:text-3xl font-bold leading-tight text-app-ink tracking-tight">{title}</h1>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-app-ink-soft">
-        {description}
-      </p>
+      <h1 className="mt-2 font-serif text-2xl sm:text-3xl font-bold leading-tight text-app-ink tracking-tight">
+        {title}
+      </h1>
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-app-ink-soft">{description}</p>
 
       {/* 3 Step Onboarding Visual - Warm soft cards */}
       <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3 text-left">
         <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">1</span>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
+            1
+          </span>
           <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Lĩnh vực ưu tiên</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">Tìm kiếm khía cạnh cuộc sống bạn khao khát được cải thiện lúc này.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">
+            Tìm kiếm khía cạnh cuộc sống bạn khao khát được cải thiện lúc này.
+          </p>
         </div>
 
         <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-warm-soft text-xs font-bold text-app-warm-strong">2</span>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-warm-soft text-xs font-bold text-app-warm-strong">
+            2
+          </span>
           <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Mục tiêu SMART</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">Định hình ước mơ thành một đích đến rõ ràng, đo lường được.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">
+            Định hình ước mơ thành một đích đến rõ ràng, đo lường được.
+          </p>
         </div>
 
         <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">3</span>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
+            3
+          </span>
           <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Kế hoạch 12 tuần</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">Chia nhỏ hành động và cùng đồng hành qua từng tuần thực thi.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">
+            Chia nhỏ hành động và cùng đồng hành qua từng tuần thực thi.
+          </p>
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        {children}
-      </div>
+      <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">{children}</div>
     </div>
   );
 }
@@ -191,7 +201,6 @@ interface TwelveWeekDashboardHeaderProps {
   onRenameGoal?: (title: string) => void | Promise<void>;
 }
 
-
 export function TwelveWeekDashboardHeader({
   activeGoal,
   system,
@@ -221,7 +230,9 @@ export function TwelveWeekDashboardHeader({
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
             <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">Hệ thống 12 tuần</span>
             <span>·</span>
-            <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">Tuần {currentWeek}/{system.totalWeeks}</span>
+            <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">
+              Tuần {currentWeek}/{system.totalWeeks}
+            </span>
             <span>·</span>
             <span className="inline-flex items-center gap-1 bg-app-accent-soft/60 px-2.5 py-0.5 rounded-full text-app-accent border border-app-accent/10">
               <PhaseIcon className="h-3 w-3 shrink-0" />
@@ -239,9 +250,13 @@ export function TwelveWeekDashboardHeader({
               inputClassName="h-auto rounded-lg px-2 py-1 font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink"
             />
             <div className="flex flex-wrap items-center gap-2 text-[10px] text-app-ink-soft">
-              <span className="bg-app-bg/40 px-1.5 py-0.5 rounded-md border border-app-line/20">Gói {getPlanLabel(activePlanCode)}</span>
+              <span className="bg-app-bg/40 px-1.5 py-0.5 rounded-md border border-app-line/20">
+                Gói {getPlanLabel(activePlanCode)}
+              </span>
               <span>·</span>
-              <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}>
+              <span
+                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}
+              >
                 {syncBadgeLabel}
               </span>
             </div>
@@ -258,7 +273,7 @@ export function TwelveWeekDashboardHeader({
             <span>{reviewDueToday ? "Review tuần này →" : "Xem việc hôm nay →"}</span>
             <Target className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
-          
+
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-3xs"
@@ -347,8 +362,8 @@ export function TwelveWeekRescueTriggerBanner({
   const ctaLabel = isUpgradeTrigger ? "Nâng cấp ngay" : "Xem ngay";
 
   return (
-    <div 
-      role="alert" 
+    <div
+      role="alert"
       className="relative overflow-hidden rounded-2xl border border-app-warm/20 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 p-5 shadow-2xs transition-colors"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">

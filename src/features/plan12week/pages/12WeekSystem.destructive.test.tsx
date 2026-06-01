@@ -27,8 +27,8 @@ vi.mock("@/lib/auth/AuthContext", () => ({
   }),
 }));
 
-import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal } from "@/test/app-flow-helpers";
 import * as appMode from "@/app/utils/app-mode";
+import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal } from "@/test/app-flow-helpers";
 
 describe("12-week destructive confirmations", () => {
   beforeEach(() => {

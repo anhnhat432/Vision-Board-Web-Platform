@@ -1,32 +1,21 @@
-import { useCallback, useMemo, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { type Dispatch, type RefObject, type SetStateAction, useCallback, useMemo } from "react";
 import { toast } from "sonner";
-
-import { shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
+import { shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
 import { hapticLight, hapticMedium, hapticSuccess } from "@/app/utils/haptics";
 import { playAllCompleteSound, playTaskCompleteSound } from "@/app/utils/sound";
-import { celebrateMedium, celebrateSmall } from "@/lib/effects/celebrate";
 import {
-  type UniversalDailyCheckIn,
-  type UniversalWeeklyReview,
   formatDateInputValue,
   getCalendarDateKey,
   getUserData,
   isCalendarDateKeyOnOrAfter,
   isCalendarDateKeyOnOrBefore,
   trackAppEvent,
+  type UniversalDailyCheckIn,
+  type UniversalWeeklyReview,
   updateGoal,
   upsertReflection,
 } from "@/app/utils/storage";
-import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
-import {
-  addDaysToDateKey,
-  getMoodScore,
-  getWorkloadDecisionLabel,
-  type DailyMood,
-  type RescuePlanSummary,
-  type ReentryMode,
-} from "@/app/utils/twelve-week-system-ui";
 import {
   buildDerivedScoreboard,
   getDefaultScoreboard,
@@ -35,17 +24,27 @@ import {
   getTwelveWeekTasksForWeek,
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
+  type OverdueTaskActionReason,
   rescheduleTwelveWeekTaskToNextWeek,
   rescheduleTwelveWeekTaskWithinWeek,
   skipTwelveWeekNonCoreTask,
-  type OverdueTaskActionReason,
 } from "@/app/utils/storage-twelve-week";
+import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import type { SuggestedNextWeekPlan } from "@/app/utils/twelve-week-premium";
+import {
+  addDaysToDateKey,
+  type DailyMood,
+  getMoodScore,
+  getWorkloadDecisionLabel,
+  type ReentryMode,
+  type RescuePlanSummary,
+} from "@/app/utils/twelve-week-system-ui";
 import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
-import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
-import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
+import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
+import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
+import { celebrateMedium, celebrateSmall } from "@/lib/effects/celebrate";
 import { getTodayQueueForSystem } from "./helpers";
 import type { WeeklyCommitmentStatus, WeeklyReviewForm } from "./types";
 
@@ -501,7 +500,8 @@ export function useTwelveWeekExecutionActions({
       weeklyForm.insights.trim() || weeklyForm.mainObstacle.trim() || weeklyForm.biggestOutputThisWeek.trim();
     const nextWeekPriorityValue = nextWeekCommitments[0] ?? "";
     const workloadDecisionValue =
-      weeklyForm.workloadDecision || (hasPremiumReviewInsights && suggestedNextWeekPlan ? suggestedNextWeekPlan.workloadDecision : "keep same");
+      weeklyForm.workloadDecision ||
+      (hasPremiumReviewInsights && suggestedNextWeekPlan ? suggestedNextWeekPlan.workloadDecision : "keep same");
     const keepTacticTrimmed = weeklyForm.keepTactic.trim();
     const reduceTacticTrimmed = weeklyForm.reduceTactic.trim();
     const nextReview: UniversalWeeklyReview = {

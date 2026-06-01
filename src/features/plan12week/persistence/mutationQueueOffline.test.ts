@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { UniversalDailyCheckIn } from "@/app/utils/storage-types";
 import {
+  compactMutations,
   createEmptyMutationQueueStore,
   enqueueMutation,
-  compactMutations,
+  listPendingMutations,
   markMutationFailed,
   markMutationInFlight,
-  listPendingMutations,
 } from "./mutationQueue";
 import { sendPending12WeekMutations } from "./mutationQueueSender";
 

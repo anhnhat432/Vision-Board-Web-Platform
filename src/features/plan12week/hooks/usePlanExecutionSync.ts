@@ -1,22 +1,20 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-
-import { isRateLimitError, RateLimitError, toAppError } from "@/lib/api/apiClient";
+import { isDemoMode, shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
+import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
+import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
+import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import type { ApiClientError } from "@/lib/api/apiClient";
+import { isRateLimitError, RateLimitError, toAppError } from "@/lib/api/apiClient";
 import { createMetric, getMetrics, logMetric, updateMetricLog } from "@/services/metricService";
 import { bulkSyncPlan, createPlan, getPlan, getPlans } from "@/services/planService";
 import { addTask, updateTask } from "@/services/taskService";
 import { updateWeek, updateWeekReview } from "@/services/weekService";
-import type { BulkSyncResponse } from "@/types/bulkSync";
-import { buildBulkSyncRequest, isBulkRequestEmpty } from "../persistence/bulkSyncBuilder";
 import type { AppError } from "@/types/api";
+import type { BulkSyncResponse } from "@/types/bulkSync";
 import type { PlanDetails, Task, WeekDetails } from "@/types/plan";
-import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
-import { isDemoMode, shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
-import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
-import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
+import { buildBulkSyncRequest, isBulkRequestEmpty } from "../persistence/bulkSyncBuilder";
 import { getCachedMetrics, invalidateMetricsCache, setCachedMetrics } from "../persistence/metricCache";
-import { getUniversalWeeklyReviewExecutionScore } from "../persistence/reviewExecutionScore";
 import {
   getMetricIdForGoal,
   getPlanLink,
@@ -30,8 +28,9 @@ import {
   updateTaskRevisionInLink,
   updateWeekRevisionInLink,
 } from "../persistence/planLinkStore";
-import { usePlanSyncQueue } from "./usePlanSyncQueue";
+import { getUniversalWeeklyReviewExecutionScore } from "../persistence/reviewExecutionScore";
 import type { SyncQueueItem, SyncType } from "../persistence/syncQueueStore";
+import { usePlanSyncQueue } from "./usePlanSyncQueue";
 
 type SnapshotStatus = "idle" | "success" | "partial" | "error";
 

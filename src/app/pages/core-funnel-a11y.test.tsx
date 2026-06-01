@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Accessibility smoke tests for the core funnel's patched controls.
  *

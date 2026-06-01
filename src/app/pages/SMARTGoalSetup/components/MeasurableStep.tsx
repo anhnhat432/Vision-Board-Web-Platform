@@ -150,6 +150,39 @@ export function MeasurableStep({
             onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
             className={inputClass}
           />
+          {/* Unit selection chips */}
+          <div className="mt-2 flex flex-wrap gap-1.5 items-center select-none">
+            <span className="text-[10px] text-app-ink-muted font-bold">Đơn vị gợi ý:</span>
+            {(() => {
+              const unitSuggestions = (() => {
+                if (focusArea === "Career") return ["dự án", "giờ/tuần", "nhiệm vụ"];
+                if (focusArea === "Finance") return ["triệu VNĐ", "triệu đồng", "%"];
+                if (focusArea === "Health") return ["buổi/tuần", "km", "bữa/tuần", "phút/ngày"];
+                if (focusArea === "Education") return ["điểm", "từ mới", "chương", "giờ/tuần"];
+                if (focusArea === "Relationships") return ["buổi/tuần", "cuộc hẹn", "lần/tuần"];
+                if (focusArea === "Family") return ["bữa tối/tuần", "buổi/tuần", "lần/tuần"];
+                if (focusArea === "Personal Growth") return ["phút/ngày", "trang sách", "lần/tuần"];
+                if (focusArea === "Leisure") return ["chuyến/tháng", "giờ/tuần", "lần"];
+                return ["buổi/tuần", "lần/tuần", "giờ/tuần", "%"];
+              })();
+
+              return unitSuggestions.map((unit) => (
+                <button
+                  key={unit}
+                  type="button"
+                  onClick={() => handleUnitChange(unit)}
+                  className={cn(
+                    "text-[10px] px-2.5 py-0.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium cursor-pointer",
+                    metricUnitInput === unit
+                      ? "bg-app-accent text-white border-app-accent"
+                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/15"
+                  )}
+                >
+                  {unit}
+                </button>
+              ));
+            })()}
+          </div>
         </div>
       </div>
         
@@ -256,23 +289,23 @@ export function MeasurableStep({
           </div>
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
-              <Check className="h-3 w-3" strokeWidth={3} />
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
+          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3.5 w-3.5" strokeWidth={3} />
             </span>
             <div>
-              <p className="font-bold text-emerald-700 dark:text-emerald-400">Ví dụ Tốt (Có thước đo):</p>
-              <p className="text-app-ink-soft mt-0.5">"Số buổi vận động/tuần" (đơn vị: buổi), hoặc "Số tiền tiết kiệm" (đơn vị: triệu VNĐ).</p>
+              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết rõ (Đếm được):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Số buổi vận động/tuần" (đơn vị: buổi), hoặc "Số tiền tích lũy" (đơn vị: triệu VNĐ).</p>
             </div>
           </div>
-          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-450 mt-0.5">
-              <X className="h-3 w-3" strokeWidth={3} />
+          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3.5 w-3.5" strokeWidth={3} />
             </span>
             <div>
-              <p className="font-bold text-rose-750 dark:text-rose-400">Ví dụ Chưa tốt (Chung chung):</p>
-              <p className="text-app-ink-soft mt-0.5">"Học chăm chỉ hơn" (không thể đếm) hoặc "Cải thiện bản thân."</p>
+              <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết chung chung (Không đếm được):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Học tập chăm chỉ hơn" (không có mốc đo) hoặc "Vận động nhiều hơn."</p>
             </div>
           </div>
         </div>

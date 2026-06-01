@@ -1,4 +1,4 @@
-import { Lightbulb, Lock, Sparkles, ChevronDown } from "lucide-react";
+import { ChevronDown, Lightbulb, Lock, Sparkles } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
@@ -6,11 +6,11 @@ import { Textarea } from "@/app/components/ui/textarea";
 import { cn } from "@/app/components/ui/utils";
 import type { PricingPlanCode } from "@/app/utils/storage";
 import {
-  TWELVE_WEEK_TEMPLATE_CATALOG,
-  getPlanLabel,
-  planSatisfiesRequirement,
   type AdaptiveTemplateRecommendation,
   type AdaptiveTemplateSupport,
+  getPlanLabel,
+  planSatisfiesRequirement,
+  TWELVE_WEEK_TEMPLATE_CATALOG,
   type TwelveWeekTemplateDefinition,
 } from "@/app/utils/twelve-week-premium";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
@@ -444,15 +444,11 @@ export function OutcomeStep({
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                       Tuần 1 nên thắng ở đâu
                     </p>
-                    <p className="mt-2 text-sm font-medium text-app-ink">
-                      {recommendedTemplateSupport.week1Headline}
-                    </p>
+                    <p className="mt-2 text-sm font-medium text-app-ink">{recommendedTemplateSupport.week1Headline}</p>
                     <p className="mt-2">{recommendedTemplateSupport.week1Support}</p>
                   </div>
                   <div className={infoBoxClass}>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-                      Nhịp nên giữ
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp nên giữ</p>
                     <p className="mt-2">{recommendedTemplateSupport.week1CadenceHint}</p>
                   </div>
                 </div>
@@ -483,11 +479,14 @@ export function OutcomeStep({
                   aria-label={templateAriaLabel}
                   className={cn(
                     "rounded-xl border p-4.5 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
-                    isSelected && "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
+                    isSelected &&
+                      "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
                     !isSelected &&
                       isLocked &&
                       "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/5",
-                    !isSelected && !isLocked && "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-bg",
+                    !isSelected &&
+                      !isLocked &&
+                      "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30 hover:bg-app-bg",
                   )}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -508,9 +507,7 @@ export function OutcomeStep({
                   <p className="mt-3 text-xs leading-relaxed text-app-ink-soft">{template.description}</p>
                   <div className="mt-3.5 grid gap-2.5 text-xs leading-relaxed text-app-ink-soft sm:grid-cols-2">
                     <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-sm">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                        Hợp khi
-                      </p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Hợp khi</p>
                       <p className="mt-1 font-medium">{template.bestFor}</p>
                     </div>
                     <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-sm">

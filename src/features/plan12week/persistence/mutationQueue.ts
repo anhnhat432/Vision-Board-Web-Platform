@@ -1,5 +1,5 @@
-import type { TwelveWeekSystem, UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
 import { readActiveAuthOwnerUid } from "@/app/utils/storage-auth-scope";
+import type { TwelveWeekSystem, UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
 
 export const DATA_MUTATION_QUEUE_VERSION = 1;
 export const DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY = "visionboard_data_mutation_queue";

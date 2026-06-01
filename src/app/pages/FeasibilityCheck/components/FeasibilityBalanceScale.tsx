@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Scale, ShieldAlert, BadgeCheck, Sparkles } from "lucide-react";
+import { Scale, Sparkles } from "lucide-react";
 import { QUESTIONS } from "../constants";
 
 interface FeasibilityBalanceScaleProps {
@@ -38,9 +38,6 @@ function useAnimatedValue(target: number, duration = 900) {
 }
 
 /* ── Constants ─────────────────────────────────────────────────────── */
-const CX = 150;
-const CY = 140;
-const R = 82;
 
 export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProps) {
   // ── Score calculations ──
@@ -60,11 +57,11 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     }
 
     const average = answeredCount > 0 ? totalScore / answeredCount : 2.5;
-    const normalized = (average - 2.5) / 1.5;
-    const needleAngle = normalized * 90;
+    const normalized = answeredCount > 0 ? (average - 2.5) / 1.5 : 0;
+    const tiltAngle = normalized * 18; // từ -18 độ đến +18 độ
 
     return {
-      needleAngle,
+      tiltAngle,
       average,
       answeredCount,
       isHeavyLeft: average < 2.3,
@@ -72,7 +69,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
     };
   }, [answers]);
 
-  const { needleAngle, average, answeredCount, isHeavyLeft, isHeavyRight } = balanceData;
+  const { tiltAngle, average, answeredCount, isHeavyLeft, isHeavyRight } = balanceData;
   const animatedAverage = useAnimatedValue(answeredCount > 0 ? average : 0);
 
   // ── Per-axis scores ──
@@ -113,54 +110,13 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       return { label: "Cán cân đang thăng bằng", sub: "Trả lời các câu hỏi bên dưới để hiệu chuẩn cán cân khả thi", emoji: "🔮", color: "#94a3b8", badgeClass: "bg-slate-50 dark:bg-slate-800/50 text-slate-500 border-slate-200/60 dark:border-slate-700/50" };
     }
     if (isHeavyLeft) {
-      return { label: "Rào cản khá nặng nề — Nên tinh gọn bớt việc", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "🤯", color: "#f43f5e", badgeClass: "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/40" };
+      return { label: "Cán cân nghiêng về rào cản — Nên tinh gọn bớt việc", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "⚖️", color: "#f43f5e", badgeClass: "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/40" };
     }
     if (isHeavyRight) {
-      return { label: "Mức độ khả thi rất tốt — Sẵn sàng lập kế hoạch", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "🚀", color: "#10b981", badgeClass: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40" };
+      return { label: "Cán cân thăng bằng rất tốt — Sẵn sàng lập kế hoạch", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "✨", color: "#10b981", badgeClass: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40" };
     }
-    return { label: "Cân bằng lý tưởng — Hãy duy trì kỷ luật", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "⚖️", color: "#f59e0b", badgeClass: "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/40" };
+    return { label: "Thăng bằng lý tưởng — Hãy duy trì kỷ luật", sub: `Đã đánh giá ${answeredCount}/${QUESTIONS.length} khía cạnh`, emoji: "⚖️", color: "#f59e0b", badgeClass: "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/40" };
   }, [answeredCount, isHeavyLeft, isHeavyRight]);
-
-  // ── SVG Tick marks ──
-  const radialTicks = useMemo(() => {
-    const ticks = [];
-    for (let i = 0; i <= 36; i++) {
-      const angle = (i / 36) * 180;
-      const rad = (angle * Math.PI) / 180;
-      const isMajor = i % 9 === 0;
-      const isMid = i % 3 === 0;
-
-      const r1 = isMajor ? R + 4 : isMid ? R + 6 : R + 8;
-      const r2 = R + 14;
-      const x1 = CX - r1 * Math.cos(rad);
-      const y1 = CY - r1 * Math.sin(rad);
-      const x2 = CX - r2 * Math.cos(rad);
-      const y2 = CY - r2 * Math.sin(rad);
-
-      // Smooth color interpolation
-      const t = i / 36;
-      let cr: number, cg: number, cb: number;
-      if (t < 0.33) {
-        const p = t / 0.33;
-        cr = 244 + (245 - 244) * p; cg = 63 + (158 - 63) * p; cb = 94 + (11 - 94) * p;
-      } else if (t < 0.66) {
-        const p = (t - 0.33) / 0.33;
-        cr = 245 + (16 - 245) * p; cg = 158 + (185 - 158) * p; cb = 11 + (129 - 11) * p;
-      } else {
-        const p = (t - 0.66) / 0.34;
-        cr = 16; cg = 185 + (200 - 185) * p; cb = 129 + (150 - 129) * p;
-      }
-
-      ticks.push({
-        x1, y1, x2, y2, isMajor, isMid, angle,
-        color: `rgb(${Math.round(cr)},${Math.round(cg)},${Math.round(cb)})`,
-      });
-    }
-    return ticks;
-  }, []);
-
-  // Arc half-circle path
-  const arcD = `M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`;
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Decorative 3D tilt effect only
@@ -168,7 +124,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={tiltStyle}
-      className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/60 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)] p-5 flex flex-col items-center gap-4 transition-all duration-300 group"
+      className="relative overflow-hidden rounded-3xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/60 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_12px_24px_rgba(0,0,0,0.03)] p-6 flex flex-col items-center gap-5 transition-all duration-300 group"
     >
       {/* ═══ Header ═══ */}
       <div className="w-full flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/60">
@@ -177,7 +133,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
             <Scale className="h-4 w-4" />
           </div>
           <span className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">
-            Đồng hồ khả thi 12 tuần
+            Cán cân thăng bằng 12 tuần
           </span>
         </div>
 
@@ -185,151 +141,117 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
           {answeredCount > 0 && isHeavyRight && (
             <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />
           )}
-          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Điểm</span>
+          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Mức khả thi</span>
           <span className="text-sm font-extrabold tabular-nums text-indigo-600 dark:text-indigo-400" style={{ fontFeatureSettings: "'tnum'" }}>
-            {answeredCount > 0 ? animatedAverage.toFixed(1) : "—"}
+            {answeredCount > 0 ? (animatedAverage * 2.5 * 10).toFixed(0) : "—"}%
           </span>
-          <span className="text-xs text-slate-400 dark:text-slate-500">/4.0</span>
         </div>
       </div>
 
-      {/* ═══ SVG Gauge ═══ */}
-      <div className="relative w-full max-w-[280px] h-[150px] flex items-center justify-center select-none">
+      {/* ═══ SVG Cán Cân Thăng Bằng Dreamy ═══ */}
+      <div className="relative w-full max-w-[280px] h-[160px] flex flex-col items-center justify-center select-none">
         <svg viewBox="0 0 300 170" className="w-full h-full overflow-visible" aria-hidden="true">
           <defs>
-            <linearGradient id="fbs-arc" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#fb7185" />
-              <stop offset="35%" stopColor="#f59e0b" />
-              <stop offset="65%" stopColor="#84cc16" />
-              <stop offset="100%" stopColor="#10b981" />
-            </linearGradient>
-
-            <linearGradient id="fbs-needle" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#a5b4fc" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.85" />
-            </linearGradient>
-
-            <filter id="fbs-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <filter id="fbs-hub" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#6366f1" floodOpacity="0.2" />
+            <filter id="fbs-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="glow" />
+              <feComposite in="SourceGraphic" in2="glow" operator="over" />
             </filter>
           </defs>
 
-          {/* ── Tick marks ── */}
-          {radialTicks.map((t) => (
-            <line
-              key={t.angle}
-              x1={t.x1} y1={t.y1}
-              x2={t.x2} y2={t.y2}
-              stroke={t.color}
-              strokeWidth={t.isMajor ? "2" : t.isMid ? "1" : "0.5"}
-              strokeLinecap="round"
-              opacity={t.isMajor ? 0.55 : t.isMid ? 0.3 : 0.12}
-            />
-          ))}
+          {/* 1. Trụ đỡ trung tâm (cột chống) */}
+          {/* Chân đế dẹt */}
+          <rect x="110" y="145" width="80" height="8" rx="4" className="fill-slate-200 dark:fill-slate-800/80" />
+          <path d="M 120 145 L 180 145 L 170 135 L 130 135 Z" className="fill-slate-200/60 dark:fill-slate-800/40" />
+          {/* Thân trụ */}
+          <rect x="147" y="60" width="6" height="80" rx="1.5" className="fill-slate-300 dark:fill-slate-700/60" />
+          {/* Khớp trục quay */}
+          <circle cx="150" cy="60" r="5" className="fill-slate-400 dark:fill-slate-600" />
+          <circle cx="150" cy="60" r="2.2" className="fill-white dark:fill-slate-900" />
 
-          {/* ── Track (background arc) ── */}
-          <path
-            d={arcD}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="10"
-            strokeLinecap="round"
-            className="text-slate-100 dark:text-slate-800/50"
-          />
-
-          {/* ── Gradient arc ── */}
-          <path
-            d={arcD}
-            fill="none"
-            stroke="url(#fbs-arc)"
-            strokeWidth="10"
-            strokeLinecap="round"
-            opacity="0.85"
-          />
-
-          {/* ── Gradient arc glow ── */}
-          <path
-            d={arcD}
-            fill="none"
-            stroke="url(#fbs-arc)"
-            strokeWidth="16"
-            strokeLinecap="round"
-            filter="url(#fbs-glow)"
-            opacity="0.15"
-          />
-
-          {/* ── Needle assembly ── */}
+          {/* 2. Thanh ngang beam (Xoay theo tiltAngle quanh 150, 60) */}
           <g
             style={{
-              transform: `rotate(${needleAngle}deg)`,
-              transformOrigin: `${CX}px ${CY}px`,
-              transition: "transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              transform: `rotate(${tiltAngle}deg)`,
+              transformOrigin: "150px 60px",
+              transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
           >
-            {/* Needle glow */}
-            <line
-              x1={CX} y1={CY}
-              x2={CX} y2={CY - 72}
-              stroke="url(#fbs-needle)"
-              strokeWidth="6"
-              strokeLinecap="round"
-              filter="url(#fbs-glow)"
-              opacity="0.5"
-            />
+            {/* Thanh đòn ngang chính */}
+            <line x1="60" y1="60" x2="240" y2="60" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-slate-400 dark:text-slate-500" />
+            
+            {/* Móc treo 2 đầu */}
+            <circle cx="60" cy="60" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-500 dark:text-slate-400" />
+            <circle cx="240" cy="60" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-500 dark:text-slate-400" />
 
-            {/* Needle body */}
-            <line
-              x1={CX} y1={CY + 4}
-              x2={CX} y2={CY - 70}
-              stroke="#6366f1"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
+            {/* 3. Nhóm Treo đĩa cân bên trái (Ambition/Rào cản - triệt tiêu góc nghiêng để luôn thẳng đứng) */}
+            <g
+              style={{
+                transform: `rotate(${-tiltAngle}deg)`,
+                transformOrigin: "60px 60px",
+                transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            >
+              {/* Dây treo đĩa trái (tam giác ngược nối xuống đĩa) */}
+              <line x1="60" y1="60" x2="42" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-300 dark:text-slate-700" />
+              <line x1="60" y1="60" x2="78" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-300 dark:text-slate-700" />
+              
+              {/* Đĩa cân trái */}
+              <path d="M 38 112 C 38 123, 82 123, 82 112" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-rose-400/80 dark:text-rose-600/70" />
+              
+              {/* Vật phẩm trên đĩa cân trái: Đám mây rào cản ☁️ và mục tiêu 🎯 */}
+              <circle cx="60" cy="103" r="14" className="fill-rose-50/90 dark:fill-rose-950/30 stroke-rose-200/40 dark:stroke-rose-800/30" strokeWidth="1" />
+              <g style={{ transform: "translate(49px, 94px)" }}>
+                <text className="text-[19px] select-none">☁️</text>
+              </g>
+              {answeredCount > 0 && isHeavyLeft && (
+                <g style={{ transform: "translate(60px, 86px)" }} className="animate-bounce">
+                  <text className="text-[11px] select-none">📦</text>
+                </g>
+              )}
+            </g>
 
-            {/* Needle tip */}
-            <polygon
-              points={`${CX - 2.5},${CY - 65} ${CX},${CY - 76} ${CX + 2.5},${CY - 65}`}
-              fill="#4f46e5"
-              opacity="0.9"
-            />
-
-            {/* Hub — multi-layer */}
-            <circle cx={CX} cy={CY} r="10" className="fill-white dark:fill-slate-900" filter="url(#fbs-hub)" />
-            <circle cx={CX} cy={CY} r="8" fill="none" stroke="#e2e8f0" strokeWidth="0.5" className="dark:stroke-slate-700" />
-            <circle cx={CX} cy={CY} r="4.5" fill="#6366f1" />
-            <circle cx={CX} cy={CY} r="1.8" fill="white" opacity="0.85" />
+            {/* 4. Nhóm Treo đĩa cân bên phải (Capacity/Sức chứa - triệt tiêu góc nghiêng) */}
+            <g
+              style={{
+                transform: `rotate(${-tiltAngle}deg)`,
+                transformOrigin: "240px 60px",
+                transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            >
+              {/* Dây treo đĩa phải */}
+              <line x1="240" y1="60" x2="222" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-300 dark:text-slate-700" />
+              <line x1="240" y1="60" x2="258" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-300 dark:text-slate-700" />
+              
+              {/* Đĩa cân phải */}
+              <path d="M 218 112 C 218 123, 262 123, 262 112" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-emerald-400/80 dark:text-emerald-600/70" />
+              
+              {/* Vật phẩm trên đĩa cân phải: Cát giờ ⏳ và điện ⚡ */}
+              <circle cx="240" cy="103" r="14" className="fill-emerald-50/90 dark:fill-emerald-950/30 stroke-emerald-200/40 dark:stroke-emerald-800/30" strokeWidth="1" />
+              <g style={{ transform: "translate(229px, 94px)" }}>
+                <text className="text-[19px] select-none">⚡</text>
+              </g>
+              {answeredCount > 0 && isHeavyRight && (
+                <g style={{ transform: "translate(240px, 86px)" }} className="animate-pulse">
+                  <text className="text-[11px] select-none">✨</text>
+                </g>
+              )}
+            </g>
           </g>
         </svg>
 
-        {/* ── Edge labels ── */}
-        <div className="absolute left-0 bottom-0 flex items-center gap-1">
-          <ShieldAlert className="h-3 w-3 text-rose-400" />
-          <span className="text-[9px] font-bold text-rose-500/70 dark:text-rose-400/60 uppercase tracking-wider">
-            Rào cản
-          </span>
-        </div>
-        <div className="absolute right-0 bottom-0 flex items-center gap-1">
-          <BadgeCheck className="h-3 w-3 text-emerald-400" />
-          <span className="text-[9px] font-bold text-emerald-500/70 dark:text-emerald-400/60 uppercase tracking-wider">
-            Khả thi
-          </span>
+        {/* Nhãn 2 đĩa dưới SVG */}
+        <div className="absolute w-full bottom-0 flex justify-between px-2 text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
+          <span className="w-24 text-left">Tham vọng & Trở ngại</span>
+          <span className="w-24 text-right">Thời gian & Sức chứa</span>
         </div>
       </div>
 
       {/* ═══ Axis breakdown — subtle inline bars ═══ */}
-      <div className="w-full space-y-1">
+      <div className="w-full space-y-1.5 mt-2">
         {axisScores.map((ax) => {
           const pct = ax.answered ? (ax.score / 4) * 100 : 0;
           const barColor = !ax.answered
-            ? "bg-slate-100 dark:bg-slate-800"
+            ? "bg-slate-100 dark:bg-slate-800/50"
             : ax.score >= 3
               ? "bg-emerald-500"
               : ax.score === 2
@@ -337,18 +259,25 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
                 : "bg-rose-500";
 
           return (
-            <div key={ax.axis} className="flex items-center gap-2.5">
-              <span className={`text-[11px] w-[88px] shrink-0 truncate font-medium transition-colors ${ax.answered ? "text-slate-600 dark:text-slate-300" : "text-slate-300 dark:text-slate-700"}`}>
+            <div key={ax.axis} className="flex items-center gap-3">
+              <span className={`text-xs w-[90px] shrink-0 truncate font-semibold transition-colors ${ax.answered ? "text-slate-700 dark:text-slate-300" : "text-slate-400 dark:text-slate-600"}`}>
                 {ax.label}
               </span>
-              <div className="flex-1 h-[5px] rounded-full bg-slate-100 dark:bg-slate-800/60 overflow-hidden">
+              <div 
+                className="flex-1 h-2 rounded-full bg-slate-200/50 dark:bg-slate-800/40 overflow-hidden relative shadow-inner"
+                role="progressbar"
+                aria-valuenow={ax.score}
+                aria-valuemin={0}
+                aria-valuemax={4}
+                aria-label={`Điểm khía cạnh ${ax.label}`}
+              >
                 <div
                   className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
               <span
-                className={`text-[11px] font-semibold tabular-nums w-5 text-right transition-colors ${ax.answered ? (ax.score >= 3 ? "text-emerald-600 dark:text-emerald-400" : ax.score === 2 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") : "text-slate-300 dark:text-slate-700"}`}
+                className={`text-xs font-bold tabular-nums w-5 text-right transition-colors ${ax.answered ? (ax.score >= 3 ? "text-emerald-600 dark:text-emerald-400" : ax.score === 2 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") : "text-slate-400 dark:text-slate-600"}`}
                 style={{ fontFeatureSettings: "'tnum'" }}
               >
                 {ax.answered ? ax.score : "·"}
@@ -359,14 +288,14 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       </div>
 
       {/* ═══ Status badge ═══ */}
-      <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold transition-all duration-300 ${statusInfo.badgeClass}`}>
+      <div className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all duration-300 shadow-sm ${statusInfo.badgeClass}`}>
         <span className="text-sm">{statusInfo.emoji}</span>
         <span>{statusInfo.label}</span>
       </div>
 
       {/* ═══ Description ═══ */}
       <div className="w-full text-center">
-        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
           {statusInfo.sub}
         </p>
       </div>

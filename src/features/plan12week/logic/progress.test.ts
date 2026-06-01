@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { calculateLeadProgress } from "./progress";
 import type { Plan12Week } from "../types/planTypes";
+import { calculateLeadProgress } from "./progress";
 
 function makePlan(reviewScores: number[]): Plan12Week {
   return {

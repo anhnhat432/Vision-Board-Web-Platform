@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-
-import type { DailyMood } from "@/app/utils/twelve-week-system-ui";
 import type { TwelveWeekSystem, UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import type { DailyMood } from "@/app/utils/twelve-week-system-ui";
 
 import type { WeeklyCommitmentStatus, WeeklyReviewForm } from "./types";
 

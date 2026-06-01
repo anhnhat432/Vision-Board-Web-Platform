@@ -1,5 +1,5 @@
-import type { PlanDetails } from "@/types/plan";
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
+import type { PlanDetails } from "@/types/plan";
 import { detectBackendPlanConflicts } from "./backendConflictDetector";
 
 function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {

@@ -264,10 +264,7 @@ export function ScheduleStep({
 
       {setupGuideSupport && setupGuideTemplate ? (
         <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="schedule-guide-title">
-          <p
-            id="schedule-guide-title"
-            className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
-          >
+          <p id="schedule-guide-title" className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
             Nhịp tuần 1 theo khung
           </p>
           <p className="mt-2 text-sm font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
@@ -294,9 +291,7 @@ export function ScheduleStep({
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhìn lại</p>
               <p className="mt-2 text-sm font-medium text-app-ink">{draft.reviewDay}</p>
-              <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-                {setupGuideSupport.recommendedReviewReason}
-              </p>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">{setupGuideSupport.recommendedReviewReason}</p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nhịp tuần</p>

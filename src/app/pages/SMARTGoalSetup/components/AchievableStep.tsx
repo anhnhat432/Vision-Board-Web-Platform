@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { Gauge, BookOpen, Wrench } from "lucide-react";
+import { Gauge, BookOpen, Wrench, Check, X } from "lucide-react";
 
 const getDailyCommitmentString = (weeklyHours: number) => {
   if (weeklyHours <= 0) return "";
@@ -102,7 +102,7 @@ export function AchievableStep({
       <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
         <label htmlFor="smart-weekly-hours-slider" className={cn(labelClass, "flex items-center gap-1.5 text-base font-bold text-app-ink border-b border-app-line/60 pb-2")}>
           <Gauge className="h-4.5 w-4.5 text-app-accent" />
-          1. Thời gian cam kết thực hiện mỗi tuần
+          Thời gian bạn dành cho mục tiêu mỗi tuần
           <span className={requiredMarkerClass} aria-hidden="true">*</span>
           <span className="sr-only"> bắt buộc</span>
         </label>
@@ -168,7 +168,7 @@ export function AchievableStep({
                 setHasBlurredWeeklyHours(true);
               }}
               className={cn(
-                "text-xs px-3 py-1.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm",
+                "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
                 parsedWeeklyHours === Number(hours)
                   ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
                   : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10"
@@ -196,7 +196,7 @@ export function AchievableStep({
       <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
         <label htmlFor="smart-required-skills" className={cn(labelClass, "flex items-center gap-1.5 text-base font-bold text-app-ink border-b border-app-line/60 pb-2")}>
           <BookOpen className="h-4.5 w-4.5 text-app-accent" />
-          2. Kỹ năng cần bổ sung hoặc rèn luyện (Skills Needed)
+          Kỹ năng bạn muốn tập trung rèn luyện
         </label>
         <Textarea
           id="smart-required-skills"
@@ -213,45 +213,70 @@ export function AchievableStep({
           }
           className={`${textareaClass} min-h-[90px]`}
         />
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
+          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+            </span>
+            <div>
+              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên tập trung (Vừa sức 12 tuần):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Tìm hiểu cú pháp React cơ bản" hoặc "Kỹ năng quản lý thời gian Pomodoro."</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+            </span>
+            <div>
+              <p className="font-bold text-rose-750 dark:text-rose-455">Tránh đặt quá lớn (Khó đạt sớm):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Master toàn bộ ngành khoa học máy tính" hoặc "Trở thành diễn giả xuất chúng."</p>
+            </div>
+          </div>
+        </div>
         
         {/* 1-Click Skills Suggestions */}
-        <div className="mt-3 flex flex-wrap gap-2 items-center">
-          <span className="text-[10px] font-bold text-app-accent">Gợi ý nhanh:</span>
-          {(() => {
-            const skillSuggestions = (() => {
-              if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
-                return FOCUS_AREA_EXAMPLES[focusArea].achievable[0].skills.split(",").map((s) => s.trim());
-              }
-              return archetype === "habit_building"
-                ? ["Kỷ luật tự giác", "Quản lý thời gian", "Thiết lập thói quen"]
-                : archetype === "skill_learning"
-                  ? ["Tự học nghiên cứu", "Đọc hiểu tài liệu", "Thực hành thực tế"]
-                  : archetype === "project_completion"
-                    ? ["Lập kế hoạch công việc", "Giải quyết vấn đề", "Quản lý tiến độ"]
-                    : ["Quản lý thời gian", "Kỷ luật thực thi"];
-            })();
+        <div className="mt-4 bg-app-bg/50 p-4 rounded-2xl border border-app-line/60">
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-2.5 flex items-center gap-1.5 select-none">
+            <span>💡</span> Gợi ý nhanh (1-Click Suggestions):
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(() => {
+              const skillSuggestions = (() => {
+                if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                  return FOCUS_AREA_EXAMPLES[focusArea].achievable[0].skills.split(",").map((s) => s.trim());
+                }
+                return archetype === "habit_building"
+                  ? ["Kỷ luật tự giác", "Quản lý thời gian", "Thiết lập thói quen"]
+                  : archetype === "skill_learning"
+                    ? ["Tự học nghiên cứu", "Đọc hiểu tài liệu", "Thực hành thực tế"]
+                    : archetype === "project_completion"
+                      ? ["Lập kế hoạch công việc", "Giải quyết vấn đề", "Quản lý tiến độ"]
+                      : ["Quản lý thời gian", "Kỷ luật thực thi"];
+              })();
 
-            return skillSuggestions.map((skill) => (
-              <button
-                key={skill}
-                type="button"
-                onClick={() => {
-                  const current = smartData.achievable.required_skills.trim();
-                  const updated = current ? `${current}, ${skill}` : skill;
-                  setSmartData((previous) => ({
-                    ...previous,
-                    achievable: {
-                      ...previous.achievable,
-                      required_skills: updated,
-                    },
-                  }));
-                }}
-                className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97] cursor-pointer"
-              >
-                + {skill}
-              </button>
-            ));
-          })()}
+              return skillSuggestions.map((skill) => (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => {
+                    const current = smartData.achievable.required_skills.trim();
+                    const updated = current ? `${current}, ${skill}` : skill;
+                    setSmartData((previous) => ({
+                      ...previous,
+                      achievable: {
+                        ...previous.achievable,
+                        required_skills: updated,
+                      },
+                    }));
+                  }}
+                  className="text-xs bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-full border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.97] cursor-pointer shadow-sm"
+                >
+                  + {skill}
+                </button>
+              ));
+            })()}
+          </div>
         </div>
 
         <p className={helperTextClass}>
@@ -263,7 +288,7 @@ export function AchievableStep({
       <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
         <label htmlFor="smart-support-resources" className={cn(labelClass, "flex items-center gap-1.5 text-base font-bold text-app-ink border-b border-app-line/60 pb-2")}>
           <Wrench className="h-4.5 w-4.5 text-app-accent" />
-          3. Công cụ & Nguồn lực hỗ trợ (Tools & Resources)
+          Nguồn lực và công cụ hỗ trợ bạn
         </label>
         <Textarea
           id="smart-support-resources"
@@ -280,45 +305,70 @@ export function AchievableStep({
           }
           className={`${textareaClass} min-h-[90px]`}
         />
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
+          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+            </span>
+            <div>
+              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên chọn nguồn lực sẵn có (Dễ tiếp cận):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Khóa học Udemy đã mua" hoặc "1 người bạn cùng tham gia thử thách chạy bộ."</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+            </span>
+            <div>
+              <p className="font-bold text-rose-750 dark:text-rose-455">Tránh dựa vào nguồn lực chưa chắc chắn:</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Nhờ chuyên gia hàng đầu hướng dẫn trực tiếp" hoặc "Mua thiết bị đắt tiền chưa có ngân sách."</p>
+            </div>
+          </div>
+        </div>
         
         {/* 1-Click Resources Suggestions */}
-        <div className="mt-3 flex flex-wrap gap-2 items-center">
-          <span className="text-[10px] font-bold text-app-accent">Gợi ý nhanh:</span>
-          {(() => {
-            const resSuggestions = (() => {
-              if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
-                return FOCUS_AREA_EXAMPLES[focusArea].achievable[0].resources.split(",").map((r) => r.trim());
-              }
-              return archetype === "habit_building"
-                ? ["Ứng dụng ghi nhận", "Người đồng hành", "Chuông báo nhắc nhở"]
-                : archetype === "skill_learning"
-                  ? ["Khóa học online", "Mentor hướng dẫn", "Cộng đồng học tập"]
-                  : archetype === "project_completion"
-                    ? ["Tài liệu hướng dẫn", "Mentor đánh giá", "Trello/Notion"]
-                    : ["Lịch tuần cá nhân", "Không gian yên tĩnh"];
-            })();
+        <div className="mt-4 bg-app-bg/50 p-4 rounded-2xl border border-app-line/60">
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-2.5 flex items-center gap-1.5 select-none">
+            <span>💡</span> Gợi ý nhanh (1-Click Suggestions):
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(() => {
+              const resSuggestions = (() => {
+                if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                  return FOCUS_AREA_EXAMPLES[focusArea].achievable[0].resources.split(",").map((r) => r.trim());
+                }
+                return archetype === "habit_building"
+                  ? ["Ứng dụng ghi nhận", "Người đồng hành", "Chuông báo nhắc nhở"]
+                  : archetype === "skill_learning"
+                    ? ["Khóa học online", "Mentor hướng dẫn", "Cộng đồng học tập"]
+                    : archetype === "project_completion"
+                      ? ["Tài liệu hướng dẫn", "Mentor đánh giá", "Trello/Notion"]
+                      : ["Lịch tuần cá nhân", "Không gian yên tĩnh"];
+              })();
 
-            return resSuggestions.map((res) => (
-              <button
-                key={res}
-                type="button"
-                onClick={() => {
-                  const current = smartData.achievable.support_resources.trim();
-                  const updated = current ? `${current}, ${res}` : res;
-                  setSmartData((previous) => ({
-                    ...previous,
-                    achievable: {
-                      ...previous.achievable,
-                      support_resources: updated,
-                    },
-                  }));
-                }}
-                className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97] cursor-pointer"
-              >
-                + {res}
-              </button>
-            ));
-          })()}
+              return resSuggestions.map((res) => (
+                <button
+                  key={res}
+                  type="button"
+                  onClick={() => {
+                    const current = smartData.achievable.support_resources.trim();
+                    const updated = current ? `${current}, ${res}` : res;
+                    setSmartData((previous) => ({
+                      ...previous,
+                      achievable: {
+                        ...previous.achievable,
+                        support_resources: updated,
+                      },
+                    }));
+                  }}
+                  className="text-xs bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-full border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.97] cursor-pointer shadow-sm"
+                >
+                  + {res}
+                </button>
+              ));
+            })()}
+          </div>
         </div>
 
         <p className={helperTextClass}>

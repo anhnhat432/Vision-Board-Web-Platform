@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { calculateCycleSummary } from "./cycleReview";
 import type { UniversalWeeklyReview } from "@/app/utils/storage-types";
+import { calculateCycleSummary } from "./cycleReview";
 
 function makeReview(
   weekNumber: number,

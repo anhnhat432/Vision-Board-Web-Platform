@@ -4,10 +4,10 @@ import { toast } from "sonner";
 
 import {
   applyBackendPlanSnapshotToLocal,
-  hydrateTwelveWeekPlansFromBackend,
   type BackendPlanHydrationResult,
+  hydrateTwelveWeekPlansFromBackend,
 } from "@/app/hooks/useBackendPlanHydration";
-import { syncPendingOutbox, type OutboxSyncSnapshot } from "@/app/utils/production";
+import { type OutboxSyncSnapshot, syncPendingOutbox } from "@/app/utils/production";
 import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
 import { buildBackendSyncKey } from "./helpers";
 

@@ -33,3 +33,17 @@ Mỗi màn tối đa 1–3 file chính.
 Không sửa toàn bộ design system nếu chưa cần.
 Không refactor logic trong lúc redesign UI.
 Không cho AI đổi flow nếu bạn chưa duyệt. -->
+
+<!-- sửa chi tiết nhỏ thì dùng prompt dưới này -->
+Read docs/DESIGN.md, but this is only a small polish request.
+
+Do not redesign the whole screen.
+Do not change business logic, routes, state, storage, analytics, or data flow.
+Only adjust the specific UI detail below.
+
+Screen: [route/tên màn]
+Problem: [mô tả lỗi nhỏ]
+Expected change: [muốn sửa thành gì]
+
+Keep all other layout, components, and behavior unchanged.
+After editing, report exactly which file and lines were changed.

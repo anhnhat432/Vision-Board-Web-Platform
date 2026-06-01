@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { useAuthContext } from "@/lib/auth/AuthContext";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
-  sendPending12WeekMutations,
   type MutationQueueSyncResult,
   type SendPending12WeekMutationsOptions,
+  sendPending12WeekMutations,
 } from "../persistence/mutationQueueSender";
 
 interface UseMutationQueueSyncOptions extends Omit<SendPending12WeekMutationsOptions, "ownerUid" | "authenticated"> {

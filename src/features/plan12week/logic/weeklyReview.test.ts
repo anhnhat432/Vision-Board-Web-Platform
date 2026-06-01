@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { createWeeklyReview } from "./weeklyReview";
 import type { Task, Week } from "../types/planTypes";
+import { createWeeklyReview } from "./weeklyReview";
 
 const week: Pick<Week, "weekNumber"> = { weekNumber: 2 };
 

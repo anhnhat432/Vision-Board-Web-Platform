@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
-  PULL_CURSOR_STORAGE_PREFIX,
   clearPullCursor,
+  PULL_CURSOR_STORAGE_PREFIX,
   readPullCursorState,
   recordConflictPull,
   recordErrorPull,

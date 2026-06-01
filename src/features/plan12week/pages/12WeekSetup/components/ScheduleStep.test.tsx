@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
-import { ScheduleStep } from "./ScheduleStep";
 import type { TwelveWeekSetupDraft } from "../types";
+import { ScheduleStep } from "./ScheduleStep";
 
 function makeDraft(overrides: Partial<TwelveWeekSetupDraft> = {}): TwelveWeekSetupDraft {
   return {

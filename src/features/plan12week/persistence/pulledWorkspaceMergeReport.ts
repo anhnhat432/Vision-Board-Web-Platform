@@ -1,8 +1,8 @@
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
+import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 import type { DataMutationItem, DataMutationStatus } from "./mutationQueue";
 import { getTwelveWeekClientPlanId, getTwelveWeekClientWeekId } from "./twelveWeekImportPayload";
-import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 
 export type PulledWorkspaceMergeEntityKind =
   | "goal"
@@ -863,14 +863,10 @@ export function createPulledWorkspaceMergeReport(
       // If there is a pending local mutation and the cloud wins, we cannot auto-resolve safely
       if (c.reason === "pending_local_mutation_cloud_newer" && c.winner === "cloud") return false;
       return true;
-    }) &&
-    missingClientIds.length === 0;
+    }) && missingClientIds.length === 0;
 
   return {
-    safeToApply:
-      conflicts.length === 0 &&
-      localOnlyChanges.length === 0 &&
-      missingClientIds.length === 0,
+    safeToApply: conflicts.length === 0 && localOnlyChanges.length === 0 && missingClientIds.length === 0,
     localOnlyChanges,
     cloudOnlyChanges,
     conflicts,

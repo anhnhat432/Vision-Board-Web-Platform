@@ -1,8 +1,8 @@
-import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
+import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
+import type { Task as BackendTask, PlanDetails, WeekDetails } from "@/types/plan";
 import { isDailyCheckInMetric } from "../constants/progressMetrics";
 import { getUniversalWeeklyReviewExecutionScore } from "./reviewExecutionScore";
-import type { PlanDetails, Task as BackendTask, WeekDetails } from "@/types/plan";
 
 export type BackendPlanConflictKind =
   | "weekly_focus"

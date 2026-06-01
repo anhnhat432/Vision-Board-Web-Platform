@@ -1,7 +1,6 @@
 import { AlertCircle, Info, TrendingUp } from "lucide-react";
-
+import type { PlanQualityContext, PlanQualityInput } from "../logic/planQuality";
 import { evaluateTwelveWeekPlanQuality } from "../logic/planQuality";
-import type { PlanQualityInput, PlanQualityContext } from "../logic/planQuality";
 
 interface PlanQualityPanelProps {
   plan: {

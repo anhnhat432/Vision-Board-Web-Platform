@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { toAppError } from "@/lib/api/apiClient";
-import { createPlan as createRemotePlan, getPlanById, type CreatePlanPayload } from "@/services/planService";
-import { addTask as addRemoteTask, updateTask as updateRemoteTask } from "@/services/taskService";
 import { createMetric as createRemoteMetric, getMetrics, logMetric as logRemoteMetric } from "@/services/metricService";
+import { type CreatePlanPayload, createPlan as createRemotePlan, getPlanById } from "@/services/planService";
+import { addTask as addRemoteTask, updateTask as updateRemoteTask } from "@/services/taskService";
 import { submitWeeklyReview as submitRemoteWeeklyReview, updateWeek as updateRemoteWeek } from "@/services/weekService";
 import type { AppError } from "@/types/api";
 import type {
   Metric as ApiLeadMetric,
   PlanDetails as ApiPlanDetails,
+  WeekDetails as ApiPlanWeekDetail,
   Task as ApiTask,
   Week as ApiWeek,
-  WeekDetails as ApiPlanWeekDetail,
 } from "@/types/plan";
 
 import { generateAdaptiveSuggestion } from "../logic/adaptivePlanning";
+import type { BehaviorInsights } from "../logic/behaviorInsights";
 import { analyzeExecutionPatterns } from "../logic/behaviorInsights";
 import { generateExecutionSuggestion, interpretExecutionScore } from "../logic/executionFeedback";
-import { savePlanDetailsLink } from "../persistence/planLinkStore";
 import { calculateExecutionScore } from "../logic/executionScore";
 import { calculateGoalProgress } from "../logic/goalProgress";
 import { logLeadMetric as appendLeadMetricLog } from "../logic/leadMetrics";
@@ -26,10 +26,10 @@ import { calculateCycleCompletionRate, calculateLeadProgress } from "../logic/pr
 import { calculateMetricStreak } from "../logic/streak";
 import { getWeeklyTaskWarning } from "../logic/taskConstraints";
 import { createWeeklyReview } from "../logic/weeklyReview";
-import type { BehaviorInsights } from "../logic/behaviorInsights";
-import type { Plan12Week, Task, TaskStatus, Week, WeekReview } from "../types/planTypes";
+import { savePlanDetailsLink } from "../persistence/planLinkStore";
 import type { GoalProgress } from "../types/goalProgress";
 import type { PlanInsights } from "../types/planInsights";
+import type { Plan12Week, Task, TaskStatus, Week, WeekReview } from "../types/planTypes";
 
 interface AddTaskInput {
   title: string;

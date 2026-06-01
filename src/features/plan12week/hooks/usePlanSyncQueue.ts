@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
-import { isRateLimitError } from "@/lib/api/apiClient";
 import { isDemoMode } from "@/app/utils/app-mode";
+import { isRateLimitError } from "@/lib/api/apiClient";
 import {
   cleanupOldSyncs,
   enqueueSync,
@@ -13,11 +13,11 @@ import {
   markSyncInFlight,
   markSyncSucceeded,
   readSyncQueueStore,
-  shouldProcessNow,
-  writeSyncQueueStore,
   type SyncQueueItem,
   type SyncQueueStore,
   type SyncType,
+  shouldProcessNow,
+  writeSyncQueueStore,
 } from "../persistence/syncQueueStore";
 
 export interface UsePlanSyncQueueOptions {
@@ -210,7 +210,8 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
           const retryAfterMs = rateLimited && typeof err.retryAfterMs === "number" ? err.retryAfterMs : 0;
           const nextRetryAt = retryable
             ? new Date(
-                currentNow.getTime() + (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs),
+                currentNow.getTime() +
+                  (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs),
               )
             : undefined;
           store = markSyncFailed(store, item.id, failure, {

@@ -636,25 +636,6 @@ export function SMARTGoalSetup() {
           >
             {renderCurrentStepFields()}
           </SmartGoalStepShell>
-
-          <details className="mt-5 rounded-[14px] border border-dashed border-app-line bg-app-bg p-5">
-            <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
-              Xem lại mục tiêu đang viết
-            </summary>
-
-            <div className="mt-4 space-y-3">
-              {SMART_STEPS.map((step) => (
-                <div key={step.key} className="rounded-lg border border-app-line bg-app-surface p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
-                    {step.label}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-app-ink">
-                    {formatStepDraft(step.key, smartData) || "Chưa có nội dung cho phần này."}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </details>
         </div>
       </div>
       {showAnvilEffect && (

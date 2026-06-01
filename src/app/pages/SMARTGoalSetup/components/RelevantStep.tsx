@@ -1,5 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { Check, X } from "lucide-react";
+import { cn } from "@/app/components/ui/utils";
 
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
@@ -26,8 +27,8 @@ export function RelevantStep({ smartData, setSmartData, currentStepHasDraftConte
   return (
     <div className="space-y-5">
       <div>
-        <label htmlFor="smart-relevant-reason" className={labelClass}>
-          Động lực cốt lõi (Lý do thực sự quan trọng với bạn)
+        <label htmlFor="smart-relevant-reason" className={cn(labelClass, "text-base font-bold text-app-ink")}>
+          Vì sao mục tiêu này thực sự quan trọng với bạn?
           <span className={requiredMarkerClass} aria-hidden="true">*</span>
           <span className="sr-only"> bắt buộc</span>
         </label>
@@ -113,23 +114,23 @@ export function RelevantStep({ smartData, setSmartData, currentStepHasDraftConte
           </div>
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
-              <Check className="h-3 w-3" strokeWidth={3} />
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
+          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
             </span>
             <div>
-              <p className="font-bold text-emerald-700 dark:text-emerald-400">Ví dụ Tốt (Có động lực thực tế):</p>
-              <p className="text-app-ink-soft mt-0.5">"Để có quỹ khẩn cấp giúp gia đình an tâm trước rủi ro phát sinh."</p>
+              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết rõ (Động lực thực tế):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Để có quỹ khẩn cấp giúp gia đình an tâm trước rủi ro phát sinh."</p>
             </div>
           </div>
-          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 flex items-start gap-2 text-xs leading-relaxed">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-450 mt-0.5">
-              <X className="h-3 w-3" strokeWidth={3} />
+          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
+              <X className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
             </span>
             <div>
-              <p className="font-bold text-rose-750 dark:text-rose-400">Ví dụ Chưa tốt (Chung chung):</p>
-              <p className="text-app-ink-soft mt-0.5">"Kiếm nhiều tiền hơn" hoặc "Vì tôi thích thế."</p>
+              <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết chung chung (Mơ hồ):</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Kiếm nhiều tiền hơn" hoặc "Vì tôi thích thế."</p>
             </div>
           </div>
         </div>
@@ -138,8 +139,8 @@ export function RelevantStep({ smartData, setSmartData, currentStepHasDraftConte
         ) : null}
       </div>
       <div>
-        <label htmlFor="smart-life-alignment" className={labelClass}>
-          Khía cạnh liên kết trong đời sống (Tùy chọn)
+        <label htmlFor="smart-life-alignment" className={cn(labelClass, "text-base font-bold text-app-ink")}>
+          Khía cạnh cuộc sống bạn muốn liên kết (Tùy chọn)
         </label>
         <Input
           id="smart-life-alignment"

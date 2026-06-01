@@ -1,14 +1,14 @@
 import type { BackendConnectionStatus } from "@/app/components/twelve-week/TwelveWeekSettingsShared";
 import type { BackendPlanHydrationResult } from "@/app/hooks/useBackendPlanHydration";
 import { formatDateInputValue, getCalendarDateKey } from "@/app/utils/storage";
-import type { TwelveWeekSystem, UniversalDailyCheckIn } from "@/app/utils/storage-types";
-import { dedupeTasks } from "@/app/utils/twelve-week-system-ui";
 import {
   getTwelveWeekCurrentWeek,
   getTwelveWeekMissedTasks,
   getTwelveWeekTasksForWeek,
   getTwelveWeekTodayTasks,
 } from "@/app/utils/storage-twelve-week";
+import type { TwelveWeekSystem, UniversalDailyCheckIn } from "@/app/utils/storage-types";
+import { dedupeTasks } from "@/app/utils/twelve-week-system-ui";
 
 export function buildBackendSyncKey(goalId: string, system: TwelveWeekSystem): string {
   return JSON.stringify({

@@ -1,9 +1,8 @@
 import type { GoalArchetype } from "@/lib/smart-goal";
-
+import type { LeadMetric, Plan12Week, Task, Week } from "../types/planTypes";
 import { getArchetypeFirstAction, getArchetypePlanFullDefaults } from "./planArchetypeDefaults";
-import { generateTacticsFromArchetype, type GeneratedTactic, type WeekOneTask } from "./tacticGeneration";
+import { type GeneratedTactic, generateTacticsFromArchetype, type WeekOneTask } from "./tacticGeneration";
 import { generateWeekOneTasks } from "./taskGeneration";
-import type { LeadMetric, Plan12Week, Week, Task } from "../types/planTypes";
 
 export interface Generate12WeekPlanInput {
   id: string;

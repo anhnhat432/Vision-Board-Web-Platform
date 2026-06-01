@@ -1,5 +1,3 @@
-import { useRef, useState, type ReactNode } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -10,9 +8,11 @@ import {
   Flag,
   ListChecks,
   Loader2,
-  Target,
   type LucideIcon,
+  Target,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { type ReactNode, useRef, useState } from "react";
 
 import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { cn } from "@/app/components/ui/utils";
@@ -113,11 +113,13 @@ export function SetupStepShell({
         <div className="relative my-8 flex items-center justify-between px-2">
           {/* Stepper background track line */}
           <div className="absolute left-4 right-4 top-1/2 h-0.5 -translate-y-1/2 bg-app-line/60" aria-hidden="true" />
-          
+
           {/* Stepper active track line */}
           <div
             className="absolute left-4 top-1/2 h-0.5 -translate-y-1/2 bg-app-accent transition-all duration-300"
-            style={{ width: `calc(${(currentStep / (stepCount - 1)) * 100}% - ${currentStep === stepCount - 1 ? '32px' : '16px'})` }}
+            style={{
+              width: `calc(${(currentStep / (stepCount - 1)) * 100}% - ${currentStep === stepCount - 1 ? "32px" : "16px"})`,
+            }}
             aria-hidden="true"
           />
 
@@ -129,11 +131,7 @@ export function SetupStepShell({
               const StepMetaIcon = STEP_META[index]?.icon ?? Target;
 
               return (
-                <li
-                  key={step.id}
-                  className="flex flex-col items-center"
-                  aria-current={isActive ? "step" : undefined}
-                >
+                <li key={step.id} className="flex flex-col items-center" aria-current={isActive ? "step" : undefined}>
                   <button
                     type="button"
                     className={cn(
@@ -141,8 +139,8 @@ export function SetupStepShell({
                       isActive
                         ? "border-app-accent bg-app-accent text-white scale-110 ring-4 ring-app-accent-soft"
                         : isCompleted
-                        ? "border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white"
-                        : "border-app-line bg-app-surface text-app-ink-muted",
+                          ? "border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white"
+                          : "border-app-line bg-app-surface text-app-ink-muted",
                       canJump ? "cursor-pointer" : "cursor-default",
                     )}
                     disabled={!canJump}
@@ -156,12 +154,14 @@ export function SetupStepShell({
                     ) : (
                       <StepMetaIcon className="h-4.5 w-4.5" aria-hidden="true" />
                     )}
-                    
+
                     {/* Step label for desktop */}
-                    <span className={cn(
-                      "absolute -bottom-7 hidden whitespace-nowrap text-xs font-semibold sm:block transition-colors duration-200",
-                      isActive ? "text-app-accent font-bold" : isCompleted ? "text-app-ink" : "text-app-ink-muted"
-                    )}>
+                    <span
+                      className={cn(
+                        "absolute -bottom-7 hidden whitespace-nowrap text-xs font-semibold sm:block transition-colors duration-200",
+                        isActive ? "text-app-accent font-bold" : isCompleted ? "text-app-ink" : "text-app-ink-muted",
+                      )}
+                    >
                       {step.label}
                     </span>
 
