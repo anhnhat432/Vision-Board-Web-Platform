@@ -994,7 +994,7 @@ function GoalTrackerContent({
             {/* Soft glow decoration */}
             <div className="absolute right-0 top-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-app-accent/5 blur-3xl pointer-events-none" />
 
-            <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center relative z-10">
+            <div className="grid gap-6 md:grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_240px] lg:items-center relative z-10">
               <div className="space-y-2.5">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5">
                   <span className="relative flex h-2.5 w-2.5">
@@ -1028,6 +1028,16 @@ function GoalTrackerContent({
                   <Plus className="h-4.5 w-4.5" />
                   Thiết lập mục tiêu
                 </Button>
+              </div>
+
+              {/* Visual Anchor */}
+              <div className="hidden lg:block relative overflow-hidden rounded-2xl border border-app-line bg-app-bg shadow-xs aspect-[4/3] w-full max-w-[240px] shrink-0">
+                <img
+                  src="/vision_board_canvas.png"
+                  alt="Bản đồ tầm nhìn và mục tiêu"
+                  className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+                  loading="lazy"
+                />
               </div>
             </div>
           </div>

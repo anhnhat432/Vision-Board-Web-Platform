@@ -29,6 +29,10 @@ interface CheckoutSessionResponse {
   provider: string;
 }
 
+type CheckoutRedirectTarget =
+  | { kind: "internal"; path: string }
+  | { kind: "external"; url: string };
+
 const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
 function isValidEmail(value: string): boolean {
@@ -43,6 +47,34 @@ function getPlanName(billingCycle: string): string {
 
 function getAmount(info: CheckoutInfoResponse | null): number {
   return info?.amount && Number.isFinite(info.amount) ? info.amount : PLUS_MONTHLY_PRICE_VND;
+}
+
+export function getCheckoutRedirectTarget(
+  result: CheckoutSessionResponse | null | undefined,
+  currentOrigin: string,
+): CheckoutRedirectTarget | null {
+  if (!result) return null;
+
+  const provider = result.provider?.trim().toLowerCase() ?? "";
+  const checkoutUrl = result.checkoutUrl?.trim() ?? "";
+
+  if (provider !== "casso" && checkoutUrl) {
+    try {
+      const parsedUrl = new URL(checkoutUrl, currentOrigin);
+      if (parsedUrl.origin === currentOrigin) {
+        return { kind: "internal", path: `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}` };
+      }
+      return { kind: "external", url: parsedUrl.toString() };
+    } catch {
+      return null;
+    }
+  }
+
+  if (result.checkoutSessionId) {
+    return { kind: "internal", path: `/billing/checkout/${encodeURIComponent(result.checkoutSessionId)}` };
+  }
+
+  return null;
 }
 
 export function BillingConfirm() {
@@ -153,8 +185,15 @@ export function BillingConfirm() {
         },
       );
 
-      if (result?.checkoutSessionId) {
-        navigate(`/billing/checkout/${result.checkoutSessionId}`, { replace: true });
+      const redirectTarget = getCheckoutRedirectTarget(result, window.location.origin);
+
+      if (redirectTarget?.kind === "external") {
+        window.location.assign(redirectTarget.url);
+        return;
+      }
+
+      if (redirectTarget?.kind === "internal") {
+        navigate(redirectTarget.path, { replace: true });
         return;
       }
 

@@ -1,4 +1,4 @@
-﻿import {
+import {
   AlertTriangle,
   Check,
   CreditCard,
@@ -562,6 +562,16 @@ export function BillingPlan() {
         eyebrow="GÓI & THANH TOÁN"
         title="Chọn gói phù hợp với bạn"
         description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
+        aside={
+          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+            <img
+              src="/plus_value.png"
+              alt="Gói nâng cấp Plus"
+              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+              loading="lazy"
+            />
+          </div>
+        }
       />
 
       {paidCheckoutDisabled && (

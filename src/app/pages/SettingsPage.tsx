@@ -1,4 +1,4 @@
-﻿import {
+import {
   AlertTriangle,
   Bell,
   CalendarDays,
@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { exportAccountData } from "@/services/syncService";
+import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -255,15 +256,22 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CÀI ĐẶT</p>
-        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
-          Tuỳ chỉnh tài khoản
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
-          Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn.
-        </p>
-      </header>
+      <PageHero
+        className="page-enter"
+        eyebrow="CÀI ĐẶT"
+        title="Tuỳ chỉnh tài khoản"
+        description="Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn."
+        aside={
+          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+            <img
+              src="/settings_safe_data.png"
+              alt="Cài đặt an toàn dữ liệu"
+              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+              loading="lazy"
+            />
+          </div>
+        }
+      />
 
       <div className="mt-6 space-y-5">
         {firstRecoverySnapshot ? (

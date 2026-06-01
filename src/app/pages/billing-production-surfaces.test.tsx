@@ -144,6 +144,36 @@ describe("production billing surfaces", () => {
     localStorage.clear();
   });
 
+  it("keeps Casso checkout sessions on the internal QR route", async () => {
+    const { getCheckoutRedirectTarget } = await import("./BillingConfirm");
+
+    expect(
+      getCheckoutRedirectTarget(
+        {
+          checkoutSessionId: "VBABCDEFGH",
+          checkoutUrl: "https://img.vietqr.io/image/970422-123456789-compact2.png",
+          provider: "casso",
+        },
+        "https://dearourfuture.io.vn",
+      ),
+    ).toEqual({ kind: "internal", path: "/billing/checkout/VBABCDEFGH" });
+  });
+
+  it("uses hosted checkout URLs for PayOS sessions", async () => {
+    const { getCheckoutRedirectTarget } = await import("./BillingConfirm");
+
+    expect(
+      getCheckoutRedirectTarget(
+        {
+          checkoutSessionId: "VBABCDEFGH",
+          checkoutUrl: "https://pay.payos.vn/web/pay/payos_link_created",
+          provider: "payos",
+        },
+        "https://dearourfuture.io.vn",
+      ),
+    ).toEqual({ kind: "external", url: "https://pay.payos.vn/web/pay/payos_link_created" });
+  });
+
   it(
     "renders the active Plus plan with renewal, provider, and subscription management copy",
     async () => {
@@ -186,7 +216,7 @@ describe("production billing surfaces", () => {
   it(
     "does not request protected payment history before a user signs in",
     async () => {
-      const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
+      const apiClient = stubRealBillingEnv("casso");
       stubAuthContext(null);
       const { BillingPlan } = await import("./BillingPlan");
 

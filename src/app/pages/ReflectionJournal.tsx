@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
-import { ZenLeafIllustration } from "../components/illustrations";
+import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -323,16 +323,13 @@ function ReflectionJournalContent() {
       </AlertDialog>
 
       {/* Hero Section */}
-      <section className="surface-raised rounded-card border border-app-line bg-app-surface p-5 md:p-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
-            <h1 className="font-serif text-4xl font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
-            <p className="max-w-2xl text-sm leading-6 text-app-ink-soft">
-              Ghi lại điều bạn học được, biết ơn, và muốn cải thiện.
-            </p>
-          </div>
-          {hasReflections && (
+      <PageHero
+        className="page-enter"
+        eyebrow="PHẢN TƯ"
+        title="Nhật ký phản tư"
+        description="Ghi lại điều bạn học được, biết ơn, và muốn cải thiện."
+        primaryCta={
+          hasReflections && (
             <Button
               onClick={() => setIsAddingReflection(true)}
               className="bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-md shadow-app-warm/15"
@@ -340,8 +337,19 @@ function ReflectionJournalContent() {
               <Plus className="h-4 w-4 mr-2" />
               Viết nhật ký mới
             </Button>
-          )}
-        </div>
+          )
+        }
+        aside={
+          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+            <img
+              src="/reflection_journal.png"
+              alt="Nhật ký phản tư chánh niệm"
+              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+              loading="lazy"
+            />
+          </div>
+        }
+      />
 
         {/* Toolbar */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -401,7 +409,6 @@ function ReflectionJournalContent() {
             })}
           </div>
         </div>
-      </section>
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
         <DialogContent className="max-w-3xl">
@@ -574,7 +581,15 @@ function ReflectionJournalContent() {
       {sortedReflections.length === 0 ? (
         <EmptyState
           variant="card"
-          illustration={<ZenLeafIllustration className="w-full text-app-warm" />}
+          illustration={
+            <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto mb-4">
+              <img
+                src="/reflection_journal.png"
+                alt="Nhật ký phản tư chánh niệm"
+                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+              />
+            </div>
+          }
           title="Bắt đầu nhật ký của bạn"
           description="Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển."
           actions={

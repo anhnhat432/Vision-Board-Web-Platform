@@ -166,7 +166,6 @@ export function VisionBoardGallery() {
   if (!userData) return <VisionBoardGallerySkeleton />;
 
   const totalItems = userData.visionBoards.reduce((sum, board) => sum + board.items.length, 0);
-  const latestBoard = userData.visionBoards[userData.visionBoards.length - 1];
   const spotlightBoardId =
     typeof location.state === "object" && location.state && "spotlightBoardId" in location.state
       ? (location.state as { spotlightBoardId?: string }).spotlightBoardId
@@ -218,29 +217,13 @@ export function VisionBoardGallery() {
           </Button>
         }
         aside={
-          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
-            <div className="mt-3 grid gap-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
-                  <p className="mt-1 text-2xl font-bold text-foreground">{userData.visionBoards.length}</p>
-                </div>
-                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
-                  <p className="mt-1 text-2xl font-bold text-foreground">{totalItems}</p>
-                </div>
-              </div>
-              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
-                <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                  {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên."}
-                </p>
-              </div>
-            </div>
+          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+            <img
+              src="/gallery_templates.png"
+              alt="Các mẫu bảng tầm nhìn phong phú"
+              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+              loading="lazy"
+            />
           </div>
         }
       />
