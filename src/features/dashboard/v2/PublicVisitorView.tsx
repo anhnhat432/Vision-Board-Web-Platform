@@ -14,7 +14,7 @@ import { Link } from "react-router";
 import { RevealOnScroll } from "@/app/components/motion";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 
-import { HeroMockupAnimated, type GoalPreviewData } from "./HeroMockupAnimated";
+import { DreamToPlanPreview, type GoalPreviewData } from "./DreamToPlanPreview";
 
 const GOAL_PREVIEWS: GoalPreviewData[] = [
   {
@@ -107,8 +107,8 @@ const FEATURE_ROWS = [
 ] as const;
 
 export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSignIn, onSignUp }: PublicVisitorViewProps) {
-  const primaryLabel = "Tạo kế hoạch 12 tuần đầu tiên";
-  const heroStartLabel = "Bắt đầu thiết lập hành trình ngay";
+  const primaryLabel = "Thiết lập chu kỳ 12 tuần ngay";
+  const heroStartLabel = "Thiết lập chu kỳ 12 tuần ngay";
   const [selectedPreviewId, setSelectedPreviewId] = useState(GOAL_PREVIEWS[0].id);
   const selectedPreview = GOAL_PREVIEWS.find((p) => p.id === selectedPreviewId) ?? GOAL_PREVIEWS[0];
 
@@ -135,103 +135,120 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
           className="pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
         />
 
-        <div className="relative z-10 grid gap-12 lg:grid-cols-[55fr_45fr] lg:items-center lg:gap-8 max-w-6xl mx-auto w-full">
-          <div className="appear-fade-up space-y-6">
-            <div className="space-y-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-500/5 dark:border-emerald-900/30 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 shadow-3xs">
-                ✨ DEAR OUR FUTURE
-              </span>
-              
-              <h1 className="max-w-2xl font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[3.5rem]">
-                Thiết lập cuộc sống mơ ước qua <br className="hidden sm:inline" />
-                <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-8">kế hoạch 12 tuần</span> bền bỉ
-              </h1>
-              
-              {/* Shortened and high impact caption (under 3 lines on mobile) */}
-              <p className="max-w-[48ch] text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic">
-                Nơi khát vọng không còn mơ hồ. Vẽ bảng tầm nhìn sống động, đóng gói thành các mục tiêu SMART và thực hiện đều đặn mỗi ngày.
-              </p>
-            </div>
+        <div className="relative z-10 flex flex-col gap-12 lg:gap-16 max-w-6xl mx-auto w-full">
+          <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:items-center">
+            <div className="appear-fade-up space-y-6">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-500/5 dark:border-emerald-900/30 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 shadow-3xs">
+                  ✨ DEAR OUR FUTURE
+                </span>
+                
+                <h1 className="max-w-2xl font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[3.5rem]">
+                  Thiết lập cuộc sống mơ ước qua <br className="hidden sm:inline" />
+                  <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-8">kế hoạch 12 tuần</span> bền bỉ
+                </h1>
+                
+                {/* Shortened and high impact caption (under 3 lines on mobile) */}
+                <p className="max-w-[48ch] text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic">
+                  Nơi mục tiêu lớn được chia nhỏ thành thói quen kỷ luật mỗi ngày. Đánh giá bánh xe cuộc sống, xây dựng mục tiêu SMART và thực thi dứt khoát.
+                </p>
+              </div>
 
-            {/* Visual preview journey diagram: Vision -> Goal -> 12-week -> Action */}
-            <div className="bg-white/80 dark:bg-neutral-900/80 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 p-4 shadow-3xs backdrop-blur-md max-w-xl">
-              <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-2.5">Hành trình 5 giây hiểu ngay cách hoạt động:</p>
-              <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
-                <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                  <div className="text-base mb-1">🎨</div>
-                  <div className="font-bold text-neutral-800 dark:text-neutral-200">1. Tầm nhìn</div>
-                  <div className="text-[9px] text-neutral-400 font-medium">Bảng ước mơ</div>
+              {/* Visual preview journey diagram: Vision -> Goal -> 12-week -> Action */}
+              <div className="bg-white/80 dark:bg-neutral-900/80 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 p-4 shadow-3xs backdrop-blur-md max-w-xl">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-2.5">Hành trình 5 giây gặt hái kết quả:</p>
+                <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
+                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
+                    <div className="text-base mb-1">🎨</div>
+                    <div className="font-bold text-neutral-800 dark:text-neutral-200">1. Tầm nhìn</div>
+                    <div className="text-[9px] text-neutral-400 font-medium">Bảng ước mơ</div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
+                    <div className="text-base mb-1">🎯</div>
+                    <div className="font-bold text-neutral-800 dark:text-neutral-200">2. Mục tiêu</div>
+                    <div className="text-[9px] text-neutral-400 font-medium">Chuẩn SMART</div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
+                    <div className="text-base mb-1">🗓️</div>
+                    <div className="font-bold text-neutral-800 dark:text-neutral-200">3. Kế hoạch</div>
+                    <div className="text-[9px] text-neutral-400 font-medium">Lộ trình 12 tuần</div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-app-accent-soft text-app-accent border border-app-accent/15">
+                    <div className="text-base mb-1">⚡</div>
+                    <div className="font-bold">4. Hành động</div>
+                    <div className="text-[9px] text-app-accent/80 font-medium">Việc Today</div>
+                  </div>
                 </div>
-                <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                  <div className="text-base mb-1">🎯</div>
-                  <div className="font-bold text-neutral-800 dark:text-neutral-200">2. Mục tiêu</div>
-                  <div className="text-[9px] text-neutral-400 font-medium">Chuẩn SMART</div>
+              </div>
+
+              {/* Interactive Goal Preview Chips */}
+              <div className="space-y-2.5">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chọn xem ví dụ thực tế:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {PREVIEW_CHIPS.map((chip) => (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      aria-pressed={selectedPreviewId === chip.id}
+                      onClick={() => handlePreviewSelect(chip.id)}
+                      className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg cursor-pointer ${
+                        selectedPreviewId === chip.id
+                          ? "bg-app-accent text-white shadow-sm hover:bg-app-accent-hover"
+                          : "border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:border-app-accent/40 hover:text-app-accent hover:-translate-y-px"
+                      }`}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                  <div className="text-base mb-1">🗓️</div>
-                  <div className="font-bold text-neutral-800 dark:text-neutral-200">3. Kế hoạch</div>
-                  <div className="text-[9px] text-neutral-400 font-medium">Lộ trình 12 tuần</div>
-                </div>
-                <div className="p-2 rounded-xl bg-app-accent-soft text-app-accent border border-app-accent/15">
-                  <div className="text-base mb-1">⚡</div>
-                  <div className="font-bold">4. Hành động</div>
-                  <div className="text-[9px] text-app-accent/80 font-medium">Hôm nay (Today)</div>
-                </div>
+              </div>
+
+              {/* Action Buttons - Highly visible, min 44px on mobile */}
+              <div className="flex flex-col gap-3 sm:flex-row pt-2 max-w-xl">
+                <button
+                  type="button"
+                  onClick={onStart}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40 cursor-pointer w-full sm:w-auto"
+                >
+                  {heroStartLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={scrollToHowItWorks}
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-transparent px-8 py-3.5 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-all duration-200 hover:bg-neutral-50/50 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none cursor-pointer w-full sm:w-auto"
+                >
+                  Xem lộ trình ghim chu kỳ
+                </button>
+              </div>
+
+              <div className="pt-0.5 flex items-center gap-2">
+                <p className="text-[10px] font-medium text-app-ink-muted flex items-center gap-1.5">
+                  <span>✦</span>
+                  Thiết lập nhanh trong 3 phút để nhận Bánh xe cuộc sống và gợi ý mục tiêu đầu tiên.
+                </p>
               </div>
             </div>
 
-            {/* Interactive Goal Preview Chips */}
-            <div className="space-y-2.5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chọn xem ví dụ thực tế:</p>
-              <div className="flex flex-wrap gap-1.5">
-                {PREVIEW_CHIPS.map((chip) => (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    aria-pressed={selectedPreviewId === chip.id}
-                    onClick={() => handlePreviewSelect(chip.id)}
-                    className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg cursor-pointer ${
-                      selectedPreviewId === chip.id
-                        ? "bg-app-accent text-white shadow-sm hover:bg-app-accent-hover"
-                        : "border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:border-app-accent/40 hover:text-app-accent hover:-translate-y-px"
-                    }`}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
+            {/* Cozy planning corner generated image asset for public landing */}
+            <div className="hidden lg:block relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-sm aspect-[4/3] w-full group select-none transition-all duration-300 hover:shadow-md hover:-rotate-[0.5deg]">
+              <span className="absolute -top-3.5 left-6 text-xl z-20 select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.06)]">📌</span>
+              <img
+                src="/study_desk_hero.png"
+                alt="Góc học tập & lập kế hoạch ấm áp"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 dark:brightness-[0.85] dark:contrast-[1.05]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-5">
+                <p className="text-xs font-medium text-white/90 italic font-serif leading-relaxed">
+                  "Không gian tĩnh tại ghim ước mơ và kiến tạo chu kỳ mới."
+                </p>
               </div>
-            </div>
-
-            {/* Action Buttons - Highly visible, min 44px on mobile */}
-            <div className="flex flex-col gap-3 sm:flex-row pt-2 max-w-xl">
-              <button
-                type="button"
-                onClick={onStart}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40 cursor-pointer w-full sm:w-auto"
-              >
-                {heroStartLabel}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={scrollToHowItWorks}
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-8 py-3.5 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-all duration-200 hover:bg-neutral-50 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none cursor-pointer w-full sm:w-auto"
-              >
-                Xem cách hoạt động
-              </button>
-            </div>
-
-            <div className="pt-0.5 flex items-center gap-2">
-              <p className="text-[10px] font-medium text-app-ink-muted flex items-center gap-1.5">
-                <span>✦</span>
-                Hoàn thành thiết lập trong 10 phút để nhận bản kế hoạch hành động đầu tiên.
-              </p>
             </div>
           </div>
 
-          {/* SaaS Mockup Centerpiece */}
-          <div className="flex items-center justify-center w-full">
-            <HeroMockupAnimated previewData={selectedPreview} />
+          {/* SaaS Mockup Centerpiece - Dream-to-Plan Preview */}
+          <div className="w-full">
+            <DreamToPlanPreview previewData={selectedPreview} />
           </div>
         </div>
       </section>

@@ -85,25 +85,36 @@ export function DashboardHero({
         </div>
       </div>
 
-      {/* Featured Goal focus card - premium frosted layout */}
+      {/* Featured Goal focus card - premium dreamy wood layout */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/card relative z-10 rounded-2xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-md p-5 sm:p-6 shadow-3xs transition-all duration-300 hover:border-app-accent/35 hover:shadow-2xs -rotate-[1deg] hover:rotate-0"
+        className="group/card relative z-10 rounded-3xl border border-neutral-200/60 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-md transition-all duration-300 hover:shadow-lg -rotate-[1deg] hover:rotate-0 overflow-hidden"
       >
-        {/* 📌 Floating pin on the goal card itself */}
-        <span className="absolute -top-3 left-4 text-lg select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+        {/* Background gradient dreamy mờ ảo giả lập Vision Board */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-amber-500/5 to-violet-500/5 opacity-80 pointer-events-none" />
 
-        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-400 flex items-center gap-1.5">
+        {/* 📌 Floating pin on the goal card itself */}
+        <span className="absolute top-2 left-6 text-xl select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)]">📌</span>
+
+        <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5 mt-2 relative z-10">
           <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
           Tiêu điểm chu kỳ
         </p>
         
-        <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200">
+        {/* Visual Dreamy Vision Anchor */}
+        <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
+          <span className="text-3xl animate-bounce duration-1000">🎨</span>
+          <div className="absolute inset-0 bg-black/2 flex items-end p-2">
+            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/80 dark:bg-neutral-900/80 px-2 py-0.5 rounded-md backdrop-blur-xs">BẢNG TẦM NHÌN</span>
+          </div>
+        </div>
+        
+        <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200 relative z-10">
           {featuredGoalTitle}
         </p>
 
         {/* Slender modern progress line */}
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex items-center gap-3 relative z-10">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800" aria-hidden="true">
             <div
               className="h-full rounded-full bg-gradient-to-r from-app-accent to-green-600 transition-all duration-500 ease-out"
@@ -115,7 +126,7 @@ export function DashboardHero({
 
         <Link
           to={planHref}
-          className="mt-4.5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-sm hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group cursor-pointer"
+          className="mt-4.5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-sm hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group cursor-pointer relative z-10"
         >
           <span>Mở kế hoạch 12 tuần</span>
           <ArrowRight className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover:translate-x-0.5" />

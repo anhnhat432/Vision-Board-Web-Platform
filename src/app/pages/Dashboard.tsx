@@ -867,40 +867,86 @@ function DashboardActiveLayout({
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column: Today Tasks & Execution Core */}
         <div className="space-y-6 lg:col-span-2">
           <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
-          <TodayMiniCard
-            title={data.todayPreviewTitle}
-            tasks={data.activeSystemTaskPreview}
-            completedCount={data.todayPreviewCompleted}
-            totalCount={data.todayPreviewTotal}
-          />
-          <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
-          <WeekRhythmCard
-            system={data.activeSystem}
-            currentWeek={data.dashboardKpiCurrentWeek}
-            totalWeeks={data.dashboardKpiTotalWeeks}
-            completedCount={
-              data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks
-            }
-            totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
-            leadAverage={data.dashboardKpiLeadAverage}
-            wheelScore={data.averageLifeScore}
-            streak={data.dashboardKpiStreak}
-          />
-          <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+          
+          {/* Today Tasks - Primary Focus */}
+          <div className="relative">
+            <TodayMiniCard
+              title={data.todayPreviewTitle}
+              tasks={data.activeSystemTaskPreview}
+              completedCount={data.todayPreviewCompleted}
+              totalCount={data.todayPreviewTotal}
+            />
+          </div>
+          
+          {/* Active Goals Card - Quieter border */}
+          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
+            <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
+          </div>
+          
+          {/* Week Rhythm Card - Quieter border */}
+          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+            <WeekRhythmCard
+              system={data.activeSystem}
+              currentWeek={data.dashboardKpiCurrentWeek}
+              totalWeeks={data.dashboardKpiTotalWeeks}
+              completedCount={
+                data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks
+              }
+              totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
+              leadAverage={data.dashboardKpiLeadAverage}
+              wheelScore={data.averageLifeScore}
+              streak={data.dashboardKpiStreak}
+            />
+          </div>
+          
+          {/* Twelve Week Trend Card - Quieter / conditional display within card */}
+          <div className="opacity-85 hover:opacity-100 transition-opacity duration-200">
+            <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+          </div>
         </div>
 
+        {/* Right Column: Secondary Insights & Inspiration */}
         <aside className="space-y-6">
           {data.reviewDueToday ? (
-            <ReflectionPrompt
-              currentWeek={data.dashboardKpiCurrentWeek}
-              reviewHref={data.dashboardNextAction.ctaTarget}
-            />
+            <div className="relative">
+              <span className="absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] z-10">📌</span>
+              <ReflectionPrompt
+                currentWeek={data.dashboardKpiCurrentWeek}
+                reviewHref={data.dashboardNextAction.ctaTarget}
+              />
+            </div>
           ) : null}
-          <BalanceCard rows={balanceRows} />
-          <DailyStoicCard />
-          <QuoteBlock />
+          
+          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
+            <BalanceCard rows={balanceRows} />
+          </div>
+          
+          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+            <DailyStoicCard />
+          </div>
+          
+          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+            <QuoteBlock />
+          </div>
+
+          {/* 🎨 Cozy planning corner generated image asset for Active Users */}
+          <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none opacity-90 hover:opacity-100 transition-all duration-200">
+            <img
+              src="/study_desk_hero.png"
+              alt="Góc học tập & lập kế hoạch ấm áp"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              width={320}
+              height={180}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
+              <p className="text-[10px] font-medium text-white/90 italic font-serif">
+                "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét."
+              </p>
+            </div>
+          </div>
         </aside>
       </div>
     </div>

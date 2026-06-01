@@ -229,7 +229,7 @@ export function WeekRhythmCard({
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 relative">
-        {stats.map((item, index) => {
+        {stats.map((item, _index) => {
           const Icon = item.icon;
           const styles = KPI_CARD_STYLES[item.caption];
 

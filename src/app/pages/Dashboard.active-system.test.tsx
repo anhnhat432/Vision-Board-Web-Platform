@@ -161,19 +161,15 @@ describe("Dashboard active 12-week system UX", () => {
     renderDashboard();
 
     const hero = await screen.findByTestId("dashboard-primary-action-card");
-    const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
+    const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu chu kỳ" });
     const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
     const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
-    const todayHeadings = screen.getAllByRole("heading", { name: "Việc hôm nay" });
-    const mobileTodayHeading = todayHeadings.find((heading) => heading.closest("aside") === null);
-    const desktopTodayHeading = todayHeadings.find((heading) => heading.closest("aside") !== null);
+    const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
 
-    expect(hero).toHaveTextContent("Đây là bức tranh tuần 1");
-    expect(mobileTodayHeading).toBeDefined();
-    expect(desktopTodayHeading).toBeDefined();
-    expect(desktopTodayHeading?.closest("aside")).not.toBeNull();
-    expect(hero.compareDocumentPosition(mobileTodayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect((mobileTodayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
+    expect(hero).toHaveTextContent("Tuần 1 / 12");
+    expect(todayHeading).toBeDefined();
+    expect(hero.compareDocumentPosition(todayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
     expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -186,20 +182,15 @@ describe("Dashboard active 12-week system UX", () => {
     renderDashboard();
 
     const hero = await screen.findByTestId("dashboard-primary-action-card");
-    const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
+    const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu chu kỳ" });
     const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
     const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
     const kpiRow = await screen.findByTestId("dashboard-kpi-row");
-    const todayHeadings = screen.getAllByRole("heading", { name: "Việc hôm nay" });
-    const mobileTodayHeading = todayHeadings.find((heading) => heading.closest("aside") === null);
-    const desktopTodayHeading = todayHeadings.find((heading) => heading.closest("aside") !== null);
+    const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
 
-    expect(todayHeadings).toHaveLength(2);
-    expect(mobileTodayHeading).toBeDefined();
-    expect(desktopTodayHeading).toBeDefined();
-    expect(desktopTodayHeading?.closest("aside")).not.toBeNull();
-    expect(hero.compareDocumentPosition(mobileTodayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect((mobileTodayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
+    expect(todayHeading).toBeDefined();
+    expect(hero.compareDocumentPosition(todayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
     expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);

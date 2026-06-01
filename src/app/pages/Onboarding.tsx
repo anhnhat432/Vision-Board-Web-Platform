@@ -23,7 +23,6 @@ import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { VisionMapIllustration } from "../components/illustrations/VisionMapIllustration";
 import { PageShell } from "../components/PageShell";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
@@ -677,7 +676,14 @@ export function Onboarding() {
 
                 <div className="hidden lg:flex flex-col items-center justify-center surface-raised rounded-3xl border border-neutral-200 bg-gradient-to-br from-emerald-500/[0.03] to-teal-500/[0.03] p-8 shadow-3xs hover:shadow-2xs transition-shadow relative overflow-hidden">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-                  <VisionMapIllustration className="w-full h-auto max-w-[260px] text-app-accent opacity-95 animate-[float_4s_ease-in-out_infinite] relative z-10" />
+                  <div className="w-full max-w-[260px] rounded-2xl overflow-hidden border border-emerald-250/20 shadow-sm relative z-10 animate-[float_4s_ease-in-out_infinite]">
+                    <img 
+                      src="/life_balance_checkin.png" 
+                      alt="Khảo sát Bánh xe cuộc sống và tự phản tư" 
+                      className="w-full h-auto object-cover aspect-[4/3]"
+                      loading="lazy"
+                    />
+                  </div>
                   <p className="mt-6 text-xs font-semibold tracking-wider uppercase text-emerald-800/70 dark:text-emerald-300/70 relative z-10">
                     Bản đồ Cân bằng Cuộc sống
                   </p>

@@ -668,6 +668,14 @@ export function LifeInsight() {
                 </div>
 
                 <div>
+                  <div className="mb-4 overflow-hidden rounded-xl border border-app-line/45 aspect-[4/3] w-full bg-app-bg shadow-sm">
+                    <img 
+                      src="/personal_insight.png" 
+                      alt="Góc nhìn cá nhân qua khúc xạ lăng kính thủy tinh" 
+                      className="w-full h-full object-cover" 
+                      loading="lazy"
+                    />
+                  </div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">BÁO CÁO GÓC NHÌN CÁ NHÂN</p>
                   
                   {/* Selected Focus Area Info */}

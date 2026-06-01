@@ -866,6 +866,15 @@ export function SmartGoalStepShell({
         <div className="hidden lg:block lg:sticky lg:top-6 space-y-6">
           {renderPolaroidCard(false)}
 
+          <div className="overflow-hidden rounded-xl border border-app-line/45 aspect-[4/3] w-full bg-app-bg shadow-sm">
+            <img 
+              src="/smart_goal_builder.png" 
+              alt="Công cụ dựng mục tiêu SMART" 
+              className="w-full h-full object-cover" 
+              loading="lazy"
+            />
+          </div>
+
           <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
             <div className="space-y-1">
               <h3 className="text-sm font-bold text-app-ink">Kiểm tra độ rõ mục tiêu (Clarity)</h3>

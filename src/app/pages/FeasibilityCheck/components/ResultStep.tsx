@@ -349,6 +349,16 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </span>
         </div>
 
+        {/* Banner visual anchor ở trên */}
+        <div className="overflow-hidden rounded-2xl border border-app-line/45 aspect-[16/5] w-full bg-app-bg shadow-sm">
+          <img 
+            src="/feasibility_readiness.png" 
+            alt="Kiểm tra độ sẵn sàng và nguồn lực khả thi" 
+            className="w-full h-full object-cover" 
+            loading="lazy"
+          />
+        </div>
+
         {/* Hero Banner Khẳng định tính thực tế */}
         <div className={cn(
           "rounded-2xl border p-6 bg-gradient-to-br shadow-md flex gap-4 items-start transition-all duration-300 hover:shadow-lg",

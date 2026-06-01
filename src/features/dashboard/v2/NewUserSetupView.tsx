@@ -1,8 +1,12 @@
-import { Check, Sparkles, BookOpen } from "lucide-react";
+import { useState } from "react";
+import { Check, Sparkles, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
 import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
 import { capitalizeVietnameseName } from "@/app/utils/text";
+import { VisionMapIllustration } from "@/app/components/illustrations";
+import { DreamyPinboardMockup } from "./DreamyPinboardMockup";
+import { DreamToPlanPreview } from "./DreamToPlanPreview";
 
 interface NewUserSetupViewProps {
   userData: UserData;
@@ -91,8 +95,23 @@ const getStepTheme = (index: number): CardStepTheme => {
 };
 
 export function NewUserSetupView({ userData, displayName, onContinue }: NewUserSetupViewProps) {
+  const [showSamplePlan, setShowSamplePlan] = useState(false);
   const steps = buildSetupSteps(userData);
   const nextStep = steps.find((step) => !step.completed) ?? steps[steps.length - 1];
+  const hasLifeBalance = hasScoredLifeBalance(userData);
+
+  const translateArea = (name: string) => {
+    const map: Record<string, string> = {
+      Career: "Sự nghiệp",
+      Health: "Sức khỏe",
+      Relationships: "Mối quan hệ",
+      "Personal Growth": "Tinh thần",
+      Leisure: "Giải trí",
+      Family: "Gia đình",
+      Education: "Học tập",
+    };
+    return map[name] || name;
+  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto w-full">
@@ -100,6 +119,11 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
       <section className="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs backdrop-blur-md">
         {/* Ambient background light */}
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px]" />
+        
+        {/* Ambient background Vision Map Illustration */}
+        <div className="pointer-events-none absolute right-4 bottom-0 w-48 h-36 opacity-[0.06] dark:opacity-[0.02] select-none z-0 hidden sm:block" aria-hidden="true">
+          <VisionMapIllustration className="w-full h-full object-contain" />
+        </div>
         
         <div className="relative z-10 space-y-4 max-w-3xl">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-500/5 dark:border-amber-900/30 px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400 shadow-sm">
@@ -152,75 +176,164 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
             onClick={() => onContinue(nextStep.href)}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] cursor-pointer"
           >
-            Tiếp tục thiết lập
+            Bắt đầu: {nextStep.title} →
           </button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 relative select-none">
-          {steps.map((step, index) => {
-            const theme = getStepTheme(index);
-            const isNextStep = step.title === nextStep.title;
-            
-            return (
-              <button
-                key={step.title}
-                type="button"
-                onClick={() => onContinue(step.href)}
-                className={`group flex text-left gap-4 rounded-2xl border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${
-                  step.completed
-                    ? "border-neutral-200 bg-neutral-50/20 dark:bg-neutral-900/5 opacity-55 hover:opacity-85 hover:border-neutral-300"
-                    : isNextStep
-                    ? "bg-white dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15 -rotate-[0.5deg] scale-[1.01]"
-                    : `bg-white/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
-                }`}
-              >
-                {/* 📌 Pin indicator on top header of cards to align with Roadmap 4-step */}
-                <span className="absolute -top-3 left-4 text-lg select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
-                
-                {/* Index / Check bubble */}
-                <div className="relative shrink-0 pt-0.5">
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
-                      step.completed
-                        ? "bg-emerald-700 text-white shadow-sm"
-                        : isNextStep
-                        ? "border border-app-accent bg-app-accent-soft text-app-accent font-extrabold"
-                        : `border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-500`
-                    }`}
-                  >
-                    {step.completed ? <Check className="h-4 w-4" strokeWidth={3} /> : index + 1}
-                  </span>
-                </div>
-                
-                {/* Text Content */}
-                <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <h3 className={`text-xs font-bold leading-none ${step.completed ? "text-neutral-400 line-through" : "text-neutral-800 dark:text-neutral-200"}`}>
-                      {step.title}
-                    </h3>
-                    
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${
-                      isNextStep && !step.completed 
-                        ? "bg-app-accent/10 text-app-accent border border-app-accent/10" 
-                        : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
-                    }`}>
-                      {theme.badgeText}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 grid gap-4 relative select-none">
+            {steps.map((step, index) => {
+              const theme = getStepTheme(index);
+              const isNextStep = step.title === nextStep.title;
+              
+              return (
+                <button
+                  key={step.title}
+                  type="button"
+                  onClick={() => onContinue(step.href)}
+                  className={`group flex text-left gap-4 rounded-2xl border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${
+                    step.completed
+                      ? "border-neutral-200 bg-neutral-50/20 dark:bg-neutral-900/5 opacity-55 hover:opacity-85 hover:border-neutral-300"
+                      : isNextStep
+                      ? "bg-white dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15 -rotate-[0.5deg] scale-[1.01]"
+                      : `bg-white/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
+                  }`}
+                >
+                  {/* 📌 Pin indicator on top header of cards to align with Roadmap 4-step */}
+                  <span className="absolute -top-3 left-4 text-lg select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+                  
+                  {/* Index / Check bubble */}
+                  <div className="relative shrink-0 pt-0.5">
+                    <span
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
+                        step.completed
+                          ? "bg-emerald-700 text-white shadow-sm"
+                          : isNextStep
+                          ? "border border-app-accent bg-app-accent-soft text-app-accent font-extrabold"
+                          : `border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-500`
+                      }`}
+                    >
+                      {step.completed ? <Check className="h-4 w-4" strokeWidth={3} /> : index + 1}
                     </span>
-                    
-                    {isNextStep && !step.completed && (
-                      <span className="inline-block rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-emerald-500/10 animate-pulse">
-                        Đề xuất
-                      </span>
-                    )}
                   </div>
                   
-                  <p className={`text-xs font-semibold leading-relaxed ${step.completed ? "text-neutral-400" : "text-neutral-500 dark:text-neutral-400"}`}>
-                    {step.description}
+                  {/* Text Content */}
+                  <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <h3 className={`text-xs font-bold leading-none ${step.completed ? "text-neutral-400 line-through" : "text-neutral-800 dark:text-neutral-200"}`}>
+                        {step.title}
+                      </h3>
+                      
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${
+                        isNextStep && !step.completed 
+                          ? "bg-app-accent/10 text-app-accent border border-app-accent/10" 
+                          : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
+                      }`}>
+                        {theme.badgeText}
+                      </span>
+                      
+                      {isNextStep && !step.completed && (
+                        <span className="inline-block rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-emerald-500/10 animate-pulse">
+                          Đề xuất
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p className={`text-xs font-semibold leading-relaxed ${step.completed ? "text-neutral-400" : "text-neutral-500 dark:text-neutral-400"}`}>
+                      {step.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+            
+            {/* 💡 Accordion: First Week Plan Mockup */}
+            <div className="mt-4 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 bg-white/30 dark:bg-neutral-900/20 shadow-3xs overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowSamplePlan(!showSamplePlan)}
+                className="w-full flex items-center justify-between px-5 py-4 text-xs font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50/50 dark:hover:bg-neutral-900/40 transition-colors cursor-pointer select-none"
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-app-accent" />
+                  💡 Xem cách một chu kỳ 12 tuần vận hành mẫu
+                </span>
+                {showSamplePlan ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              
+              {showSamplePlan && (
+                <div className="px-5 pb-5 border-t border-neutral-100 dark:border-neutral-900 pt-4 bg-[#fbfbfa]/30 overflow-hidden">
+                  <DreamToPlanPreview />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mini Wheel of Life Visual Anchor & Study Corner Image */}
+          <div className="space-y-4">
+            {hasLifeBalance && userData.currentWheelOfLife && userData.currentWheelOfLife.length > 0 ? (
+              <div className="rounded-3xl border border-neutral-200/80 bg-white/60 dark:bg-neutral-950/20 p-5 shadow-xs relative -rotate-[0.5deg]">
+                <span className="absolute -top-3 left-6 text-lg filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">📌</span>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-accent mb-4">Kết quả chấm điểm của bạn</p>
+                <div className="space-y-3">
+                  {userData.currentWheelOfLife.map((area) => (
+                    <div key={area.name} className="space-y-1">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-neutral-600 dark:text-neutral-400">{translateArea(area.name)}</span>
+                        <span className="text-app-accent">{area.score}/10</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800" aria-hidden="true">
+                        <div
+                          className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
+                          style={{ width: `${area.score * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-square w-full group select-none transition-all duration-300 hover:shadow-md hover:-rotate-[0.5deg]">
+                  <span className="absolute -top-3 left-6 text-lg z-20 select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+                  <img
+                    src="/vision_board_detail.png"
+                    alt="Bảng tầm nhìn chi tiết mẫu"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 dark:brightness-[0.85] dark:contrast-[1.05]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent flex items-end p-4">
+                    <p className="text-[10px] font-medium text-white/90 italic font-serif leading-relaxed">
+                      "Tầm nhìn rõ ràng là một nửa chặng đường thành công."
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="rounded-2xl border border-dashed border-neutral-200/80 dark:border-neutral-800 p-5 text-center space-y-2.5 bg-white/30 backdrop-blur-3xs">
+                  <span className="text-2xl">🎯</span>
+                  <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Kiến tạo cuộc sống mơ ước</h4>
+                  <p className="text-[10px] leading-relaxed text-neutral-500 dark:text-neutral-400 font-semibold">
+                    Dành 3 phút chấm Bánh xe cuộc sống để nhìn rõ các khía cạnh cần ưu tiên trước khi bước vào lập kế hoạch hành động.
                   </p>
                 </div>
-              </button>
-            );
-          })}
+              </div>
+            )}
+
+            {/* 🎨 Cozy planning corner generated image asset */}
+            <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none">
+              <img
+                src="/study_desk_hero.png"
+                alt="Góc học tập & lập kế hoạch ấm áp"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                width={320}
+                height={180}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
+                <p className="text-[10px] font-medium text-white/90 italic font-serif">
+                  "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét."
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

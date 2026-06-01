@@ -1182,16 +1182,28 @@ export function TwelveWeekSetupLab() {
         />
 
         {/* Tiêu đề chính tối giản */}
-        <section aria-labelledby="twelve-week-setup-title">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-            {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
-          </p>
-          <h1
-            id="twelve-week-setup-title"
-            className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
-          >
-            Tạo kế hoạch 12 tuần
-          </h1>
+        <section aria-labelledby="twelve-week-setup-title" className="space-y-4">
+          {/* Banner visual anchor ở trên */}
+          <div className="overflow-hidden rounded-2xl border border-app-line/45 aspect-[16/5] w-full bg-app-bg shadow-sm">
+            <img 
+              src="/twelve_week_roadmap.png" 
+              alt="Lộ trình hành trình 12 tuần" 
+              className="w-full h-full object-cover" 
+              loading="lazy"
+            />
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+              {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
+            </p>
+            <h1
+              id="twelve-week-setup-title"
+              className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
+            >
+              Tạo kế hoạch 12 tuần
+            </h1>
+          </div>
 
           <div className="mt-3.5 max-w-2xl bg-app-bg-subtle/50 dark:bg-app-bg-subtle/10 border border-app-line/60 rounded-xl p-3.5 flex items-start gap-2.5 shadow-3xs">
             <span

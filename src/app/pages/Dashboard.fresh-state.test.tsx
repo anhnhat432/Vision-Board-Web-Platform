@@ -144,7 +144,7 @@ describe("Dashboard fresh workspace states", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: /Biến mục tiêu lớn thành.*kế hoạch 12 tuần.*việc hôm nay/i,
+        name: /Thiết lập cuộc sống mơ ước qua.*kế hoạch 12 tuần/i,
       }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Private stale goal must stay hidden")).not.toBeInTheDocument();
@@ -162,10 +162,10 @@ describe("Dashboard fresh workspace states", () => {
 
     renderDashboard();
 
-    const startButton = await screen.findByRole("button", { name: /Đăng ký miễn phí/i });
+    const startButton = (await screen.findAllByRole("button", { name: /Thiết lập chu kỳ 12 tuần ngay/i }))[0];
     expect(
       screen.getByRole("heading", {
-        name: /Biến mục tiêu lớn thành.*kế hoạch 12 tuần.*việc hôm nay/i,
+        name: /Thiết lập cuộc sống mơ ước qua.*kế hoạch 12 tuần/i,
       }),
     ).toBeInTheDocument();
 
@@ -188,17 +188,17 @@ describe("Dashboard fresh workspace states", () => {
     renderDashboard();
 
     expect(await screen.findByTestId("fresh-workspace-empty-state")).toBeInTheDocument();
-    expect(screen.getByText(/Cần hướng dẫn 6 bước/)).toBeInTheDocument();
+    expect(screen.getByText(/Cần xem hướng dẫn nhanh\?/)).toBeInTheDocument();
     expect(screen.queryByText(/Free: 0\/3/)).not.toBeInTheDocument();
-    expect(screen.getByText(/Hãy đi qua 4 bước hành động cốt lõi/i)).toBeInTheDocument();
+    expect(screen.getByText(/Hoàn thành 4 chặng cốt lõi/i)).toBeInTheDocument();
     expect(screen.queryByText("Chưa có dữ liệu bánh xe cuộc sống")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng quan hiệu suất 12 tuần")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tiếp tục thiết lập →" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bắt đầu: Cân bằng cuộc sống →" })).toBeInTheDocument();
     expect(screen.getByText("Cân bằng cuộc sống")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Tôi đã có insight" })).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu gần đây")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Mở ngay →" }));
+    await user.click(screen.getByRole("button", { name: "Mở cẩm nang →" }));
     expect(openGuideHandler).toHaveBeenCalledTimes(1);
     window.removeEventListener("visionboard:open-guide", openGuideHandler);
   });
