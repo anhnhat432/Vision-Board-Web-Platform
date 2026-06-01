@@ -699,7 +699,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         {/* Collapsible phân tích chi tiết phụ trợ */}
         <Collapsible
           key={isDesktop ? "feasibility-details-desktop" : "feasibility-details-mobile"}
-          defaultOpen={false}
+          defaultOpen={isDesktop}
           className="mt-6 border-t border-slate-200/30 dark:border-slate-800/40 pt-5"
         >
           <CollapsibleTrigger asChild>

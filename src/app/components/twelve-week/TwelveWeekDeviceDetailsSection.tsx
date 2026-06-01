@@ -451,7 +451,7 @@ export function TwelveWeekDataSafety({
       </div>
 
       <ExpandableSection
-        title="Dữ liệu & quyền riêng tư chi tiết"
+        title="Dữ liệu & quyền riêng tư"
         description="Chi tiết dữ liệu được lưu cục bộ và các kênh truyền nhận dữ liệu."
       >
         <div className="stack-stack">
@@ -663,7 +663,7 @@ export function TwelveWeekDangerZone({
               className="shrink-0 border-app-warm/20 bg-app-surface text-app-warm hover:bg-app-warm-soft rounded-xl"
               onClick={onDeleteCloudWorkspace}
             >
-              Xóa dữ liệu cloud
+              Xóa dữ liệu tài khoản
             </Button>
           </div>
         )}

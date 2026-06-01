@@ -9,6 +9,13 @@ interface ScoreboardWeek {
   mainMetricProgress: string;
 }
 
+// Decorative elements for Dreamy Planner aesthetic
+const WashiTape = ({ className = "" }: { className?: string }) => (
+  <div 
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  />
+);
+
 interface ZenJourneyMapProps {
   scoreboard: ScoreboardWeek[];
   currentWeek: number;
@@ -54,21 +61,22 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
   const pathD = generateSmoothPath();
 
   return (
-    <div className="relative w-full rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface via-app-bg to-app-surface p-5 shadow-inner">
+    <div className="relative w-full rounded-3xl border border-app-line/50 bg-gradient-to-b from-app-surface via-[#FAF9F5]/40 to-app-surface p-5 shadow-sm pt-8 overflow-hidden">
+      <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
       {/* Khung tiêu đề chánh niệm */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3 pt-1">
         <div>
-          <h3 className="font-serif text-lg font-medium text-app-ink flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-app-accent animate-pulse" />
+          <h3 className="font-serif text-xl font-bold text-app-ink flex items-center gap-1.5">
+            <Sparkles className="h-4.5 w-4.5 text-app-accent animate-pulse" />
             Bản đồ hành trình Zen Journey
           </h3>
           <p className="text-xs text-app-ink-soft">
             Con đường 12 tuần uốn lượn chánh niệm. Chạm vào mỗi trạm dừng (Zen Stone) để xem suy ngẫm sâu sắc bên dưới.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 text-xs text-app-ink-muted">
+        <div className="flex flex-wrap gap-3 text-xs text-app-ink-muted font-semibold">
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
             Đã hoàn thành review
           </span>
           <span className="flex items-center gap-1">
@@ -93,16 +101,25 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
             role="img"
             aria-label="Bản đồ hành trình 12 tuần"
           >
+            {/* Constellation backdrops */}
+            <circle cx="100" cy="150" r="1.5" fill="var(--app-accent)" opacity="0.35" className="animate-pulse" />
+            <circle cx="300" cy="80" r="1" fill="var(--app-accent)" opacity="0.5" />
+            <circle cx="650" cy="100" r="2" fill="var(--app-warm)" opacity="0.3" className="animate-pulse" />
+            <circle cx="700" cy="400" r="1" fill="var(--app-accent)" opacity="0.45" />
+            <circle cx="200" cy="300" r="1.5" fill="var(--app-warm)" opacity="0.35" />
+            <circle cx="450" cy="220" r="1" fill="var(--app-accent)" opacity="0.55" />
+            <circle cx="580" cy="90" r="1.5" fill="var(--app-accent)" opacity="0.4" className="animate-pulse" />
+
             {/* 1. ĐƯỜNG ĐI CHÍNH (ĐƯỜNG ẨN HÀNH HƯƠNG TỔNG THỂ) */}
-            <path d={pathD} stroke="var(--app-line)" strokeWidth="4" strokeDasharray="8 8" opacity="0.3" />
+            <path d={pathD} stroke="var(--app-line)" strokeWidth="4" strokeDasharray="8 8" opacity="0.35" />
 
             {/* 2. ĐƯỜNG ĐÃ ĐI QUA (Hành trình đã thắp sáng) */}
             <path
               d={pathD}
-              stroke="var(--app-accent)"
-              strokeWidth="4"
+              stroke="url(#journeyGradient)"
+              strokeWidth="4.5"
               strokeLinecap="round"
-              opacity="0.75"
+              opacity="0.85"
               // Cắt nhỏ path chỉ hiển thị phần đến tuần hiện tại
               strokeDasharray="4000"
               strokeDashoffset={800 - Math.min(100, (currentWeek / 12) * 100) * 8}
@@ -277,6 +294,12 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
                 <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0" />
               </radialGradient>
+              {/* Linear gradient cho con đường đã đi qua */}
+              <linearGradient id="journeyGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#2A5447" />
+                <stop offset="60%" stopColor="#3A7261" />
+                <stop offset="100%" stopColor="#f59e0b" />
+              </linearGradient>
             </defs>
           </svg>
         </div>
@@ -284,7 +307,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
 
       {/* TẤM CARD CHI TIẾT TRẠM DỪNG CHÂN NẰM THÔNG THOÁNG BÊN DƯỚI BẢN ĐỒ */}
       {activeWeek && (
-        <div className="mt-6 rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-bg/30 to-app-surface p-5 shadow-sm transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
+        <div className="mt-6 rounded-3xl border border-app-line bg-gradient-to-br from-app-surface via-app-bg/30 to-app-surface p-6 shadow-sm transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3">
             <div className="flex items-center gap-2.5">
               <span className="text-2xl">🪨</span>

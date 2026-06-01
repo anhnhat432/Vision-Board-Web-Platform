@@ -898,6 +898,7 @@ export function SmartGoalStepShell({
                     type="button"
                     onClick={handleApplyTransformedStarter}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-[0.98] cursor-pointer"
+                    aria-label={`Dùng gợi ý cho bước ${step.label}`}
                   >
                     <Sparkles className="h-3 w-3" />
                     Dùng gợi ý này

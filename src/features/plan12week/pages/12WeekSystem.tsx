@@ -1202,13 +1202,13 @@ export function TwelveWeekSystem() {
               </span>
             </div>
 
-            <h2 className="font-serif text-2xl font-semibold text-app-ink">Thiết lập kế hoạch thành công!</h2>
+            <h2 className="font-serif text-2xl font-semibold leading-tight text-app-ink">Thiết lập kế hoạch thành công!</h2>
             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-app-accent">
               12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
             </p>
 
             <div className="my-4 p-3 rounded-xl bg-app-bg-subtle/50 border border-app-line/40 text-left">
-              <p className="text-[9px] font-bold text-app-ink-muted uppercase">Mục tiêu của bạn:</p>
+              <p className="text-[9px] font-bold text-app-ink-muted uppercase tracking-[0.12em]">Mục tiêu của bạn:</p>
               <p className="mt-0.5 text-xs font-semibold leading-snug text-app-ink break-words line-clamp-2">
                 {activeGoal?.title}
               </p>
@@ -1229,7 +1229,7 @@ export function TwelveWeekSystem() {
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-app-ink leading-tight">Nhận nhiệm vụ ngày</p>
                     <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
-                      Vào ngay tab <span className="font-bold">"Hôm nay"</span> để xem các hành động lặp lại cần hoàn
+                      Vào ngay tab <span className="font-bold">“Hôm nay”</span> để xem các hành động lặp lại cần hoàn
                       thành trong ngày.
                     </p>
                   </div>

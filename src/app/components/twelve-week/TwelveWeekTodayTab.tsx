@@ -141,17 +141,32 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
   return want ? `« ${truncateCommitmentReminder(want)} »` : null;
 }
 
+// Decorative elements for Dreamy Planner aesthetic
+const WashiTape = ({ className = "" }: { className?: string }) => (
+  <div 
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  />
+);
+
+const PaperPin = ({ className = "" }: { className?: string }) => (
+  <div className={`absolute -top-2 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
+    <div className="w-3.5 h-3.5 bg-rose-500 rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
+      <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
+    </div>
+  </div>
+);
+
 function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
   if (!isActive) {
-    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:border-app-line-strong hover:shadow-3xs transition-all duration-200 rounded-xl shadow-none";
+    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:border-app-line-strong hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl shadow-none";
   }
   switch (value) {
     case "low":
-      return "border-indigo-200 bg-indigo-50/20 text-indigo-800 dark:border-indigo-900/40 dark:bg-indigo-950/10 dark:text-indigo-300 font-semibold shadow-xs transition-all duration-200 rounded-xl";
+      return "border-indigo-300/60 bg-indigo-50/30 text-indigo-800 dark:border-indigo-900/40 dark:bg-indigo-950/20 dark:text-indigo-300 font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-indigo-200 dark:ring-indigo-900/20";
     case "high":
-      return "border-amber-200 bg-amber-50/20 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/10 dark:text-amber-300 font-semibold shadow-xs transition-all duration-200 rounded-xl";
+      return "border-amber-300/60 bg-amber-50/30 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300 font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-amber-200 dark:ring-amber-900/20";
     default:
-      return "border-emerald-200 bg-emerald-50/20 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/10 dark:text-emerald-300 font-semibold shadow-xs transition-all duration-200 rounded-xl";
+      return "border-emerald-300/60 bg-emerald-50/30 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300 font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-emerald-200 dark:ring-emerald-900/20";
   }
 }
 
@@ -472,7 +487,7 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 text-[11px] text-app-ink-muted flex items-center gap-1.5 px-2 py-1 bg-app-accent-soft/30 border border-app-accent/10 rounded-xl w-fit"
+          className="order-1 text-[11px] text-app-ink-muted flex items-center gap-1.5 px-2 py-1 bg-app-accent-soft/35 border border-app-accent/15 rounded-xl w-fit shadow-4xs"
         >
           <Sparkles className="h-3 w-3 text-app-accent shrink-0 animate-pulse" />
           <span>
@@ -484,18 +499,19 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 border border-app-line/45 rounded-2xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-300 shadow-xs"
+          className="order-1 bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-subtle/25 border border-app-line/50 rounded-3xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md"
         >
+          <WashiTape className="opacity-80" />
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
-          <div className="flex flex-col gap-1 relative z-10">
+          <div className="flex flex-col gap-1 relative z-10 pt-2">
             <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
               <Sparkles className="h-3.5 w-3.5 text-app-accent shrink-0" />
               Hôm nay · {nextActionState.key === "setup-needed" ? "Kế hoạch" : "Hành động"}
             </p>
-            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-app-ink mt-2">
+            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight leading-tight sm:leading-snug text-app-ink mt-2">
               {nextActionState.title}
             </h1>
-            <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl">
+            <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl font-sans">
               {nextActionState.description}
             </p>
           </div>
@@ -607,48 +623,52 @@ export function TwelveWeekTodayTab({
           data-testid="today-primary-hero"
           className={`order-2 border ${
             primaryTaskOverdue
-              ? "border-app-warm/20 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-subtle/35"
-              : "border-app-accent/20 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/35"
-          } rounded-2xl p-5 sm:p-6 flex flex-col gap-3 relative overflow-hidden transition-all duration-300 shadow-3xs`}
+              ? "border-app-warm-border bg-gradient-to-br from-app-surface via-[#FFFBF9] to-app-warm-subtle/40"
+              : "border-app-accent/25 bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-subtle/35"
+          } rounded-3xl p-6 sm:p-8 flex flex-col gap-3.5 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md pt-8`}
         >
+          <PaperPin />
+          <WashiTape className="opacity-70 rotate-[2deg] -top-3.5" />
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
           <div className="flex flex-col gap-1 relative z-10">
             <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
               <Sparkles className="h-3.5 w-3.5 text-app-accent shrink-0 animate-pulse" />
               {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
               {primaryTaskOverdue && (
-                <span className="ml-2 rounded border border-app-warm-border/30 bg-app-warm-soft/20 px-1.5 py-0.5 text-[9px] font-bold tracking-normal text-app-warm-strong uppercase">
+                <span className="ml-2 rounded border border-app-warm-border/30 bg-app-warm-soft/30 px-1.5 py-0.5 text-[9px] font-bold tracking-normal text-app-warm-strong uppercase">
                   Đang trễ
                 </span>
               )}
             </p>
-            <h1 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-app-ink mt-1.5">
+            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight leading-tight sm:leading-snug text-app-ink mt-2">
               {primaryTask.title}
             </h1>
-            <p className="text-xs leading-relaxed text-app-ink-soft mt-1 max-w-3xl">
+            <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl font-sans">
               {primaryTaskOverdue ? (
                 `Việc này đang trễ — hôm nay làm phiên bản gọn nhất. Duy trì nhịp lặp quan trọng hơn làm hết.`
               ) : (
                 <>
-                  Thuộc nhóm việc lặp lại '{primaryTask.leadIndicatorName}'. Xong việc này là bạn đã giữ đúng tiến độ.
+                  Thuộc nhóm việc lặp lại “{primaryTask.leadIndicatorName}”. Xong việc này là bạn đã giữ đúng tiến độ.
                   <span className="sr-only">Chỉ cần xong việc này là hôm nay đã đủ</span>
                 </>
               )}
             </p>
             {isFirstWeek && (
-              <p data-testid="today-first-week-encouragement" className="text-xs text-app-ink-soft mt-1">
+              <p data-testid="today-first-week-encouragement" className="text-xs text-app-ink-soft mt-1 font-sans">
                 Tuần đầu tiên: Bắt đầu nhỏ để tạo đà và giữ thói quen lâu dài.
               </p>
             )}
           </div>
 
           {primaryTaskCommitmentQuote && (
-            <p className="text-xs italic leading-relaxed text-app-ink-muted/80 border-l-2 border-app-line/40 pl-3 my-0.5 relative z-10">
+            <p className={`text-xs italic leading-relaxed pl-3.5 py-2 my-1 relative z-10 border-l-2 ${
+              primaryTaskOverdue ? "border-app-warm/40 bg-app-warm-soft/15 text-app-warm-strong" : "border-app-accent/40 bg-app-accent-soft/20 text-app-ink-soft"
+            } rounded-r-xl font-serif`}>
               {primaryTaskCommitmentQuote}
             </p>
           )}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-1 pt-3.5 border-t border-app-line/20 relative z-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-2 pt-4 border-t border-app-line/20 relative z-10">
             <div className="flex flex-wrap gap-2">
               <Button
                 data-testid="today-primary-mark-done"
@@ -693,21 +713,22 @@ export function TwelveWeekTodayTab({
           <div className={fadeInClassName}>
             <Card
               data-tour-id="system-today-queue"
-              className="h-full min-w-0 overflow-hidden rounded-2xl border border-app-line/50 bg-app-surface shadow-2xs"
+              className="h-full min-w-0 overflow-hidden rounded-3xl border border-app-line/50 bg-app-surface shadow-2xs relative pt-6"
             >
+              <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3 sm:px-8 sm:pt-8 sm:pb-4">
                 <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <CardTitle as="h2" className="break-words text-app-ink font-serif text-lg font-semibold">
+                  <div className="min-w-0 pt-1">
+                    <CardTitle as="h2" className="break-words text-app-ink font-serif text-xl font-bold leading-tight">
                       Hàng việc hôm nay
                     </CardTitle>
-                    <CardDescription className="mt-0.5 break-words text-xs text-app-ink-soft">
+                    <CardDescription className="mt-1 break-words text-xs text-app-ink-soft">
                       Ưu tiên hoàn thành nhóm việc quan trọng nhất trước.
                     </CardDescription>
                   </div>
                   <Badge
                     variant="outline"
-                    className="shrink-0 border-app-line bg-app-bg text-app-ink-muted/80 rounded-lg text-[10px] px-2.5 py-0.5 shadow-none font-semibold"
+                    className="shrink-0 border-app-line bg-app-bg/60 text-app-ink-muted/80 rounded-lg text-[10px] px-2.5 py-0.5 shadow-none font-bold"
                   >
                     {todayCompletedCount}/{checkInTotal} hoàn thành
                   </Badge>
@@ -992,26 +1013,27 @@ export function TwelveWeekTodayTab({
             </Card>
           </div>
           <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
-            <Card className="h-full min-w-0 overflow-hidden rounded-2xl border border-app-line/50 bg-app-surface shadow-2xs">
+            <Card className="h-full min-w-0 overflow-hidden rounded-3xl border border-app-line/50 bg-app-surface shadow-2xs relative pt-6">
+              <WashiTape className="opacity-60 rotate-[1.5deg] -top-3.5" />
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3 sm:px-8 sm:pt-8 sm:pb-4">
-                <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start justify-between gap-3 pt-1">
                   <div className="min-w-0">
                     <CardTitle
                       as="h2"
-                      className="flex items-center gap-2 break-words text-app-ink font-serif text-lg font-semibold"
+                      className="flex items-center gap-2 break-words text-app-ink font-serif text-xl font-bold"
                     >
                       <Gauge className="h-5 w-5 text-app-accent shrink-0" />
                       Check-in hôm nay
                       <span className="sr-only">Check-in 30 giây</span>
                     </CardTitle>
-                    <CardDescription className="mt-0.5 break-words text-xs text-app-ink-soft">
+                    <CardDescription className="mt-1 break-words text-xs text-app-ink-soft">
                       Lắng nghe bản thân và ghi chép nhanh.
                       <span className="sr-only">Chọn năng lượng và ghi 1 ý ngắn</span>
                     </CardDescription>
                   </div>
                   <Badge
                     variant="outline"
-                    className="shrink-0 border-app-accent/25 bg-app-accent-soft text-app-accent rounded-lg text-[10px] px-2.5 py-0.5 font-semibold"
+                    className="shrink-0 border-app-accent/25 bg-app-accent-soft text-app-accent rounded-lg text-[10px] px-2.5 py-0.5 font-bold"
                   >
                     {todayCompletedCount}/{checkInTotal}
                   </Badge>

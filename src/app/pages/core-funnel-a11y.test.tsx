@@ -248,12 +248,12 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Mục tiêu này ổn, bước tiếp theo là chia nhỏ theo tuần" }),
+      screen.getByRole("heading", { level: 1, name: /Có, mục tiêu rất thực tế/i }),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Tiếp tục với mục tiêu này" }).length).toBeGreaterThan(0);
-    const detailsTrigger = screen.getByRole("button", { name: "Mở chi tiết" });
+    expect(screen.getAllByRole("button", { name: /Bắt đầu lập Kế hoạch 12 tuần ngay/i }).length).toBeGreaterThan(0);
+    const detailsTrigger = screen.getByRole("button", { name: /Xem phân tích chi tiết/i });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getAllByRole("button", { name: "Mở chi tiết" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /Xem phân tích chi tiết/i })).toHaveLength(1);
   });
 
   it("expands detailed feasibility analysis by default on desktop", () => {
@@ -269,7 +269,7 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
       />,
     );
 
-    const detailsTrigger = screen.getByRole("button", { name: "Phân tích chi tiết" });
+    const detailsTrigger = screen.getByRole("button", { name: /Xem phân tích chi tiết/i });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Hướng đi tiếp theo")).toBeInTheDocument();
     expect(screen.getByText("Xem 7 góc nhìn")).toBeInTheDocument();
@@ -437,9 +437,6 @@ describe("SmartGoalStepShell — a11y", () => {
         <div />
       </SmartGoalStepShell>,
     );
-
-    const coachButton = screen.getByRole("button", { name: /Cố vấn mục tiêu AI/i });
-    fireEvent.click(coachButton);
 
     const button = screen.getByRole("button", { name: /Dùng gợi ý cho bước Cụ thể/i });
     expect(button).toBeInTheDocument();

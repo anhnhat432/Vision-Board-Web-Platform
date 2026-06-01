@@ -522,14 +522,14 @@ export function Onboarding() {
         <div className="flex flex-row gap-2">
           <button
             type="button"
-            className="inline-flex min-h-9 items-center justify-center rounded-full bg-emerald-700 hover:bg-emerald-800 px-4 py-1 text-xs font-bold text-white transition-all duration-200 active:scale-[0.98] cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-emerald-700 hover:bg-emerald-800 px-4 py-2 text-xs font-bold text-white transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
             onClick={handleResumeDraft}
           >
             Tiếp tục
           </button>
           <button
             type="button"
-            className="inline-flex min-h-9 items-center justify-center rounded-full border border-neutral-200 bg-white px-4 py-1 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 active:scale-[0.98] cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-neutral-200 bg-white dark:bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
             onClick={handleRestartDraft}
           >
             Làm lại từ đầu
@@ -559,137 +559,193 @@ export function Onboarding() {
 
               {draftBanner}
 
-              <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-stretch animate-fade-in w-full">
-                <div className="surface-raised rounded-3xl border border-neutral-200/60 dark:border-neutral-800 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs flex flex-col justify-between space-y-6">
-                  <div className="space-y-5">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">
-                        Bước 1 / 3 · Đánh giá Bánh xe cuộc sống · ≈2 phút
-                      </span>
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-3 py-0.5 text-[10px] font-bold tracking-wider text-emerald-700 dark:text-emerald-300 border border-emerald-100/50 dark:border-emerald-900/30 w-fit mt-1">
-                        <Compass className="h-3.5 w-3.5 animate-spin-slow" />
-                        LIFE BALANCE STUDIO
+              <div className="max-w-2xl mx-auto flex flex-col items-center text-center space-y-8 py-4 md:py-8 animate-fade-in w-full">
+                {/* Header */}
+                <div className="space-y-4 flex flex-col items-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
+                      Bước 1 / 3 · Bánh xe cuộc sống · ≈2 phút
+                    </span>
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-3 py-0.5 text-[10px] font-bold tracking-[0.14em] text-emerald-700 dark:text-emerald-300 border border-emerald-100/50 dark:border-emerald-900/30 w-fit mt-1">
+                      <Compass className="h-3.5 w-3.5 animate-spin-slow" aria-hidden="true" />
+                      LIFE BALANCE STUDIO
+                    </div>
+                  </div>
+
+                  <h1 className="font-serif text-3xl md:text-5xl font-semibold tracking-tight text-app-ink leading-[1.25] [text-wrap:balance]">
+                    Thiết kế cuộc sống
+                    <br className="sm:hidden" />{" "}
+                    12 tuần của bạn
+                  </h1>
+
+                  <p className="text-sm sm:text-base font-medium leading-[1.7] text-neutral-600 dark:text-neutral-400 font-serif italic max-w-lg [text-wrap:pretty]">
+                    Rà 8 khía cạnh cốt lõi, tìm ra nơi cần thay đổi đầu tiên.
+                  </p>
+                </div>
+
+                {/* Progressive Disclosure: Nút xem hướng dẫn lộ trình nhỏ gọn */}
+                <div className="relative z-20">
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 px-3.5 py-2.5 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer border border-neutral-200/60 dark:border-neutral-800 focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none"
+                    onClick={() => setIsHelpOpen(!isHelpOpen)}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 animate-pulse" aria-hidden="true" />
+                    Ứng dụng sẽ hoạt động thế nào?
+                    {isHelpOpen ? (
+                      <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                    )}
+                  </button>
+
+                  {isHelpOpen && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 sm:w-96 bg-[#fafaf9] dark:bg-neutral-900 rounded-2xl border border-neutral-200/85 dark:border-neutral-800 p-5 shadow-lg text-left space-y-3 z-30 animate-fade-in">
+                      <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 border-b border-neutral-200/60 dark:border-neutral-800 pb-1.5 flex items-center gap-1">
+                        <Sparkles className="h-3 w-3" />
+                        Hành trình 3 bước
+                      </h4>
+                      <div className="grid gap-3 text-xs text-neutral-600 dark:text-neutral-400 font-medium">
+                        <div className="flex gap-2">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
+                            1. Đánh giá:
+                          </span>
+                          <span>Chấm 8 khía cạnh → phác thảo Bản đồ Cuộc sống.</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
+                            2. Trọng tâm:
+                          </span>
+                          <span>Tìm 1 khía cạnh lệch nhịp nhất để tập trung.</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
+                            3. Kế hoạch:
+                          </span>
+                          <span>Biến mục tiêu thành hành động nhỏ trong 12 tuần.</span>
+                        </div>
                       </div>
                     </div>
+                  )}
+                </div>
 
-                    <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-app-ink leading-tight">
-                      Thiết kế cuộc sống 12 tuần của bạn
-                    </h1>
+                {/* Visual Anchor: Polaroid Style Image of Hand-drawn Life Balance Wheel */}
+                <div className="relative group max-w-sm w-full px-4">
+                  {/* Ghim giấy trang trí phía sau */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 w-6 h-6 bg-amber-600/20 rounded-full border border-amber-600/30 flex items-center justify-center rotate-6 pointer-events-none shadow-sm">
+                    <div className="w-1.5 h-1.5 bg-neutral-600 rounded-full" />
+                  </div>
 
-                    <p className="text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic max-w-xl">
-                      Dành 2 phút rà soát 8 khía cạnh cốt lõi để tìm ra lĩnh vực lệch nhịp ưu tiên thay đổi ngay lập
-                      tức.
+                  {/* Băng keo dán xéo góc */}
+                  <div className="absolute -top-2 left-10 z-10 w-16 h-5 bg-amber-100/60 dark:bg-amber-950/40 border border-amber-250/20 -rotate-12 backdrop-blur-xs pointer-events-none shadow-3xs" />
+
+                  {/* Polaroid Frame */}
+                  <div className="mx-auto bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 p-4 pb-6 rounded-sm shadow-md rotate-1 hover:rotate-0 transition-transform duration-300 w-full max-w-[280px]">
+                    <div className="relative w-full aspect-square bg-[#fafaf9] dark:bg-neutral-950 rounded-xs border border-neutral-100 dark:border-neutral-900 overflow-hidden flex items-center justify-center">
+                      {/* Minh họa Bánh xe cuộc sống vector vẽ nét */}
+                      <svg
+                        className="w-40 h-40 opacity-85 dark:opacity-75"
+                        viewBox="0 0 100 100"
+                        role="img"
+                        aria-label="Bản đồ Cân bằng Cuộc sống"
+                      >
+                        {/* 8 Trục */}
+                        {Array.from({ length: 8 }).map((_, i) => {
+                          const angle = (i * Math.PI) / 4;
+                          const x2 = 50 + 40 * Math.cos(angle);
+                          const y2 = 50 + 40 * Math.sin(angle);
+                          return (
+                            <line
+                              // biome-ignore lint/suspicious/noArrayIndexKey: Static loop
+                              key={i}
+                              x1="50"
+                              y1="50"
+                              x2={x2}
+                              y2={y2}
+                              stroke="var(--app-line)"
+                              strokeWidth="0.5"
+                              strokeDasharray="2,2"
+                            />
+                          );
+                        })}
+                        {/* 4 Mức lưới */}
+                        {[10, 20, 30, 40].map((r, i) => (
+                          <circle
+                            // biome-ignore lint/suspicious/noArrayIndexKey: Static loop
+                            key={i}
+                            cx="50"
+                            cy="50"
+                            r={r}
+                            fill="none"
+                            stroke="var(--app-line)"
+                            strokeWidth="0.5"
+                          />
+                        ))}
+                        {/* Vùng Bánh xe cuộc sống mẫu vẽ tay nét chì màu Sage Green mờ */}
+                        <path
+                          d="M 50 20 L 78 50 L 50 68 L 30 70 L 22 50 L 32 32 Z"
+                          fill="rgba(16, 185, 129, 0.12)"
+                          stroke="rgba(16, 185, 129, 0.5)"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        {/* Các điểm ghim đỉnh */}
+                        {[
+                          [50, 20],
+                          [78, 50],
+                          [50, 68],
+                          [30, 70],
+                          [22, 50],
+                          [32, 32],
+                        ].map(([cx, cy], i) => (
+                          <circle
+                            // biome-ignore lint/suspicious/noArrayIndexKey: Static loop
+                            key={i}
+                            cx={cx}
+                            cy={cy}
+                            r="2"
+                            fill="white"
+                            stroke="rgba(16, 185, 129, 0.7)"
+                            strokeWidth="1"
+                          />
+                        ))}
+                      </svg>
+                    </div>
+                    {/* Caption viết tay dưới Polaroid */}
+                    <p className="mt-4 font-serif text-sm font-semibold tracking-wide text-neutral-600 dark:text-neutral-400 italic">
+                      Bản đồ Cuộc sống
                     </p>
-                  </div>
-
-                  {/* Phần lộ trình ngắn gọn 10 giây tóm tắt */}
-                  <div className="space-y-2">
-                    <button
-                      type="button"
-                      className="flex lg:hidden items-center justify-between w-full bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200 rounded-xl px-4 py-3 text-xs font-bold text-neutral-700 transition-colors cursor-pointer"
-                      onClick={() => setIsHelpOpen(!isHelpOpen)}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
-                        Xem nhanh app sẽ làm gì
-                      </span>
-                      {isHelpOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </button>
-
-                    <div
-                      className={cn(
-                        "bg-[#fafaf9] rounded-2xl border border-neutral-200/60 p-5 space-y-4 shadow-3xs transition-all duration-200",
-                        isHelpOpen ? "block animate-fade-in" : "hidden lg:block",
-                      )}
-                    >
-                      <h3 className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5 border-b border-neutral-200 pb-2">
-                        <Sparkles className="h-3.5 w-3.5 text-emerald-600 animate-pulse" />
-                        Hành trình bứt phá (10 giây tóm tắt)
-                      </h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-neutral-400 block">
-                            1. Ứng dụng giúp gì?
-                          </span>
-                          <p className="text-xs text-neutral-600 leading-normal font-semibold">
-                            Biến mục tiêu lớn thành hành động nhỏ thực tế trong chu kỳ 12 tuần.
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-neutral-400 block">
-                            2. Bạn cần làm gì lúc này?
-                          </span>
-                          <p className="text-xs text-neutral-600 leading-normal font-semibold">
-                            Chấm điểm 8 khía cạnh để phác thảo <strong>Bản đồ Cân bằng Cuộc sống</strong> (3 phút).
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-neutral-400 block">
-                            3. Lộ trình còn bao nhiêu bước?
-                          </span>
-                          <p className="text-xs text-neutral-600 leading-normal font-semibold">
-                            Gồm 3 chặng ngắn gọn: <strong>Đánh giá</strong> ➔ <strong>Chọn trọng tâm</strong> ➔{" "}
-                            <strong>Lên kế hoạch</strong>.
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-neutral-400 block">
-                            4. Nhận được gì khi hoàn thành?
-                          </span>
-                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold leading-normal">
-                            Bản đồ bánh xe cuộc sống trực quan & Kế hoạch hành động 12 tuần được cá nhân hóa.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nút bấm CTA chính và phụ phản hồi linh hoạt */}
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center pt-2">
-                    <button
-                      type="button"
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:scale-[0.99] focus-visible:outline-none cursor-pointer w-full sm:w-auto"
-                      onClick={handleStartAssessment}
-                    >
-                      Bắt đầu rà 8 lĩnh vực (3 phút)
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full border border-neutral-200 bg-white px-6 py-3 text-xs font-bold text-neutral-700 transition-all duration-200 hover:bg-neutral-50 active:scale-[0.99] focus-visible:outline-none cursor-pointer bg-app-accent"
-                      onClick={() => setShowBreathing(true)}
-                    >
-                      <Sparkles className="h-3.5 w-3.5 text-app-accent" aria-hidden="true" />
-                      Tập thở thư giãn
-                    </button>
-
-                    <button
-                      type="button"
-                      className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-[11px] font-bold text-neutral-550 hover:text-neutral-750 focus-visible:outline-none cursor-pointer"
-                      onClick={handleDefer}
-                    >
-                      Để sau
-                    </button>
                   </div>
                 </div>
 
-                <div className="hidden lg:flex flex-col items-center justify-center surface-raised rounded-3xl border border-neutral-200 bg-gradient-to-br from-emerald-500/[0.03] to-teal-500/[0.03] p-8 shadow-3xs hover:shadow-2xs transition-shadow relative overflow-hidden">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-                  <div className="w-full max-w-[260px] rounded-2xl overflow-hidden border border-emerald-250/20 shadow-sm relative z-10 animate-[float_4s_ease-in-out_infinite]">
-                    <img
-                      src="/life_balance_checkin.png"
-                      alt="Khảo sát Bánh xe cuộc sống và tự phản tư"
-                      className="w-full h-auto object-cover aspect-[4/3]"
-                      loading="lazy"
-                    />
-                  </div>
-                  <p className="mt-6 text-xs font-semibold tracking-wider uppercase text-emerald-800/70 dark:text-emerald-300/70 relative z-10">
-                    Bản đồ Cân bằng Cuộc sống
-                  </p>
-                  <p className="mt-1 text-[11px] text-app-ink-muted text-center max-w-[200px] relative z-10">
-                    Phác thảo trạng thái của 8 lĩnh vực cuộc sống ngay lập tức.
-                  </p>
+                {/* Nút bấm CTA chính và phụ phản hồi linh hoạt */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-center pt-4 w-full max-w-md px-4">
+                  <button
+                    type="button"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer w-full sm:w-auto"
+                    onClick={handleStartAssessment}
+                  >
+                    Bắt đầu rà 8 lĩnh vực · 3 phút
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-850 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                    onClick={() => setShowBreathing(true)}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                    Tập thở thư giãn
+                  </button>
+
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-[11px] font-bold text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                    onClick={handleDefer}
+                  >
+                    Để sau
+                  </button>
                 </div>
               </div>
             </>
@@ -705,16 +761,111 @@ export function Onboarding() {
         {progressHeader}
         {draftBanner}
 
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
-            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-            Đánh giá Bánh xe cuộc sống (Bước 1/3) · ≈2 phút còn lại
+        {/* Sticky Mini Radar ở góc trên bên phải cho Mobile */}
+        <div className="lg:hidden fixed top-20 right-4 z-40">
+          <button
+            type="button"
+            onClick={() => setIsRadarExpanded(!isRadarExpanded)}
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-lg active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none relative"
+            aria-label="Xem bản đồ cân bằng cuộc sống"
+          >
+            <div className="w-10 h-10 flex items-center justify-center opacity-85">
+              <SimpleRadarChart
+                data={radarData}
+                height={40}
+                fill="var(--app-accent)"
+                stroke="var(--app-accent)"
+                fillOpacity={0.1}
+                className="w-full h-full pointer-events-none"
+              />
+            </div>
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-605 text-white text-[9px] font-extrabold shadow-sm border border-white dark:border-neutral-900 animate-pulse">
+              {reviewedAreaCount}
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile Radar Modal/Popover khi click Mini Radar */}
+        {isRadarExpanded && (
+          // biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay keyboard trigger
+          // biome-ignore lint/a11y/noStaticElementInteractions: backdrop clicks
+          <div
+            className="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setIsRadarExpanded(false)}
+          >
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: modal content event stop bubbling */}
+            {/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation doesn't need key */}
+            <div
+              className="w-full max-w-[340px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-2xl space-y-4 animate-scale-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-850 pb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5">
+                  📊 Bản đồ Cân bằng Cuộc sống
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsRadarExpanded(false)}
+                  className="inline-flex min-h-11 items-center justify-center text-xs font-bold text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white px-4 py-2 bg-neutral-200/70 dark:bg-neutral-800 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                >
+                  Đóng
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center min-h-[260px] my-1">
+                <SimpleRadarChart
+                  data={radarData}
+                  height={260}
+                  fill="var(--app-accent)"
+                  stroke="var(--app-accent)"
+                  fillOpacity={0.15}
+                  className="w-full max-w-[280px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-left" data-testid="onboarding-assessment-summary-mobile">
+                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Điểm TB</span>
+                  <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
+                    {averageScore.toFixed(1)}
+                    <span className="text-[10px] font-normal text-app-ink-muted">/10</span>
+                  </p>
+                </div>
+                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Tiến trình</span>
+                  <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
+                    {Math.round((reviewedAreaCount / 8) * 100)}%
+                  </p>
+                </div>
+                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">
+                    Cần tập trung
+                  </span>
+                  <p className="text-xs font-bold text-app-warm truncate mt-0.5">
+                    {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
+                  </p>
+                </div>
+                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
+                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Mạnh nhất</span>
+                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-450 truncate mt-0.5">
+                    {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-app-ink">
-            Đánh giá mức độ hài lòng của bạn
+        )}
+
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
+            <Sparkles className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+            Bước 1 / 3 · Bánh xe cuộc sống
+          </div>
+          <h1 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-app-ink [text-wrap:balance]">
+            Đánh giá mức độ hài lòng
           </h1>
-          <p className="text-xs sm:text-sm text-app-ink-soft max-w-2xl leading-relaxed">
-            Dành 15 giây cho mỗi khía cạnh. Sự trung thực lúc này sẽ giúp bạn thiết kế mục tiêu 12 tuần chính xác nhất.
+          <p className="text-xs sm:text-sm text-app-ink-soft max-w-2xl leading-[1.7] [text-wrap:pretty]">
+            Chấm điểm trung thực — kết quả sẽ định hình mục tiêu 12 tuần của bạn.
           </p>
         </div>
 
@@ -725,7 +876,7 @@ export function Onboarding() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted mb-3 text-center sm:text-left">
                 Chuyển nhanh giữa các lĩnh vực:
               </p>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
+              <div className="flex gap-2 overflow-x-auto pb-2 pr-16 lg:pr-2 scrollbar-none snap-x">
                 {lifeAreas.map((area, index) => {
                   const AreaIcon = getCalmLifeAreaIcon(area.name);
                   const isSelected = activeAreaIndex === index;
@@ -739,7 +890,7 @@ export function Onboarding() {
                       type="button"
                       onClick={() => setActiveAreaIndex(index)}
                       className={cn(
-                        "relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 outline-none shrink-0 border select-none snap-start focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                        "relative flex min-h-11 items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 outline-none shrink-0 border select-none snap-start focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900",
                         "after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
                         isSelected ? "shadow-sm scale-[1.02] font-bold" : "hover:bg-app-bg-subtle/60",
                       )}
@@ -758,7 +909,7 @@ export function Onboarding() {
                       }
                       title={label}
                     >
-                      <AreaIcon className="h-4 w-4 shrink-0" />
+                      <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       <span className="text-xs font-semibold tracking-tight">
                         {index + 1}. {label}
                       </span>
@@ -794,20 +945,23 @@ export function Onboarding() {
 
               return (
                 <div
-                  className="rounded-2xl border bg-app-surface p-6 md:p-8 space-y-6 transition-all duration-300 shadow-app-md animate-fade-in"
-                  style={{ borderColor: colorConfig.accent, boxShadow: `0 12px 36px -12px ${colorConfig.accent}12` }}
+                  className="rounded-3xl border bg-app-surface p-6 md:p-8 space-y-6 transition-all duration-300 shadow-app-md animate-fade-in relative overflow-hidden"
+                  style={{ borderColor: colorConfig.accent, boxShadow: `0 12px 36px -12px ${colorConfig.accent}15` }}
                 >
+                  {/* Băng keo dán xéo góc trên card scrapbook */}
+                  <div className="absolute top-0 left-12 w-14 h-4 bg-neutral-100/70 dark:bg-neutral-800/40 border-x border-b border-neutral-250/20 rotate-2 pointer-events-none" />
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-app-line/45 pb-4">
                     <div className="flex items-center gap-4">
                       <div
-                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-md animate-pulse-slow"
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-md"
                         style={{ backgroundColor: colorConfig.accent }}
                       >
-                        <AreaIcon className="h-7 w-7" />
+                        <AreaIcon className="h-7 w-7" aria-hidden="true" />
                       </div>
                       <div>
                         <span
-                          className="text-[11px] font-bold uppercase tracking-widest"
+                          className="text-[10px] font-bold uppercase tracking-wider"
                           style={{ color: colorConfig.accent }}
                         >
                           LĨNH VỰC {index + 1} / 8
@@ -817,7 +971,7 @@ export function Onboarding() {
                     </div>
 
                     <div className="flex items-baseline gap-1.5 self-start sm:self-center bg-app-bg-subtle px-3 py-1.5 rounded-xl border border-app-line/60">
-                      <span className="text-[11px] text-app-ink-muted font-bold uppercase">Điểm hiện tại:</span>
+                      <span className="text-[10px] text-app-ink-muted font-bold uppercase">Điểm hiện tại:</span>
                       <span
                         className="font-serif text-3xl font-extrabold tabular-nums leading-none"
                         style={{ color: colorConfig.accent }}
@@ -828,8 +982,8 @@ export function Onboarding() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl bg-app-bg-subtle/30 p-4 border border-app-line/20 space-y-3">
-                    <p className="text-xs sm:text-sm text-app-ink-soft leading-relaxed font-semibold">
+                  <div className="rounded-2xl bg-app-bg-subtle/30 p-4 border border-app-line/20 space-y-3">
+                    <p className="text-xs sm:text-sm text-app-ink-soft leading-[1.7] font-semibold">
                       {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
                     </p>
 
@@ -838,13 +992,13 @@ export function Onboarding() {
                       <button
                         type="button"
                         onClick={() => setIsQuestionsOpen((prev) => !prev)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/20 cursor-pointer"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
                       >
                         {isQuestionsOpen ? "Ẩn câu hỏi gợi ý ▲" : "Gợi ý câu hỏi tự vấn ▼"}
                       </button>
 
                       {isQuestionsOpen && (
-                        <ul className="mt-3 pl-5 list-disc space-y-1.5 bg-white dark:bg-neutral-900 border border-emerald-100 dark:border-emerald-900/30 rounded-xl p-3 text-[11px] text-neutral-600 dark:text-neutral-400 animate-fade-in shadow-3xs">
+                        <ul className="mt-3 pl-5 list-disc space-y-1.5 bg-[#fafaf9] dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-[11px] text-neutral-600 dark:text-neutral-400 animate-fade-in shadow-3xs">
                           {(LIFE_AREA_QUESTIONS[area.name] ?? []).map((q) => (
                             <li key={q} className="leading-relaxed font-medium">
                               {q}
@@ -856,11 +1010,11 @@ export function Onboarding() {
                   </div>
 
                   {/* Phần điều chỉnh điểm */}
-                  <div className="space-y-4 pt-2">
+                  <div className="space-y-6 pt-2">
                     {/* Bong bóng chọn điểm cho màn hình cảm ứng & desktop tiện lợi */}
                     <div className="space-y-2">
-                      <span className="text-xs font-semibold text-app-ink-muted">Chấm điểm nhanh (0 - 10):</span>
-                      <div className="flex flex-wrap gap-2 justify-start sm:justify-between py-1">
+                      <span className="text-xs font-semibold text-app-ink-muted">Chọn điểm:</span>
+                      <div className="grid grid-cols-6 sm:flex sm:flex-wrap gap-2 justify-start sm:justify-between py-1">
                         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((scoreVal) => {
                           const isCurrentScore = area.score === scoreVal;
                           return (
@@ -869,10 +1023,10 @@ export function Onboarding() {
                               type="button"
                               onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
                               className={cn(
-                                "flex h-11 w-11 items-center justify-center rounded-full border text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent/30 outline-none",
+                                "flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none",
                                 isCurrentScore
                                   ? "text-white scale-110 shadow-sm"
-                                  : "bg-app-bg hover:bg-app-bg-subtle text-app-ink-soft border-app-line",
+                                  : "bg-app-bg hover:bg-app-bg-subtle text-app-ink-soft border-app-line dark:border-neutral-800",
                               )}
                               style={
                                 isCurrentScore
@@ -888,8 +1042,8 @@ export function Onboarding() {
                       </div>
                     </div>
 
-                    {/* Slider ẩn/nhỏ gọn để hỗ trợ phím điều hướng & test */}
-                    <div className="space-y-2 pt-2 border-t border-app-line/20">
+                    {/* Slider ẩn trên di động để chống chạm nhầm khi cuộn trang, chỉ hiện trên Desktop */}
+                    <div className="hidden md:block space-y-2 pt-2 border-t border-app-line/20">
                       <div className="flex items-center justify-between text-xs font-semibold">
                         <span className="text-app-ink-muted">Hoặc kéo thanh trượt:</span>
                         <span
@@ -905,7 +1059,7 @@ export function Onboarding() {
                       <div className="flex items-center gap-3 py-1">
                         <button
                           type="button"
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none outline-none cursor-pointer"
+                          className="flex h-11 w-11 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
                           onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
                           aria-label="Giảm 1 điểm"
                         >
@@ -927,7 +1081,7 @@ export function Onboarding() {
 
                         <button
                           type="button"
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none outline-none cursor-pointer"
+                          className="flex h-11 w-11 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
                           onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
                           aria-label="Tăng 1 điểm"
                         >
@@ -936,10 +1090,10 @@ export function Onboarding() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between text-[11px] sm:text-xs font-semibold text-app-ink-muted/80 uppercase tracking-wider px-1">
-                      <span className="flex items-center gap-1">😢 Cần chăm sóc (0-3)</span>
-                      <span className="flex items-center gap-1">😐 Ổn định (4-7)</span>
-                      <span className="flex items-center gap-1">😊 Phát triển (8-10)</span>
+                    <div className="flex justify-between text-[11px] sm:text-xs font-semibold text-app-ink-muted tracking-wide px-1">
+                      <span className="flex items-center gap-1">😢 0–3</span>
+                      <span className="flex items-center gap-1">😐 4–7</span>
+                      <span className="flex items-center gap-1">😊 8–10</span>
                     </div>
                   </div>
 
@@ -947,18 +1101,18 @@ export function Onboarding() {
                   <div className="pt-6 border-t border-app-line/40 flex items-center justify-between gap-3">
                     <button
                       type="button"
-                      className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all disabled:opacity-40 cursor-pointer"
+                      className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 sm:px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none disabled:opacity-40 cursor-pointer"
                       disabled={index === 0}
                       onClick={() => setActiveAreaIndex(index - 1)}
                     >
-                      <ArrowLeft className="h-3.5 w-3.5" />
-                      Lĩnh vực trước
+                      <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="hidden sm:inline">Lĩnh vực </span>trước
                     </button>
 
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-app-ink-muted hover:text-app-ink hover:underline transition-colors cursor-pointer"
+                        className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:underline transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
                         onClick={() => {
                           handleSkipArea(index);
                           if (index < 7) {
@@ -971,7 +1125,7 @@ export function Onboarding() {
 
                       <button
                         type="button"
-                        className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-app-accent px-6 py-2.5 text-xs font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.97] shadow-md cursor-pointer"
+                        className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-app-accent px-4 sm:px-6 py-2.5 text-xs font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.97] shadow-md focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
                         style={{ backgroundColor: colorConfig.accent }}
                         onClick={() => {
                           markAreaReviewed(index);
@@ -984,8 +1138,8 @@ export function Onboarding() {
                       >
                         {index < 7 ? (
                           <>
-                            Lĩnh vực tiếp theo
-                            <ArrowRight className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Lĩnh vực </span>tiếp theo
+                            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                           </>
                         ) : (
                           "Xem insight của tôi"
@@ -998,12 +1152,15 @@ export function Onboarding() {
             })()}
 
             {!canCompleteAssessment && (
-              <div className="bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/80 dark:border-neutral-800 rounded-2xl p-4 flex items-start gap-2.5 shadow-3xs">
-                <Info className="h-4 w-4 text-neutral-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa đánh giá. Bạn có thể nhấn chọn từng mục phía
-                  trên để điều chỉnh hoặc nhấn nút <strong>"Xem insight của tôi"</strong> ở cuối trang để tiếp tục sử
-                  dụng mức điểm trung bình mặc định (5).
+              <div
+                role="status"
+                aria-live="polite"
+                className="bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/80 dark:border-neutral-800 rounded-2xl p-4 flex items-start gap-2.5 shadow-3xs"
+              >
+                <Info className="h-4 w-4 text-neutral-400 shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-[1.7] font-medium">
+                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm.
+                  Bấm <strong>“Xem insight”</strong> để tiếp tục với điểm mặc định (5).
                 </p>
               </div>
             )}
@@ -1073,90 +1230,9 @@ export function Onboarding() {
               </div>
 
               <div className="mt-4 pt-3 flex items-center justify-center gap-1.5 text-xs italic text-app-ink-muted">
-                <Sparkles className="h-3.5 w-3.5 text-app-accent opacity-70" />
+                <Sparkles className="h-3.5 w-3.5 text-app-accent opacity-70" aria-hidden="true" />
                 <span>“Điểm càng thật, insight càng đúng.”</span>
               </div>
-            </div>
-
-            {/* Trên Mobile: Thiết kế dạng Collapsible/Accordion để giải phóng diện tích màn hình */}
-            <div className="block lg:hidden surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/5 p-4 shadow-sm relative overflow-hidden transition-all duration-300 w-full max-w-full">
-              <button
-                type="button"
-                className="flex items-center justify-between w-full text-left cursor-pointer"
-                onClick={() => setIsRadarExpanded(!isRadarExpanded)}
-              >
-                <div className="space-y-0.5">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5">
-                    📊 Bản đồ Cân bằng & Thống kê
-                  </h3>
-                  <p className="text-xs text-app-ink-soft">
-                    Đã rà soát: <strong className="text-app-accent">{reviewedAreaCount}/8</strong> · Trung bình:{" "}
-                    <strong className="text-app-accent">{averageScore.toFixed(1)}đ</strong>
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 bg-app-bg-subtle hover:bg-app-bg px-2.5 py-1.5 rounded-lg border border-app-line text-xs font-semibold text-app-ink transition-colors">
-                  {isRadarExpanded ? (
-                    <>
-                      Thu gọn
-                      <ChevronUp className="h-3.5 w-3.5 text-app-ink-muted" />
-                    </>
-                  ) : (
-                    <>
-                      Xem bản đồ
-                      <ChevronDown className="h-3.5 w-3.5 text-app-ink-muted" />
-                    </>
-                  )}
-                </div>
-              </button>
-
-              {isRadarExpanded && (
-                <div className="mt-4 pt-4 border-t border-app-line/60 animate-fade-in space-y-4">
-                  <div className="flex items-center justify-center min-h-[260px] my-1">
-                    <SimpleRadarChart
-                      data={radarData}
-                      height={260}
-                      fill="var(--app-accent)"
-                      stroke="var(--app-accent)"
-                      fillOpacity={0.15}
-                      className="w-full max-w-[280px]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-left" data-testid="onboarding-assessment-summary-mobile">
-                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                      <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Điểm TB</span>
-                      <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
-                        {averageScore.toFixed(1)}
-                        <span className="text-[10px] font-normal text-app-ink-muted">/10</span>
-                      </p>
-                    </div>
-                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                      <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">
-                        Tiến trình
-                      </span>
-                      <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
-                        {Math.round((reviewedAreaCount / 8) * 100)}%
-                      </p>
-                    </div>
-                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                      <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">
-                        Cần tập trung
-                      </span>
-                      <p className="text-xs font-bold text-app-warm truncate mt-0.5">
-                        {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
-                      </p>
-                    </div>
-                    <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                      <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">
-                        Mạnh nhất
-                      </span>
-                      <p className="text-xs font-bold text-emerald-600 dark:text-emerald-450 truncate mt-0.5">
-                        {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1164,39 +1240,39 @@ export function Onboarding() {
         <footer className="mt-8 border-t border-app-line pt-6">
           <div className="flex flex-col gap-4">
             {!canCompleteAssessment && (
-              <div className="flex items-center gap-2 text-xs text-neutral-450 justify-end font-medium">
-                <Info className="h-3.5 w-3.5 text-neutral-450" />
-                <span>Các khía cạnh chưa đánh giá sẽ nhận mức điểm trung bình mặc định (5).</span>
+              <div className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400 justify-end font-medium">
+                <Info className="h-3.5 w-3.5 text-neutral-600 dark:text-neutral-400" aria-hidden="true" />
+                <span>Khía cạnh chưa chấm sẽ dùng điểm mặc định (5).</span>
               </div>
             )}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3 order-2 sm:order-1 justify-center sm:justify-start">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 order-2 sm:order-1 justify-center sm:justify-start">
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                    onClick={() => setStep("welcome")}
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                    Quay lại chào mừng
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-bold text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                    onClick={handleDefer}
+                  >
+                    Để sau
+                  </button>
+                </div>
                 <button
+                  id="btn-complete-onboarding"
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer"
-                  onClick={() => setStep("welcome")}
+                  className="order-1 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3 text-xs font-bold text-white transition-all duration-200 hover:shadow-md active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-450 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none shadow-sm sm:order-2 cursor-pointer"
+                  onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
                 >
-                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                  Quay lại chào mừng
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-bold text-neutral-500 hover:text-neutral-700 transition-colors focus-visible:outline-none cursor-pointer"
-                  onClick={handleDefer}
-                >
-                  Để sau
+                  {canCompleteAssessment ? "Xem insight của tôi" : "Xem insight của tôi (Dùng điểm mặc định)"}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
-              <button
-                id="btn-complete-onboarding"
-                type="button"
-                className="order-1 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3 text-xs font-bold text-white transition-all duration-200 hover:shadow-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-emerald-700/35 shadow-sm sm:order-2 cursor-pointer"
-                onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
-              >
-                {canCompleteAssessment ? "Xem insight của tôi" : "Xem insight của tôi (Dùng điểm mặc định)"}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
           </div>
         </footer>
       </div>

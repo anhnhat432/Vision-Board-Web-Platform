@@ -46,7 +46,7 @@ describe("Onboarding", () => {
 
     const startButton = await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i });
     const breathingStartButton = await screen.findByRole("button", { name: /Tập thở thư giãn/i });
-    expect(breathingStartButton).toHaveClass("bg-app-accent");
+    expect(breathingStartButton).toHaveClass("bg-white");
     expect(breathingStartButton).not.toHaveClass("gradient-brand");
 
     scrollToMock.mockClear();

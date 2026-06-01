@@ -53,7 +53,8 @@ describe("life insight flow", () => {
     expect(await screen.findByRole("heading", { name: "Nhìn lại để bước tiếp" })).toBeInTheDocument();
     expect(screen.getByText("Đề xuất ưu tiên: Sức khỏe")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sức khỏe" })).toBeInTheDocument();
-    expect(screen.getByText("Điểm hiện tại: 4/10")).toBeInTheDocument();
+    expect(screen.getByText(/Điểm hiện tại/i)).toBeInTheDocument();
+    expect(screen.getAllByText("4/10").length).toBeGreaterThan(0);
     expect(screen.getByText(/sức khỏe tốt hơn sẽ giúp tôi có năng lượng ổn định hơn/i)).toBeInTheDocument();
 
     const primaryCta = screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i });

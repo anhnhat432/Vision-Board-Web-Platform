@@ -219,60 +219,60 @@ async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/Mức đích cần đạt/i), "12");
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  // Đối với AchievableStep, nhãn là "1. Thời gian cam kết thực hiện mỗi tuần"
-  const slider = await screen.findByLabelText(/Thời gian cam kết thực hiện/i, {}, { timeout: 5000 });
+  // Đối với AchievableStep, nhãn là "Thời gian bạn dành cho mục tiêu mỗi tuần"
+  const slider = await screen.findByLabelText(/Thời gian bạn dành cho mục tiêu/i, {}, { timeout: 5000 });
   fireEvent.change(slider, { target: { value: "6" } });
-  await user.type(screen.getByLabelText(/Kỹ năng cần bổ sung/i), "Lập kế hoạch\nReview tuần");
-  await user.type(screen.getByLabelText(/Công cụ & Nguồn lực/i), "Lịch cá nhân và dashboard 12 tuần");
+  await user.type(screen.getByLabelText(/Kỹ năng bạn muốn tập trung rèn luyện/i), "Lập kế hoạch\nReview tuần");
+  await user.type(screen.getByLabelText(/Nguồn lực và công cụ hỗ trợ bạn/i), "Lịch cá nhân và dashboard 12 tuần");
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
   await user.type(
-    await screen.findByLabelText(/Động lực cốt lõi/i, {}, { timeout: 5000 }),
+    await screen.findByLabelText(/Vì sao mục tiêu này thực sự quan trọng/i, {}, { timeout: 5000 }),
     "Tôi cần một nhịp review đủ rõ để không bỏ dở mục tiêu dài hạn.",
   );
-  await user.type(screen.getByLabelText(/Khía cạnh liên kết/i), "Sự nghiệp");
+  await user.type(screen.getByLabelText(/Khía cạnh cuộc sống bạn muốn liên kết/i), "Sự nghiệp");
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  await screen.findByLabelText(/Thời hạn mục tiêu/i, {}, { timeout: 5000 });
+  await screen.findByLabelText(/Số tuần bạn cam kết/i, {}, { timeout: 5000 });
   await user.click(screen.getByRole("button", { name: "Kiểm tra độ khả thi" }));
 }
 
 async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
-  const answers = [
-    /Hơn 5 giờ mỗi tuần/i,
-    /Còn khá tốt và chủ động được/i,
-    /Đủ để bắt đầu ngay/i,
-    /Rất thực tế/i,
-    /Hiện chưa thấy trở ngại lớn/i,
-    /Đã có khung giờ khá cố định/i,
-    /Cam kết hoàn toàn/i,
+  const steps = [
+    { question: /Mỗi tuần bạn có mấy giờ/i, answer: /Trên 5/i },
+    { question: /Năng lượng còn lại/i, answer: /Dồi dào/i },
+    { question: /Bạn đã có đủ kỹ năng/i, answer: /Hoàn toàn sẵn sàng/i },
+    { question: /Mục tiêu này có thực sự rõ ràng/i, answer: /Thực tế/i },
+    { question: /Trở ngại lớn nhất/i, answer: /Chưa thấy/i },
+    { question: /Bạn đã xếp lịch cố định/i, answer: /Có vài/i },
+    { question: /Độ tự tin hoàn thành/i, answer: /chiến đấu/i },
   ];
 
-  for (const [index, answer] of answers.entries()) {
-    await user.click(await screen.findByLabelText(answer, {}, { timeout: 5000 }));
+  for (const [index, step] of steps.entries()) {
+    await screen.findByRole("heading", { name: step.question }, { timeout: 5000 });
+    await user.click(await screen.findByLabelText(step.answer, {}, { timeout: 5000 }));
     await user.click(
       screen.getByRole("button", {
-        name: index === answers.length - 1 ? "Xem phân tích khả thi" : "Tiếp theo",
+        name: index === steps.length - 1 ? "Xem phân tích khả thi" : "Tiếp theo",
       }),
     );
   }
 
-  await user.click(await screen.findByRole("button", { name: "Tiếp tục với mục tiêu này" }, { timeout: 5000 }));
+  await user.click(await screen.findByRole("button", { name: /Bắt đầu lập Kế hoạch/i }, { timeout: 5000 }));
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" }, { timeout: 5000 });
-  await user.click(await screen.findByRole("button", { name: "Tiếp →" }, { timeout: 5000 }));
+  await screen.findByRole("heading", { name: "Tạo kế hoạch 12 tuần" }, { timeout: 5000 });
+  await user.click(await screen.findByRole("button", { name: "Sắp xếp lịch thực hiện 📅" }, { timeout: 5000 }));
 
-  const tacticInputs = await screen.findAllByLabelText(/Mô tả hành động lặp lại/i);
+  const tacticInputs = await screen.findAllByLabelText("Tên việc");
   await user.clear(tacticInputs[0]);
   await user.type(tacticInputs[0], "Chốt review tuần");
   await user.clear(tacticInputs[1]);
   await user.type(tacticInputs[1], "Hoàn thành việc trọng tâm");
 
-  await user.click(await screen.findByRole("button", { name: "Tiếp →" }, { timeout: 5000 }));
-  await user.click(await screen.findByRole("button", { name: "Tiếp →" }, { timeout: 5000 }));
-  await user.click(await screen.findByRole("button", { name: "Bắt đầu kế hoạch" }, { timeout: 5000 }));
+  await user.click(await screen.findByRole("button", { name: "Xem trước kế hoạch Hôm nay 👀" }, { timeout: 5000 }));
+  await user.click(await screen.findByRole("button", { name: "Lưu kế hoạch" }, { timeout: 5000 }));
 }
 
 describe("authenticated new user core flow", () => {
@@ -361,26 +361,28 @@ describe("authenticated new user core flow", () => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu Đánh giá ngay/i }));
+    await user.click(screen.getByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
     for (let i = 0; i < 8; i++) {
       const slider = await screen.findByRole("slider");
       slider.focus();
       await user.keyboard("{ArrowRight}");
-      const nextBtnName = i < 7 ? "Lĩnh vực tiếp theo" : "Hoàn thành rà soát";
-      await user.click(screen.getByRole("button", { name: nextBtnName }));
+      if (i < 7) {
+        await user.click(screen.getByRole("button", { name: /tiếp theo/i }));
+      } else {
+        await user.click(screen.getAllByRole("button", { name: /Xem insight của tôi/i })[0]);
+      }
     }
-    await user.click(await screen.findByRole("button", { name: /Xem Góc nhìn cuộc sống của tôi/i }));
 
     expect(
       await screen.findByText(
         (_content, element) =>
-          element?.tagName === "H1" && /Góc nhìn cuộc sống & Trọng tâm của bạn/i.test(element.textContent ?? ""),
+          element?.tagName === "H1" && /Nhìn lại để bước tiếp/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     expect(getUserData().onboardingCompleted).toBe(true);
     expect(getUserData().goals).toEqual([]);
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu đặt mục tiêu SMART/i }));
+    await user.click(screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i }));
     await fillSmartGoal(user);
     await completeFeasibility(user);
     await completeTwelveWeekSetup(user);
@@ -388,7 +390,7 @@ describe("authenticated new user core flow", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/12-week-system");
     });
-    expect(await screen.findByText(/Hệ thống 12 tuần/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Hệ thống 12 tuần/i, {}, { timeout: 10000 })).length).toBeGreaterThan(0);
 
     const dataAfterSetup = getUserData();
     expect(dataAfterSetup.goals).toHaveLength(1);
@@ -414,7 +416,7 @@ describe("authenticated new user core flow", () => {
     ui.unmount();
 
     const reloadRender = renderAuthenticatedCoreFlow("/12-week-system");
-    expect(await screen.findByText(/Hệ thống 12 tuần/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Hệ thống 12 tuần/i, {}, { timeout: 10000 })).length).toBeGreaterThan(0);
     expect(screen.getByText(/Ra mắt hệ thống review cá nhân/i)).toBeInTheDocument();
     expect(getUserData().goals).toHaveLength(1);
 

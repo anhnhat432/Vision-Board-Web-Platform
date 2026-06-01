@@ -1,12 +1,7 @@
 import {
-  BookmarkCheck,
-  CheckCircle2,
   ChevronDown,
-  ClipboardCheck,
   Lightbulb,
   Loader2,
-  Rocket,
-  Target,
 } from "lucide-react";
 import { useState } from "react";
 import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
@@ -189,6 +184,21 @@ function getCommitmentButtonClass(status: WeeklyCommitmentStatus, currentStatus:
       return "border-app-ink bg-app-ink text-white font-semibold text-xs px-2.5 py-1.5 rounded-lg shadow-2xs";
   }
 }
+
+// Decorative elements for Dreamy Planner aesthetic
+const WashiTape = ({ className = "" }: { className?: string }) => (
+  <div 
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  />
+);
+
+const PaperPin = ({ className = "" }: { className?: string }) => (
+  <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
+    <div className="w-3.5 h-3.5 bg-rose-500 rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
+      <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
+    </div>
+  </div>
+);
 
 export function TwelveWeekWeekTab({
   system,
@@ -392,28 +402,30 @@ export function TwelveWeekWeekTab({
       {!reviewIsCompleted && !canShowFormReview && (
         <>
           {/* Card Hero Tuần lớn sang trọng */}
-          <div className="rounded-3xl border border-app-line/45 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/15 p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-6">
+          <div className="rounded-3xl border border-app-line/45 bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-soft/20 p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-6 pt-10">
+            <PaperPin />
+            <WashiTape className="opacity-75 rotate-[-1deg] -top-3.5" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
-            <div className="flex flex-col gap-1.5 relative z-10">
+            <div className="flex flex-col gap-1.5 relative z-10 pt-2">
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
-                <span className="font-serif text-sm font-semibold tracking-normal normal-case text-app-ink bg-app-bg/80 px-2.5 py-0.5 rounded-md border border-app-line/20">
+                <span className="font-serif text-sm font-bold tracking-normal normal-case text-app-ink bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
                   Tuần {currentWeekLimit} / {system.totalWeeks}
                 </span>
-                <span className="bg-app-bg/80 px-2.5 py-0.5 rounded-md border border-app-line/20">
+                <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-sans">
                   {currentWeekRange
                     ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
                     : "Chu kỳ hiện tại"}
                 </span>
               </div>
               {currentPlanFocus && (
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-app-ink mt-3">
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight leading-tight sm:leading-snug text-app-ink mt-3">
                   {currentPlanFocus}
                 </h2>
               )}
               {currentPlanMilestone && (
-                <p className="text-xs text-app-ink-soft">
+                <p className="text-xs text-app-ink-soft mt-1">
                   Cột mốc:{" "}
-                  <span className="font-semibold text-app-ink bg-app-bg/50 px-2 py-0.5 rounded-md border border-app-line/10">
+                  <span className="font-semibold text-app-ink bg-app-bg/60 px-2 py-0.5 rounded-md border border-app-line/10 font-sans">
                     {currentPlanMilestone}
                   </span>
                 </p>
@@ -425,7 +437,7 @@ export function TwelveWeekWeekTab({
               <div className="flex items-baseline justify-between">
                 <span className="text-xs font-bold text-app-ink uppercase tracking-widest">Điểm thực thi</span>
                 {weekCompletion.isEmpty ? (
-                  <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">
+                  <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft font-sans">
                     Chưa có việc
                   </span>
                 ) : (
@@ -438,17 +450,18 @@ export function TwelveWeekWeekTab({
                 )}
               </div>
               {!weekCompletion.isEmpty && <Progress value={leadScoreValue} className="h-2 bg-app-bg/50 rounded-full" />}
-              <p className="text-xs text-app-ink-soft leading-relaxed mt-1">
+              <p className="text-xs text-app-ink-soft leading-relaxed mt-1 font-sans">
                 {scoreInterpretation.headline}. {scoreInterpretation.advice}
               </p>
             </div>
           </div>
 
           {/* Khối Việc đã cam kết */}
-          <div className="rounded-3xl border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-app-line/30 pb-3.5">
-              <h3 className="text-base font-semibold text-app-ink font-serif">Hành động cam kết</h3>
-              <span className="text-xs text-app-ink-soft font-semibold bg-app-bg px-2.5 py-0.5 rounded-lg border border-app-line/10">
+          <div className="rounded-3xl border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-4 relative pt-10">
+            <WashiTape className="opacity-60 rotate-[1deg] -top-3.5" />
+            <div className="flex items-center justify-between border-b border-app-line/30 pb-3.5 pt-1">
+              <h3 className="text-lg font-bold text-app-ink font-serif">Hành động cam kết</h3>
+              <span className="text-xs text-app-ink-soft font-bold bg-app-bg px-2.5 py-0.5 rounded-lg border border-app-line/10">
                 {mergedIndicators.length} việc
               </span>
             </div>
@@ -464,27 +477,27 @@ export function TwelveWeekWeekTab({
                   return (
                     <div
                       key={indicator.id || indicator.name}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl border border-app-line/40 bg-app-bg/10 gap-3"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl border border-app-line/40 bg-[#FAF9F5]/70 hover:bg-app-accent-subtle/25 gap-3 transition-all duration-300 shadow-3xs"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full shrink-0 ${indicator.isCore ? "bg-app-warm" : "bg-app-ink-muted"}`}
+                          className={`h-2.5 w-2.5 rounded-full shrink-0 ${indicator.isCore ? "bg-app-warm animate-pulse" : "bg-app-ink-muted"}`}
                         />
                         <span className="text-sm font-semibold text-app-ink truncate">{indicator.name}</span>
                         <Badge
                           variant={indicator.isCore ? "success" : "warning"}
-                          className="shadow-none rounded-md text-[9px] px-1.5 py-0"
+                          className="shadow-none rounded-md text-[9px] px-1.5 py-0 font-bold"
                         >
                           {indicator.isCore ? "Cốt lõi" : "Tùy chọn"}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 text-xs text-app-ink-soft mt-1 sm:mt-0 pt-2 sm:pt-0 border-t border-app-line/10 sm:border-t-0">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 text-xs text-app-ink-soft mt-1 sm:mt-0 pt-2 sm:pt-0 border-t border-app-line/10 sm:border-t-0 font-medium">
                         <span>
-                          Tiến độ: <span className="font-semibold text-app-ink">{completed}</span>/
+                          Tiến độ: <span className="font-bold text-app-ink">{completed}</span>/
                           {total || indicator.target || 1} {indicator.unit || "lần"}
                         </span>
                         {!weekCompletion.isEmpty && (
-                          <span className="font-bold text-app-accent bg-app-accent-soft/40 px-2 py-0.5 rounded-md">
+                          <span className="font-bold text-app-accent bg-app-accent-soft/50 px-2 py-0.5 rounded-md">
                             {percent}%
                           </span>
                         )}
@@ -578,13 +591,14 @@ export function TwelveWeekWeekTab({
       {showForm && (
         <div
           className={cn(
-            "rounded-3xl border border-app-line/45 bg-app-surface p-5 sm:p-8 shadow-xs space-y-6",
+            "rounded-3xl border border-app-line/45 bg-app-surface p-5 sm:p-8 shadow-xs space-y-6 relative pt-10",
             !canShowFormReview && "hidden",
           )}
         >
-          <div className="space-y-1">
-            <h3 className="font-serif text-lg sm:text-xl font-bold text-app-ink">Đánh giá và cam kết tuần</h3>
-            <p className="text-xs text-app-ink-soft">
+          <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
+          <div className="space-y-1 pt-1">
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-app-ink">Đánh giá và cam kết tuần</h3>
+            <p className="text-xs sm:text-sm text-app-ink-soft">
               Ghi chép lại bài học tuần cũ và thiết lập ưu tiên tuần mới để giữ nhịp thực thi ổn định.
             </p>
           </div>
@@ -597,7 +611,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-score"
                 data-done="true"
-                className="p-5 rounded-2xl border border-app-line/40 bg-app-bg/10 space-y-3"
+                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
               >
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-accent-soft text-[10px] font-bold text-app-accent">
@@ -640,7 +654,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-commitments"
                 data-done={allPreviousCommitmentsAnswered ? "true" : "false"}
-                className="p-5 rounded-2xl border border-app-line/40 bg-app-bg/10 space-y-3"
+                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
               >
                 <Label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-warm-soft text-[10px] font-bold text-app-warm-strong">
@@ -652,7 +666,7 @@ export function TwelveWeekWeekTab({
 
                 {previousCommitments.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-app-line bg-app-surface px-4 py-3.5 text-xs leading-relaxed text-app-ink-soft">
-                    Tuần đầu tiên chưa có cam kết tuần trước. Hãy đặt ưu tiên tuần sau tại mục 4 bên dưới.
+                    Tuần đầu chưa có cam kết tuần trước. Hãy đặt ưu tiên tuần sau tại mục 4 bên dưới.
                   </div>
                 ) : (
                   <div className="space-y-3 mt-2.5">
@@ -728,7 +742,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-insights"
                 data-done={weeklyForm.insights.trim().length > 0 ? "true" : "false"}
-                className="p-5 rounded-2xl border border-app-line/40 bg-app-bg/10 space-y-3"
+                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
               >
                 <Label
                   htmlFor="weekly-insights"
@@ -758,7 +772,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-next"
                 data-done={hasNextWeekCommitment ? "true" : "false"}
-                className="p-5 rounded-2xl border border-app-line/40 bg-app-bg/10 space-y-3"
+                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
               >
                 <Label
                   htmlFor="weekly-next-commitments"
@@ -798,7 +812,7 @@ export function TwelveWeekWeekTab({
                   }`}
                 />
               ))}
-              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">Tiến độ review</span>
+              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">Tiến độ review ({reviewReadyCount}/4)</span>
             </div>
           </div>
 

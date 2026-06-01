@@ -72,6 +72,10 @@ describe("12-week destructive confirmations", () => {
     const checkbox = screen.getByLabelText("Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.");
     await user.click(checkbox);
 
+    // Type the confirmation text XOACLOUD
+    const textInput = screen.getByPlaceholderText("XOACLOUD");
+    await user.type(textInput, "XOACLOUD");
+
     // Action button should now be enabled
     expect(confirmActionBtn).toBeEnabled();
 
@@ -121,6 +125,10 @@ describe("12-week destructive confirmations", () => {
     // Check the confirmation checkbox
     const checkbox = screen.getByLabelText("Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.");
     await user.click(checkbox);
+
+    // Type the confirmation text XOATAIKHOAN
+    const textInput = screen.getByPlaceholderText("XOATAIKHOAN");
+    await user.type(textInput, "XOATAIKHOAN");
 
     // Action button should now be enabled
     expect(confirmActionBtn).toBeEnabled();

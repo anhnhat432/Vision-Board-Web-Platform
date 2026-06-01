@@ -206,6 +206,21 @@ function getAverageLeadScore(system: TwelveWeekSystem): number {
   );
 }
 
+// Decorative elements for Dreamy Planner aesthetic
+const WashiTape = ({ className = "" }: { className?: string }) => (
+  <div 
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  />
+);
+
+const PaperPin = ({ className = "" }: { className?: string }) => (
+  <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
+    <div className="w-3.5 h-3.5 bg-rose-500 rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
+      <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
+    </div>
+  </div>
+);
+
 export function TwelveWeekProgressTab({
   system,
   currentWeek,
@@ -269,61 +284,66 @@ export function TwelveWeekProgressTab({
 
   return (
     <div className="stack-section pt-4">
-      <PrimaryActionCard
-        data-testid="progress-trend-hero"
-        hero
-        tone="primary"
-        eyebrow="Trạng thái nhịp tuần này"
-        icon={<Sparkles className="h-3.5 w-3.5" />}
-        title={trend.headline}
-        description={trend.advice}
-        titleClassName="font-serif text-xl font-semibold text-app-ink sm:text-2xl"
-        descriptionClassName="text-sm leading-relaxed text-app-ink-soft"
-        contentClassName="stack-stack"
-        action={
-          nextActionHandler ? (
-            <div className="rounded-2xl border border-app-line/60 bg-app-bg/50 backdrop-blur-xs p-4 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Tiếp theo nên làm</p>
-              <p className="mt-1.5 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
-              <Button
-                size="lg"
-                className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-xl sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
-                onClick={nextActionHandler}
-              >
-                {nextActionSuggestion.buttonLabel}
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          ) : null
-        }
-      >
-        <div className="pointer-events-none hidden justify-end sm:flex">
-          <WeeklyReviewIllustration className="-my-6 w-36 text-app-accent opacity-80" />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
-          >
-            {narrativeStyle.badgeLabel}
-          </span>
-          {trend.weekOverWeekDelta !== null && (
-            <Badge
-              variant="outline"
-              className="border-app-line bg-app-bg text-app-ink-soft rounded-full px-2.5 py-0.5 text-xs font-medium"
+      <div className="relative pt-6">
+        <PaperPin />
+        <WashiTape className="opacity-70 rotate-[-1.5deg] -top-3.5" />
+        <PrimaryActionCard
+          data-testid="progress-trend-hero"
+          hero
+          tone="primary"
+          eyebrow="Trạng thái nhịp tuần này"
+          icon={<Sparkles className="h-3.5 w-3.5" />}
+          title={trend.headline}
+          description={trend.advice}
+          titleClassName="font-serif text-xl font-bold leading-tight sm:leading-snug text-app-ink sm:text-2xl pt-1"
+          descriptionClassName="text-sm leading-relaxed text-app-ink-soft"
+          contentClassName="stack-stack"
+          className="rounded-3xl bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-soft/20 border border-app-accent/25 shadow-xs pt-8"
+          action={
+            nextActionHandler ? (
+              <div className="rounded-2xl border border-app-line/40 bg-[#FAF9F5]/70 backdrop-blur-xs p-4 shadow-3xs">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Tiếp theo nên làm</p>
+                <p className="mt-1.5 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
+                <Button
+                  size="lg"
+                  className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-xl sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
+                  onClick={nextActionHandler}
+                >
+                  {nextActionSuggestion.buttonLabel}
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            ) : null
+          }
+        >
+          <div className="pointer-events-none hidden justify-end sm:flex">
+            <WeeklyReviewIllustration className="-my-6 w-36 text-app-accent opacity-80" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
             >
-              {trend.trendDirection === "up" ? (
-                <ArrowUp className="mr-1 h-3 w-3 text-app-accent" />
-              ) : trend.trendDirection === "down" ? (
-                <ArrowDown className="mr-1 h-3 w-3 text-app-warm" />
-              ) : (
-                <Minus className="mr-1 h-3 w-3 text-app-ink-muted" />
-              )}
-              {trend.weekOverWeekDelta > 0 ? "+" : ""}
-              {trend.weekOverWeekDelta} so với tuần trước
-            </Badge>
-          )}
-        </div>
-      </PrimaryActionCard>
+              {narrativeStyle.badgeLabel}
+            </span>
+            {trend.weekOverWeekDelta !== null && (
+              <Badge
+                variant="outline"
+                className="border-app-line bg-app-bg text-app-ink-soft rounded-full px-2.5 py-0.5 text-xs font-medium"
+              >
+                {trend.trendDirection === "up" ? (
+                  <ArrowUp className="mr-1 h-3 w-3 text-app-accent" />
+                ) : trend.trendDirection === "down" ? (
+                  <ArrowDown className="mr-1 h-3 w-3 text-app-warm" />
+                ) : (
+                  <Minus className="mr-1 h-3 w-3 text-app-ink-muted" />
+                )}
+                {trend.weekOverWeekDelta > 0 ? "+" : ""}
+                {trend.weekOverWeekDelta} so với tuần trước
+              </Badge>
+            )}
+          </div>
+        </PrimaryActionCard>
+      </div>
 
       {goalTitle ? (
         <div className="rounded-2xl border border-app-line/60 bg-gradient-to-br from-app-surface to-app-bg/20 p-4 sm:p-5 shadow-2xs">
@@ -353,79 +373,91 @@ export function TwelveWeekProgressTab({
       )}
 
       <SectionBlock title="Tổng quan hiệu suất" eyebrow="Performance" collapsible defaultOpen={true}>
-        <div className="grid gap-5 md:grid-cols-3">
-          <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
-            <CardContent className="p-5 md:p-6">
-              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
-                <CalendarDays className="h-3.5 w-3.5 text-app-accent-soft-strong" />
-                Tuần đang chạy
-              </p>
-              <div className="mt-4">
-                <p className="font-serif text-3xl font-bold text-app-ink">Tuần {currentWeek}</p>
+        <div className="grid gap-6 md:grid-cols-3 pt-2">
+          {/* Card 1 */}
+          <div className="relative pt-3">
+            <WashiTape className="w-20 h-4 bg-app-accent-soft/30 rotate-[-2deg] -top-1" />
+            <Card className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-[#FAF9F5]/40 shadow-2xs hover:shadow-xs transition-all duration-300">
+              <CardContent className="p-5 md:p-6">
+                <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                  <CalendarDays className="h-3.5 w-3.5 text-app-accent-soft-strong" />
+                  Tuần đang chạy
+                </p>
+                <div className="mt-4">
+                  <p className="font-serif text-3xl font-bold text-app-ink">Tuần {currentWeek}</p>
+                  <p className="mt-1.5 text-xs font-medium text-app-ink-soft">
+                    {currentWeekRange
+                      ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                      : "Đang cập nhật phạm vi tuần"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Card 2 */}
+          <div className="relative pt-3">
+            <PaperPin className="-top-1.5" />
+            <Card className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-[#FAF9F5]/40 shadow-2xs hover:shadow-xs transition-all duration-300">
+              <CardContent className="p-5 md:p-6">
+                <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                  <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
+                  Tiến độ việc lặp lại
+                </p>
+                <div className="mt-4 flex items-start justify-between gap-3">
+                  <p className="font-serif text-3xl font-bold text-app-ink">
+                    {averageLeadScore}%{" "}
+                    <span className="text-xs font-sans font-normal text-app-ink-soft">trung bình</span>
+                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft/30 hover:scale-105 transition-all"
+                        aria-label="Tại sao 85%?"
+                      >
+                        <CircleHelp className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent sideOffset={8}>{WEEKLY_EXECUTION_TARGET_TOOLTIP}</TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="mt-1.5 text-xs font-medium text-app-ink-soft">
-                  {currentWeekRange
-                    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-                    : "Đang cập nhật phạm vi tuần"}
+                  Tuần này: {currentWeekScoreValue}% · Điểm trung bình: {averageScore}%
                 </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
-            <CardContent className="p-5 md:p-6">
-              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
-                <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
-                Tiến độ việc lặp lại
-              </p>
-              <div className="mt-4 flex items-start justify-between gap-3">
-                <p className="font-serif text-3xl font-bold text-app-ink">
-                  {averageLeadScore}%{" "}
-                  <span className="text-xs font-sans font-normal text-app-ink-soft">trung bình</span>
+          {/* Card 3 */}
+          <div className="relative pt-3">
+            <WashiTape className="w-20 h-4 bg-app-warm-soft/40 rotate-[3deg] -top-1" />
+            <Card className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-[#FAF9F5]/40 shadow-2xs hover:shadow-xs transition-all duration-300">
+              <CardContent className="p-5 md:p-6">
+                {reviewDoneCount === 0 && <WeeklyReviewIllustration className="mb-3 w-20 text-app-accent opacity-80" />}
+                <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                  <Flag className="h-3.5 w-3.5 text-app-accent" />
+                  Tuần đã hoàn thành
                 </p>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft/30 hover:scale-105 transition-all"
-                      aria-label="Tại sao 85%?"
-                    >
-                      <CircleHelp className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent sideOffset={8}>{WEEKLY_EXECUTION_TARGET_TOOLTIP}</TooltipContent>
-                </Tooltip>
-              </div>
-              <p className="mt-1.5 text-xs font-medium text-app-ink-soft">
-                Tuần này: {currentWeekScoreValue}% · Điểm trung bình: {averageScore}%
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
-            <CardContent className="p-5 md:p-6">
-              {reviewDoneCount === 0 && <WeeklyReviewIllustration className="mb-3 w-20 text-app-accent opacity-80" />}
-              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
-                <Flag className="h-3.5 w-3.5 text-app-accent" />
-                Tuần đã hoàn thành
-              </p>
-              <p className="mt-4 font-serif text-3xl font-bold text-app-ink">
-                {reviewDoneCount}/{system.totalWeeks}{" "}
-                <span className="text-xs font-sans font-normal text-app-ink-soft">tuần</span>
-              </p>
-              <p className="mt-1.5 text-xs font-medium text-app-ink-soft leading-relaxed">
-                {isEarlyState
-                  ? "Hết tuần này có review đầu tiên."
-                  : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
-              </p>
-            </CardContent>
-          </Card>
+                <p className="mt-4 font-serif text-3xl font-bold text-app-ink">
+                  {reviewDoneCount}/{system.totalWeeks}{" "}
+                  <span className="text-xs font-sans font-normal text-app-ink-soft">tuần</span>
+                </p>
+                <p className="mt-1.5 text-xs font-medium text-app-ink-soft leading-relaxed">
+                  {isEarlyState
+                    ? "Hết tuần này có review đầu tiên."
+                    : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </SectionBlock>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 font-serif text-lg font-bold text-app-ink">
+            <CardTitle className="flex items-center gap-2 font-serif text-lg font-bold leading-tight text-app-ink">
               <BarChart3 className="h-5 w-5 text-app-accent" />
               Bảng điểm 12 tuần
             </CardTitle>
@@ -452,41 +484,44 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 font-serif text-lg font-bold text-app-ink">
-              <Target className="h-5 w-5 text-app-accent" />
-              Cột mốc và đích đến
-            </CardTitle>
-            <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
-              Nhìn lại các mốc quan trọng của chu kỳ thay vì chỉ nhìn điểm số.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-bg/50 to-app-bg/25 p-5 shadow-3xs">
-              <div className="stack-stack">
-                {milestoneItems.map((item, index) => {
-                  const isLastItem = index === milestoneItems.length - 1;
+        <div className="relative">
+          <WashiTape className="w-20 h-4 bg-app-accent-soft/30 rotate-[2deg] -top-1.5 left-auto right-4 translate-x-0" />
+          <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 font-serif text-lg font-bold leading-tight text-app-ink">
+                <Target className="h-5 w-5 text-app-accent" />
+                Cột mốc và đích đến
+              </CardTitle>
+              <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
+                Nhìn lại các mốc quan trọng của chu kỳ thay vì chỉ nhìn điểm số.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-[#FAF9F5] to-app-surface p-5 shadow-3xs">
+                <div className="stack-stack">
+                  {milestoneItems.map((item, index) => {
+                    const isLastItem = index === milestoneItems.length - 1;
 
-                  return (
-                    <div key={item.label} className={`relative pl-11 ${isLastItem ? "" : "pb-6"}`}>
-                      {!isLastItem && (
-                        <div className="absolute left-[13px] top-8 h-full w-[2px] bg-gradient-to-b from-app-accent/30 to-app-line/10" />
-                      )}
-                      <div className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-app-accent/80 text-[10px] font-bold text-white shadow-sm ring-4 ring-app-accent-soft/50">
-                        {index + 1}
+                    return (
+                      <div key={item.label} className={`relative pl-11 ${isLastItem ? "" : "pb-6"}`}>
+                        {!isLastItem && (
+                          <div className="absolute left-[13px] top-8 h-full w-[2px] bg-gradient-to-b from-app-accent/30 to-app-line/10" />
+                        )}
+                        <div className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-app-accent/80 text-[10px] font-bold text-white shadow-sm ring-4 ring-app-accent-soft/50">
+                          {index + 1}
+                        </div>
+                        <p className="pt-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-app-accent">
+                          {item.label}
+                        </p>
+                        <p className="mt-1.5 font-serif text-sm leading-relaxed text-app-ink font-medium">{item.value}</p>
                       </div>
-                      <p className="pt-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-app-accent">
-                        {item.label}
-                      </p>
-                      <p className="mt-1.5 font-serif text-sm leading-relaxed text-app-ink font-medium">{item.value}</p>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {hasAdvancedAnalytics ? (
@@ -494,7 +529,7 @@ export function TwelveWeekProgressTab({
           {executionHeatmap.length > 0 && (
             <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="font-serif text-lg font-bold text-app-ink">Bản đồ thực thi</CardTitle>
+                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">Bản đồ thực thi</CardTitle>
                 <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
                   Mỗi ô là một ngày. Màu dịu, càng đậm nghĩa là mức hoàn thành càng chắc.
                 </CardDescription>
@@ -578,7 +613,7 @@ export function TwelveWeekProgressTab({
           {weeklyTrend.length > 0 && (
             <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="font-serif text-lg font-bold text-app-ink">Xu hướng thực thi theo tuần</CardTitle>
+                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">Xu hướng thực thi theo tuần</CardTitle>
                 <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
                   So sánh mức hoàn thành việc cốt lõi, việc tùy chọn và điểm qua các tuần.
                 </CardDescription>
@@ -637,7 +672,7 @@ export function TwelveWeekProgressTab({
           {tacticBreakdown.length > 0 && (
             <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="font-serif text-lg font-bold text-app-ink">Phân tích theo việc lặp lại</CardTitle>
+                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">Phân tích theo việc lặp lại</CardTitle>
                 <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
                   Chi tiết hoàn thành và xu hướng từng việc lặp lại đến tuần {currentWeek}.
                 </CardDescription>
