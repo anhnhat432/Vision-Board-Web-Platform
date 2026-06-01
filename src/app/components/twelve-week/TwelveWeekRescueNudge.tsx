@@ -1,4 +1,5 @@
-﻿import { Heart, RefreshCcw } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronUp, Heart, RefreshCcw } from "lucide-react";
 
 import type { RescueModeStatus, RescueSuggestion, RescueSuggestionId } from "@/features/plan12week/logic";
 import { getRescueActionSuggestion, getRescueModeMessage } from "@/features/plan12week/logic";
@@ -49,6 +50,7 @@ function getCallbackForSuggestion(id: RescueSuggestionId, props: TwelveWeekRescu
 
 export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
   const { status, variant = "today" } = props;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (status.severity === "none" || status.triggers.length === 0) {
     return null;
@@ -65,64 +67,108 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
     <div
       data-testid={variant === "today" ? "today-rescue-nudge" : "week-rescue-nudge"}
       data-rescue-severity={status.severity}
-      className={`order-1 rounded-card border p-5 sm:p-6 ${accent}`}
+      className={`order-1 rounded-xl border p-3.5 sm:p-4 shadow-3xs transition-all duration-200 ${accent}`}
     >
-      <div className="flex items-start gap-3">
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-            variant === "today" ? "bg-app-accent-soft text-app-accent" : "bg-app-warm-soft text-app-warm"
-          }`}
-        >
-          <Heart className="h-4 w-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p
-            className={`text-xs font-semibold uppercase tracking-[0.16em] ${
-              variant === "today" ? "text-app-accent" : "text-app-warm"
-            }`}
-          >
-            Cứu nhịp nhẹ
-          </p>
-          <p className="mt-1 text-base font-semibold leading-7 text-app-ink">{message.headline}</p>
-          {message.subtext && <p className="mt-1 text-sm leading-6 text-app-ink-soft">{message.subtext}</p>}
+      <div className="flex flex-col gap-2.5">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                variant === "today" ? "bg-app-accent-soft text-app-accent" : "bg-app-warm-soft text-app-warm"
+              }`}
+            >
+              <Heart className="h-3.5 w-3.5" />
+            </span>
+            <span
+              className={`text-xs font-bold uppercase tracking-[0.14em] ${
+                variant === "today" ? "text-app-accent" : "text-app-warm"
+              }`}
+            >
+              Cứu nhịp nhẹ
+            </span>
+            <span className="text-[10px] text-app-ink-muted/50">•</span>
+            <span className="rounded-md bg-app-surface/60 border border-app-line/20 px-1.5 py-0.5 text-[9px] font-semibold text-app-ink-soft uppercase tracking-wider">
+              {status.severity === "gentle" ? "Nhẹ nhàng" : status.severity === "active" ? "Cần thiết" : "Ưu tiên"}
+            </span>
+          </div>
+        </div>
 
-          {suggestions.length > 0 && (
+        {/* Message */}
+        <div className="min-w-0">
+          <h4 className="text-sm font-semibold leading-relaxed text-app-ink">{message.headline}</h4>
+          {message.subtext && (
+            <p className="mt-0.5 text-xs leading-normal text-app-ink-soft/90 font-sans">{message.subtext}</p>
+          )}
+        </div>
+
+        {/* Suggestions */}
+        {suggestions.length > 0 && (
+          <div className="mt-1">
             <ul
               data-testid={variant === "today" ? "today-rescue-suggestions" : "week-rescue-suggestions"}
-              className="mt-3 grid gap-2"
+              className="divide-y divide-app-line/20 border-t border-app-line/25 pt-1"
             >
-              {suggestions.map((suggestion: RescueSuggestion) => {
+              {suggestions.map((suggestion: RescueSuggestion, index) => {
                 const callback = getCallbackForSuggestion(suggestion.id, props);
+                const isSecondOrLater = index > 0;
+                
                 return (
                   <li
                     key={suggestion.id}
                     data-suggestion-id={suggestion.id}
-                    className="rounded-lg border border-app-line bg-app-surface px-3 py-2"
+                    className={`py-2 flex items-start justify-between gap-3 transition-all ${
+                      isSecondOrLater && !isExpanded ? "hidden sm:flex" : "flex"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-app-ink">{suggestion.title}</p>
-                        <p className="mt-0.5 text-xs leading-5 text-app-ink-soft">{suggestion.hint}</p>
-                      </div>
-                      {callback && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="shrink-0 bg-app-surface"
-                          onClick={callback}
-                          aria-label={`Làm: ${suggestion.title}`}
-                        >
-                          <RefreshCcw className="mr-1 h-3.5 w-3.5" />
-                          Làm
-                        </Button>
-                      )}
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="text-xs font-semibold text-app-ink flex items-center gap-1.5">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-app-accent/60 shrink-0" />
+                        {suggestion.title}
+                      </p>
+                      <p className="mt-0.5 text-[11px] leading-normal text-app-ink-soft pl-3 font-sans">
+                        {suggestion.hint}
+                      </p>
                     </div>
+                    {callback && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="shrink-0 bg-app-surface border-app-line min-h-[44px] sm:min-h-0 sm:h-8 px-3 rounded-lg text-xs hover:bg-app-bg hover:text-app-ink transition-colors font-medium flex items-center gap-1"
+                        onClick={callback}
+                        aria-label={`Làm: ${suggestion.title}`}
+                      >
+                        <RefreshCcw className="h-3 w-3 text-app-ink-soft shrink-0" />
+                        <span>Làm</span>
+                      </Button>
+                    )}
                   </li>
                 );
               })}
             </ul>
-          )}
-        </div>
+
+            {/* View More Buttons on Mobile */}
+            {suggestions.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="sm:hidden mt-2 text-[11px] font-semibold text-app-accent hover:text-app-accent-hover flex items-center gap-1 py-2 min-h-[44px] w-full justify-center border border-dashed border-app-line rounded-xl bg-app-surface/40 hover:bg-app-surface/80 transition-colors"
+              >
+                {isExpanded ? (
+                  <>
+                    <span>Thu gọn gợi ý</span>
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  </>
+                ) : (
+                  <>
+                    <span>Xem thêm gợi ý ({suggestions.length - 1})</span>
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
