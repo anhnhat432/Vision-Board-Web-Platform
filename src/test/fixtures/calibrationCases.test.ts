@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-
+import { assessPlanQuality, assessWeekOneLoad } from "@/features/plan12week/logic";
 import {
   assessGoalClarity,
   buildSmartGoal,
@@ -7,7 +7,6 @@ import {
   getCalibratedDifficulty,
   isQualitativeMetric,
 } from "@/lib/smart-goal";
-import { assessPlanQuality, assessWeekOneLoad } from "@/features/plan12week/logic";
 
 import { CALIBRATION_CASES } from "./calibrationCases";
 

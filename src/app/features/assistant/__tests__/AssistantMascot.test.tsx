@@ -23,7 +23,15 @@ describe("AssistantMascot", () => {
   });
 
   it("shows tooltip on keyboard focus and hides it after 2 seconds", () => {
-    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
+    render(
+      <AssistantMascot
+        isOpen={false}
+        onClick={vi.fn()}
+        nudge={inactiveNudge}
+        dismissNudge={vi.fn()}
+        {...mascotProps}
+      />,
+    );
 
     expect(screen.queryByText("Kéo để di chuyển · Click để hỏi")).not.toBeInTheDocument();
 
@@ -71,7 +79,15 @@ describe("AssistantMascot", () => {
   });
 
   it("renders the decorative sparkle icon inside the mascot button", () => {
-    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
+    render(
+      <AssistantMascot
+        isOpen={false}
+        onClick={vi.fn()}
+        nudge={inactiveNudge}
+        dismissNudge={vi.fn()}
+        {...mascotProps}
+      />,
+    );
 
     const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
     const owlIcon = button.querySelector("svg");
@@ -81,7 +97,15 @@ describe("AssistantMascot", () => {
   });
 
   it("applies twinkle animation to the sparkle icon when not open/dragging", () => {
-    render(<AssistantMascot isOpen={false} onClick={vi.fn()} nudge={inactiveNudge} dismissNudge={vi.fn()} {...mascotProps} />);
+    render(
+      <AssistantMascot
+        isOpen={false}
+        onClick={vi.fn()}
+        nudge={inactiveNudge}
+        dismissNudge={vi.fn()}
+        {...mascotProps}
+      />,
+    );
 
     const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
     const innerShell = button.querySelector(".animate-sparkle-twinkle");

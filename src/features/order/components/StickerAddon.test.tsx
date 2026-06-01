@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import type { CatalogItem } from "@/features/order/catalog/types";
 
@@ -24,13 +24,7 @@ describe("StickerAddon", () => {
 
   it("clamps qty within [1, maxQty]", () => {
     const onChange = vi.fn();
-    render(
-      <StickerAddon
-        sticker={sticker}
-        value={{ itemId: sticker.itemId, qty: 1 }}
-        onChange={onChange}
-      />,
-    );
+    render(<StickerAddon sticker={sticker} value={{ itemId: sticker.itemId, qty: 1 }} onChange={onChange} />);
     fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "99" } });
     expect(onChange).toHaveBeenLastCalledWith({ itemId: sticker.itemId, qty: 5 });
   });

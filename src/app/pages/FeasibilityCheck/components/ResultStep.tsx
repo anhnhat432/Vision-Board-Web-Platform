@@ -1,22 +1,22 @@
 import {
+  Activity,
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  Calendar,
   CheckCircle2,
+  ChevronDown,
   Compass,
+  Flame,
   Gauge,
+  HelpCircle,
+  Info,
+  Key,
+  type LucideIcon,
   ShieldCheck,
   Sparkles,
   Target,
-  ChevronDown,
-  Flame,
-  Key,
-  HelpCircle,
-  Activity,
-  Calendar,
   Wrench,
-  Info,
-  type LucideIcon,
 } from "lucide-react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 
@@ -71,7 +71,8 @@ const RESULT_COPY: Record<ResultType, ResultCopy> = {
     statusLabel: "Mục tiêu này ổn, bước tiếp theo là chia nhỏ theo tuần",
     statusHint: "Nền tảng của bạn rất vững vàng, sẵn sàng để bắt đầu kế hoạch 12 tuần.",
     guideTitle: "Hãy đi tiếp và giữ cho tuần đầu tiên thật nhẹ nhàng.",
-    guideBody: "Bạn không cần lập một kế hoạch quá vĩ mô. Hãy bắt đầu bằng vài việc nhỏ, cụ thể, đo lường được và duy trì đều đặn.",
+    guideBody:
+      "Bạn không cần lập một kế hoạch quá vĩ mô. Hãy bắt đầu bằng vài việc nhỏ, cụ thể, đo lường được và duy trì đều đặn.",
     highlights: [
       {
         title: "Nhịp nhỏ nhưng đều",
@@ -139,8 +140,7 @@ const RESULT_COPY: Record<ResultType, ResultCopy> = {
   },
   too_ambitious: {
     statusLabel: "Mục tiêu này cần thu nhỏ một chút để dễ hoàn thành hơn",
-    statusHint:
-      "Chúng mình khuyên bạn nên điều chỉnh để có một khởi đầu nhẹ nhàng và bền vững.",
+    statusHint: "Chúng mình khuyên bạn nên điều chỉnh để có một khởi đầu nhẹ nhàng và bền vững.",
     guideTitle: "Không cần hạ thấp ước mơ — chỉ cần chia nhỏ chặng đường.",
     guideBody:
       "Hãy giữ ước mơ lớn, nhưng biến 12 tuần này thành một bước đệm vừa tầm để bạn có một hành trình đầy tự tin và chiến thắng.",
@@ -308,21 +308,24 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
     realistic: {
       answer: "Có, mục tiêu rất thực tế! 🎉",
       desc: "Nền tảng của bạn cực kỳ vững vàng. Đây là thời điểm hoàn hảo để chuyển ý tưởng thành hành động thực tế.",
-      cardBg: "from-emerald-500/10 via-teal-500/5 to-emerald-500/10 dark:from-emerald-950/20 dark:via-teal-950/10 dark:to-emerald-950/20 border-emerald-500/30",
+      cardBg:
+        "from-emerald-500/10 via-teal-500/5 to-emerald-500/10 dark:from-emerald-950/20 dark:via-teal-950/10 dark:to-emerald-950/20 border-emerald-500/30",
       textClass: "text-emerald-700 dark:text-emerald-400",
       icon: CheckCircle2,
     },
     challenging: {
       answer: "Khả thi nếu đi đúng hướng! 🌱",
       desc: "Mục tiêu rất đầy cảm hứng! Bạn chỉ cần tinh chỉnh nhẹ nhịp độ và phân bổ lại quỹ thời gian để đảm bảo đi được đường dài.",
-      cardBg: "from-amber-500/10 via-yellow-500/5 to-amber-500/10 dark:from-amber-950/20 dark:via-yellow-950/10 dark:to-amber-950/20 border-amber-500/30",
+      cardBg:
+        "from-amber-500/10 via-yellow-500/5 to-amber-500/10 dark:from-amber-950/20 dark:via-yellow-950/10 dark:to-amber-950/20 border-amber-500/30",
       textClass: "text-amber-700 dark:text-amber-400",
       icon: Compass,
     },
     too_ambitious: {
       answer: "Cần tinh chỉnh một chút để chắc thắng! 🧗",
       desc: "Ước mơ lớn luôn tuyệt vời! Hãy thu nhỏ quy mô chặng 12 tuần này để tích lũy những chiến thắng nhỏ đầu tiên trước khi tăng tốc.",
-      cardBg: "from-rose-500/10 via-orange-500/5 to-rose-500/10 dark:from-rose-950/20 dark:via-orange-950/10 dark:to-rose-950/20 border-rose-500/30",
+      cardBg:
+        "from-rose-500/10 via-orange-500/5 to-rose-500/10 dark:from-rose-950/20 dark:via-orange-950/10 dark:to-rose-950/20 border-rose-500/30",
       textClass: "text-rose-700 dark:text-rose-400",
       icon: AlertCircle,
     },
@@ -343,7 +346,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       {/* ── KHU VỰC 1: Mục tiêu có thực tế không? ── */}
       <div className="relative z-10 space-y-6">
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">Kết quả đánh giá khả thi</p>
+          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">
+            Kết quả đánh giá khả thi
+          </p>
           <span className="w-fit rounded-full bg-indigo-50/80 dark:bg-indigo-950/40 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-200/30 shadow-sm">
             {getLifeAreaLabel(focusArea)}
           </span>
@@ -351,20 +356,24 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
         {/* Banner visual anchor ở trên */}
         <div className="overflow-hidden rounded-2xl border border-app-line/45 aspect-[16/5] w-full bg-app-bg shadow-sm">
-          <img 
-            src="/feasibility_readiness.png" 
-            alt="Kiểm tra độ sẵn sàng và nguồn lực khả thi" 
-            className="w-full h-full object-cover" 
+          <img
+            src="/feasibility_readiness.png"
+            alt="Kiểm tra độ sẵn sàng và nguồn lực khả thi"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
         </div>
 
         {/* Hero Banner Khẳng định tính thực tế */}
-        <div className={cn(
-          "rounded-2xl border p-6 bg-gradient-to-br shadow-md flex gap-4 items-start transition-all duration-300 hover:shadow-lg",
-          resultHeaderCopy.cardBg
-        )}>
-          <div className={cn("p-3 rounded-xl bg-white dark:bg-slate-900 shadow-sm shrink-0", resultHeaderCopy.textClass)}>
+        <div
+          className={cn(
+            "rounded-2xl border p-6 bg-gradient-to-br shadow-md flex gap-4 items-start transition-all duration-300 hover:shadow-lg",
+            resultHeaderCopy.cardBg,
+          )}
+        >
+          <div
+            className={cn("p-3 rounded-xl bg-white dark:bg-slate-900 shadow-sm shrink-0", resultHeaderCopy.textClass)}
+          >
             <ActionIcon className="h-6 w-6" aria-hidden="true" />
           </div>
           <div className="space-y-1.5">
@@ -388,20 +397,72 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               <div className="w-full max-w-[200px] h-[130px] flex items-center justify-center select-none bg-white/40 dark:bg-slate-900/40 rounded-2xl border border-slate-200/50 dark:border-slate-800/40 p-2 shadow-inner">
                 <svg viewBox="0 0 300 170" className="w-full h-full overflow-visible" aria-hidden="true">
                   {/* 1. Trụ đỡ trung tâm */}
-                  <rect x="110" y="145" width="80" height="8" rx="4" className="fill-slate-200 dark:fill-slate-800/80" />
-                  <rect x="147" y="60" width="6" height="80" rx="1.5" className="fill-slate-300 dark:fill-slate-700/60" />
+                  <rect
+                    x="110"
+                    y="145"
+                    width="80"
+                    height="8"
+                    rx="4"
+                    className="fill-slate-200 dark:fill-slate-800/80"
+                  />
+                  <rect
+                    x="147"
+                    y="60"
+                    width="6"
+                    height="80"
+                    rx="1.5"
+                    className="fill-slate-300 dark:fill-slate-700/60"
+                  />
                   <circle cx="150" cy="60" r="5" className="fill-slate-400 dark:fill-slate-600" />
-                  
+
                   {/* 2. Thanh beam xoay */}
                   <g style={{ transform: `rotate(${tiltAngle}deg)`, transformOrigin: "150px 60px" }}>
-                    <line x1="60" y1="60" x2="240" y2="60" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-slate-400 dark:text-slate-500" />
-                    
+                    <line
+                      x1="60"
+                      y1="60"
+                      x2="240"
+                      y2="60"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="text-slate-400 dark:text-slate-500"
+                    />
+
                     {/* 3. Đĩa cân trái */}
                     <g style={{ transform: `rotate(${-tiltAngle}deg)`, transformOrigin: "60px 60px" }}>
-                      <line x1="60" y1="60" x2="42" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-400 dark:text-slate-700" />
-                      <line x1="60" y1="60" x2="78" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-400 dark:text-slate-700" />
-                      <path d="M 38 112 C 38 123, 82 123, 82 112" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-rose-400/80 dark:text-rose-600/70" />
-                      <circle cx="60" cy="103" r="14" className="fill-rose-50/90 dark:fill-rose-950/30 stroke-rose-200/40 dark:stroke-rose-800/30" strokeWidth="1" />
+                      <line
+                        x1="60"
+                        y1="60"
+                        x2="42"
+                        y2="112"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        className="text-slate-400 dark:text-slate-700"
+                      />
+                      <line
+                        x1="60"
+                        y1="60"
+                        x2="78"
+                        y2="112"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        className="text-slate-400 dark:text-slate-700"
+                      />
+                      <path
+                        d="M 38 112 C 38 123, 82 123, 82 112"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        className="text-rose-400/80 dark:text-rose-600/70"
+                      />
+                      <circle
+                        cx="60"
+                        cy="103"
+                        r="14"
+                        className="fill-rose-50/90 dark:fill-rose-950/30 stroke-rose-200/40 dark:stroke-rose-800/30"
+                        strokeWidth="1"
+                      />
                       <g style={{ transform: "translate(49px, 94px)" }}>
                         <text className="text-[19px] select-none">☁️</text>
                       </g>
@@ -409,10 +470,39 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
                     {/* 4. Đĩa cân phải */}
                     <g style={{ transform: `rotate(${-tiltAngle}deg)`, transformOrigin: "240px 60px" }}>
-                      <line x1="240" y1="60" x2="222" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-400 dark:text-slate-700" />
-                      <line x1="240" y1="60" x2="258" y2="112" stroke="currentColor" strokeWidth="1.2" className="text-slate-400 dark:text-slate-700" />
-                      <path d="M 218 112 C 218 123, 262 123, 262 112" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-emerald-400/80 dark:text-emerald-600/70" />
-                      <circle cx="240" cy="103" r="14" className="fill-emerald-50/90 dark:fill-emerald-950/30 stroke-emerald-200/40 dark:stroke-emerald-800/30" strokeWidth="1" />
+                      <line
+                        x1="240"
+                        y1="60"
+                        x2="222"
+                        y2="112"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        className="text-slate-400 dark:text-slate-700"
+                      />
+                      <line
+                        x1="240"
+                        y1="60"
+                        x2="258"
+                        y2="112"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        className="text-slate-400 dark:text-slate-700"
+                      />
+                      <path
+                        d="M 218 112 C 218 123, 262 123, 262 112"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        className="text-emerald-400/80 dark:text-emerald-600/70"
+                      />
+                      <circle
+                        cx="240"
+                        cy="103"
+                        r="14"
+                        className="fill-emerald-50/90 dark:fill-emerald-950/30 stroke-emerald-200/40 dark:stroke-emerald-800/30"
+                        strokeWidth="1"
+                      />
                       <g style={{ transform: "translate(229px, 94px)" }}>
                         <text className="text-[19px] select-none">⚡</text>
                       </g>
@@ -423,18 +513,20 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
               <div>
                 <p className={cn("text-base font-extrabold", resultHeaderCopy.textClass)}>{statusLabel}</p>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wider">Cán cân khả thi: {(averageScore * 2.5 * 10).toFixed(0)}%</p>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wider">
+                  Cán cân khả thi: {(averageScore * 2.5 * 10).toFixed(0)}%
+                </p>
               </div>
             </div>
-            
+
             <div className="min-w-0 flex-1 space-y-5">
               <div className="rounded-xl bg-indigo-500/5 p-4 border border-indigo-500/10 shadow-sm text-sm font-semibold leading-relaxed text-indigo-700 dark:text-indigo-400">
                 {result.summary}
               </div>
-              
+
               <div className="space-y-3">
                 {/* Premium Multi-Color Gradient Progress Track */}
-                <div 
+                <div
                   className="relative h-3.5 w-full overflow-hidden rounded-full bg-slate-200/40 dark:bg-slate-800/60 shadow-inner border border-slate-200/10"
                   role="progressbar"
                   aria-valuenow={scorePercent}
@@ -495,14 +587,16 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               )}
 
               {/* Thẻ Điểm nghẽn (Trở ngại chính) */}
-              <div className={cn(
-                "rounded-2xl border p-5 space-y-3 relative overflow-hidden",
-                result.type === "too_ambitious" 
-                  ? "border-rose-200/30 bg-rose-500/5 text-rose-800 dark:text-rose-300"
-                  : result.type === "challenging"
-                    ? "border-amber-200/30 bg-amber-500/5 text-amber-800 dark:text-amber-300"
-                    : "border-indigo-200/30 bg-indigo-500/5 text-indigo-800 dark:text-indigo-300"
-              )}>
+              <div
+                className={cn(
+                  "rounded-2xl border p-5 space-y-3 relative overflow-hidden",
+                  result.type === "too_ambitious"
+                    ? "border-rose-200/30 bg-rose-500/5 text-rose-800 dark:text-rose-300"
+                    : result.type === "challenging"
+                      ? "border-amber-200/30 bg-amber-500/5 text-amber-800 dark:text-amber-300"
+                      : "border-indigo-200/30 bg-indigo-500/5 text-indigo-800 dark:text-indigo-300",
+                )}
+              >
                 <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                   <BlockerIcon className="h-4.5 w-4.5" /> Trở ngại chính cần chú ý: {result.bottleneck.label}
                 </h3>
@@ -531,14 +625,20 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <Key className="h-4 w-4" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-xs font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">1. Chuẩn bị bệ đỡ</h4>
+                  <h4 className="text-xs font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+                    1. Chuẩn bị bệ đỡ
+                  </h4>
                   <p className="text-sm font-bold text-slate-800 dark:text-white leading-relaxed capitalize">
-                    {result.bottleneck.axis === "wheel" 
-                      ? "Gia cố nền tảng lĩnh vực" 
+                    {result.bottleneck.axis === "wheel"
+                      ? "Gia cố nền tảng lĩnh vực"
                       : `Hãy ${result.bottleneck.axis === "time" ? "khóa lịch rảnh" : result.bottleneck.axis === "routine" ? "cố định thời gian" : result.bottleneck.axis === "resources" ? "tìm kiếm công cụ" : "tinh chỉnh mục tiêu"}`}
                   </p>
                   <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium text-left">
-                    Hãy {result.bottleneck.axis === "wheel" ? "giữ mục tiêu nhỏ vừa sức" : getPrePlanAction(result.bottleneck)} trước khi lập bảng kế hoạch.
+                    Hãy{" "}
+                    {result.bottleneck.axis === "wheel"
+                      ? "giữ mục tiêu nhỏ vừa sức"
+                      : getPrePlanAction(result.bottleneck)}{" "}
+                    trước khi lập bảng kế hoạch.
                   </p>
                 </div>
               </div>
@@ -549,7 +649,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <Sparkles className="h-4 w-4" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-xs font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">2. Tuần khởi động (Tuần 1)</h4>
+                  <h4 className="text-xs font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+                    2. Tuần khởi động (Tuần 1)
+                  </h4>
                   <p className="text-sm font-bold text-slate-800 dark:text-white leading-relaxed">
                     Khởi động để lấy đà chiến thắng
                   </p>
@@ -565,7 +667,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <Target className="h-4 w-4" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-xs font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">3. Quy mô & Mức tải</h4>
+                  <h4 className="text-xs font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+                    3. Quy mô & Mức tải
+                  </h4>
                   <p className="text-sm font-bold text-slate-800 dark:text-white leading-relaxed">
                     Mức tải đề xuất: {PLAN_LOAD_LABEL[result.planLoad]}
                   </p>
@@ -619,10 +723,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 </p>
               </div>
               <h3 className="mt-4 font-serif text-2xl font-bold text-slate-900 dark:text-white">{copy.guideTitle}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-350 font-medium">{copy.guideBody}</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-350 font-medium">
+                {copy.guideBody}
+              </p>
               <div className="mt-5 rounded-xl border border-indigo-500/10 bg-indigo-50/50 dark:bg-indigo-950/20 p-4">
                 <p className="text-sm font-bold text-indigo-700 dark:text-indigo-400">Lời khuyên Tuần 1</p>
-                <p className="mt-1.5 text-sm leading-relaxed text-indigo-600 dark:text-indigo-300">{result.firstWeekGuidance}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-indigo-600 dark:text-indigo-300">
+                  {result.firstWeekGuidance}
+                </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <span className="rounded-full bg-indigo-500 text-white px-3 py-1 text-xs font-bold shadow-sm">
                     Mức tải: {PLAN_LOAD_LABEL[result.planLoad]}
@@ -636,10 +744,17 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
             <div className="grid gap-4 md:grid-cols-3">
               {scoreCards.map((card) => (
-                <div key={card.label} className="rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 transition-all duration-300 hover:bg-white/60 dark:hover:bg-slate-900/50 hover:shadow-md">
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-550 dark:text-slate-400">{card.label}</p>
-                  <p className="mt-2 text-2xl font-extrabold leading-none text-slate-800 dark:text-white tracking-tight">{card.value}</p>
-                  <div 
+                <div
+                  key={card.label}
+                  className="rounded-2xl border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-900/30 p-5 transition-all duration-300 hover:bg-white/60 dark:hover:bg-slate-900/50 hover:shadow-md"
+                >
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-550 dark:text-slate-400">
+                    {card.label}
+                  </p>
+                  <p className="mt-2 text-2xl font-extrabold leading-none text-slate-800 dark:text-white tracking-tight">
+                    {card.value}
+                  </p>
+                  <div
                     className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800 shadow-inner"
                     role="progressbar"
                     aria-valuenow={card.progress}
@@ -647,7 +762,10 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                     aria-valuemax={100}
                     aria-label={card.label}
                   >
-                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 transition-all duration-1000" style={{ width: `${card.progress}%` }} />
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 transition-all duration-1000"
+                      style={{ width: `${card.progress}%` }}
+                    />
                   </div>
                   <p className="mt-3 text-xs leading-relaxed text-slate-500 font-medium">{card.note}</p>
                 </div>
@@ -661,14 +779,17 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </summary>
               <div className="mt-4 border-t border-slate-200/50 dark:border-slate-800 pt-5 grid gap-4">
                 {result.axisScores.map((axis) => (
-                  <div key={axis.axis} className="rounded-xl border border-white/30 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-4">
+                  <div
+                    key={axis.axis}
+                    className="rounded-xl border border-white/30 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-4"
+                  >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{axis.label}</p>
                       <span className="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                         {axis.score}/{axis.maxScore}
                       </span>
                     </div>
-                    <div 
+                    <div
                       className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800 shadow-inner"
                       role="progressbar"
                       aria-valuenow={axis.percent}
@@ -681,7 +802,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                         style={{ width: `${axis.percent}%` }}
                       />
                     </div>
-                    <p className="mt-3 text-xs leading-relaxed text-slate-650 dark:text-slate-400 font-medium">{axis.diagnostic}</p>
+                    <p className="mt-3 text-xs leading-relaxed text-slate-650 dark:text-slate-400 font-medium">
+                      {axis.diagnostic}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -693,18 +816,26 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 <ChevronDown className="h-5 w-5 text-slate-400 transition-transform duration-300 group-open:rotate-180" />
               </summary>
               <div className="mt-4 border-t border-slate-200/50 dark:border-slate-800 pt-5 space-y-4">
-                <p className="text-sm font-bold leading-relaxed text-slate-800 dark:text-slate-200 p-4 rounded-xl bg-white/60 dark:bg-slate-900/60 shadow-sm border border-white/30 dark:border-slate-800">{pendingGoal.specific}</p>
+                <p className="text-sm font-bold leading-relaxed text-slate-800 dark:text-slate-200 p-4 rounded-xl bg-white/60 dark:bg-slate-900/60 shadow-sm border border-white/30 dark:border-slate-800">
+                  {pendingGoal.specific}
+                </p>
                 <div className="grid gap-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-1">Thời hạn</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-1">
+                      Thời hạn
+                    </p>
                     <p className="font-medium text-slate-800 dark:text-slate-200">{pendingGoal.timeBound}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-1">Dấu hiệu hoàn thành</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-1">
+                      Dấu hiệu hoàn thành
+                    </p>
                     <p className="font-medium text-slate-800 dark:text-slate-200">{pendingGoal.measurable}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-1">Lý do theo đuổi</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-1">
+                      Lý do theo đuổi
+                    </p>
                     <p className="font-medium text-slate-800 dark:text-slate-200">{pendingGoal.relevant}</p>
                   </div>
                 </div>
@@ -718,13 +849,18 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </summary>
               <div className="mt-4 border-t border-slate-200/50 dark:border-slate-800 pt-5 grid gap-4">
                 {copy.weeklyRhythm.map((item, index) => (
-                  <div key={item.label} className="flex gap-4 p-4 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-white/30 dark:border-slate-800">
+                  <div
+                    key={item.label}
+                    className="flex gap-4 p-4 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-white/30 dark:border-slate-800"
+                  >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-sm font-bold text-indigo-600 dark:text-indigo-400">
                       {index + 1}
                     </div>
                     <div>
                       <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{item.label}</p>
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">{item.detail}</p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
+                        {item.detail}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -743,11 +879,16 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 </div>
                 <ol className="grid gap-3">
                   {copy.nextMoves.map((item, index) => (
-                    <li key={item} className="flex gap-4 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-slate-900/40 transition-colors">
+                    <li
+                      key={item}
+                      className="flex gap-4 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-slate-900/40 transition-colors"
+                    >
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-xs font-bold text-emerald-600 dark:text-emerald-400">
                         {index + 1}
                       </span>
-                      <span className="text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium">{item}</span>
+                      <span className="text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
+                        {item}
+                      </span>
                     </li>
                   ))}
                 </ol>
@@ -755,8 +896,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <p className="text-xs font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-500 mb-2">
                     Nguyên tắc lập kế hoạch
                   </p>
-                  <p className="text-sm font-bold leading-relaxed text-slate-800 dark:text-slate-200">{result.scopeRecommendation}</p>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">{result.bottleneck.action}</p>
+                  <p className="text-sm font-bold leading-relaxed text-slate-800 dark:text-slate-200">
+                    {result.scopeRecommendation}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
+                    {result.bottleneck.action}
+                  </p>
                 </div>
               </div>
             </details>
@@ -767,7 +912,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         <div className="mt-10 pt-8 border-t border-slate-200/40 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 relative z-10">
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">Đã sẵn sàng hành động?</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-500 font-medium">Bất kể mức độ khả thi, hãy biến mục tiêu của bạn thành kế hoạch 12 tuần thích nghi.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-500 font-medium">
+              Bất kể mức độ khả thi, hãy biến mục tiêu của bạn thành kế hoạch 12 tuần thích nghi.
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
             <button

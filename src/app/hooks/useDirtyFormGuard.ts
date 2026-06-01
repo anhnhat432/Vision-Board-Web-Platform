@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-
 export function useDirtyFormGuard(isDirty: boolean, flushPendingSave: () => void) {
   const isDirtyRef = useRef(isDirty);
   const flushPendingSaveRef = useRef(flushPendingSave);

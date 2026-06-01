@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Laptop } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { cn } from "@/app/components/ui/utils";
 

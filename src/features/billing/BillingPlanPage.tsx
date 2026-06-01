@@ -1,6 +1,4 @@
-﻿import { apiClient, toAppError } from "@/lib/api/apiClient";
-import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import {
+﻿import {
   AlertTriangle,
   Check,
   CreditCard,
@@ -16,17 +14,13 @@ import {
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { apiClient, toAppError } from "@/lib/api/apiClient";
+import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { BillingTrustSignals } from "../../app/components/BillingTrustSignals";
-import { UpgradePaywallDialog } from "../../app/components/UpgradePaywallDialog";
-import {
-  canRequestRefund,
-  getEmailVerificationRequiredMessage,
-  rememberEmailVerificationReturnPath,
-} from "../../app/utils/email-verification-guard";
-import { logBillingUiError, toastBillingNetworkError } from "../../app/utils/billing-ui-monitoring";
 import { PageHero } from "../../app/components/layout/PageHero";
 import { PrimaryActionCard } from "../../app/components/layout/PrimaryActionCard";
 import { SectionBlock } from "../../app/components/layout/SectionBlock";
+import { UpgradePaywallDialog } from "../../app/components/UpgradePaywallDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,18 +46,24 @@ import { Input } from "../../app/components/ui/input";
 import { Textarea } from "../../app/components/ui/textarea";
 import { usePlanEntitlements } from "../../app/hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../../app/hooks/useSyncedUserData";
-import { isRealMode, isPaidCheckoutDisabled, shouldShowBillingDebugUi } from "../../app/utils/app-mode";
+import { isPaidCheckoutDisabled, isRealMode, shouldShowBillingDebugUi } from "../../app/utils/app-mode";
+import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../../app/utils/billing-contract";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../../app/utils/billing-expiry";
 import { getSubscriptionGraceState } from "../../app/utils/billing-grace-period";
-import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../../app/utils/billing-contract";
+import { logBillingUiError, toastBillingNetworkError } from "../../app/utils/billing-ui-monitoring";
+import {
+  canRequestRefund,
+  getEmailVerificationRequiredMessage,
+  rememberEmailVerificationReturnPath,
+} from "../../app/utils/email-verification-guard";
 import { trackPaywallCtaClicked } from "../../app/utils/monetization-analytics";
 import {
   getBillingProviderStatus,
   getLastEntitlementSyncSnapshot,
   getLastRestoreAccessSnapshot,
   openBillingCustomerPortal,
-  restorePlanAccess,
   resolveAppReturnPath,
+  restorePlanAccess,
   syncEntitlementsWithProvider,
 } from "../../app/utils/production";
 import { getUserData } from "../../app/utils/storage";
@@ -131,13 +131,8 @@ export function BillingPlan() {
   const signedInUserId = authContext?.user?.uid ?? null;
   const canLoadPaymentHistory = realMode && signedInUserId !== null;
 
-  const {
-    paymentHistory,
-    setPaymentHistory,
-    isLoadingPaymentHistory,
-    paymentHistoryError,
-    loadPaymentHistory,
-  } = usePaymentHistory(canLoadPaymentHistory);
+  const { paymentHistory, setPaymentHistory, isLoadingPaymentHistory, paymentHistoryError, loadPaymentHistory } =
+    usePaymentHistory(canLoadPaymentHistory);
 
   const { checkoutReturnStatus, retry: retryCheckoutEntitlement } = useCheckoutReturn({
     isCheckoutReturn,
@@ -579,8 +574,8 @@ export function BillingPlan() {
             <div className="flex-1">
               <p className="font-medium text-app-ink">Thanh toán đang tạm khóa.</p>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị
-                ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
+                Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
+                hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ{" "}
                 {BILLING_SUPPORT_EMAIL ? (
                   <a
                     href={`mailto:${BILLING_SUPPORT_EMAIL}`}
@@ -590,8 +585,8 @@ export function BillingPlan() {
                   </a>
                 ) : (
                   "đội hỗ trợ"
-                )}
-                {" "}để mở Plus thủ công.
+                )}{" "}
+                để mở Plus thủ công.
               </p>
             </div>
           </div>
@@ -673,11 +668,7 @@ export function BillingPlan() {
               className="ml-auto bg-app-accent text-white hover:bg-app-accent"
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              {paidCheckoutDisabled
-                ? "Tạm khóa thanh toán"
-                : isInRenewalPriority
-                  ? "Gia hạn ngay"
-                  : "Gia hạn Plus"}
+              {paidCheckoutDisabled ? "Tạm khóa thanh toán" : isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
             </Button>
           </div>
         </div>
@@ -809,11 +800,7 @@ export function BillingPlan() {
                   className="bg-app-accent text-white hover:bg-app-accent"
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  {paidCheckoutDisabled
-                    ? "Tạm khóa thanh toán"
-                    : isInRenewalPriority
-                      ? "Gia hạn ngay"
-                      : "Gia hạn Plus"}
+                  {paidCheckoutDisabled ? "Tạm khóa thanh toán" : isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
                 </Button>
               )}
               {realMode && (

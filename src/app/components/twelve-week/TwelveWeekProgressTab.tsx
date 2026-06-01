@@ -12,21 +12,20 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-
-import { InlineGoalTitleEdit } from "./InlineGoalTitleEdit";
+import type { ExecutionInsight } from "@/features/plan12week/logic";
+import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/features/plan12week/logic";
+import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
+import type { TwelveWeekSystem } from "../../utils/storage-types";
+import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";
+import { WeeklyReviewIllustration } from "../illustrations";
+import { PrimaryActionCard } from "../layout/PrimaryActionCard";
+import { SectionBlock } from "../layout/SectionBlock";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { WeeklyReviewIllustration } from "../illustrations";
-import { PrimaryActionCard } from "../layout/PrimaryActionCard";
-import { SectionBlock } from "../layout/SectionBlock";
-import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
-import type { TwelveWeekSystem } from "../../utils/storage-types";
-import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";
-import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/features/plan12week/logic";
-import type { ExecutionInsight } from "@/features/plan12week/logic";
+import { InlineGoalTitleEdit } from "./InlineGoalTitleEdit";
 
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 import { ZenJourneyMap } from "./ZenJourneyMap";
@@ -146,25 +145,29 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
   switch (level) {
     case "on_track":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-2xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-2xl shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-2xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-2xl shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-2xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-2xl shadow-xs",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-2xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-2xl shadow-xs",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
@@ -202,8 +205,6 @@ function getAverageLeadScore(system: TwelveWeekSystem): number {
       reviewedWeeks.length,
   );
 }
-
-
 
 export function TwelveWeekProgressTab({
   system,
@@ -282,9 +283,7 @@ export function TwelveWeekProgressTab({
         action={
           nextActionHandler ? (
             <div className="rounded-2xl border border-app-line/60 bg-app-bg/50 backdrop-blur-xs p-4 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
-                Tiếp theo nên làm
-              </p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Tiếp theo nên làm</p>
               <p className="mt-1.5 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
               <Button
                 size="lg"
@@ -308,7 +307,10 @@ export function TwelveWeekProgressTab({
             {narrativeStyle.badgeLabel}
           </span>
           {trend.weekOverWeekDelta !== null && (
-            <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink-soft rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Badge
+              variant="outline"
+              className="border-app-line bg-app-bg text-app-ink-soft rounded-full px-2.5 py-0.5 text-xs font-medium"
+            >
               {trend.trendDirection === "up" ? (
                 <ArrowUp className="mr-1 h-3 w-3 text-app-accent" />
               ) : trend.trendDirection === "down" ? (
@@ -377,7 +379,8 @@ export function TwelveWeekProgressTab({
               </p>
               <div className="mt-4 flex items-start justify-between gap-3">
                 <p className="font-serif text-3xl font-bold text-app-ink">
-                  {averageLeadScore}% <span className="text-xs font-sans font-normal text-app-ink-soft">trung bình</span>
+                  {averageLeadScore}%{" "}
+                  <span className="text-xs font-sans font-normal text-app-ink-soft">trung bình</span>
                 </p>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -406,7 +409,8 @@ export function TwelveWeekProgressTab({
                 Tuần đã hoàn thành
               </p>
               <p className="mt-4 font-serif text-3xl font-bold text-app-ink">
-                {reviewDoneCount}/{system.totalWeeks} <span className="text-xs font-sans font-normal text-app-ink-soft">tuần</span>
+                {reviewDoneCount}/{system.totalWeeks}{" "}
+                <span className="text-xs font-sans font-normal text-app-ink-soft">tuần</span>
               </p>
               <p className="mt-1.5 text-xs font-medium text-app-ink-soft leading-relaxed">
                 {isEarlyState
@@ -438,7 +442,9 @@ export function TwelveWeekProgressTab({
                     Duy trì việc cốt lõi và chốt review vào {getReviewDayLabel(system.reviewDay)}.
                   </p>
                 </div>
-                <Badge className="bg-app-accent text-white hover:bg-app-accent rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs">{currentWeekScoreValue} điểm</Badge>
+                <Badge className="bg-app-accent text-white hover:bg-app-accent rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs">
+                  {currentWeekScoreValue} điểm
+                </Badge>
               </div>
             </div>
 
@@ -464,7 +470,9 @@ export function TwelveWeekProgressTab({
 
                   return (
                     <div key={item.label} className={`relative pl-11 ${isLastItem ? "" : "pb-6"}`}>
-                      {!isLastItem && <div className="absolute left-[13px] top-8 h-full w-[2px] bg-gradient-to-b from-app-accent/30 to-app-line/10" />}
+                      {!isLastItem && (
+                        <div className="absolute left-[13px] top-8 h-full w-[2px] bg-gradient-to-b from-app-accent/30 to-app-line/10" />
+                      )}
                       <div className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-app-accent/80 text-[10px] font-bold text-white shadow-sm ring-4 ring-app-accent-soft/50">
                         {index + 1}
                       </div>
@@ -496,7 +504,10 @@ export function TwelveWeekProgressTab({
                   <div className="min-w-[320px] stack-tight">
                     <div className="flex gap-1 pl-10">
                       {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => (
-                        <div key={day} className="w-9 text-center text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+                        <div
+                          key={day}
+                          className="w-9 text-center text-[10px] font-bold uppercase tracking-wider text-app-ink-muted"
+                        >
                           {day}
                         </div>
                       ))}
@@ -526,8 +537,8 @@ export function TwelveWeekProgressTab({
                               <div
                                 key={cell.dateKey}
                                 className={`h-9 w-9 rounded-[6px] transition-all duration-200 hover:scale-105 ${cellClass} ${
-                                  weekNumber === currentWeek 
-                                    ? "ring-2 ring-app-accent ring-offset-2 ring-offset-app-surface" 
+                                  weekNumber === currentWeek
+                                    ? "ring-2 ring-app-accent ring-offset-2 ring-offset-app-surface"
                                     : ""
                                 }`}
                                 title={`${cell.dateKey}: ${cell.completed}/${cell.total} xong`}
@@ -551,7 +562,8 @@ export function TwelveWeekProgressTab({
                         <span className="inline-block h-3.5 w-3.5 rounded bg-app-warm/40 shadow-3xs" /> 0%
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <span className="inline-block h-3.5 w-3.5 rounded border border-app-line/20 bg-app-bg shadow-3xs" /> Trống
+                        <span className="inline-block h-3.5 w-3.5 rounded border border-app-line/20 bg-app-bg shadow-3xs" />{" "}
+                        Trống
                       </span>
                     </div>
                     <p className="mt-3.5 text-[11px] italic text-app-ink-muted">
@@ -580,16 +592,14 @@ export function TwelveWeekProgressTab({
                       <div
                         key={point.weekNumber}
                         className={`rounded-2xl border p-4.5 transition-all duration-200 ${
-                          isCurrent 
-                            ? "border-app-accent/30 bg-app-accent-soft/30 shadow-xs" 
+                          isCurrent
+                            ? "border-app-accent/30 bg-app-accent-soft/30 shadow-xs"
                             : "border-app-line/60 bg-app-bg/50 hover:bg-app-bg/80"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <span
-                              className={`text-sm font-bold ${isCurrent ? "text-app-ink" : "text-app-ink-soft"}`}
-                            >
+                            <span className={`text-sm font-bold ${isCurrent ? "text-app-ink" : "text-app-ink-soft"}`}>
                               Tuần {point.weekNumber}
                             </span>
                             {isCurrent && (
@@ -688,7 +698,7 @@ export function TwelveWeekProgressTab({
           {/* Background Accents */}
           <div className="absolute -right-16 -top-16 -z-10 w-32 h-32 rounded-full bg-amber-400/15 blur-2xl pointer-events-none" />
           <div className="absolute -left-16 -bottom-16 -z-10 w-32 h-32 rounded-full bg-yellow-400/10 blur-2xl pointer-events-none" />
-          
+
           <CardContent className="flex flex-col items-center gap-5 p-8 text-center sm:p-10">
             {/* Glowing Lock Icon */}
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/25 ring-4 ring-amber-500/10 transition-transform duration-300 hover:scale-105">
@@ -701,7 +711,9 @@ export function TwelveWeekProgressTab({
                 Phân tích thực thi nâng cao
               </h3>
               <p className="mx-auto max-w-md text-sm leading-relaxed text-app-ink-soft">
-                Khai phá toàn bộ tiềm năng với Bản đồ nhiệt hoàn thành, phân tích xu hướng chi tiết theo tuần và đo lường hiệu quả từng việc lặp lại. Giúp bạn biết rõ chỗ nào đang mạnh, điểm nào cần tối ưu hóa để bứt phá.
+                Khai phá toàn bộ tiềm năng với Bản đồ nhiệt hoàn thành, phân tích xu hướng chi tiết theo tuần và đo
+                lường hiệu quả từng việc lặp lại. Giúp bạn biết rõ chỗ nào đang mạnh, điểm nào cần tối ưu hóa để bứt
+                phá.
               </p>
             </div>
 
@@ -712,7 +724,7 @@ export function TwelveWeekProgressTab({
               </Badge>
 
               {onOpenSettingsTab && (
-                <Button 
+                <Button
                   onClick={onOpenSettingsTab}
                   className="mt-2 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-medium px-6 py-2 rounded-xl shadow-md shadow-amber-500/15 hover:shadow-lg hover:shadow-amber-500/25 transition-all duration-300 flex items-center gap-2 text-sm border-none"
                 >

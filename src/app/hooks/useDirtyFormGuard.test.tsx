@@ -17,7 +17,9 @@ describe("useDirtyFormGuard", () => {
     let returnValueVal = "";
     Object.defineProperty(event, "returnValue", {
       get: () => returnValueVal,
-      set: (val) => { returnValueVal = val; },
+      set: (val) => {
+        returnValueVal = val;
+      },
       configurable: true,
     });
     window.dispatchEvent(event);

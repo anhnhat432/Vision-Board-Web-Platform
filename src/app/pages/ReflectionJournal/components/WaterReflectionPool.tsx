@@ -3,7 +3,8 @@ import { useEffect, useRef } from "react";
 // Bộ tổng hợp tiếng giọt nước rơi thanh lọc tâm hồn Stoic bằng Web Audio API
 const playWaterDroplet = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
 
@@ -56,7 +57,7 @@ export function WaterReflectionPool() {
     }
 
     const ripples: Ripple[] = [];
-    
+
     // Hàm kích hoạt tiếng giọt nước có throttling tối thiểu 350ms để không bị ồn khi gõ nhanh
     const triggerWaterDroplet = () => {
       const now = Date.now();
@@ -72,8 +73,8 @@ export function WaterReflectionPool() {
       if (!activeElement || activeElement.tagName !== "TEXTAREA") return;
 
       // Sinh toạ độ ngẫu nhiên xung quanh khu vực viết (tâm màn hình)
-      const rippleX = (width * 0.25) + Math.random() * (width * 0.5);
-      const rippleY = (height * 0.3) + Math.random() * (height * 0.4);
+      const rippleX = width * 0.25 + Math.random() * (width * 0.5);
+      const rippleY = height * 0.3 + Math.random() * (height * 0.4);
 
       // Thêm gợn sóng chánh niệm
       ripples.push({
@@ -101,10 +102,10 @@ export function WaterReflectionPool() {
 
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i];
-        
+
         // Lan tỏa sóng ra ngoài
         r.radius += r.speed;
-        
+
         // Giảm dần alpha theo bán kính
         const lifeRatio = 1 - r.radius / r.maxRadius;
         r.alpha = lifeRatio * 0.15;
@@ -113,7 +114,7 @@ export function WaterReflectionPool() {
         if (r.alpha > 0) {
           ctx.save();
           ctx.globalAlpha = r.alpha;
-          
+
           // Vòng sóng ngoài
           ctx.strokeStyle = `rgba(${r.color}, 0.8)`;
           ctx.lineWidth = 1.0;
@@ -154,10 +155,5 @@ export function WaterReflectionPool() {
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-70"
-    />
-  );
+  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-70" />;
 }

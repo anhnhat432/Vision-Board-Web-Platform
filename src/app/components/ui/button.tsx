@@ -1,7 +1,7 @@
-import { forwardRef, type ComponentProps } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
+import { type ComponentProps, forwardRef } from "react";
 
 import { cn } from "./utils";
 
@@ -101,10 +101,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     >
       {loading ? (
         <>
-          <span
-            className="pointer-events-none absolute inset-0 flex items-center justify-center"
-            aria-hidden="true"
-          >
+          <span className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
             <Loader2 className="size-4 animate-spin" />
           </span>
           <span className="opacity-60">{children}</span>

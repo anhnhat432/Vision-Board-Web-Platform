@@ -1,6 +1,6 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { LIFE_AREAS, getLifeAreaLabel } from "../utils/storage";
+import { getLifeAreaLabel, LIFE_AREAS } from "../utils/storage";
 
 export interface LifeBalanceHistoryChartPoint {
   date: string;

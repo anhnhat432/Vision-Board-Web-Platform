@@ -1,11 +1,11 @@
-import type { BuildSmartGoalInput } from "@/lib/smart-goal";
 import type { LeadIndicatorDraft } from "@/app/pages/12WeekSetup/types";
 import type {
+  FeasibilityAxis,
   PlanLoadRecommendation,
   ResultType,
   WeeklyCapacity,
-  FeasibilityAxis,
 } from "@/app/pages/FeasibilityCheck/types";
+import type { BuildSmartGoalInput } from "@/lib/smart-goal";
 
 export type CoreFunnelGoalType =
   | "skill"

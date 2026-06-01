@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { CatalogItem } from "@/features/order/catalog/types";
 
@@ -38,21 +38,13 @@ describe("buildOrderLines", () => {
   });
 
   it("skips frame when frameItemId null", () => {
-    expect(
-      buildOrderLines(
-        { frameItemId: null, themeItemIds: [], stickerSelection: null },
-        catalog,
-      ),
-    ).toEqual([]);
+    expect(buildOrderLines({ frameItemId: null, themeItemIds: [], stickerSelection: null }, catalog)).toEqual([]);
   });
 
   it("skips items missing from catalog", () => {
-    expect(
-      buildOrderLines(
-        { frameItemId: "frame:nope", themeItemIds: [], stickerSelection: null },
-        catalog,
-      ),
-    ).toEqual([]);
+    expect(buildOrderLines({ frameItemId: "frame:nope", themeItemIds: [], stickerSelection: null }, catalog)).toEqual(
+      [],
+    );
   });
 });
 
@@ -63,9 +55,7 @@ describe("calcSubtotal/calcTotal", () => {
       catalog,
     );
     expect(calcSubtotal(lines)).toBe(120);
-    expect(
-      calcShipping({ frameItemId: "frame:30x40", themeItemIds: [], stickerSelection: null }),
-    ).toBe(0);
+    expect(calcShipping({ frameItemId: "frame:30x40", themeItemIds: [], stickerSelection: null })).toBe(0);
     expect(calcTotal(120, 0)).toBe(120);
   });
 });

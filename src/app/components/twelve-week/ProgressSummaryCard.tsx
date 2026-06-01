@@ -10,12 +10,11 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
-import type { TwelveWeekSystem } from "../../utils/storage-types";
 import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/features/plan12week/logic";
 import { formatCalendarDate } from "../../utils/storage";
+import type { TwelveWeekSystem } from "../../utils/storage-types";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
 import { getProgressNextActionSuggestion, type ProgressNextActionSuggestion } from "./TwelveWeekProgressTab";
 
 interface WeekRange {
@@ -50,25 +49,29 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
   switch (level) {
     case "on_track":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-3xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-3xl shadow-xs",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
-        container: "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-3xl shadow-xs",
+        container:
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-3xl shadow-xs",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
@@ -178,7 +181,9 @@ export function ProgressSummaryCard({
                 <Sparkles className="h-3.5 w-3.5 text-app-accent" />
                 Trạng thái nhịp tuần này
               </p>
-              <p className="mt-2 font-serif text-xl font-bold leading-snug text-app-ink sm:text-2xl">{trend.headline}</p>
+              <p className="mt-2 font-serif text-xl font-bold leading-snug text-app-ink sm:text-2xl">
+                {trend.headline}
+              </p>
               <p className="mt-1.5 text-sm leading-relaxed text-app-ink-soft">{trend.advice}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {trend.weekOverWeekDelta !== null && (
@@ -257,9 +262,7 @@ export function ProgressSummaryCard({
               Review đã khóa
             </p>
             <p className="mt-4 font-serif text-3xl font-bold text-app-ink">
-              {isEarlyState
-                ? `${boundedCurrentWeek}/${boundedTotalWeeks}`
-                : `${reviewDoneCount}/${boundedTotalWeeks}`}
+              {isEarlyState ? `${boundedCurrentWeek}/${boundedTotalWeeks}` : `${reviewDoneCount}/${boundedTotalWeeks}`}
             </p>
             <p className="mt-1.5 text-xs font-medium text-app-ink-soft leading-relaxed">
               {isEarlyState
@@ -350,8 +353,8 @@ export function ProgressSummaryCard({
 
       {onViewFull && (
         <div className="flex justify-center mt-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onViewFull}
             className="rounded-xl border-app-line/80 hover:bg-app-bg transition-colors px-6 py-2 text-sm font-semibold"
           >

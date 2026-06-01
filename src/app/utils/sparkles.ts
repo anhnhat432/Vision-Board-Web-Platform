@@ -1,10 +1,7 @@
 // Helper tạo hiệu ứng hạt lấp lánh (Sparkles Canvas Particles) khi hoàn thành công việc
 export function triggerSparkles(clientX: number, clientY: number) {
   // Nếu người dùng bật chế độ giảm chuyển động, không chạy hiệu ứng hạt để bảo vệ mắt
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  ) {
+  if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return;
   }
 
@@ -12,17 +9,17 @@ export function triggerSparkles(clientX: number, clientY: number) {
     const canvas = document.createElement("canvas");
     canvas.width = 160;
     canvas.height = 160;
-    
+
     // Tọa độ tương đối trên trang (bao gồm cả khoảng scroll)
     const scrollX = window.scrollX || window.pageXOffset;
     const scrollY = window.scrollY || window.pageYOffset;
-    
+
     canvas.style.position = "absolute";
     canvas.style.left = `${clientX + scrollX - 80}px`;
     canvas.style.top = `${clientY + scrollY - 80}px`;
     canvas.style.pointerEvents = "none";
     canvas.style.zIndex = "9999";
-    
+
     document.body.appendChild(canvas);
 
     const ctx = canvas.getContext("2d");
@@ -75,23 +72,23 @@ export function triggerSparkles(clientX: number, clientY: number) {
       for (const p of particles) {
         if (p.alpha > 0) {
           alive = true;
-          
+
           // Cập nhật vị trí
           p.x += p.vx;
           p.y += p.vy;
-          
+
           // Thêm lực cản gió nhẹ và trọng lực rất nhỏ
           p.vx *= 0.95;
-          p.vy = (p.vy + 0.05) * 0.95; 
-          
+          p.vy = (p.vy + 0.05) * 0.95;
+
           // Giảm độ mờ
           p.alpha -= p.decay;
-          
+
           if (p.alpha > 0) {
             ctx.save();
             ctx.globalAlpha = p.alpha;
             ctx.fillStyle = p.color;
-            
+
             // Vẽ hạt dạng hình thoi lấp lánh (Sparkle shape) thay vì hình tròn đơn giản
             ctx.beginPath();
             ctx.moveTo(p.x, p.y - p.size);

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { STORY_FEELING_OPTIONS } from "@/app/utils/vision-board-config";
-import { VisionBoardStoryWizard, type VisionBoardStorySeed } from "./VisionBoardStoryWizard";
+import { type VisionBoardStorySeed, VisionBoardStoryWizard } from "./VisionBoardStoryWizard";
 
 const GOALS = [
   { id: "goal_health_1", title: "Chạy 5km", category: "Health" },

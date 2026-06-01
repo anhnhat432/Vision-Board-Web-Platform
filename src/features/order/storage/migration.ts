@@ -25,10 +25,7 @@ function normStatus(value: unknown): OrderStatus {
 
 export function migrateOrderV1ToV2(raw: LegacyOrderV1): LocalOrderV2 {
   const now = new Date().toISOString();
-  const kitMarker =
-    typeof raw.kitType === "string" && raw.kitType
-      ? `[Đơn cũ — kitType: ${raw.kitType}]`
-      : "[Đơn cũ]";
+  const kitMarker = typeof raw.kitType === "string" && raw.kitType ? `[Đơn cũ — kitType: ${raw.kitType}]` : "[Đơn cũ]";
   const existingNote = typeof raw.note === "string" ? raw.note : "";
 
   return {
@@ -56,9 +53,7 @@ export function migrateOrderV1ToV2(raw: LegacyOrderV1): LocalOrderV2 {
     shippingAddress: typeof raw.shippingAddress === "string" ? raw.shippingAddress : "",
     goalId: typeof raw.goalId === "string" ? raw.goalId : null,
     goalTitle: typeof raw.goalTitle === "string" ? raw.goalTitle : "",
-    keywords: Array.isArray(raw.keywords)
-      ? raw.keywords.filter((k): k is string => typeof k === "string")
-      : [],
+    keywords: Array.isArray(raw.keywords) ? raw.keywords.filter((k): k is string => typeof k === "string") : [],
     note: existingNote ? `${existingNote}\n\n${kitMarker}` : kitMarker,
   };
 }

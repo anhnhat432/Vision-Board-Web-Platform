@@ -1,5 +1,5 @@
-import { Link } from "react-router";
 import { Shield } from "lucide-react";
+import { Link } from "react-router";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 

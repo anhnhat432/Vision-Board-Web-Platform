@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +11,8 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Trash2 } from "lucide-react";
+import { Label } from "../ui/label";
 
 interface DeleteDataConfirmationDialogProps {
   open: boolean;
@@ -41,7 +41,7 @@ export function DeleteDataConfirmationDialog({
     }
   }, [open]);
 
-  const expectedText = (isSignedIn && !isDemoMode) ? "XOATAIKHOAN" : "XOADULIEU";
+  const expectedText = isSignedIn && !isDemoMode ? "XOATAIKHOAN" : "XOADULIEU";
 
   const title = isDemoMode
     ? "Xóa dữ liệu trên thiết bị?"
@@ -86,9 +86,7 @@ export function DeleteDataConfirmationDialog({
         </AlertDialogHeader>
 
         <div className="rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-4 py-3">
-          <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">
-            Hành động này không thể hoàn tác.
-          </p>
+          <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">Hành động này không thể hoàn tác.</p>
           <p className="mt-1 text-sm font-semibold text-[color:var(--color-danger-fg)]">
             Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
           </p>

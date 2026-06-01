@@ -1,6 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import {
   ChevronsUpDown,
   Compass,
@@ -11,6 +10,7 @@ import {
   Sun,
   User as UserIcon,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 
 import { Button } from "../ui/button";
 import {
@@ -84,9 +84,7 @@ export function AppSidebar({
             className="size-9 rounded-lg object-cover shadow-sm ring-1 ring-app-accent/20"
           />
           <div className="min-w-0">
-            <span className="block truncate text-base font-semibold tracking-tight text-app-ink">
-              Dear Our Future
-            </span>
+            <span className="block truncate text-base font-semibold tracking-tight text-app-ink">Dear Our Future</span>
             <span className="block truncate text-xs text-app-ink-muted">12-tuần · Vision</span>
           </div>
         </button>
@@ -182,7 +180,11 @@ export function AppSidebar({
             className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface text-xs font-semibold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink hover:shadow-xs active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
-            {resolvedTheme === "dark" ? <Sun className="h-4 w-4 text-amber-500 animate-pulse" /> : <Moon className="h-4 w-4 text-slate-500" />}
+            {resolvedTheme === "dark" ? (
+              <Sun className="h-4 w-4 text-amber-500 animate-pulse" />
+            ) : (
+              <Moon className="h-4 w-4 text-slate-500" />
+            )}
             {resolvedTheme === "dark" ? "Sáng" : "Tối"}
           </button>
           <button
@@ -213,7 +215,9 @@ export function AppSidebar({
                   <p className="truncate text-xs font-semibold text-app-ink leading-tight">
                     {user.displayName ?? user.email ?? "Tài khoản"}
                   </p>
-                  <p className="truncate text-[10px] font-bold text-app-ink-muted/95 uppercase tracking-wider mt-0.5">{user.planLabel}</p>
+                  <p className="truncate text-[10px] font-bold text-app-ink-muted/95 uppercase tracking-wider mt-0.5">
+                    {user.planLabel}
+                  </p>
                 </div>
                 <ChevronsUpDown className="h-4 w-4 shrink-0 text-app-ink-muted/80" />
               </button>

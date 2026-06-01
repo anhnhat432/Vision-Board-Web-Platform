@@ -1,16 +1,15 @@
-import { useState } from "react";
 import { ChevronDown, Crown } from "lucide-react";
-
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+import { useState } from "react";
+import type { PricingPlanCode } from "../../utils/storage-types";
 import {
   getPlanLabel,
   type SuggestedNextWeekPlan,
   type WeeklyReviewPremiumInsight,
 } from "../../utils/twelve-week-premium";
-import type { PricingPlanCode } from "../../utils/storage-types";
 import { getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 
 interface TwelveWeekPremiumInsightSectionProps {
   currentPlanCode: PricingPlanCode;
@@ -133,7 +132,10 @@ export function TwelveWeekPremiumInsightSection({
                 Bước đầu tuần nên làm: {suggestedNextWeekPlan?.firstMove}
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <Button className="w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90" onClick={onApplySuggestedPlan}>
+                <Button
+                  className="w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90"
+                  onClick={onApplySuggestedPlan}
+                >
                   Dùng gợi ý này cho tuần sau
                 </Button>
                 <p className="text-sm text-app-ink-muted">Bạn vẫn có thể sửa lại trước khi chốt review.</p>
@@ -183,7 +185,10 @@ export function TwelveWeekPremiumInsightSection({
                 Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt - không chỉ là phân tích để
                 đọc.
               </p>
-              <Button className="mt-4 w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90" onClick={onOpenPremiumInsights}>
+              <Button
+                className="mt-4 w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90"
+                onClick={onOpenPremiumInsights}
+              >
                 Mở ôn lại Plus ngay
               </Button>
             </div>

@@ -1,6 +1,6 @@
+import { ChevronDown, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
 import type { GoalArchetype } from "@/lib/smart-goal";
 import { getGoalArchetypeExample, getGoalArchetypeLabel } from "@/lib/smart-goal";
-import { CircleAlert, Lightbulb, ChevronDown, Sparkles } from "lucide-react";
 import { cn } from "./ui/utils";
 
 export type GoalArchetypeExampleVariant =
@@ -48,7 +48,7 @@ export function GoalArchetypeExamples({
       data-archetype={archetype}
       className={cn(
         "group overflow-hidden rounded-[14px] border border-app-line bg-app-surface transition-all duration-200 text-left",
-        className
+        className,
       )}
     >
       <summary className="flex cursor-pointer items-center justify-between list-none p-4 text-sm font-semibold text-app-accent hover:bg-app-accent-soft/10 focus:outline-none focus:ring-2 focus:ring-app-accent/30 [&::-webkit-details-marker]:hidden">
@@ -76,7 +76,7 @@ export function GoalArchetypeExamples({
                   "rounded-[14px] border p-4 text-sm leading-relaxed transition-all duration-200",
                   isStrong
                     ? "border-app-accent/30 bg-app-accent-soft/30 text-app-accent"
-                    : "border-app-line bg-app-surface text-app-ink-soft"
+                    : "border-app-line bg-app-surface text-app-ink-soft",
                 )}
               >
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">

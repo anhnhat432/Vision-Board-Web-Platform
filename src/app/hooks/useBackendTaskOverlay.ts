@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import { useAuthContext } from "@/lib/auth/AuthContext";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import { getPlan } from "@/services/planService";
-import type { PlanDetails, Task as ApiTask } from "@/types/plan";
+import type { Task as ApiTask, PlanDetails } from "@/types/plan";
 import type { TwelveWeekTaskInstance } from "../utils/storage-types";
 
 /**

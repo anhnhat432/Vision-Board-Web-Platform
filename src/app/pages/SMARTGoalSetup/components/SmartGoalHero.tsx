@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 import { getLifeAreaLabel } from "../../../utils/storage";
@@ -40,9 +40,11 @@ export function SmartGoalHero({
               isCompact ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl"
             }`}
           >
-            {isCompact ? `Đang rèn luyện mục tiêu cho ${focusAreaLabel}` : `Viết mục tiêu SMART đầu tiên cho ${focusAreaLabel}`}
+            {isCompact
+              ? `Đang rèn luyện mục tiêu cho ${focusAreaLabel}`
+              : `Viết mục tiêu SMART đầu tiên cho ${focusAreaLabel}`}
           </motion.h1>
-          
+
           <AnimatePresence>
             {!isCompact && (
               <motion.p
@@ -73,4 +75,3 @@ export function SmartGoalHero({
     </section>
   );
 }
-

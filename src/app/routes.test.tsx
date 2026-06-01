@@ -104,8 +104,8 @@ vi.mock("./utils/production", () => ({
   syncPendingOutbox: vi.fn(),
 }));
 
-import { initializeUserData, saveUserData } from "./utils/storage";
 import { appRoutes } from "./routes";
+import { initializeUserData, saveUserData } from "./utils/storage";
 
 function renderRoute(pathname: string) {
   const router = createMemoryRouter(appRoutes, { initialEntries: [pathname] });

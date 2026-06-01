@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getUserData, saveUserData, initializeUserData } from "../utils/storage";
+import { getUserData, initializeUserData, saveUserData } from "../utils/storage";
 import { Dashboard } from "./Dashboard";
 
 const authContextMock = vi.hoisted(() => ({

@@ -2,11 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-import { LifeInsight } from "./LifeInsight";
 import { LIFE_AREAS, saveUserData } from "../utils/storage";
 import { CURRENT_STORAGE_VERSION } from "../utils/storage-constants";
 import type { UserData } from "../utils/storage-types";
+import { LifeInsight } from "./LifeInsight";
 
 function seedRealLifeBalance(): void {
   const base: UserData = {

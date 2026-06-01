@@ -1,17 +1,16 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
 import { Calendar, Hourglass } from "lucide-react";
-
-import { parseNumberInput } from "@/lib/smart-goal";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { cn } from "@/app/components/ui/utils";
+import { parseNumberInput } from "@/lib/smart-goal";
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { DEFAULT_TARGET_WEEKS } from "../constants";
-import type { SMARTData, GoalClarityItem, SmartGoalSummaryRow, SmartStepKey } from "../types";
+import type { GoalClarityItem, SMARTData, SmartGoalSummaryRow, SmartStepKey } from "../types";
 import { helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
-import { ReviewStep } from "./ReviewStep";
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
+import { ReviewStep } from "./ReviewStep";
 
 interface TimeBoundStepProps {
   smartData: SMARTData;
@@ -74,7 +73,7 @@ export function TimeBoundStep({
             "flex items-center justify-center gap-2 rounded-2xl border px-4 py-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
             smartData.timeBound.mode === "weeks"
               ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
-              : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+              : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink",
           )}
           onClick={() =>
             setSmartData((previous) => ({
@@ -100,7 +99,7 @@ export function TimeBoundStep({
             "flex items-center justify-center gap-2 rounded-2xl border px-4 py-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
             smartData.timeBound.mode === "date"
               ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
-              : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+              : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink",
           )}
           onClick={() =>
             setSmartData((previous) => ({
@@ -121,20 +120,24 @@ export function TimeBoundStep({
         <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
           <label htmlFor="smart-target-weeks-slider" className={cn(labelClass, "text-base font-bold text-app-ink")}>
             Số tuần bạn cam kết hoàn thành mục tiêu
-            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className={requiredMarkerClass} aria-hidden="true">
+              *
+            </span>
             <span className="sr-only"> bắt buộc</span>
           </label>
-          
+
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
             {/* Vòng hiển thị số tuần */}
-            <div className={cn(
-              "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-2xl border transition-all duration-300 shadow-sm",
-              parsedTargetWeeks === 12
-                ? "border-purple-500/35 text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/30"
-                : parsedTargetWeeks <= 6
-                  ? "border-emerald-500/20 text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/30"
-                  : "border-indigo-500/20 text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30"
-            )}>
+            <div
+              className={cn(
+                "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-2xl border transition-all duration-300 shadow-sm",
+                parsedTargetWeeks === 12
+                  ? "border-purple-500/35 text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/30"
+                  : parsedTargetWeeks <= 6
+                    ? "border-emerald-500/20 text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/30"
+                    : "border-indigo-500/20 text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30",
+              )}
+            >
               <span className="text-3xl font-extrabold tracking-tight">{parsedTargetWeeks}</span>
               <span className="text-[10px] font-bold uppercase tracking-wider">tuần</span>
             </div>
@@ -154,7 +157,7 @@ export function TimeBoundStep({
                 aria-invalid={showTargetWeeksError}
                 aria-describedby={showTargetWeeksError ? "smart-target-weeks-error" : undefined}
               />
-              
+
               <div className="flex items-center justify-between text-xs text-app-ink-muted">
                 <span>1 tuần</span>
                 <span className="text-purple-600 dark:text-purple-400 font-semibold">12 tuần (Chu kỳ chuẩn)</span>
@@ -165,12 +168,19 @@ export function TimeBoundStep({
               <div className="rounded-xl border border-purple-500/15 bg-gradient-to-br from-purple-500/[0.01] to-indigo-500/[0.02] dark:from-purple-950/[0.04] dark:to-indigo-950/[0.02] px-4 py-3 flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                 <Calendar className="h-5 w-5 text-purple-500 shrink-0" />
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-purple-600 dark:text-purple-400 font-extrabold">Thời khắc cán đích dự kiến</p>
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-purple-600 dark:text-purple-400 font-extrabold">
+                    Thời khắc cán đích dự kiến
+                  </p>
                   <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                     {(() => {
                       const d = new Date();
                       d.setDate(d.getDate() + parsedTargetWeeks * 7);
-                      return d.toLocaleDateString("vi-VN", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                      return d.toLocaleDateString("vi-VN", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      });
                     })()}
                   </p>
                 </div>
@@ -222,7 +232,7 @@ export function TimeBoundStep({
                   "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
                   parsedTargetWeeks === Number(weeks)
                     ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
-                    : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10"
+                    : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
                 )}
               >
                 {weeks} tuần {weeks === "12" ? " (Khuyên dùng)" : ""}
@@ -230,7 +240,9 @@ export function TimeBoundStep({
             ))}
           </div>
 
-          <p className={helperTextClass}>Hệ thống 12 tuần giúp chia nhỏ kế hoạch hành động thành từng tuần dễ dàng hơn.</p>
+          <p className={helperTextClass}>
+            Hệ thống 12 tuần giúp chia nhỏ kế hoạch hành động thành từng tuần dễ dàng hơn.
+          </p>
           {showTargetWeeksError ? (
             <FieldError id="smart-target-weeks-error" message="Nhập số tuần mục tiêu lớn hơn 0." role="alert" />
           ) : null}
@@ -239,7 +251,9 @@ export function TimeBoundStep({
         <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
           <label htmlFor="smart-target-date" className={cn(labelClass, "text-base font-bold text-app-ink")}>
             Ngày bạn muốn hoàn thành mục tiêu
-            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className={requiredMarkerClass} aria-hidden="true">
+              *
+            </span>
             <span className="sr-only"> bắt buộc</span>
           </label>
           <Input
@@ -260,7 +274,7 @@ export function TimeBoundStep({
             aria-invalid={showTargetDateError}
             aria-describedby={showTargetDateError ? "smart-target-date-error" : undefined}
           />
-          
+
           {/* 1-Click Date Suggestions */}
           <div className="mt-4 flex flex-wrap gap-2 items-center border-t border-app-line/60 pt-4">
             <span className="text-[10px] font-bold text-app-accent">Chọn nhanh:</span>
@@ -290,7 +304,7 @@ export function TimeBoundStep({
                     "text-xs px-3 py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer",
                     isSelected
                       ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
-                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10"
+                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
                   )}
                 >
                   Sau {weeks} tuần ({weeks === 12 ? "12 tuần" : `${weeks} tuần`})
@@ -304,7 +318,9 @@ export function TimeBoundStep({
             <div className="rounded-xl border border-purple-500/15 bg-gradient-to-br from-purple-500/[0.01] to-indigo-500/[0.02] dark:from-purple-950/[0.04] dark:to-indigo-950/[0.02] px-4 py-3 flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
               <Calendar className="h-5 w-5 text-purple-500 shrink-0" />
               <div>
-                <p className="text-[10px] uppercase tracking-[0.12em] text-purple-600 dark:text-purple-400 font-extrabold">Thời gian thực thi dự kiến</p>
+                <p className="text-[10px] uppercase tracking-[0.12em] text-purple-600 dark:text-purple-400 font-extrabold">
+                  Thời gian thực thi dự kiến
+                </p>
                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                   {(() => {
                     const diffTime = new Date(smartData.timeBound.target_date).getTime() - Date.now();
@@ -319,11 +335,15 @@ export function TimeBoundStep({
           )}
 
           <p className={helperTextClass}>
-            Chọn một thời hạn thực tế. Ví dụ chu kỳ chuẩn 12 tuần sẽ rơi vào ngày: <span className="font-semibold text-app-ink">{(() => {
-              const d = new Date();
-              d.setDate(d.getDate() + 12 * 7);
-              return d.toLocaleDateString("vi-VN");
-            })()}</span>.
+            Chọn một thời hạn thực tế. Ví dụ chu kỳ chuẩn 12 tuần sẽ rơi vào ngày:{" "}
+            <span className="font-semibold text-app-ink">
+              {(() => {
+                const d = new Date();
+                d.setDate(d.getDate() + 12 * 7);
+                return d.toLocaleDateString("vi-VN");
+              })()}
+            </span>
+            .
           </p>
           {showTargetDateError ? (
             <FieldError id="smart-target-date-error" message="Chọn ngày mục tiêu cho kế hoạch này." role="alert" />
@@ -341,7 +361,8 @@ export function TimeBoundStep({
             </h4>
           </div>
           <p className="text-xs text-app-ink-soft leading-relaxed mb-5">
-            Đánh giá toàn diện các tiêu chí cụ thể (S), đo lường (M), khả thi (A), liên quan (R) và thời hạn (T) trước khi chốt mục tiêu.
+            Đánh giá toàn diện các tiêu chí cụ thể (S), đo lường (M), khả thi (A), liên quan (R) và thời hạn (T) trước
+            khi chốt mục tiêu.
           </p>
 
           <div className="grid gap-6 md:grid-cols-2">

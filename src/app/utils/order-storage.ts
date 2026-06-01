@@ -1,30 +1,24 @@
 // DEPRECATED: re-export từ features/order/storage. Code mới nên dùng @/features/order/storage/order.
-export {
-  getOrders,
-  getOrderById,
-  createLocalOrder,
-  getLatestOrder,
-  ORDER_STORAGE_KEY,
-  ORDER_SCHEMA_VERSION,
-} from "@/features/order/storage/order";
+
 export type {
+  CreateLocalOrderInput,
   LocalOrderV2,
   OrderLine,
   OrderStatus,
-  CreateLocalOrderInput,
+} from "@/features/order/storage/order";
+export {
+  createLocalOrder,
+  getLatestOrder,
+  getOrderById,
+  getOrders,
+  ORDER_SCHEMA_VERSION,
+  ORDER_STORAGE_KEY,
 } from "@/features/order/storage/order";
 
-import {
-  ORDER_STORAGE_KEY,
-  type LocalOrderV2,
-  type OrderStatus,
-} from "@/features/order/storage/order";
+import { type LocalOrderV2, ORDER_STORAGE_KEY, type OrderStatus } from "@/features/order/storage/order";
 
 // Legacy compat: OrderStatusPage cũ build LocalOrder shape lai V1+V2. Phase 3 sẽ migrate sạch.
-export type LocalOrder = Omit<
-  LocalOrderV2,
-  "schemaVersion" | "lines" | "subtotalVnd" | "shippingVnd" | "totalVnd"
-> &
+export type LocalOrder = Omit<LocalOrderV2, "schemaVersion" | "lines" | "subtotalVnd" | "shippingVnd" | "totalVnd"> &
   Partial<Pick<LocalOrderV2, "schemaVersion" | "lines" | "subtotalVnd" | "shippingVnd" | "totalVnd">> & {
     focusArea?: string;
     kitType?: string;
@@ -55,8 +49,7 @@ export function updateOrderStatus(orderId: string, status: OrderStatus): LocalOr
   }
   if (!Array.isArray(parsed)) return null;
   const idx = parsed.findIndex(
-    (o): o is { id: string } =>
-      typeof o === "object" && o !== null && (o as { id?: unknown }).id === orderId,
+    (o): o is { id: string } => typeof o === "object" && o !== null && (o as { id?: unknown }).id === orderId,
   );
   if (idx === -1) return null;
   const updated = {

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { AlertTriangle, Home, RefreshCw, Sparkles } from "lucide-react";
+import { useEffect } from "react";
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 
 import { captureFrontendException } from "@/lib/monitoring/sentry";

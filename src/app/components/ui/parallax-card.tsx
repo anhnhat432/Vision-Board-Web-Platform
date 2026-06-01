@@ -10,7 +10,7 @@ export function ParallaxCard({ children, className, maxTilt, ...props }: Paralla
     <div
       className={cn(
         "relative overflow-hidden rounded-card border border-app-line bg-app-surface transition-all duration-300",
-        className
+        className,
       )}
       {...props}
     >

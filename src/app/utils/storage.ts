@@ -1,25 +1,39 @@
 // Local Storage Management Utility
 
-import type {
-  Achievement,
-  AppPreferences,
-  AspirationalVision,
-  AspirationalVisionArea,
-  EntitlementKey,
-  ExperimentVariantId,
-  FunnelStepSummary,
-  Goal,
-  InAppReminder,
-  LifeArea,
-  PricingPlanCode,
-  PrivacyConsentCategory,
-  Reflection,
-  Task,
-  TwelveWeekSystem,
-  TwelveWeekTaskInstance,
-  UserData,
-  VisionBoard,
-} from "./storage-types";
+import { toast } from "sonner";
+import { shouldSeedDemoData } from "./app-mode";
+import { postUserDataMutation, subscribeUserDataMutation, userDataMutationSource } from "./cross-tab-sync";
+import { createLocalUserDataBackupJson } from "./local-data-backup";
+import { cleanupExpiredMigrationBackups, registerOnImportComplete } from "./local-data-migration";
+import { addAchievementToData, checkAchievementsInData } from "./storage-achievement-ops";
+import {
+  activateAuthenticatedUserDataInStorage,
+  mirrorUserDataToActiveAuthScope,
+  persistActiveAuthenticatedUserDataInStorage,
+  removeKnownAuxiliaryUserData,
+} from "./storage-auth-scope";
+import {
+  getCurrentEntitlementKeysFromData,
+  getCurrentPlanFromData,
+  hasEntitlementInData,
+  restorePlanAccessLocallyInData,
+  startTrialLocallyInData,
+  upgradePlanLocallyInData,
+} from "./storage-billing-ops";
+import {
+  APP_STORAGE_KEYS,
+  AUTH_OWNER_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION,
+  DEFAULT_APP_PREFERENCES,
+  FEASIBILITY_RESULT_LABELS,
+  LIFE_AREA_LABELS,
+  MOTIVATIONAL_QUOTES,
+  REVIEW_DAY_LABELS,
+  STORAGE_KEY,
+  TWELVE_WEEK_FUNNEL_STEPS,
+  TWELVE_WEEK_MONETIZATION_STEPS,
+  USER_DATA_UPDATED_EVENT_NAME,
+} from "./storage-constants";
 import {
   compareCalendarDateKeys as compareCalendarDateKeysFromModule,
   formatCalendarDate as formatCalendarDateFromModule,
@@ -34,22 +48,10 @@ import {
   sortReflectionsByDateDesc as sortReflectionsByDateDescFromModule,
 } from "./storage-date-utils";
 import {
-  getActiveTwelveWeekGoal as getActiveTwelveWeekGoalFromModule,
-  getGoalExecutionStats as getGoalExecutionStatsFromModule,
-  getTwelveWeekCurrentWeek as getTwelveWeekCurrentWeekFromModule,
-  getTwelveWeekCycleWeekNumber as getTwelveWeekCycleWeekNumberFromModule,
-  getTwelveWeekMissedTasks as getTwelveWeekMissedTasksFromModule,
-  getTwelveWeekTacticCount as getTwelveWeekTacticCountFromModule,
-  getTwelveWeekTasksForWeek as getTwelveWeekTasksForWeekFromModule,
-  getTwelveWeekTodayTasks as getTwelveWeekTodayTasksFromModule,
-  getTwelveWeekWeekCompletion as getTwelveWeekWeekCompletionFromModule,
-  getTwelveWeekWeekRange as getTwelveWeekWeekRangeFromModule,
-  isTwelveWeekCycleReviewPhase as isTwelveWeekCycleReviewPhaseFromModule,
-  isTwelveWeekReviewDueToday as isTwelveWeekReviewDueTodayFromModule,
-  migrateLegacyUserData as migrateLegacyUserDataFromModule,
-  normalizeGoal as normalizeGoalFromModule,
-  sortTwelveWeekGoalsForSelection as sortTwelveWeekGoalsForSelectionFromModule,
-} from "./storage-twelve-week";
+  createDemoUserData as createDemoUserDataFromModule,
+  createEmptyUserData as createEmptyUserDataFromModule,
+  shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
+} from "./storage-demo-data";
 import {
   addGoalToData,
   deleteGoalFromData,
@@ -60,7 +62,6 @@ import {
   updateWheelOfLifeInData,
   upgradeLegacyGoalToSystemInData,
 } from "./storage-goal-ops";
-import { addReflectionToData, deleteReflectionFromData, upsertReflectionInData } from "./storage-reflection-ops";
 import {
   archiveOutboxItemInData,
   autoScheduleEmailRemindersInData,
@@ -82,76 +83,85 @@ import {
   trackAppEventInData,
   updateAppPreferencesInData,
 } from "./storage-local-ops";
+import { addReflectionToData, deleteReflectionFromData, upsertReflectionInData } from "./storage-reflection-ops";
+import {
+  getActiveTwelveWeekGoal as getActiveTwelveWeekGoalFromModule,
+  getGoalExecutionStats as getGoalExecutionStatsFromModule,
+  getTwelveWeekCurrentWeek as getTwelveWeekCurrentWeekFromModule,
+  getTwelveWeekCycleWeekNumber as getTwelveWeekCycleWeekNumberFromModule,
+  getTwelveWeekMissedTasks as getTwelveWeekMissedTasksFromModule,
+  getTwelveWeekTacticCount as getTwelveWeekTacticCountFromModule,
+  getTwelveWeekTasksForWeek as getTwelveWeekTasksForWeekFromModule,
+  getTwelveWeekTodayTasks as getTwelveWeekTodayTasksFromModule,
+  getTwelveWeekWeekCompletion as getTwelveWeekWeekCompletionFromModule,
+  getTwelveWeekWeekRange as getTwelveWeekWeekRangeFromModule,
+  isTwelveWeekCycleReviewPhase as isTwelveWeekCycleReviewPhaseFromModule,
+  isTwelveWeekReviewDueToday as isTwelveWeekReviewDueTodayFromModule,
+  migrateLegacyUserData as migrateLegacyUserDataFromModule,
+  normalizeGoal as normalizeGoalFromModule,
+  sortTwelveWeekGoalsForSelection as sortTwelveWeekGoalsForSelectionFromModule,
+} from "./storage-twelve-week";
+import type {
+  Achievement,
+  AppPreferences,
+  AspirationalVision,
+  AspirationalVisionArea,
+  EntitlementKey,
+  ExperimentVariantId,
+  FunnelStepSummary,
+  Goal,
+  InAppReminder,
+  LifeArea,
+  PricingPlanCode,
+  PrivacyConsentCategory,
+  Reflection,
+  Task,
+  TwelveWeekSystem,
+  TwelveWeekTaskInstance,
+  UserData,
+  VisionBoard,
+} from "./storage-types";
 import {
   addVisionBoardToData,
   deleteVisionBoardFromData,
   normalizeVisionBoard,
   updateVisionBoardInData,
 } from "./storage-vision-board-ops";
-import { toast } from "sonner";
-import { addAchievementToData, checkAchievementsInData } from "./storage-achievement-ops";
-import {
-  createEmptyUserData as createEmptyUserDataFromModule,
-  createDemoUserData as createDemoUserDataFromModule,
-  shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
-} from "./storage-demo-data";
-import { createLocalUserDataBackupJson } from "./local-data-backup";
-import { cleanupExpiredMigrationBackups, registerOnImportComplete } from "./local-data-migration";
 import { getEntitlementsForPlan } from "./twelve-week-premium";
-import { shouldSeedDemoData } from "./app-mode";
-import { postUserDataMutation, subscribeUserDataMutation, userDataMutationSource } from "./cross-tab-sync";
-import {
+
+export {
   APP_STORAGE_KEYS,
-  AUTH_OWNER_STORAGE_KEY,
-  CURRENT_STORAGE_VERSION,
-  DEFAULT_APP_PREFERENCES,
   FEASIBILITY_RESULT_LABELS,
   LIFE_AREA_LABELS,
+  LIFE_AREAS,
   MOTIVATIONAL_QUOTES,
   REVIEW_DAY_LABELS,
-  STORAGE_KEY,
-  TWELVE_WEEK_FUNNEL_STEPS,
-  TWELVE_WEEK_MONETIZATION_STEPS,
+  USER_DATA_STORAGE_KEY,
   USER_DATA_UPDATED_EVENT_NAME,
 } from "./storage-constants";
-import {
-  activateAuthenticatedUserDataInStorage,
-  mirrorUserDataToActiveAuthScope,
-  persistActiveAuthenticatedUserDataInStorage,
-  removeKnownAuxiliaryUserData,
-} from "./storage-auth-scope";
-import {
-  getCurrentEntitlementKeysFromData,
-  getCurrentPlanFromData,
-  hasEntitlementInData,
-  restorePlanAccessLocallyInData,
-  startTrialLocallyInData,
-  upgradePlanLocallyInData,
-} from "./storage-billing-ops";
-
 export type {
   Achievement,
   AppPreferences,
   AspirationalVision,
   AspirationalVisionArea,
   AspirationalVisionLifeArea,
+  BillingCycle,
   DailyUpdate,
+  Entitlement,
+  EntitlementKey,
   FunnelStepSummary,
   Goal,
   InAppReminder,
   LagMetric,
-  LeadIndicatorCommitment,
   LeadIndicator,
+  LeadIndicatorCommitment,
   LifeArea,
   Milestones,
   PricingPlanCode,
-  Entitlement,
-  EntitlementKey,
-  Subscription,
-  SubscriptionStatus,
-  BillingCycle,
   Reflection,
   ScoreboardWeek,
+  Subscription,
+  SubscriptionStatus,
   SyncOutboxItem,
   TacticType,
   Task,
@@ -176,17 +186,6 @@ export type {
   WeeklyReview,
   WheelOfLifeRecord,
 } from "./storage-types";
-
-export {
-  APP_STORAGE_KEYS,
-  FEASIBILITY_RESULT_LABELS,
-  LIFE_AREAS,
-  LIFE_AREA_LABELS,
-  MOTIVATIONAL_QUOTES,
-  REVIEW_DAY_LABELS,
-  USER_DATA_STORAGE_KEY,
-  USER_DATA_UPDATED_EVENT_NAME,
-} from "./storage-constants";
 
 const LEGACY_TRUST_BADGE_DISMISSED_KEY = "trust_badge_dismissed_v1";
 

@@ -1,5 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
-import {
+﻿import {
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -14,34 +13,34 @@ import {
   Target,
   Truck,
 } from "lucide-react";
-import { toast } from "sonner";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-
+import { toast } from "sonner";
+import { INCLUDED_DOCS } from "@/features/order/catalog/included";
+import { formatVnd } from "@/features/order/lib/pricing";
+import { apiClient } from "@/lib/api/apiClient";
+import { getBackendOrderId } from "@/lib/api/orderLinkStore";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { type ApiOrder, getOrder as getBackendOrder } from "@/services/orderService";
 import { PageHero } from "../components/layout/PageHero";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { isDemoMode } from "../utils/app-mode";
+import { formatVndAmount } from "../utils/billing-pricing";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import {
   getLatestOrder,
   getNextOrderStatus,
   getOrderById,
-  getOrders,
   getOrderStatusLabel,
   getOrderStatusStepIndex,
-  updateOrderStatus,
+  getOrders,
   type LocalOrder,
   type OrderStatus,
+  updateOrderStatus,
 } from "../utils/order-storage";
 import { formatCalendarDate } from "../utils/storage";
-import { isDemoMode } from "../utils/app-mode";
-import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
-import { formatVndAmount } from "../utils/billing-pricing";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import { apiClient } from "@/lib/api/apiClient";
-import { getOrder as getBackendOrder, type ApiOrder } from "@/services/orderService";
-import { getBackendOrderId } from "@/lib/api/orderLinkStore";
-import { INCLUDED_DOCS } from "@/features/order/catalog/included";
-import { formatVnd } from "@/features/order/lib/pricing";
 
 const UNLINKED_GOAL_TITLE = "Chưa gắn mục tiêu cụ thể";
 const DEFAULT_FOCUS_AREA = "Chưa chọn trọng tâm";
@@ -753,24 +752,16 @@ export function OrderStatusPage() {
                   {order.lines && order.lines.length > 0 ? (
                     <ul className="mt-[var(--space-inline)] space-y-2 text-sm">
                       {order.lines.map((line) => (
-                        <li
-                          key={`${line.itemId}-${line.qty}`}
-                          className="flex items-start justify-between gap-2"
-                        >
+                        <li key={`${line.itemId}-${line.qty}`} className="flex items-start justify-between gap-2">
                           <span className="text-slate-900">
                             {line.label}
                             {line.qty > 1 ? ` × ${line.qty}` : ""}
                           </span>
-                          <span className="shrink-0 tabular-nums text-slate-700">
-                            {formatVnd(line.lineTotalVnd)}
-                          </span>
+                          <span className="shrink-0 tabular-nums text-slate-700">{formatVnd(line.lineTotalVnd)}</span>
                         </li>
                       ))}
                       {INCLUDED_DOCS.map((doc) => (
-                        <li
-                          key={doc.id}
-                          className="flex items-start justify-between gap-2 text-muted-foreground"
-                        >
+                        <li key={doc.id} className="flex items-start justify-between gap-2 text-muted-foreground">
                           <span>{doc.label}</span>
                           <span className="shrink-0">Tặng kèm — 0đ</span>
                         </li>
@@ -853,7 +844,11 @@ export function OrderStatusPage() {
                     {hasKeywords && (
                       <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
                         {order.keywords.map((keyword) => (
-                          <Badge key={keyword} variant="outline" className="border-slate-200 bg-app-surface text-slate-700">
+                          <Badge
+                            key={keyword}
+                            variant="outline"
+                            className="border-slate-200 bg-app-surface text-slate-700"
+                          >
                             {keyword}
                           </Badge>
                         ))}
@@ -996,7 +991,9 @@ export function OrderStatusPage() {
                   key={item.id}
                   type="button"
                   className={`w-full rounded-xl border px-4 py-4 text-left transition-colors ${
-                    item.id === order.id ? "border-sky-200 bg-sky-50" : "border-slate-200 bg-app-surface hover:bg-slate-50"
+                    item.id === order.id
+                      ? "border-sky-200 bg-sky-50"
+                      : "border-slate-200 bg-app-surface hover:bg-slate-50"
                   }`}
                   onClick={() => navigate(`/order-status/${item.id}`)}
                 >
@@ -1005,9 +1002,7 @@ export function OrderStatusPage() {
                       <p className="truncate text-sm font-semibold text-slate-900">{item.goalTitle}</p>
                       <p className="mt-1 text-xs text-slate-500">
                         {getOrderStatusLabel(item.status)}
-                        {typeof item.totalVnd === "number" && item.totalVnd > 0
-                          ? ` · ${formatVnd(item.totalVnd)}`
-                          : ""}
+                        {typeof item.totalVnd === "number" && item.totalVnd > 0 ? ` · ${formatVnd(item.totalVnd)}` : ""}
                       </p>
                       <p className="mt-1 text-xs text-slate-400">
                         {formatCalendarDate(item.createdAt, "vi-VN", {

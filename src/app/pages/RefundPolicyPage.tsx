@@ -1,5 +1,5 @@
-import { Link } from "react-router";
 import { BadgeCheck, Clock, Mail, ReceiptText, RefreshCw } from "lucide-react";
+import { Link } from "react-router";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 const REFUND_WINDOW_DAYS = Number.parseInt(import.meta.env.VITE_REFUND_WINDOW_DAYS?.trim() || "7", 10);
@@ -117,7 +117,6 @@ export function RefundPolicyPage() {
           <strong>“Yêu cầu hoàn tiền cho chu kỳ chưa dùng”</strong> để đội ngũ hỗ trợ xét duyệt thủ công.
         </p>
       </section>
-
     </article>
   );
 }

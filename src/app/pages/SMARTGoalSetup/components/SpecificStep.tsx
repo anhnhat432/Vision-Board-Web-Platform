@@ -1,16 +1,15 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
 import { Check, X } from "lucide-react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
-
-import { FieldError } from "../../../components/ui/field-error";
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
+import { FieldError } from "../../../components/ui/field-error";
 import { Textarea } from "../../../components/ui/textarea";
+import { FOCUS_AREA_EXAMPLES } from "../constants";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
 import { labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
-import { FOCUS_AREA_EXAMPLES } from "../constants";
 
 interface SpecificStepProps {
   smartData: SMARTData;
@@ -49,7 +48,11 @@ export function SpecificStep({
   const activeArchetype = archetype ?? intentArchetype ?? "other";
   const goalStatementInvalid = specificLength < 10;
   const showInlineError = goalStatementInvalid && (hasBlurredGoalStatement || showError || specificLength > 0);
-  const specificDescribedBy = ["smart-specific-hint", "smart-specific-counter", showInlineError ? "smart-specific-error" : null]
+  const specificDescribedBy = [
+    "smart-specific-hint",
+    "smart-specific-counter",
+    showInlineError ? "smart-specific-error" : null,
+  ]
     .filter(Boolean)
     .join(" ");
   const activeInferredArchetype = inferredArchetype ?? activeArchetype;
@@ -59,7 +62,9 @@ export function SpecificStep({
       <div>
         <label htmlFor="smart-specific" className={labelClass}>
           Mục tiêu cụ thể của bạn (Hành động hoặc Dự án)
-          <span className={requiredMarkerClass} aria-hidden="true">*</span>
+          <span className={requiredMarkerClass} aria-hidden="true">
+            *
+          </span>
           <span className="sr-only"> bắt buộc</span>
         </label>
         <Textarea
@@ -86,7 +91,9 @@ export function SpecificStep({
             </span>
             <div>
               <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết cụ thể (Rõ việc):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Hoàn thành khóa học React và tự làm 1 trang web cá nhân."</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                "Hoàn thành khóa học React và tự làm 1 trang web cá nhân."
+              </p>
             </div>
           </div>
           <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
@@ -95,17 +102,23 @@ export function SpecificStep({
             </span>
             <div>
               <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết mơ hồ (Chung chung):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Học lập trình tốt hơn" hoặc "Trở thành coder giỏi."</p>
+              <p className="text-app-ink-soft mt-0.5 font-serif italic">
+                "Học lập trình tốt hơn" hoặc "Trở thành coder giỏi."
+              </p>
             </div>
           </div>
         </div>
         <div className="mt-2.5 flex justify-between items-center text-[10px] text-app-ink-muted font-bold px-1 select-none">
-          <span id="smart-specific-hint">Hãy mô tả rõ hành động hoặc dự án cụ thể để bạn dễ kiểm chứng khi hoàn thành.</span>
-          <span id="smart-specific-counter" className={specificLength >= 10 ? "text-emerald-600 font-bold" : "text-app-ink-muted"}>
+          <span id="smart-specific-hint">
+            Hãy mô tả rõ hành động hoặc dự án cụ thể để bạn dễ kiểm chứng khi hoàn thành.
+          </span>
+          <span
+            id="smart-specific-counter"
+            className={specificLength >= 10 ? "text-emerald-600 font-bold" : "text-app-ink-muted"}
+          >
             {specificLength}/10 ký tự tối thiểu
           </span>
         </div>
-
 
         {/* 1-Click Suggestions */}
         <div className="mt-4 bg-app-bg/50 p-4 rounded-2xl border border-app-line/60">
@@ -123,31 +136,31 @@ export function SpecificStep({
                     return [
                       "Thiết lập thói quen chạy bộ buổi sáng hàng ngày để nâng cao thể lực",
                       "Thực hiện thói quen đọc sách 30 trang mỗi tối trước khi đi ngủ",
-                      "Thiết lập thói quen ghi chép chi tiêu cá nhân mỗi ngày để tối ưu ngân sách"
+                      "Thiết lập thói quen ghi chép chi tiêu cá nhân mỗi ngày để tối ưu ngân sách",
                     ];
                   case "skill_learning":
                     return [
                       "Học và làm chủ kiến thức nền tảng về lập trình web với React và Tailwind",
                       "Luyện tập kỹ năng giao tiếp tiếng Anh trôi chảy trong môi trường công sở",
-                      "Master kỹ năng thiết kế slide chuyên nghiệp phục vụ thuyết trình dự án"
+                      "Master kỹ năng thiết kế slide chuyên nghiệp phục vụ thuyết trình dự án",
                     ];
                   case "project_completion":
                     return [
                       "Hoàn thành thiết kế và phát triển ứng dụng di động cá nhân đầu tiên",
                       "Hoàn thành việc cải tạo, trang trí lại toàn bộ phòng làm việc tại nhà",
-                      "Viết và xuất bản 3 bài viết chuyên sâu chia sẻ kiến thức trên blog cá nhân"
+                      "Viết và xuất bản 3 bài viết chuyên sâu chia sẻ kiến thức trên blog cá nhân",
                     ];
                   case "financial_goal":
                     return [
                       "Thiết lập thêm một nguồn thu nhập thụ động mới từ viết lách tự do",
                       "Cắt giảm 15% các khoản chi tiêu không cần thiết để tối ưu hóa tiết kiệm",
-                      "Hoàn thành việc tìm hiểu và bắt đầu đầu tư tích lũy định kỳ hàng tháng"
+                      "Hoàn thành việc tìm hiểu và bắt đầu đầu tư tích lũy định kỳ hàng tháng",
                     ];
                   default:
                     return [
                       "Thiết lập thói quen thiền định chánh niệm 15 phút mỗi ngày để giảm stress",
                       "Hoàn thành khóa học trực tuyến nâng cao kiến thức chuyên ngành",
-                      "Xây dựng kế hoạch dọn dẹp và tối giản hóa không gian sống mỗi tuần"
+                      "Xây dựng kế hoạch dọn dẹp và tối giản hóa không gian sống mỗi tuần",
                     ];
                 }
               })();

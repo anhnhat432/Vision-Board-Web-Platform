@@ -1,5 +1,5 @@
-import { Link } from "react-router";
 import { Facebook } from "lucide-react";
+import { Link } from "react-router";
 
 type ProductLink = { label: string; to: string };
 type CompanyLink = { label: string; to?: string; href?: string };
@@ -124,8 +124,7 @@ export function AppPublicFooter() {
 
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-app-line pt-6 text-xs text-app-ink-muted sm:flex-row sm:items-center">
           <p>
-            © {year} Dear Our Future. Made with{" "}
-            <span aria-hidden="true">❤️</span>
+            © {year} Dear Our Future. Made with <span aria-hidden="true">❤️</span>
             <span className="sr-only">tình yêu</span> ở Việt Nam.
           </p>
           <p>Local-first · Hoạt động trên mọi thiết bị</p>

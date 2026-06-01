@@ -1,18 +1,18 @@
+import { hasMeaningfulLocalWork } from "./local-data-migration";
+import { LAST_ENTITLEMENT_SYNC_KEY, LAST_RESTORE_ACCESS_KEY, MOCK_BILLING_ACCOUNT_KEY } from "./production/env";
+import { resetBillingAccessInData } from "./storage-billing-ops";
 import {
   ANONYMOUS_USER_DATA_STORAGE_KEY,
   AUTH_OWNER_STORAGE_KEY,
-  BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY,
-  BACKEND_LINK_STORAGE_KEYS,
   AUXILIARY_USER_DATA_STORAGE_KEYS,
   AUXILIARY_USER_DATA_STORAGE_PREFIXES,
+  BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY,
+  BACKEND_LINK_STORAGE_KEYS,
   LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX,
   STORAGE_KEY,
   USER_DATA_STORAGE_KEY,
   USER_DATA_UPDATED_EVENT_NAME,
 } from "./storage-constants";
-import { hasMeaningfulLocalWork } from "./local-data-migration";
-import { LAST_ENTITLEMENT_SYNC_KEY, LAST_RESTORE_ACCESS_KEY, MOCK_BILLING_ACCOUNT_KEY } from "./production/env";
-import { resetBillingAccessInData } from "./storage-billing-ops";
 import type { UserData } from "./storage-types";
 
 interface AuthScopedStorageDependencies {

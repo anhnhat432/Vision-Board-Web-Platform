@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Check, Sparkles, Target } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 
@@ -23,8 +23,8 @@ const DEFAULT_PREVIEW: GoalPreviewData = {
     { emoji: "🏃‍♂️", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
     { emoji: "💼", bgClass: "bg-blue-800/10", borderClass: "border-blue-800/20" },
   ],
-  visionLabel: "\"Khát vọng tương lai\"",
-  todayTasks: ["Đọc 30 trang \"Atomic Habits\"", "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
+  visionLabel: '"Khát vọng tương lai"',
+  todayTasks: ['Đọc 30 trang "Atomic Habits"', "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
   weekLabel: "Tuần 4/12",
 };
 
@@ -53,20 +53,14 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
       setPhase(0);
 
       PHASE_SCHEDULE.forEach((delay, i) => {
-        activeTimers.push(
-          window.setTimeout(() => setPhase(i + 1), delay)
-        );
+        activeTimers.push(window.setTimeout(() => setPhase(i + 1), delay));
       });
 
       // Reset to phase 0 at 5800ms
-      activeTimers.push(
-        window.setTimeout(() => setPhase(0), RESET_DELAY)
-      );
+      activeTimers.push(window.setTimeout(() => setPhase(0), RESET_DELAY));
 
       // Start next cycle at 6000ms (RESET_DELAY + 200)
-      activeTimers.push(
-        window.setTimeout(() => runCycle(), RESET_DELAY + 200)
-      );
+      activeTimers.push(window.setTimeout(() => runCycle(), RESET_DELAY + 200));
     };
 
     runCycle();
@@ -84,7 +78,6 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
     <div className="appear-fade-up mx-auto w-full max-w-[440px] lg:mx-0 lg:max-w-md lg:[animation-delay:120ms]">
       {/* SaaS Browser Shell Container */}
       <div className="relative rounded-2xl border border-app-line/80 bg-white dark:bg-neutral-950 shadow-[0_24px_50px_-12px_rgba(47,93,80,0.12),0_8px_24px_-8px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-300">
-        
         {/* Browser Header Bar */}
         <div className="flex items-center justify-between bg-neutral-50/80 dark:bg-neutral-900/60 backdrop-blur-md px-4 py-3 border-b border-app-line/65 select-none">
           {/* Mac-style Window Dot Controls */}
@@ -103,7 +96,6 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
         {/* Browser Page Body: Dashboard Mockup */}
         <div className="relative p-6 bg-gradient-to-b from-app-surface/40 via-white to-white dark:from-neutral-950 dark:to-neutral-950 min-h-[340px]">
-          
           {/* Floating Streak Badge - elegant glass badge popping from the corner */}
           <div
             aria-hidden="true"
@@ -111,7 +103,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
               badgeVisible ? "translate-y-0 scale-100 opacity-100" : "-translate-y-2 scale-95 opacity-0"
             }`}
             style={{
-              transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in"
+              transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in",
             }}
           >
             <Sparkles className="size-3 text-emerald-500 animate-spin-slow" />
@@ -120,7 +112,6 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
           {/* Grid Layout: Vision Canvas & Focus Plan */}
           <div className="grid grid-cols-1 xs:grid-cols-12 gap-5">
-            
             {/* Left Column (Span 5): Mini Vision Board Pins (Polaroid Vibe) */}
             <div className="xs:col-span-5 flex flex-col justify-between">
               <div>
@@ -143,7 +134,9 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                 </div>
               </div>
               <div className="mt-3 p-2 bg-app-accent-soft/30 dark:bg-app-accent-soft/5 border border-app-accent/15 rounded-lg">
-                <span className="text-[8px] font-semibold uppercase text-app-accent tracking-wider block">Châm ngôn</span>
+                <span className="text-[8px] font-semibold uppercase text-app-accent tracking-wider block">
+                  Châm ngôn
+                </span>
                 <p className="text-[10px] font-serif italic text-app-ink-soft leading-snug mt-0.5">
                   {data.visionLabel}
                 </p>
@@ -155,7 +148,9 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
               {/* Target & Week progress */}
               <div className="p-3.5 bg-neutral-50 dark:bg-neutral-900/40 border border-app-line/65 rounded-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-app-ink-muted">Chu kỳ hiện tại</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-app-ink-muted">
+                    Chu kỳ hiện tại
+                  </span>
                   <span className="rounded-full bg-app-accent/10 px-2 py-0.5 text-[9px] font-semibold text-app-accent border border-app-accent/10">
                     {data.weekLabel}
                   </span>
@@ -164,7 +159,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                   <Target className="h-3.5 w-3.5 text-app-accent shrink-0" />
                   {data.goalTitle}
                 </h4>
-                
+
                 {/* 12-Week Mini Progress Bar */}
                 <div className="mt-3.5 pt-2 border-t border-app-line/45">
                   <div className="flex items-center justify-between text-[10px]">
@@ -190,7 +185,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                     {taskTwoChecked ? "2" : "1"}/3 Hoàn thành
                   </span>
                 </div>
-                
+
                 <div className="space-y-2">
                   {/* Task 1: Always completed */}
                   <div className="flex items-center gap-2.5 p-2 bg-neutral-50/50 dark:bg-neutral-900/20 border border-app-line/40 rounded-lg">
@@ -229,13 +224,15 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
                   {/* Task 3: Uncompleted */}
                   <div className="flex items-center gap-2.5 p-2 bg-white dark:bg-neutral-950 border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
-                    <span className="h-4 w-4 shrink-0 rounded-full border border-app-line bg-app-surface" aria-hidden="true" />
+                    <span
+                      className="h-4 w-4 shrink-0 rounded-full border border-app-line bg-app-surface"
+                      aria-hidden="true"
+                    />
                     <span className="text-xs font-medium text-app-ink truncate">{data.todayTasks[2]}</span>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Minimalist status bar footer */}
@@ -243,7 +240,6 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
             <span>● Đồng bộ đám mây cục bộ</span>
             <span>Vite SPA v2.1</span>
           </div>
-
         </div>
       </div>
     </div>

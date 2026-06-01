@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-
-import { APP_STORAGE_KEYS, getUserData, saveUserData } from "./storage";
 import { getNewUserGuideProgress } from "./new-user-guide";
+import { APP_STORAGE_KEYS, getUserData, saveUserData } from "./storage";
 
 function seedZeroScoreLifeBalance() {
   const data = getUserData();

@@ -1,23 +1,17 @@
-import {
-  canUpgradeToPlus,
-  getEmailVerificationRequiredMessage,
-  rememberEmailVerificationReturnPath,
-} from "../email-verification-guard";
 import { apiClient } from "@/lib/api/apiClient";
-import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
 import type {
   BillingProvider,
   BillingProviderStatus,
   CustomerPortalResult,
   RestoreAccessResult,
 } from "../billing-contract";
-import type { EntitlementKey, PricingPlanCode, SubscriptionStatus } from "../storage-types";
 import {
-  BILLING_CHECKOUT_ENDPOINT,
-  BILLING_ENTITLEMENT_SYNC_ENDPOINT,
-  BILLING_PORTAL_ENDPOINT,
-  BILLING_RESTORE_ENDPOINT,
-} from "./env";
+  canUpgradeToPlus,
+  getEmailVerificationRequiredMessage,
+  rememberEmailVerificationReturnPath,
+} from "../email-verification-guard";
+import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
+import type { EntitlementKey, PricingPlanCode, SubscriptionStatus } from "../storage-types";
 import {
   applyBillingAccessPayload,
   buildBillingContractBody,
@@ -28,6 +22,12 @@ import {
   isOffline,
   postBillingContract,
 } from "./billingCore";
+import {
+  BILLING_CHECKOUT_ENDPOINT,
+  BILLING_ENTITLEMENT_SYNC_ENDPOINT,
+  BILLING_PORTAL_ENDPOINT,
+  BILLING_RESTORE_ENDPOINT,
+} from "./env";
 import { mockBillingProvider } from "./mockBillingProvider";
 
 const localBillingProvider: BillingProvider = {

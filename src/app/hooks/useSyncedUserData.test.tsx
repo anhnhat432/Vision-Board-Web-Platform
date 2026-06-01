@@ -1,8 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-
-import { useSyncedUserData } from "./useSyncedUserData";
 import { saveUserData, USER_DATA_STORAGE_KEY, USER_DATA_UPDATED_EVENT_NAME } from "../utils/storage";
 import type { AppPreferences, UserData } from "../utils/storage-types";
+import { useSyncedUserData } from "./useSyncedUserData";
 
 const defaultAppPreferences: AppPreferences = {
   allowLocalAnalytics: true,

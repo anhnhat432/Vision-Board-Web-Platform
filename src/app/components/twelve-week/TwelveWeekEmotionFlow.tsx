@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
 import { Calendar, FileText, Smile } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
 
 interface WeekRange {
@@ -52,13 +52,13 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
-      
+
       const tzOffset = currentDate.getTimezoneOffset() * 60000;
       const dateStr = new Date(currentDate.getTime() - tzOffset).toISOString().split("T")[0];
-      
+
       // 1. Lấy dữ liệu check-in trong hệ thống 12 tuần
       const checkIn = system.dailyCheckIns?.find((c) => c.date === dateStr);
-      
+
       // 2. Lấy dữ liệu Daily Stoic Card đã lưu ở localStorage
       let stoicQuote = "";
       let stoicReflection = "";
@@ -96,7 +96,7 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
   // Trục Y: high=30, steady=75, low=120, none=75
   const svgPath = useMemo(() => {
     if (daysData.length === 0) return "";
-    
+
     const points = daysData.map((d, index) => {
       const x = 30 + index * 43.33; // 43.33px distance between points
       let y = 75; // steady & none
@@ -127,12 +127,8 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
         <div className="flex items-center gap-2">
           <Smile className="h-5 w-5 text-app-warm animate-pulse" />
           <div>
-            <h3 className="text-base font-semibold text-app-ink">
-              Dòng chảy Cảm xúc Tuần {currentWeek}
-            </h3>
-            <p className="text-[11px] text-app-ink-soft">
-              Kết nối tâm trạng hàng ngày để suy ngẫm sâu sắc hơn
-            </p>
+            <h3 className="text-base font-semibold text-app-ink">Dòng chảy Cảm xúc Tuần {currentWeek}</h3>
+            <p className="text-[11px] text-app-ink-soft">Kết nối tâm trạng hàng ngày để suy ngẫm sâu sắc hơn</p>
           </div>
         </div>
         <span className="text-[10px] font-bold text-app-ink-muted uppercase tracking-wider bg-app-bg px-2.5 py-1 rounded-full border border-app-line/50">
@@ -189,13 +185,15 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
 
             // Xác định màu điểm
             let pColor = "#94a3b8"; // none (xám)
-            if (d.mood === "high") pColor = "#f59e0b"; // vàng
-            else if (d.mood === "steady") pColor = "#10b981"; // emerald
+            if (d.mood === "high")
+              pColor = "#f59e0b"; // vàng
+            else if (d.mood === "steady")
+              pColor = "#10b981"; // emerald
             else if (d.mood === "low") pColor = "#6366f1"; // indigo
 
             return (
               // biome-ignore lint/a11y/useSemanticElements: SVG groups can act as buttons in visual charts
-              <g 
+              <g
                 key={d.dateStr}
                 role="button"
                 tabIndex={0}
@@ -217,13 +215,7 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
                   className="fill-current text-app-line/20 opacity-0 group-hover:opacity-100 transition-all duration-300"
                 />
                 {/* Vòng tròn viền trắng sang trọng */}
-                <circle
-                  cx={x}
-                  cy={y}
-                  r="6.5"
-                  className="fill-app-surface stroke-2"
-                  style={{ stroke: pColor }}
-                />
+                <circle cx={x} cy={y} r="6.5" className="fill-app-surface stroke-2" style={{ stroke: pColor }} />
                 {/* Điểm nhân chính */}
                 <circle
                   cx={x}
@@ -251,7 +243,9 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
 
       {/* POP-OVER CHI TIẾT CẢM XÚC HÀNG NGÀY KHI CLICK */}
       {selectedDay && (
-        <div className={`rounded-xl border p-4 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${MOOD_COLORS[selectedDay.mood]}`}>
+        <div
+          className={`rounded-xl border p-4 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${MOOD_COLORS[selectedDay.mood]}`}
+        >
           <div className="flex items-center justify-between border-b border-app-line/50 pb-2 mb-2">
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
@@ -291,14 +285,14 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
             {selectedDay.note ? (
               <div className="flex gap-1.5 items-start mt-1">
                 <FileText className="h-3.5 w-3.5 shrink-0 opacity-70 mt-0.5" />
-                <p className="text-app-ink font-medium">
-                  📝 Nhật ký: {selectedDay.note}
-                </p>
+                <p className="text-app-ink font-medium">📝 Nhật ký: {selectedDay.note}</p>
               </div>
-            ) : !selectedDay.stoicReflection && (
-              <p className="text-[11px] italic text-app-ink-muted">
-                Không có ghi chép nhật ký chánh niệm nào cho ngày này.
-              </p>
+            ) : (
+              !selectedDay.stoicReflection && (
+                <p className="text-[11px] italic text-app-ink-muted">
+                  Không có ghi chép nhật ký chánh niệm nào cho ngày này.
+                </p>
+              )
             )}
           </div>
         </div>

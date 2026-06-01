@@ -1,4 +1,3 @@
-import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -19,35 +18,15 @@ import {
   User2,
   X,
 } from "lucide-react";
+import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
-import {
-  maybeShowBrowserReminderNotification,
-  syncPendingOutbox,
-} from "../../utils/production";
-import {
-  exportUserDataSnapshot,
-  getCurrentPlan,
-  getUserData,
-  initializeUserData,
-  trackAppEvent,
-  USER_DATA_UPDATED_EVENT_NAME,
-} from "../../utils/storage";
-import { isDemoMode, shouldEnable12WeekImportDryRun, shouldEnable12WeekCloudImport } from "../../utils/app-mode";
-import {
-  getAnonymousLocalDataMigrationCandidate,
-  hasCompletedCloudImport,
-  hasSkippedLocalDataMigrationPrompt,
-  importAnonymousLocalDataToAccountScope,
-  markCloudImportCompleted,
-  markLocalDataMigrationPromptSkipped,
-  type LocalDataMigrationCandidate,
-} from "../../utils/local-data-migration";
+import { AIAssistant } from "@/app/features/assistant/AIAssistant";
+import { AssistantPageContextProvider } from "@/app/features/assistant/AssistantPageContextProvider";
+import { AutoCloudSyncProvider } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import {
   createTwelveWeekImportPayload,
   type TwelveWeekImportPayload,
 } from "@/features/plan12week/persistence/twelveWeekImportPayload";
-import { AutoCloudSyncProvider } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
-import { AutoCloudConflictDialog } from "./AutoCloudConflictDialog";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -58,38 +37,31 @@ import {
 } from "@/services/syncService";
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../../hooks/useBackendPlanHydration";
 import { useTheme } from "../../hooks/useTheme";
-import { MotionPageTransition } from "../motion";
-import { MindfulPlayer } from "../ui/mindful-player";
-
-import { MotivationalReminder } from "../MotivationalReminder";
-import { NewUserGuideDialog } from "../NewUserGuide";
+import { isDemoMode, shouldEnable12WeekCloudImport, shouldEnable12WeekImportDryRun } from "../../utils/app-mode";
 import {
-  LocalDataMigrationPrompt,
-  type CloudImportDryRunResult,
-  type CloudImportResult,
-} from "./LocalDataMigrationPrompt";
-import { OfflineBanner } from "../states/OfflineBanner";
+  getAnonymousLocalDataMigrationCandidate,
+  hasCompletedCloudImport,
+  hasSkippedLocalDataMigrationPrompt,
+  importAnonymousLocalDataToAccountScope,
+  type LocalDataMigrationCandidate,
+  markCloudImportCompleted,
+  markLocalDataMigrationPromptSkipped,
+} from "../../utils/local-data-migration";
+import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../../utils/production";
+import {
+  exportUserDataSnapshot,
+  getCurrentPlan,
+  getUserData,
+  initializeUserData,
+  trackAppEvent,
+  USER_DATA_UPDATED_EVENT_NAME,
+} from "../../utils/storage";
 import { GracePeriodBanner } from "../billing/GracePeriodBanner";
-import { AppSidebar } from "./AppSidebar";
-import { CommandPalette, type CommandPaletteGoal } from "./CommandPalette";
-import { EmailVerificationBanner } from "./EmailVerificationBanner";
-import { FirstLoginRestoreToast } from "./FirstLoginRestoreToast";
-import { SyncStatusPill } from "./SyncStatusPill";
-import {
-  buildAuthPath,
-  getNavItemsForState,
-  isActiveRoute,
-  MOBILE_NAV_LABELS,
-  NAV_ITEMS,
-  prefetchRoute,
-} from "./navConfig";
-import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
-import {
-  buildLoginRedirect,
-  isAuthProtectedPath,
-  isPublicCheckoutPath,
-  useWorkspaceGate,
-} from "./useWorkspaceGate";
+import { AppPublicFooter } from "../layout/AppPublicFooter";
+import { MotivationalReminder } from "../MotivationalReminder";
+import { MotionPageTransition } from "../motion";
+import { NewUserGuideDialog } from "../NewUserGuide";
+import { OfflineBanner } from "../states/OfflineBanner";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
@@ -100,11 +72,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { MindfulPlayer } from "../ui/mindful-player";
 import { Toaster } from "../ui/sonner";
-import { AIAssistant } from "@/app/features/assistant/AIAssistant";
-import { AssistantPageContextProvider } from "@/app/features/assistant/AssistantPageContextProvider";
-import { AppPublicFooter } from "../layout/AppPublicFooter";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { AppSidebar } from "./AppSidebar";
+import { AutoCloudConflictDialog } from "./AutoCloudConflictDialog";
+import { CommandPalette, type CommandPaletteGoal } from "./CommandPalette";
+import { EmailVerificationBanner } from "./EmailVerificationBanner";
+import { FirstLoginRestoreToast } from "./FirstLoginRestoreToast";
 import {
   createCloudImportId,
   createImportValidationRequestId,
@@ -113,9 +88,25 @@ import {
   getRouteTone,
   isRecord,
 } from "./helpers";
-import { useCommandPaletteHotkey, useWarmPrefetch } from "./hooks/useUiBootstrap";
 import { useEntitlementsAutoSync } from "./hooks/useEntitlementsAutoSync";
 import { usePageViewAnalytics } from "./hooks/usePageViewAnalytics";
+import { useCommandPaletteHotkey, useWarmPrefetch } from "./hooks/useUiBootstrap";
+import {
+  type CloudImportDryRunResult,
+  type CloudImportResult,
+  LocalDataMigrationPrompt,
+} from "./LocalDataMigrationPrompt";
+import {
+  buildAuthPath,
+  getNavItemsForState,
+  isActiveRoute,
+  MOBILE_NAV_LABELS,
+  NAV_ITEMS,
+  prefetchRoute,
+} from "./navConfig";
+import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
+import { SyncStatusPill } from "./SyncStatusPill";
+import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
 
 export function RootLayout() {
   const navigate = useNavigate();
@@ -1328,10 +1319,7 @@ export function RootLayout() {
                           return (
                             <li key={crumb.path} className="inline-flex min-w-0 items-center gap-1.5">
                               {isLast ? (
-                                <span
-                                  aria-current="page"
-                                  className="truncate text-sm font-medium text-app-ink"
-                                >
+                                <span aria-current="page" className="truncate text-sm font-medium text-app-ink">
                                   {crumb.label}
                                 </span>
                               ) : (
@@ -1439,13 +1427,17 @@ export function RootLayout() {
                       onPointerEnter={() => handlePrefetch(item.path)}
                       title={item.label}
                     >
-                      <div className={`bottom-nav-icon transition-all duration-200 ${active ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}>
+                      <div
+                        className={`bottom-nav-icon transition-all duration-200 ${active ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}
+                      >
                         <Icon
                           className={`h-4.5 w-4.5 ${active ? "text-white" : "text-app-ink-soft group-hover:text-app-ink"}`}
                           strokeWidth={active ? 2.25 : 1.8}
                         />
                       </div>
-                      <span className={`bottom-nav-label font-semibold text-[10px] tracking-tight ${active ? "text-app-accent font-bold" : "text-app-ink-soft/90"}`}>
+                      <span
+                        className={`bottom-nav-label font-semibold text-[10px] tracking-tight ${active ? "text-app-accent font-bold" : "text-app-ink-soft/90"}`}
+                      >
                         {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
                       </span>
                     </button>
@@ -1460,13 +1452,17 @@ export function RootLayout() {
                   aria-expanded={mobileMenuOpen}
                   aria-controls="mobile-nav-menu"
                 >
-                  <div className={`bottom-nav-icon transition-all duration-200 ${isMoreNavActive ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}>
+                  <div
+                    className={`bottom-nav-icon transition-all duration-200 ${isMoreNavActive ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}
+                  >
                     <Menu
                       className={`h-4.5 w-4.5 ${isMoreNavActive ? "text-white" : "text-app-ink-soft"}`}
                       strokeWidth={isMoreNavActive ? 2.25 : 1.8}
                     />
                   </div>
-                  <span className={`bottom-nav-label font-semibold text-[10px] tracking-tight ${isMoreNavActive ? "text-app-accent font-bold" : "text-app-ink-soft/90"}`}>
+                  <span
+                    className={`bottom-nav-label font-semibold text-[10px] tracking-tight ${isMoreNavActive ? "text-app-accent font-bold" : "text-app-ink-soft/90"}`}
+                  >
                     Khác
                   </span>
                 </button>

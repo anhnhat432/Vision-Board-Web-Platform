@@ -1,18 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Package, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Switch } from "@/app/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/app/components/ui/table";
 import type { CatalogItem, CatalogItemType } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 import { getApiBaseUrl } from "@/lib/api/apiClient";
@@ -150,9 +143,7 @@ export function AdminCatalogPage() {
       }
       const json = (await res.json()) as CatalogItemResponse;
       const updated = json.data;
-      setItems((prev) =>
-        prev.map((i) => (i.itemId === itemId ? { ...i, thumbnail: updated.thumbnail } : i)),
-      );
+      setItems((prev) => prev.map((i) => (i.itemId === itemId ? { ...i, thumbnail: updated.thumbnail } : i)));
     } catch (err) {
       setError(`Lỗi upload ảnh: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
@@ -179,96 +170,96 @@ export function AdminCatalogPage() {
         containerClassName="rounded-[var(--r-card)] border-white/10 bg-white/[0.02] shadow-none"
         className="text-slate-200"
       >
-          <TableHeader className="bg-white/[0.04] [&_tr]:border-b [&_tr]:border-white/10">
-            <TableRow className="border-white/10 hover:bg-transparent">
-              <TableHead className="text-slate-400">Ảnh</TableHead>
-              <TableHead className="text-slate-400">Item ID</TableHead>
-              <TableHead className="text-slate-400">Tên</TableHead>
-              <TableHead className="text-slate-400">Giá (đ)</TableHead>
-              <TableHead className="text-slate-400">Trạng thái</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-white/10">
-            {list.map((item) => (
-              <TableRow key={item.itemId} className="border-white/10 hover:bg-white/5">
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    {item.thumbnail ? (
-                      <img
-                        src={item.thumbnail}
-                        alt={item.label}
-                        className="h-12 w-12 rounded-[var(--r-tile)] border border-white/10 object-cover"
-                      />
+        <TableHeader className="bg-white/[0.04] [&_tr]:border-b [&_tr]:border-white/10">
+          <TableRow className="border-white/10 hover:bg-transparent">
+            <TableHead className="text-slate-400">Ảnh</TableHead>
+            <TableHead className="text-slate-400">Item ID</TableHead>
+            <TableHead className="text-slate-400">Tên</TableHead>
+            <TableHead className="text-slate-400">Giá (đ)</TableHead>
+            <TableHead className="text-slate-400">Trạng thái</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="divide-y divide-white/10">
+          {list.map((item) => (
+            <TableRow key={item.itemId} className="border-white/10 hover:bg-white/5">
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  {item.thumbnail ? (
+                    <img
+                      src={item.thumbnail}
+                      alt={item.label}
+                      className="h-12 w-12 rounded-[var(--r-tile)] border border-white/10 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-white/15 bg-white/5 text-xs text-slate-500">
+                      no img
+                    </div>
+                  )}
+                  <input
+                    ref={(el) => {
+                      fileInputs.current[item.itemId] = el;
+                    }}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void uploadThumbnail(item.itemId, file);
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
+                    disabled={uploading === item.itemId}
+                    onClick={() => fileInputs.current[item.itemId]?.click()}
+                  >
+                    {uploading === item.itemId ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Đang upload…
+                      </span>
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-white/15 bg-white/5 text-xs text-slate-500">
-                        no img
-                      </div>
+                      "Đổi ảnh"
                     )}
-                    <input
-                      ref={(el) => {
-                        fileInputs.current[item.itemId] = el;
-                      }}
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) void uploadThumbnail(item.itemId, file);
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
-                      disabled={uploading === item.itemId}
-                      onClick={() => fileInputs.current[item.itemId]?.click()}
-                    >
-                      {uploading === item.itemId ? (
-                        <span className="inline-flex items-center gap-1">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Đang upload…
-                        </span>
-                      ) : (
-                        "Đổi ảnh"
-                      )}
-                    </Button>
-                  </div>
-                </TableCell>
-                <TableCell className="font-mono text-xs text-slate-300">{item.itemId}</TableCell>
-                <TableCell className="text-slate-100">{item.label}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      className={`${adminInput} w-32`}
-                      defaultValue={item.priceVnd}
-                      disabled={saving === item.itemId}
-                      onBlur={(e) => {
-                        const v = Number(e.target.value);
-                        if (!Number.isFinite(v) || v < 0) return;
-                        if (v !== item.priceVnd) void updatePrice(item.itemId, v);
-                      }}
-                    />
-                    <span className="text-xs text-slate-500">{formatVnd(item.priceVnd)}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="inline-flex items-center gap-2 text-xs">
-                    <Switch
-                      checked={item.isActive}
-                      disabled={saving === item.itemId}
-                      onCheckedChange={(checked) => void toggleActive(item.itemId, Boolean(checked))}
-                      aria-label={`${item.label}: ${item.isActive ? "đang bán" : "đã ẩn"}`}
-                    />
-                    <span className={item.isActive ? "text-emerald-300" : "text-slate-500"}>
-                      {item.isActive ? "Đang bán" : "Đã ẩn"}
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  </Button>
+                </div>
+              </TableCell>
+              <TableCell className="font-mono text-xs text-slate-300">{item.itemId}</TableCell>
+              <TableCell className="text-slate-100">{item.label}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    className={`${adminInput} w-32`}
+                    defaultValue={item.priceVnd}
+                    disabled={saving === item.itemId}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (!Number.isFinite(v) || v < 0) return;
+                      if (v !== item.priceVnd) void updatePrice(item.itemId, v);
+                    }}
+                  />
+                  <span className="text-xs text-slate-500">{formatVnd(item.priceVnd)}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="inline-flex items-center gap-2 text-xs">
+                  <Switch
+                    checked={item.isActive}
+                    disabled={saving === item.itemId}
+                    onCheckedChange={(checked) => void toggleActive(item.itemId, Boolean(checked))}
+                    aria-label={`${item.label}: ${item.isActive ? "đang bán" : "đã ẩn"}`}
+                  />
+                  <span className={item.isActive ? "text-emerald-300" : "text-slate-500"}>
+                    {item.isActive ? "Đang bán" : "Đã ẩn"}
+                  </span>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     );
   }
 

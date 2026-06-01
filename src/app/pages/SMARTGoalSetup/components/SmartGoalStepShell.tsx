@@ -1,30 +1,28 @@
-import type { ReactNode, RefObject } from "react";
-import { useRef, useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
-  CircleAlert,
-  Lightbulb,
-  Sparkles,
-  ChevronDown,
-  Target,
   BarChart3,
-  ShieldCheck,
-  Heart,
+  Check,
+  ChevronDown,
+  CircleAlert,
   Clock,
+  Heart,
+  Lightbulb,
+  ShieldCheck,
+  Sparkles,
+  Target,
 } from "lucide-react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
-
-import type { QualityLevel } from "@/lib/smart-goal/quality";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import type { ReactNode, RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/app/components/ui/utils";
-
-import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
-import { ReviewStep } from "./ReviewStep";
+import type { QualityLevel } from "@/lib/smart-goal/quality";
+import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 import { SMART_STEPS } from "../constants";
 import { formatStepDraft } from "../helpers";
 import type { GoalClarityItem, SMARTData, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
-import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
+import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
+import { ReviewStep } from "./ReviewStep";
 
 interface QualityFeedbackData {
   level: QualityLevel;
@@ -85,7 +83,8 @@ const STEP_ICONS: Record<SmartStepKey, typeof Target> = {
 // Tổng hợp chuông ngân chánh niệm tần số 639Hz (hoà hợp, kết nối)
 const playMindfulStepSuccess = () => {
   try {
-    const AudioCtxClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
+    const AudioCtxClass =
+      window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
     if (!AudioCtxClass) return;
     const ctx = new AudioCtxClass();
 
@@ -184,7 +183,7 @@ function useTypingEffect(text: string, speed = 6) {
 
     let index = 0;
     let currentText = "";
-    
+
     const timer = setInterval(() => {
       if (index < text.length) {
         currentText += text.charAt(index);
@@ -329,13 +328,15 @@ export function SmartGoalStepShell({
   const motivationReasonStr = smartGoalStarter.motivationReason;
   const weeksVal = smartGoalStarter.targetWeeks;
 
-  const getPersonaData = (tone: "empathetic" | "pragmatic" | "strategic"): {
+  const getPersonaData = (
+    tone: "empathetic" | "pragmatic" | "strategic",
+  ): {
     coachComment: string;
     goalDraft: string;
     coreTextToApply: string;
   } => {
     const cleanMetric = metric.toLowerCase();
-    
+
     if (step.key === "specific") {
       if (tone === "empathetic") {
         return {
@@ -345,15 +346,42 @@ export function SmartGoalStepShell({
         };
       }
       const pragmaticGoal = goalStr
-        .replace("Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.", "Thực hiện cam kết hành động 12 tuần để cải thiện lĩnh vực ưu tiên và ghi nhận tiến bộ rõ ràng.")
-        .replace("Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.", "Hoàn thành 1 dự án trọng điểm trong 12 tuần để chứng minh năng lực và thăng tiến nghề nghiệp.")
-        .replace("Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.", "Tích lũy quỹ dự phòng khẩn cấp trong 12 tuần nhằm ổn định tài chính cá nhân trước các sự cố phát sinh.")
-        .replace("Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.", "Duy trì tập thể dục 3 buổi mỗi tuần trong 12 tuần nhằm nâng cao thể lực và năng lượng làm việc.")
-        .replace("Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.", "Hoàn thành lộ trình học kỹ năng mới trong 12 tuần và tự làm 1 sản phẩm thực tế để ứng dụng.")
-        .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Chủ động kết nối với những người quan trọng 2 lần mỗi tuần trong 12 tuần để gia tăng sự gắn kết.")
-        .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Dành riêng 2 khoảng thời gian chất lượng cho gia đình mỗi tuần trong 12 tuần, gác lại công việc riêng.")
-        .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Thực hiện thói quen phát triển bản thân đều đặn mỗi tuần trong 12 tuần để nâng cao nhận thức cá nhân.")
-        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc riêng.", "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.");
+        .replace(
+          "Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.",
+          "Thực hiện cam kết hành động 12 tuần để cải thiện lĩnh vực ưu tiên và ghi nhận tiến bộ rõ ràng.",
+        )
+        .replace(
+          "Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.",
+          "Hoàn thành 1 dự án trọng điểm trong 12 tuần để chứng minh năng lực và thăng tiến nghề nghiệp.",
+        )
+        .replace(
+          "Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.",
+          "Tích lũy quỹ dự phòng khẩn cấp trong 12 tuần nhằm ổn định tài chính cá nhân trước các sự cố phát sinh.",
+        )
+        .replace(
+          "Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.",
+          "Duy trì tập thể dục 3 buổi mỗi tuần trong 12 tuần nhằm nâng cao thể lực và năng lượng làm việc.",
+        )
+        .replace(
+          "Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.",
+          "Hoàn thành lộ trình học kỹ năng mới trong 12 tuần và tự làm 1 sản phẩm thực tế để ứng dụng.",
+        )
+        .replace(
+          "Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.",
+          "Chủ động kết nối với những người quan trọng 2 lần mỗi tuần trong 12 tuần để gia tăng sự gắn kết.",
+        )
+        .replace(
+          "Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.",
+          "Dành riêng 2 khoảng thời gian chất lượng cho gia đình mỗi tuần trong 12 tuần, gác lại công việc riêng.",
+        )
+        .replace(
+          "Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.",
+          "Thực hiện thói quen phát triển bản thân đều đặn mỗi tuần trong 12 tuần để nâng cao nhận thức cá nhân.",
+        )
+        .replace(
+          "Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc riêng.",
+          "Lên lịch và thực hiện 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần nhằm phục hồi năng lượng tối ưu.",
+        );
 
       if (tone === "pragmatic") {
         return {
@@ -363,22 +391,49 @@ export function SmartGoalStepShell({
         };
       }
       const strategicGoal = goalStr
-        .replace("Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.", "Thực thi chiến lược 12 tuần nhằm tối ưu hóa lĩnh vực ưu tiên và tạo chỉ số tiến trình rõ nét.")
-        .replace("Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.", "Xây dựng dự án trọng điểm trong 12 tuần, tạo đòn bẩy thăng tiến nghề nghiệp rõ rệt.")
-        .replace("Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.", "Tối ưu hóa phân bổ dòng tiền và thiết lập quỹ dự phòng 12 tuần nhằm bảo vệ an toàn tài chính lâu dài.")
-        .replace("Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.", "Xây dựng thói quen vận động 3 buổi/tuần trong 12 tuần nhằm tái tạo năng lượng thể chất và tinh thần tối đa.")
-        .replace("Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.", "Làm chủ kỹ năng mới thông qua lộ trình học 12 tuần và đóng gói kết quả dưới dạng sản phẩm kiểm chứng.")
-        .replace("Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.", "Hệ thống hóa lịch kết nối chất lượng 2 lần/tuần trong 12 tuần nhằm tối ưu hóa các mối quan hệ cốt lõi.")
-        .replace("Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.", "Thiết lập ranh giới công việc, dành 2 buổi sinh hoạt gia đình chất lượng mỗi tuần trong 12 tuần.")
-        .replace("Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.", "Chuẩn hóa quy trình tự phản tỉnh và thực hiện thói quen phát triển bản thân mỗi tuần trong 12 tuần.")
-        .replace("Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc riêng.", "Quản trị năng lượng bằng 2 khoảng nghỉ sâu mỗi tuần trong 12 tuần, ngăn chặn rủi ro kiệt sức.");
+        .replace(
+          "Hoàn thành một kết quả quan trọng trong 12 tuần để cải thiện lĩnh vực đang ưu tiên và có bằng chứng rõ ràng về tiến bộ.",
+          "Thực thi chiến lược 12 tuần nhằm tối ưu hóa lĩnh vực ưu tiên và tạo chỉ số tiến trình rõ nét.",
+        )
+        .replace(
+          "Hoàn thành một dự án nổi bật trong 12 tuần để có bằng chứng rõ ràng khi trao đổi về bước tiến nghề nghiệp.",
+          "Xây dựng dự án trọng điểm trong 12 tuần, tạo đòn bẩy thăng tiến nghề nghiệp rõ rệt.",
+        )
+        .replace(
+          "Xây dựng quỹ dự phòng đầu tiên trong 12 tuần để tài chính cá nhân ổn hơn và giảm áp lực khi có việc phát sinh.",
+          "Tối ưu hóa phân bổ dòng tiền và thiết lập quỹ dự phòng 12 tuần nhằm bảo vệ an toàn tài chính lâu dài.",
+        )
+        .replace(
+          "Duy trì 3 buổi vận động mỗi tuần trong 12 tuần để cơ thể khỏe hơn, ngủ tốt hơn và có nhiều năng lượng hơn.",
+          "Xây dựng thói quen vận động 3 buổi/tuần trong 12 tuần nhằm tái tạo năng lượng thể chất và tinh thần tối đa.",
+        )
+        .replace(
+          "Hoàn thành một lộ trình học 12 tuần để nắm chắc một kỹ năng mới và có sản phẩm nhỏ chứng minh kết quả học.",
+          "Làm chủ kỹ năng mới thông qua lộ trình học 12 tuần và đóng gói kết quả dưới dạng sản phẩm kiểm chứng.",
+        )
+        .replace(
+          "Duy trì ít nhất 2 lần chủ động kết nối mỗi tuần trong 12 tuần để các mối quan hệ quan trọng gần gũi hơn.",
+          "Hệ thống hóa lịch kết nối chất lượng 2 lần/tuần trong 12 tuần nhằm tối ưu hóa các mối quan hệ cốt lõi.",
+        )
+        .replace(
+          "Duy trì 2 khoảng thời gian chất lượng với gia đình mỗi tuần trong 12 tuần để kết nối gần hơn và bớt bị cuốn vào việc riêng.",
+          "Thiết lập ranh giới công việc, dành 2 buổi sinh hoạt gia đình chất lượng mỗi tuần trong 12 tuần.",
+        )
+        .replace(
+          "Duy trì một thói quen phát triển bản thân trong 12 tuần để hiểu mình hơn và có nhịp cải thiện đều mỗi tuần.",
+          "Chuẩn hóa quy trình tự phản tỉnh và thực hiện thói quen phát triển bản thân mỗi tuần trong 12 tuần.",
+        )
+        .replace(
+          "Duy trì 2 khoảng nghỉ chất lượng mỗi tuần trong 12 tuần để phục hồi năng lượng và không để cuộc sống chỉ xoay quanh việc riêng.",
+          "Quản trị năng lượng bằng 2 khoảng nghỉ sâu mỗi tuần trong 12 tuần, ngăn chặn rủi ro kiệt sức.",
+        );
       return {
         coachComment: "Phân tích chiến lược cho thấy đây là lộ trình tối ưu nhất. Hãy tham khảo cấu trúc mục tiêu:",
         goalDraft: strategicGoal,
         coreTextToApply: strategicGoal,
       };
     }
-    
+
     if (step.key === "measurable") {
       if (tone === "empathetic") {
         return {
@@ -427,12 +482,13 @@ export function SmartGoalStepShell({
       const cleanReason = motivationReasonStr.replace("Tôi muốn mục tiêu này vì ", "");
       if (tone === "empathetic") {
         return {
-          coachComment: "Lý do sâu sắc từ trái tim sẽ tiếp thêm sức mạnh cho bạn. Hãy cảm nhận xem điều này đã thực sự chạm tới ước muốn của bạn chưa:",
+          coachComment:
+            "Lý do sâu sắc từ trái tim sẽ tiếp thêm sức mạnh cho bạn. Hãy cảm nhận xem điều này đã thực sự chạm tới ước muốn của bạn chưa:",
           goalDraft: motivationReasonStr,
           coreTextToApply: motivationReasonStr,
         };
       }
-      
+
       const pragmaticReason = `Động lực thực tế: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
       if (tone === "pragmatic") {
         return {
@@ -441,7 +497,7 @@ export function SmartGoalStepShell({
           coreTextToApply: pragmaticReason,
         };
       }
-      
+
       const strategicReason = `Căn chỉnh trục phát triển: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
       return {
         coachComment: "Định hình tầm nhìn chiến lược và căn chỉnh hệ giá trị phát triển cốt lõi:",
@@ -545,18 +601,22 @@ export function SmartGoalStepShell({
         ref={isMobile ? undefined : cardRef}
         onMouseMove={isMobile ? undefined : handleMouseMove}
         onMouseLeave={isMobile ? undefined : handleMouseLeave}
-        style={isMobile ? {} : {
-          rotateX,
-          rotateY,
-          transformStyle: "preserve-3d",
-        }}
+        style={
+          isMobile
+            ? {}
+            : {
+                rotateX,
+                rotateY,
+                transformStyle: "preserve-3d",
+              }
+        }
         className={cn(
           "group relative rounded-sm p-5 sm:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.05),0_2px_8px_rgba(0,0,0,0.02)] select-none border-[10px] border-white dark:border-slate-800 bg-[#faf6ee] dark:bg-[#1a1c17] transition-all duration-300 transform",
-          isMobile ? "max-w-md mx-auto my-4 rotate-[0.5deg]" : "rotate-[1deg] hover:rotate-0"
+          isMobile ? "max-w-md mx-auto my-4 rotate-[0.5deg]" : "rotate-[1deg] hover:rotate-0",
         )}
       >
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-yellow-100/40 dark:bg-yellow-950/20 border-b border-yellow-250/10 shadow-[0_1px_2px_rgba(0,0,0,0.02)] rotate-[-1.5deg] z-10 backdrop-blur-[0.5px]" />
-        
+
         <AnimatePresence>
           {isGoldStandard && (
             <motion.div
@@ -576,46 +636,58 @@ export function SmartGoalStepShell({
 
         <div className="text-[14px] sm:text-[15px] leading-loose text-slate-850 dark:text-slate-200 font-serif tracking-wide select-text relative z-20">
           Tôi quyết tâm{" "}
-          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
-            isSpecFilled
-              ? "text-teal-800 dark:text-teal-300 font-bold bg-teal-500/5"
-              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
-          )}>
+          <span
+            className={cn(
+              "inline-flex items-center px-1 rounded transition-colors duration-200",
+              isSpecFilled
+                ? "text-teal-800 dark:text-teal-300 font-bold bg-teal-500/5"
+                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+            )}
+          >
             {isSpecFilled ? specText : "hành động cụ thể"}
           </span>
-          <span className="text-xs opacity-75 ml-1 select-none">🎯</span>. 
-          Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
-          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
-            isMeasFilled
-              ? "text-blue-800 dark:text-blue-300 font-bold bg-blue-500/5"
-              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
-          )}>
+          <span className="text-xs opacity-75 ml-1 select-none">🎯</span>. Tôi sẽ đo lường tiến bộ bằng cách đạt mốc{" "}
+          <span
+            className={cn(
+              "inline-flex items-center px-1 rounded transition-colors duration-200",
+              isMeasFilled
+                ? "text-blue-800 dark:text-blue-300 font-bold bg-blue-500/5"
+                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+            )}
+          >
             {isMeasFilled ? `${measTarget} ${measUnit || "đơn vị"}` : "chỉ số"}
           </span>
-          <span className="text-xs opacity-75 ml-1 select-none">📊</span>. 
-          Tôi cam kết dành ra{" "}
-          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
-            isAchFilled
-              ? "text-amber-800 dark:text-amber-300 font-bold bg-amber-500/5"
-              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
-          )}>
+          <span className="text-xs opacity-75 ml-1 select-none">📊</span>. Tôi cam kết dành ra{" "}
+          <span
+            className={cn(
+              "inline-flex items-center px-1 rounded transition-colors duration-200",
+              isAchFilled
+                ? "text-amber-800 dark:text-amber-300 font-bold bg-amber-500/5"
+                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+            )}
+          >
             {isAchFilled ? `${achHours} giờ mỗi tuần` : "thời gian cam kết"}
           </span>
-          <span className="text-xs opacity-75 ml-1 select-none">⚡</span> để thực hiện. 
-          Việc này quan trọng vì{" "}
-          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
-            isRelFilled
-              ? "text-rose-800 dark:text-rose-350 font-bold bg-rose-500/5"
-              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
-          )}>
+          <span className="text-xs opacity-75 ml-1 select-none">⚡</span> để thực hiện. Việc này quan trọng vì{" "}
+          <span
+            className={cn(
+              "inline-flex items-center px-1 rounded transition-colors duration-200",
+              isRelFilled
+                ? "text-rose-800 dark:text-rose-350 font-bold bg-rose-500/5"
+                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+            )}
+          >
             {isRelFilled ? relReason : "lý do của bạn"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">❤️</span> và hoàn thành trước{" "}
-          <span className={cn("inline-flex items-center px-1 rounded transition-colors duration-200",
-            isTimeFilled
-              ? "text-purple-800 dark:text-purple-300 font-bold bg-purple-500/5"
-              : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]"
-          )}>
+          <span
+            className={cn(
+              "inline-flex items-center px-1 rounded transition-colors duration-200",
+              isTimeFilled
+                ? "text-purple-800 dark:text-purple-300 font-bold bg-purple-500/5"
+                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+            )}
+          >
             {isTimeFilled ? timeDate : "ngày hoàn thành"}
           </span>
           <span className="text-xs opacity-75 ml-1 select-none">📅</span>.
@@ -658,7 +730,8 @@ export function SmartGoalStepShell({
                 <span>🎯</span> Live Preview
               </p>
               <p className="text-xs truncate font-serif italic text-slate-700 dark:text-slate-300 leading-normal">
-                Quyết tâm {isSpecFilled ? specText : "..."} 🎯. Đo lường: {isMeasFilled ? `${measTarget} ${measUnit}` : "..."} 📊.
+                Quyết tâm {isSpecFilled ? specText : "..."} 🎯. Đo lường:{" "}
+                {isMeasFilled ? `${measTarget} ${measUnit}` : "..."} 📊.
               </p>
             </div>
             <span className="shrink-0 rounded-full bg-app-accent-soft px-2.5 py-0.5 text-[10px] font-bold text-app-accent">
@@ -692,14 +765,20 @@ export function SmartGoalStepShell({
           </div>
 
           <div className="relative mt-4">
-            <div className="absolute top-[22px] left-[10%] right-[10%] h-[3px] bg-app-line rounded-full z-0 overflow-hidden" aria-hidden="true">
+            <div
+              className="absolute top-[22px] left-[10%] right-[10%] h-[3px] bg-app-line rounded-full z-0 overflow-hidden"
+              aria-hidden="true"
+            >
               <div
                 className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-app-accent transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
                 style={{ width: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
               />
             </div>
 
-            <ol aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`} className="relative z-10 grid grid-cols-5 gap-2">
+            <ol
+              aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`}
+              className="relative z-10 grid grid-cols-5 gap-2"
+            >
               {SMART_STEPS.map((smartStep, index) => {
                 const isActive = index === stepIndex;
                 const isDone = index < stepIndex;
@@ -718,21 +797,27 @@ export function SmartGoalStepShell({
                           ? "border-app-accent bg-app-accent-soft text-app-accent scale-[1.03] shadow-sm"
                           : isDone
                             ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent hover:scale-[1.02] active:scale-[0.97]"
-                            : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent active:scale-[0.97] disabled:cursor-default"
+                            : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent active:scale-[0.97] disabled:cursor-default",
                       )}
                     >
-                      <span className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300",
-                        isActive
-                          ? "bg-app-accent text-white shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.4)]"
-                          : isDone
-                            ? "bg-white/20 text-white"
-                            : "bg-app-surface text-app-ink-muted border border-app-line"
-                      )}>
+                      <span
+                        className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300",
+                          isActive
+                            ? "bg-app-accent text-white shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.4)]"
+                            : isDone
+                              ? "bg-white/20 text-white"
+                              : "bg-app-surface text-app-ink-muted border border-app-line",
+                        )}
+                      >
                         <StepIcon className="h-4 w-4" />
                       </span>
-                      <span className="text-[10px] font-bold tracking-widest uppercase">{STEP_LETTERS[smartStep.key]}</span>
-                      <span className="hidden truncate text-xs font-semibold sm:block">{STEP_NAMES[smartStep.key]}</span>
+                      <span className="text-[10px] font-bold tracking-widest uppercase">
+                        {STEP_LETTERS[smartStep.key]}
+                      </span>
+                      <span className="hidden truncate text-xs font-semibold sm:block">
+                        {STEP_NAMES[smartStep.key]}
+                      </span>
                       {isDone ? <span className="sr-only">đã hoàn thành</span> : null}
                     </button>
                   </li>
@@ -742,8 +827,6 @@ export function SmartGoalStepShell({
           </div>
 
           <div className="my-6 h-px bg-app-line" aria-hidden="true" />
-
-
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -762,15 +845,21 @@ export function SmartGoalStepShell({
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5 text-teal-500 animate-[pulse_2s_infinite]" />
                     <span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
-                      Cố vấn mục tiêu AI · {selectedTone === "empathetic" ? "Ấm áp" : selectedTone === "pragmatic" ? "Thực tế" : "Chiến lược"}
+                      Cố vấn mục tiêu AI ·{" "}
+                      {selectedTone === "empathetic"
+                        ? "Ấm áp"
+                        : selectedTone === "pragmatic"
+                          ? "Thực tế"
+                          : "Chiến lược"}
                     </span>
                   </div>
-                  
+
                   {/* Selector chọn giọng điệu nhỏ gọn */}
                   <div className="flex items-center gap-1.5 text-[9px] text-app-ink-muted">
                     {(["empathetic", "pragmatic", "strategic"] as const).map((tone, idx) => {
                       const isActive = selectedTone === tone;
-                      const toneLabel = tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
+                      const toneLabel =
+                        tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
                       return (
                         <span key={tone} className="flex items-center">
                           {idx > 0 && <span className="mr-1.5 opacity-40">|</span>}
@@ -779,7 +868,9 @@ export function SmartGoalStepShell({
                             onClick={() => setSelectedTone(tone)}
                             className={cn(
                               "font-bold transition-all duration-150 hover:text-teal-600 cursor-pointer",
-                              isActive ? "text-teal-600 dark:text-teal-400 underline decoration-2 underline-offset-2" : "text-app-ink-muted"
+                              isActive
+                                ? "text-teal-600 dark:text-teal-400 underline decoration-2 underline-offset-2"
+                                : "text-app-ink-muted",
                             )}
                           >
                             {toneLabel}
@@ -791,9 +882,7 @@ export function SmartGoalStepShell({
                 </div>
 
                 <div className="space-y-2.5">
-                  <p className="text-xs text-app-ink-soft leading-relaxed select-none italic">
-                    {typedCommentText}
-                  </p>
+                  <p className="text-xs text-app-ink-soft leading-relaxed select-none italic">{typedCommentText}</p>
 
                   {typedDraftText && (
                     <div className="relative rounded-xl border-l-2 border-emerald-500/50 bg-emerald-500/[0.015] px-3.5 py-2">
@@ -827,7 +916,10 @@ export function SmartGoalStepShell({
               )}
 
               {currentStepSoftWarning && (
-                <div className="rounded-xl border border-app-line bg-app-bg p-4 text-app-ink-soft shadow-sm animate-[fade-in_0.3s_ease-out]" role="note">
+                <div
+                  className="rounded-xl border border-app-line bg-app-bg p-4 text-app-ink-soft shadow-sm animate-[fade-in_0.3s_ease-out]"
+                  role="note"
+                >
                   <div className="flex items-start gap-2.5">
                     <Lightbulb className="mt-0.5 h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
                     <div>
@@ -855,9 +947,7 @@ export function SmartGoalStepShell({
               onClick={onNext}
               disabled={!isCurrentStepValid}
             >
-              {step.key === "timeBound"
-                ? "Kiểm tra độ khả thi"
-                : "Tiếp tục"}
+              {step.key === "timeBound" ? "Kiểm tra độ khả thi" : "Tiếp tục"}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
@@ -867,10 +957,10 @@ export function SmartGoalStepShell({
           {renderPolaroidCard(false)}
 
           <div className="overflow-hidden rounded-xl border border-app-line/45 aspect-[4/3] w-full bg-app-bg shadow-sm">
-            <img 
-              src="/smart_goal_builder.png" 
-              alt="Công cụ dựng mục tiêu SMART" 
-              className="w-full h-full object-cover" 
+            <img
+              src="/smart_goal_builder.png"
+              alt="Công cụ dựng mục tiêu SMART"
+              className="w-full h-full object-cover"
               loading="lazy"
             />
           </div>
@@ -879,12 +969,14 @@ export function SmartGoalStepShell({
             <div className="space-y-1">
               <h3 className="text-sm font-bold text-app-ink">Kiểm tra độ rõ mục tiêu (Clarity)</h3>
               <div className="flex items-center justify-between text-xs text-app-ink-muted">
-                <span>{clarityDoneCount}/{clarityItems.length} tiêu chí hoàn thành</span>
+                <span>
+                  {clarityDoneCount}/{clarityItems.length} tiêu chí hoàn thành
+                </span>
                 <span className="font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
               </div>
             </div>
 
-            <div 
+            <div
               role="progressbar"
               aria-valuenow={Math.round(clarityProgress)}
               aria-valuemin={0}
@@ -892,7 +984,10 @@ export function SmartGoalStepShell({
               aria-label="Kiểm tra độ rõ mục tiêu"
               className="h-2 w-full overflow-hidden rounded-full bg-app-line"
             >
-              <div className="h-full rounded-full bg-app-accent transition-all duration-305" style={{ width: `${clarityProgress}%` }} />
+              <div
+                className="h-full rounded-full bg-app-accent transition-all duration-305"
+                style={{ width: `${clarityProgress}%` }}
+              />
             </div>
 
             <div className="grid gap-2 pt-2">
@@ -905,14 +1000,18 @@ export function SmartGoalStepShell({
                     "group/btn flex items-center justify-between rounded-xl border px-3 py-2 text-left transition-all duration-200 text-xs w-full cursor-pointer",
                     item.done
                       ? "border-app-accent/15 bg-app-accent-soft/20 text-app-accent"
-                      : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-ink-muted"
+                      : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-ink-muted",
                   )}
                 >
                   <span className="font-medium group-hover/btn:underline">{item.label}</span>
-                  <div className={cn(
-                    "flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border",
-                    item.done ? "border-app-accent bg-app-accent text-white" : "border-app-ink-muted/30 text-transparent"
-                  )}>
+                  <div
+                    className={cn(
+                      "flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border",
+                      item.done
+                        ? "border-app-accent bg-app-accent text-white"
+                        : "border-app-ink-muted/30 text-transparent",
+                    )}
+                  >
                     {item.done ? <Check className="h-2.5 w-2.5" /> : null}
                   </div>
                 </button>
@@ -927,14 +1026,16 @@ export function SmartGoalStepShell({
                 <span className="text-teal-600 font-extrabold">{feasibilityScore}%</span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden">
-                <div 
+                <div
                   className={cn(
                     "h-full rounded-full transition-all duration-500 bg-gradient-to-r shadow-sm",
-                    feasibilityScore >= 80 ? "from-emerald-400 to-teal-500" :
-                    feasibilityScore >= 60 ? "from-amber-400 to-emerald-500" : 
-                    "from-rose-400 to-amber-500"
-                  )} 
-                  style={{ width: `${feasibilityScore}%` }} 
+                    feasibilityScore >= 80
+                      ? "from-emerald-400 to-teal-500"
+                      : feasibilityScore >= 60
+                        ? "from-amber-400 to-emerald-500"
+                        : "from-rose-400 to-amber-500",
+                  )}
+                  style={{ width: `${feasibilityScore}%` }}
                 />
               </div>
               <p className="text-[10px] text-slate-400 leading-normal">
@@ -944,11 +1045,7 @@ export function SmartGoalStepShell({
           )}
 
           {showReview && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
-            >
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <ReviewStep
                 clarityDoneCount={clarityDoneCount}
                 clarityItemCount={clarityItems.length}

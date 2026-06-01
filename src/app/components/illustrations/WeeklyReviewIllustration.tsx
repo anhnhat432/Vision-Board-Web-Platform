@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "./utils";
 
 const WEEK_CELLS = [
   { id: "monday", x: 76, fillOpacity: 0.78 },

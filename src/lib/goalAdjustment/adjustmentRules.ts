@@ -1,5 +1,5 @@
-import { getDimensionStatus } from "../feasibility/dimensionStatus";
 import type { DimensionKey } from "../feasibility/dimensionScore";
+import { getDimensionStatus } from "../feasibility/dimensionStatus";
 import type {
   GoalAdjustmentPriority,
   GoalAdjustmentRule,

@@ -23,7 +23,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Education",
-        style: { sizePreset: "M", imageFrame: "shadow" }
+        style: { sizePreset: "M", imageFrame: "shadow" },
       },
       {
         type: "image",
@@ -33,7 +33,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Education",
-        style: { sizePreset: "M", imageFrame: "washi" }
+        style: { sizePreset: "M", imageFrame: "washi" },
       },
       {
         type: "quote",
@@ -42,7 +42,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 50,
         width: 320,
         height: 120,
-        style: { sizePreset: "L", quoteFont: "serif" }
+        style: { sizePreset: "L", quoteFont: "serif" },
       },
       {
         type: "icon",
@@ -51,9 +51,9 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 55,
         width: 140,
         height: 140,
-        style: { sizePreset: "S" }
-      }
-    ]
+        style: { sizePreset: "S" },
+      },
+    ],
   },
   {
     id: "su-nghiep",
@@ -69,7 +69,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Career",
-        style: { sizePreset: "M", imageFrame: "shadow" }
+        style: { sizePreset: "M", imageFrame: "shadow" },
       },
       {
         type: "image",
@@ -79,7 +79,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Career",
-        style: { sizePreset: "M", imageFrame: "washi" }
+        style: { sizePreset: "M", imageFrame: "washi" },
       },
       {
         type: "quote",
@@ -88,7 +88,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 48,
         width: 320,
         height: 120,
-        style: { sizePreset: "L", quoteFont: "bold" }
+        style: { sizePreset: "L", quoteFont: "bold" },
       },
       {
         type: "icon",
@@ -97,9 +97,9 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 50,
         width: 140,
         height: 140,
-        style: { sizePreset: "S" }
-      }
-    ]
+        style: { sizePreset: "S" },
+      },
+    ],
   },
   {
     id: "suc-khoe",
@@ -115,7 +115,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Health",
-        style: { sizePreset: "M", imageFrame: "polaroid" }
+        style: { sizePreset: "M", imageFrame: "polaroid" },
       },
       {
         type: "image",
@@ -125,7 +125,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Health",
-        style: { sizePreset: "M", imageFrame: "shadow" }
+        style: { sizePreset: "M", imageFrame: "shadow" },
       },
       {
         type: "quote",
@@ -134,7 +134,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 52,
         width: 320,
         height: 120,
-        style: { sizePreset: "L", quoteFont: "handwriting" }
+        style: { sizePreset: "L", quoteFont: "handwriting" },
       },
       {
         type: "icon",
@@ -143,9 +143,9 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 55,
         width: 140,
         height: 140,
-        style: { sizePreset: "S" }
-      }
-    ]
+        style: { sizePreset: "S" },
+      },
+    ],
   },
   {
     id: "tinh-yeu",
@@ -161,7 +161,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Relationships",
-        style: { sizePreset: "M", imageFrame: "washi" }
+        style: { sizePreset: "M", imageFrame: "washi" },
       },
       {
         type: "image",
@@ -171,7 +171,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Family",
-        style: { sizePreset: "M", imageFrame: "polaroid" }
+        style: { sizePreset: "M", imageFrame: "polaroid" },
       },
       {
         type: "quote",
@@ -180,7 +180,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 50,
         width: 320,
         height: 120,
-        style: { sizePreset: "L", quoteFont: "serif" }
+        style: { sizePreset: "L", quoteFont: "serif" },
       },
       {
         type: "icon",
@@ -189,9 +189,9 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 52,
         width: 140,
         height: 140,
-        style: { sizePreset: "S" }
-      }
-    ]
+        style: { sizePreset: "S" },
+      },
+    ],
   },
   {
     id: "tai-chinh",
@@ -207,7 +207,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Finance",
-        style: { sizePreset: "M", imageFrame: "shadow" }
+        style: { sizePreset: "M", imageFrame: "shadow" },
       },
       {
         type: "image",
@@ -217,7 +217,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         width: 220,
         height: 165,
         lifeAreaId: "Finance",
-        style: { sizePreset: "M", imageFrame: "washi" }
+        style: { sizePreset: "M", imageFrame: "washi" },
       },
       {
         type: "quote",
@@ -226,7 +226,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 48,
         width: 320,
         height: 120,
-        style: { sizePreset: "L", quoteFont: "bold" }
+        style: { sizePreset: "L", quoteFont: "bold" },
       },
       {
         type: "icon",
@@ -235,8 +235,8 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
         y: 52,
         width: 140,
         height: 140,
-        style: { sizePreset: "S" }
-      }
-    ]
-  }
+        style: { sizePreset: "S" },
+      },
+    ],
+  },
 ];

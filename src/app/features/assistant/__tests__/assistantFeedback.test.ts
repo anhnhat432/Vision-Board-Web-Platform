@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   ASSISTANT_GOLDEN_EXAMPLES_STORAGE_KEY,
   captureAssistantFeedback,

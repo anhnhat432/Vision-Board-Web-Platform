@@ -1,4 +1,4 @@
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
+import { type HTMLMotionProps, motion, useReducedMotion } from "motion/react";
 import type { HTMLAttributes, ReactNode } from "react";
 
 import { duration as motionDuration, ease as motionEase } from "@/app/lib/motion";

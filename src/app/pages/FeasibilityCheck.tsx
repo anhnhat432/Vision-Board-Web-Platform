@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import {
-  type GoalArchetype,
-  type PendingSMARTGoal,
   evaluateSmartGoalQuality,
+  type GoalArchetype,
   inferGoalArchetype,
+  type PendingSMARTGoal,
   parsePendingSMARTGoal,
   parseSmartGoal,
 } from "@/lib/smart-goal";
@@ -19,8 +19,8 @@ import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
-import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
 import { FeasibilityBalanceScale } from "./FeasibilityCheck/components/FeasibilityBalanceScale";
+import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
 import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./FeasibilityCheck/helpers";

@@ -1,5 +1,5 @@
-import { motion, useMotionValue, useReducedMotion, useTransform, type HTMLMotionProps } from "motion/react";
-import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { type HTMLMotionProps, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { type CSSProperties, type HTMLAttributes, type ReactNode, useEffect, useRef, useState } from "react";
 
 interface MotionTiltProps extends HTMLMotionProps<"div"> {
   children: ReactNode;

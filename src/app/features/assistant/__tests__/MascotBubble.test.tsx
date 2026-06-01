@@ -50,12 +50,7 @@ describe("MascotBubble", () => {
     const onDismiss = vi.fn();
 
     render(
-      <MascotBubble
-        text="Cần giúp gì không?"
-        active={true}
-        mascotPosition={mascotPosition}
-        onDismiss={onDismiss}
-      />,
+      <MascotBubble text="Cần giúp gì không?" active={true} mascotPosition={mascotPosition} onDismiss={onDismiss} />,
     );
 
     fireEvent.click(screen.getByText("Cần giúp gì không?"));

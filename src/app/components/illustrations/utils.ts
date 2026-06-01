@@ -1,4 +1,4 @@
-import { useId, type SVGProps } from "react";
+import { type SVGProps, useId } from "react";
 
 export interface AmbientIllustrationProps extends SVGProps<SVGSVGElement> {
   className?: string;

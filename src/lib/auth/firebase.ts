@@ -1,21 +1,21 @@
-import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
+import { type FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
-  EmailAuthProvider,
-  GoogleAuthProvider,
+  type Auth,
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
+  sendEmailVerification as firebaseSendEmailVerification,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  GoogleAuthProvider,
   getAuth,
   onAuthStateChanged,
   onIdTokenChanged,
   reauthenticateWithCredential,
-  sendEmailVerification as firebaseSendEmailVerification,
-  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  verifyBeforeUpdateEmail,
-  type Auth,
   type User,
   type UserCredential,
+  verifyBeforeUpdateEmail,
 } from "firebase/auth";
 
 const FIREBASE_TOKEN_STORAGE_KEY = "firebase_id_token";

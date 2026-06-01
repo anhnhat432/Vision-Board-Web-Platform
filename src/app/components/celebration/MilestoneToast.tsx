@@ -3,12 +3,7 @@ import type { ReactNode } from "react";
 
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 
-export type MilestoneKind =
-  | "today-complete"
-  | "streak"
-  | "goal"
-  | "week"
-  | "achievement";
+export type MilestoneKind = "today-complete" | "streak" | "goal" | "week" | "achievement";
 
 interface MilestoneToastProps {
   kind: MilestoneKind;

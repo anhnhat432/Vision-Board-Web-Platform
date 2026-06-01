@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
 import {
   ArrowRight,
   Award,
@@ -7,20 +5,21 @@ import {
   Crown,
   Flame,
   LockKeyhole,
+  type LucideIcon,
   Sparkles,
   Target,
   Trophy,
-  type LucideIcon,
 } from "lucide-react";
-
-import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { EmptyState } from "@/app/components/states/EmptyState";
-import { Button } from "../components/ui/button";
-import { Skeleton } from "../components/ui/skeleton";
-import { emptyNarratives } from "../components/empty-states/narratives";
-import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { celebrateLarge } from "@/lib/effects/celebrate";
 import { hasNewCelebrationIds } from "@/lib/effects/celebrationTriggers";
+import { emptyNarratives } from "../components/empty-states/narratives";
+import { Button } from "../components/ui/button";
+import { Skeleton } from "../components/ui/skeleton";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { Stoic3DCoin } from "./Achievements/components/Stoic3DCoin";
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -225,14 +224,12 @@ function AchievementsContent() {
                 key={achievement.key}
                 onClick={() => isUnlocked && setSelectedAchievement(achievement)}
                 className={`surface-raised relative rounded-xl border border-app-line bg-app-surface p-5 transition-all ${
-                  isUnlocked 
-                    ? "cursor-pointer hover:scale-[1.02] hover:shadow-md" 
-                    : "opacity-60"
+                  isUnlocked ? "cursor-pointer hover:scale-[1.02] hover:shadow-md" : "opacity-60"
                 }`}
               >
                 {/* Wax Seal Stamp (Con dấu sáp đỏ) cho huy hiệu đã đạt */}
                 {isUnlocked && (
-                  <div 
+                  <div
                     className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-red-700 to-red-900 shadow-md transform rotate-12 border border-red-800 animate-[bounce_0.6s_ease-out_1]"
                     title="Đã đóng dấu chứng nhận"
                   >
@@ -268,10 +265,7 @@ function AchievementsContent() {
       </section>
 
       {selectedAchievement && (
-        <Stoic3DCoin
-          achievement={selectedAchievement}
-          onClose={() => setSelectedAchievement(null)}
-        />
+        <Stoic3DCoin achievement={selectedAchievement} onClose={() => setSelectedAchievement(null)} />
       )}
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">

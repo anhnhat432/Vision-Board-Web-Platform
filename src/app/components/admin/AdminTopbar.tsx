@@ -1,12 +1,12 @@
-import { useLocation } from "react-router";
 import { Menu, Search } from "lucide-react";
+import { useLocation } from "react-router";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { cn } from "../ui/utils";
 import { useAdminSearchSlot } from "./AdminSearchContext";
 import { ADMIN_NAV_ITEMS } from "./AdminSidebar";
 import { adminInput } from "./tokens";
-import { cn } from "../ui/utils";
 
 interface AdminTopbarProps {
   onOpenSidebar: () => void;

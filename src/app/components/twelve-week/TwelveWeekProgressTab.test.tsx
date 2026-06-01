@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 
-import { TwelveWeekProgressTab, getProgressNextActionSuggestion } from "./TwelveWeekProgressTab";
+import { getProgressNextActionSuggestion, TwelveWeekProgressTab } from "./TwelveWeekProgressTab";
 
 type ProgressTabProps = ComponentProps<typeof TwelveWeekProgressTab>;
 

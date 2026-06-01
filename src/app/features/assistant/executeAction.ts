@@ -1,5 +1,5 @@
+import type { TwelveWeekTaskInstance, UserData } from "@/app/utils/storage-types";
 import type { AssistantAction } from "./parseActions";
-import type { UserData, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 
 const STORAGE_KEY = "userData";
 

@@ -1,10 +1,10 @@
-import { useRef, useState, type JSX } from "react";
-import type React from "react";
 import { Trash2 } from "lucide-react";
+import type React from "react";
+import { type JSX, useRef, useState } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import { ParallaxCard } from "@/app/components/ui/parallax-card";
-import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem, VisionBoardThemeId } from "@/app/utils/storage-types";
 import { VISION_BOARD_THEMES } from "@/app/utils/vision-board-config";
 import { VisionBoardItemRenderer } from "./VisionBoardItemRenderer";

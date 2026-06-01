@@ -17,9 +17,7 @@ export function isImportValidationReport(value: unknown): value is TwelveWeekImp
   );
 }
 
-export function getImportValidationReportFromError(
-  error: unknown,
-): TwelveWeekImportValidationReport | null {
+export function getImportValidationReportFromError(error: unknown): TwelveWeekImportValidationReport | null {
   if (!isRecord(error)) return null;
 
   if (isImportValidationReport(error.details)) return error.details;

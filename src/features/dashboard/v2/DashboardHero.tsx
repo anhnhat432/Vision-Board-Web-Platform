@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import { ArrowRight, Calendar, Sparkles } from "lucide-react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 
 interface DashboardHeroProps {
@@ -37,7 +37,7 @@ export function DashboardHero({
       "Giữ tâm tĩnh tại giữa những ồn ào của cuộc sống.",
       "Sự nhất quán quan trọng hơn tốc độ.",
       "Lắng nghe bản thân và bước tiếp với sự rõ ràng.",
-      "Một tuần trôi qua ý nghĩa bắt đầu từ một ngày sống trọn vẹn."
+      "Một tuần trôi qua ý nghĩa bắt đầu từ một ngày sống trọn vẹn.",
     ];
     const day = new Date().getDate();
     return quotes[day % quotes.length];
@@ -52,9 +52,11 @@ export function DashboardHero({
       {/* Decorative ambient light */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px] dark:bg-app-accent/10" />
       <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px] dark:bg-amber-500/5" />
-      
+
       {/* 📌 Pin indicator on top header corner */}
-      <span className="absolute top-4 left-4 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+      <span className="hidden sm:inline absolute top-4 left-4 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+        📌
+      </span>
 
       {/* Welcome content */}
       <div className="relative z-10 space-y-4 pt-2">
@@ -70,11 +72,15 @@ export function DashboardHero({
         </div>
 
         <h1 className="font-serif text-2xl sm:text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink md:text-[2.5rem]">
-          Chào tuần mới, <span className="font-semibold underline decoration-amber-400/50 decoration-wavy underline-offset-4 italic">{displayName}</span>
+          Chào tuần mới,{" "}
+          <span className="font-semibold underline decoration-amber-400/50 decoration-wavy underline-offset-4 italic">
+            {displayName}
+          </span>
         </h1>
-        
+
         <p className="text-xs sm:text-sm font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
-          Hãy tập trung năng lượng vào các cam kết cốt lõi. Một chu kỳ hành động tĩnh tại và chất lượng đang chờ đón bạn.
+          Hãy tập trung năng lượng vào các cam kết cốt lõi. Một chu kỳ hành động tĩnh tại và chất lượng đang chờ đón
+          bạn.
         </p>
 
         {/* Life Quote Banner with deep and delicate design */}
@@ -93,29 +99,31 @@ export function DashboardHero({
         {/* Background gradient dreamy mờ ảo giả lập Vision Board */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-amber-500/5 to-violet-500/5 opacity-80 pointer-events-none" />
 
-        {/* 📌 Floating pin on the goal card itself */}
-        <span className="absolute top-2 left-6 text-xl select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)]">📌</span>
-
         <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5 mt-2 relative z-10">
           <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
           Tiêu điểm chu kỳ
         </p>
-        
+
         {/* Visual Dreamy Vision Anchor */}
         <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
           <span className="text-3xl animate-bounce duration-1000">🎨</span>
           <div className="absolute inset-0 bg-black/2 flex items-end p-2">
-            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/80 dark:bg-neutral-900/80 px-2 py-0.5 rounded-md backdrop-blur-xs">BẢNG TẦM NHÌN</span>
+            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/80 dark:bg-neutral-900/80 px-2 py-0.5 rounded-md backdrop-blur-xs">
+              BẢNG TẦM NHÌN
+            </span>
           </div>
         </div>
-        
+
         <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200 relative z-10">
           {featuredGoalTitle}
         </p>
 
         {/* Slender modern progress line */}
         <div className="mt-4 flex items-center gap-3 relative z-10">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800" aria-hidden="true">
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800"
+            aria-hidden="true"
+          >
             <div
               className="h-full rounded-full bg-gradient-to-r from-app-accent to-green-600 transition-all duration-500 ease-out"
               style={{ width: `${safeProgress}%` }}

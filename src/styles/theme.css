@@ -642,6 +642,12 @@
     max-width: 100vw;
     overflow-x: hidden;
     overflow-y: visible;
+    background-color: var(--app-bg);
+    /* Subtle loang màu sage & terracotta mộc mạc tạo chiều sâu chánh niệm */
+    background-image: 
+      radial-gradient(circle at 5% 5%, rgba(58, 114, 97, 0.035) 0%, transparent 40%),
+      radial-gradient(circle at 95% 95%, rgba(211, 106, 71, 0.035) 0%, transparent 45%);
+    background-attachment: fixed;
   }
 
   .app-shell[data-route-tone="journal"] {
@@ -779,9 +785,108 @@
     --tone-orb-c: rgba(20, 184, 166, 0.06);
   }
 
-  .app-shell::before,
+  .app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    opacity: 0.015; /* Rất nhạt để giữ tính dễ đọc tối đa */
+    pointer-events: none;
+    /* Noise SVG fractal noise */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  .dark .app-shell::before {
+    opacity: 0.025; /* Dark mode tăng opacity nhẹ cho dễ nhận biết grain */
+  }
+
+  .dark .app-shell {
+    background-color: var(--background);
+    background-image: 
+      radial-gradient(circle at 5% 5%, rgba(91, 165, 144, 0.02) 0%, transparent 40%),
+      radial-gradient(circle at 95% 95%, rgba(232, 152, 120, 0.02) 0%, transparent 45%);
+  }
+
   .app-shell::after {
     content: none;
+  }
+
+  /* ── PAPER STUDIO ACCENTS ───────────────────────────────── */
+  /* Băng dính xanh sage trang trí */
+  .washi-tape-sage {
+    position: relative;
+  }
+  .washi-tape-sage::after {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 24px;
+    width: 64px;
+    height: 18px;
+    background-color: rgba(58, 114, 97, 0.14);
+    backdrop-filter: blur(0.5px);
+    -webkit-backdrop-filter: blur(0.5px);
+    transform: rotate(-2.5deg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
+    border-left: 2px dashed rgba(58, 114, 97, 0.1);
+    border-right: 2px dashed rgba(58, 114, 97, 0.1);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Băng dính đất nung trang trí */
+  .washi-tape-terra {
+    position: relative;
+  }
+  .washi-tape-terra::after {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 24px;
+    width: 64px;
+    height: 18px;
+    background-color: rgba(211, 106, 71, 0.14);
+    backdrop-filter: blur(0.5px);
+    -webkit-backdrop-filter: blur(0.5px);
+    transform: rotate(2deg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
+    border-left: 2px dashed rgba(211, 106, 71, 0.1);
+    border-right: 2px dashed rgba(211, 106, 71, 0.1);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Đinh ghim gỗ/đồng trang trí */
+  .studio-pin {
+    position: relative;
+  }
+  .studio-pin::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle at 30% 30%, #E89878, #C96843);
+    border-radius: 50%;
+    box-shadow: 
+      0 1px 2px rgba(26, 26, 26, 0.15),
+      inset 0 0.5px 0.5px rgba(255, 255, 255, 0.4);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .studio-pin::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: calc(50% + 1.5px);
+    width: 1px;
+    height: 4px;
+    background: #A39B8C;
+    transform: rotate(15deg);
+    z-index: 9;
+    pointer-events: none;
   }
 
   /* .surface-aurora removed — superseded by simple Card + token shadows. */

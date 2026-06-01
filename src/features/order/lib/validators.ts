@@ -25,9 +25,7 @@ export type ValidateErrorKey =
   | "shippingAddress"
   | "catalog";
 
-export type ValidateResult =
-  | { ok: true }
-  | { ok: false; errors: Partial<Record<ValidateErrorKey, string>> };
+export type ValidateResult = { ok: true } | { ok: false; errors: Partial<Record<ValidateErrorKey, string>> };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

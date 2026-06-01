@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getUserData, saveUserData, formatDateInputValue } from "../utils/storage";
+import { formatDateInputValue, getUserData, saveUserData } from "../utils/storage";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "../utils/storage-types";
 import { Dashboard } from "./Dashboard";
 
@@ -169,9 +169,7 @@ describe("Dashboard active 12-week system UX", () => {
     expect(hero).toHaveTextContent("Tuần 1 / 12");
     expect(todayHeading).toBeDefined();
     expect(hero.compareDocumentPosition(todayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
+    expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
@@ -190,9 +188,7 @@ describe("Dashboard active 12-week system UX", () => {
 
     expect(todayHeading).toBeDefined();
     expect(hero.compareDocumentPosition(todayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
+    expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(goalsHeading.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);

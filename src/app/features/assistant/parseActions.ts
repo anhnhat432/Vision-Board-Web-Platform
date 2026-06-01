@@ -13,7 +13,9 @@ export interface ParsedReply {
 const VALID_ACTION_TYPES = ["create_task", "mark_task_done", "navigate_to"];
 const VALID_ROUTES = ["/twelve-week", "/today", "/reflection", "/dashboard"];
 
-function sanitizeCreateTaskPayload(payload: Record<string, unknown>): { title: string; scheduledDate: string; isCore: boolean } | null {
+function sanitizeCreateTaskPayload(
+  payload: Record<string, unknown>,
+): { title: string; scheduledDate: string; isCore: boolean } | null {
   if (typeof payload.title !== "string") return null;
   const title = payload.title.slice(0, 200);
 

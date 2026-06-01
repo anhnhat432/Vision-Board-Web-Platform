@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./helpers";
 import { QUESTIONS } from "./constants";
+import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./helpers";
 
 // ---------------------------------------------------------------------------
 // Helpers — build answer sets for specific scenarios

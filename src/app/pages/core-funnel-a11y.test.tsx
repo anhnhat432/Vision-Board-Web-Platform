@@ -8,18 +8,10 @@
  * narrow to avoid coupling to business logic.
  */
 
-import { describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
-
-import { Card, CardHeader, CardTitle } from "../components/ui/card";
-import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
-import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
-import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep";
-import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
-import { SmartGoalStepShell } from "./SMARTGoalSetup/components/SmartGoalStepShell";
-import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
+import { describe, expect, it, vi } from "vitest";
 import { PlanPreview } from "@/features/plan12week/components/PlanPreview";
 import { ReviewStep as TwelveWeekReviewStep } from "@/features/plan12week/pages/12WeekSetup/components/ReviewStep";
 import type {
@@ -27,8 +19,15 @@ import type {
   TwelveWeekSetupDraft as FeatureTwelveWeekSetupDraft,
 } from "@/features/plan12week/pages/12WeekSetup/types";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
-import type { Question, ResultData } from "./FeasibilityCheck/types";
+import { Card, CardHeader, CardTitle } from "../components/ui/card";
+import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "./12WeekSetup/types";
+import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
+import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
+import type { Question, ResultData } from "./FeasibilityCheck/types";
+import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
+import { SmartGoalStepShell } from "./SMARTGoalSetup/components/SmartGoalStepShell";
+import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
 import type { SMARTData, SmartStepDefinition } from "./SMARTGoalSetup/types";
 
 function makeSmartData(overrides: Partial<SMARTData> = {}): SMARTData {
@@ -248,7 +247,9 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { level: 2, name: "Mục tiêu này ổn, bước tiếp theo là chia nhỏ theo tuần" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Mục tiêu này ổn, bước tiếp theo là chia nhỏ theo tuần" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Tiếp tục với mục tiêu này" }).length).toBeGreaterThan(0);
     const detailsTrigger = screen.getByRole("button", { name: "Mở chi tiết" });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");

@@ -17,8 +17,8 @@
  *    state for any production deploy is "hidden" even if flag leaks.
  */
 
-import { evaluateSmartGoalQuality, parseSmartGoal, type QualityLevel } from "@/lib/smart-goal";
 import { evaluateTwelveWeekPlanQuality, type PlanQualityLevel } from "@/features/plan12week/logic";
+import { evaluateSmartGoalQuality, parseSmartGoal, type QualityLevel } from "@/lib/smart-goal";
 
 import { hasRealLifeBalance } from "./core-flow-guard";
 import { APP_STORAGE_KEYS, getUserData } from "./storage";

@@ -1,22 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-
-import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { CoreFlowGateState } from "../components/CoreFlowGateState";
-import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { PageShell } from "../components/PageShell";
-import { AnvilForgingEffect } from "./SMARTGoalSetup/components/AnvilForgingEffect";
-import { FormSkeleton } from "../components/ui/skeleton";
-import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
-import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
-import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
-import { trackAnalyticsEvent } from "../utils/analytics";
-import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
-import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
-import { APP_STORAGE_KEYS, getCurrentPlan, getUserData } from "../utils/storage";
-import { hasReachedLimit } from "../utils/feature-entitlements";
-import type { AspirationalVision as AspirationalVisionModel } from "../utils/storage-types";
 import {
   buildSmartGoal,
   evaluateSmartGoalQuality,
@@ -27,13 +10,36 @@ import {
   parseNumberInput,
   type SmartGoal,
 } from "@/lib/smart-goal";
-import { getArchetypeQualityHints, type GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
+import { type GoalArchetype, getArchetypeQualityHints } from "@/lib/smart-goal/goalArchetypes";
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
+import { CoreFlowGateState } from "../components/CoreFlowGateState";
+import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { PageShell } from "../components/PageShell";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { FormSkeleton } from "../components/ui/skeleton";
+import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
+import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
+import { trackAnalyticsEvent } from "../utils/analytics";
+import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
+import { hasReachedLimit } from "../utils/feature-entitlements";
+import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
+import { APP_STORAGE_KEYS, getCurrentPlan, getUserData } from "../utils/storage";
+import type { AspirationalVision as AspirationalVisionModel } from "../utils/storage-types";
 import {
   getArchetypeForIntent,
   getUserIntentId,
   hasActionableArchetypeHint,
   type UserIntentId,
 } from "../utils/user-intent";
+import { AchievableStep } from "./SMARTGoalSetup/components/AchievableStep";
+import { AnvilForgingEffect } from "./SMARTGoalSetup/components/AnvilForgingEffect";
+import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
+import { RelevantStep } from "./SMARTGoalSetup/components/RelevantStep";
+import { SmartGoalHero } from "./SMARTGoalSetup/components/SmartGoalHero";
+import { SmartGoalStepShell } from "./SMARTGoalSetup/components/SmartGoalStepShell";
+import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
+import { TimeBoundStep } from "./SMARTGoalSetup/components/TimeBoundStep";
 import { SMART_STEPS } from "./SMARTGoalSetup/constants";
 import {
   buildGoalClarityItems,
@@ -46,13 +52,6 @@ import {
   getStepValidationError,
   hasStepDraftContent,
 } from "./SMARTGoalSetup/helpers";
-import { AchievableStep } from "./SMARTGoalSetup/components/AchievableStep";
-import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
-import { RelevantStep } from "./SMARTGoalSetup/components/RelevantStep";
-import { SmartGoalHero } from "./SMARTGoalSetup/components/SmartGoalHero";
-import { SmartGoalStepShell } from "./SMARTGoalSetup/components/SmartGoalStepShell";
-import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
-import { TimeBoundStep } from "./SMARTGoalSetup/components/TimeBoundStep";
 import type { SMARTData, SmartStepKey } from "./SMARTGoalSetup/types";
 
 type FlushableDebouncedSave<T> = {
@@ -560,7 +559,11 @@ export function SMARTGoalSetup() {
         <div>
           <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
           <div className="sticky top-2 z-20 flex justify-end">
-            <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} variant="prominent" />
+            <AutoSaveIndicator
+              status={isDirty ? autoSaveStatus : "saved"}
+              lastSavedAt={lastSavedAt}
+              variant="prominent"
+            />
           </div>
         </div>
 
@@ -639,8 +642,8 @@ export function SMARTGoalSetup() {
         </div>
       </div>
       {showAnvilEffect && (
-        <AnvilForgingEffect 
-          onComplete={() => navigate("/feasibility")} 
+        <AnvilForgingEffect
+          onComplete={() => navigate("/feasibility")}
           goalStatement={smartData.specific.goal_statement}
         />
       )}

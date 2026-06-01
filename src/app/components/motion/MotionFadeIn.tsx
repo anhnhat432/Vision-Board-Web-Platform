@@ -1,5 +1,5 @@
-import { motion, useInView, useReducedMotion, type HTMLMotionProps } from "motion/react";
-import { useRef, type HTMLAttributes, type ReactNode } from "react";
+import { type HTMLMotionProps, motion, useInView, useReducedMotion } from "motion/react";
+import { type HTMLAttributes, type ReactNode, useRef } from "react";
 
 interface MotionFadeInProps extends HTMLMotionProps<"div"> {
   children: ReactNode;

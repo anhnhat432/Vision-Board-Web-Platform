@@ -1,7 +1,6 @@
 import * as React from "react";
-
-import { cn } from "./utils";
 import { useReducedMotion } from "./use-reduced-motion";
+import { cn } from "./utils";
 
 type InteractiveSurfaceProps = Omit<React.ComponentProps<"div">, "translate"> & {
   intensity?: number;

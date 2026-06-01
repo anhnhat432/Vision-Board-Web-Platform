@@ -1,6 +1,6 @@
+import { type AnalyticsSource, trackAnalyticsEvent } from "./analytics";
 import type { PricingPlanCode, RescueTriggerKind, RescueTriggerSeverity } from "./storage-types";
 import type { PremiumFeatureContext } from "./twelve-week-premium";
-import { trackAnalyticsEvent, type AnalyticsSource } from "./analytics";
 
 export type MonetizationSource =
   | "dashboard"

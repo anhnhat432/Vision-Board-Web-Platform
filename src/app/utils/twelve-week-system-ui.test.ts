@@ -1,14 +1,14 @@
+import type { SyncOutboxItem, TwelveWeekSystem, TwelveWeekTaskInstance } from "./storage-types";
 import {
   buildRescuePlanSummary,
-  evaluateRescueTriggers,
   dismissRescueTrigger,
+  evaluateRescueTriggers,
   getLatestDailyCheckIn,
-  isRescueTriggerDismissed,
   getOutboxSummaryText,
   getOutboxTypeLabel,
   getWorkloadDecisionLabel,
+  isRescueTriggerDismissed,
 } from "./twelve-week-system-ui";
-import type { SyncOutboxItem, TwelveWeekTaskInstance, TwelveWeekSystem } from "./storage-types";
 
 describe("twelve-week-system-ui helpers", () => {
   beforeEach(() => {

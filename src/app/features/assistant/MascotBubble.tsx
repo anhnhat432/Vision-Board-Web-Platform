@@ -16,22 +16,13 @@ function getViewportWidth(): number {
   return window.innerWidth;
 }
 
-export function MascotBubble({
-  text,
-  active,
-  mascotPosition,
-  onDismiss,
-  onHoverStart,
-  onHoverEnd,
-}: MascotBubbleProps) {
+export function MascotBubble({ text, active, mascotPosition, onDismiss, onHoverStart, onHoverEnd }: MascotBubbleProps) {
   const prefersReducedMotion = useReducedMotion();
   const viewportWidth = getViewportWidth();
   const shouldPlaceLeft = mascotPosition.x > viewportWidth / 2;
   const style: CSSProperties = {
     top: mascotPosition.y + 8,
-    ...(shouldPlaceLeft
-      ? { right: viewportWidth - mascotPosition.x + 8 }
-      : { left: mascotPosition.x + 72 }),
+    ...(shouldPlaceLeft ? { right: viewportWidth - mascotPosition.x + 8 } : { left: mascotPosition.x + 72 }),
   };
 
   return (

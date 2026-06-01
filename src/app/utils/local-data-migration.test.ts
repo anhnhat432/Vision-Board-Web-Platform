@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
-
+import {
+  getAnonymousLocalDataMigrationCandidate,
+  hasCompletedCloudImport,
+  hasMeaningfulLocalWork,
+  hasSkippedLocalDataMigrationPrompt,
+  importAnonymousLocalDataToAccountScope,
+  markCloudImportCompleted,
+  markLocalDataMigrationPromptSkipped,
+} from "./local-data-migration";
+import { getScopedUserDataStorageKey } from "./storage-auth-scope";
 import {
   ANONYMOUS_USER_DATA_STORAGE_KEY,
   AUTH_OWNER_STORAGE_KEY,
@@ -11,16 +20,6 @@ import {
   STORAGE_KEY,
 } from "./storage-constants";
 import { createDemoUserData, createEmptyUserData } from "./storage-demo-data";
-import { getScopedUserDataStorageKey } from "./storage-auth-scope";
-import {
-  getAnonymousLocalDataMigrationCandidate,
-  hasCompletedCloudImport,
-  hasMeaningfulLocalWork,
-  hasSkippedLocalDataMigrationPrompt,
-  importAnonymousLocalDataToAccountScope,
-  markCloudImportCompleted,
-  markLocalDataMigrationPromptSkipped,
-} from "./local-data-migration";
 import type { Goal, TrackingEvent, UserData } from "./storage-types";
 
 function createFreshUserData(): UserData {

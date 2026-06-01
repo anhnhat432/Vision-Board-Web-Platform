@@ -1,6 +1,6 @@
+import { BrainCircuit, CloudRain, Music, Volume2, VolumeX, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CloudRain, Waves, BrainCircuit, Volume2, VolumeX, Music } from "lucide-react";
-import { ambienceService, type AmbienceMode } from "../../services/ambienceService";
+import { type AmbienceMode, ambienceService } from "../../services/ambienceService";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
@@ -27,19 +27,27 @@ export function MindfulPlayer() {
 
   const getModeLabel = (m: AmbienceMode) => {
     switch (m) {
-      case "rain": return "Tiếng mưa rơi";
-      case "ocean": return "Sóng biển vỗ";
-      case "binaural": return "Sóng não tập trung";
-      default: return "Không gian im lặng";
+      case "rain":
+        return "Tiếng mưa rơi";
+      case "ocean":
+        return "Sóng biển vỗ";
+      case "binaural":
+        return "Sóng não tập trung";
+      default:
+        return "Không gian im lặng";
     }
   };
 
   const getModeIcon = (m: AmbienceMode) => {
     switch (m) {
-      case "rain": return <CloudRain className="h-4 w-4" />;
-      case "ocean": return <Waves className="h-4 w-4" />;
-      case "binaural": return <BrainCircuit className="h-4 w-4" />;
-      default: return <VolumeX className="h-4 w-4" />;
+      case "rain":
+        return <CloudRain className="h-4 w-4" />;
+      case "ocean":
+        return <Waves className="h-4 w-4" />;
+      case "binaural":
+        return <BrainCircuit className="h-4 w-4" />;
+      default:
+        return <VolumeX className="h-4 w-4" />;
     }
   };
 
@@ -56,24 +64,20 @@ export function MindfulPlayer() {
         >
           <div className="flex items-center gap-2">
             {mode !== "none" ? (
-              <span className="text-app-accent animate-pulse-slow">
-                {getModeIcon(mode)}
-              </span>
+              <span className="text-app-accent animate-pulse-slow">{getModeIcon(mode)}</span>
             ) : (
               <Music className="h-4 w-4 text-app-muted/80" />
             )}
-            
+
             <span className="text-xs font-medium max-md:hidden">
               {mode !== "none" ? getModeLabel(mode) : "Âm thanh tập trung"}
             </span>
-
-
           </div>
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent 
-        align="end" 
+      <PopoverContent
+        align="end"
         className="w-72 p-4 rounded-2xl border border-app-line/60 bg-app-surface/90 backdrop-blur-xl shadow-2xl transition-all duration-300"
       >
         <div className="space-y-4">
@@ -88,7 +92,8 @@ export function MindfulPlayer() {
           </div>
 
           <p className="text-xs text-app-muted">
-            Tạo không gian âm thanh êm dịu tổng hợp trực tiếp trên trình duyệt để tăng cường tập trung học tập và làm việc.
+            Tạo không gian âm thanh êm dịu tổng hợp trực tiếp trên trình duyệt để tăng cường tập trung học tập và làm
+            việc.
           </p>
 
           {/* Soundscapes Buttons */}
@@ -106,7 +111,9 @@ export function MindfulPlayer() {
                       : "border-app-line/40 bg-app-surface/30 text-app-foreground hover:border-app-line hover:bg-app-surface/70"
                   }`}
                 >
-                  <span className={`mb-1.5 p-1.5 rounded-lg ${active ? "bg-app-accent/15 text-app-accent" : "bg-app-muted/10 text-app-muted"}`}>
+                  <span
+                    className={`mb-1.5 p-1.5 rounded-lg ${active ? "bg-app-accent/15 text-app-accent" : "bg-app-muted/10 text-app-muted"}`}
+                  >
                     {getModeIcon(m)}
                   </span>
                   <span className="text-xs font-medium leading-tight">

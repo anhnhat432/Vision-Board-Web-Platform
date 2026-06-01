@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { isDailyCheckInMetric } from "@/features/plan12week/constants/progressMetrics";
 import {
-  detectBackendPlanConflicts,
   type BackendPlanConflict,
+  detectBackendPlanConflicts,
 } from "@/features/plan12week/persistence/backendConflictDetector";
 import {
   getPlanLink,
@@ -11,9 +11,9 @@ import {
   setRemoteTaskIdForGoal,
 } from "@/features/plan12week/persistence/planLinkStore";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
-import { getGoals, type ApiGoal } from "@/services/goalService";
+import { type ApiGoal, getGoals } from "@/services/goalService";
 import { getPlan, getPlans } from "@/services/planService";
-import type { Plan, PlanDetails, Task as ApiTask, WeekDetails } from "@/types/plan";
+import type { Task as ApiTask, Plan, PlanDetails, WeekDetails } from "@/types/plan";
 import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";
 import {
   formatDateInputValue,

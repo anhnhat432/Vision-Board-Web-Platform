@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Cloud, Database, Download, Eye, Loader2, ShieldCheck, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import type { TwelveWeekImportResponse, TwelveWeekImportValidationReport } from "@/services/syncService";
 import type {
   LocalDataAccountImportResult,
   LocalDataMigrationCandidate,
   LocalDataMigrationSummary,
 } from "../../utils/local-data-migration";
-import type { TwelveWeekImportValidationReport } from "@/services/syncService";
-import type { TwelveWeekImportResponse } from "@/services/syncService";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 

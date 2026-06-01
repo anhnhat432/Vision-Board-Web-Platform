@@ -1,5 +1,5 @@
-import { Suspense, lazy, type ComponentType } from "react";
-import { Navigate, createBrowserRouter } from "react-router";
+import { type ComponentType, lazy, Suspense } from "react";
+import { createBrowserRouter, Navigate } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";

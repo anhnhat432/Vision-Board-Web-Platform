@@ -1,6 +1,6 @@
 import { delete as deleteRequest, get, patch, post } from "@/lib/api/apiClient";
-import type { Plan, PlanDetails } from "@/types/plan";
 import type { BulkSyncRequest, BulkSyncResponse } from "@/types/bulkSync";
+import type { Plan, PlanDetails } from "@/types/plan";
 
 export interface CreatePlanPayload {
   vision?: string;

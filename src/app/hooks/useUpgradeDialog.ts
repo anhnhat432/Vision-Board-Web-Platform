@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
+import { type MonetizationSource, trackPaywallCtaClicked } from "../utils/monetization-analytics";
 import type { PricingPlanCode } from "../utils/storage";
-import { trackPaywallCtaClicked, type MonetizationSource } from "../utils/monetization-analytics";
 import type { PremiumFeatureContext } from "../utils/twelve-week-premium";
 
 interface UseUpgradeDialogOptions {

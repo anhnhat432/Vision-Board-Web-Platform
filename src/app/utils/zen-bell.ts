@@ -22,10 +22,10 @@ export function playZenBell() {
     // 2. Tạo bộ điều khiển âm lượng tổng (Master Gain) để thiết kế Envelope
     const masterGain = audioCtx.createGain();
     masterGain.gain.setValueAtTime(0, now);
-    
+
     // Attack nhanh (0.02s) tạo âm gõ đầu tiên của chuông
     masterGain.gain.linearRampToValueAtTime(0.12, now + 0.02);
-    
+
     // Decay/Release dài (3s) tạo tiếng ngân ấm áp nhạt dần theo hàm mũ
     masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.0);
     masterGain.connect(audioCtx.destination);
@@ -34,7 +34,7 @@ export function playZenBell() {
     const osc1 = audioCtx.createOscillator();
     osc1.type = "sine";
     osc1.frequency.setValueAtTime(primaryFreq, now);
-    
+
     const gain1 = audioCtx.createGain();
     gain1.gain.setValueAtTime(0.8, now);
     osc1.connect(gain1);
@@ -44,7 +44,7 @@ export function playZenBell() {
     const osc2 = audioCtx.createOscillator();
     osc2.type = "sine";
     osc2.frequency.setValueAtTime(primaryFreq * 1.5, now); // 792 Hz
-    
+
     const gain2 = audioCtx.createGain();
     gain2.gain.setValueAtTime(0.25, now);
     osc2.connect(gain2);
@@ -54,7 +54,7 @@ export function playZenBell() {
     const osc3 = audioCtx.createOscillator();
     osc3.type = "sine";
     osc3.frequency.setValueAtTime(primaryFreq * 2.0, now); // 1056 Hz
-    
+
     const gain3 = audioCtx.createGain();
     gain3.gain.setValueAtTime(0.12, now);
     osc3.connect(gain3);

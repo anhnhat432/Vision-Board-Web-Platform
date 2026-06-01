@@ -1,24 +1,18 @@
-﻿import { useCallback, useEffect, useMemo, useState } from "react";
-import { ClipboardList, Loader2, RefreshCw } from "lucide-react";
+﻿import { ClipboardList, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-
-import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { adminGetOrders, adminUpdateOrderStatus, type ApiOrder, type ApiOrderStatus } from "@/services/orderService";
-
+import { type ApiOrder, type ApiOrderStatus, adminGetOrders, adminUpdateOrderStatus } from "@/services/orderService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
 import { useAdminSearch } from "../components/admin/AdminSearchContext";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
-import {
-  ADMIN_STATUS_TRANSITIONS,
-  ORDER_STATUS_LABELS,
-  ORDER_STATUS_TONES,
-} from "../components/admin/statusMappings";
+import { ADMIN_STATUS_TRANSITIONS, ORDER_STATUS_LABELS, ORDER_STATUS_TONES } from "../components/admin/statusMappings";
 import { adminInput, adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, getErrorMessage, withTimeout } from "../components/admin/utils";
+import { Button } from "../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
 const STATUS_FILTER_ORDER: Array<ApiOrderStatus | "all"> = [
   "all",
@@ -151,9 +145,7 @@ export function AdminOrdersPage() {
       if (frameFilter !== "all" && orderFrame !== frameFilter) return false;
 
       if (normalisedQuery.length === 0) return true;
-      const haystack = [order.id, order.email ?? "", order.fullName ?? "", order.phone ?? ""]
-        .join("\n")
-        .toLowerCase();
+      const haystack = [order.id, order.email ?? "", order.fullName ?? "", order.phone ?? ""].join("\n").toLowerCase();
       return haystack.includes(normalisedQuery);
     });
   }, [frameFilter, orders, query, statusFilter]);
@@ -356,11 +348,7 @@ export function AdminOrdersPage() {
                 ) : null}
 
                 <div className="mt-4 flex items-center justify-end border-t border-white/10 pt-4">
-                  <OrderActions
-                    order={order}
-                    busy={busyOrderId === order.id}
-                    onTransition={handleTransition}
-                  />
+                  <OrderActions order={order} busy={busyOrderId === order.id} onTransition={handleTransition} />
                 </div>
               </li>
             );

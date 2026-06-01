@@ -1,7 +1,7 @@
-import { applyBackendProgressOverlay } from "./useBackendProgressOverlay";
+import type { Metric, PlanDetails, WeekReview } from "@/types/plan";
 import { getDefaultScoreboard } from "../utils/storage-twelve-week";
 import type { TwelveWeekSystem, UniversalWeeklyReview } from "../utils/storage-types";
-import type { Metric, PlanDetails, WeekReview } from "@/types/plan";
+import { applyBackendProgressOverlay } from "./useBackendProgressOverlay";
 
 function createMetric(
   name: string,

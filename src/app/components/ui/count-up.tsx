@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useReducedMotion } from "./use-reduced-motion";
-
-import { cn } from "./utils";
 import { useInView } from "./use-in-view";
+import { useReducedMotion } from "./use-reduced-motion";
+import { cn } from "./utils";
 
 interface CountUpProps extends React.ComponentPropsWithoutRef<"span"> {
   value: number;

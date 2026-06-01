@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { UserData } from "../utils/storage";
-import { getCurrentPlan, getCurrentEntitlementKeys } from "../utils/storage";
+import { getCurrentEntitlementKeys, getCurrentPlan } from "../utils/storage";
 import { getPlanDefinition } from "../utils/twelve-week-premium";
 
 const PREMIUM_STATUS_ITEMS = [

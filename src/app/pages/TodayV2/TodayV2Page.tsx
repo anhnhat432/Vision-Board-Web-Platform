@@ -4,9 +4,9 @@ import { Link, useNavigate } from "react-router";
 import { celebrateSmall } from "../../../lib/effects/celebrate";
 
 import { Skeleton } from "../../components/ui/skeleton";
+import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
 import { useSyncedUserData } from "../../hooks/useSyncedUserData";
 import { soundService } from "../../services/soundService";
-import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
 import {
   formatDateInputValue,
   getActiveTwelveWeekGoal,
@@ -16,9 +16,9 @@ import {
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
   parseCalendarDate,
-  toggleTwelveWeekTask,
   type TwelveWeekSystem,
   type TwelveWeekTaskInstance,
+  toggleTwelveWeekTask,
   type UserData,
 } from "../../utils/storage";
 
@@ -317,7 +317,9 @@ function TaskCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () =>
       aria-pressed={checked}
       onClick={onToggle}
       className={`relative mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 after:absolute after:w-11 after:h-11 after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 ${
-        checked ? "border border-app-accent bg-app-accent text-white" : "border-[1.5px] border-app-line-strong bg-app-surface"
+        checked
+          ? "border border-app-accent bg-app-accent text-white"
+          : "border-[1.5px] border-app-line-strong bg-app-surface"
       }`}
     >
       {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
@@ -615,20 +617,49 @@ function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void 
               </defs>
               <circle cx="100" cy="70" r="32" fill="url(#sun-grad)" opacity="0.1" />
               <circle cx="100" cy="70" r="22" fill="url(#sun-grad)" opacity="0.25" className="animate-float-svg" />
-              
+
               <path d="M20 130 Q100 100 180 130 L180 150 L20 150 Z" fill="url(#hill-grad)" opacity="0.15" />
               <path d="M40 135 Q100 115 160 135 L160 150 L40 150 Z" fill="url(#hill-grad)" opacity="0.25" />
 
               <g className="animate-sway-svg" style={{ transformBox: "fill-box" }}>
-                <path d="M100 130 Q102 110 98 90" fill="none" stroke="var(--color-accent, #7c3aed)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+                <path
+                  d="M100 130 Q102 110 98 90"
+                  fill="none"
+                  stroke="var(--color-accent, #7c3aed)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  opacity="0.8"
+                />
                 <path d="M99 110 Q85 105 90 95 Q97 100 99 110" fill="#34d399" />
                 <path d="M100 100 Q115 95 110 85 Q103 90 100 100" fill="#10b981" />
                 <circle cx="98" cy="90" r="3.5" fill="#f472b6" />
               </g>
 
-              <circle cx="45" cy="55" r="2.5" fill="var(--color-accent, #7c3aed)" opacity="0.4" className="animate-float-svg" style={{ animationDelay: "1s" }} />
-              <circle cx="155" cy="65" r="2" fill="#fbbf24" opacity="0.5" className="animate-float-svg" style={{ animationDelay: "2s" }} />
-              <path d="M140 105 L143 108 L140 111 L137 108 Z" fill="#ec4899" opacity="0.3" className="animate-float-svg" style={{ animationDelay: "0.5s" }} />
+              <circle
+                cx="45"
+                cy="55"
+                r="2.5"
+                fill="var(--color-accent, #7c3aed)"
+                opacity="0.4"
+                className="animate-float-svg"
+                style={{ animationDelay: "1s" }}
+              />
+              <circle
+                cx="155"
+                cy="65"
+                r="2"
+                fill="#fbbf24"
+                opacity="0.5"
+                className="animate-float-svg"
+                style={{ animationDelay: "2s" }}
+              />
+              <path
+                d="M140 105 L143 108 L140 111 L137 108 Z"
+                fill="#ec4899"
+                opacity="0.3"
+                className="animate-float-svg"
+                style={{ animationDelay: "0.5s" }}
+              />
             </svg>
           </div>
 
@@ -637,9 +668,10 @@ function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void 
             Khởi đầu chu kỳ 12 tuần của bạn
           </h1>
           <p className="mt-3 text-xs leading-relaxed text-app-ink-soft max-w-xs mx-auto">
-            Hệ thống 12 tuần giúp chuyển đổi những mong muốn mơ hồ thành hành động cụ thể cho từng ngày. Bắt đầu ngay hôm nay để thấy sự thay đổi.
+            Hệ thống 12 tuần giúp chuyển đổi những mong muốn mơ hồ thành hành động cụ thể cho từng ngày. Bắt đầu ngay
+            hôm nay để thấy sự thay đổi.
           </p>
-          
+
           <div className="mt-6 flex flex-col gap-2.5">
             <button
               type="button"
@@ -747,7 +779,7 @@ export function TodayV2Page() {
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     if (!viewModel.activeGoalId) return;
-    const willBeAllCompleted = completed && viewModel.tasks.every(t => t.id === taskId ? true : t.completed);
+    const willBeAllCompleted = completed && viewModel.tasks.every((t) => (t.id === taskId ? true : t.completed));
     toggleTwelveWeekTask(viewModel.activeGoalId, taskId, completed);
     if (completed) {
       soundService.click();

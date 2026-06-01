@@ -1,6 +1,4 @@
-﻿import type { ChangeEvent } from "react";
-import { useEffect, useRef, useState } from "react";
-import {
+﻿import {
   AlertTriangle,
   Bell,
   CalendarDays,
@@ -20,9 +18,13 @@ import {
   Volume2,
   WifiOff,
 } from "lucide-react";
+import type { ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
-
+import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { exportAccountData } from "@/services/syncService";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,17 +37,14 @@ import {
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import { Switch } from "../components/ui/switch";
-import { useTheme } from "../hooks/useTheme";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import { inputClass } from "./SMARTGoalSetup/components/formStyles";
+import { useTheme } from "../hooks/useTheme";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import {
   getMigrationBackupSnapshots,
-  restoreMigrationBackupSnapshot,
   type MigrationBackupSnapshot,
+  restoreMigrationBackupSnapshot,
 } from "../utils/local-data-migration";
 import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
 import {
@@ -55,7 +54,7 @@ import {
   saveUserData,
   updateAppPreferences,
 } from "../utils/storage";
-import { exportAccountData } from "@/services/syncService";
+import { inputClass } from "./SMARTGoalSetup/components/formStyles";
 
 const themeOptions = [
   { value: "system", label: "Theo thiết bị", description: "Dùng cài đặt hệ thống." },
@@ -268,7 +267,10 @@ export function SettingsPage() {
 
       <div className="mt-6 space-y-5">
         {firstRecoverySnapshot ? (
-          <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5" aria-label="Khôi phục dữ liệu cũ">
+          <section
+            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
+            aria-label="Khôi phục dữ liệu cũ"
+          >
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
@@ -290,7 +292,10 @@ export function SettingsPage() {
         ) : null}
 
         {shouldShowExpiryNotice ? (
-          <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5" aria-label="Trạng thái gói Plus">
+          <section
+            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
+            aria-label="Trạng thái gói Plus"
+          >
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
@@ -315,7 +320,10 @@ export function SettingsPage() {
           </section>
         ) : null}
 
-        <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6" aria-label="Tài khoản">
+        <section
+          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+          aria-label="Tài khoản"
+        >
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
               <User2 className="h-5 w-5" />
@@ -345,7 +353,10 @@ export function SettingsPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="settings-display-name" className="mb-1.5 block text-sm font-medium leading-5 text-app-ink">
+                <label
+                  htmlFor="settings-display-name"
+                  className="mb-1.5 block text-sm font-medium leading-5 text-app-ink"
+                >
                   Tên hiển thị
                 </label>
                 <input
@@ -449,9 +460,7 @@ export function SettingsPage() {
                             className="sr-only"
                           />
                           <span className="block text-sm font-medium">{option.label}</span>
-                          <span className="mt-1 block text-xs leading-5 text-app-ink-muted">
-                            {option.description}
-                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-app-ink-muted">{option.description}</span>
                         </label>
                       );
                     })}
@@ -521,7 +530,10 @@ export function SettingsPage() {
           </div>
         </section>
 
-        <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6" aria-label="Dữ liệu">
+        <section
+          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+          aria-label="Dữ liệu"
+        >
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
               <CloudDownload className="h-5 w-5" />
@@ -538,9 +550,7 @@ export function SettingsPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-sm font-semibold text-app-ink">Thiết bị</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                  Thay đổi được giữ ngay trên thiết bị này.
-                </p>
+                <p className="mt-1 text-xs leading-5 text-app-ink-muted">Thay đổi được giữ ngay trên thiết bị này.</p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-sm font-semibold text-app-ink">Tài khoản</p>

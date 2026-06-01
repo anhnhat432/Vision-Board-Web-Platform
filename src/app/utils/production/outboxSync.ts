@@ -1,9 +1,9 @@
 import { apiClient } from "@/lib/api/apiClient";
-import { canSyncToCloud, getEmailVerificationRequiredMessage } from "../email-verification-guard";
 import { isDemoMode } from "../app-mode";
+import { canSyncToCloud, getEmailVerificationRequiredMessage } from "../email-verification-guard";
 import { getUserData, saveUserData } from "../storage";
-import { LAST_OUTBOX_SYNC_KEY, OUTBOX_SYNC_ENDPOINT } from "./env";
 import { isOffline } from "./billingCore";
+import { LAST_OUTBOX_SYNC_KEY, OUTBOX_SYNC_ENDPOINT } from "./env";
 
 export interface OutboxSyncSnapshot {
   at: string;
@@ -106,9 +106,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
   // single-request latency.
   const results = await Promise.allSettled(
     pendingItems.map((item) =>
-      apiClient
-        .post<unknown, typeof item>(OUTBOX_SYNC_ENDPOINT, item, { keepalive: true })
-        .then(() => item),
+      apiClient.post<unknown, typeof item>(OUTBOX_SYNC_ENDPOINT, item, { keepalive: true }).then(() => item),
     ),
   );
 

@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -13,11 +12,32 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-
+import { useEffect, useRef, useState } from "react";
+import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
+import { SectionBlock } from "@/app/components/layout/SectionBlock";
+import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
-import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
-
+import { hapticLight } from "../../utils/haptics";
+import { triggerSparkles } from "../../utils/sparkles";
+import { formatCalendarDate } from "../../utils/storage";
+import type { TwelveWeekSystem, TwelveWeekTaskInstance, UniversalDailyCheckIn } from "../../utils/storage-types";
+import {
+  type DailyMood,
+  getMoodLabel,
+  MOOD_OPTIONS,
+  type ReentryMode,
+  type RescuePlanSummary,
+} from "../../utils/twelve-week-system-ui";
+import { playZenBell } from "../../utils/zen-bell";
+import {
+  EmptyTaskIllustration,
+  TaskDoneIcon,
+  TaskInProgressIcon,
+  TaskTodoIcon,
+  ZenLeafIllustration,
+} from "../illustrations";
+import { EmptyState } from "../states";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -26,23 +46,7 @@ import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
 import { useReducedMotion } from "../ui/use-reduced-motion";
-import { EmptyTaskIllustration, TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon, ZenLeafIllustration } from "../illustrations";
-import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
-import { formatCalendarDate } from "../../utils/storage";
-import { hapticLight } from "../../utils/haptics";
-import { playZenBell } from "../../utils/zen-bell";
-import { triggerSparkles } from "../../utils/sparkles";
-import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
-import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
-import { SectionBlock } from "@/app/components/layout/SectionBlock";
-import {
-  MOOD_OPTIONS,
-  type RescuePlanSummary,
-  type ReentryMode,
-  type DailyMood,
-  getMoodLabel,
-} from "../../utils/twelve-week-system-ui";
 
 interface WeekRange {
   start: string;
@@ -276,7 +280,8 @@ export function TwelveWeekTodayTab({
       triggerSparkles(x, y);
     }
 
-    const isTest = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || import.meta.env.MODE === "test");
+    const isTest =
+      typeof process !== "undefined" && (process.env.NODE_ENV === "test" || import.meta.env.MODE === "test");
 
     if (isTest) {
       // Gọi đồng bộ trực tiếp trong môi trường unit test để các test case pass ngay lập tức
@@ -389,7 +394,9 @@ export function TwelveWeekTodayTab({
             <CalendarClock className="h-3.5 w-3.5" />
             Review tuần đang chờ
           </p>
-          <p className="mt-1.5 text-base font-semibold leading-6 text-app-ink font-serif">Chốt tuần trước khi mở thêm việc mới.</p>
+          <p className="mt-1.5 text-base font-semibold leading-6 text-app-ink font-serif">
+            Chốt tuần trước khi mở thêm việc mới.
+          </p>
           <p className="mt-0.5 text-xs leading-5 text-app-ink-soft">
             Lưu bài học, điểm tuần và ưu tiên tuần sau để hệ 12 tuần không bị đứt nhịp.
           </p>
@@ -422,7 +429,9 @@ export function TwelveWeekTodayTab({
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tiến độ</p>
           <p className="mt-0.5 text-base font-bold text-app-ink">{weekCompletion.percent}%</p>
         </div>
-        <div className={`min-w-0 rounded-xl px-2 py-1.5 text-center ${reviewDueToday ? "bg-app-warm-soft/60" : "bg-app-accent-soft/60"}`}>
+        <div
+          className={`min-w-0 rounded-xl px-2 py-1.5 text-center ${reviewDueToday ? "bg-app-warm-soft/60" : "bg-app-accent-soft/60"}`}
+        >
           <p
             className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}
           >
@@ -449,7 +458,10 @@ export function TwelveWeekTodayTab({
                 Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi.
               </p>
             </div>
-            <Badge variant="outline" className="w-fit border-app-accent/20 bg-app-surface text-app-accent shadow-none rounded-lg px-3 py-1 font-semibold text-xs">
+            <Badge
+              variant="outline"
+              className="w-fit border-app-accent/20 bg-app-surface text-app-accent shadow-none rounded-lg px-3 py-1 font-semibold text-xs"
+            >
               {upcomingStrategicBlock.startTime} · {upcomingStrategicBlock.durationMinutes} phút
             </Badge>
           </div>
@@ -463,7 +475,10 @@ export function TwelveWeekTodayTab({
           className="order-1 text-[11px] text-app-ink-muted flex items-center gap-1.5 px-2 py-1 bg-app-accent-soft/30 border border-app-accent/10 rounded-xl w-fit"
         >
           <Sparkles className="h-3 w-3 text-app-accent shrink-0 animate-pulse" />
-          <span><span className="font-semibold text-app-accent">{nextActionState.title}:</span> {nextActionState.description}</span>
+          <span>
+            <span className="font-semibold text-app-accent">{nextActionState.title}:</span>{" "}
+            {nextActionState.description}
+          </span>
         </div>
       ) : (
         <div
@@ -502,7 +517,9 @@ export function TwelveWeekTodayTab({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-app-ink-muted/80">
               <span>Tuần {currentWeek}/12</span>
               <span className="text-app-line/30">•</span>
-              <span>Đã xong {todayCompletedCount}/{checkInTotal}</span>
+              <span>
+                Đã xong {todayCompletedCount}/{checkInTotal}
+              </span>
               <span className="text-app-line/30">•</span>
               <span>Tiến độ {weekCompletion.percent}%</span>
             </div>
@@ -619,10 +636,7 @@ export function TwelveWeekTodayTab({
               )}
             </p>
             {isFirstWeek && (
-              <p
-                data-testid="today-first-week-encouragement"
-                className="text-xs text-app-ink-soft mt-1"
-              >
+              <p data-testid="today-first-week-encouragement" className="text-xs text-app-ink-soft mt-1">
                 Tuần đầu tiên: Bắt đầu nhỏ để tạo đà và giữ thói quen lâu dài.
               </p>
             )}
@@ -661,7 +675,9 @@ export function TwelveWeekTodayTab({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-medium text-app-ink-muted/80">
               <span>Tuần {currentWeek}/12</span>
               <span className="text-app-line/30">•</span>
-              <span>Đã xong {todayCompletedCount}/{checkInTotal}</span>
+              <span>
+                Đã xong {todayCompletedCount}/{checkInTotal}
+              </span>
               <span className="text-app-line/30">•</span>
               <span>Tiến độ {weekCompletion.percent}%</span>
             </div>
@@ -689,7 +705,10 @@ export function TwelveWeekTodayTab({
                       Ưu tiên hoàn thành nhóm việc quan trọng nhất trước.
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className="shrink-0 border-app-line bg-app-bg text-app-ink-muted/80 rounded-lg text-[10px] px-2.5 py-0.5 shadow-none font-semibold">
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 border-app-line bg-app-bg text-app-ink-muted/80 rounded-lg text-[10px] px-2.5 py-0.5 shadow-none font-semibold"
+                  >
                     {todayCompletedCount}/{checkInTotal} hoàn thành
                   </Badge>
                 </div>
@@ -745,10 +764,10 @@ export function TwelveWeekTodayTab({
                       const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
                       const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
                       const TaskStateIcon = taskCompleted
-                         ? TaskDoneIcon
-                         : isPrimaryTask
-                           ? TaskInProgressIcon
-                           : TaskTodoIcon;
+                        ? TaskDoneIcon
+                        : isPrimaryTask
+                          ? TaskInProgressIcon
+                          : TaskTodoIcon;
                       const statusLabel = taskCompleted
                         ? "Đã chốt"
                         : isOverdue
@@ -760,7 +779,7 @@ export function TwelveWeekTodayTab({
                       const showTaskCommitmentQuote = Boolean(
                         taskCommitmentQuote && !(isPrimaryTask && primaryTaskCommitmentQuote),
                       );
- 
+
                       return (
                         <MotionStaggerItem
                           key={task.id}
@@ -789,9 +808,7 @@ export function TwelveWeekTodayTab({
                                 <div className="flex flex-wrap items-center gap-2">
                                   <TaskStateIcon
                                     className={`h-4 w-4 shrink-0 ${
-                                      isPrimaryTask && !taskCompleted
-                                        ? "text-app-accent"
-                                        : "text-app-ink-muted/80"
+                                      isPrimaryTask && !taskCompleted ? "text-app-accent" : "text-app-ink-muted/80"
                                     }`}
                                   />
                                   <p
@@ -940,7 +957,10 @@ export function TwelveWeekTodayTab({
                             <p className="truncate text-xs font-semibold text-app-ink">{task.title}</p>
                             <p className="mt-0.5 text-[10px] text-app-ink-muted">{task.leadIndicatorName}</p>
                           </div>
-                          <Badge variant={task.isCore ? "success" : "warning"} className="text-[9px] px-1.5 py-0 shadow-none rounded-md">
+                          <Badge
+                            variant={task.isCore ? "success" : "warning"}
+                            className="text-[9px] px-1.5 py-0 shadow-none rounded-md"
+                          >
                             {task.isCore ? "Cốt lõi" : "Tùy chọn"}
                           </Badge>
                         </div>
@@ -976,7 +996,10 @@ export function TwelveWeekTodayTab({
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3 sm:px-8 sm:pt-8 sm:pb-4">
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <CardTitle as="h2" className="flex items-center gap-2 break-words text-app-ink font-serif text-lg font-semibold">
+                    <CardTitle
+                      as="h2"
+                      className="flex items-center gap-2 break-words text-app-ink font-serif text-lg font-semibold"
+                    >
                       <Gauge className="h-5 w-5 text-app-accent shrink-0" />
                       Check-in hôm nay
                       <span className="sr-only">Check-in 30 giây</span>
@@ -986,7 +1009,10 @@ export function TwelveWeekTodayTab({
                       <span className="sr-only">Chọn năng lượng và ghi 1 ý ngắn</span>
                     </CardDescription>
                   </div>
-                  <Badge variant="outline" className="shrink-0 border-app-accent/25 bg-app-accent-soft text-app-accent rounded-lg text-[10px] px-2.5 py-0.5 font-semibold">
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 border-app-accent/25 bg-app-accent-soft text-app-accent rounded-lg text-[10px] px-2.5 py-0.5 font-semibold"
+                  >
                     {todayCompletedCount}/{checkInTotal}
                   </Badge>
                 </div>
@@ -999,24 +1025,27 @@ export function TwelveWeekTodayTab({
                   >
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
                     <div className="flex-1">
-                      <span className="font-semibold">Đã lưu check-in:</span> Năng lượng {" "}
-                      <span className="font-bold">{getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}</span>
+                      <span className="font-semibold">Đã lưu check-in:</span> Năng lượng{" "}
+                      <span className="font-bold">
+                        {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                      </span>
                       <span className="sr-only">{todayCheckIn.date}</span>
                     </div>
                   </div>
                 )}
                 <div className="stack-tight">
-                  <Label id="daily-mood-label" className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-ink-soft/80">Năng lượng của bạn</Label>
-                  <div
-                    role="radiogroup"
-                    aria-labelledby="daily-mood-label"
-                    className="grid grid-cols-3 gap-2"
+                  <Label
+                    id="daily-mood-label"
+                    className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-ink-soft/80"
                   >
+                    Năng lượng của bạn
+                  </Label>
+                  <div role="radiogroup" aria-labelledby="daily-mood-label" className="grid grid-cols-3 gap-2">
                     {MOOD_OPTIONS.map((option) => {
                       const isActive = dailyMood === option.value;
                       const moodStyle = getMoodOptionStyle(option.value, isActive);
                       const emoji = option.value === "low" ? "🧘‍♂️" : option.value === "high" ? "🔥" : "🌱";
-                      
+
                       return (
                         <Button
                           key={option.value}
@@ -1038,7 +1067,12 @@ export function TwelveWeekTodayTab({
                   </div>
                 </div>
                 <div className="stack-tight">
-                  <Label htmlFor="daily-note" className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-ink-soft/80">Nhật ký ngày (tùy chọn)</Label>
+                  <Label
+                    htmlFor="daily-note"
+                    className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-ink-soft/80"
+                  >
+                    Nhật ký ngày (tùy chọn)
+                  </Label>
                   <Textarea
                     id="daily-note"
                     rows={2}
@@ -1087,7 +1121,9 @@ export function TwelveWeekTodayTab({
                       className="rounded-xl border border-app-line/60 bg-app-bg/50 p-4 text-xs text-app-ink-muted leading-relaxed"
                     >
                       Check-in gần nhất: {formatCalendarDate(latestCheckIn.date)} • năng lượng{" "}
-                      <span className="font-semibold text-app-ink-soft">{getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}</span>
+                      <span className="font-semibold text-app-ink-soft">
+                        {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                      </span>
                     </div>
                   )}
                 </SecondaryPanel>

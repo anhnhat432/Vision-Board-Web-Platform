@@ -1,13 +1,13 @@
 import "@testing-library/jest-dom/vitest";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-
+import { useSyncedUserData } from "@/app/hooks/useSyncedUserData";
+import { MOCK_BILLING_ACCOUNT_KEY } from "@/app/utils/production/env";
 import {
+  completeMockCheckoutSession,
   getMockBillingAccount,
   mockBillingProvider,
-  completeMockCheckoutSession,
 } from "@/app/utils/production/mockBillingProvider";
-import { MOCK_BILLING_ACCOUNT_KEY } from "@/app/utils/production/env";
 import {
   activateAuthenticatedUserData,
   getCurrentPlan,
@@ -16,6 +16,7 @@ import {
   saveUserData,
   USER_DATA_STORAGE_KEY,
 } from "@/app/utils/storage";
+import { getScopedUserDataStorageKey } from "@/app/utils/storage-auth-scope";
 import {
   ANONYMOUS_USER_DATA_STORAGE_KEY,
   AUTH_OWNER_STORAGE_KEY,
@@ -24,9 +25,7 @@ import {
   MOTIVATIONAL_QUOTES,
 } from "@/app/utils/storage-constants";
 import { createDemoUserData } from "@/app/utils/storage-demo-data";
-import { getScopedUserDataStorageKey } from "@/app/utils/storage-auth-scope";
 import type { Goal, Reflection, UserData } from "@/app/utils/storage-types";
-import { useSyncedUserData } from "@/app/hooks/useSyncedUserData";
 
 function makeGoal(title: string): Goal {
   return {

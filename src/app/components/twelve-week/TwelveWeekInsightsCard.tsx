@@ -1,5 +1,5 @@
-import type { ReactElement } from "react";
 import { ArrowRight, ChevronUp, Lightbulb, ShieldAlert, Sparkles } from "lucide-react";
+import type { ReactElement } from "react";
 
 import type {
   ExecutionInsight,
@@ -78,7 +78,9 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
   };
 
   const severityBadge: Record<ExecutionInsightSeverity, string> = {
-    positive: isReflection ? "border-app-warm-border bg-app-surface text-app-warm" : "border-app-accent/20 bg-app-surface text-app-accent",
+    positive: isReflection
+      ? "border-app-warm-border bg-app-surface text-app-warm"
+      : "border-app-accent/20 bg-app-surface text-app-accent",
     neutral: "border-app-line bg-app-surface text-app-ink",
     warning: "border-app-warm-border bg-app-surface text-app-warm",
   };
@@ -97,7 +99,12 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className={cn("flex h-7 w-7 items-center justify-center rounded-full bg-app-bg", isReflection ? "text-app-warm" : "text-app-accent")}>
+          <span
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-full bg-app-bg",
+              isReflection ? "text-app-warm" : "text-app-accent",
+            )}
+          >
             <ChevronUp className="h-4 w-4" />
           </span>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{title}</p>
@@ -130,9 +137,19 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
       </ul>
 
       {nextActionCallback && nextAction.id !== "no_action" && (
-        <div className={cn("mt-4 flex flex-wrap items-start justify-between gap-3 rounded-lg border p-3", isReflection ? "border-app-warm-border bg-app-warm-soft" : "border-app-accent/20 bg-app-accent-soft")}>
+        <div
+          className={cn(
+            "mt-4 flex flex-wrap items-start justify-between gap-3 rounded-lg border p-3",
+            isReflection ? "border-app-warm-border bg-app-warm-soft" : "border-app-accent/20 bg-app-accent-soft",
+          )}
+        >
           <div className="min-w-0">
-            <p className={cn("text-xs font-semibold uppercase tracking-[0.14em]", isReflection ? "text-app-warm" : "text-app-accent")}>
+            <p
+              className={cn(
+                "text-xs font-semibold uppercase tracking-[0.14em]",
+                isReflection ? "text-app-warm" : "text-app-accent",
+              )}
+            >
               Gợi ý hành động tiếp theo
             </p>
             <p data-testid="execution-insights-next-action-hint" className="mt-1 text-sm leading-6 text-app-ink">
@@ -142,7 +159,12 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className={cn("bg-app-surface", isReflection ? "border-app-warm-border text-app-warm hover:bg-app-warm-soft/40 hover:text-app-warm" : "border-app-line")}
+            className={cn(
+              "bg-app-surface",
+              isReflection
+                ? "border-app-warm-border text-app-warm hover:bg-app-warm-soft/40 hover:text-app-warm"
+                : "border-app-line",
+            )}
             data-testid="execution-insights-next-action-button"
             onClick={nextActionCallback}
           >

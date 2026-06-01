@@ -1,5 +1,5 @@
-import { APP_STORAGE_KEYS, getActiveTwelveWeekGoal } from "./storage";
 import { hasScoredLifeBalance } from "./core-flow-guard";
+import { APP_STORAGE_KEYS, getActiveTwelveWeekGoal } from "./storage";
 import type { UserData } from "./storage-types";
 
 const GUIDE_DISMISSED_KEY = "visionboard_new_user_guide_dismissed";

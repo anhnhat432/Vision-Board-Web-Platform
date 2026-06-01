@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { WARM_PREFETCH_ROUTE_PATHS, prefetchRoute } from "../navConfig";
+import { prefetchRoute, WARM_PREFETCH_ROUTE_PATHS } from "../navConfig";
 
 /**
  * Bật listener Cmd/Ctrl+K toggle CommandPalette ở phạm vi window.

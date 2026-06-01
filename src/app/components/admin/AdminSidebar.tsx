@@ -1,6 +1,6 @@
+import { ClipboardList, CreditCard, LayoutDashboard, LogOut, Package, WalletCards } from "lucide-react";
 import type { ComponentType } from "react";
 import { NavLink } from "react-router";
-import { LayoutDashboard, ClipboardList, CreditCard, WalletCards, Package, LogOut } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
@@ -61,9 +61,7 @@ export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: Adm
               className={({ isActive }) =>
                 cn(
                   "group flex items-center gap-3 rounded-[var(--r-control)] px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white",
+                  isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white",
                 )
               }
             >

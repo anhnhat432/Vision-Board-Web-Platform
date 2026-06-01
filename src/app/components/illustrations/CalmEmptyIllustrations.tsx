@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "./utils";
 
 export function MountainMoonIllustration({ className, ...rest }: AmbientIllustrationProps) {
   const gradientId = useIllustrationId("calm-mountain-grad");
@@ -65,13 +65,7 @@ export function MountainMoonIllustration({ className, ...rest }: AmbientIllustra
       />
 
       {/* Horizontal Horizon line */}
-      <path
-        d="M40 140H280"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeLinecap="round"
-        opacity="0.2"
-      />
+      <path d="M40 140H280" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.2" />
 
       {/* Tiny stars / sparkles */}
       <circle cx="95" cy="55" r="1.5" fill="currentColor" opacity="0.3" />
@@ -118,15 +112,7 @@ export function ZenLeafIllustration({ className, ...rest }: AmbientIllustrationP
       />
 
       {/* Water Concentric ripple 2 */}
-      <ellipse
-        cx="160"
-        cy="125"
-        rx="50"
-        ry="12"
-        stroke="currentColor"
-        strokeWidth="1"
-        opacity="0.35"
-      />
+      <ellipse cx="160" cy="125" rx="50" ry="12" stroke="currentColor" strokeWidth="1" opacity="0.35" />
 
       {/* Minimalist zen leaf outline */}
       <path

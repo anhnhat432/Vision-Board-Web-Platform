@@ -1,34 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { CreditCard, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { Button } from "../components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
-import { Textarea } from "../components/ui/textarea";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
+  type AdminPaymentOrderSummary,
   adminCompletePaymentOrderManually,
   adminListPaymentOrders,
-  type AdminPaymentOrderSummary,
 } from "@/services/adminService";
-
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
@@ -40,6 +18,19 @@ import {
   PAYMENT_STATUS_TONES,
 } from "../components/admin/statusMappings";
 import { formatDate, formatVnd, getErrorMessage } from "../components/admin/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { Button } from "../components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { Textarea } from "../components/ui/textarea";
 
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -62,9 +53,7 @@ export function AdminPaymentsPage() {
   const [statusFilter, setStatusFilter] = useState<AdminPaymentOrderSummary["status"] | "all">("all");
 
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
-  const [manualNote, setManualNote] = useState(
-    "Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.",
-  );
+  const [manualNote, setManualNote] = useState("Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.");
 
   const handleSearchChange = useCallback((next: string) => setQuery(next), []);
   useAdminSearch(query, handleSearchChange, "Tìm mã đơn, email, mã giao dịch");
@@ -236,75 +225,65 @@ export function AdminPaymentsPage() {
           containerClassName="rounded-[var(--r-card)] border-white/10 bg-white/[0.02] shadow-none"
           className="text-slate-200"
         >
-            <TableHeader className="sticky top-0 bg-white/[0.04] text-slate-300 [&_tr]:border-b [&_tr]:border-white/10">
-              <TableRow className="border-white/10 hover:bg-transparent">
-                <TableHead className="text-slate-400">Mã đơn</TableHead>
-                <TableHead className="text-slate-400">Người dùng</TableHead>
-                <TableHead className="text-slate-400">Số tiền</TableHead>
-                <TableHead className="text-slate-400">Trạng thái</TableHead>
-                <TableHead className="text-slate-400">Tạo lúc</TableHead>
-                <TableHead className="text-right text-slate-400">Hành động</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-white/10">
-              {items.map((payment) => {
-                const canComplete =
-                  payment.status === "pending" ||
-                  payment.status === "expired" ||
-                  payment.status === "failed";
-                return (
-                  <TableRow key={payment.orderId} className="border-white/10 hover:bg-white/5">
-                    <TableCell className="font-mono text-xs text-white">
-                      <p>{payment.orderId}</p>
-                      {payment.cassoTransactionId ? (
-                        <p className="mt-1 truncate text-xs text-slate-500">
-                          TX: {payment.cassoTransactionId}
-                        </p>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="text-slate-200">
-                      <p className="truncate text-sm font-medium">{getPaymentOwnerLabel(payment)}</p>
-                      <p className="mt-0.5 truncate text-xs text-slate-500">{payment.userId}</p>
-                    </TableCell>
-                    <TableCell className="text-slate-200">
-                      <p className="font-semibold text-white">{formatVnd(payment.amount)}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        {payment.bankName ?? "Nhà cung cấp thanh toán"}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      <AdminStatusBadge tone={PAYMENT_STATUS_TONES[payment.status]}>
-                        {PAYMENT_STATUS_LABELS[payment.status]}
-                      </AdminStatusBadge>
-                      {payment.manualCompletedBy ? (
-                        <p className="mt-2 text-xs text-slate-500">Manual: {payment.manualCompletedBy}</p>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="text-xs text-slate-400">
-                      {formatDate(payment.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {canComplete ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          className="bg-cyan-500 text-slate-950 hover:bg-cyan-400"
-                          disabled={busyOrderId === payment.orderId}
-                          onClick={() => handleManualComplete(payment.orderId)}
-                        >
-                          {busyOrderId === payment.orderId ? (
-                            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                          ) : null}
-                          Mở Plus thủ công
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-slate-500">Đã xử lý</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+          <TableHeader className="sticky top-0 bg-white/[0.04] text-slate-300 [&_tr]:border-b [&_tr]:border-white/10">
+            <TableRow className="border-white/10 hover:bg-transparent">
+              <TableHead className="text-slate-400">Mã đơn</TableHead>
+              <TableHead className="text-slate-400">Người dùng</TableHead>
+              <TableHead className="text-slate-400">Số tiền</TableHead>
+              <TableHead className="text-slate-400">Trạng thái</TableHead>
+              <TableHead className="text-slate-400">Tạo lúc</TableHead>
+              <TableHead className="text-right text-slate-400">Hành động</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-white/10">
+            {items.map((payment) => {
+              const canComplete =
+                payment.status === "pending" || payment.status === "expired" || payment.status === "failed";
+              return (
+                <TableRow key={payment.orderId} className="border-white/10 hover:bg-white/5">
+                  <TableCell className="font-mono text-xs text-white">
+                    <p>{payment.orderId}</p>
+                    {payment.cassoTransactionId ? (
+                      <p className="mt-1 truncate text-xs text-slate-500">TX: {payment.cassoTransactionId}</p>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-slate-200">
+                    <p className="truncate text-sm font-medium">{getPaymentOwnerLabel(payment)}</p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500">{payment.userId}</p>
+                  </TableCell>
+                  <TableCell className="text-slate-200">
+                    <p className="font-semibold text-white">{formatVnd(payment.amount)}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">{payment.bankName ?? "Nhà cung cấp thanh toán"}</p>
+                  </TableCell>
+                  <TableCell>
+                    <AdminStatusBadge tone={PAYMENT_STATUS_TONES[payment.status]}>
+                      {PAYMENT_STATUS_LABELS[payment.status]}
+                    </AdminStatusBadge>
+                    {payment.manualCompletedBy ? (
+                      <p className="mt-2 text-xs text-slate-500">Manual: {payment.manualCompletedBy}</p>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-xs text-slate-400">{formatDate(payment.createdAt)}</TableCell>
+                  <TableCell className="text-right">
+                    {canComplete ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+                        disabled={busyOrderId === payment.orderId}
+                        onClick={() => handleManualComplete(payment.orderId)}
+                      >
+                        {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                        Mở Plus thủ công
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-slate-500">Đã xử lý</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
         </Table>
       )}
 
@@ -320,8 +299,8 @@ export function AdminPaymentsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Mở Plus thủ công?</AlertDialogTitle>
             <AlertDialogDescription>
-              Đơn <span className="font-mono">{pendingOrderId ?? "—"}</span> sẽ được đánh dấu đã nhận tiền. Chỉ xác
-              nhận sau khi đã đối chiếu số tiền trong cổng thanh toán/app ngân hàng.
+              Đơn <span className="font-mono">{pendingOrderId ?? "—"}</span> sẽ được đánh dấu đã nhận tiền. Chỉ xác nhận
+              sau khi đã đối chiếu số tiền trong cổng thanh toán/app ngân hàng.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2">

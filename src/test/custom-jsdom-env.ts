@@ -1,11 +1,11 @@
-import { builtinEnvironments } from "vitest/environments";
 import type { Environment } from "vitest";
+import { builtinEnvironments } from "vitest/environments";
 
 // Capture the native Node.js AbortController and AbortSignal
 const nativeAbortController = globalThis.AbortController;
 const nativeAbortSignal = globalThis.AbortSignal;
 
-export default <Environment>{
+export default (<Environment>{
   name: "custom-jsdom",
   transformMode: "web",
   async setup(global, options) {
@@ -20,4 +20,4 @@ export default <Environment>{
       teardown,
     };
   },
-};
+});

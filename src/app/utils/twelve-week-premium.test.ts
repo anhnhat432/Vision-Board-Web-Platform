@@ -4,8 +4,8 @@ import {
   buildSuggestedNextWeekPlan,
   buildWeeklyReviewPremiumInsight,
   getPaywallCopy,
-  TWELVE_WEEK_TEMPLATE_CATALOG,
   planSatisfiesRequirement,
+  TWELVE_WEEK_TEMPLATE_CATALOG,
 } from "./twelve-week-premium";
 
 describe("twelve-week-premium helpers", () => {

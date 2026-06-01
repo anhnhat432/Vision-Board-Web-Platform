@@ -1,6 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
 import type { User, UserCredential } from "firebase/auth";
+import type { ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { post } from "@/lib/api/apiClient";
@@ -92,10 +92,7 @@ function waitForProfileRetry(attemptIndex: number, error: unknown): Promise<void
       PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS[attemptIndex] ??
       PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS[PROFILE_BOOTSTRAP_RATE_LIMIT_DELAYS_MS.length - 1] ??
       0;
-    delay = Math.min(
-      PROFILE_BOOTSTRAP_MAX_RATE_LIMIT_DELAY_MS,
-      Math.max(fallback, retryAfter ?? 0),
-    );
+    delay = Math.min(PROFILE_BOOTSTRAP_MAX_RATE_LIMIT_DELAY_MS, Math.max(fallback, retryAfter ?? 0));
   } else {
     const fallbackDelay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[PROFILE_BOOTSTRAP_RETRY_DELAYS_MS.length - 1] ?? 0;
     delay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[attemptIndex] ?? fallbackDelay;

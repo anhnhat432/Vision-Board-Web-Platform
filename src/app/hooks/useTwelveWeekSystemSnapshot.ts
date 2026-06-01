@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
-
-import { useBackendProgressOverlay } from "./useBackendProgressOverlay";
+import {
+  type ExecutionInsight,
+  getExecutionInsights,
+  getNextWeekAdjustmentRecommendation,
+  getRescueModeStatus,
+  getWeeklyReflectionInsights,
+  type NextWeekRecommendation,
+  type RescueModeStatus,
+} from "@/features/plan12week/logic";
 import type { BillingActionSnapshot, BillingProviderStatus } from "../utils/billing-contract";
 import type { BrowserNotificationStatus, OutboxSyncSnapshot } from "../utils/production";
 import {
@@ -16,12 +23,10 @@ import {
   type AppPreferences,
   type EntitlementKey,
   type FunnelStepSummary,
+  formatDateInputValue,
   type Goal,
-  type InAppReminder,
-  type PricingPlanCode,
-  type SyncOutboxItem,
-  type TwelveWeekSystem,
   getActiveTwelveWeekGoal,
+  getCalendarDateKey,
   getCurrentEntitlementKeys,
   getCurrentPlan,
   getInAppReminders,
@@ -36,9 +41,14 @@ import {
   getTwelveWeekWeekRange,
   getUserData,
   hasEntitlement,
+  type InAppReminder,
   isTwelveWeekReviewDueToday,
+  type PricingPlanCode,
+  type SyncOutboxItem,
   sortTwelveWeekGoalsForSelection,
+  type TwelveWeekSystem,
 } from "../utils/storage";
+import { buildSuggestedNextWeekPlan, buildWeeklyReviewPremiumInsight } from "../utils/twelve-week-premium";
 import {
   buildExecutionHeatmap,
   buildRescuePlanSummary,
@@ -48,17 +58,7 @@ import {
   evaluateRescueTriggers,
   getLatestDailyCheckIn,
 } from "../utils/twelve-week-system-ui";
-import { buildSuggestedNextWeekPlan, buildWeeklyReviewPremiumInsight } from "../utils/twelve-week-premium";
-import { formatDateInputValue, getCalendarDateKey } from "../utils/storage";
-import {
-  getExecutionInsights,
-  getNextWeekAdjustmentRecommendation,
-  getRescueModeStatus,
-  getWeeklyReflectionInsights,
-  type ExecutionInsight,
-  type NextWeekRecommendation,
-  type RescueModeStatus,
-} from "@/features/plan12week/logic";
+import { useBackendProgressOverlay } from "./useBackendProgressOverlay";
 
 const DEFAULT_WEEK_FOCUS = "Giữ nhịp tactic cốt lõi và tạo ra một đầu ra thật rõ ràng.";
 
@@ -429,15 +429,20 @@ export function useTwelveWeekSystemSnapshot() {
 
   const hasAdvancedAnalytics = useMemo(() => hasEntitlement("advanced_analytics"), []);
   const executionHeatmap = useMemo(
-    () => (effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildExecutionHeatmap(effectiveSystem) : []),
+    () =>
+      effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildExecutionHeatmap(effectiveSystem) : [],
     [effectiveSystem, hasAdvancedAnalytics, activeTab],
   );
   const weeklyTrend = useMemo(
-    () => (effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildWeeklyTrend(effectiveSystem) : []),
+    () =>
+      effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildWeeklyTrend(effectiveSystem) : [],
     [effectiveSystem, hasAdvancedAnalytics, activeTab],
   );
   const tacticBreakdown = useMemo(
-    () => (effectiveSystem && hasAdvancedAnalytics && activeTab === "progress" ? buildTacticBreakdown(effectiveSystem, currentWeek) : []),
+    () =>
+      effectiveSystem && hasAdvancedAnalytics && activeTab === "progress"
+        ? buildTacticBreakdown(effectiveSystem, currentWeek)
+        : [],
     [effectiveSystem, hasAdvancedAnalytics, currentWeek, activeTab],
   );
   const rescueStatus: RescueModeStatus = useMemo(() => {

@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "../utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "../utils";
 
 function AreaFrame({ children, className, gradientId, ...rest }: AmbientIllustrationProps & { gradientId: string }) {
   return (

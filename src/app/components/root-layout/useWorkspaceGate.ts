@@ -67,12 +67,7 @@ export function resolveWorkspaceGateState({
   // tránh việc bootstrap 429 khiến class demo bị giữ ở splash hoặc bounce
   // sang /onboarding (B1 fallback).
   const shouldWaitForProfile =
-    !demoMode &&
-    !authLoading &&
-    hasUser &&
-    !userProfile &&
-    !userProfileError &&
-    userProfileLoading;
+    !demoMode && !authLoading && hasUser && !userProfile && !userProfileError && userProfileLoading;
   // B1 follow-up (verify 2026-05-26 trên prod): backend trả profile với
   // onboardingCompletedAt=null ngay cả khi user đã có 12-week plan trên DB
   // (data inconsistency). RootLayout guard sẽ bounce về /onboarding nếu
@@ -83,14 +78,9 @@ export function resolveWorkspaceGateState({
   //   - profile thiếu onboardingCompletedAt (cần plan để fallback),
   //   - hydration đang loading.
   const profileMissingOnboardingFlag =
-    Boolean(userProfile) &&
-    !(userProfile as { onboardingCompletedAt?: string | null } | null)?.onboardingCompletedAt;
+    Boolean(userProfile) && !(userProfile as { onboardingCompletedAt?: string | null } | null)?.onboardingCompletedAt;
   const shouldWaitForBackendPlan =
-    !demoMode &&
-    !authLoading &&
-    hasUser &&
-    profileMissingOnboardingFlag &&
-    backendHydrationLoading;
+    !demoMode && !authLoading && hasUser && profileMissingOnboardingFlag && backendHydrationLoading;
   const shouldWaitForWorkspace = shouldWaitForAuth || shouldWaitForProfile || shouldWaitForBackendPlan;
   const workspaceGateStage: WorkspaceGateStage = shouldRedirectToLogin
     ? "redirect-login"

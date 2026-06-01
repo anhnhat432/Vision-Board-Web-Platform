@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "../utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "../utils";
 
 function MiniDefs({ id }: { id: string }) {
   return (

@@ -7,10 +7,9 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
+import type { SMARTData } from "../types";
 import { MeasurableStep } from "./MeasurableStep";
 import { SpecificStep } from "./SpecificStep";
-import type { SMARTData } from "../types";
 
 function makeSmartData(overrides: Partial<SMARTData> = {}): SMARTData {
   return {

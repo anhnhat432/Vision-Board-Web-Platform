@@ -59,11 +59,16 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
       aria-labelledby="dashboard-active-goals-title"
     >
       {/* 📌 Floating wood pin at the header */}
-      <span className="absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+        📌
+      </span>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-neutral-200/80 dark:border-neutral-800/60 pb-4 mb-6 pt-2">
         <div>
-          <h2 id="dashboard-active-goals-title" className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2">
+          <h2
+            id="dashboard-active-goals-title"
+            className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2"
+          >
             <Target className="h-4.5 w-4.5 text-app-accent/80" />
             Mục tiêu chu kỳ
           </h2>
@@ -71,7 +76,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
             {Math.min(goals.length, maxGoals)} / {maxGoals} Mục tiêu đang chạy
           </p>
         </div>
-        
+
         <button
           type="button"
           onClick={onAddGoal}
@@ -91,7 +96,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
             const domain = getLifeAreaLabel(goal.focusArea ?? goal.category);
             const theme = getAreaTheme(goal.focusArea ?? goal.category);
             const GoalIcon = theme.icon;
-            
+
             // Alternating subtle tilts to echo Variant B vision-board look
             const tilts = ["-rotate-[0.5deg]", "rotate-[0.4deg]", "-rotate-[0.3deg]"];
             const tiltClass = tilts[index % tilts.length];
@@ -111,12 +116,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                 }}
                 className={`group flex gap-4 rounded-2xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white/60 dark:bg-neutral-950/20 p-5 hover:border-app-accent/20 hover:bg-white dark:hover:bg-neutral-950 hover:shadow-sm transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${tiltClass} hover:rotate-0`}
               >
-                {/* 📌 Tiny tape or pin indicator at the top corner of each active goal card */}
-                <span className="absolute -top-2.5 left-4 text-sm filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">📌</span>
-
-                <div
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200 dark:border-neutral-800 group-hover:scale-105 transition-all duration-300"
-                >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200 dark:border-neutral-800 group-hover:scale-105 transition-all duration-300">
                   <GoalIcon className="h-4.5 w-4.5 text-app-accent/80" />
                 </div>
 
@@ -124,12 +124,15 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                   <h3 className="line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover:text-app-accent transition-colors duration-200">
                     {goal.title}
                   </h3>
-                  
+
                   <p className="text-[10px] font-semibold text-neutral-500">
                     {getWeekLabel(goal)} · <span className="text-app-accent font-extrabold">{domain}</span>
                   </p>
-                  
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800/80" aria-hidden="true">
+
+                  <div
+                    className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800/80"
+                    aria-hidden="true"
+                  >
                     <div
                       className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
                       style={{ width: `${progress}%` }}
@@ -139,9 +142,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
                 <div className="flex shrink-0 flex-col items-end justify-between gap-3 text-right pt-0.5">
                   <span className="text-xs font-extrabold text-app-accent tabular-nums">{progress}%</span>
-                  <span
-                    className="inline-flex items-center gap-0.5 text-[10px] font-bold text-app-accent group-hover:translate-x-0.5 transition-transform duration-200"
-                  >
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-app-accent group-hover:translate-x-0.5 transition-transform duration-200">
                     Chi tiết
                     <ArrowRight className="h-3 w-3" />
                   </span>

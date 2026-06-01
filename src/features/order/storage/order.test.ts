@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { createLocalOrder, getOrders, getOrderById } from "./order";
+import { createLocalOrder, getOrderById, getOrders } from "./order";
 
 beforeEach(() => {
   window.localStorage.clear();

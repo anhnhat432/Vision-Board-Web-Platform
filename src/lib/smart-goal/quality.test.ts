@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-
-import type { SmartGoal } from "./types";
 import {
   evaluateSmartGoalQuality,
+  getSmartGoalImprovementSuggestions,
   getSmartGoalQualityScore,
   getSmartGoalQualityWarnings,
-  getSmartGoalImprovementSuggestions,
 } from "./quality";
+import type { SmartGoal } from "./types";
 
 // ---------------------------------------------------------------------------
 // Helpers

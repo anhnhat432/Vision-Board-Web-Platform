@@ -55,10 +55,15 @@ export function BalanceCard({ rows }: BalanceCardProps) {
       aria-labelledby="dashboard-balance-title"
     >
       {/* 📌 Floating wood pin at the header */}
-      <span className="absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+        📌
+      </span>
 
       <div className="flex flex-col gap-1 border-b border-neutral-200/80 dark:border-neutral-800/60 pb-4 mb-5 pt-2">
-        <h2 id="dashboard-balance-title" className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2">
+        <h2
+          id="dashboard-balance-title"
+          className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2"
+        >
           <Scale className="h-4.5 w-4.5 text-app-accent/80" />
           Cân bằng cuộc sống
         </h2>
@@ -96,7 +101,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
                   {score}/10
                 </span>
               </div>
-              
+
               <div className="h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800" aria-hidden="true">
                 <div
                   className={`h-full rounded-full bg-gradient-to-r ${style.gradient} transition-all duration-500 ease-out`}

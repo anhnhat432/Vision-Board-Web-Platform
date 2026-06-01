@@ -1,6 +1,6 @@
+import type { AssistantContext } from "./buildAssistantContext";
 import type { SanitizedAssistantContext } from "./sanitizeContext";
 import { sanitizeAssistantContext } from "./sanitizeContext";
-import type { AssistantContext } from "./buildAssistantContext";
 
 export const ASSISTANT_GOLDEN_EXAMPLES_STORAGE_KEY = "assistant.golden_examples";
 

@@ -72,8 +72,7 @@ interface EmptyStateProps {
   testId?: string;
 }
 
-const CARD_CLASSES =
-  "surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6";
+const CARD_CLASSES = "surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6";
 const DASHED_CLASSES = "surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 px-6 py-8";
 
 export function EmptyState({
@@ -98,8 +97,8 @@ export function EmptyState({
     align === "center" ? "flex flex-col gap-2 sm:flex-row sm:justify-center" : "flex flex-col gap-2 sm:flex-row";
   const titleSizeClass =
     variant === "card"
-    ? "font-serif text-lg font-medium tracking-normal text-app-ink"
-    : "text-base font-semibold tracking-normal text-app-ink";
+      ? "font-serif text-lg font-medium tracking-normal text-app-ink"
+      : "text-base font-semibold tracking-normal text-app-ink";
 
   const Wrapper = as;
   const HeadingTag = `h${headingLevel}` as "h1" | "h2" | "h3" | "h4";

@@ -9,7 +9,7 @@ export function SpotlightCard({ children, className, ...props }: SpotlightCardPr
     <div
       className={cn(
         "relative overflow-hidden rounded-card border border-app-line bg-app-surface transition-all duration-300 hover:border-app-accent/40 hover:shadow-sm",
-        className
+        className,
       )}
       {...props}
     >

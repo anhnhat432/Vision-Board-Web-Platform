@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import { getPlanLink, savePlanDetailsLink } from "@/features/plan12week/persistence/planLinkStore";
-import { getPlan } from "@/services/planService";
-import type { PlanDetails, WeekDetails as ApiWeekDetails } from "@/types/plan";
 import { isDailyCheckInMetric } from "@/features/plan12week/constants/progressMetrics";
+import { getPlanLink, savePlanDetailsLink } from "@/features/plan12week/persistence/planLinkStore";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { getPlan } from "@/services/planService";
+import type { WeekDetails as ApiWeekDetails, PlanDetails } from "@/types/plan";
 import { getCalendarDateKey } from "../utils/storage-date-utils";
 import {
   buildDerivedScoreboard,

@@ -426,7 +426,7 @@ describe("AssistantPanel", () => {
     );
   });
 
-it("executes /clear command", async () => {
+  it("executes /clear command", async () => {
     // Add some messages first
     localStorage.setItem(
       "assistant.chat.history:anon",

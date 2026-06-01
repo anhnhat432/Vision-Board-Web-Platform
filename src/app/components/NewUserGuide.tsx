@@ -1,8 +1,6 @@
+import { ArrowRight, CheckCircle2, Compass, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowRight, CheckCircle2, Compass, Sparkles } from "lucide-react";
-
-import type { UserData } from "../utils/storage-types";
 import {
   dismissNewUserGuide,
   getNewUserGuideProgress,
@@ -10,6 +8,7 @@ import {
   restoreNewUserGuide,
   subscribeToNewUserGuideChanges,
 } from "../utils/new-user-guide";
+import type { UserData } from "../utils/storage-types";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
 import { BellRing, Sparkles, X } from "lucide-react";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 import { getInAppReminders, getRandomMotivationalQuote } from "../utils/storage";
 import { Button } from "./ui/button";

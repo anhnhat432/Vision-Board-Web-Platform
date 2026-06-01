@@ -1,5 +1,5 @@
-import type { UserData } from "./storage-types";
 import { getCurrentEntitlementKeys, getCurrentPlan } from "./storage";
+import type { UserData } from "./storage-types";
 
 export const FREE_TIER_LIMITS = {
   maxActiveGoals: 3,

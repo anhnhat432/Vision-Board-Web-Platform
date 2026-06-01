@@ -1,8 +1,8 @@
 "use client";
 
 import type * as React from "react";
-import { cn } from "../ui/utils";
 import { Badge } from "../ui/badge";
+import { cn } from "../ui/utils";
 
 interface StatusRowProps {
   icon?: React.ReactNode;

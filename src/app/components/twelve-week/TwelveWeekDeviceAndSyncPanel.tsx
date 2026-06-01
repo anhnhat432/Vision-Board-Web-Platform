@@ -1,5 +1,5 @@
-﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { shouldShowSyncDebugUi } from "../../utils/app-mode";
+﻿import { shouldShowSyncDebugUi } from "../../utils/app-mode";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
 import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
 import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";

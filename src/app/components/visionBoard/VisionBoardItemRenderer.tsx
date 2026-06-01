@@ -1,4 +1,3 @@
-import type { JSX } from "react";
 import {
   Heart,
   Image as ImageIcon,
@@ -11,6 +10,7 @@ import {
   Trophy,
   Zap,
 } from "lucide-react";
+import type { JSX } from "react";
 
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { LIFE_AREA_LABELS } from "@/app/utils/storage-constants";

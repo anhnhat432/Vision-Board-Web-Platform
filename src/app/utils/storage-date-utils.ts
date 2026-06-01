@@ -116,4 +116,3 @@ export function formatDisplayDateWithWeekday(dateInput: Date | string): string {
   const weekday = weekdays[date.getDay()];
   return `${weekday}, ${formatDisplayDate(date)}`;
 }
-

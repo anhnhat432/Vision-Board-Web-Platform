@@ -5,11 +5,11 @@ import {
   CreditCard,
   Images,
   LayoutDashboard,
+  type LucideIcon,
   Package,
   Sparkles,
   Target,
   TrendingUp,
-  type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {

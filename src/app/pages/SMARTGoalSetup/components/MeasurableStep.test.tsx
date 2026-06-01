@@ -1,9 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-
-import { MeasurableStep } from "./MeasurableStep";
 import type { SMARTData } from "../types";
+import { MeasurableStep } from "./MeasurableStep";
 
 function makeSmartData(overrides: Partial<SMARTData> = {}): SMARTData {
   return {

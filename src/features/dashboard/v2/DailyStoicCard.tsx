@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Sparkles, Check, Bookmark, HelpCircle } from "lucide-react";
+import { Bookmark, Check, HelpCircle, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/app/components/ui/button";
 
 interface StoicQuote {
@@ -12,43 +12,45 @@ const STOIC_QUOTES: StoicQuote[] = [
   {
     quote: "Chúng ta thường đau khổ trong tưởng tượng nhiều hơn là trong thực tế.",
     author: "Seneca",
-    question: "Nỗi lo sợ nào đang bị phóng đại trong tâm trí bạn hôm nay? Hãy gọi tên và đối diện với nó."
+    question: "Nỗi lo sợ nào đang bị phóng đại trong tâm trí bạn hôm nay? Hãy gọi tên và đối diện với nó.",
   },
   {
-    quote: "Bạn có quyền kiểm soát tâm trí của mình, không phải các sự kiện bên ngoài. Hãy nhận ra điều này, và bạn sẽ tìm thấy sức mạnh.",
+    quote:
+      "Bạn có quyền kiểm soát tâm trí của mình, không phải các sự kiện bên ngoài. Hãy nhận ra điều này, và bạn sẽ tìm thấy sức mạnh.",
     author: "Marcus Aurelius",
-    question: "Sự việc nào đang nằm ngoài tầm kiểm soát của bạn? Bạn sẽ tập trung năng lượng vào điều gì bạn có thể kiểm soát?"
+    question:
+      "Sự việc nào đang nằm ngoài tầm kiểm soát của bạn? Bạn sẽ tập trung năng lượng vào điều gì bạn có thể kiểm soát?",
   },
   {
     quote: "Không phải những gì xảy ra với bạn, mà là cách bạn phản ứng với nó mới là điều quan trọng.",
     author: "Epictetus",
-    question: "Có sự việc không như ý nào xảy ra gần đây? Bạn sẽ chọn phản ứng chánh niệm với nó thế nào?"
+    question: "Có sự việc không như ý nào xảy ra gần đây? Bạn sẽ chọn phản ứng chánh niệm với nó thế nào?",
   },
   {
     quote: "Trở ngại cản đường sẽ trở thành con đường. Dưới mọi khó khăn luôn ẩn chứa một cơ hội.",
     author: "Marcus Aurelius",
-    question: "Trở ngại lớn nhất của bạn hôm nay là gì? Bạn có thể chuyển hóa nó thành cơ hội học hỏi nào?"
+    question: "Trở ngại lớn nhất của bạn hôm nay là gì? Bạn có thể chuyển hóa nó thành cơ hội học hỏi nào?",
   },
   {
     quote: "Tài sản lớn nhất của con người là biết hài lòng với những gì mình đang có.",
     author: "Seneca",
-    question: "Hãy ghi nhanh 3 điều giản dị xung quanh khiến bạn cảm thấy trân trọng và biết ơn ngày hôm nay."
+    question: "Hãy ghi nhanh 3 điều giản dị xung quanh khiến bạn cảm thấy trân trọng và biết ơn ngày hôm nay.",
   },
   {
     quote: "Hãy coi mỗi ngày mới là một cuộc đời độc lập và trọn vẹn.",
     author: "Seneca",
-    question: "If hôm nay là ngày duy nhất để sống ý nghĩa, bạn muốn dành trọn vẹn sự tập trung cho điều gì?"
+    question: "If hôm nay là ngày duy nhất để sống ý nghĩa, bạn muốn dành trọn vẹn sự tập trung cho điều gì?",
   },
   {
     quote: "Bất cứ nơi nào có con người, ở đó có cơ hội cho sự tử tế.",
     author: "Seneca",
-    question: "Hôm nay bạn có thể trao đi một hành động tử tế hay sự thấu hiểu nhỏ bé nào cho ai đó không?"
+    question: "Hôm nay bạn có thể trao đi một hành động tử tế hay sự thấu hiểu nhỏ bé nào cho ai đó không?",
   },
   {
     quote: "Hạnh phúc của cuộc đời phụ thuộc vào chất lượng của những suy nghĩ trong tâm trí bạn.",
     author: "Marcus Aurelius",
-    question: "Suy nghĩ nào đang chiếm lĩnh đầu óc bạn nhiều nhất? Nó mang lại sự bình an hay xáo động?"
-  }
+    question: "Suy nghĩ nào đang chiếm lĩnh đầu óc bạn nhiều nhất? Nó mang lại sự bình an hay xáo động?",
+  },
 ];
 
 export function DailyStoicCard() {
@@ -95,14 +97,14 @@ export function DailyStoicCard() {
 
   const handleSave = () => {
     if (!reflection.trim()) return;
-    
+
     const dataToSave = {
       date: dateKey,
       quote: currentQuote.quote,
       author: currentQuote.author,
-      reflection: reflection.trim()
+      reflection: reflection.trim(),
     };
-    
+
     localStorage.setItem(`daily_stoic_reflection_${dateKey}`, JSON.stringify(dataToSave));
     setIsSaved(true);
   };
@@ -115,12 +117,14 @@ export function DailyStoicCard() {
   };
 
   return (
-    <div 
+    <div
       className="w-full aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] select-none relative"
       style={{ perspective: "1000px", WebkitPerspective: "1000px" }}
     >
       {/* 📌 Floating wood pin at the top center of Stoic card framework */}
-      <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 text-xl z-30 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+      <span className="hidden sm:inline absolute -top-3 left-1/2 transform -translate-x-1/2 text-xl z-30 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+        📌
+      </span>
 
       <div
         className="relative w-full h-full transition-transform duration-700"
@@ -158,7 +162,10 @@ export function DailyStoicCard() {
           <div className="flex flex-col items-center gap-4 text-center my-auto">
             <div className="relative flex items-center justify-center w-16 h-16 rounded-full border border-amber-200/20 bg-amber-900/30">
               <Sparkles className="h-6 w-6 text-amber-300 animate-pulse" />
-              <div className="absolute inset-0 rounded-full border border-dashed border-amber-400/20 animate-spin" style={{ animationDuration: "16s" }} />
+              <div
+                className="absolute inset-0 rounded-full border border-dashed border-amber-400/20 animate-spin"
+                style={{ animationDuration: "16s" }}
+              />
             </div>
             <div>
               <h3 className="font-serif text-lg font-normal text-amber-100 tracking-wide">Lá Bài Trí Tuệ</h3>
@@ -204,7 +211,7 @@ export function DailyStoicCard() {
             <blockquote className="font-serif text-sm italic leading-relaxed text-neutral-600 dark:text-neutral-400 text-center select-none">
               “{currentQuote.quote}”
             </blockquote>
-            
+
             <p className="text-[9px] font-bold text-center uppercase tracking-[0.15em] text-app-accent mt-2.5">
               — {currentQuote.author}
             </p>
@@ -213,7 +220,7 @@ export function DailyStoicCard() {
               <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200 leading-relaxed mb-2">
                 💡 {currentQuote.question}
               </p>
-              
+
               <textarea
                 value={reflection}
                 onChange={handleTextChange}
@@ -229,8 +236,8 @@ export function DailyStoicCard() {
               onClick={handleSave}
               disabled={!reflection.trim() || isSaved}
               className={`w-full text-xs font-bold py-2.5 rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                isSaved 
-                  ? "bg-neutral-100 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-600 cursor-not-allowed border border-neutral-200 dark:border-neutral-800" 
+                isSaved
+                  ? "bg-neutral-100 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-600 cursor-not-allowed border border-neutral-200 dark:border-neutral-800"
                   : "bg-emerald-700 text-white hover:bg-emerald-800 shadow-sm"
               }`}
             >

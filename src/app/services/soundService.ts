@@ -19,7 +19,8 @@ class SoundService {
   private initCtx() {
     if (this.audioCtx) return;
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.audioCtx = new AudioContextClass();
     } catch {
       /* Web Audio API not supported */
@@ -64,7 +65,7 @@ class SoundService {
     osc.type = "sine";
 
     const now = ctx.currentTime;
-    
+
     // Very fast pitch drop to simulate mechanical haptic tap (150Hz -> 40Hz over 45ms)
     osc.frequency.setValueAtTime(150, now);
     osc.frequency.exponentialRampToValueAtTime(40, now + 0.045);

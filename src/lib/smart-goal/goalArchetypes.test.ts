@@ -1,17 +1,16 @@
 import { describe, expect, it } from "vitest";
-
+import { CORE_FUNNEL_SCENARIOS } from "@/test/fixtures/coreFunnelScenarios";
 import {
+  type GoalArchetype,
+  type GoalArchetypeInput,
   getArchetypeFeasibilityFocus,
   getArchetypePlanDefaults,
   getArchetypeQualityHints,
   getDefaultArchetypeForDomain,
   getGoalArchetypeLabel,
   inferGoalArchetype,
-  type GoalArchetype,
-  type GoalArchetypeInput,
 } from "./goalArchetypes";
 import { buildSmartGoal } from "./helpers";
-import { CORE_FUNNEL_SCENARIOS } from "@/test/fixtures/coreFunnelScenarios";
 
 const ALL_ARCHETYPES: GoalArchetype[] = [
   "skill_learning",

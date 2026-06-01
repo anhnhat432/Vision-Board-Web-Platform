@@ -1,15 +1,17 @@
 import { describe, expect, it } from "vitest";
-
-import { buildSmartGoal, hasOutcomeIndicator } from "@/lib/smart-goal";
+import {
+  buildLeadIndicatorSchedules,
+  getFeasibilityDraftDefaults,
+  getPreviewTasks,
+} from "@/app/pages/12WeekSetup/helpers";
 import { buildResult } from "@/app/pages/FeasibilityCheck/helpers";
-import { getFeasibilityDraftDefaults } from "@/app/pages/12WeekSetup/helpers";
-import { buildLeadIndicatorSchedules, getPreviewTasks } from "@/app/pages/12WeekSetup/helpers";
 import {
   getMaxTasksPerTactic,
   getMaxWeeklyTaskCount,
   getWeeklyTaskWarning,
   isTaskCountInRecommendedRange,
 } from "@/features/plan12week/logic/taskConstraints";
+import { buildSmartGoal, hasOutcomeIndicator } from "@/lib/smart-goal";
 
 import { CORE_FUNNEL_SCENARIOS } from "./coreFunnelScenarios";
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { GoalArchetype } from "./goalArchetypes";
-import { getAllGoalArchetypeExamples, getGoalArchetypeExample, type ArchetypeExample } from "./goalExamples";
+import { type ArchetypeExample, getAllGoalArchetypeExamples, getGoalArchetypeExample } from "./goalExamples";
 
 const ARCHETYPES: readonly GoalArchetype[] = [
   "skill_learning",

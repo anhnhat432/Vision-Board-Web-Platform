@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-
+import { Button } from "@/app/components/ui/button";
 import { useOrderCatalog } from "@/features/order/hooks/useOrderCatalog";
 import {
   buildOrderLines,
@@ -10,11 +10,10 @@ import {
   formatVnd,
   type OrderDraft,
 } from "@/features/order/lib/pricing";
-import { validateOrderDraft, type ValidateErrorKey } from "@/features/order/lib/validators";
+import { type ValidateErrorKey, validateOrderDraft } from "@/features/order/lib/validators";
 import { createLocalOrder } from "@/features/order/storage/order";
 import { saveOrderLink } from "@/lib/api/orderLinkStore";
 import { createOrder } from "@/services/orderService";
-import { Button } from "@/app/components/ui/button";
 
 import { FrameSizePicker } from "../components/FrameSizePicker";
 import { NotesField, type NotesFieldValue } from "../components/NotesField";
@@ -95,38 +94,21 @@ export function OrderPage() {
   if (draft.themeItemIds.length > 0) completedSteps.push(2);
   completedSteps.push(3); // sticker optional
   const shippingFieldsOk =
-    validation.ok ||
-    !(["fullName", "email", "phone", "shippingAddress"] as const).some(
-      (k) => k in errorMap,
-    );
-  if (
-    shippingFieldsOk &&
-    shipping.fullName &&
-    shipping.email &&
-    shipping.phone &&
-    shipping.shippingAddress
-  ) {
+    validation.ok || !(["fullName", "email", "phone", "shippingAddress"] as const).some((k) => k in errorMap);
+  if (shippingFieldsOk && shipping.fullName && shipping.email && shipping.phone && shipping.shippingAddress) {
     completedSteps.push(4);
   }
   completedSteps.push(5); // notes optional
 
-  const currentStep =
-    [1, 2, 3, 4, 5].find((s) => !completedSteps.includes(s)) ?? 5;
+  const currentStep = [1, 2, 3, 4, 5].find((s) => !completedSteps.includes(s)) ?? 5;
 
   // Required steps for the mobile progress bar fill — sticker (3) and notes (5) are optional.
   const REQUIRED_STEPS = [1, 2, 4] as const;
-  const requiredDone = REQUIRED_STEPS.filter((s) =>
-    completedSteps.includes(s),
-  ).length;
-  const progressPercent = Math.round(
-    (requiredDone / REQUIRED_STEPS.length) * 100,
-  );
+  const requiredDone = REQUIRED_STEPS.filter((s) => completedSteps.includes(s)).length;
+  const progressPercent = Math.round((requiredDone / REQUIRED_STEPS.length) * 100);
 
-  const selectedFrame =
-    frames.find((f) => f.itemId === draft.frameItemId) ?? null;
-  const selectedThemes = themes.filter((t) =>
-    draft.themeItemIds.includes(t.itemId),
-  );
+  const selectedFrame = frames.find((f) => f.itemId === draft.frameItemId) ?? null;
+  const selectedThemes = themes.filter((t) => draft.themeItemIds.includes(t.itemId));
   const selectedSticker = draft.stickerSelection ? sticker : null;
 
   function scrollToStep(step: number) {
@@ -149,10 +131,7 @@ export function OrderPage() {
     setSubmitError(null);
     try {
       const payload = {
-        itemIds: [
-          ...(draft.frameItemId ? [draft.frameItemId] : []),
-          ...draft.themeItemIds,
-        ],
+        itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
         sticker: draft.stickerSelection,
         fullName: shipping.fullName,
         email: shipping.email,
@@ -217,11 +196,7 @@ export function OrderPage() {
               title="Chọn kích thước khung"
               status={statusFor(1)}
               hint={selectedFrame ? selectedFrame.label : undefined}
-              errorText={
-                shouldShowError("frame") && !validation.ok
-                  ? validation.errors.frame
-                  : undefined
-              }
+              errorText={shouldShowError("frame") && !validation.ok ? validation.errors.frame : undefined}
             >
               {isLoading ? (
                 <Skeleton />
@@ -242,16 +217,8 @@ export function OrderPage() {
               id="step-2"
               title="Chọn set ảnh chủ đề"
               status={statusFor(2)}
-              hint={
-                draft.themeItemIds.length > 0
-                  ? `đã chọn ${draft.themeItemIds.length} set`
-                  : undefined
-              }
-              errorText={
-                shouldShowError("themes") && !validation.ok
-                  ? validation.errors.themes
-                  : undefined
-              }
+              hint={draft.themeItemIds.length > 0 ? `đã chọn ${draft.themeItemIds.length} set` : undefined}
+              errorText={shouldShowError("themes") && !validation.ok ? validation.errors.themes : undefined}
             >
               {isLoading ? (
                 <Skeleton />
@@ -281,12 +248,7 @@ export function OrderPage() {
               />
             </StepCard>
 
-            <StepCard
-              step={4}
-              id="step-4"
-              title="Thông tin giao hàng"
-              status={statusFor(4)}
-            >
+            <StepCard step={4} id="step-4" title="Thông tin giao hàng" status={statusFor(4)}>
               <ShippingForm
                 value={shipping}
                 onChange={(next) => {
@@ -294,19 +256,13 @@ export function OrderPage() {
                   if (next.fullName !== shipping.fullName) markTouched("fullName");
                   if (next.email !== shipping.email) markTouched("email");
                   if (next.phone !== shipping.phone) markTouched("phone");
-                  if (next.shippingAddress !== shipping.shippingAddress)
-                    markTouched("shippingAddress");
+                  if (next.shippingAddress !== shipping.shippingAddress) markTouched("shippingAddress");
                 }}
                 errors={visibleShippingErrors}
               />
             </StepCard>
 
-            <StepCard
-              step={5}
-              id="step-5"
-              title="Ghi chú"
-              status={statusFor(5)}
-            >
+            <StepCard step={5} id="step-5" title="Ghi chú" status={statusFor(5)}>
               <NotesField value={notes} onChange={setNotes} />
             </StepCard>
           </div>
@@ -325,27 +281,21 @@ export function OrderPage() {
               selectedThemes={selectedThemes}
               selectedSticker={selectedSticker}
             />
-            {submitError && (
-              <p className="mt-2 text-xs text-destructive">{submitError}</p>
-            )}
+            {submitError && <p className="mt-2 text-xs text-destructive">{submitError}</p>}
           </div>
         </div>
 
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--order-border)] bg-[var(--order-bg)]/95 px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.04)] backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-6xl items-center gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-xs uppercase tracking-wide text-[var(--order-text-muted)]">
-                Tổng đơn
-              </div>
+              <div className="text-xs uppercase tracking-wide text-[var(--order-text-muted)]">Tổng đơn</div>
               <div className="truncate text-base font-semibold tabular-nums text-[var(--order-accent)]">
                 {formatVnd(total)}
               </div>
               {!validation.ok && missingFields.length > 0 && (
                 <div className="truncate text-xs text-[var(--order-text-muted)]">
                   Còn thiếu: {missingFields.slice(0, 2).join(", ")}
-                  {missingFields.length > 2
-                    ? `, +${missingFields.length - 2}`
-                    : ""}
+                  {missingFields.length > 2 ? `, +${missingFields.length - 2}` : ""}
                 </div>
               )}
             </div>
@@ -355,18 +305,10 @@ export function OrderPage() {
               disabled={submitting}
               onClick={handleSubmit}
             >
-              {submitting
-                ? "Đang gửi..."
-                : validation.ok
-                  ? "Đặt đơn"
-                  : "Kiểm tra lại"}
+              {submitting ? "Đang gửi..." : validation.ok ? "Đặt đơn" : "Kiểm tra lại"}
             </Button>
           </div>
-          {submitError && (
-            <p className="mx-auto mt-1 max-w-6xl text-xs text-destructive">
-              {submitError}
-            </p>
-          )}
+          {submitError && <p className="mx-auto mt-1 max-w-6xl text-xs text-destructive">{submitError}</p>}
         </div>
       </div>
     </div>

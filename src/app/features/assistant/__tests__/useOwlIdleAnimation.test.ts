@@ -71,10 +71,7 @@ describe("useOwlIdleAnimation", () => {
   });
 
   it("pauses blinking when pause = true", () => {
-    const { result } = renderHook(
-      ({ pause }) => useOwlIdleAnimation({ pause }),
-      { initialProps: { pause: false } },
-    );
+    const { result } = renderHook(({ pause }) => useOwlIdleAnimation({ pause }), { initialProps: { pause: false } });
 
     // Advance time - should blink since pause = false
     act(() => {
@@ -95,10 +92,9 @@ describe("useOwlIdleAnimation", () => {
   });
 
   it("resumes blinking when pause changes from true to false", () => {
-    const { result, rerender } = renderHook(
-      ({ pause }) => useOwlIdleAnimation({ pause }),
-      { initialProps: { pause: true } },
-    );
+    const { result, rerender } = renderHook(({ pause }) => useOwlIdleAnimation({ pause }), {
+      initialProps: { pause: true },
+    });
 
     // With pause, no blink should occur
     act(() => {

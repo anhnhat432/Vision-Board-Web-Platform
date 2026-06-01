@@ -1,16 +1,15 @@
+import { AlertCircle, Compass, Eye, EyeOff, Loader2, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
-import { AlertCircle, Compass, Eye, EyeOff, Loader2, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
 import { toast } from "sonner";
-
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Toaster } from "../components/ui/sonner";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
+import { isDemoMode } from "@/app/utils/app-mode";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { loginWithGoogle, resetPassword } from "@/lib/auth/firebase";
-import { isDemoMode } from "@/app/utils/app-mode";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Toaster } from "../components/ui/sonner";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { inputClass, labelClass } from "../features/auth/shared/formStyles";
 
 type LoginMode = "signin" | "signup";
@@ -285,9 +284,7 @@ export function LoginPage() {
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block">
               <div className="rounded-[14px] border border-app-line bg-app-surface p-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-                  {captionText}
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{captionText}</p>
                 <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink max-w-md">
                   {heroTitle}
                 </h1>
@@ -543,9 +540,7 @@ export function LoginPage() {
                         }`}
                       >
                         <AlertCircle className="h-4 w-4 text-[color:var(--color-danger-fg)] shrink-0 mt-0.5" />
-                        <p className="text-sm text-[color:var(--color-danger-fg)] leading-relaxed">
-                          {displayError}
-                        </p>
+                        <p className="text-sm text-[color:var(--color-danger-fg)] leading-relaxed">{displayError}</p>
                       </div>
                     ) : null}
 

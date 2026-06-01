@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import type { User, UserCredential } from "firebase/auth";
+import { useCallback, useEffect, useState } from "react";
 
 import { activateAuthenticatedUserData, persistActiveAuthenticatedUserData } from "@/app/utils/storage";
 import { clearAuthScopedSensitiveData } from "@/app/utils/storage-auth-scope";

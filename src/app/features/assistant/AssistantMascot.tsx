@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { Sparkles, X } from "lucide-react";
+import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
-import type { NudgeState } from "./useProactiveNudge";
 import type { Position } from "./useDraggableMascot";
+import type { NudgeState } from "./useProactiveNudge";
 
 interface AssistantMascotProps {
   onClick: () => void;

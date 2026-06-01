@@ -61,10 +61,7 @@ describe("userProfileCache", () => {
   });
 
   it("ignores cache where envelope shape is wrong", () => {
-    window.localStorage.setItem(
-      "auth:profile-cache:uid-1",
-      JSON.stringify({ profile: sampleProfile }),
-    );
+    window.localStorage.setItem("auth:profile-cache:uid-1", JSON.stringify({ profile: sampleProfile }));
     expect(readCachedUserProfile("uid-1")).toBeNull();
   });
 

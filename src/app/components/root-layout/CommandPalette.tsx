@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, CornerDownLeft, Search, Sparkles, Target } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import type { NavItem } from "./navConfig";

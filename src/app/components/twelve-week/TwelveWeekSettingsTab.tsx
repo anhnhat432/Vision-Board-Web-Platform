@@ -1,30 +1,29 @@
 import {
-  SlidersHorizontal,
+  AlertTriangle,
+  Bell,
   CalendarClock,
+  Crown,
   Database,
   MessageSquare,
-  Bell,
   Settings2,
-  Crown,
-  AlertTriangle,
+  SlidersHorizontal,
   Zap,
 } from "lucide-react";
-
-import { FeedbackDialog } from "../FeedbackDialog";
-import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
-import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
-import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
-import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import { isRealMode } from "../../utils/app-mode";
+import { FeedbackDialog } from "../FeedbackDialog";
+import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import {
-  TwelveWeekRemindersSettings,
-  TwelveWeekExecutionPreferences,
-  TwelveWeekDataSafety,
   TwelveWeekDangerZone,
+  TwelveWeekDataSafety,
+  TwelveWeekExecutionPreferences,
   TwelveWeekQuickShortcuts,
+  TwelveWeekRemindersSettings,
 } from "./TwelveWeekDeviceDetailsSection";
+import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
+import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
+import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
 
 export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
   return (

@@ -1,10 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-import { TwelveWeekTodayTab } from "./TwelveWeekTodayTab";
-import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "@/app/utils/storage-types";
 import type { ComponentProps } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { TwelveWeekSystem, TwelveWeekTaskInstance, UniversalDailyCheckIn } from "@/app/utils/storage-types";
+import { TwelveWeekTodayTab } from "./TwelveWeekTodayTab";
 
 type TodayTabProps = ComponentProps<typeof TwelveWeekTodayTab>;
 

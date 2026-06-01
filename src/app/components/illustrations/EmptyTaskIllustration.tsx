@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "./utils";
 
 export function EmptyTaskIllustration({ className, ...rest }: AmbientIllustrationProps) {
   const gradientId = useIllustrationId("empty-task-app-accent");

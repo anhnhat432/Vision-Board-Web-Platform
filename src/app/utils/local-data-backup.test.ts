@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
+import { createDataExportJson, type DataExportPayload } from "./local-data-backup";
 import { deleteAllUserData, saveUserData } from "./storage";
 import { APP_STORAGE_KEYS, USER_DATA_STORAGE_KEY } from "./storage-constants";
-import { createDataExportJson, type DataExportPayload } from "./local-data-backup";
 import type { AppPreferences, TwelveWeekSystem, UserData } from "./storage-types";
 
 const defaultAppPreferences: AppPreferences = {

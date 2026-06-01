@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { soundService } from "../../services/soundService";
 
 import { type CelebrationPalette, fireCelebration } from "./fireCelebration";
-import { MilestoneToast, type MilestoneKind } from "./MilestoneToast";
+import { type MilestoneKind, MilestoneToast } from "./MilestoneToast";
 
 interface CelebrationPayload {
   /** Identifier so the same milestone is only celebrated once per session. */
@@ -23,11 +23,7 @@ interface CelebrationPayload {
 const SESSION_KEY_PREFIX = "vb-celebrate:";
 
 /** Milestone kinds where the default behavior is "fire confetti". */
-const BIG_MILESTONE_KINDS: ReadonlySet<MilestoneKind> = new Set<MilestoneKind>([
-  "goal",
-  "week",
-  "achievement",
-]);
+const BIG_MILESTONE_KINDS: ReadonlySet<MilestoneKind> = new Set<MilestoneKind>(["goal", "week", "achievement"]);
 
 /** Project design philosophy: warm (terracotta) is reserved for reflection
  * surfaces. Streak + achievement carry a reflective tone — the user is
@@ -69,38 +65,33 @@ const PALETTE_BY_KIND: Record<MilestoneKind, CelebrationPalette> = {
  * }
  */
 export function useCelebration() {
-  return useCallback(
-    (kind: MilestoneKind, payload: CelebrationPayload): boolean => {
-      if (typeof window === "undefined") return false;
+  return useCallback((kind: MilestoneKind, payload: CelebrationPayload): boolean => {
+    if (typeof window === "undefined") return false;
 
-      const sessionKey = `${SESSION_KEY_PREFIX}${kind}:${payload.id}`;
-      try {
-        if (window.sessionStorage.getItem(sessionKey)) return false;
-        window.sessionStorage.setItem(sessionKey, "1");
-      } catch {
-        // sessionStorage may be unavailable (private mode); proceed without
-        // dedupe rather than silently dropping the celebration.
-      }
+    const sessionKey = `${SESSION_KEY_PREFIX}${kind}:${payload.id}`;
+    try {
+      if (window.sessionStorage.getItem(sessionKey)) return false;
+      window.sessionStorage.setItem(sessionKey, "1");
+    } catch {
+      // sessionStorage may be unavailable (private mode); proceed without
+      // dedupe rather than silently dropping the celebration.
+    }
 
-      const shouldFireConfetti = payload.withConfetti ?? BIG_MILESTONE_KINDS.has(kind);
-      if (shouldFireConfetti) {
-        fireCelebration({
-          ...payload.origin,
-          palette: payload.palette ?? PALETTE_BY_KIND[kind],
-        });
-        soundService.success();
-
-
-      } else {
-        soundService.click();
-      }
-
-      toast.custom(() => <MilestoneToast kind={kind} title={payload.title} description={payload.description} />, {
-        duration: 4000,
+    const shouldFireConfetti = payload.withConfetti ?? BIG_MILESTONE_KINDS.has(kind);
+    if (shouldFireConfetti) {
+      fireCelebration({
+        ...payload.origin,
+        palette: payload.palette ?? PALETTE_BY_KIND[kind],
       });
+      soundService.success();
+    } else {
+      soundService.click();
+    }
 
-      return true;
-    },
-    [],
-  );
+    toast.custom(() => <MilestoneToast kind={kind} title={payload.title} description={payload.description} />, {
+      duration: 4000,
+    });
+
+    return true;
+  }, []);
 }

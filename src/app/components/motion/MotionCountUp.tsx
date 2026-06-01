@@ -1,11 +1,11 @@
 import {
   animate,
+  type HTMLMotionProps,
   motion,
   useInView,
   useMotionValue,
   useReducedMotion,
   useTransform,
-  type HTMLMotionProps,
 } from "motion/react";
 import { useEffect, useRef } from "react";
 

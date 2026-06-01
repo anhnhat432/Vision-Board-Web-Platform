@@ -1,7 +1,7 @@
-import type { JSX } from "react";
 import { Calendar } from "lucide-react";
+import type { JSX } from "react";
 
-import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 
 export interface GoalCardChipProps {
   goal?: {

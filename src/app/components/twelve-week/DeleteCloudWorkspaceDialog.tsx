@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,6 @@ import {
 } from "../ui/alert-dialog";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-import { Trash2 } from "lucide-react";
 
 interface DeleteCloudWorkspaceDialogProps {
   open: boolean;
@@ -45,14 +45,13 @@ export function DeleteCloudWorkspaceDialog({
             Xóa dữ liệu 12 tuần đã đồng bộ?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm leading-6 text-app-ink-soft">
-            Hành động này sẽ xóa dữ liệu chu kỳ 12 tuần của bạn trên đám mây. Dữ liệu cục bộ trên thiết bị này vẫn được giữ nguyên.
+            Hành động này sẽ xóa dữ liệu chu kỳ 12 tuần của bạn trên đám mây. Dữ liệu cục bộ trên thiết bị này vẫn được
+            giữ nguyên.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-4 py-3">
-          <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">
-            Hành động này không thể hoàn tác.
-          </p>
+          <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">Hành động này không thể hoàn tác.</p>
           <p className="mt-1 text-xs text-[color:var(--color-danger-fg)]">
             Tất cả bản sao lưu của chu kỳ này trên máy chủ đám mây sẽ bị xóa vĩnh viễn.
           </p>

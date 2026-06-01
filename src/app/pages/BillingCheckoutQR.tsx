@@ -1,12 +1,12 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
 
 import { apiClient } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { isPaidCheckoutDisabled } from "../utils/app-mode";
-import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount } from "../utils/billing-pricing";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { syncEntitlementsWithProvider } from "../utils/production";
 import { upgradePlanLocally } from "../utils/storage";
 
@@ -334,12 +334,15 @@ export function BillingCheckoutQR() {
           </div>
           <h2 className="font-serif text-xl font-medium text-app-ink">Thanh toán đang tạm khóa</h2>
           <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-            Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
-            hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
-            <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="font-medium text-app-ink underline-offset-4 hover:underline">
+            Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng.
+            Nếu bạn muốn nâng cấp ngay, liên hệ{" "}
+            <a
+              href={`mailto:${BILLING_SUPPORT_EMAIL}`}
+              className="font-medium text-app-ink underline-offset-4 hover:underline"
+            >
               {BILLING_SUPPORT_EMAIL}
-            </a>
-            {" "}để mở Plus thủ công.
+            </a>{" "}
+            để mở Plus thủ công.
           </p>
           <button
             type="button"

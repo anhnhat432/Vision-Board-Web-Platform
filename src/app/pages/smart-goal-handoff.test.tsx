@@ -2,9 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { SMARTGoalSetup } from "./SMARTGoalSetup";
 import { APP_STORAGE_KEYS, getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
+import { SMARTGoalSetup } from "./SMARTGoalSetup";
 
 function seedSmartGoalHandoff(focusArea = "Health") {
   const data = getUserData();

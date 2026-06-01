@@ -1,5 +1,5 @@
-import type { UserData } from "./storage-types";
 import { SUBSCRIPTION_GRACE_PERIOD_MS } from "./storage-billing-ops";
+import type { UserData } from "./storage-types";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 

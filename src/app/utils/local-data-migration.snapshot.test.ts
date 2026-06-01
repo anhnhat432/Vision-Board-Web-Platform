@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
+import {
+  cleanupExpiredMigrationBackups,
+  getAnonymousLocalDataMigrationCandidate,
+  importAnonymousLocalDataToAccountScope,
+  restoreMigrationBackupSnapshot,
+} from "./local-data-migration";
+import { getScopedUserDataStorageKey } from "./storage-auth-scope";
 import {
   AUTH_OWNER_STORAGE_KEY,
   CURRENT_STORAGE_VERSION,
@@ -8,13 +14,6 @@ import {
   STORAGE_KEY,
 } from "./storage-constants";
 import { createEmptyUserData } from "./storage-demo-data";
-import { getScopedUserDataStorageKey } from "./storage-auth-scope";
-import {
-  cleanupExpiredMigrationBackups,
-  getAnonymousLocalDataMigrationCandidate,
-  importAnonymousLocalDataToAccountScope,
-  restoreMigrationBackupSnapshot,
-} from "./local-data-migration";
 import type { Goal, UserData } from "./storage-types";
 
 function createFreshUserData(): UserData {

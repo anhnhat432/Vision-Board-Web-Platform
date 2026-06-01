@@ -10,9 +10,9 @@
  * This is a security-safe fallback — backend failure = no premium access.
  */
 
-import { apiClient } from "@/lib/api/apiClient";
 import { isDemoMode } from "@/app/utils/app-mode";
 import type { EntitlementKey, PricingPlanCode } from "@/app/utils/storage-types";
+import { apiClient } from "@/lib/api/apiClient";
 
 export interface ServerEntitlementSnapshot {
   planCode: PricingPlanCode;

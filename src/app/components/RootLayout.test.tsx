@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { ProtectedRoute } from "./ProtectedRoute";
-import { RootLayout } from "./RootLayout";
+import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
+import { activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
+import { getScopedUserDataStorageKey } from "../utils/storage-auth-scope";
 import {
   ANONYMOUS_USER_DATA_STORAGE_KEY,
   CURRENT_STORAGE_VERSION,
@@ -11,10 +11,9 @@ import {
   MOTIVATIONAL_QUOTES,
 } from "../utils/storage-constants";
 import { createEmptyUserData } from "../utils/storage-demo-data";
-import { activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
-import { getScopedUserDataStorageKey } from "../utils/storage-auth-scope";
 import type { Goal, UserData } from "../utils/storage-types";
-import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { RootLayout } from "./RootLayout";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
@@ -637,9 +636,7 @@ describe("RootLayout onboarding redirect", () => {
     renderAppShell("/goals");
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
-    expect(
-      await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Giữ trên thiết bị này" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Lấy bản tài khoản" })).toBeInTheDocument();
   });

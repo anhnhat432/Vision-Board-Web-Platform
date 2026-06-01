@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
 import { OrderSummary } from "./OrderSummary";
 
@@ -66,9 +66,7 @@ describe("OrderSummary", () => {
         selectedSticker={null}
       />,
     );
-    expect(
-      screen.getByText(/Chọn khung và set ảnh để xem trước/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Chọn khung và set ảnh để xem trước/)).toBeInTheDocument();
   });
 
   it("renders preview thumbnails when selected items have thumbnails", () => {

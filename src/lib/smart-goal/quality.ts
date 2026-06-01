@@ -1,5 +1,5 @@
-import type { SmartGoal } from "./types";
 import { estimateGoalDifficulty, hasOutcomeIndicator } from "./helpers";
+import type { SmartGoal } from "./types";
 
 // ---------------------------------------------------------------------------
 // Types

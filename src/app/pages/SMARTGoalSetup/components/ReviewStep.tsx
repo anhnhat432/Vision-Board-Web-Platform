@@ -56,7 +56,8 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
           <span>📌 Bước tiếp theo:</span>
         </div>
         <p>
-          Mục tiêu SMART của bạn sẽ được chuyển sang giai đoạn **Kiểm tra độ khả thi**. Chúng mình sẽ cùng bạn phân tích các rủi ro, dự phòng thời gian biểu và thiết lập nhịp điệu hành động 12 tuần thật vững chắc.
+          Mục tiêu SMART của bạn sẽ được chuyển sang giai đoạn **Kiểm tra độ khả thi**. Chúng mình sẽ cùng bạn phân tích
+          các rủi ro, dự phòng thời gian biểu và thiết lập nhịp điệu hành động 12 tuần thật vững chắc.
         </p>
       </div>
     </section>

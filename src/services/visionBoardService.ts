@@ -1,5 +1,5 @@
 import type { VisionBoardItemStyle, VisionBoardItemType, VisionBoardThemeId } from "@/app/utils/storage-types";
-import { get, post, put, delete as deleteReq } from "@/lib/api/apiClient";
+import { delete as deleteReq, get, post, put } from "@/lib/api/apiClient";
 
 export interface ApiVisionBoardItem {
   id: string;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Desktop = viewport >= 768px (matches Tailwind `md:` breakpoint and `useIsMobile`).

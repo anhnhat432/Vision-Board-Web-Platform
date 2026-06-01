@@ -1,10 +1,10 @@
-﻿import { useMemo } from "react";
-import { Activity, ShieldCheck } from "lucide-react";
+﻿import { Activity, ShieldCheck } from "lucide-react";
+import { useMemo } from "react";
 
 import {
   buildFunnelDiagnosticsSnapshot,
-  shouldShowFunnelDiagnostics,
   type FunnelDiagnosticsSnapshot,
+  shouldShowFunnelDiagnostics,
 } from "@/app/utils/funnel-diagnostics";
 
 interface FunnelDiagnosticsPanelProps {

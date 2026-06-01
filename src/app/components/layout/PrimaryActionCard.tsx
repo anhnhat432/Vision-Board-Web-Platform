@@ -1,8 +1,8 @@
 "use client";
 
 import type * as React from "react";
-import { cn } from "../ui/utils";
 import { Card, CardContent, CardDescription, CardHeader } from "../ui/card";
+import { cn } from "../ui/utils";
 
 type PrimaryActionCardTone = "primary" | "violet" | "emerald" | "amber";
 type PrimaryActionCardDensity = "compact" | "default";
@@ -118,7 +118,10 @@ export function PrimaryActionCard({
             {eyebrow}
           </p>
         )}
-        <Title data-slot="card-title" className={cn("font-serif text-lg font-medium leading-tight tracking-normal text-app-ink", titleClassName)}>
+        <Title
+          data-slot="card-title"
+          className={cn("font-serif text-lg font-medium leading-tight tracking-normal text-app-ink", titleClassName)}
+        >
           {title}
         </Title>
         {description && <CardDescription className={descriptionClassName}>{description}</CardDescription>}

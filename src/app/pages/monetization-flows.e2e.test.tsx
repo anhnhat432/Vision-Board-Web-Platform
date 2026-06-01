@@ -1,8 +1,8 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { buildBillingPlanUpgradePath, getCurrentUpgradeOriginPath } from "../components/UpgradePaywallDialog";
 import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal, updateUserData } from "../../test/app-flow-helpers";
+import { buildBillingPlanUpgradePath, getCurrentUpgradeOriginPath } from "../components/UpgradePaywallDialog";
 import { getMockCheckoutSession, startCheckoutFlow } from "../utils/production";
 import { getCurrentEntitlementKeys, getCurrentPlan, getUserData } from "../utils/storage";
 import { BillingPlan } from "./BillingPlan";

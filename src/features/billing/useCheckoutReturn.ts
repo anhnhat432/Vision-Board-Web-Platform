@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import type { useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 import { logBillingUiError, toastBillingNetworkError } from "../../app/utils/billing-ui-monitoring";
 import { syncEntitlementsWithProvider } from "../../app/utils/production";

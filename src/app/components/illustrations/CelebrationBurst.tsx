@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "./utils";
 
 export function CelebrationBurst({ className, ...rest }: AmbientIllustrationProps) {
   const gradientId = useIllustrationId("celebration-burst-app-accent");

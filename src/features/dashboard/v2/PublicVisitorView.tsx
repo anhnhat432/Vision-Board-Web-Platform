@@ -1,13 +1,5 @@
+import { ArrowRight, Compass, HardDrive, Lock, LogIn, Smartphone, UserPlus } from "lucide-react";
 import { useState } from "react";
-import {
-  ArrowRight,
-  Compass,
-  HardDrive,
-  Lock,
-  LogIn,
-  Smartphone,
-  UserPlus,
-} from "lucide-react";
 
 import { Link } from "react-router";
 
@@ -25,8 +17,8 @@ const GOAL_PREVIEWS: GoalPreviewData[] = [
       { emoji: "✍️", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
       { emoji: "🧠", bgClass: "bg-violet-800/10", borderClass: "border-violet-800/20" },
     ],
-    visionLabel: "\"Phát triển tri thức\"",
-    todayTasks: ["Đọc 30 trang \"Atomic Habits\"", "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
+    visionLabel: '"Phát triển tri thức"',
+    todayTasks: ['Đọc 30 trang "Atomic Habits"', "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
     weekLabel: "Tuần 4/12",
   },
   {
@@ -37,7 +29,7 @@ const GOAL_PREVIEWS: GoalPreviewData[] = [
       { emoji: "📝", bgClass: "bg-rose-800/10", borderClass: "border-rose-800/20" },
       { emoji: "🌍", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
     ],
-    visionLabel: "\"Tự tin giao tiếp quốc tế\"",
+    visionLabel: '"Tự tin giao tiếp quốc tế"',
     todayTasks: ["Làm 1 bài Listening Practice", "Viết 1 essay Task 2", "Review 50 từ vựng"],
     weekLabel: "Tuần 3/12",
   },
@@ -49,7 +41,7 @@ const GOAL_PREVIEWS: GoalPreviewData[] = [
       { emoji: "🥗", bgClass: "bg-green-800/10", borderClass: "border-green-800/20" },
       { emoji: "😴", bgClass: "bg-indigo-800/10", borderClass: "border-indigo-800/20" },
     ],
-    visionLabel: "\"Sức khoẻ bền vững\"",
+    visionLabel: '"Sức khoẻ bền vững"',
     todayTasks: ["Tập Upper Body 45 phút", "Uống 2L nước", "Ngủ trước 23h"],
     weekLabel: "Tuần 6/12",
   },
@@ -61,7 +53,7 @@ const GOAL_PREVIEWS: GoalPreviewData[] = [
       { emoji: "📄", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
       { emoji: "🤝", bgClass: "bg-teal-800/10", borderClass: "border-teal-800/20" },
     ],
-    visionLabel: "\"Sẵn sàng bước vào sự nghiệp\"",
+    visionLabel: '"Sẵn sàng bước vào sự nghiệp"',
     todayTasks: ["Code 1 feature project", "Viết 1 case study", "Update LinkedIn"],
     weekLabel: "Tuần 2/12",
   },
@@ -106,7 +98,13 @@ const FEATURE_ROWS = [
   },
 ] as const;
 
-export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSignIn, onSignUp }: PublicVisitorViewProps) {
+export function PublicVisitorView({
+  isDemo: _isDemo,
+  hasLocalData,
+  onStart,
+  onSignIn,
+  onSignUp,
+}: PublicVisitorViewProps) {
   const primaryLabel = "Thiết lập chu kỳ 12 tuần ngay";
   const heroStartLabel = "Thiết lập chu kỳ 12 tuần ngay";
   const [selectedPreviewId, setSelectedPreviewId] = useState(GOAL_PREVIEWS[0].id);
@@ -142,21 +140,27 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-500/5 dark:border-emerald-900/30 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 shadow-3xs">
                   ✨ DEAR OUR FUTURE
                 </span>
-                
+
                 <h1 className="max-w-2xl font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[3.5rem]">
                   Thiết lập cuộc sống mơ ước qua <br className="hidden sm:inline" />
-                  <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-8">kế hoạch 12 tuần</span> bền bỉ
+                  <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-8">
+                    kế hoạch 12 tuần
+                  </span>{" "}
+                  bền bỉ
                 </h1>
-                
+
                 {/* Shortened and high impact caption (under 3 lines on mobile) */}
                 <p className="max-w-[48ch] text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic">
-                  Nơi mục tiêu lớn được chia nhỏ thành thói quen kỷ luật mỗi ngày. Đánh giá bánh xe cuộc sống, xây dựng mục tiêu SMART và thực thi dứt khoát.
+                  Nơi mục tiêu lớn được chia nhỏ thành thói quen kỷ luật mỗi ngày. Đánh giá bánh xe cuộc sống, xây dựng
+                  mục tiêu SMART và thực thi dứt khoát.
                 </p>
               </div>
 
               {/* Visual preview journey diagram: Vision -> Goal -> 12-week -> Action */}
               <div className="bg-white/80 dark:bg-neutral-900/80 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 p-4 shadow-3xs backdrop-blur-md max-w-xl">
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-2.5">Hành trình 5 giây gặt hái kết quả:</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-2.5">
+                  Hành trình 5 giây gặt hái kết quả:
+                </p>
                 <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
                   <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
                     <div className="text-base mb-1">🎨</div>
@@ -183,7 +187,9 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
 
               {/* Interactive Goal Preview Chips */}
               <div className="space-y-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chọn xem ví dụ thực tế:</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+                  Chọn xem ví dụ thực tế:
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {PREVIEW_CHIPS.map((chip) => (
                     <button
@@ -232,7 +238,9 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
 
             {/* Cozy planning corner generated image asset for public landing */}
             <div className="hidden lg:block relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-sm aspect-[4/3] w-full group select-none transition-all duration-300 hover:shadow-md hover:-rotate-[0.5deg]">
-              <span className="absolute -top-3.5 left-6 text-xl z-20 select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.06)]">📌</span>
+              <span className="hidden sm:inline absolute -top-3.5 left-6 text-xl z-20 select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.06)]">
+                📌
+              </span>
               <img
                 src="/study_desk_hero.png"
                 alt="Góc học tập & lập kế hoạch ấm áp"
@@ -351,8 +359,13 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
         aria-labelledby="dashboard-how-it-works-title"
       >
         <div className="flex flex-col gap-1.5 max-w-2xl">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-500">Kiến tạo tương lai</p>
-          <h2 id="dashboard-how-it-works-title" className="font-serif text-2xl font-normal leading-[1.25] text-app-ink sm:text-[2.25rem]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-500">
+            Kiến tạo tương lai
+          </p>
+          <h2
+            id="dashboard-how-it-works-title"
+            className="font-serif text-2xl font-normal leading-[1.25] text-app-ink sm:text-[2.25rem]"
+          >
             Lộ trình 4 bước chuyển mình rõ nét
           </h2>
         </div>
@@ -360,13 +373,16 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
         {/* Polaroid/Paper Cards Stepper */}
         <div className="relative mt-10 select-none">
           <ol className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-4 z-10">
-            
             {/* Step 1 */}
             <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative -rotate-[1deg] space-y-4 hover:rotate-0 duration-300 transition-transform flex flex-col justify-between">
-              <span className="absolute -top-3 left-4 text-xl">📌</span>
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">01</div>
+              <span className="hidden sm:inline absolute -top-3 left-4 text-xl">📌</span>
+              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
+                01
+              </div>
               <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">Bước 1 · Nhìn nhận</div>
+                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
+                  Bước 1 · Nhìn nhận
+                </div>
                 <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Cân bằng cuộc sống</h4>
                 <p className="text-xs text-neutral-500 leading-relaxed font-medium">
                   Đánh giá 8 khía cạnh cuộc sống để phát hiện điểm lệch nhịp cần cải thiện đầu tiên.
@@ -380,8 +396,10 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
 
             {/* Step 2 */}
             <li className="bg-[#fffde7] text-neutral-800 p-6 rounded-2xl border border-yellow-200/80 shadow-3xs relative rotate-[1.5deg] space-y-4 hover:rotate-0 duration-300 transition-transform flex flex-col justify-between">
-              <span className="absolute -top-3 left-4 text-xl">📌</span>
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-yellow-300 select-none">02</div>
+              <span className="hidden sm:inline absolute -top-3 left-4 text-xl">📌</span>
+              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-yellow-300 select-none">
+                02
+              </div>
               <div className="space-y-3 pt-2">
                 <div className="text-[10px] font-bold text-yellow-700 uppercase tracking-wider">Bước 2 · Định vị</div>
                 <h4 className="text-xs font-bold text-neutral-800">Đặt mục tiêu SMART</h4>
@@ -397,10 +415,14 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
 
             {/* Step 3 */}
             <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative -rotate-[0.5deg] space-y-4 hover:rotate-0 duration-300 transition-transform flex flex-col justify-between">
-              <span className="absolute -top-3 left-4 text-xl">📌</span>
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">03</div>
+              <span className="hidden sm:inline absolute -top-3 left-4 text-xl">📌</span>
+              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
+                03
+              </div>
               <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">Bước 3 · Thiết lập</div>
+                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
+                  Bước 3 · Thiết lập
+                </div>
                 <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Kế hoạch 12 tuần</h4>
                 <p className="text-xs text-neutral-500 leading-relaxed font-medium">
                   Xây dựng thói quen lặp lại (tactics) và checkpoint đo lường tiến độ tự động.
@@ -414,10 +436,14 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
 
             {/* Step 4 */}
             <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative rotate-[1deg] space-y-4 hover:rotate-0 duration-300 transition-transform flex flex-col justify-between">
-              <span className="absolute -top-3 left-4 text-xl">📌</span>
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">04</div>
+              <span className="hidden sm:inline absolute -top-3 left-4 text-xl">📌</span>
+              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
+                04
+              </div>
               <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">Bước 4 · Thực thi</div>
+                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
+                  Bước 4 · Thực thi
+                </div>
                 <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Hành động mỗi ngày</h4>
                 <p className="text-xs text-neutral-500 leading-relaxed font-medium">
                   Mở việc Today mỗi sáng, tick hoàn thành và phản tư ngắn vào cuối tuần.
@@ -428,13 +454,16 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
                 <span>2 phút mỗi ngày</span>
               </div>
             </li>
-
           </ol>
         </div>
       </RevealOnScroll>
 
       {/* Feature cards Grid */}
-      <RevealOnScroll as="section" className="grid gap-6 lg:grid-cols-3 max-w-6xl mx-auto px-4 w-full" aria-label="Vì sao chọn Dear Our Future">
+      <RevealOnScroll
+        as="section"
+        className="grid gap-6 lg:grid-cols-3 max-w-6xl mx-auto px-4 w-full"
+        aria-label="Vì sao chọn Dear Our Future"
+      >
         {FEATURE_ROWS.map((feature) => {
           const Icon = feature.icon;
 
@@ -449,8 +478,12 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
                   <Icon className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-app-accent/80">{feature.tag}</p>
-                  <h2 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 transition-colors duration-200 group-hover:text-app-accent">{feature.title}</h2>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-app-accent/80">
+                    {feature.tag}
+                  </p>
+                  <h2 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 transition-colors duration-200 group-hover:text-app-accent">
+                    {feature.title}
+                  </h2>
                   <p className="text-xs font-semibold leading-relaxed text-neutral-500">{feature.description}</p>
                   <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
                     Tìm hiểu thêm
@@ -472,10 +505,12 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
         <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-emerald-950 text-white p-8 md:p-14 shadow-2xl text-center sm:text-left">
           <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]" />
           <div className="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]" />
-          
+
           <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-4 max-w-2xl">
-              <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-emerald-400 block">Gửi lời chào tới tương lai</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-emerald-400 block">
+                Gửi lời chào tới tương lai
+              </span>
               <h2
                 id="dashboard-public-cta-title"
                 className="font-serif text-3xl font-normal leading-[1.25] text-white sm:text-5xl"
@@ -483,10 +518,11 @@ export function PublicVisitorView({ isDemo: _isDemo, hasLocalData, onStart, onSi
                 Kiến tạo phiên bản <br className="hidden sm:inline" /> rực rỡ nhất của bạn
               </h2>
               <p className="text-xs font-normal leading-relaxed text-slate-300">
-                Dành 10 phút tĩnh lặng thiết lập chu kỳ hành động 12 tuần của bạn ngay hôm nay để thắp sáng bản đồ mục tiêu.
+                Dành 10 phút tĩnh lặng thiết lập chu kỳ hành động 12 tuần của bạn ngay hôm nay để thắp sáng bản đồ mục
+                tiêu.
               </p>
             </div>
-            
+
             <div className="shrink-0 flex flex-col items-center lg:items-end gap-3.5">
               <button
                 type="button"

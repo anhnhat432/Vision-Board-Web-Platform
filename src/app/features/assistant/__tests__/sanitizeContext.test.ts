@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeAssistantContext, sanitizePageContextHint } from "../sanitizeContext";
 import type { AssistantContext } from "../buildAssistantContext";
+import { sanitizeAssistantContext, sanitizePageContextHint } from "../sanitizeContext";
 
 describe("sanitizePageContextHint", () => {
   it("should sanitize pageContextHint", () => {

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, CircleAlert, Info } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { cn } from "@/app/components/ui/utils";
 

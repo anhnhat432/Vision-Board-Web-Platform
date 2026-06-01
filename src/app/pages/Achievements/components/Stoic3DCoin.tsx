@@ -1,5 +1,5 @@
+import { Calendar, Lock, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { X, Calendar, Lock } from "lucide-react";
 
 interface Stoic3DCoinProps {
   achievement: {
@@ -77,7 +77,7 @@ const playMetalChime = () => {
     osc1.type = "sine";
     // Tần số kim loại cao A5 (880Hz)
     osc1.frequency.setValueAtTime(880, ctx.currentTime);
-    
+
     osc2.type = "triangle";
     // Tần số hài âm thứ hai (1760Hz) tạo cảm giác vang
     osc2.frequency.setValueAtTime(1760, ctx.currentTime);
@@ -104,13 +104,13 @@ const playMetalChime = () => {
 export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
   const quote = STOIC_QUOTES[achievement.key] || DEFAULT_QUOTE;
   const coinRef = useRef<HTMLDivElement | null>(null);
-  
+
   // State quản lý toạ độ xoay của đồng xu (độ)
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const currentRotationStart = useRef({ x: 0, y: 0 });
-  
+
   // Thời gian chặn phát âm thanh (throttling)
   const lastSoundTime = useRef<number>(0);
 
@@ -185,7 +185,7 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity duration-300">
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation on modal container */}
-      <div 
+      <div
         className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-app-line bg-gradient-to-b from-app-surface to-app-bg shadow-2xl transition-all duration-300 md:max-w-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -212,14 +212,12 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
             <h2 id="modal-title" className="mt-2 font-serif text-2xl font-semibold leading-tight text-app-ink">
               {achievement.title}
             </h2>
-            <p className="mt-2 max-w-sm text-xs text-app-ink-soft">
-              {achievement.description}
-            </p>
+            <p className="mt-2 max-w-sm text-xs text-app-ink-soft">{achievement.description}</p>
           </div>
 
           {/* Sân khấu hiển thị Đồng xu 3D */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: 3D drag stage */}
-          <div 
+          <div
             className="my-8 flex h-64 w-full items-center justify-center select-none cursor-grab active:cursor-grabbing"
             style={{ perspective: "1000px" }}
             onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
@@ -266,12 +264,12 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
               >
                 {/* Viền tròn hoa văn chấm cổ điển */}
                 <div className="absolute inset-2 rounded-full border border-dashed border-amber-900/40 opacity-70" />
-                
+
                 {/* Biểu tượng trung tâm */}
                 <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-amber-950/15 text-amber-950 shadow-inner">
                   <span className="text-4xl">🏛️</span>
                 </div>
-                
+
                 {/* Tên Latin viết tắt bên dưới */}
                 <span className="absolute bottom-6 z-10 font-serif text-[10px] font-bold uppercase tracking-wider text-amber-950/70">
                   {quote.latin.split(" ")[0]}
@@ -316,7 +314,7 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
                 {achievement.unlocked ? "Đã mở khóa" : "Đang bị khóa"}
               </span>
             </div>
-            
+
             {achievement.unlocked && achievement.earnedAt && (
               <div className="mt-2 flex items-center justify-between text-xs text-app-ink-soft">
                 <span className="flex items-center gap-1">

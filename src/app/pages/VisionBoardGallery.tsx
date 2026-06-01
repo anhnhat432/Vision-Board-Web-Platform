@@ -1,26 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
 import {
   Calendar,
   Edit,
   Eye,
+  Heart,
   Image as ImageIcon,
   Images,
+  Moon,
   Plus,
   Sparkles,
+  Star,
+  Sun,
+  Target,
   Trash2,
   Trophy,
   Zap,
-  Heart,
-  Star,
-  Sun,
-  Moon,
-  Target,
 } from "lucide-react";
-
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { EmptyState } from "@/app/components/states/EmptyState";
+import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  deleteVisionBoard as backendDeleteVisionBoard,
+  getVisionBoards as backendGetVisionBoards,
+} from "@/services/visionBoardService";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { VisionMapIllustration } from "../components/illustrations";
-import { EmptyState } from "@/app/components/states/EmptyState";
 import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
@@ -39,14 +44,8 @@ import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Skeleton } from "../components/ui/skeleton";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { deleteVisionBoard, getUserData, saveUserData, type VisionBoard } from "../utils/storage";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import {
-  deleteVisionBoard as backendDeleteVisionBoard,
-  getVisionBoards as backendGetVisionBoards,
-} from "@/services/visionBoardService";
-import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
-import { generateId } from "../utils/storage-types";
 import { formatDisplayDate } from "../utils/storage-date-utils";
+import { generateId } from "../utils/storage-types";
 
 const ICON_COMPONENTS = {
   Sparkles,
@@ -220,9 +219,7 @@ export function VisionBoardGallery() {
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Snapshot thư viện
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
             <div className="mt-3 grid gap-2">
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">

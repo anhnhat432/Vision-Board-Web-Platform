@@ -1,24 +1,23 @@
 import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
-
-import { AuthProvider } from "../lib/auth/AuthContext";
 import { TwelveWeekSetup } from "../app/pages/12WeekSetup";
 import { TwelveWeekSystem } from "../app/pages/12WeekSystem";
-import { MockBillingCheckout } from "../app/pages/MockBillingCheckout";
 import { LifeInsight } from "../app/pages/LifeInsight";
+import { MockBillingCheckout } from "../app/pages/MockBillingCheckout";
 import {
   APP_STORAGE_KEYS,
   addGoal,
   formatDateInputValue,
-  getUserData,
-  saveUserData,
-  resetUserDataCache,
   type Goal,
+  getUserData,
   type PricingPlanCode,
+  resetUserDataCache,
+  saveUserData,
   type TacticType,
   type TwelveWeekSystem as TwelveWeekSystemModel,
   type UserData,
 } from "../app/utils/storage";
+import { AuthProvider } from "../lib/auth/AuthContext";
 
 function Placeholder({ title }: { title: string }) {
   return <div>{title}</div>;

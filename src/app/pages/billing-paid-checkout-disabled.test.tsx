@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, RouterProvider, createMemoryRouter } from "react-router";
+import { createMemoryRouter, MemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 /**
@@ -111,12 +111,7 @@ describe("paid checkout kill-switch", () => {
 
         render(
           <MemoryRouter>
-            <UpgradePaywallDialog
-              open
-              onOpenChange={() => undefined}
-              context="plan"
-              currentPlan="FREE"
-            />
+            <UpgradePaywallDialog open onOpenChange={() => undefined} context="plan" currentPlan="FREE" />
           </MemoryRouter>,
         );
 
@@ -144,9 +139,7 @@ describe("paid checkout kill-switch", () => {
           [
             {
               path: "/paywall-test",
-              element: (
-                <UpgradePaywallDialog open onOpenChange={() => undefined} context="plan" currentPlan="FREE" />
-              ),
+              element: <UpgradePaywallDialog open onOpenChange={() => undefined} context="plan" currentPlan="FREE" />,
             },
             { path: "/billing/confirm", element: <div data-testid="billing-confirm-page">Confirm</div> },
           ],
@@ -171,12 +164,7 @@ describe("paid checkout kill-switch", () => {
 
         render(
           <MemoryRouter>
-            <UpgradePaywallDialog
-              open
-              onOpenChange={() => undefined}
-              context="plan"
-              currentPlan="FREE"
-            />
+            <UpgradePaywallDialog open onOpenChange={() => undefined} context="plan" currentPlan="FREE" />
           </MemoryRouter>,
         );
 

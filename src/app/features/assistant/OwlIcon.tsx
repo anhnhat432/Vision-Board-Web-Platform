@@ -40,16 +40,8 @@ export function OwlIcon({ size = 24, className, blinking = false, ...props }: Ow
       {...props}
     >
       {/* Ear tufts (drawn first so body overlaps the base of them) */}
-      <path
-        d="M9.5 9 C 9 6, 10.5 4.5, 12.5 6.5 L 11.5 9.5 Z"
-        fill="currentColor"
-        className="owl-body"
-      />
-      <path
-        d="M22.5 9 C 23 6, 21.5 4.5, 19.5 6.5 L 20.5 9.5 Z"
-        fill="currentColor"
-        className="owl-body"
-      />
+      <path d="M9.5 9 C 9 6, 10.5 4.5, 12.5 6.5 L 11.5 9.5 Z" fill="currentColor" className="owl-body" />
+      <path d="M22.5 9 C 23 6, 21.5 4.5, 19.5 6.5 L 20.5 9.5 Z" fill="currentColor" className="owl-body" />
 
       {/* Body — chubby rounded silhouette */}
       <path
@@ -63,15 +55,7 @@ export function OwlIcon({ size = 24, className, blinking = false, ...props }: Ow
       />
 
       {/* Belly highlight — a softer oval inside the body for depth */}
-      <ellipse
-        cx="16"
-        cy="20"
-        rx="5.5"
-        ry="5"
-        fill="currentColor"
-        className="owl-belly"
-        opacity="0.45"
-      />
+      <ellipse cx="16" cy="20" rx="5.5" ry="5" fill="currentColor" className="owl-belly" opacity="0.45" />
 
       {/* Eyes — each eye is its own .owl-eyes group with its own translate
           so the blink scaleY animation squashes around the eye's own center. */}
@@ -96,11 +80,7 @@ export function OwlIcon({ size = 24, className, blinking = false, ...props }: Ow
       </g>
 
       {/* Beak — warm tone via .owl-beak class */}
-      <path
-        d="M16 18.5 L 14.5 21 L 17.5 21 Z"
-        fill="currentColor"
-        className="owl-beak"
-      />
+      <path d="M16 18.5 L 14.5 21 L 17.5 21 Z" fill="currentColor" className="owl-beak" />
 
       {/* Wing hint — a soft curve on the side */}
       <path

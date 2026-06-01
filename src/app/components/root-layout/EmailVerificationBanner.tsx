@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
 import { HardDrive, Loader2, Pencil } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-
+import { isDemoMode } from "@/app/utils/app-mode";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { changeEmailWithPassword, sendVerificationEmail } from "@/lib/auth/firebase";
-import { isDemoMode } from "@/app/utils/app-mode";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";

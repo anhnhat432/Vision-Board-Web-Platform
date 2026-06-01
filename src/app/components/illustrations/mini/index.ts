@@ -1,3 +1,4 @@
+export { getGoalArchetypeIcon } from "./goalArchetypeMap";
 export {
   KpiBalanceSpark,
   KpiFocusSpark,
@@ -14,6 +15,7 @@ export {
   LifeAreaMindIcon,
   LifeAreaRelationshipIcon,
 } from "./LifeAreaIcons";
+export { getLifeAreaIcon } from "./lifeAreaMap";
 export {
   BadgeRibbonAccent,
   EmptyHintArrow,
@@ -34,5 +36,3 @@ export {
   PhaseRampChipIcon,
 } from "./PhaseAndArchetypeIcons";
 export { TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon } from "./TaskStateIcons";
-export { getGoalArchetypeIcon } from "./goalArchetypeMap";
-export { getLifeAreaIcon } from "./lifeAreaMap";

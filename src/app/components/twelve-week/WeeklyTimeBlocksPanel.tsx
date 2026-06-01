@@ -1,8 +1,7 @@
 import { CalendarClock, Clock3, Pencil, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
-
-import { getDefaultTimeBlocks, TIME_BLOCK_DAYS, validateTimeBlocks } from "@/features/plan12week/logic/timeBlocks";
 import type { TimeBlock, TimeBlockDayOfWeek, TimeBlockType } from "@/app/utils/storage-types";
+import { getDefaultTimeBlocks, TIME_BLOCK_DAYS, validateTimeBlocks } from "@/features/plan12week/logic/timeBlocks";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -39,9 +38,12 @@ const TYPE_DESCRIPTIONS: Record<TimeBlockType, string> = {
 };
 
 const TYPE_CHIP_CLASS: Record<TimeBlockType, string> = {
-  strategic: "border-emerald-300 bg-gradient-to-br from-emerald-50 via-emerald-50/60 to-transparent text-emerald-900 dark:from-emerald-950/40 dark:to-transparent dark:text-emerald-300 font-bold",
-  buffer: "border-sky-300 bg-gradient-to-br from-sky-50 via-sky-50/60 to-transparent text-sky-900 dark:from-sky-950/40 dark:to-transparent dark:text-sky-300 font-bold",
-  breakout: "border-amber-300 bg-gradient-to-br from-amber-50 via-amber-50/60 to-transparent text-amber-900 dark:from-amber-950/40 dark:to-transparent dark:text-amber-300 font-bold",
+  strategic:
+    "border-emerald-300 bg-gradient-to-br from-emerald-50 via-emerald-50/60 to-transparent text-emerald-900 dark:from-emerald-950/40 dark:to-transparent dark:text-emerald-300 font-bold",
+  buffer:
+    "border-sky-300 bg-gradient-to-br from-sky-50 via-sky-50/60 to-transparent text-sky-900 dark:from-sky-950/40 dark:to-transparent dark:text-sky-300 font-bold",
+  breakout:
+    "border-amber-300 bg-gradient-to-br from-amber-50 via-amber-50/60 to-transparent text-amber-900 dark:from-amber-950/40 dark:to-transparent dark:text-amber-300 font-bold",
 };
 
 const TYPE_CARD_CLASS: Record<TimeBlockType, string> = {
@@ -177,7 +179,9 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                       data-testid="weekly-time-block-chip"
                       className={`rounded-xl border p-3.5 text-xs shadow-sm hover:scale-[1.02] hover:shadow-md transition-all duration-200 ${TYPE_CHIP_CLASS[block.type]}`}
                     >
-                      <p className="font-bold tracking-wide text-slate-950 dark:text-inherit">{TYPE_LABELS[block.type]}</p>
+                      <p className="font-bold tracking-wide text-slate-950 dark:text-inherit">
+                        {TYPE_LABELS[block.type]}
+                      </p>
                       <p className="mt-1.5 flex items-center gap-1.5 font-medium text-slate-800 dark:text-inherit/90">
                         <Clock3 className="h-3.5 w-3.5" />
                         {block.startTime} · {formatDuration(block.durationMinutes)}
@@ -211,7 +215,10 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               key={type}
               className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all duration-300 ${TYPE_CARD_CLASS[type]}`}
             >
-              <Badge variant="outline" className={`${TYPE_CHIP_CLASS[type]} px-2.5 py-0.5 rounded-full text-xs shadow-sm`}>
+              <Badge
+                variant="outline"
+                className={`${TYPE_CHIP_CLASS[type]} px-2.5 py-0.5 rounded-full text-xs shadow-sm`}
+              >
                 {TYPE_LABELS[type]}
               </Badge>
               <p className="mt-3 text-sm leading-relaxed font-medium text-slate-700 dark:text-slate-300">
@@ -233,7 +240,9 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
           {editingDraft ? (
             <div className="stack-stack space-y-4 pt-2">
               <div className="space-y-2">
-                <Label htmlFor="time-block-day" className="text-sm font-bold text-app-ink">Ngày trong tuần</Label>
+                <Label htmlFor="time-block-day" className="text-sm font-bold text-app-ink">
+                  Ngày trong tuần
+                </Label>
                 <Select
                   value={editingDraft.dayOfWeek}
                   onValueChange={(day) =>
@@ -255,7 +264,9 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="time-block-start" className="text-sm font-bold text-app-ink">Giờ bắt đầu</Label>
+                  <Label htmlFor="time-block-start" className="text-sm font-bold text-app-ink">
+                    Giờ bắt đầu
+                  </Label>
                   <Input
                     id="time-block-start"
                     type="time"
@@ -267,7 +278,9 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="time-block-duration" className="text-sm font-bold text-app-ink">Thời lượng (phút)</Label>
+                  <Label htmlFor="time-block-duration" className="text-sm font-bold text-app-ink">
+                    Thời lượng (phút)
+                  </Label>
                   <Input
                     id="time-block-duration"
                     type="number"
@@ -284,7 +297,9 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="time-block-note" className="text-sm font-bold text-app-ink">Ghi chú</Label>
+                <Label htmlFor="time-block-note" className="text-sm font-bold text-app-ink">
+                  Ghi chú
+                </Label>
                 <Input
                   id="time-block-note"
                   value={editingDraft.note}
@@ -306,7 +321,11 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                 <Button type="button" variant="outline" onClick={() => setEditingDraft(null)} className="rounded-xl">
                   Huỷ
                 </Button>
-                <Button type="button" onClick={handleSaveDraft} className="bg-app-accent hover:bg-app-accent/90 text-white rounded-xl font-bold px-5">
+                <Button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="bg-app-accent hover:bg-app-accent/90 text-white rounded-xl font-bold px-5"
+                >
                   Lưu khung
                 </Button>
               </div>

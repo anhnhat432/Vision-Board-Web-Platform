@@ -92,9 +92,7 @@ describe("useInView", () => {
 
   it("toggles back to false when once=false and element leaves view", () => {
     const updates: boolean[] = [];
-    const { getByTestId } = render(
-      <Probe onUpdate={(v) => updates.push(v)} options={{ once: false }} />,
-    );
+    const { getByTestId } = render(<Probe onUpdate={(v) => updates.push(v)} options={{ once: false }} />);
     const target = getByTestId("target");
 
     act(() => {

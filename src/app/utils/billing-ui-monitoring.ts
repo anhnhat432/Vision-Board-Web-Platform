@@ -1,5 +1,5 @@
-import { captureFrontendException } from "@/lib/monitoring/sentry";
 import { toast } from "sonner";
+import { captureFrontendException } from "@/lib/monitoring/sentry";
 
 const BILLING_NETWORK_ERROR_MESSAGE = "Mạng có vấn đề, vui lòng thử lại";
 const BILLING_NETWORK_TOAST_INTERVAL_MS = 15_000;

@@ -11,4 +11,3 @@ export const helperTextClass = "mt-1 text-xs leading-5 text-app-ink-muted";
 export const errorTextClass = "mt-1 flex items-start gap-1.5 text-xs leading-5 text-[color:var(--color-danger-fg)]";
 
 export const requiredMarkerClass = "ml-1 text-[color:var(--color-danger-fg)]";
-

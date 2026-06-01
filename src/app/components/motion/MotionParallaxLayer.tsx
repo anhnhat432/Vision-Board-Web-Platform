@@ -1,4 +1,4 @@
-import { motion, useReducedMotion, useScroll, useTransform, type HTMLMotionProps } from "motion/react";
+import { type HTMLMotionProps, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
 interface MotionParallaxLayerProps extends HTMLMotionProps<"div"> {

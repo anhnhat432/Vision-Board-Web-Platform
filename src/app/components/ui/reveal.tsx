@@ -1,9 +1,8 @@
-import type { HTMLAttributes, ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import type { HTMLMotionProps } from "motion/react";
-
-import { cn } from "./utils";
+import { motion, useReducedMotion } from "motion/react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { useInView } from "./use-in-view";
+import { cn } from "./utils";
 
 interface RevealProps extends Omit<HTMLMotionProps<"div">, "children"> {
   amount?: number;

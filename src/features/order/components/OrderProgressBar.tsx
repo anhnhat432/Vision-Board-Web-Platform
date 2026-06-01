@@ -18,12 +18,7 @@ export interface OrderProgressBarProps {
   onStepClick: (step: number) => void;
 }
 
-export function OrderProgressBar({
-  currentStep,
-  completedSteps,
-  progressPercent,
-  onStepClick,
-}: OrderProgressBarProps) {
+export function OrderProgressBar({ currentStep, completedSteps, progressPercent, onStepClick }: OrderProgressBarProps) {
   function statusOf(num: number): "done" | "current" | "pending" {
     if (completedSteps.includes(num)) return "done";
     if (num === currentStep) return "current";
@@ -58,24 +53,16 @@ export function OrderProgressBar({
                   <span
                     className={cn(
                       "flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold",
-                      status === "done" &&
-                        "bg-[var(--order-accent)] text-white",
-                      status === "current" &&
-                        "border border-[var(--order-accent)] text-[var(--order-accent)]",
-                      status === "pending" &&
-                        "bg-[var(--order-border)] text-[var(--order-text-muted)]",
+                      status === "done" && "bg-[var(--order-accent)] text-white",
+                      status === "current" && "border border-[var(--order-accent)] text-[var(--order-accent)]",
+                      status === "pending" && "bg-[var(--order-border)] text-[var(--order-text-muted)]",
                     )}
                   >
-                    {status === "done" ? (
-                      <Check className="h-3 w-3" />
-                    ) : (
-                      s.num
-                    )}
+                    {status === "done" ? <Check className="h-3 w-3" /> : s.num}
                   </span>
                   <span
                     className={cn(
-                      status === "current" &&
-                        "font-medium text-[var(--order-accent)]",
+                      status === "current" && "font-medium text-[var(--order-accent)]",
                       status !== "current" && "text-[var(--order-text-muted)]",
                     )}
                   >

@@ -1,6 +1,6 @@
+import { isDemoMode } from "@/app/utils/app-mode";
 import { AuthError, authedFetch } from "@/lib/auth/authedFetch";
 import type { ApiErrorEnvelope, ApiSuccessEnvelope, AppError } from "@/types/api";
-import { isDemoMode } from "@/app/utils/app-mode";
 
 const DEFAULT_API_BASE_URL = "http://localhost:4000/api";
 const CONFIGURED_API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() ?? "";

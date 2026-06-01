@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // We test normalizeAppMode indirectly through the public API.
 // Since the module reads import.meta.env at module scope, we need to

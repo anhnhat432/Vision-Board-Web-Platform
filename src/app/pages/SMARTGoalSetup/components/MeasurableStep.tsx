@@ -1,6 +1,6 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
-import { Lightbulb, Check, X } from "lucide-react";
+import { Check, Lightbulb, X } from "lucide-react";
 import { motion } from "motion/react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { cn } from "@/app/components/ui/utils";
 
 function parseMetricAndUnit(metricName: string) {
@@ -20,10 +20,10 @@ import { parseNumberInput } from "@/lib/smart-goal";
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
+import { FOCUS_AREA_EXAMPLES } from "../constants";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
-import { FOCUS_AREA_EXAMPLES } from "../constants";
 
 interface MeasurableStepProps {
   smartData: SMARTData;
@@ -119,7 +119,9 @@ export function MeasurableStep({
         <div>
           <label htmlFor="smart-metric-name" className={labelClass}>
             Tên chỉ số đo lường (Metric Name)
-            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className={requiredMarkerClass} aria-hidden="true">
+              *
+            </span>
             <span className="sr-only"> bắt buộc</span>
           </label>
           <Input
@@ -139,7 +141,9 @@ export function MeasurableStep({
         <div>
           <label htmlFor="smart-metric-unit" className={labelClass}>
             Đơn vị đo lường (Unit)
-            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className={requiredMarkerClass} aria-hidden="true">
+              *
+            </span>
             <span className="sr-only"> bắt buộc</span>
           </label>
           <Input
@@ -175,7 +179,7 @@ export function MeasurableStep({
                     "text-[10px] px-2.5 py-0.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium cursor-pointer",
                     metricUnitInput === unit
                       ? "bg-app-accent text-white border-app-accent"
-                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/15"
+                      : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/15",
                   )}
                 >
                   {unit}
@@ -185,146 +189,250 @@ export function MeasurableStep({
           </div>
         </div>
       </div>
-        
-        {/* 1-Click Metric Suggestions */}
-        <div className="mt-3 bg-app-bg/40 p-3 rounded-xl border border-app-line/60">
-          <p className="text-[11px] font-extrabold uppercase tracking-wide text-app-accent mb-2 flex items-center gap-1">
-            <span>📊</span> Gợi ý đo lường nhanh (1-Click Suggestions):
-          </p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {(() => {
-              const suggestions = (() => {
-                if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
-                  return FOCUS_AREA_EXAMPLES[focusArea].measurable.map((e) => ({
-                    label: `${e.name}: ${e.baseline} -> ${e.target} ${e.unit}`,
-                    name: `${e.name} (${e.unit})`,
-                    baseline: e.baseline,
-                    target: e.target,
-                  }));
-                }
-                const text = smartData.specific.goal_statement.toLowerCase();
-                
-                // Phân tích từ khóa động
-                if (text.includes("chạy bộ") || text.includes("chạy") || text.includes("thể dục") || text.includes("gym") || text.includes("workout")) {
+
+      {/* 1-Click Metric Suggestions */}
+      <div className="mt-3 bg-app-bg/40 p-3 rounded-xl border border-app-line/60">
+        <p className="text-[11px] font-extrabold uppercase tracking-wide text-app-accent mb-2 flex items-center gap-1">
+          <span>📊</span> Gợi ý đo lường nhanh (1-Click Suggestions):
+        </p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {(() => {
+            const suggestions = (() => {
+              if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                return FOCUS_AREA_EXAMPLES[focusArea].measurable.map((e) => ({
+                  label: `${e.name}: ${e.baseline} -> ${e.target} ${e.unit}`,
+                  name: `${e.name} (${e.unit})`,
+                  baseline: e.baseline,
+                  target: e.target,
+                }));
+              }
+              const text = smartData.specific.goal_statement.toLowerCase();
+
+              // Phân tích từ khóa động
+              if (
+                text.includes("chạy bộ") ||
+                text.includes("chạy") ||
+                text.includes("thể dục") ||
+                text.includes("gym") ||
+                text.includes("workout")
+              ) {
+                return [
+                  { label: "Chạy bộ: 0 -> 3 buổi/tuần", name: "Số buổi chạy bộ/tuần", baseline: "0", target: "3" },
+                  { label: "Tập gym: 0 -> 4 buổi/tuần", name: "Số buổi tập luyện/tuần", baseline: "0", target: "4" },
+                ];
+              }
+              if (
+                text.includes("tiếng anh") ||
+                text.includes("ielts") ||
+                text.includes("english") ||
+                text.includes("từ vựng") ||
+                text.includes("học từ")
+              ) {
+                return [
+                  { label: "IELTS: 5.5 -> 7.0 điểm", name: "Điểm số IELTS tổng quát", baseline: "5.5", target: "7.0" },
+                  {
+                    label: "Từ vựng: 0 -> 300 từ mới",
+                    name: "Số từ vựng tiếng Anh học được",
+                    baseline: "0",
+                    target: "300",
+                  },
+                ];
+              }
+              if (
+                text.includes("lập trình") ||
+                text.includes("code") ||
+                text.includes("web") ||
+                text.includes("react") ||
+                text.includes("javascript")
+              ) {
+                return [
+                  {
+                    label: "React: 0 -> 12 chương",
+                    name: "Số chương học lập trình React",
+                    baseline: "0",
+                    target: "12",
+                  },
+                  {
+                    label: "Dự án: 0 -> 2 sản phẩm",
+                    name: "Số sản phẩm lập trình thực tế hoàn thành",
+                    baseline: "0",
+                    target: "2",
+                  },
+                ];
+              }
+              if (
+                text.includes("tiết kiệm") ||
+                text.includes("tiền") ||
+                text.includes("thu nhập") ||
+                text.includes("tài chính") ||
+                text.includes("đầu tư")
+              ) {
+                return [
+                  {
+                    label: "Tích lũy: 0 -> 20 triệu đồng",
+                    name: "Số tiền tiết kiệm được (triệu đồng)",
+                    baseline: "0",
+                    target: "20",
+                  },
+                  {
+                    label: "Chi tiêu: 0% -> 15% cắt giảm",
+                    name: "Tỷ lệ cắt giảm chi tiêu không cần thiết (%)",
+                    baseline: "0",
+                    target: "15",
+                  },
+                ];
+              }
+              if (
+                text.includes("viết") ||
+                text.includes("blog") ||
+                text.includes("bài viết") ||
+                text.includes("đăng bài") ||
+                text.includes("sách")
+              ) {
+                return [
+                  { label: "Blog: 0 -> 6 bài viết", name: "Số bài viết blog xuất bản", baseline: "0", target: "6" },
+                  {
+                    label: "Trang sách: 0 -> 200 trang",
+                    name: "Số trang sách đã viết xong",
+                    baseline: "0",
+                    target: "200",
+                  },
+                ];
+              }
+
+              switch (activeArchetype) {
+                case "habit_building":
                   return [
                     { label: "Chạy bộ: 0 -> 3 buổi/tuần", name: "Số buổi chạy bộ/tuần", baseline: "0", target: "3" },
-                    { label: "Tập gym: 0 -> 4 buổi/tuần", name: "Số buổi tập luyện/tuần", baseline: "0", target: "4" }
+                    {
+                      label: "Đọc sách: 0 -> 30 trang/ngày",
+                      name: "Số trang sách đã đọc/ngày",
+                      baseline: "0",
+                      target: "30",
+                    },
                   ];
-                }
-                if (text.includes("tiếng anh") || text.includes("ielts") || text.includes("english") || text.includes("từ vựng") || text.includes("học từ")) {
+                case "skill_learning":
                   return [
-                    { label: "IELTS: 5.5 -> 7.0 điểm", name: "Điểm số IELTS tổng quát", baseline: "5.5", target: "7.0" },
-                    { label: "Từ vựng: 0 -> 300 từ mới", name: "Số từ vựng tiếng Anh học được", baseline: "0", target: "300" }
+                    { label: "React: 0 -> 12 chương", name: "Số chương React hoàn thành", baseline: "0", target: "12" },
+                    {
+                      label: "Tiếng Anh: 0 -> 300 từ mới",
+                      name: "Số từ vựng tiếng Anh học được",
+                      baseline: "0",
+                      target: "300",
+                    },
                   ];
-                }
-                if (text.includes("lập trình") || text.includes("code") || text.includes("web") || text.includes("react") || text.includes("javascript")) {
+                case "project_completion":
                   return [
-                    { label: "React: 0 -> 12 chương", name: "Số chương học lập trình React", baseline: "0", target: "12" },
-                    { label: "Dự án: 0 -> 2 sản phẩm", name: "Số sản phẩm lập trình thực tế hoàn thành", baseline: "0", target: "2" }
+                    {
+                      label: "Bàn giao: 0% -> 100% tiến độ",
+                      name: "Phần trăm tiến độ dự án",
+                      baseline: "0",
+                      target: "100",
+                    },
+                    {
+                      label: "Blog: 0 -> 3 bài xuất bản",
+                      name: "Số bài viết blog đã đăng",
+                      baseline: "0",
+                      target: "3",
+                    },
                   ];
-                }
-                if (text.includes("tiết kiệm") || text.includes("tiền") || text.includes("thu nhập") || text.includes("tài chính") || text.includes("đầu tư")) {
+                case "financial_goal":
                   return [
-                    { label: "Tích lũy: 0 -> 20 triệu đồng", name: "Số tiền tiết kiệm được (triệu đồng)", baseline: "0", target: "20" },
-                    { label: "Chi tiêu: 0% -> 15% cắt giảm", name: "Tỷ lệ cắt giảm chi tiêu không cần thiết (%)", baseline: "0", target: "15" }
+                    {
+                      label: "Tiết kiệm: 0 -> 15 triệu",
+                      name: "Số tiền tích lũy (triệu đồng)",
+                      baseline: "0",
+                      target: "15",
+                    },
+                    {
+                      label: "Chi tiêu: 0% -> 15% cắt giảm",
+                      name: "Tỷ lệ cắt giảm chi phí sinh hoạt (%)",
+                      baseline: "0",
+                      target: "15",
+                    },
                   ];
-                }
-                if (text.includes("viết") || text.includes("blog") || text.includes("bài viết") || text.includes("đăng bài") || text.includes("sách")) {
+                default:
                   return [
-                    { label: "Blog: 0 -> 6 bài viết", name: "Số bài viết blog xuất bản", baseline: "0", target: "6" },
-                    { label: "Trang sách: 0 -> 200 trang", name: "Số trang sách đã viết xong", baseline: "0", target: "200" }
+                    {
+                      label: "Hành động: 0 -> 10 lần thực hiện",
+                      name: "Số lần thực hiện hành động",
+                      baseline: "0",
+                      target: "10",
+                    },
+                    {
+                      label: "Thiền định: 0 -> 15 phút/ngày",
+                      name: "Số phút ngồi thiền hàng ngày",
+                      baseline: "0",
+                      target: "15",
+                    },
                   ];
-                }
+              }
+            })();
 
-                switch (activeArchetype) {
-                  case "habit_building":
-                    return [
-                      { label: "Chạy bộ: 0 -> 3 buổi/tuần", name: "Số buổi chạy bộ/tuần", baseline: "0", target: "3" },
-                      { label: "Đọc sách: 0 -> 30 trang/ngày", name: "Số trang sách đã đọc/ngày", baseline: "0", target: "30" }
-                    ];
-                  case "skill_learning":
-                    return [
-                      { label: "React: 0 -> 12 chương", name: "Số chương React hoàn thành", baseline: "0", target: "12" },
-                      { label: "Tiếng Anh: 0 -> 300 từ mới", name: "Số từ vựng tiếng Anh học được", baseline: "0", target: "300" }
-                    ];
-                  case "project_completion":
-                    return [
-                      { label: "Bàn giao: 0% -> 100% tiến độ", name: "Phần trăm tiến độ dự án", baseline: "0", target: "100" },
-                      { label: "Blog: 0 -> 3 bài xuất bản", name: "Số bài viết blog đã đăng", baseline: "0", target: "3" }
-                    ];
-                  case "financial_goal":
-                    return [
-                      { label: "Tiết kiệm: 0 -> 15 triệu", name: "Số tiền tích lũy (triệu đồng)", baseline: "0", target: "15" },
-                      { label: "Chi tiêu: 0% -> 15% cắt giảm", name: "Tỷ lệ cắt giảm chi phí sinh hoạt (%)", baseline: "0", target: "15" }
-                    ];
-                  default:
-                    return [
-                      { label: "Hành động: 0 -> 10 lần thực hiện", name: "Số lần thực hiện hành động", baseline: "0", target: "10" },
-                      { label: "Thiền định: 0 -> 15 phút/ngày", name: "Số phút ngồi thiền hàng ngày", baseline: "0", target: "15" }
-                    ];
-                }
-              })();
+            return suggestions.map((suggestion) => (
+              <button
+                key={suggestion.label}
+                type="button"
+                onClick={() => {
+                  setSmartData((previous) => ({
+                    ...previous,
+                    measurable: {
+                      metric_name: suggestion.name,
+                      baseline_value: suggestion.baseline,
+                      target_value: suggestion.target,
+                    },
+                  }));
+                  setBlurredFields({ metricName: true, targetValue: true });
+                }}
+                className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-lg border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] w-full block shadow-sm"
+              >
+                ⚡ <span className="font-semibold">{suggestion.label}</span>
+              </button>
+            ));
+          })()}
+        </div>
+      </div>
 
-              return suggestions.map((suggestion) => (
-                <button
-                  key={suggestion.label}
-                  type="button"
-                  onClick={() => {
-                    setSmartData((previous) => ({
-                      ...previous,
-                      measurable: {
-                        metric_name: suggestion.name,
-                        baseline_value: suggestion.baseline,
-                        target_value: suggestion.target,
-                      },
-                    }));
-                    setBlurredFields({ metricName: true, targetValue: true });
-                  }}
-                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-lg border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] w-full block shadow-sm"
-                >
-                  ⚡ <span className="font-semibold">{suggestion.label}</span>
-                </button>
-              ));
-            })()}
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
+        <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+            <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          </span>
+          <div>
+            <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết rõ (Đếm được):</p>
+            <p className="text-app-ink-soft mt-0.5 font-serif italic">
+              "Số buổi vận động/tuần" (đơn vị: buổi), hoặc "Số tiền tích lũy" (đơn vị: triệu VNĐ).
+            </p>
           </div>
         </div>
-
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 select-none">
-          <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
-              <Check className="h-3.5 w-3.5" strokeWidth={3} />
-            </span>
-            <div>
-              <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết rõ (Đếm được):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Số buổi vận động/tuần" (đơn vị: buổi), hoặc "Số tiền tích lũy" (đơn vị: triệu VNĐ).</p>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
-              <X className="h-3.5 w-3.5" strokeWidth={3} />
-            </span>
-            <div>
-              <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết chung chung (Không đếm được):</p>
-              <p className="text-app-ink-soft mt-0.5 font-serif italic">"Học tập chăm chỉ hơn" (không có mốc đo) hoặc "Vận động nhiều hơn."</p>
-            </div>
+        <div className="rounded-2xl border border-rose-500/10 bg-rose-50/20 dark:bg-rose-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-305 hover:shadow-sm">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-450 mt-0.5">
+            <X className="h-3.5 w-3.5" strokeWidth={3} />
+          </span>
+          <div>
+            <p className="font-bold text-rose-750 dark:text-rose-400">Tránh viết chung chung (Không đếm được):</p>
+            <p className="text-app-ink-soft mt-0.5 font-serif italic">
+              "Học tập chăm chỉ hơn" (không có mốc đo) hoặc "Vận động nhiều hơn."
+            </p>
           </div>
         </div>
-        {intentMetricHint && (
-          <div
-            data-testid="smart-intent-metric-hint"
-            id="smart-metric-intent-hint"
-            role="note"
-            className="mt-3 flex items-start gap-2 rounded-[14px] border border-app-line bg-app-bg p-3 text-xs leading-relaxed text-app-ink-soft"
-          >
-            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-            <span>
-              <span className="font-medium text-app-ink">Gợi ý đo lường:</span> {intentMetricHint}
-            </span>
-          </div>
-        )}
-        {showMetricNameError ? (
-          <FieldError id="smart-metric-name-error" message="Chọn một chỉ số cụ thể để bắt đầu đo lường." role="alert" />
-        ) : null}
+      </div>
+      {intentMetricHint && (
+        <div
+          data-testid="smart-intent-metric-hint"
+          id="smart-metric-intent-hint"
+          role="note"
+          className="mt-3 flex items-start gap-2 rounded-[14px] border border-app-line bg-app-bg p-3 text-xs leading-relaxed text-app-ink-soft"
+        >
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+          <span>
+            <span className="font-medium text-app-ink">Gợi ý đo lường:</span> {intentMetricHint}
+          </span>
+        </div>
+      )}
+      {showMetricNameError ? (
+        <FieldError id="smart-metric-name-error" message="Chọn một chỉ số cụ thể để bắt đầu đo lường." role="alert" />
+      ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px] bg-app-surface p-4 rounded-xl border border-app-line/60">
         <div>
@@ -354,14 +462,14 @@ export function MeasurableStep({
           <p className="mt-1 text-[10px] text-app-ink-muted leading-normal">
             Điểm khởi đầu của bạn. Nếu bắt đầu từ đầu, hãy điền <span className="font-semibold text-app-ink">0</span>.
           </p>
-          {baselineInvalid ? (
-            <FieldError id="smart-baseline-error" message="Nhập một con số hợp lệ." />
-          ) : null}
+          {baselineInvalid ? <FieldError id="smart-baseline-error" message="Nhập một con số hợp lệ." /> : null}
         </div>
         <div>
           <label htmlFor="smart-target" className={labelClass}>
             Mức đích cần đạt (Mục tiêu)
-            <span className={requiredMarkerClass} aria-hidden="true">*</span>
+            <span className={requiredMarkerClass} aria-hidden="true">
+              *
+            </span>
             <span className="sr-only"> bắt buộc</span>
           </label>
           <Input
@@ -385,9 +493,7 @@ export function MeasurableStep({
             aria-invalid={showTargetError}
             aria-describedby={targetDescribedBy || undefined}
           />
-          <p className="mt-1 text-[10px] text-app-ink-muted leading-normal">
-            Mốc bạn muốn đạt tới sau 12 tuần.
-          </p>
+          <p className="mt-1 text-[10px] text-app-ink-muted leading-normal">Mốc bạn muốn đạt tới sau 12 tuần.</p>
           {targetNotAboveBaseline ? (
             <FieldError id="smart-target-error" message="Mục tiêu cần lớn hơn mốc hiện tại" role="alert" />
           ) : null}
@@ -396,7 +502,9 @@ export function MeasurableStep({
           ) : null}
         </div>
       </div>
-      <p className={helperTextClass}>Nếu bạn điền cả hai mức, mục tiêu phải lớn hơn mức xuất phát để thể hiện sự tiến bộ.</p>
+      <p className={helperTextClass}>
+        Nếu bạn điền cả hai mức, mục tiêu phải lớn hơn mức xuất phát để thể hiện sự tiến bộ.
+      </p>
 
       {/* Thước đo tiến độ động (Interactive Goal Gauge) */}
       {(() => {
@@ -408,9 +516,9 @@ export function MeasurableStep({
         const baseline = hasBaseline ? (parsedBaselineValue ?? 0) : 0;
         const target = parsedTargetValue ?? 0;
         const unit = smartData.measurable.metric_name.trim()
-          ? (smartData.measurable.metric_name.includes("/")
+          ? smartData.measurable.metric_name.includes("/")
             ? smartData.measurable.metric_name.split("/")[1].trim()
-            : smartData.measurable.metric_name.trim())
+            : smartData.measurable.metric_name.trim()
           : "đơn vị";
 
         let growthPct = 0;
@@ -464,7 +572,9 @@ export function MeasurableStep({
 
             <div className="flex justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 select-none">
               <span>{hasBaseline ? `Bắt đầu: ${baseline} ${unit}` : `Khởi điểm: 0 ${unit}`}</span>
-              <span>🎯 Đích: {target} {unit}</span>
+              <span>
+                🎯 Đích: {target} {unit}
+              </span>
             </div>
 
             <div className="rounded-xl bg-app-surface border border-app-line px-3 py-2 text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">

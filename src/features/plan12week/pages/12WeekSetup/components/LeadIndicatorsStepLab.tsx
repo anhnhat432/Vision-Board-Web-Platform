@@ -64,11 +64,7 @@ interface LeadIndicatorsStepProps {
   weekOneTaskGroups?: IndicatorPreviewGroup[];
   onAddIndicator: () => void;
   onRemoveIndicator: (index: number) => void;
-  onIndicatorChange: <K extends keyof LeadIndicatorDraft>(
-    index: number,
-    key: K,
-    value: LeadIndicatorDraft[K],
-  ) => void;
+  onIndicatorChange: <K extends keyof LeadIndicatorDraft>(index: number, key: K, value: LeadIndicatorDraft[K]) => void;
   onPreferredDayToggle?: (dayIndex: number) => void;
 }
 

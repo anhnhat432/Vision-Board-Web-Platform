@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
-import { FunnelDiagnosticsPanel } from "./FunnelDiagnosticsPanel";
 import type { FunnelDiagnosticsSnapshot } from "@/app/utils/funnel-diagnostics";
+import { FunnelDiagnosticsPanel } from "./FunnelDiagnosticsPanel";
 
 function makeSnapshot(overrides: Partial<FunnelDiagnosticsSnapshot> = {}): FunnelDiagnosticsSnapshot {
   return {

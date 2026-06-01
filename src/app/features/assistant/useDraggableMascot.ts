@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "assistant.mascot.position";
 const MASCOT_SIZE = 64;

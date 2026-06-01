@@ -5,9 +5,9 @@ import { toast } from "sonner";
 
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
-import { errorTextClass, helperTextClass, labelClass, textareaClass } from "./SMARTGoalSetup/components/formStyles";
 import { getUserData, saveUserData } from "../utils/storage";
 import type { AspirationalVisionArea } from "../utils/storage-types";
+import { errorTextClass, helperTextClass, labelClass, textareaClass } from "./SMARTGoalSetup/components/formStyles";
 
 const LIFE_AREA_FIELDS: Array<{ area: AspirationalVisionArea; label: string; placeholder: string }> = [
   {

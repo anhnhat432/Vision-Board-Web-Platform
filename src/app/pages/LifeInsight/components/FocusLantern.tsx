@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import type { ComponentType } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface FocusLanternProps {
   // biome-ignore lint/suspicious/noExplicitAny: compatibility with custom illustrations and Lucide icons
@@ -8,12 +8,12 @@ interface FocusLanternProps {
 }
 
 interface FocusLanternColor {
-  accentBg: string;       // bg class cho lồng đèn khi bình thường
-  glowBg: string;         // background cho hiệu ứng pulse sau lưng
-  activeBg: string;       // bg class khi thắp sáng (triggerGlow)
-  activeRing: string;     // ring class khi triggerGlow
-  shadowGlow: string;     // shadow class cho lồng đèn
-  particleColor: string;  // mã HEX cho canvas draw
+  accentBg: string; // bg class cho lồng đèn khi bình thường
+  glowBg: string; // background cho hiệu ứng pulse sau lưng
+  activeBg: string; // bg class khi thắp sáng (triggerGlow)
+  activeRing: string; // ring class khi triggerGlow
+  shadowGlow: string; // shadow class cho lồng đèn
+  particleColor: string; // mã HEX cho canvas draw
 }
 
 const getLanternColorConfig = (areaName: string): FocusLanternColor => {
@@ -194,7 +194,7 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
         // Vẽ đốm hạt sáng màu sắc theo lĩnh vực
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.alpha);
-        
+
         // Tạo hiệu ứng tỏa sáng mờ cho hạt (shadow glow)
         ctx.shadowBlur = 4;
         ctx.shadowColor = config.particleColor;
@@ -226,10 +226,10 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
       />
 
       {/* Vòng tròn hào quang phát sáng chậm đệm phía sau */}
-      <div 
+      <div
         className={`absolute rounded-xl transition-all duration-1000 pointer-events-none ${
-          triggerGlow 
-            ? `-inset-3.5 opacity-100 scale-125 ${config.glowBg.replace("/40", "/75")} shadow-lg ${config.shadowGlow}` 
+          triggerGlow
+            ? `-inset-3.5 opacity-100 scale-125 ${config.glowBg.replace("/40", "/75")} shadow-lg ${config.shadowGlow}`
             : `-inset-1.5 opacity-50 scale-100 animate-[pulse_3s_infinite] ${config.glowBg}`
         }`}
       />
@@ -237,12 +237,14 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
       {/* Khối chứa Icon thắp sáng */}
       <div
         className={`relative z-20 flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-500 shadow-md ${
-          triggerGlow 
-            ? `${config.activeBg} text-white scale-110 ${config.shadowGlow} ring-4 ${config.activeRing}` 
+          triggerGlow
+            ? `${config.activeBg} text-white scale-110 ${config.shadowGlow} ring-4 ${config.activeRing}`
             : `${config.accentBg} hover:scale-105`
         }`}
       >
-        <Icon className={`h-5 w-5 transition-transform duration-500 ${triggerGlow ? "rotate-[15deg] scale-110" : ""}`} />
+        <Icon
+          className={`h-5 w-5 transition-transform duration-500 ${triggerGlow ? "rotate-[15deg] scale-110" : ""}`}
+        />
       </div>
     </div>
   );

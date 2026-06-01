@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
-import { getGoals, type ApiGoal } from "@/services/goalService";
+import { type ApiGoal, getGoals } from "@/services/goalService";
 import { getPlan, getPlans } from "@/services/planService";
 import type { Metric, PlanDetails } from "@/types/plan";
 import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";

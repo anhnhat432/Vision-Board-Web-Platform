@@ -1185,10 +1185,10 @@ export function TwelveWeekSetupLab() {
         <section aria-labelledby="twelve-week-setup-title" className="space-y-4">
           {/* Banner visual anchor ở trên */}
           <div className="overflow-hidden rounded-2xl border border-app-line/45 aspect-[16/5] w-full bg-app-bg shadow-sm">
-            <img 
-              src="/twelve_week_roadmap.png" 
-              alt="Lộ trình hành trình 12 tuần" 
-              className="w-full h-full object-cover" 
+            <img
+              src="/twelve_week_roadmap.png"
+              alt="Lộ trình hành trình 12 tuần"
+              className="w-full h-full object-cover"
               loading="lazy"
             />
           </div>

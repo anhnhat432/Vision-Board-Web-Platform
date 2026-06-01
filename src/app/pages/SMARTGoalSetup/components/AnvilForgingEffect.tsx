@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { Hammer } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface AnvilForgingEffectProps {
   onComplete: () => void;
@@ -170,9 +170,18 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       c.closePath();
       c.fill();
       const bodyGrad = c.createLinearGradient(ax - 30, ay - 10, ax + 35, ay + 20);
-      bodyGrad.addColorStop(0, `rgba(${30 + Math.round(heat * 90)}, ${41 + Math.round(heat * 20)}, ${59 - Math.round(heat * 15)}, 1)`);
-      bodyGrad.addColorStop(0.5, `rgba(${51 + Math.round(heat * 140)}, ${65 + Math.round(heat * 40)}, ${85 - Math.round(heat * 30)}, 1)`);
-      bodyGrad.addColorStop(1, `rgba(${15 + Math.round(heat * 40)}, ${23 + Math.round(heat * 10)}, ${42 - Math.round(heat * 10)}, 1)`);
+      bodyGrad.addColorStop(
+        0,
+        `rgba(${30 + Math.round(heat * 90)}, ${41 + Math.round(heat * 20)}, ${59 - Math.round(heat * 15)}, 1)`,
+      );
+      bodyGrad.addColorStop(
+        0.5,
+        `rgba(${51 + Math.round(heat * 140)}, ${65 + Math.round(heat * 40)}, ${85 - Math.round(heat * 30)}, 1)`,
+      );
+      bodyGrad.addColorStop(
+        1,
+        `rgba(${15 + Math.round(heat * 40)}, ${23 + Math.round(heat * 10)}, ${42 - Math.round(heat * 10)}, 1)`,
+      );
       c.fillStyle = bodyGrad;
       c.beginPath();
       c.moveTo(ax - 45, ay + 20);
@@ -183,9 +192,18 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       c.closePath();
       c.fill();
       const headGrad = c.createLinearGradient(ax - 90, ay - 25, ax + 60, ay - 10);
-      headGrad.addColorStop(0, `rgba(${47 + Math.round(heat * 150)}, ${55 + Math.round(heat * 30)}, ${69 - Math.round(heat * 30)}, 1)`);
-      headGrad.addColorStop(0.4, `rgba(${71 + Math.round(heat * 184)}, ${85 + Math.round(heat * 135)}, ${105 - Math.round(heat * 60)}, 1)`);
-      headGrad.addColorStop(0.8, `rgba(${30 + Math.round(heat * 110)}, ${41 + Math.round(heat * 25)}, ${59 - Math.round(heat * 20)}, 1)`);
+      headGrad.addColorStop(
+        0,
+        `rgba(${47 + Math.round(heat * 150)}, ${55 + Math.round(heat * 30)}, ${69 - Math.round(heat * 30)}, 1)`,
+      );
+      headGrad.addColorStop(
+        0.4,
+        `rgba(${71 + Math.round(heat * 184)}, ${85 + Math.round(heat * 135)}, ${105 - Math.round(heat * 60)}, 1)`,
+      );
+      headGrad.addColorStop(
+        0.8,
+        `rgba(${30 + Math.round(heat * 110)}, ${41 + Math.round(heat * 25)}, ${59 - Math.round(heat * 20)}, 1)`,
+      );
       headGrad.addColorStop(1, "#0f172a");
       c.fillStyle = headGrad;
       c.beginPath();
@@ -198,8 +216,14 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       c.closePath();
       c.fill();
       const plateGrad = c.createLinearGradient(ax - 38, ay - 26, ax + 65, ay - 26);
-      plateGrad.addColorStop(0, `rgba(255, ${160 + Math.round((1 - heat) * 95)}, ${100 + Math.round((1 - heat) * 155)}, ${0.1 + heat * 0.9})`);
-      plateGrad.addColorStop(0.5, `rgba(255, ${220 + Math.round((1 - heat) * 35)}, ${180 + Math.round((1 - heat) * 75)}, ${0.2 + heat * 0.8})`);
+      plateGrad.addColorStop(
+        0,
+        `rgba(255, ${160 + Math.round((1 - heat) * 95)}, ${100 + Math.round((1 - heat) * 155)}, ${0.1 + heat * 0.9})`,
+      );
+      plateGrad.addColorStop(
+        0.5,
+        `rgba(255, ${220 + Math.round((1 - heat) * 35)}, ${180 + Math.round((1 - heat) * 75)}, ${0.2 + heat * 0.8})`,
+      );
       plateGrad.addColorStop(1, "rgba(255,255,255,0.08)");
       c.fillStyle = plateGrad;
       c.beginPath();
@@ -258,7 +282,10 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         gradient.addColorStop(0, "rgba(16, 185, 129, 0.18)");
         gradient.addColorStop(1, "rgba(99, 102, 241, 0.08)");
       } else {
-        gradient.addColorStop(0, `rgba(${255 - Math.round(heat * 50)}, ${145 - Math.round(heat * 145)}, ${50 - Math.round(heat * 50)}, 0.16)`);
+        gradient.addColorStop(
+          0,
+          `rgba(${255 - Math.round(heat * 50)}, ${145 - Math.round(heat * 145)}, ${50 - Math.round(heat * 50)}, 0.16)`,
+        );
         gradient.addColorStop(1, "rgba(16, 185, 129, 0.08)");
       }
       c.fillStyle = gradient;
@@ -303,7 +330,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
     const startTime = Date.now();
     const hitTimes = [300, 750, 1200];
     const hitProcessed = [false, false, false];
-    const hammerStrikes = hitTimes.map(hitTime => ({ start: hitTime - 180, hit: hitTime, end: hitTime + 120 }));
+    const hammerStrikes = hitTimes.map((hitTime) => ({ start: hitTime - 180, hit: hitTime, end: hitTime + 120 }));
 
     const render = () => {
       ctx.fillStyle = "rgba(8, 10, 20, 0.18)";
@@ -312,10 +339,22 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       if (shakeIntensity > 0) shakeIntensity *= 0.88;
       if (heatIntensity > 0) heatIntensity *= 0.94;
       if (Math.random() < 0.25) {
-        sparks.push({ x: Math.random() * width, y: height + 20, vx: (Math.random() - 0.5) * 1.5, vy: -1.8 - Math.random() * 3.0, size: 1 + Math.random() * 2.5, color: "#f97316", alpha: 0.8, decay: 0.003 + Math.random() * 0.005, gravity: -0.015, friction: 0.99 });
+        sparks.push({
+          x: Math.random() * width,
+          y: height + 20,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: -1.8 - Math.random() * 3.0,
+          size: 1 + Math.random() * 2.5,
+          color: "#f97316",
+          alpha: 0.8,
+          decay: 0.003 + Math.random() * 0.005,
+          gravity: -0.015,
+          friction: 0.99,
+        });
       }
       ctx.save();
-      if (shakeIntensity > 0.5) ctx.translate((Math.random() - 0.5) * shakeIntensity, (Math.random() - 0.5) * shakeIntensity);
+      if (shakeIntensity > 0.5)
+        ctx.translate((Math.random() - 0.5) * shakeIntensity, (Math.random() - 0.5) * shakeIntensity);
       if (heatIntensity > 0) {
         const radialGrad = ctx.createRadialGradient(cx, cy - 25, 10, cx, cy - 25, 280);
         radialGrad.addColorStop(0, `rgba(249, 115, 22, ${heatIntensity * 0.22})`);
@@ -331,9 +370,25 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
           shakeIntensity = 22;
           heatIntensity = 1.0;
           createSparks(cx, cy - 25, 80);
-          shockwaves.push({ x: cx, y: cy - 25, radius: 5, maxRadius: 220, alpha: 1.0, color: idx === 2 ? "rgba(52, 211, 153, 0.75)" : "rgba(251, 146, 60, 0.8)" });
+          shockwaves.push({
+            x: cx,
+            y: cy - 25,
+            radius: 5,
+            maxRadius: 220,
+            alpha: 1.0,
+            color: idx === 2 ? "rgba(52, 211, 153, 0.75)" : "rgba(251, 146, 60, 0.8)",
+          });
           for (let i = 0; i < 18; i++) {
-            smokes.push({ x: cx + (Math.random() - 0.5) * 50, y: cy - 25, vx: (Math.random() - 0.5) * 3.0, vy: -1.8 - Math.random() * 2.5, size: 12 + Math.random() * 16, alpha: 0.55, color: "rgba(148, 163, 184, 0.18)", growth: 0.3 + Math.random() * 0.3 });
+            smokes.push({
+              x: cx + (Math.random() - 0.5) * 50,
+              y: cy - 25,
+              vx: (Math.random() - 0.5) * 3.0,
+              vy: -1.8 - Math.random() * 2.5,
+              size: 12 + Math.random() * 16,
+              alpha: 0.55,
+              color: "rgba(148, 163, 184, 0.18)",
+              growth: 0.3 + Math.random() * 0.3,
+            });
           }
           playForgeSound(idx + 1);
         }
@@ -341,46 +396,134 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       if (isHeating && heatIntensity < 0.25) isHeating = false;
       for (let i = smokes.length - 1; i >= 0; i--) {
         const sm = smokes[i];
-        if (sm.alpha <= 0) { smokes.splice(i, 1); continue; }
-        sm.x += sm.vx; sm.y += sm.vy; sm.size += sm.growth; sm.alpha -= 0.015;
-        ctx.save(); ctx.globalAlpha = Math.max(0, sm.alpha); ctx.fillStyle = sm.color; ctx.beginPath(); ctx.arc(sm.x, sm.y, sm.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        if (sm.alpha <= 0) {
+          smokes.splice(i, 1);
+          continue;
+        }
+        sm.x += sm.vx;
+        sm.y += sm.vy;
+        sm.size += sm.growth;
+        sm.alpha -= 0.015;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, sm.alpha);
+        ctx.fillStyle = sm.color;
+        ctx.beginPath();
+        ctx.arc(sm.x, sm.y, sm.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
       for (let i = sparks.length - 1; i >= 0; i--) {
         const p = sparks[i];
-        if (p.alpha <= 0) { sparks.splice(i, 1); continue; }
-        p.vx *= p.friction; p.vy *= p.friction; p.vy += p.gravity; p.x += p.vx; p.y += p.vy; p.alpha -= p.decay;
-        ctx.save(); ctx.globalAlpha = Math.max(0, p.alpha); ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        if (p.alpha <= 0) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        p.vx *= p.friction;
+        p.vy *= p.friction;
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= p.decay;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
       for (let i = shockwaves.length - 1; i >= 0; i--) {
         const sw = shockwaves[i];
-        if (sw.alpha <= 0) { shockwaves.splice(i, 1); continue; }
-        sw.radius += 6.5; sw.alpha = 1 - (sw.radius / sw.maxRadius);
-        ctx.save(); ctx.globalAlpha = Math.max(0, sw.alpha); ctx.strokeStyle = sw.color; ctx.lineWidth = 3.5 - (sw.radius / sw.maxRadius) * 2.5; ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        if (sw.alpha <= 0) {
+          shockwaves.splice(i, 1);
+          continue;
+        }
+        sw.radius += 6.5;
+        sw.alpha = 1 - sw.radius / sw.maxRadius;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, sw.alpha);
+        ctx.strokeStyle = sw.color;
+        ctx.lineWidth = 3.5 - (sw.radius / sw.maxRadius) * 2.5;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
       }
       drawAnvil(ctx, cx, cy, heatIntensity);
       let cardY = cy - 80;
       let cardTilt = Math.sin(elapsed / 180) * 0.03;
-      if (elapsed < hitTimes[0]) { cardY = -100 + (cy - 80 + 100) * (elapsed / hitTimes[0]); }
-      else if (elapsed < hitTimes[1]) { const t = (elapsed - hitTimes[0]) / (hitTimes[1] - hitTimes[0]); cardY = cy - 26 - Math.sin(t * Math.PI) * 45; cardTilt += (1 - t) * 0.15; }
-      else if (elapsed < hitTimes[2]) { const t = (elapsed - hitTimes[1]) / (hitTimes[2] - hitTimes[1]); cardY = cy - 26 - Math.sin(t * Math.PI) * 35; cardTilt -= (1 - t) * 0.12; }
-      else if (elapsed < 1650) { const t = (elapsed - hitTimes[2]) / (1650 - hitTimes[2]); cardY = cy - 26 - Math.sin(t * Math.PI) * 15; }
-      else { cardY = cy - 110 - Math.sin((elapsed - 1650) / 200) * 8; if (forgeState !== "completed") setForgeState("completed"); }
+      if (elapsed < hitTimes[0]) {
+        cardY = -100 + (cy - 80 + 100) * (elapsed / hitTimes[0]);
+      } else if (elapsed < hitTimes[1]) {
+        const t = (elapsed - hitTimes[0]) / (hitTimes[1] - hitTimes[0]);
+        cardY = cy - 26 - Math.sin(t * Math.PI) * 45;
+        cardTilt += (1 - t) * 0.15;
+      } else if (elapsed < hitTimes[2]) {
+        const t = (elapsed - hitTimes[1]) / (hitTimes[2] - hitTimes[1]);
+        cardY = cy - 26 - Math.sin(t * Math.PI) * 35;
+        cardTilt -= (1 - t) * 0.12;
+      } else if (elapsed < 1650) {
+        const t = (elapsed - hitTimes[2]) / (1650 - hitTimes[2]);
+        cardY = cy - 26 - Math.sin(t * Math.PI) * 15;
+      } else {
+        cardY = cy - 110 - Math.sin((elapsed - 1650) / 200) * 8;
+        if (forgeState !== "completed") setForgeState("completed");
+      }
       drawCard(ctx, cx, cardY, cardTilt, heatIntensity);
       let drawHammerActive = false;
-      let hx = 0, hy = 0, hAngle = 0, hAlpha = 0;
+      let hx = 0,
+        hy = 0,
+        hAngle = 0,
+        hAlpha = 0;
       for (const strike of hammerStrikes) {
         if (elapsed >= strike.start && elapsed <= strike.end) {
           drawHammerActive = true;
-          if (elapsed < strike.hit) { const ratio = (elapsed - strike.start) / (strike.hit - strike.start); const ease = ratio * ratio * ratio; hx = (cx + 150) + (cx - (cx + 150)) * ease; hy = (cy - 230) + ((cy - 28) - (cy - 230)) * ease; hAngle = (-Math.PI / 4) + (0 - (-Math.PI / 4)) * ease; hAlpha = ratio; }
-          else { const ratio = (elapsed - strike.hit) / (strike.end - strike.hit); const ease = 1 - Math.pow(1 - ratio, 2); hx = cx + ((cx - 70) - cx) * ease; hy = (cy - 28) + ((cy - 130) - (cy - 28)) * ease; hAngle = 0 + (Math.PI / 10 - 0) * ease; hAlpha = 1 - ratio; }
+          if (elapsed < strike.hit) {
+            const ratio = (elapsed - strike.start) / (strike.hit - strike.start);
+            const ease = ratio * ratio * ratio;
+            hx = cx + 150 + (cx - (cx + 150)) * ease;
+            hy = cy - 230 + (cy - 28 - (cy - 230)) * ease;
+            hAngle = -Math.PI / 4 + (0 - -Math.PI / 4) * ease;
+            hAlpha = ratio;
+          } else {
+            const ratio = (elapsed - strike.hit) / (strike.end - strike.hit);
+            const ease = 1 - (1 - ratio) ** 2;
+            hx = cx + (cx - 70 - cx) * ease;
+            hy = cy - 28 + (cy - 130 - (cy - 28)) * ease;
+            hAngle = 0 + (Math.PI / 10 - 0) * ease;
+            hAlpha = 1 - ratio;
+          }
           break;
         }
       }
       if (drawHammerActive) drawHammer(ctx, hx, hy, hAngle, hAlpha);
       if (forgeState === "completed") {
-        const beamGrad = ctx.createLinearGradient(cx - 70, 0, cx + 70, 0); beamGrad.addColorStop(0, "rgba(16, 185, 129, 0)"); beamGrad.addColorStop(0.5, "rgba(16, 185, 129, 0.15)"); beamGrad.addColorStop(1, "rgba(16, 185, 129, 0)"); ctx.fillStyle = beamGrad; ctx.fillRect(cx - 70, 0, 140, height);
-        const coreBeam = ctx.createLinearGradient(cx - 15, 0, cx + 15, 0); coreBeam.addColorStop(0, "rgba(255, 255, 255, 0)"); coreBeam.addColorStop(0.5, "rgba(255, 255, 255, 0.35)"); coreBeam.addColorStop(1, "rgba(255, 255, 255, 0)"); ctx.fillStyle = coreBeam; ctx.fillRect(cx - 15, 0, 30, height);
-        if (Math.random() < 0.4) { sparks.push({ x: cx + (Math.random() - 0.5) * 85, y: cy - 90, vx: (Math.random() - 0.5) * 1.6, vy: -4.5 - Math.random() * 4.5, size: 1.8 + Math.random() * 2.2, color: "#10b981", alpha: 1.0, decay: 0.008 + Math.random() * 0.012, gravity: -0.06, friction: 0.98 }); }
+        const beamGrad = ctx.createLinearGradient(cx - 70, 0, cx + 70, 0);
+        beamGrad.addColorStop(0, "rgba(16, 185, 129, 0)");
+        beamGrad.addColorStop(0.5, "rgba(16, 185, 129, 0.15)");
+        beamGrad.addColorStop(1, "rgba(16, 185, 129, 0)");
+        ctx.fillStyle = beamGrad;
+        ctx.fillRect(cx - 70, 0, 140, height);
+        const coreBeam = ctx.createLinearGradient(cx - 15, 0, cx + 15, 0);
+        coreBeam.addColorStop(0, "rgba(255, 255, 255, 0)");
+        coreBeam.addColorStop(0.5, "rgba(255, 255, 255, 0.35)");
+        coreBeam.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.fillStyle = coreBeam;
+        ctx.fillRect(cx - 15, 0, 30, height);
+        if (Math.random() < 0.4) {
+          sparks.push({
+            x: cx + (Math.random() - 0.5) * 85,
+            y: cy - 90,
+            vx: (Math.random() - 0.5) * 1.6,
+            vy: -4.5 - Math.random() * 4.5,
+            size: 1.8 + Math.random() * 2.2,
+            color: "#10b981",
+            alpha: 1.0,
+            decay: 0.008 + Math.random() * 0.012,
+            gravity: -0.06,
+            friction: 0.98,
+          });
+        }
       }
       ctx.restore();
       if (elapsed < 2350) animId = requestAnimationFrame(render);
@@ -395,7 +538,10 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
   }, [onComplete, forgeState, goalStatement]);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex flex-col justify-between items-center py-12 px-6 select-none">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex flex-col justify-between items-center py-12 px-6 select-none"
+    >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
       <div className="text-center z-10 pointer-events-none transition-all duration-500 animate-[pulse_3s_infinite] select-none">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 px-4 py-1.5 text-xs font-extrabold text-emerald-400 border border-emerald-500/25 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
@@ -408,7 +554,9 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       </div>
       <div className="text-center z-10 pointer-events-none max-w-xs transition-opacity duration-300 select-none">
         <p className="text-xs uppercase tracking-[0.25em] text-emerald-400 font-extrabold drop-shadow-[0_1px_5px_rgba(16,185,129,0.2)] animate-pulse">
-          {forgeState === "forging" ? "Đang kiên cố hoá ý chí của bạn" : "Mục tiêu đã sẵn sàng chuyển hoá thành hành động"}
+          {forgeState === "forging"
+            ? "Đang kiên cố hoá ý chí của bạn"
+            : "Mục tiêu đã sẵn sàng chuyển hoá thành hành động"}
         </p>
         <div className="mt-4 h-1.5 w-36 mx-auto bg-slate-900 rounded-full overflow-hidden border border-slate-800">
           <div

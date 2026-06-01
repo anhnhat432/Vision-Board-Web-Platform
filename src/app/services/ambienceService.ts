@@ -9,7 +9,7 @@ class AmbienceService {
   private sourceNode: AudioBufferSourceNode | null = null;
   private lfoNode: OscillatorNode | null = null;
   private gainNode: GainNode | null = null;
-  
+
   // Binaural beats specific nodes
   private leftOsc: OscillatorNode | null = null;
   private rightOsc: OscillatorNode | null = null;
@@ -20,7 +20,8 @@ class AmbienceService {
   private initCtx() {
     if (this.audioCtx) return;
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.audioCtx = new AudioContextClass();
     } catch {
       /* Web Audio API not supported */
@@ -28,8 +29,8 @@ class AmbienceService {
   }
 
   /**
-   * Generates Pink Noise buffer. Pink noise has a spectral density 
-   * that is proportional to 1/f, making it sound much warmer and more natural 
+   * Generates Pink Noise buffer. Pink noise has a spectral density
+   * that is proportional to 1/f, making it sound much warmer and more natural
    * (like constant rain or wind) than white noise.
    */
   private getPinkNoiseBuffer(ctx: AudioContext): AudioBuffer {
@@ -51,10 +52,10 @@ class AmbienceService {
       const white = Math.random() * 2 - 1;
       b0 = 0.99886 * b0 + white * 0.0555179;
       b1 = 0.99332 * b1 + white * 0.0750759;
-      b2 = 0.96900 * b2 + white * 0.1538520;
-      b3 = 0.86650 * b3 + white * 0.3104856;
-      b4 = 0.55000 * b4 + white * 0.5329522;
-      b5 = -0.7616 * b5 - white * 0.0168980;
+      b2 = 0.969 * b2 + white * 0.153852;
+      b3 = 0.8665 * b3 + white * 0.3104856;
+      b4 = 0.55 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.016898;
       data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
       data[i] *= 0.11; // compensation for gain clipping
       b6 = white * 0.115926;
@@ -97,7 +98,7 @@ class AmbienceService {
     }
 
     const now = ctx.currentTime;
-    
+
     // Create master gain control for the ambience track
     this.gainNode = ctx.createGain();
     this.gainNode.gain.setValueAtTime(this.volume, now);
@@ -116,10 +117,9 @@ class AmbienceService {
 
       source.connect(filter);
       filter.connect(this.gainNode);
-      
+
       source.start(now);
       this.sourceNode = source;
-
     } else if (mode === "ocean") {
       const buffer = this.getPinkNoiseBuffer(ctx);
       const source = ctx.createBufferSource();
@@ -156,12 +156,11 @@ class AmbienceService {
 
       this.sourceNode = source;
       this.lfoNode = lfo;
-
     } else if (mode === "binaural") {
       // 8Hz Alpha Binaural beats for focus. 432Hz in Left ear, 440Hz in Right ear.
       const oscL = ctx.createOscillator();
       const oscR = ctx.createOscillator();
-      
+
       oscL.type = "sine";
       oscL.frequency.setValueAtTime(432, now); // Earth focus tuning
 
@@ -181,7 +180,7 @@ class AmbienceService {
 
       oscL.connect(panL);
       oscR.connect(panR);
-      
+
       panL.connect(binauralGain);
       panR.connect(binauralGain);
       binauralGain.connect(this.gainNode);

@@ -1,4 +1,4 @@
-import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
+import { type AmbientIllustrationProps, useIllustrationId } from "./utils";
 
 export function VisionMapIllustration({ className, ...rest }: AmbientIllustrationProps) {
   const gradientId = useIllustrationId("vision-map-app-accent");

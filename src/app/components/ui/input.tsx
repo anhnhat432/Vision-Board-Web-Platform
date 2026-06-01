@@ -1,5 +1,5 @@
-import * as React from "react";
 import { AlertCircle } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "./utils";
 
@@ -31,7 +31,10 @@ function FieldError({ id, message, className }: { id?: string; message?: string 
     <p
       id={id}
       role="alert"
-      className={cn("mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-450", className)}
+      className={cn(
+        "mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-450",
+        className,
+      )}
     >
       <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-500" aria-hidden="true" />
       <span>{message}</span>
@@ -39,4 +42,4 @@ function FieldError({ id, message, className }: { id?: string; message?: string 
   );
 }
 
-export { Input, FieldError };
+export { FieldError, Input };

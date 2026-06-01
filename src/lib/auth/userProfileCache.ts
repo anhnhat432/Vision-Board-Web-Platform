@@ -48,10 +48,7 @@ export function readCachedUserProfile(uid: string, now: number = Date.now()): Us
   }
 }
 
-export function writeCachedUserProfile(
-  profile: UserProfile,
-  options: { ttlMs?: number; now?: number } = {},
-): void {
+export function writeCachedUserProfile(profile: UserProfile, options: { ttlMs?: number; now?: number } = {}): void {
   const storage = getStorage();
   if (!storage) return;
   if (!profile?.firebaseUid) return;

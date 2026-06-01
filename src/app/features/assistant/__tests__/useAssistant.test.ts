@@ -36,6 +36,7 @@ vi.mock("../assistantApi", () => ({
 }));
 
 import { sendAssistantMessageStream } from "../assistantApi";
+
 const mockedSendAssistantMessageStream = vi.mocked(sendAssistantMessageStream);
 
 function setAuthContext(userId: string | null = null) {

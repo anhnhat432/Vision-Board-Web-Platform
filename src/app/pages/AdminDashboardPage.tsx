@@ -1,20 +1,17 @@
+import { Bell, CreditCard, Loader2, Package, RefreshCw, Users, WalletCards } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Bell, CreditCard, Loader2, Package, RefreshCw, Users, WalletCards } from "lucide-react";
 import { toast } from "sonner";
-
-import { Button } from "../components/ui/button";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
-  adminGetOverview,
-  adminSendExpiringBillingReminders,
   type AdminOverview,
   type AdminPaymentOrderSummary,
   type AdminReminderRunResult,
   type AdminUserSummary,
+  adminGetOverview,
+  adminSendExpiringBillingReminders,
 } from "@/services/adminService";
-import { adminGetOrders, type ApiOrder } from "@/services/orderService";
-
+import { type ApiOrder, adminGetOrders } from "@/services/orderService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatCard } from "../components/admin/AdminStatCard";
@@ -26,13 +23,8 @@ import {
   PAYMENT_STATUS_TONES,
 } from "../components/admin/statusMappings";
 import { adminSurface } from "../components/admin/tokens";
-import {
-  ADMIN_LOAD_TIMEOUT_MS,
-  formatDate,
-  formatVnd,
-  getErrorMessage,
-  withTimeout,
-} from "../components/admin/utils";
+import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
+import { Button } from "../components/ui/button";
 
 function StatSkeleton() {
   return (
@@ -151,13 +143,7 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
   );
 }
 
-function RecentOrdersPreview({
-  orders,
-  onSeeAll,
-}: {
-  orders: ApiOrder[];
-  onSeeAll: () => void;
-}) {
+function RecentOrdersPreview({ orders, onSeeAll }: { orders: ApiOrder[]; onSeeAll: () => void }) {
   return (
     <div className={`${adminSurface.card} p-5`}>
       <div className="mb-4 flex items-center justify-between">

@@ -1,13 +1,9 @@
+import { AlertTriangle, Bell, ChevronDown, Flag, RotateCcw, Settings2, ShieldCheck, Target, Zap } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
-import { AlertTriangle, ChevronDown, Flag, RotateCcw, Settings2, Target, Bell, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
-
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
-import { formatCalendarDate, getPushSubscription, getUserData } from "../../utils/storage";
 import { isDemoMode } from "../../utils/app-mode";
 import { requestPushPermissionAndSubscribe, unregisterPushSubscription } from "../../utils/production";
+import { formatCalendarDate, getPushSubscription, getUserData } from "../../utils/storage";
 import {
   formatDateTimeLabel,
   getBrowserNotificationStatusLabel,
@@ -16,6 +12,9 @@ import {
   getReminderActionLabel,
   getSyncStatusLabel,
 } from "../../utils/twelve-week-system-ui";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 type TwelveWeekDeviceDetailsSectionProps = Pick<
@@ -174,8 +173,8 @@ export function TwelveWeekRemindersSettings({
             </Badge>
           </div>
           <p className="mt-1 text-sm text-app-ink">
-            {getBrowserNotificationStatusLabel(browserNotificationStatus)}. Hữu ích khi bạn rời khỏi tab nhưng vẫn
-            muốn được nhắc việc.
+            {getBrowserNotificationStatusLabel(browserNotificationStatus)}. Hữu ích khi bạn rời khỏi tab nhưng vẫn muốn
+            được nhắc việc.
           </p>
         </div>
         <Switch
@@ -288,9 +287,7 @@ export function TwelveWeekExecutionPreferences({
               {appPreferences.allowLocalAnalytics ? "Đang bật" : "Đang tắt"}
             </Badge>
           </div>
-          <p className="mt-1 text-sm text-app-ink">
-            Lưu hành trình 12 tuần trên thiết bị này để xem lịch sử thao tác.
-          </p>
+          <p className="mt-1 text-sm text-app-ink">Lưu hành trình 12 tuần trên thiết bị này để xem lịch sử thao tác.</p>
         </div>
         <Switch
           checked={appPreferences.allowLocalAnalytics}
@@ -314,9 +311,7 @@ export function TwelveWeekExecutionPreferences({
               {appPreferences.keepLocalOutbox ? "Đang bật" : "Đang tắt"}
             </Badge>
           </div>
-          <p className="mt-1 text-sm text-app-ink">
-            Giữ các mục chờ đồng bộ để thao tác hằng ngày vẫn nhẹ và nhanh.
-          </p>
+          <p className="mt-1 text-sm text-app-ink">Giữ các mục chờ đồng bộ để thao tác hằng ngày vẫn nhẹ và nhanh.</p>
         </div>
         <Switch
           checked={appPreferences.keepLocalOutbox}
@@ -422,7 +417,8 @@ export function TwelveWeekDataSafety({
         <div className="rounded-xl border border-app-line bg-app-surface p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Dữ liệu trên thiết bị</p>
           <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-            Dữ liệu chu kỳ 12 tuần, tactic và nhật ký phản tư được lưu trữ an toàn trong trình duyệt của bạn. Bạn nên xuất dữ liệu định kỳ làm bản sao dự phòng.
+            Dữ liệu chu kỳ 12 tuần, tactic và nhật ký phản tư được lưu trữ an toàn trong trình duyệt của bạn. Bạn nên
+            xuất dữ liệu định kỳ làm bản sao dự phòng.
           </p>
           <div className="mt-4">
             <Button variant="outline" className="w-full bg-app-surface rounded-xl" onClick={onExportLocalData}>
@@ -432,9 +428,12 @@ export function TwelveWeekDataSafety({
         </div>
 
         <div className="rounded-xl border border-app-line bg-app-surface p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Quyền riêng tư & Tải về</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            Quyền riêng tư & Tải về
+          </p>
           <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-            Hiểu dữ liệu nào đang lưu trên thiết bị và dữ liệu nào có thể được gửi đi. Tải bản sao gồm mục tiêu, kế hoạch 12 tuần và cài đặt ứng dụng.
+            Hiểu dữ liệu nào đang lưu trên thiết bị và dữ liệu nào có thể được gửi đi. Tải bản sao gồm mục tiêu, kế
+            hoạch 12 tuần và cài đặt ứng dụng.
           </p>
           <div className="mt-4">
             <Badge
@@ -603,7 +602,8 @@ export function TwelveWeekDangerZone({
         <div>
           <h3 className="font-serif text-lg font-medium text-app-warm">Vùng nguy hiểm</h3>
           <p className="mt-1.5 text-sm text-app-ink-soft">
-            Các hành động dưới đây sẽ thay đổi hoặc xóa bỏ dữ liệu vĩnh viễn. Hãy chắc chắn rằng bạn đã tải bản sao lưu dữ liệu trước khi thực hiện.
+            Các hành động dưới đây sẽ thay đổi hoặc xóa bỏ dữ liệu vĩnh viễn. Hãy chắc chắn rằng bạn đã tải bản sao lưu
+            dữ liệu trước khi thực hiện.
           </p>
         </div>
       </div>
@@ -633,7 +633,8 @@ export function TwelveWeekDangerZone({
           <div className="min-w-0">
             <p className="text-sm font-semibold text-app-ink">Xóa dữ liệu tạm cục bộ</p>
             <p className="mt-1 text-xs text-app-ink-muted">
-              Xóa nhật ký sự kiện thao tác, hàng chờ đồng bộ và trạng thái nhắc nhở trên thiết bị này. Dữ liệu chính vẫn an toàn.
+              Xóa nhật ký sự kiện thao tác, hàng chờ đồng bộ và trạng thái nhắc nhở trên thiết bị này. Dữ liệu chính vẫn
+              an toàn.
             </p>
           </div>
           <Button
@@ -652,7 +653,8 @@ export function TwelveWeekDangerZone({
             <div className="min-w-0">
               <p className="text-sm font-semibold text-app-ink">Xóa dữ liệu trên tài khoản (Cloud)</p>
               <p className="mt-1 text-xs text-app-ink-muted">
-                Xóa toàn bộ các bản sao chu kỳ 12 tuần trên đám mây. Dữ liệu trên thiết bị này và thông tin gói dịch vụ không bị ảnh hưởng.
+                Xóa toàn bộ các bản sao chu kỳ 12 tuần trên đám mây. Dữ liệu trên thiết bị này và thông tin gói dịch vụ
+                không bị ảnh hưởng.
               </p>
             </div>
             <Button

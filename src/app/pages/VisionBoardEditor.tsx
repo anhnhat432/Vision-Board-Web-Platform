@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import {
   Download,
+  Globe,
   Heart,
   Image,
-  Globe,
   LayoutGrid,
   Link2,
   MessageSquareQuote,
@@ -22,14 +20,17 @@ import {
   Wand2,
   Zap,
 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-
+import { getBackendVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  createVisionBoard as backendCreateVisionBoard,
+  updateVisionBoard as backendUpdateVisionBoard,
+} from "@/services/visionBoardService";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { ItemControlsPopover } from "../components/visionBoard/ItemControlsPopover";
-import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
-import { VisionBoardSidebar } from "../components/visionBoard/VisionBoardSidebar";
-import { VisionBoardStoryWizard, type VisionBoardStorySeed } from "../components/visionBoard/VisionBoardStoryWizard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,24 +47,29 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Textarea } from "../components/ui/textarea";
+import { ItemControlsPopover } from "../components/visionBoard/ItemControlsPopover";
+import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
+import { VisionBoardSidebar } from "../components/visionBoard/VisionBoardSidebar";
+import { type VisionBoardStorySeed, VisionBoardStoryWizard } from "../components/visionBoard/VisionBoardStoryWizard";
 import {
   celebrateAchievementUnlock,
   celebrateSpotlight,
   getAchievementCelebrationCopy,
   getUnlockedAchievements,
 } from "../utils/experience";
+import { hasReachedLimit } from "../utils/feature-entitlements";
 import {
-  type VisionBoard,
-  type VisionBoardItem,
-  type VisionBoardThemeId,
   addVisionBoard,
   calculateGoalProgress,
   getCurrentPlan,
   getUserData,
   updateVisionBoard,
+  type VisionBoard,
+  type VisionBoardItem,
+  type VisionBoardThemeId,
 } from "../utils/storage";
-import { hasReachedLimit } from "../utils/feature-entitlements";
-import { LIFE_AREAS, LIFE_AREA_LABELS } from "../utils/storage-constants";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "../utils/storage-constants";
+import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS, VISION_BOARD_THEMES } from "../utils/vision-board-config";
 import {
   downloadDataUrl,
   EXPORT_RATIOS,
@@ -71,13 +77,6 @@ import {
   exportVisionBoardToPng,
   getRatioLabel,
 } from "../utils/vision-board-export";
-import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS, VISION_BOARD_THEMES } from "../utils/vision-board-config";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import {
-  createVisionBoard as backendCreateVisionBoard,
-  updateVisionBoard as backendUpdateVisionBoard,
-} from "@/services/visionBoardService";
-import { getBackendVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { VISION_BOARD_TEMPLATES, type VisionBoardTemplate } from "../utils/vision-board-templates";
 
 const ICON_COMPONENTS = {
@@ -790,17 +789,13 @@ export function VisionBoardEditor() {
                     className="w-full text-left rounded-xl border border-app-line bg-app-surface p-3 transition hover:border-app-accent hover:bg-app-accent-soft group"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-app-ink group-hover:text-app-accent">
-                        {tmpl.name}
-                      </span>
+                      <span className="text-sm font-bold text-app-ink group-hover:text-app-accent">{tmpl.name}</span>
                       <span
                         className="h-3.5 w-3.5 rounded-full border border-white"
-                        style={{ background: VISION_BOARD_THEMES.find(t => t.id === tmpl.themeId)?.preview.gradient }}
+                        style={{ background: VISION_BOARD_THEMES.find((t) => t.id === tmpl.themeId)?.preview.gradient }}
                       />
                     </div>
-                    <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">
-                      {tmpl.description}
-                    </p>
+                    <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">{tmpl.description}</p>
                   </button>
                 ))}
               </div>
@@ -819,7 +814,8 @@ export function VisionBoardEditor() {
                   <div>
                     <h4 className="text-sm font-bold text-app-ink">Tự động sinh bảng</h4>
                     <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">
-                      Trả lời 4 câu hỏi cực nhanh về cảm xúc và lĩnh vực tập trung để hệ thống tự động thiết kế bảng riêng cho bạn.
+                      Trả lời 4 câu hỏi cực nhanh về cảm xúc và lĩnh vực tập trung để hệ thống tự động thiết kế bảng
+                      riêng cho bạn.
                     </p>
                   </div>
                   <Button
@@ -842,12 +838,7 @@ export function VisionBoardEditor() {
                 <p className="text-xs text-app-ink-soft">
                   Nếu bạn đã có sẵn ý tưởng, hãy bắt đầu thiết kế thủ công từ đầu.
                 </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsInitDialogOpen(false)}
-                  className="w-full"
-                >
+                <Button type="button" variant="outline" onClick={() => setIsInitDialogOpen(false)} className="w-full">
                   Tạo bảng trống
                 </Button>
               </div>

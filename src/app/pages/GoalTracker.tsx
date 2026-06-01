@@ -1,6 +1,20 @@
-import { AlertTriangle, ArrowRight, Award, CheckCircle2, Circle, Lock, Mail, MailOpen, Plus, RotateCcw, Search, Target, Trash2, Zap } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Award,
+  CheckCircle2,
+  Circle,
+  Lock,
+  Mail,
+  MailOpen,
+  Plus,
+  RotateCcw,
+  Search,
+  Target,
+  Trash2,
+  Zap,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { EmptyState } from "@/app/components/states/EmptyState";
@@ -23,6 +37,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+import { Button } from "../components/ui/button";
+import { CountUp } from "../components/ui/count-up";
 import {
   Dialog,
   DialogContent,
@@ -31,13 +47,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
-import { CountUp } from "../components/ui/count-up";
 import { Skeleton } from "../components/ui/skeleton";
 import { SpotlightCard } from "../components/ui/spotlight-card";
 import { cn } from "../components/ui/utils";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { soundService } from "../services/soundService";
 import { isRealMode, shouldEnable12WeekGoalTombstoneSync } from "../utils/app-mode";
@@ -53,17 +68,17 @@ import {
   getGoalExecutionStats,
   getLifeAreaLabel,
   getTwelveWeekCurrentWeek,
-  getTwelveWeekTodayTasks,
   getTwelveWeekTasksForWeek,
+  getTwelveWeekTodayTasks,
   getUserData,
+  type PricingPlanCode,
   recomputeGoalProgressFromWeeks,
   saveUserData,
+  type TwelveWeekSystem,
+  type TwelveWeekTaskInstance,
   toggleTwelveWeekTask,
   type UserData,
   updateGoal,
-  type PricingPlanCode,
-  type TwelveWeekSystem,
-  type TwelveWeekTaskInstance,
 } from "../utils/storage";
 import { getPlanLabel } from "../utils/twelve-week-premium";
 
@@ -178,26 +193,29 @@ const getGoalHealthStatus = (
   goal: Goal,
   progress: number,
   isOverdue: boolean,
-  isNearDeadline: boolean
+  isNearDeadline: boolean,
 ): HealthStatus => {
   const stats = getGoalExecutionStats(goal);
 
   if (progress === 100) {
     return {
       label: "Hoàn thành ✨",
-      bgClass: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
+      bgClass:
+        "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
     };
   }
   if (isOverdue) {
     return {
       label: "Cần chỉnh nhịp 🌊",
-      bgClass: "bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30",
+      bgClass:
+        "bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30",
     };
   }
   if (stats.reviewDueToday) {
     return {
       label: "Đến ngày review 📋",
-      bgClass: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40",
+      bgClass:
+        "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40",
     };
   }
   if (isNearDeadline) {
@@ -277,9 +295,7 @@ const getTodayFocusGoal = (goalsWithMetadata: GoalMetadata[]): FocusGoalData | n
     };
   }
 
-  const p4 = activeGoals.find(
-    (m) => m.isTwelveWeek && m.goal.twelveWeekSystem?.status === "active"
-  );
+  const p4 = activeGoals.find((m) => m.isTwelveWeek && m.goal.twelveWeekSystem?.status === "active");
   if (p4) {
     return {
       goal: p4.goal,
@@ -304,11 +320,9 @@ const getWeeklyQuestDetails = (system: TwelveWeekSystem): WeeklyQuestDetails => 
   const currentWeek = getTwelveWeekCurrentWeek(system);
   const weekTasks = getTwelveWeekTasksForWeek(system, currentWeek);
   const activeTasks = weekTasks.filter((t) => !t.skipped);
-  const uniqueScheduledDays = Array.from(
-    new Set(activeTasks.map((t) => t.scheduledDate).filter(Boolean))
-  );
+  const uniqueScheduledDays = Array.from(new Set(activeTasks.map((t) => t.scheduledDate).filter(Boolean)));
   const completedDays = uniqueScheduledDays.filter((date) =>
-    activeTasks.some((t) => t.scheduledDate === date && t.completed)
+    activeTasks.some((t) => t.scheduledDate === date && t.completed),
   ).length;
   const targetDays = Math.min(3, uniqueScheduledDays.length);
 
@@ -343,7 +357,8 @@ function TodayFocusCard({
         <div className="space-y-1">
           <h4 className="text-sm font-bold text-app-ink">Tất cả mục tiêu đã hoàn tất!</h4>
           <p className="text-xs text-app-ink-soft leading-relaxed max-w-md mx-auto">
-            Không có tiêu điểm hành động cần xử lý. Hãy thiết lập một chu kỳ 12 tuần mới hoặc thêm mục tiêu thường để tiếp tục hành trình.
+            Không có tiêu điểm hành động cần xử lý. Hãy thiết lập một chu kỳ 12 tuần mới hoặc thêm mục tiêu thường để
+            tiếp tục hành trình.
           </p>
         </div>
         <Button
@@ -412,9 +427,7 @@ function TodayFocusCard({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent"></span>
           </span>
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-accent">
-            Tiêu điểm hôm nay
-          </p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-app-accent">Tiêu điểm hôm nay</p>
         </div>
 
         <div className="space-y-1">
@@ -438,14 +451,10 @@ function TodayFocusCard({
               >
                 <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
               </button>
-              <span className="text-sm font-medium truncate text-app-ink">
-                {firstOpenTask.title}
-              </span>
+              <span className="text-sm font-medium truncate text-app-ink">{firstOpenTask.title}</span>
             </div>
           ) : (
-            <p className="text-sm text-app-ink-soft leading-relaxed font-medium">
-              💡 {recommendedAction}
-            </p>
+            <p className="text-sm text-app-ink-soft leading-relaxed font-medium">💡 {recommendedAction}</p>
           )}
         </div>
       </div>
@@ -530,7 +539,9 @@ function GoalTrackerContent({
   const autoCloudSync = useOptionalAutoCloudSyncContext();
   const reload = onReload;
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<'all' | '12week' | 'simple' | 'dueSoon' | 'atRisk' | 'completed'>('all');
+  const [activeFilter, setActiveFilter] = useState<"all" | "12week" | "simple" | "dueSoon" | "atRisk" | "completed">(
+    "all",
+  );
   const [viewUserData, setViewUserData] = useState(userData);
   const [isGoalLimitPaywallOpen, setIsGoalLimitPaywallOpen] = useState(false);
   const [locallyUpdatedSystemGoalIds, setLocallyUpdatedSystemGoalIds] = useState<Set<string>>(new Set());
@@ -626,9 +637,7 @@ function GoalTrackerContent({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
-        ({ goal }) =>
-          goal.title.toLowerCase().includes(q) ||
-          goal.description?.toLowerCase().includes(q),
+        ({ goal }) => goal.title.toLowerCase().includes(q) || goal.description?.toLowerCase().includes(q),
       );
     }
 
@@ -929,15 +938,11 @@ function GoalTrackerContent({
   }, [goalsWithMetadata]);
 
   const needsReviewGoals = useMemo(() => {
-    return goalsWithMetadata
-      .filter(({ goal }) => getGoalExecutionStats(goal).reviewDueToday)
-      .map(({ goal }) => goal);
+    return goalsWithMetadata.filter(({ goal }) => getGoalExecutionStats(goal).reviewDueToday).map(({ goal }) => goal);
   }, [goalsWithMetadata]);
 
   const atRiskGoals = useMemo(() => {
-    return goalsWithMetadata
-      .filter(({ isOverdue }) => isOverdue)
-      .map(({ goal }) => goal);
+    return goalsWithMetadata.filter(({ isOverdue }) => isOverdue).map(({ goal }) => goal);
   }, [goalsWithMetadata]);
 
   return (
@@ -988,7 +993,7 @@ function GoalTrackerContent({
           >
             {/* Soft glow decoration */}
             <div className="absolute right-0 top-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-app-accent/5 blur-3xl pointer-events-none" />
-            
+
             <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center relative z-10">
               <div className="space-y-2.5">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5">
@@ -1001,7 +1006,8 @@ function GoalTrackerContent({
                   Hành trình mục tiêu
                 </h1>
                 <p className="text-sm leading-relaxed text-app-ink-soft max-w-xl font-sans">
-                  Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều đặn.
+                  Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều
+                  đặn.
                 </p>
               </div>
 
@@ -1060,11 +1066,7 @@ function GoalTrackerContent({
 
             {/* Filter Chips */}
             <div className="w-full lg:w-auto overflow-x-auto">
-              <GoalFilterChips
-                activeFilter={activeFilter}
-                setActiveFilter={setActiveFilter}
-                counts={filterCounts}
-              />
+              <GoalFilterChips activeFilter={activeFilter} setActiveFilter={setActiveFilter} counts={filterCounts} />
             </div>
           </div>
 
@@ -1270,17 +1272,18 @@ function GoalSummaryStrip({
             className="h-full rounded-[18px] border border-app-line/70 bg-app-surface p-5 flex items-center justify-between gap-4 shadow-app-sm hover:border-app-accent/20 hover:shadow-app-md transition-all duration-300"
           >
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold tracking-[0.05em] text-app-ink-soft">
-                {item.title}
-              </p>
+              <p className="text-xs font-semibold tracking-[0.05em] text-app-ink-soft">{item.title}</p>
               <p className="mt-1.5 font-serif text-2xl sm:text-3xl font-black text-app-ink tabular-nums leading-none">
                 {item.value}
               </p>
-              <p className="mt-2 text-xs font-medium text-app-ink-muted leading-tight">
-                {item.note}
-              </p>
+              <p className="mt-2 text-xs font-medium text-app-ink-muted leading-tight">{item.note}</p>
             </div>
-            <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-app-sm", item.colorClass)}>
+            <div
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-app-sm",
+                item.colorClass,
+              )}
+            >
               <Icon className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -1292,7 +1295,7 @@ function GoalSummaryStrip({
 
 interface GoalFilterChipsProps {
   activeFilter: string;
-  setActiveFilter: (filter: 'all' | '12week' | 'simple' | 'dueSoon' | 'atRisk' | 'completed') => void;
+  setActiveFilter: (filter: "all" | "12week" | "simple" | "dueSoon" | "atRisk" | "completed") => void;
   counts: {
     all: number;
     twelveWeek: number;
@@ -1330,12 +1333,12 @@ function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalFilterCh
             )}
           >
             <span>{chip.label}</span>
-            <span className={cn(
-              "text-xs px-2 py-0.5 rounded-full font-bold tabular-nums",
-              isActive
-                ? "bg-white/20 text-white"
-                : "bg-app-line text-app-ink-soft",
-            )}>
+            <span
+              className={cn(
+                "text-xs px-2 py-0.5 rounded-full font-bold tabular-nums",
+                isActive ? "bg-white/20 text-white" : "bg-app-line text-app-ink-soft",
+              )}
+            >
               {chip.count}
             </span>
           </button>
@@ -1400,24 +1403,27 @@ function GoalCard({
   const completionDetails = useMemo(() => getGoalCompletionDetails(goal), [goal]);
   const health = useMemo(
     () => getGoalHealthStatus(goal, progress, isOverdue, isNearDeadline),
-    [goal, progress, isOverdue, isNearDeadline]
+    [goal, progress, isOverdue, isNearDeadline],
   );
 
-  const glowClass = progress === 100
-    ? (prefersReducedMotion 
-        ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)] bg-emerald-50/15 dark:bg-emerald-950/5" 
-        : "completed-goal-glow bg-emerald-50/15 dark:bg-emerald-950/5 border-emerald-500/25 dark:border-emerald-500/15")
-    : "bg-app-surface border-app-line/70";
+  const glowClass =
+    progress === 100
+      ? prefersReducedMotion
+        ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)] bg-emerald-50/15 dark:bg-emerald-950/5"
+        : "completed-goal-glow bg-emerald-50/15 dark:bg-emerald-950/5 border-emerald-500/25 dark:border-emerald-500/15"
+      : "bg-app-surface border-app-line/70";
 
   return (
     <div id={`goal-card-${goal.id}`} className="perspective-1000 w-full relative">
-      <div className={cn(
-        "preserve-3d card-transition w-full relative",
-        isFlipped ? "rotate-y-180" : ""
-      )}>
+      <div className={cn("preserve-3d card-transition w-full relative", isFlipped ? "rotate-y-180" : "")}>
         {/* FRONT SIDE */}
         <div className="backface-hidden w-full">
-          <SpotlightCard className={cn("rounded-[18px] border p-5 sm:p-6 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md relative", glowClass)}>
+          <SpotlightCard
+            className={cn(
+              "rounded-[18px] border p-5 sm:p-6 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md relative",
+              glowClass,
+            )}
+          >
             {/* Washi tape decoration */}
             <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/10 dark:bg-app-accent/20 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/15 z-10" />
             {/* Nút xóa thùng rác nhỏ ở góc trên bên phải, visually quieter */}
@@ -1475,17 +1481,14 @@ function GoalCard({
                   >
                     {getLifeAreaLabel(goal.category)}
                   </span>
-                  
+
                   {/* Health status badge */}
                   <span
-                    className={cn(
-                      "border text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm",
-                      health.bgClass
-                    )}
+                    className={cn("border text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm", health.bgClass)}
                   >
                     {health.label}
                   </span>
-                  
+
                   {system && (
                     <span className="bg-app-bg border border-app-line text-app-ink-soft text-xs font-bold rounded-full px-3 py-0.5 shadow-app-sm">
                       {getPlanLabel(currentPlanCode)}
@@ -1509,7 +1512,10 @@ function GoalCard({
                       <CountUp value={progress} suffix="%" />
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 overflow-hidden" aria-hidden="true">
+                  <div
+                    className="h-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 overflow-hidden"
+                    aria-hidden="true"
+                  >
                     <div
                       className={cn(
                         "h-full rounded-full bg-gradient-to-r transition-all duration-500 ease-out",
@@ -1532,9 +1538,7 @@ function GoalCard({
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   )}
-                  {system ? (
-                    <FutureSelfLetter goalId={goal.id} progress={progress} system={system} />
-                  ) : null}
+                  {system ? <FutureSelfLetter goalId={goal.id} progress={progress} system={system} /> : null}
                   {progress === 100 && (
                     <Button
                       type="button"
@@ -1620,7 +1624,15 @@ function GoalCard({
 
         {/* BACK SIDE */}
         <div className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10">
-          <SpotlightCard className={cn("h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto", progress === 100 && (prefersReducedMotion ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]" : "completed-goal-glow"))}>
+          <SpotlightCard
+            className={cn(
+              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
+              progress === 100 &&
+                (prefersReducedMotion
+                  ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
+                  : "completed-goal-glow"),
+            )}
+          >
             <div className="space-y-4">
               {/* Certificate Header */}
               <div className="flex items-center gap-3 border-b border-app-line pb-3">
@@ -1631,9 +1643,7 @@ function GoalCard({
                   <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-amber-600 dark:text-amber-400">
                     Thành tích xuất sắc
                   </h4>
-                  <p className="text-sm font-semibold text-app-ink-soft">
-                    Mục tiêu đã hoàn thành
-                  </p>
+                  <p className="text-sm font-semibold text-app-ink-soft">Mục tiêu đã hoàn thành</p>
                 </div>
               </div>
 
@@ -1642,7 +1652,7 @@ function GoalCard({
                 <h3 className="font-serif text-lg sm:text-xl font-bold text-app-ink leading-snug break-words line-clamp-3">
                   {goal.title}
                 </h3>
-                
+
                 <div className="grid grid-cols-2 gap-4 pt-1 text-xs">
                   <div className="bg-app-bg/50 rounded-lg p-2.5 border border-app-line/40">
                     <p className="text-app-ink-muted font-medium">Hoàn thành ngày</p>
@@ -1713,7 +1723,8 @@ function GoalsSidebar({
   handleToggleTask,
   openTwelveWeekCenter,
 }: GoalsSidebarProps) {
-  const isSidebarEmpty = todayUncompletedTasks.length === 0 && needsReviewGoals.length === 0 && atRiskGoals.length === 0;
+  const isSidebarEmpty =
+    todayUncompletedTasks.length === 0 && needsReviewGoals.length === 0 && atRiskGoals.length === 0;
 
   return (
     <aside className="space-y-6 lg:space-y-8 lg:pt-2">
@@ -1726,7 +1737,8 @@ function GoalsSidebar({
           <div className="space-y-2">
             <h4 className="text-sm font-bold text-app-ink">Mọi thứ đang đi đúng hướng!</h4>
             <p className="text-xs text-app-ink-soft leading-relaxed px-2">
-              Không có mục tiêu nào cần chú ý khẩn cấp hay việc chưa hoàn thành hôm nay. Hãy giữ vững nhịp độ tuyệt vời này.
+              Không có mục tiêu nào cần chú ý khẩn cấp hay việc chưa hoàn thành hôm nay. Hãy giữ vững nhịp độ tuyệt vời
+              này.
             </p>
           </div>
         </div>
@@ -1758,12 +1770,8 @@ function GoalsSidebar({
                       <Circle className="size-3 text-app-ink-muted hover:text-app-accent shrink-0" />
                     </button>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-app-ink leading-snug break-words">
-                        {task.title}
-                      </p>
-                      <p className="text-xs text-app-ink-muted font-bold truncate mt-1">
-                        {task.goalTitle}
-                      </p>
+                      <p className="text-sm font-semibold text-app-ink leading-snug break-words">{task.title}</p>
+                      <p className="text-xs text-app-ink-muted font-bold truncate mt-1">{task.goalTitle}</p>
                     </div>
                   </div>
                 ))
@@ -1901,13 +1909,15 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
   }, [system.startDate]);
 
   const weeks = useMemo(() => {
-    const weeksList: Array<Array<{
-      dateStr: string;
-      total: number;
-      completed: number;
-      colorClass: string;
-      label: string;
-    }>> = [];
+    const weeksList: Array<
+      Array<{
+        dateStr: string;
+        total: number;
+        completed: number;
+        colorClass: string;
+        label: string;
+      }>
+    > = [];
 
     const tasksMap = new Map<string, { total: number; completed: number }>();
     for (const task of system.taskInstances) {
@@ -1948,9 +1958,10 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
         }
 
         const formattedDate = formatDayLabel(dateKey);
-        const label = stats.total > 0 
-          ? `${formattedDate}: Chốt ${stats.completed}/${stats.total} việc`
-          : `${formattedDate}: Không có việc lên lịch`;
+        const label =
+          stats.total > 0
+            ? `${formattedDate}: Chốt ${stats.completed}/${stats.total} việc`
+            : `${formattedDate}: Không có việc lên lịch`;
 
         days.push({
           dateStr: dateKey,
@@ -1971,7 +1982,7 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
         <span>Nhịp độ hành động</span>
         <span className="text-xs text-app-ink-muted font-normal font-sans">Hover xem chi tiết</span>
       </div>
-      
+
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
         {/* Nhãn hàng Thứ 2 - CN */}
         <div className="flex flex-col justify-between h-[96px] text-[9px] font-bold text-app-ink-muted pr-1 select-none leading-none pt-0.5 pb-0.5">
@@ -1987,11 +1998,11 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
             <div key={`week-${weekDays[0].dateStr}`} className="flex flex-col gap-1">
               {weekDays.map((day) => (
                 <div key={day.dateStr} className="relative group flex justify-center">
-                  <div 
+                  <div
                     className={cn(
-                      "w-3 h-3 rounded-[2.5px] transition-all duration-150 cursor-pointer hover:scale-110", 
-                      day.colorClass
-                    )} 
+                      "w-3 h-3 rounded-[2.5px] transition-all duration-150 cursor-pointer hover:scale-110",
+                      day.colorClass,
+                    )}
                   />
                   {/* Custom CSS Tooltip */}
                   <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-neutral-900 dark:bg-neutral-800 text-white text-[10px] font-sans rounded px-2 py-1 whitespace-nowrap shadow-md pointer-events-none transform -translate-y-0.5 border border-neutral-800/80 leading-normal">
@@ -2047,14 +2058,14 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
   const isUnlocked = useMemo(() => {
     if (progress === 100) return true;
     if (!system) return false;
-    
+
     if (system.currentWeek >= 12) return true;
     try {
       const today = new Date();
       const end = new Date(system.endDate);
       if (today > end) return true;
     } catch {}
-    
+
     return false;
   }, [progress, system]);
 
@@ -2086,13 +2097,12 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
               <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-app-accent shrink-0" />
-                <DialogTitle className="font-serif text-lg font-bold text-app-ink">
-                  Gửi tôi ở tuần thứ 12
-                </DialogTitle>
+                <DialogTitle className="font-serif text-lg font-bold text-app-ink">Gửi tôi ở tuần thứ 12</DialogTitle>
               </div>
             </DialogHeader>
             <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
-              Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
+              Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra
+              khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
             </DialogDescription>
 
             <div className="pt-2">
@@ -2104,7 +2114,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
                 maxLength={500}
               />
             </div>
-            
+
             <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
               <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
                 {tempText.length}/500 ký tự
@@ -2142,7 +2152,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           "rounded-lg border px-3.5 py-2 text-xs font-bold transition-all inline-flex items-center gap-1.5 h-9",
           isUnlocked
             ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/75 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-400"
-            : "border-amber-200 bg-amber-50/70 text-amber-700 hover:bg-amber-100/70 dark:border-amber-900/40 dark:bg-amber-950/10 dark:text-amber-400"
+            : "border-amber-200 bg-amber-50/70 text-amber-700 hover:bg-amber-100/70 dark:border-amber-900/40 dark:bg-amber-950/10 dark:text-amber-400",
         )}
       >
         {isUnlocked ? (
@@ -2164,9 +2174,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           <DialogHeader className="space-y-1.5 text-left border-b border-app-line pb-3">
             <div className="flex items-center gap-2">
               <MailOpen className="h-5 w-5 text-emerald-600 shrink-0" />
-              <DialogTitle className="font-serif text-lg font-bold text-app-ink">
-                Thư gửi từ quá khứ
-              </DialogTitle>
+              <DialogTitle className="font-serif text-lg font-bold text-app-ink">Thư gửi từ quá khứ</DialogTitle>
             </div>
           </DialogHeader>
           <DialogDescription className="text-sm text-app-ink-soft font-sans mt-2">
@@ -2174,9 +2182,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           </DialogDescription>
 
           <div className="bg-app-warm-soft/40 dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60 my-2">
-            <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">
-              “{letterText}”
-            </p>
+            <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">“{letterText}”</p>
           </div>
 
           <DialogFooter className="flex flex-row justify-between items-center gap-3 font-sans w-full mt-2">
@@ -2204,9 +2210,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
             <div className="flex items-center gap-2">
               <Mail className="h-5 w-5 text-app-accent shrink-0" />
-              <DialogTitle className="font-serif text-lg font-bold text-app-ink">
-                Chỉnh sửa thư gửi tuần 12
-              </DialogTitle>
+              <DialogTitle className="font-serif text-lg font-bold text-app-ink">Chỉnh sửa thư gửi tuần 12</DialogTitle>
             </div>
           </DialogHeader>
           <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
@@ -2222,7 +2226,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               maxLength={500}
             />
           </div>
-          
+
           <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
             <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
               {tempText.length}/500 ký tự

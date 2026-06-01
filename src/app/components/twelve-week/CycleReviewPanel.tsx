@@ -1,12 +1,11 @@
 import { BarChart3, CheckCircle2, Flag, RefreshCw, Save, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
-
-import { calculateCycleSummary } from "@/features/plan12week/logic/cycleReview";
-import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
+import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
+import { calculateCycleSummary } from "@/features/plan12week/logic/cycleReview";
 import { WeeklyReviewIllustration } from "../illustrations";
-import { Button } from "../ui/button";
 import { PrimaryActionCard } from "../layout/PrimaryActionCard";
+import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";

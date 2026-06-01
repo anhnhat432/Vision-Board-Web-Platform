@@ -1,5 +1,5 @@
-import { Link } from "react-router";
 import { ArrowRight, CheckCircle2, Circle, ListTodo } from "lucide-react";
+import { Link } from "react-router";
 
 import type { TwelveWeekTaskInstance } from "@/app/utils/storage";
 
@@ -19,11 +19,16 @@ export function TodayMiniCard({ title = "Hành động hôm nay", tasks, complet
       aria-labelledby="dashboard-today-mini-title"
     >
       {/* 📌 Floating wood pin at the header */}
-      <span className="absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
+      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+        📌
+      </span>
 
       <div className="flex flex-col gap-1.5 p-6 pb-4 bg-gradient-to-b from-app-accent-soft/10 to-transparent border-b border-neutral-200/60 dark:border-neutral-800/60 pt-7">
         <div className="flex items-center justify-between">
-          <h2 id="dashboard-today-mini-title" className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-2">
+          <h2
+            id="dashboard-today-mini-title"
+            className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-2"
+          >
             <ListTodo className="h-4.5 w-4.5 text-app-accent" />
             {title}
           </h2>
@@ -31,7 +36,7 @@ export function TodayMiniCard({ title = "Hành động hôm nay", tasks, complet
             {completedCount}/{totalCount} Việc
           </span>
         </div>
-        
+
         <p className="text-xs font-medium leading-relaxed text-neutral-500 font-serif italic mt-1.5">
           “Duy trì sự nhất quán mỗi ngày để đạt mục tiêu lớn.”
         </p>
@@ -61,7 +66,9 @@ export function TodayMiniCard({ title = "Hành động hôm nay", tasks, complet
                 )}
                 <p
                   className={`min-w-0 flex-1 line-clamp-1 text-xs font-semibold leading-relaxed transition-all duration-200 ${
-                    task.completed ? "text-neutral-400 line-through opacity-60" : "text-neutral-800 dark:text-neutral-200 group-hover:text-app-accent"
+                    task.completed
+                      ? "text-neutral-400 line-through opacity-60"
+                      : "text-neutral-800 dark:text-neutral-200 group-hover:text-app-accent"
                   }`}
                 >
                   {task.title}

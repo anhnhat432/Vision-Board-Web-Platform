@@ -1,2 +1,2 @@
-export { generateGoalAdjustments } from "./goalAdjustment";
 export type { AdjustmentType, GoalAdjustmentSuggestion } from "./adjustmentTypes";
+export { generateGoalAdjustments } from "./goalAdjustment";

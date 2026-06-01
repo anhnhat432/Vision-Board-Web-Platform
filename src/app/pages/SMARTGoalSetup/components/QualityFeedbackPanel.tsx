@@ -17,27 +17,31 @@ function getClarityDetails(score: number) {
   if (score >= 80) {
     return {
       label: "Rất rõ ràng",
-      colorClass: "text-emerald-700 bg-emerald-50/70 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/20 dark:border-emerald-900/30",
+      colorClass:
+        "text-emerald-700 bg-emerald-50/70 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/20 dark:border-emerald-900/30",
       barClass: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]",
     };
   }
   if (score >= 60) {
     return {
       label: "Khá rõ nét",
-      colorClass: "text-teal-700 bg-teal-50/70 border-teal-100 dark:text-teal-400 dark:bg-teal-950/20 dark:border-teal-900/30",
+      colorClass:
+        "text-teal-700 bg-teal-50/70 border-teal-100 dark:text-teal-400 dark:bg-teal-950/20 dark:border-teal-900/30",
       barClass: "bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.4)]",
     };
   }
   if (score >= 40) {
     return {
       label: "Đang hình thành",
-      colorClass: "text-amber-700 bg-amber-50/70 border-amber-100 dark:text-amber-400 dark:bg-amber-950/20 dark:border-amber-900/30",
+      colorClass:
+        "text-amber-700 bg-amber-50/70 border-amber-100 dark:text-amber-400 dark:bg-amber-950/20 dark:border-amber-900/30",
       barClass: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]",
     };
   }
   return {
     label: "Đang phác thảo",
-    colorClass: "text-rose-750 bg-rose-50/70 border-rose-100 dark:text-rose-450 dark:bg-rose-950/20 dark:border-rose-900/30",
+    colorClass:
+      "text-rose-750 bg-rose-50/70 border-rose-100 dark:text-rose-450 dark:bg-rose-950/20 dark:border-rose-900/30",
     barClass: "bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.4)]",
   };
 }
@@ -60,30 +64,38 @@ export function QualityFeedbackPanel({
           : "Hãy bổ sung câu mục tiêu và mốc đích cụ thể để chúng mình đồng hành tiếp cùng bạn.";
 
   // Làm dịu văn phong của warnings và suggestions
-  const formattedWarnings = warnings.map(w => 
-    w.replace("Cần bổ sung", "Bạn nên bổ sung thêm")
-     .replace("Không nên bỏ trống", "Hãy điền thêm chi tiết về")
-     .replace("chưa đạt tối thiểu", "hơi ngắn, hãy viết rõ thêm một chút")
+  const formattedWarnings = warnings.map((w) =>
+    w
+      .replace("Cần bổ sung", "Bạn nên bổ sung thêm")
+      .replace("Không nên bỏ trống", "Hãy điền thêm chi tiết về")
+      .replace("chưa đạt tối thiểu", "hơi ngắn, hãy viết rõ thêm một chút"),
   );
-  
-  const formattedSuggestions = suggestions.map(s => 
-    s.replace("Hãy thử", "Gợi ý cho bạn:")
-     .replace("Nên dùng", "Chúng mình khuyên dùng")
+
+  const formattedSuggestions = suggestions.map((s) =>
+    s.replace("Hãy thử", "Gợi ý cho bạn:").replace("Nên dùng", "Chúng mình khuyên dùng"),
   );
 
   const hintItems = [completedMessage, ...formattedWarnings, ...formattedSuggestions].slice(0, MAX_DISPLAY_ITEMS);
 
   return (
-    <section className="rounded-[14px] border border-app-line bg-app-surface p-5 shadow-sm space-y-4" aria-label="Mức độ rõ ràng mục tiêu">
+    <section
+      className="rounded-[14px] border border-app-line bg-app-surface p-5 shadow-sm space-y-4"
+      aria-label="Mức độ rõ ràng mục tiêu"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
         <h3 className="text-sm font-bold text-app-ink">Mức độ rõ nét của mục tiêu</h3>
-        <span className={cn("rounded-full px-3 py-1 text-xs font-bold border transition-all duration-300", clarity.colorClass)}>
+        <span
+          className={cn(
+            "rounded-full px-3 py-1 text-xs font-bold border transition-all duration-300",
+            clarity.colorClass,
+          )}
+        >
           {clarity.label} · {overallScore}%
         </span>
       </div>
 
       {/* Thanh Clarity Progress Bar */}
-      <div 
+      <div
         role="progressbar"
         aria-valuenow={overallScore}
         aria-valuemin={0}
@@ -91,9 +103,9 @@ export function QualityFeedbackPanel({
         aria-label="Độ rõ nét mục tiêu"
         className="relative h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden"
       >
-        <div 
+        <div
           className={cn("h-full rounded-full transition-all duration-500 ease-out", clarity.barClass)}
-          style={{ width: `${overallScore}%` }} 
+          style={{ width: `${overallScore}%` }}
         />
       </div>
 
@@ -119,4 +131,3 @@ export function QualityFeedbackPanel({
     </section>
   );
 }
-

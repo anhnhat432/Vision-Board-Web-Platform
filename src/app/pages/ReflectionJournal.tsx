@@ -1,9 +1,10 @@
+import { ArrowRight, Frown, Meh, MoreVertical, Plus, Search, Smile } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { cn } from "../components/ui/utils";
-import { ArrowRight, Frown, Meh, Plus, Search, Smile, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
-
+import { EmptyState } from "@/app/components/states/EmptyState";
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { ZenLeafIllustration } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,9 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
-import { EmptyState } from "@/app/components/states/EmptyState";
-import { ZenLeafIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -33,10 +31,10 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Skeleton } from "../components/ui/skeleton";
 import { Textarea } from "../components/ui/textarea";
-import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
-import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { WaterReflectionPool } from "./ReflectionJournal/components/WaterReflectionPool";
+import { cn } from "../components/ui/utils";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
+import { type ReflectionDraft, useReflectionDraft } from "../hooks/useReflectionDraft";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import {
   celebrateAchievementUnlock,
   celebrateSpotlight,
@@ -54,6 +52,7 @@ import {
   saveUserData,
   sortReflectionsByDateDesc,
 } from "../utils/storage";
+import { WaterReflectionPool } from "./ReflectionJournal/components/WaterReflectionPool";
 
 type MoodValue = "happy" | "neutral" | "sad" | "";
 
@@ -347,7 +346,10 @@ function ReflectionJournalContent() {
         {/* Toolbar */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative min-w-[200px] flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+              aria-hidden="true"
+            />
             <Input
               type="search"
               aria-label="Tìm kiếm nhật ký"
@@ -365,7 +367,9 @@ function ReflectionJournalContent() {
                 onClick={() => setFilterType(type)}
                 className={cn(
                   "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
-                  filterType === type ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm" : "text-app-ink-soft hover:bg-app-bg",
+                  filterType === type
+                    ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
+                    : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
                 {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
@@ -386,7 +390,9 @@ function ReflectionJournalContent() {
                   onClick={() => setFilterMood(mood)}
                   className={cn(
                     "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
-                    filterMood === mood ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm" : "text-app-ink-soft hover:bg-app-bg",
+                    filterMood === mood
+                      ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
+                      : "text-app-ink-soft hover:bg-app-bg",
                   )}
                 >
                   {labels[mood]}
@@ -412,10 +418,21 @@ function ReflectionJournalContent() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p>Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" type="button" onClick={handleRestoreReflectionDraft} className="transition-all duration-150 active:scale-[0.97] focus-visible:ring-app-warm focus-visible:ring-offset-2">
+                    <Button
+                      size="sm"
+                      type="button"
+                      onClick={handleRestoreReflectionDraft}
+                      className="transition-all duration-150 active:scale-[0.97] focus-visible:ring-app-warm focus-visible:ring-offset-2"
+                    >
                       Khôi phục
                     </Button>
-                    <Button size="sm" type="button" variant="outline" onClick={handleIgnoreReflectionDraft} className="transition-all duration-150 active:scale-[0.97]">
+                    <Button
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                      onClick={handleIgnoreReflectionDraft}
+                      className="transition-all duration-150 active:scale-[0.97]"
+                    >
                       Bỏ qua
                     </Button>
                   </div>
@@ -452,9 +469,7 @@ function ReflectionJournalContent() {
                 </span>
               </div>
 
-              <p className="mb-4 font-serif text-lg font-medium leading-7 text-app-warm-strong">
-                {JOURNAL_PROMPTS[0]}
-              </p>
+              <p className="mb-4 font-serif text-lg font-medium leading-7 text-app-warm-strong">{JOURNAL_PROMPTS[0]}</p>
 
               <Textarea
                 id="reflection-content"
@@ -610,10 +625,7 @@ function ReflectionJournalContent() {
                           </Badge>
                         )}
                         {reflection.linkedWeekNumber && (
-                          <Badge
-                            variant="outline"
-                            className={cn("rounded-full px-2.5 py-0.5 text-xs", phaseTone.soft)}
-                          >
+                          <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-xs", phaseTone.soft)}>
                             Tuần {reflection.linkedWeekNumber}
                           </Badge>
                         )}

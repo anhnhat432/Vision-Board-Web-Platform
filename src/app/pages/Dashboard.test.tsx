@@ -1,9 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { Dashboard } from "./Dashboard";
 import { getUserData, saveUserData } from "../utils/storage";
+import { Dashboard } from "./Dashboard";
 
 const planServiceMocks = vi.hoisted(() => ({
   createPlan: vi.fn(),

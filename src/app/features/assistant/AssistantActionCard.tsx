@@ -1,4 +1,4 @@
-import { CheckSquare, Plus, ArrowRight } from "lucide-react";
+import { ArrowRight, CheckSquare, Plus } from "lucide-react";
 import type { AssistantAction } from "./parseActions";
 
 interface AssistantActionCardProps {
@@ -31,9 +31,7 @@ export function AssistantActionCard({ action, onExecute, status, errorMessage }:
         <div className="mt-0.5">{getIconForAction(action.type)}</div>
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-900">{action.label}</p>
-          {status === "error" && errorMessage && (
-            <p className="mt-1 text-xs text-red-600">{errorMessage}</p>
-          )}
+          {status === "error" && errorMessage && <p className="mt-1 text-xs text-red-600">{errorMessage}</p>}
         </div>
         <button
           type="button"
@@ -43,8 +41,8 @@ export function AssistantActionCard({ action, onExecute, status, errorMessage }:
             status === "done"
               ? "bg-green-100 text-green-700 cursor-default"
               : status === "error"
-              ? "bg-red-100 text-red-700 cursor-default"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
+                ? "bg-red-100 text-red-700 cursor-default"
+                : "bg-indigo-600 text-white hover:bg-indigo-700"
           }`}
         >
           {status === "executing" && (

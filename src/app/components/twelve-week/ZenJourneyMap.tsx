@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Sparkles } from "lucide-react";
+import { useState } from "react";
 
 interface ScoreboardWeek {
   weekNumber: number;
@@ -48,7 +48,7 @@ const generateSmoothPath = () => {
 
 export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
   const [activeWeek, setActiveWeek] = useState<ScoreboardWeek | null>(
-    scoreboard.find((w) => w.weekNumber === currentWeek) || null
+    scoreboard.find((w) => w.weekNumber === currentWeek) || null,
   );
 
   const pathD = generateSmoothPath();
@@ -94,13 +94,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
             aria-label="Bản đồ hành trình 12 tuần"
           >
             {/* 1. ĐƯỜNG ĐI CHÍNH (ĐƯỜNG ẨN HÀNH HƯƠNG TỔNG THỂ) */}
-            <path
-              d={pathD}
-              stroke="var(--app-line)"
-              strokeWidth="4"
-              strokeDasharray="8 8"
-              opacity="0.3"
-            />
+            <path d={pathD} stroke="var(--app-line)" strokeWidth="4" strokeDasharray="8 8" opacity="0.3" />
 
             {/* 2. ĐƯỜNG ĐÃ ĐI QUA (Hành trình đã thắp sáng) */}
             <path
@@ -111,9 +105,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
               opacity="0.75"
               // Cắt nhỏ path chỉ hiển thị phần đến tuần hiện tại
               strokeDasharray="4000"
-              strokeDashoffset={
-                800 - Math.min(100, (currentWeek / 12) * 100) * 8
-              }
+              strokeDashoffset={800 - Math.min(100, (currentWeek / 12) * 100) * 8}
               className="transition-all duration-1000 ease-in-out"
             />
 
@@ -176,8 +168,22 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                   {isFuture ? (
                     // Sương mù che phủ tương lai - ổ khóa nhỏ tự vẽ
                     <g transform={`translate(${coord.x - 5}, ${coord.y - 5})`} className="opacity-45">
-                      <rect x="1" y="4" width="8" height="6" rx="1" fill="currentColor" className="text-app-ink-muted" />
-                      <path d="M3,4 V2.5 A 2,2 0 0,1 7,2.5 V4" stroke="currentColor" strokeWidth="1" fill="none" className="text-app-ink-muted" />
+                      <rect
+                        x="1"
+                        y="4"
+                        width="8"
+                        height="6"
+                        rx="1"
+                        fill="currentColor"
+                        className="text-app-ink-muted"
+                      />
+                      <path
+                        d="M3,4 V2.5 A 2,2 0 0,1 7,2.5 V4"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        fill="none"
+                        className="text-app-ink-muted"
+                      />
                     </g>
                   ) : isCurrent ? (
                     // Lửa trại bập bùng (Campfire) cho tuần hiện tại vẽ bằng SVG path tự bập bùng tuyệt đối chuẩn xác
@@ -254,8 +260,8 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 return (
                   <g key={`fog-${week.weekNumber}`} className="pointer-events-none opacity-20">
                     <circle
-                      cx={coord.x + (Math.sin(week.weekNumber) * 12)}
-                      cy={coord.y + (Math.cos(week.weekNumber) * 8)}
+                      cx={coord.x + Math.sin(week.weekNumber) * 12}
+                      cy={coord.y + Math.cos(week.weekNumber) * 8}
                       r="28"
                       fill="url(#fogGradient)"
                       className="filter blur-[4px] animate-pulse"
@@ -292,9 +298,9 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                   )}
                 </h4>
                 <p className="text-xs text-app-ink-soft">
-                  {activeWeek.weekNumber === currentWeek 
+                  {activeWeek.weekNumber === currentWeek
                     ? "Ngọn lửa kỷ luật đang thắp sáng tại trạm dừng này. Hãy tiếp tục duy trì!"
-                    : activeWeek.reviewDone 
+                    : activeWeek.reviewDone
                       ? "Bạn đã vượt qua và hoàn thành việc suy ngẫm sâu sắc cho tuần này."
                       : "Trạm dừng tương lai hoặc cần bạn tiến hành review để thắp sáng."}
                 </p>
@@ -323,13 +329,17 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
               </p>
             </div>
             <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Hoàn thành cốt lõi</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+                Hoàn thành cốt lõi
+              </span>
               <p className="mt-2 font-serif text-3xl font-bold text-app-ink tabular-nums">
                 {activeWeek.leadCompletionPercent}%
               </p>
             </div>
             <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Chỉ số tiến triển</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+                Chỉ số tiến triển
+              </span>
               <p className="mt-2 text-xs font-semibold text-app-ink leading-relaxed line-clamp-2">
                 {activeWeek.mainMetricProgress || "Chưa cập nhật chỉ số chính"}
               </p>

@@ -1,4 +1,3 @@
-import { getCurrentEntitlementKeys, getCurrentPlan } from "../storage";
 import type {
   BillingActionSnapshot,
   CheckoutFlowInput,
@@ -7,15 +6,16 @@ import type {
   RestoreAccessResult,
 } from "../billing-contract";
 import {
+  type MonetizationSource,
   trackCheckoutCompleted,
   trackCheckoutStarted,
   trackUpgradeRestored,
-  type MonetizationSource,
 } from "../monetization-analytics";
+import { getCurrentEntitlementKeys, getCurrentPlan } from "../storage";
 import type { PricingPlanCode } from "../storage-types";
 import { normalizePlanCode } from "../twelve-week-premium";
-import { getBillingProvider, getBillingProviderStatus } from "./billingProvider";
 import { buildBillingActionSnapshot, persistBillingActionSnapshot, readBillingActionSnapshot } from "./billingCore";
+import { getBillingProvider, getBillingProviderStatus } from "./billingProvider";
 import { LAST_ENTITLEMENT_SYNC_KEY, LAST_RESTORE_ACCESS_KEY } from "./env";
 
 export type LocalCheckoutResult = CheckoutFlowResult;

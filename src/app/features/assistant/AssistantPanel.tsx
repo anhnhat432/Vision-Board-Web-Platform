@@ -1,21 +1,14 @@
-import { Send, Square, ThumbsDown, ThumbsUp, Trash2, X } from "lucide-react";
+import { Send, Sparkles, Square, ThumbsDown, ThumbsUp, Trash2, X } from "lucide-react";
 import { motion } from "motion/react";
 import {
+  type ChangeEvent,
+  type MouseEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
   useRef,
   useState,
-  type ChangeEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent,
 } from "react";
-import { Sparkles } from "lucide-react";
-import { useAssistant } from "./useAssistant";
-import { AssistantMessageContent } from "./AssistantMessageContent";
-import { AssistantActionCard } from "./AssistantActionCard";
-import type { AssistantAction } from "./parseActions";
-import { executeAction } from "./executeAction";
-import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +19,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
+import { AssistantActionCard } from "./AssistantActionCard";
+import { AssistantMessageContent } from "./AssistantMessageContent";
+import { executeAction } from "./executeAction";
+import type { AssistantAction } from "./parseActions";
+import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
+import { useAssistant } from "./useAssistant";
 
 interface AssistantPanelProps {
   open: boolean;
@@ -50,7 +49,9 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   const [inputText, setInputText] = useState("");
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
-  const [actionStatus, setActionStatus] = useState<Record<string, { status: "pending" | "executing" | "done" | "error"; errorMessage?: string }>>({});
+  const [actionStatus, setActionStatus] = useState<
+    Record<string, { status: "pending" | "executing" | "done" | "error"; errorMessage?: string }>
+  >({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -111,66 +112,75 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     window.requestAnimationFrame(resizeTextarea);
   }, [inputText, isTyping, resizeTextarea, send]);
 
-  const handleSelectCommand = useCallback((cmd: SlashCommand) => {
-    if (cmd.action === "clear") {
-      clearHistory();
-      setInputText("");
-      textareaRef.current?.focus();
-    } else if (cmd.action === "help") {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: getHelpMessage(),
-          createdAt: Date.now(),
-          status: "complete",
-        },
-      ]);
-      setInputText("");
-      textareaRef.current?.focus();
-    } else if (cmd.promptText) {
-      const prompt = cmd.promptText;
-      setInputText(prompt);
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-          textareaRef.current.setSelectionRange(prompt.length, prompt.length);
-        }
-      }, 0);
-    }
-  }, [clearHistory, setMessages]);
-
-  const handleKeyDownWithCommands = useCallback((event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-    if (isShowingCommands) {
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        setSelectedCommandIndex((prev) => (prev + 1) % filteredCommands.length);
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        setSelectedCommandIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
-      } else if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        handleSelectCommand(filteredCommands[selectedCommandIndex]);
-      } else if (event.key === "Escape") {
-        event.preventDefault();
+  const handleSelectCommand = useCallback(
+    (cmd: SlashCommand) => {
+      if (cmd.action === "clear") {
+        clearHistory();
         setInputText("");
-      } else if (event.key === "Tab") {
-        event.preventDefault();
-        handleSelectCommand(filteredCommands[selectedCommandIndex]);
+        textareaRef.current?.focus();
+      } else if (cmd.action === "help") {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: getHelpMessage(),
+            createdAt: Date.now(),
+            status: "complete",
+          },
+        ]);
+        setInputText("");
+        textareaRef.current?.focus();
+      } else if (cmd.promptText) {
+        const prompt = cmd.promptText;
+        setInputText(prompt);
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(prompt.length, prompt.length);
+          }
+        }, 0);
       }
-      return;
-    }
+    },
+    [clearHistory, setMessages],
+  );
 
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      handleSubmit();
-    }
-  }, [isShowingCommands, filteredCommands, selectedCommandIndex, handleSelectCommand, handleSubmit]);
+  const handleKeyDownWithCommands = useCallback(
+    (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+      if (isShowingCommands) {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          setSelectedCommandIndex((prev) => (prev + 1) % filteredCommands.length);
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          setSelectedCommandIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+        } else if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          handleSelectCommand(filteredCommands[selectedCommandIndex]);
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          setInputText("");
+        } else if (event.key === "Tab") {
+          event.preventDefault();
+          handleSelectCommand(filteredCommands[selectedCommandIndex]);
+        }
+        return;
+      }
 
-  const handleTextareaKeyDown = useCallback((event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-    handleKeyDownWithCommands(event);
-  }, [handleKeyDownWithCommands]);
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        handleSubmit();
+      }
+    },
+    [isShowingCommands, filteredCommands, selectedCommandIndex, handleSelectCommand, handleSubmit],
+  );
+
+  const handleTextareaKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+      handleKeyDownWithCommands(event);
+    },
+    [handleKeyDownWithCommands],
+  );
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(event.target.value);

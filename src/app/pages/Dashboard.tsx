@@ -1,20 +1,6 @@
+import { AlertCircle, ArrowRight, Award, CheckCircle2, Compass } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { CheckCircle2, AlertCircle, Compass, Award, ArrowRight } from "lucide-react";
-
-import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
-import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
-import { DashboardFooter } from "@/features/dashboard/v2/DashboardFooter";
-import { DashboardHero } from "@/features/dashboard/v2/DashboardHero";
-import { NewUserSetupView } from "@/features/dashboard/v2/NewUserSetupView";
-import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
-import { QuoteBlock } from "@/features/dashboard/v2/QuoteBlock";
-import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
-import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
-import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
-import { TwelveWeekTrendCard } from "@/features/dashboard/v2/TwelveWeekTrendCard";
-import { DailyStoicCard } from "@/features/dashboard/v2/DailyStoicCard";
-import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import {
   buildCurrentWeekExecutionSnapshot,
   buildGoalProgressSnapshot,
@@ -25,18 +11,31 @@ import {
 import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
 import { getDashboardNextAction } from "@/features/dashboard/helpers/dashboardSections";
 import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
+import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
+import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
+import { DailyStoicCard } from "@/features/dashboard/v2/DailyStoicCard";
+import { DashboardFooter } from "@/features/dashboard/v2/DashboardFooter";
+import { DashboardHero } from "@/features/dashboard/v2/DashboardHero";
+import { NewUserSetupView } from "@/features/dashboard/v2/NewUserSetupView";
+import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
+import { QuoteBlock } from "@/features/dashboard/v2/QuoteBlock";
+import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
+import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
+import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
+import { TwelveWeekTrendCard } from "@/features/dashboard/v2/TwelveWeekTrendCard";
+import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Skeleton } from "../components/ui/skeleton";
+import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { isDemoMode } from "../utils/app-mode";
@@ -47,6 +46,7 @@ import {
   trackRescueTriggerFired,
 } from "../utils/monetization-analytics";
 import {
+  type Goal,
   getActiveTwelveWeekGoal,
   getLifeAreaLabel,
   getTwelveWeekCurrentWeek,
@@ -54,16 +54,15 @@ import {
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   isTwelveWeekReviewDueToday,
-  sortReflectionsByDateDesc,
-  type Goal,
   type LifeArea,
+  type PricingPlanCode,
+  sortReflectionsByDateDesc,
   type TwelveWeekSystem,
   type TwelveWeekTaskInstance,
   type UserData,
-  type PricingPlanCode,
 } from "../utils/storage";
-import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
 import { formatDisplayDate } from "../utils/storage-date-utils";
+import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
 
 const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
@@ -708,11 +707,7 @@ function DashboardContent({
 
 type DashboardData = ReturnType<typeof useDashboardDerivedData>;
 
-function NextBestAction({
-  data,
-}: {
-  data: DashboardData;
-}) {
+function NextBestAction({ data }: { data: DashboardData }) {
   const navigate = useNavigate();
   const {
     activeSystemTodayOpenTasks,
@@ -723,7 +718,7 @@ function NextBestAction({
     radarData,
   } = data;
 
-  const hasRadarData = radarData && radarData.length > 0 && radarData.some(d => d.value > 0);
+  const hasRadarData = radarData && radarData.length > 0 && radarData.some((d) => d.value > 0);
 
   // Determine the next best action scenario
   let title = "";
@@ -731,7 +726,8 @@ function NextBestAction({
   let ctaLabel = "";
   let ctaPath = "";
   let Icon = Compass;
-  let bgClass = "bg-emerald-500/10 border-emerald-500/15 dark:bg-emerald-950/20 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300";
+  let bgClass =
+    "bg-emerald-500/10 border-emerald-500/15 dark:bg-emerald-950/20 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300";
   let iconColor = "text-emerald-600 dark:text-emerald-400";
   let buttonColor = "bg-emerald-700 hover:bg-emerald-800 text-white";
 
@@ -741,7 +737,8 @@ function NextBestAction({
     ctaLabel = "Chấm điểm ngay";
     ctaPath = "/onboarding";
     Icon = Compass;
-    bgClass = "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
+    bgClass =
+      "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
     iconColor = "text-amber-600 dark:text-amber-400";
     buttonColor = "bg-amber-500 hover:bg-amber-600 text-neutral-900";
   } else if (activeSystemTodayOpenTasks.length > 0) {
@@ -756,7 +753,8 @@ function NextBestAction({
     ctaLabel = "Viết phản tư";
     ctaPath = "/12-week-system?tab=review";
     Icon = Award;
-    bgClass = "bg-purple-500/10 border-purple-500/15 dark:bg-purple-950/20 dark:border-purple-800/30 text-purple-800 dark:text-purple-300";
+    bgClass =
+      "bg-purple-500/10 border-purple-500/15 dark:bg-purple-950/20 dark:border-purple-800/30 text-purple-800 dark:text-purple-300";
     iconColor = "text-purple-600 dark:text-purple-400";
     buttonColor = "bg-purple-700 hover:bg-purple-800 text-white";
   } else if (activeSystemWeekOpenTasks.length > 0) {
@@ -774,12 +772,14 @@ function NextBestAction({
   }
 
   return (
-    <section 
+    <section
       className={`rounded-3xl border p-5 shadow-3xs backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all duration-300 hover:shadow-2xs ${bgClass} select-none relative`}
       aria-label="Hành động đề xuất tiếp theo"
     >
       {/* 📌 Floating pin for visual consistency */}
-      <span className="absolute -top-3 left-6 text-lg filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">📌</span>
+      <span className="hidden sm:inline absolute -top-3 left-6 text-lg filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        📌
+      </span>
 
       <div className="flex gap-4 items-start sm:items-center">
         <div className="p-2.5 rounded-2xl bg-white dark:bg-neutral-900 shadow-3xs shrink-0 flex items-center justify-center">
@@ -787,12 +787,8 @@ function NextBestAction({
         </div>
         <div className="space-y-1">
           <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-60">Hành động đề xuất</span>
-          <h3 className="text-xs font-bold leading-tight">
-            {title}
-          </h3>
-          <p className="text-xs font-semibold leading-relaxed opacity-80 max-w-xl">
-            {description}
-          </p>
+          <h3 className="text-xs font-bold leading-tight">{title}</h3>
+          <p className="text-xs font-semibold leading-relaxed opacity-80 max-w-xl">{description}</p>
         </div>
       </div>
       <button
@@ -870,7 +866,7 @@ function DashboardActiveLayout({
         {/* Left Column: Today Tasks & Execution Core */}
         <div className="space-y-6 lg:col-span-2">
           <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
-          
+
           {/* Today Tasks - Primary Focus */}
           <div className="relative">
             <TodayMiniCard
@@ -880,12 +876,12 @@ function DashboardActiveLayout({
               totalCount={data.todayPreviewTotal}
             />
           </div>
-          
+
           {/* Active Goals Card - Quieter border */}
           <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
             <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
           </div>
-          
+
           {/* Week Rhythm Card - Quieter border */}
           <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
             <WeekRhythmCard
@@ -901,7 +897,7 @@ function DashboardActiveLayout({
               streak={data.dashboardKpiStreak}
             />
           </div>
-          
+
           {/* Twelve Week Trend Card - Quieter / conditional display within card */}
           <div className="opacity-85 hover:opacity-100 transition-opacity duration-200">
             <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
@@ -912,22 +908,24 @@ function DashboardActiveLayout({
         <aside className="space-y-6">
           {data.reviewDueToday ? (
             <div className="relative">
-              <span className="absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] z-10">📌</span>
+              <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] z-10">
+                📌
+              </span>
               <ReflectionPrompt
                 currentWeek={data.dashboardKpiCurrentWeek}
                 reviewHref={data.dashboardNextAction.ctaTarget}
               />
             </div>
           ) : null}
-          
+
           <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
             <BalanceCard rows={balanceRows} />
           </div>
-          
+
           <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
             <DailyStoicCard />
           </div>
-          
+
           <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
             <QuoteBlock />
           </div>
@@ -955,7 +953,10 @@ function DashboardActiveLayout({
 
 function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; limit: number; onUpgrade: () => void }) {
   return (
-    <section className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
+    <section
+      className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4"
+      aria-label="Giới hạn gói Free"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-app-ink">

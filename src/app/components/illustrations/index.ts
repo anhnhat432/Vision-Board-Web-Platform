@@ -1,10 +1,10 @@
 export { BillingPlusIllustration } from "./BillingPlusIllustration";
+export { MountainMoonIllustration, ZenLeafIllustration } from "./CalmEmptyIllustrations";
 export { CelebrationBurst } from "./CelebrationBurst";
 export { CloudSyncIllustration } from "./CloudSyncIllustration";
 export { EmptyOrdersIllustration } from "./EmptyOrdersIllustration";
 export { EmptyTaskIllustration } from "./EmptyTaskIllustration";
-export { VisionMapIllustration } from "./VisionMapIllustration";
-export { WeeklyReviewIllustration } from "./WeeklyReviewIllustration";
-export { MountainMoonIllustration, ZenLeafIllustration } from "./CalmEmptyIllustrations";
 export * from "./mini";
 export type { AmbientIllustrationProps } from "./utils";
+export { VisionMapIllustration } from "./VisionMapIllustration";
+export { WeeklyReviewIllustration } from "./WeeklyReviewIllustration";

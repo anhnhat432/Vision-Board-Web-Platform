@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
-
-import { TwelveWeekProgressTab, TwelveWeekSettingsTab } from "./TwelveWeekSystemSections";
 import type { AppPreferences, TwelveWeekSystem } from "../utils/storage-types";
+import { TwelveWeekProgressTab, TwelveWeekSettingsTab } from "./TwelveWeekSystemSections";
 
 const baseSystem: TwelveWeekSystem = {
   goalType: "Project Completion",

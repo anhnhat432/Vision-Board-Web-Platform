@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { buildAssistantContext, type AssistantContext } from "./buildAssistantContext";
 import { sendAssistantMessageStream } from "./assistantApi";
 import { captureAssistantFeedback } from "./assistantFeedback";
-import type { ChatHistoryMessage, Message, FeedbackEntry, FeedbackRating } from "./types";
+import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
 import { parseAssistantReply } from "./parseActions";
+import type { ChatHistoryMessage, FeedbackEntry, FeedbackRating, Message } from "./types";
 
 const SUGGESTIONS = [
   "Hôm nay tôi nên làm gì?",

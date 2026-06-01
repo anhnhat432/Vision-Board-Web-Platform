@@ -49,13 +49,9 @@ export function FrameSizePicker({ frames, selected, onChange }: FrameSizePickerP
             )}
             <div className="text-base font-semibold">{frame.label}</div>
             {frame.description && (
-              <div className="mt-1 text-xs text-[var(--order-text-muted)]">
-                {frame.description}
-              </div>
+              <div className="mt-1 text-xs text-[var(--order-text-muted)]">{frame.description}</div>
             )}
-            <div className="mt-2 text-sm font-semibold text-[var(--order-accent)]">
-              {formatVnd(frame.priceVnd)}
-            </div>
+            <div className="mt-2 text-sm font-semibold text-[var(--order-accent)]">{formatVnd(frame.priceVnd)}</div>
           </button>
         );
       })}

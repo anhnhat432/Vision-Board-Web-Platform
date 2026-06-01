@@ -1,10 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
+import { describe, expect, it, vi } from "vitest";
+import { getGoalArchetypeLabel } from "@/lib/smart-goal/goalArchetypes";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
-import { getGoalArchetypeLabel } from "@/lib/smart-goal/goalArchetypes";
 
 describe("ArchetypeHint", () => {
   it("renders metric variant with recommendedMetric for skill_learning", () => {

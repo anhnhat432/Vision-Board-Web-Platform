@@ -1,11 +1,11 @@
-import type { BuildSmartGoalInput } from "@/lib/smart-goal";
-import type { GoalClarityLevel, CalibratedDifficulty } from "@/lib/smart-goal/quality";
 import type {
-  PlanQualityLevel,
-  WeekOneLoadLevel,
   PlanLoadPreference,
+  PlanQualityLevel,
   WeeklyCapacityBand,
+  WeekOneLoadLevel,
 } from "@/features/plan12week/logic/planQuality";
+import type { BuildSmartGoalInput } from "@/lib/smart-goal";
+import type { CalibratedDifficulty, GoalClarityLevel } from "@/lib/smart-goal/quality";
 
 /**
  * Calibration cases for SMART quality + plan quality rubrics.

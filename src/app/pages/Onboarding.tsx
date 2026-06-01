@@ -677,9 +677,9 @@ export function Onboarding() {
                 <div className="hidden lg:flex flex-col items-center justify-center surface-raised rounded-3xl border border-neutral-200 bg-gradient-to-br from-emerald-500/[0.03] to-teal-500/[0.03] p-8 shadow-3xs hover:shadow-2xs transition-shadow relative overflow-hidden">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
                   <div className="w-full max-w-[260px] rounded-2xl overflow-hidden border border-emerald-250/20 shadow-sm relative z-10 animate-[float_4s_ease-in-out_infinite]">
-                    <img 
-                      src="/life_balance_checkin.png" 
-                      alt="Khảo sát Bánh xe cuộc sống và tự phản tư" 
+                    <img
+                      src="/life_balance_checkin.png"
+                      alt="Khảo sát Bánh xe cuộc sống và tự phản tư"
                       className="w-full h-auto object-cover aspect-[4/3]"
                       loading="lazy"
                     />
@@ -1112,13 +1112,13 @@ export function Onboarding() {
               {isRadarExpanded && (
                 <div className="mt-4 pt-4 border-t border-app-line/60 animate-fade-in space-y-4">
                   <div className="flex items-center justify-center min-h-[260px] my-1">
-                    <SimpleRadarChart 
-                      data={radarData} 
-                      height={260} 
+                    <SimpleRadarChart
+                      data={radarData}
+                      height={260}
                       fill="var(--app-accent)"
                       stroke="var(--app-accent)"
                       fillOpacity={0.15}
-                      className="w-full max-w-[280px]" 
+                      className="w-full max-w-[280px]"
                     />
                   </div>
 

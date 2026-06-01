@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
 import * as appMode from "../utils/app-mode";
-import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount, getPlusPriceLabel, PLUS_MONTHLY_PRICE_VND } from "../utils/billing-pricing";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { canUpgradeToPlus, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { type MonetizationSource, trackPaywallCtaClicked, trackPaywallViewed } from "../utils/monetization-analytics";
 import { getBillingProviderStatus } from "../utils/production";
@@ -182,9 +182,7 @@ export function UpgradePaywallDialog({
                   Gói Miễn phí vẫn giúp bạn chạy một chu kỳ 12 tuần cơ bản. Plus mở thêm lớp nâng cao để setup nhanh
                   hơn, giữ nhịp tốt hơn và review rõ hơn.
                 </p>
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">
-                  Plus mở khóa
-                </p>
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">Plus mở khóa</p>
                 <div className="mt-4 space-y-3">
                   {paywallCopy.bullets.map((bullet) => (
                     <div key={bullet} className="flex gap-3 rounded-lg border border-app-line bg-app-bg px-4 py-3">
@@ -212,17 +210,13 @@ export function UpgradePaywallDialog({
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">
-                        Thanh toán
-                      </p>
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán</p>
                       <p className="mt-2 text-sm font-medium text-app-ink">
                         {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">
-                        Khôi phục
-                      </p>
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">Khôi phục</p>
                       <p className="mt-2 text-sm font-medium text-app-ink">
                         {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
@@ -245,8 +239,8 @@ export function UpgradePaywallDialog({
                     Thanh toán đang tạm khóa.
                   </p>
                   <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-                    Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị
-                    ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
+                    Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
+                    hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ{" "}
                     {BILLING_SUPPORT_EMAIL ? (
                       <a
                         href={`mailto:${BILLING_SUPPORT_EMAIL}`}
@@ -256,8 +250,8 @@ export function UpgradePaywallDialog({
                       </a>
                     ) : (
                       "đội hỗ trợ"
-                    )}
-                    {" "}để mở Plus thủ công.
+                    )}{" "}
+                    để mở Plus thủ công.
                   </p>
                 </div>
               ) : null}
@@ -355,11 +349,7 @@ export function UpgradePaywallDialog({
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                       data-testid={`paywall-upgrade-cta-${plan.code.toLowerCase()}`}
                     >
-                      {isCurrent
-                        ? "Đang dùng"
-                        : paidCheckoutDisabled
-                          ? "Tạm khóa thanh toán"
-                          : "Tiếp tục thanh toán"}
+                      {isCurrent ? "Đang dùng" : paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Tiếp tục thanh toán"}
                     </Button>
                   </div>
                 );

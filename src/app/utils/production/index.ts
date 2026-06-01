@@ -1,3 +1,5 @@
+export type { CancelSubscriptionResult } from "./billingProvider";
+export { cancelSubscriptionOnServer, getBillingProviderStatus, openBillingCustomerPortal } from "./billingProvider";
 export type { BrowserNotificationStatus } from "./browserNotification";
 export {
   getBrowserNotificationStatus,
@@ -5,8 +7,6 @@ export {
   requestBrowserNotificationPermission,
   sendTestBrowserNotification,
 } from "./browserNotification";
-export { getBillingProviderStatus, openBillingCustomerPortal, cancelSubscriptionOnServer } from "./billingProvider";
-export type { CancelSubscriptionResult } from "./billingProvider";
 export type { LocalCheckoutResult } from "./entitlementSync";
 export {
   getLastEntitlementSyncSnapshot,

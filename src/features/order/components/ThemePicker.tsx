@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
 import { Check, Search } from "lucide-react";
-
-import { cn } from "@/app/components/ui/utils";
+import { useMemo, useState } from "react";
 import { Input } from "@/app/components/ui/input";
+import { cn } from "@/app/components/ui/utils";
 import type { CatalogItem } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 
@@ -32,12 +31,7 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
     <div className="space-y-3">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--order-text-muted)]" />
-        <Input
-          placeholder="Tìm chủ đề..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pl-9"
-        />
+        <Input placeholder="Tìm chủ đề..." value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {filtered.map((theme) => {
@@ -75,9 +69,7 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
                 />
               )}
               <div className="text-sm font-medium">{theme.label}</div>
-              <div className="mt-1 text-xs font-medium text-[var(--order-accent)]">
-                {formatVnd(theme.priceVnd)}
-              </div>
+              <div className="mt-1 text-xs font-medium text-[var(--order-accent)]">{formatVnd(theme.priceVnd)}</div>
             </button>
           );
         })}

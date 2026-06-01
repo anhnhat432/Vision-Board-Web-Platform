@@ -1,16 +1,16 @@
 import {
-  GraduationCap,
-  Dumbbell,
-  TrendingUp,
-  PiggyBank,
+  Activity,
   Award,
   CheckSquare,
-  Activity,
-  Palette,
-  Users,
-  Sparkles,
-  RotateCcw,
+  Dumbbell,
+  GraduationCap,
   type LucideIcon,
+  Palette,
+  PiggyBank,
+  RotateCcw,
+  Sparkles,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 
 import { type GoalArchetype, getGoalArchetypeLabel } from "@/lib/smart-goal/goalArchetypes";
@@ -79,15 +79,18 @@ export function ArchetypePicker({
                 "group inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
                 active
                   ? "border-app-accent bg-app-accent-soft/30 text-app-accent shadow-sm"
-                  : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/10 hover:text-app-accent"
+                  : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/10 hover:text-app-accent",
               )}
               onClick={() => onChange(option.value)}
               aria-pressed={active}
             >
-              <Icon className={cn(
-                "h-3.5 w-3.5 transition-colors duration-150",
-                active ? "text-app-accent" : "text-app-ink-muted group-hover:text-app-accent"
-              )} aria-hidden="true" />
+              <Icon
+                className={cn(
+                  "h-3.5 w-3.5 transition-colors duration-150",
+                  active ? "text-app-accent" : "text-app-ink-muted group-hover:text-app-accent",
+                )}
+                aria-hidden="true"
+              />
               <span className="leading-none">{getGoalArchetypeLabel(option.value)}</span>
             </button>
           );

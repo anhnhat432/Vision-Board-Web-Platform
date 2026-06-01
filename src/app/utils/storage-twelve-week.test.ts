@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
-
+import { CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES } from "./storage-constants";
+import { createEmptyUserData } from "./storage-demo-data";
+import { recomputeGoalProgressFromWeeksInData } from "./storage-goal-ops";
 import {
   getActiveTwelveWeekGoal,
   getDefaultScoreboard,
-  getTwelveWeekCycleWeekNumber,
   getTwelveWeekCurrentWeek,
+  getTwelveWeekCycleWeekNumber,
   getTwelveWeekMissedTasks,
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
@@ -19,9 +21,6 @@ import {
   skipTwelveWeekNonCoreTask,
   sortTwelveWeekGoalsForSelection,
 } from "./storage-twelve-week";
-import { recomputeGoalProgressFromWeeksInData } from "./storage-goal-ops";
-import { CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES } from "./storage-constants";
-import { createEmptyUserData } from "./storage-demo-data";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "./storage-types";
 
 function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {

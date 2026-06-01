@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
-import { BookOpen, Briefcase, HeartPulse, Home, Sparkles, Sprout, Users, Wallet, type LucideIcon } from "lucide-react";
+import { BookOpen, Briefcase, HeartPulse, Home, type LucideIcon, Sparkles, Sprout, Users, Wallet } from "lucide-react";
+import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import {
@@ -11,7 +11,8 @@ import {
   DialogTitle,
 } from "@/app/components/ui/dialog";
 import { Textarea } from "@/app/components/ui/textarea";
-import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
+import { cn } from "@/app/components/ui/utils";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem, VisionBoardThemeId } from "@/app/utils/storage-types";
 import {
   CURATED_IMAGES_BY_LIFE_AREA,
@@ -20,7 +21,6 @@ import {
   STORY_FEELING_OPTIONS,
   VISION_BOARD_THEMES,
 } from "@/app/utils/vision-board-config";
-import { cn } from "@/app/components/ui/utils";
 
 export interface VisionBoardStorySeed {
   themeId: VisionBoardThemeId;

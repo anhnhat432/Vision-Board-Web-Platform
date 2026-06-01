@@ -25,30 +25,17 @@ export function ShippingForm({ value, onChange, errors, goalOptions = [] }: Ship
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="sm:col-span-2">
         <Label htmlFor="order-fullname">Họ và tên</Label>
-        <Input
-          id="order-fullname"
-          value={value.fullName}
-          onChange={(e) => set("fullName", e.target.value)}
-        />
+        <Input id="order-fullname" value={value.fullName} onChange={(e) => set("fullName", e.target.value)} />
         {errors?.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName}</p>}
       </div>
       <div>
         <Label htmlFor="order-email">Email</Label>
-        <Input
-          id="order-email"
-          type="email"
-          value={value.email}
-          onChange={(e) => set("email", e.target.value)}
-        />
+        <Input id="order-email" type="email" value={value.email} onChange={(e) => set("email", e.target.value)} />
         {errors?.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
       </div>
       <div>
         <Label htmlFor="order-phone">Số điện thoại</Label>
-        <Input
-          id="order-phone"
-          value={value.phone}
-          onChange={(e) => set("phone", e.target.value)}
-        />
+        <Input id="order-phone" value={value.phone} onChange={(e) => set("phone", e.target.value)} />
         {errors?.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
       </div>
       <div className="sm:col-span-2">
@@ -58,9 +45,7 @@ export function ShippingForm({ value, onChange, errors, goalOptions = [] }: Ship
           value={value.shippingAddress}
           onChange={(e) => set("shippingAddress", e.target.value)}
         />
-        {errors?.shippingAddress && (
-          <p className="mt-1 text-xs text-destructive">{errors.shippingAddress}</p>
-        )}
+        {errors?.shippingAddress && <p className="mt-1 text-xs text-destructive">{errors.shippingAddress}</p>}
       </div>
       {goalOptions.length > 0 && (
         <div className="sm:col-span-2">

@@ -1,6 +1,6 @@
 import { getSubscriptionGraceState } from "./billing-grace-period";
-import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
 import type { BillingCycle, EntitlementKey, PricingPlanCode, UserData } from "./storage-types";
+import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
 
 export const SUBSCRIPTION_GRACE_PERIOD_MS = 3 * 24 * 60 * 60 * 1000;
 

@@ -1,8 +1,8 @@
-import { useMemo, type JSX } from "react";
-import { BookOpen, Briefcase, HeartPulse, Home, Sparkles, Sprout, Users, Wallet, type LucideIcon } from "lucide-react";
+import { BookOpen, Briefcase, HeartPulse, Home, type LucideIcon, Sparkles, Sprout, Users, Wallet } from "lucide-react";
+import { type JSX, useMemo } from "react";
 
 import { Card, CardContent } from "@/app/components/ui/card";
-import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem } from "@/app/utils/storage-types";
 
 const LIFE_AREA_ICONS: Record<string, LucideIcon> = {

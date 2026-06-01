@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
 import { Sparkles } from "lucide-react";
+import { describe, expect, it, vi } from "vitest";
 
 import { Button } from "@/app/components/ui/button";
 import { EmptyState } from "./EmptyState";

@@ -5,8 +5,8 @@
   normalizeListInput,
   parseNumberInput,
   parseSmartGoal,
-  stringifyListInput,
   type SmartGoal,
+  stringifyListInput,
 } from "@/lib/smart-goal";
 import type { DimensionScore, QualityDimension, SmartGoalQualityResult } from "@/lib/smart-goal/quality";
 

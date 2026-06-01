@@ -1,32 +1,30 @@
-import { useEffect } from "react";
-import { createElement } from "react";
-import { render, type RenderResult } from "@testing-library/react";
+import { type RenderResult, render } from "@testing-library/react";
+import { createElement, useEffect } from "react";
 import { MemoryRouter } from "react-router";
-
-import { FirstLoginRestoreToast } from "@/app/components/root-layout/FirstLoginRestoreToast";
 import { AutoCloudConflictDialog } from "@/app/components/root-layout/AutoCloudConflictDialog";
+import { FirstLoginRestoreToast } from "@/app/components/root-layout/FirstLoginRestoreToast";
 import {
   APP_STORAGE_KEYS,
-  USER_DATA_UPDATED_EVENT_NAME,
   activateAuthenticatedUserData,
+  type Goal,
   getUserData,
   saveUserData,
-  type Goal,
   type TwelveWeekSystem,
   type TwelveWeekTaskInstance,
   type UniversalDailyCheckIn,
   type UniversalScoreboardWeek,
   type UniversalWeeklyReview,
+  USER_DATA_UPDATED_EVENT_NAME,
   type UserData,
 } from "@/app/utils/storage";
 import { getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
 import { AutoCloudSyncProvider, useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 import {
+  type DataMutationItem,
   enqueueStoredMutation,
   readMutationQueueStore,
   writeMutationQueueStore,
-  type DataMutationItem,
 } from "@/features/plan12week/persistence/mutationQueue";
 import { buildPlanSnapshotUpdatedPayload } from "@/features/plan12week/persistence/planSnapshotMutation";
 import {

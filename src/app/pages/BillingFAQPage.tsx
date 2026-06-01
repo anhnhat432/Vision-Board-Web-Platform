@@ -1,7 +1,7 @@
 import { HelpCircle, LifeBuoy } from "lucide-react";
 import { Link } from "react-router";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { AppPublicFooter } from "../components/layout/AppPublicFooter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
@@ -52,7 +52,10 @@ export function BillingFAQPage() {
         </CardHeader>
         <CardContent className="space-y-4 p-5 sm:p-6">
           {FAQ_ITEMS.map((item) => (
-            <article key={item.question} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+            <article
+              key={item.question}
+              className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
+            >
               <h2 className="text-lg font-semibold text-app-ink">{item.question}</h2>
               <p className="mt-2 text-sm leading-7 text-app-ink-soft">
                 {item.answer}

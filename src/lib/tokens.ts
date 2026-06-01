@@ -21,7 +21,7 @@ const green = {
   700: "#2F5D50",
   600: "#3A7261",
   100: "#E8F0EC",
-  50:  "#F2F7F4",
+  50: "#F2F7F4",
 } as const;
 
 const terra = {
@@ -29,7 +29,7 @@ const terra = {
   700: "#C96843",
   600: "#D97757",
   100: "#FCEDE5",
-  50:  "#FEF6F1",
+  50: "#FEF6F1",
 } as const;
 
 const neutral = {
@@ -40,8 +40,8 @@ const neutral = {
   300: "#B8B2AA",
   200: "#D4CFC8",
   150: "#ECE8E1",
-  50:  "#FAF8F5",
-  0:   "#FFFFFF",
+  50: "#FAF8F5",
+  0: "#FFFFFF",
 } as const;
 
 /* ── Token shape ────────────────────────────────────────────── */
@@ -85,44 +85,44 @@ export type AppTokens = {
 /* ── Semantic tokens — Light mode ───────────────────────────── */
 export const tokens: AppTokens = {
   /* Background */
-  bg:        neutral[50],
-  bgSubtle:  "#F5F2EE",
-  surface:   neutral[0],
+  bg: neutral[50],
+  bgSubtle: "#F5F2EE",
+  surface: neutral[0],
 
   /* Text */
-  ink:         neutral[950],
-  inkSoft:     neutral[700],
-  inkMuted:    neutral[500],
+  ink: neutral[950],
+  inkSoft: neutral[700],
+  inkMuted: neutral[500],
   inkDisabled: neutral[300],
   inkOnAccent: neutral[0],
-  inkOnWarm:   neutral[0],
-  inkLink:     green[700],
+  inkOnWarm: neutral[0],
+  inkLink: green[700],
 
   /* Border */
-  line:      neutral[150],
+  line: neutral[150],
   lineStrong: neutral[200],
 
   /* Accent — Forest Green */
-  accent:       green[700],
-  accentHover:  green[800],
+  accent: green[700],
+  accentHover: green[800],
   accentActive: green[900],
-  accentSoft:   green[100],
+  accentSoft: green[100],
   accentSubtle: green[50],
 
   /* Warm — Terracotta (Reflection ONLY) */
-  warm:        terra[600],
-  warmHover:   terra[700],
-  warmActive:  terra[800],
-  warmSoft:    terra[100],
-  warmSubtle:  terra[50],
-  warmStrong:  "#5C3A2E",
-  warmBorder:  "#F3D9CC",
+  warm: terra[600],
+  warmHover: terra[700],
+  warmActive: terra[800],
+  warmSoft: terra[100],
+  warmSubtle: terra[50],
+  warmStrong: "#5C3A2E",
+  warmBorder: "#F3D9CC",
 
   /* Status */
   statusSuccess: "#3A7D5E",
   statusWarning: "#C4841A",
-  statusError:   "#B84040",
-  statusInfo:    "#3A6B9E",
+  statusError: "#B84040",
+  statusInfo: "#3A6B9E",
 
   /* Shadow (string values for boxShadow) */
   shadowSm: "0 1px 3px rgba(26,26,26,0.06), 0 1px 2px rgba(26,26,26,0.04)",
@@ -131,7 +131,7 @@ export const tokens: AppTokens = {
   shadowXl: "0 16px 40px rgba(26,26,26,0.12), 0 8px 16px rgba(26,26,26,0.06)",
 
   /* Focus ring */
-  focusRing:     "0 0 0 3px rgba(47, 93, 80, 0.20)",
+  focusRing: "0 0 0 3px rgba(47, 93, 80, 0.20)",
   focusRingWarm: "0 0 0 3px rgba(217, 119, 87, 0.20)",
 };
 
@@ -139,32 +139,32 @@ export const tokens: AppTokens = {
 // Dùng Partial<AppTokens> thay vì Partial<typeof tokens> để tránh
 // TypeScript enforce literal string types từ light mode as const.
 export const tokensDark: Partial<AppTokens> = {
-  bg:        "#1C1A15",
-  bgSubtle:  "#211F1A",
-  surface:   "#26231D",
+  bg: "#1C1A15",
+  bgSubtle: "#211F1A",
+  surface: "#26231D",
 
-  ink:         "#F2EDE5",
-  inkSoft:     "#C8C2B5",
-  inkMuted:    "#A39B8C",
+  ink: "#F2EDE5",
+  inkSoft: "#C8C2B5",
+  inkMuted: "#A39B8C",
   inkDisabled: "#6B6358",
-  inkLink:     "#5BA590",
+  inkLink: "#5BA590",
 
-  line:       "#3A342B",
+  line: "#3A342B",
   lineStrong: "#4A4239",
 
-  accent:       "#5BA590",
-  accentHover:  "#4D9480",
+  accent: "#5BA590",
+  accentHover: "#4D9480",
   accentActive: "#3E7A68",
-  accentSoft:   "#1F3A33",
+  accentSoft: "#1F3A33",
   accentSubtle: "#192E28",
 
-  warm:        "#E89878",
-  warmHover:   "#D98060",
-  warmActive:  "#C96843",
-  warmSoft:    "#3A2820",
-  warmSubtle:  "#2E201A",
-  warmStrong:  "#F8D5C2",
-  warmBorder:  "#5C3A2E",
+  warm: "#E89878",
+  warmHover: "#D98060",
+  warmActive: "#C96843",
+  warmSoft: "#3A2820",
+  warmSubtle: "#2E201A",
+  warmStrong: "#F8D5C2",
+  warmBorder: "#5C3A2E",
 
   shadowSm: "0 1px 3px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.15)",
   shadowMd: "0 4px 12px rgba(0,0,0,0.28), 0 2px 4px rgba(0,0,0,0.16)",
@@ -190,12 +190,7 @@ export function getToken(key: keyof AppTokens, isDark = false): string {
  *   - Card border: border-app-warm-border
  *   - Prompt text: text-app-warm, font-serif
  */
-export const REFLECTION_ROUTES = [
-  "/weekly-reflection",
-  "/daily-checkin",
-  "/goal-review",
-  "/review",
-] as const;
+export const REFLECTION_ROUTES = ["/weekly-reflection", "/daily-checkin", "/goal-review", "/review"] as const;
 
 export type ReflectionRoute = (typeof REFLECTION_ROUTES)[number];
 
@@ -209,16 +204,16 @@ export function isReflectionRoute(pathname: string): boolean {
  * Giá trị là "accent" hoặc "warm" — dùng để switch token context.
  */
 export const FLOW_COLOR_ZONE = {
-  onboarding:       "accent",
-  lifeBalance:      "accent",
-  lifeInsight:      "accent",
-  smartGoal:        "accent",
-  feasibility:      "accent",
-  twelveWeekPlan:   "accent",
-  weeklyExecution:  "accent",
+  onboarding: "accent",
+  lifeBalance: "accent",
+  lifeInsight: "accent",
+  smartGoal: "accent",
+  feasibility: "accent",
+  twelveWeekPlan: "accent",
+  weeklyExecution: "accent",
   weeklyReflection: "warm",
-  dailyCheckin:     "warm",
-  goalReview:       "warm",
+  dailyCheckin: "warm",
+  goalReview: "warm",
 } as const;
 
 export type FlowStep = keyof typeof FLOW_COLOR_ZONE;

@@ -23,9 +23,7 @@ export function AdminPageHeader({ title, description, actions, className }: Admi
     >
       <div className="min-w-0 space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight text-white">{title}</h1>
-        {description ? (
-          <p className="max-w-2xl text-sm leading-6 text-slate-400">{description}</p>
-        ) : null}
+        {description ? <p className="max-w-2xl text-sm leading-6 text-slate-400">{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </header>

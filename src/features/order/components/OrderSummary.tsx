@@ -36,22 +36,16 @@ export function OrderSummary({
   const previewFrame = selectedFrame?.thumbnail ? selectedFrame : null;
   const previewThemes = selectedThemes.filter((t) => t.thumbnail);
   const previewSticker = selectedSticker?.thumbnail ? selectedSticker : null;
-  const hasPreview = Boolean(
-    previewFrame || previewThemes.length > 0 || previewSticker,
-  );
+  const hasPreview = Boolean(previewFrame || previewThemes.length > 0 || previewSticker);
 
   return (
     <aside className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-sm">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--order-eyebrow)]">
-        Kit của bạn
-      </h3>
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--order-eyebrow)]">Kit của bạn</h3>
       <div className="mt-3">
         {!hasPreview ? (
           <div className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-[var(--r-card-sm)] bg-[var(--order-bg)] text-center">
             <Package className="h-8 w-8 text-[var(--order-accent)]" />
-            <p className="px-4 text-xs text-[var(--order-text-muted)]">
-              Chọn khung và set ảnh để xem trước
-            </p>
+            <p className="px-4 text-xs text-[var(--order-text-muted)]">Chọn khung và set ảnh để xem trước</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -91,32 +85,18 @@ export function OrderSummary({
       <div className="mt-5 border-t border-[var(--order-border)] pt-4">
         <h3 className="text-base font-semibold">Đơn hàng của bạn</h3>
         <div className="mt-3 space-y-2 text-sm">
-          {lines.length === 0 && (
-            <p className="text-[var(--order-text-muted)]">Chưa chọn sản phẩm.</p>
-          )}
+          {lines.length === 0 && <p className="text-[var(--order-text-muted)]">Chưa chọn sản phẩm.</p>}
           {lines.map((line) => (
-            <div
-              key={`${line.itemId}-${line.qty}`}
-              className="flex items-start justify-between gap-2"
-            >
+            <div key={`${line.itemId}-${line.qty}`} className="flex items-start justify-between gap-2">
               <div>
                 <div>{line.label}</div>
-                {line.qty > 1 && (
-                  <div className="text-xs text-[var(--order-text-muted)]">
-                    × {line.qty}
-                  </div>
-                )}
+                {line.qty > 1 && <div className="text-xs text-[var(--order-text-muted)]">× {line.qty}</div>}
               </div>
-              <div className="shrink-0 tabular-nums">
-                {formatVnd(line.lineTotalVnd)}
-              </div>
+              <div className="shrink-0 tabular-nums">{formatVnd(line.lineTotalVnd)}</div>
             </div>
           ))}
           {INCLUDED_DOCS.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex items-start justify-between gap-2 text-[var(--order-text-muted)]"
-            >
+            <div key={doc.id} className="flex items-start justify-between gap-2 text-[var(--order-text-muted)]">
               <div>{doc.label}</div>
               <div className="shrink-0">Tặng kèm — 0đ</div>
             </div>
@@ -130,23 +110,16 @@ export function OrderSummary({
           <div className="flex justify-between text-[var(--order-text-muted)]">
             <span>
               Phí ship
-              <span className="ml-1 text-xs">
-                (báo sau khi xác nhận địa chỉ)
-              </span>
+              <span className="ml-1 text-xs">(báo sau khi xác nhận địa chỉ)</span>
             </span>
-            <span className="tabular-nums">
-              {shippingVnd === 0 ? "Tính sau" : formatVnd(shippingVnd)}
-            </span>
+            <span className="tabular-nums">{shippingVnd === 0 ? "Tính sau" : formatVnd(shippingVnd)}</span>
           </div>
           <div className="mt-2 flex justify-between text-lg font-semibold">
             <span>Tổng tạm tính</span>
-            <span className="tabular-nums text-[var(--order-accent)]">
-              {formatVnd(totalVnd)}
-            </span>
+            <span className="tabular-nums text-[var(--order-accent)]">{formatVnd(totalVnd)}</span>
           </div>
           <p className="pt-1 text-xs text-[var(--order-text-muted)]">
-            Tổng đơn cuối cùng = tạm tính + phí ship. Shop sẽ chốt phí ship qua
-            email/điện thoại trước khi gửi kit.
+            Tổng đơn cuối cùng = tạm tính + phí ship. Shop sẽ chốt phí ship qua email/điện thoại trước khi gửi kit.
           </p>
         </div>
         {!isSubmittable && missingFields.length > 0 && (

@@ -1,9 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-
-import { cn } from "../ui/utils";
 import { Card, CardContent } from "../ui/card";
+import { cn } from "../ui/utils";
 
 export type PageHeroAlign = "left" | "center";
 export type PageHeroTitleLevel = 1 | 2;

@@ -1,9 +1,9 @@
-import type { JSX } from "react";
 import { Trash2, X } from "lucide-react";
+import type { JSX } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
-import { LIFE_AREAS, LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem } from "@/app/utils/storage-types";
 import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS } from "@/app/utils/vision-board-config";
 

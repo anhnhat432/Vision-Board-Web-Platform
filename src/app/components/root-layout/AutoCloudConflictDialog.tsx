@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Download, ExternalLink, Loader2, Monitor, RotateCcw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { exportUserDataSnapshot } from "@/app/utils/storage";
@@ -190,11 +190,7 @@ export function AutoCloudConflictDialog() {
                   Tải backup và lấy bản tài khoản
                 </Button>
               ) : (
-                <Button
-                  type="button"
-                  onClick={() => setShowUseCloudConfirm(true)}
-                  disabled={Boolean(resolvingAction)}
-                >
+                <Button type="button" onClick={() => setShowUseCloudConfirm(true)} disabled={Boolean(resolvingAction)}>
                   <RotateCcw className="h-4 w-4" />
                   Lấy bản tài khoản
                 </Button>

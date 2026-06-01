@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import type { CatalogItem } from "@/features/order/catalog/types";
 
@@ -39,9 +39,7 @@ describe("FrameSizePicker", () => {
   });
 
   it("renders thumbnail image when provided", () => {
-    const withImg: CatalogItem[] = [
-      { ...frames[0], thumbnail: "/img/frame-20x30.png" },
-    ];
+    const withImg: CatalogItem[] = [{ ...frames[0], thumbnail: "/img/frame-20x30.png" }];
     render(<FrameSizePicker frames={withImg} selected={null} onChange={() => {}} />);
     const img = screen.getByAltText("20×30") as HTMLImageElement;
     expect(img.tagName).toBe("IMG");

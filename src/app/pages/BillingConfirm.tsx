@@ -1,9 +1,9 @@
-import { apiClient, toAppError } from "@/lib/api/apiClient";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { CheckCircle2, CreditCard, Loader2, LockKeyhole, Mail, ReceiptText, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { apiClient, toAppError } from "@/lib/api/apiClient";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { BillingPlusIllustration } from "../components/illustrations";
 import { isPaidCheckoutDisabled } from "../utils/app-mode";
@@ -164,7 +164,15 @@ export function BillingConfirm() {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, checkoutInfo?.billingCycle, emailVerificationRequired, navigate, paidCheckoutDisabled, receiptEmail, user]);
+  }, [
+    canSubmit,
+    checkoutInfo?.billingCycle,
+    emailVerificationRequired,
+    navigate,
+    paidCheckoutDisabled,
+    receiptEmail,
+    user,
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -258,14 +266,14 @@ export function BillingConfirm() {
               </p>
               <p className="mt-2 leading-6 text-app-ink-soft">
                 Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
-                hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ {" "}
+                hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ{" "}
                 <a
                   href={`mailto:${BILLING_SUPPORT_EMAIL}`}
                   className="font-medium text-app-ink underline-offset-4 hover:underline"
                 >
                   {BILLING_SUPPORT_EMAIL}
-                </a>
-                {" "}để mở Plus thủ công.
+                </a>{" "}
+                để mở Plus thủ công.
               </p>
             </div>
           ) : null}
@@ -289,9 +297,7 @@ export function BillingConfirm() {
           ) : null}
 
           {error && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
           )}
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">

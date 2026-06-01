@@ -1,11 +1,10 @@
-import { useState, type ReactNode } from "react";
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
 import { AlertTriangle, Loader2, LogOut, RefreshCw } from "lucide-react";
-
+import { type ReactNode, useState } from "react";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Sheet, SheetContent } from "../ui/sheet";
-import { useAuthContext } from "@/lib/auth/AuthContext";
 import { AdminPendingCountsProvider, useAdminPendingCounts } from "./AdminPendingCountsContext";
 import { AdminSearchProvider } from "./AdminSearchContext";
 import { AdminSidebar } from "./AdminSidebar";
@@ -198,10 +197,7 @@ function AdminLayoutShell({
         </div>
 
         <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
-          <SheetContent
-            side="left"
-            className="w-72 border-r border-white/10 bg-slate-950 p-0 text-slate-100"
-          >
+          <SheetContent side="left" className="w-72 border-r border-white/10 bg-slate-950 p-0 text-slate-100">
             <AdminSidebar
               email={email}
               onLogout={onLogout}

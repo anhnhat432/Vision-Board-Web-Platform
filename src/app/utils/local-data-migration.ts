@@ -1,3 +1,4 @@
+import { getScopedUserDataStorageKey, readActiveAuthOwnerUid } from "./storage-auth-scope";
 import {
   ANONYMOUS_USER_DATA_STORAGE_KEY,
   AUTH_OWNER_STORAGE_KEY,
@@ -10,7 +11,6 @@ import {
   USER_DATA_UPDATED_EVENT_NAME,
 } from "./storage-constants";
 import { createDemoUserData } from "./storage-demo-data";
-import { getScopedUserDataStorageKey, readActiveAuthOwnerUid } from "./storage-auth-scope";
 import type {
   AspirationalVision,
   Goal,
@@ -503,11 +503,7 @@ export function getAnonymousLocalDataMigrationCandidate(): LocalDataMigrationCan
   };
 }
 
-function mergeById<T extends { id: string }>(
-  accountList: T[],
-  anonymousList: T[],
-  dateField: keyof T
-): T[] {
+function mergeById<T extends { id: string }>(accountList: T[], anonymousList: T[], dateField: keyof T): T[] {
   const mergedMap = new Map<string, T>();
   for (const item of anonymousList) {
     mergedMap.set(item.id, item);
@@ -537,10 +533,7 @@ function mergeById<T extends { id: string }>(
   return Array.from(mergedMap.values());
 }
 
-function mergeWheelHistory(
-  accountList: WheelOfLifeRecord[],
-  anonymousList: WheelOfLifeRecord[]
-): WheelOfLifeRecord[] {
+function mergeWheelHistory(accountList: WheelOfLifeRecord[], anonymousList: WheelOfLifeRecord[]): WheelOfLifeRecord[] {
   const mergedMap = new Map<string, WheelOfLifeRecord>();
   for (const item of anonymousList) {
     if (item.date) {
@@ -562,7 +555,7 @@ function mergeWheelHistory(
 
 function pickNewer<T extends { updatedAt?: string; createdAt?: string }>(
   accountVal: T | undefined,
-  anonVal: T | undefined
+  anonVal: T | undefined,
 ): T | undefined {
   if (!accountVal) return anonVal;
   if (!anonVal) return accountVal;
@@ -584,9 +577,13 @@ function pickNewer<T extends { updatedAt?: string; createdAt?: string }>(
 }
 
 function mergeUserData(accountData: UserData, anonymousData: UserData): UserData {
-  const accHasScores = accountData.currentWheelOfLife?.some(a => a.score > 0);
-  const anonHasScores = anonymousData.currentWheelOfLife?.some(a => a.score > 0);
-  const currentWheelOfLife = accHasScores ? accountData.currentWheelOfLife : (anonHasScores ? anonymousData.currentWheelOfLife : accountData.currentWheelOfLife);
+  const accHasScores = accountData.currentWheelOfLife?.some((a) => a.score > 0);
+  const anonHasScores = anonymousData.currentWheelOfLife?.some((a) => a.score > 0);
+  const currentWheelOfLife = accHasScores
+    ? accountData.currentWheelOfLife
+    : anonHasScores
+      ? anonymousData.currentWheelOfLife
+      : accountData.currentWheelOfLife;
 
   return {
     ...accountData,
@@ -598,7 +595,9 @@ function mergeUserData(accountData: UserData, anonymousData: UserData): UserData
     currentWheelOfLife: currentWheelOfLife || [],
     onboardingCompleted: accountData.onboardingCompleted || anonymousData.onboardingCompleted,
     achievements: mergeById(accountData.achievements || [], anonymousData.achievements || [], "earnedAt"),
-    eventLog: mergeById(accountData.eventLog || [], anonymousData.eventLog || [], "createdAt").sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    eventLog: mergeById(accountData.eventLog || [], anonymousData.eventLog || [], "createdAt").sort((a, b) =>
+      a.createdAt.localeCompare(b.createdAt),
+    ),
   };
 }
 

@@ -1,6 +1,6 @@
+import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 
 import { SyncIdleDot, SyncOkDot, SyncSyncingDot } from "@/app/components/illustrations";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
@@ -49,12 +49,14 @@ function getPendingCopy(count: number): string {
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
   if (state === "conflict") return "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Bấm để chọn phiên bản an toàn.";
-  if (state === "syncing") return `Đã lưu trên thiết bị này. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
+  if (state === "syncing")
+    return `Đã lưu trên thiết bị này. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
   if (state === "offline")
     return `Đã lưu trên thiết bị này. Chưa sao lưu. Sẽ sao lưu vào tài khoản khi có mạng; ${getPendingCopy(
       pendingCount,
     )}.`;
-  if (state === "pending") return `Đã lưu trên thiết bị này. Chưa sao lưu. Bấm để sao lưu ngay; ${getPendingCopy(pendingCount)}.`;
+  if (state === "pending")
+    return `Đã lưu trên thiết bị này. Chưa sao lưu. Bấm để sao lưu ngay; ${getPendingCopy(pendingCount)}.`;
 
   const timeCopy = relativeTime ? `Đã sao lưu ${relativeTime}` : "Chưa có lần sao lưu";
   return `${timeCopy}; ${getPendingCopy(pendingCount)}.`;
@@ -118,9 +120,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     const lastResult = syncState.lastResult;
     const summary = lastResult?.mergeReport?.summary;
     const isLegacyMissingClientId =
-      summary != null &&
-      (summary.missingClientIdCount ?? 0) > 0 &&
-      summary.conflictCount === 0;
+      summary != null && (summary.missingClientIdCount ?? 0) > 0 && summary.conflictCount === 0;
     if (isLegacyMissingClientId) {
       return null;
     }

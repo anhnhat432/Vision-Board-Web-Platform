@@ -1,17 +1,17 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { RootLayout } from "../components/RootLayout";
-import { Onboarding } from "./Onboarding";
-import { LifeInsight } from "./LifeInsight";
-import { SMARTGoalSetup } from "./SMARTGoalSetup";
-import { FeasibilityCheck } from "./FeasibilityCheck";
+import { APP_STORAGE_KEYS, activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
 import { TwelveWeekSetup } from "./12WeekSetup";
 import { TwelveWeekSystem } from "./12WeekSystem";
-import { APP_STORAGE_KEYS, activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
+import { FeasibilityCheck } from "./FeasibilityCheck";
+import { LifeInsight } from "./LifeInsight";
+import { Onboarding } from "./Onboarding";
+import { SMARTGoalSetup } from "./SMARTGoalSetup";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
@@ -210,7 +210,10 @@ async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   );
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  await user.type(await screen.findByLabelText(/Tên chỉ số đo lường/i, {}, { timeout: 5000 }), "Số tuần review hoàn chỉnh");
+  await user.type(
+    await screen.findByLabelText(/Tên chỉ số đo lường/i, {}, { timeout: 5000 }),
+    "Số tuần review hoàn chỉnh",
+  );
   await user.type(screen.getByLabelText(/Đơn vị đo lường/i), "tuần");
   await user.type(screen.getByLabelText(/Mức xuất phát/i), "0");
   await user.type(screen.getByLabelText(/Mức đích cần đạt/i), "12");

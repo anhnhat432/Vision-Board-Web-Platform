@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type RefObject } from "react";
+import { type RefObject, useLayoutEffect, useRef } from "react";
 
 const INITIAL_CHANGE_KEY = Symbol("initial-scroll-change-key");
 const DEFAULT_MOBILE_MEDIA_QUERY = "(max-width: 767px)";

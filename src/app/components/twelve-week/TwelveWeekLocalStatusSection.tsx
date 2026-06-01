@@ -1,9 +1,18 @@
+import {
+  AlertTriangle,
+  ChevronDown,
+  CloudDownload,
+  CloudUpload,
+  FileDown,
+  RefreshCw,
+  Trash2,
+  WifiOff,
+} from "lucide-react";
 import { type SyntheticEvent, useCallback, useState } from "react";
-import { AlertTriangle, ChevronDown, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
+import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import type { MutationQueueManualSyncStatus, TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 type TwelveWeekLocalStatusSectionProps = Pick<
@@ -782,7 +791,9 @@ export function TwelveWeekLocalStatusSection({
                 <div className="mt-3 space-y-3">
                   <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
                     <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chờ đồng bộ</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                        Chờ đồng bộ
+                      </p>
                       <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.pendingCount}</p>
                     </div>
                     <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
@@ -790,7 +801,9 @@ export function TwelveWeekLocalStatusSection({
                       <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.inFlightCount}</p>
                     </div>
                     <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lỗi/thử lại</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                        Lỗi/thử lại
+                      </p>
                       <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.failedOrRetryableCount}</p>
                     </div>
                     <div className="rounded-xl border border-app-line bg-app-bg px-3 py-2">

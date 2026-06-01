@@ -1,12 +1,4 @@
 import { useCallback } from "react";
-
-import { shouldEnable12WeekCloudImport, shouldEnable12WeekImportDryRun } from "../../utils/app-mode";
-import { getUserData, trackAppEvent } from "../../utils/storage";
-import {
-  hasCompletedCloudImport,
-  markCloudImportCompleted,
-  type LocalDataMigrationCandidate,
-} from "../../utils/local-data-migration";
 import {
   createTwelveWeekImportPayload,
   type TwelveWeekImportPayload,
@@ -19,6 +11,13 @@ import {
   type TwelveWeekImportValidationReport,
   type TwelveWeekImportValidationRequest,
 } from "@/services/syncService";
+import { shouldEnable12WeekCloudImport, shouldEnable12WeekImportDryRun } from "../../utils/app-mode";
+import {
+  hasCompletedCloudImport,
+  type LocalDataMigrationCandidate,
+  markCloudImportCompleted,
+} from "../../utils/local-data-migration";
+import { getUserData, trackAppEvent } from "../../utils/storage";
 import type { CloudImportDryRunResult, CloudImportResult } from "./LocalDataMigrationPrompt";
 
 interface UseCloudImportActionsOptions {

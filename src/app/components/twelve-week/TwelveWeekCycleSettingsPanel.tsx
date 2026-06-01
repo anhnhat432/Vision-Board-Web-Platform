@@ -1,6 +1,16 @@
+import {
+  Calendar,
+  CalendarDays,
+  Clock3,
+  Flag,
+  ListChecks,
+  PlayCircle,
+  RotateCcw,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useState } from "react";
-import { CalendarDays, Clock3, Flag, ListChecks, SlidersHorizontal, PlayCircle, Calendar, RotateCcw } from "lucide-react";
-
+import { formatCalendarDate } from "../../utils/storage";
+import { LOAD_OPTIONS, REVIEW_DAYS, STATUS_OPTIONS } from "../../utils/twelve-week-system-ui";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +26,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { formatCalendarDate } from "../../utils/storage";
-import { LOAD_OPTIONS, REVIEW_DAYS, STATUS_OPTIONS } from "../../utils/twelve-week-system-ui";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 type TwelveWeekCycleSettingsPanelProps = Pick<
@@ -69,7 +77,10 @@ export function TwelveWeekCycleSettingsPanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <Card data-tour-id="system-settings-panel" className="border border-app-line bg-app-surface shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+      <Card
+        data-tour-id="system-settings-panel"
+        className="border border-app-line bg-app-surface shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl"
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-app-ink text-xl font-bold">
             <SlidersHorizontal className="h-5 w-5 text-app-accent animate-pulse" />
@@ -95,7 +106,10 @@ export function TwelveWeekCycleSettingsPanel({
                   Nhịp tuần, thứ tự việc và trạng thái chu kỳ trong cùng một nơi.
                 </p>
               </div>
-              <Badge variant="outline" className="border-emerald-300/50 bg-app-surface/80 text-emerald-700 dark:text-emerald-400 font-bold px-3 py-1 text-xs tracking-wide shadow-sm rounded-full">
+              <Badge
+                variant="outline"
+                className="border-emerald-300/50 bg-app-surface/80 text-emerald-700 dark:text-emerald-400 font-bold px-3 py-1 text-xs tracking-wide shadow-sm rounded-full"
+              >
                 {STATUS_OPTIONS.find((option) => option.value === system.status)?.label ?? system.status}
               </Badge>
             </div>
@@ -113,7 +127,11 @@ export function TwelveWeekCycleSettingsPanel({
               </div>
               <div className="mt-3">
                 <Select value={system.reviewDay} onValueChange={handleReviewDayChange}>
-                  <SelectTrigger id="review-day" aria-label="Chọn ngày review" className="border-app-line hover:border-app-line-strong transition-colors duration-200">
+                  <SelectTrigger
+                    id="review-day"
+                    aria-label="Chọn ngày review"
+                    className="border-app-line hover:border-app-line-strong transition-colors duration-200"
+                  >
                     <SelectValue placeholder="Chọn ngày review" />
                   </SelectTrigger>
                   <SelectContent>
@@ -133,9 +151,7 @@ export function TwelveWeekCycleSettingsPanel({
                   <Clock3 className="h-4 w-4 text-app-accent" />
                   Giờ nhắc
                 </p>
-                <p className="mt-1 text-sm text-app-ink-soft">
-                  Khung giờ trên thiết bị để nhắc check-in và review.
-                </p>
+                <p className="mt-1 text-sm text-app-ink-soft">Khung giờ trên thiết bị để nhắc check-in và review.</p>
               </div>
               <div className="mt-3">
                 <Input
@@ -161,7 +177,11 @@ export function TwelveWeekCycleSettingsPanel({
               </div>
               <div className="mt-3">
                 <Select value={system.tacticLoadPreference || "balanced"} onValueChange={onLoadPreferenceChange}>
-                  <SelectTrigger id="week-load" aria-label="Chọn nhịp tuần" className="border-app-line hover:border-app-line-strong transition-colors duration-200">
+                  <SelectTrigger
+                    id="week-load"
+                    aria-label="Chọn nhịp tuần"
+                    className="border-app-line hover:border-app-line-strong transition-colors duration-200"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -187,7 +207,11 @@ export function TwelveWeekCycleSettingsPanel({
               </div>
               <div className="mt-3">
                 <Select value={system.status} onValueChange={onStatusChange}>
-                  <SelectTrigger id="cycle-status" aria-label="Chọn trạng thái chu kỳ" className="border-app-line hover:border-app-line-strong transition-colors duration-200">
+                  <SelectTrigger
+                    id="cycle-status"
+                    aria-label="Chọn trạng thái chu kỳ"
+                    className="border-app-line hover:border-app-line-strong transition-colors duration-200"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -213,7 +237,10 @@ export function TwelveWeekCycleSettingsPanel({
                   Việc cốt lõi được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
                 </p>
               </div>
-              <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink font-bold px-3 py-1 shadow-sm rounded-full">
+              <Badge
+                variant="outline"
+                className="border-app-line bg-app-bg text-app-ink font-bold px-3 py-1 shadow-sm rounded-full"
+              >
                 {system.leadIndicators.length} việc
               </Badge>
             </div>
@@ -244,12 +271,15 @@ export function TwelveWeekCycleSettingsPanel({
                         </Badge>
                       </div>
                       <p className="mt-2 text-xs font-semibold text-app-ink-muted">
-                        Mục tiêu: <span className="text-app-ink font-bold">{indicator.target || "1"}</span> {indicator.unit || "lần/tuần"}
+                        Mục tiêu: <span className="text-app-ink font-bold">{indicator.target || "1"}</span>{" "}
+                        {indicator.unit || "lần/tuần"}
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor={`tactic-priority-${index}`} className="text-xs font-bold text-app-ink-soft">Ưu tiên</Label>
+                      <Label htmlFor={`tactic-priority-${index}`} className="text-xs font-bold text-app-ink-soft">
+                        Ưu tiên
+                      </Label>
                       <Select
                         value={String(indicator.priority ?? index + 1)}
                         onValueChange={(value) => onTacticPriorityChange(indicator.id, value)}
@@ -262,24 +292,31 @@ export function TwelveWeekCycleSettingsPanel({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: system.leadIndicators.length }, (_, optionIndex) => optionIndex + 1).map(
-                            (priority) => (
-                              <SelectItem key={priority} value={String(priority)}>
-                                {priority}
-                              </SelectItem>
-                            ),
-                          )}
+                          {Array.from(
+                            { length: system.leadIndicators.length },
+                            (_, optionIndex) => optionIndex + 1,
+                          ).map((priority) => (
+                            <SelectItem key={priority} value={String(priority)}>
+                              {priority}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor={`tactic-type-${index}`} className="text-xs font-bold text-app-ink-soft">Loại việc</Label>
+                      <Label htmlFor={`tactic-type-${index}`} className="text-xs font-bold text-app-ink-soft">
+                        Loại việc
+                      </Label>
                       <Select
                         value={indicator.type === "optional" ? "optional" : "core"}
                         onValueChange={(value) => onTacticTypeChange(indicator.id, value)}
                       >
-                        <SelectTrigger id={`tactic-type-${index}`} aria-label={`Chọn loại tactic ${indicator.name}`} className="bg-app-surface border-app-line hover:border-app-line-strong transition-colors duration-200">
+                        <SelectTrigger
+                          id={`tactic-type-${index}`}
+                          aria-label={`Chọn loại tactic ${indicator.name}`}
+                          className="bg-app-surface border-app-line hover:border-app-line-strong transition-colors duration-200"
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -301,8 +338,12 @@ export function TwelveWeekCycleSettingsPanel({
                 <PlayCircle className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">Bắt đầu</p>
-                <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">{formatCalendarDate(system.startDate)}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+                  Bắt đầu
+                </p>
+                <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">
+                  {formatCalendarDate(system.startDate)}
+                </p>
               </div>
             </div>
             <div className="rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
@@ -310,8 +351,12 @@ export function TwelveWeekCycleSettingsPanel({
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">Kết thúc</p>
-                <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">{formatCalendarDate(system.endDate)}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
+                  Kết thúc
+                </p>
+                <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">
+                  {formatCalendarDate(system.endDate)}
+                </p>
               </div>
             </div>
             <div className="rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-500/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
@@ -319,8 +364,13 @@ export function TwelveWeekCycleSettingsPanel({
                 <RotateCcw className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">Quay lại nhịp</p>
-                <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">{system.reentryCount ?? 0} <span className="text-sm font-sans font-medium text-app-ink-soft">lần</span></p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
+                  Quay lại nhịp
+                </p>
+                <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">
+                  {system.reentryCount ?? 0}{" "}
+                  <span className="text-sm font-sans font-medium text-app-ink-soft">lần</span>
+                </p>
               </div>
             </div>
           </div>

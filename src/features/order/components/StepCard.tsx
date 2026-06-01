@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Check } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { cn } from "@/app/components/ui/utils";
 
@@ -13,15 +13,7 @@ export interface StepCardProps {
   id?: string;
 }
 
-export function StepCard({
-  step,
-  title,
-  status = "pending",
-  hint,
-  errorText,
-  children,
-  id,
-}: StepCardProps) {
+export function StepCard({ step, title, status = "pending", hint, errorText, children, id }: StepCardProps) {
   return (
     <section
       id={id}
@@ -33,24 +25,18 @@ export function StepCard({
             className={cn(
               "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
               status === "done" && "bg-[var(--order-accent)] text-white",
-              status === "current" &&
-                "border-2 border-[var(--order-accent)] text-[var(--order-accent)]",
-              status === "pending" &&
-                "bg-[var(--order-border)] text-[var(--order-text-muted)]",
+              status === "current" && "border-2 border-[var(--order-accent)] text-[var(--order-accent)]",
+              status === "pending" && "bg-[var(--order-border)] text-[var(--order-text-muted)]",
             )}
           >
             {status === "done" ? <Check className="h-4 w-4" /> : step}
           </span>
           <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
         </div>
-        {hint && (
-          <span className="text-xs text-[var(--order-text-muted)]">{hint}</span>
-        )}
+        {hint && <span className="text-xs text-[var(--order-text-muted)]">{hint}</span>}
       </header>
       <div>{children}</div>
-      {errorText && (
-        <p className="mt-2 text-xs text-destructive">{errorText}</p>
-      )}
+      {errorText && <p className="mt-2 text-xs text-destructive">{errorText}</p>}
     </section>
   );
 }

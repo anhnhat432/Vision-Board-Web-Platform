@@ -1,9 +1,13 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, ArrowRight, ChevronLeft, ChevronRight, Compass, Save, Sparkles, Target } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker } from "react-router";
-import { AlertTriangle, ArrowRight, Compass, Save, Sparkles, ChevronRight, ChevronLeft, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
+import { getLifeAreaIcon } from "../components/illustrations";
+import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
+import { PageShell } from "../components/PageShell";
+import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,20 +18,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { CountUp } from "../components/ui/count-up";
-import { getLifeAreaIcon } from "../components/illustrations";
-import { PageShell } from "../components/PageShell";
-import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
-import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { loadWithChunkReload } from "../utils/chunkLoad";
-import { type LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
+import { getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(() =>
   loadWithChunkReload(async () => ({
@@ -326,9 +326,10 @@ export function LifeBalance() {
   }, [userData]);
 
   const formattedLastSaved = useMemo(() => {
-    const lastHistoryRecord = userData?.wheelOfLifeHistory && userData.wheelOfLifeHistory.length > 0
-      ? userData.wheelOfLifeHistory[userData.wheelOfLifeHistory.length - 1]
-      : null;
+    const lastHistoryRecord =
+      userData?.wheelOfLifeHistory && userData.wheelOfLifeHistory.length > 0
+        ? userData.wheelOfLifeHistory[userData.wheelOfLifeHistory.length - 1]
+        : null;
     const dateToFormat = lastSavedAt || (lastHistoryRecord ? new Date(lastHistoryRecord.date) : null);
     if (!dateToFormat) return null;
     const day = String(dateToFormat.getDate()).padStart(2, "0");
@@ -404,9 +405,7 @@ export function LifeBalance() {
       <PageShell maxWidth="xl">
         <div ref={pageTopRef} className="pb-12">
           <header>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              Bánh xe cuộc sống
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Bánh xe cuộc sống</p>
             <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
               Bức tranh hiện tại của bạn
             </h1>
@@ -512,9 +511,7 @@ export function LifeBalance() {
             </p>
           </article>
           <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
-              Lĩnh vực mạnh nhất
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Lĩnh vực mạnh nhất</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={strongestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
@@ -522,9 +519,7 @@ export function LifeBalance() {
             <p className="mt-1.5 text-xs font-medium text-app-ink-soft">{getLifeAreaLabel(strongestArea.name)}</p>
           </article>
           <article className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
-              Lĩnh vực cần ưu tiên
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">Lĩnh vực cần ưu tiên</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
@@ -547,8 +542,12 @@ export function LifeBalance() {
                 <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm">
                   <header className="pb-3 border-b border-app-line/60 flex items-center justify-between">
                     <div>
-                      <h2 className="text-sm font-bold text-app-ink uppercase tracking-wider">Bản đồ Cân bằng cuộc sống</h2>
-                      <p className="text-[10px] text-app-ink-muted mt-0.5">Trạng thái hiện tại của 8 khía cạnh cốt lõi</p>
+                      <h2 className="text-sm font-bold text-app-ink uppercase tracking-wider">
+                        Bản đồ Cân bằng cuộc sống
+                      </h2>
+                      <p className="text-[10px] text-app-ink-muted mt-0.5">
+                        Trạng thái hiện tại của 8 khía cạnh cốt lõi
+                      </p>
                     </div>
                     {isCheckInMode && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 px-2 py-0.5 rounded-full">
@@ -565,22 +564,27 @@ export function LifeBalance() {
                 {/* Box Giải thích & Nhận định Tiêu điểm Chuyên sâu */}
                 <section className="surface-raised rounded-2xl border border-amber-500/10 bg-amber-500/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-                  
+
                   <header className="flex items-center gap-2 pb-3 border-b border-app-line/20">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
                       <Target className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-amber-700">Trọng tâm Hành động đề xuất</h2>
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-amber-700">
+                        Trọng tâm Hành động đề xuất
+                      </h2>
                       <p className="text-[10px] text-neutral-400 font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
                     </div>
                   </header>
 
                   <div className="mt-4 space-y-3">
                     <p className="text-xs font-bold text-neutral-700 leading-normal">
-                      Khía cạnh cần ưu tiên cải thiện: <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">{getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)</span>
+                      Khía cạnh cần ưu tiên cải thiện:{" "}
+                      <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">
+                        {getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)
+                      </span>
                     </p>
-                    
+
                     <p className="text-xs text-neutral-500 leading-relaxed font-medium">
                       {getFocusInsight(weakestArea.name, weakestArea.score).reason}
                     </p>
@@ -602,13 +606,16 @@ export function LifeBalance() {
                     {/* Banner Bắt đầu Check-in */}
                     <div className="surface-raised rounded-2xl border border-emerald-500/10 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/[0.05] dark:from-emerald-950/10 dark:via-neutral-900 dark:to-neutral-950 p-6 shadow-3xs flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">Check-in Cân bằng</span>
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">
+                          Check-in Cân bằng
+                        </span>
                         <h3 className="font-serif text-lg font-bold text-app-ink leading-tight flex items-center gap-1.5">
                           <Compass className="h-5 w-5 text-emerald-600 animate-spin-slow" />
                           Cập nhật Bánh xe cuộc sống hằng tuần
                         </h3>
                         <p className="text-xs text-neutral-500 leading-relaxed font-semibold">
-                          Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh qua 3 chặng tương tác nhẹ để luôn làm chủ nhịp điệu cuộc sống.
+                          Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh qua 3 chặng tương tác nhẹ để luôn làm
+                          chủ nhịp điệu cuộc sống.
                         </p>
                       </div>
 
@@ -628,7 +635,9 @@ export function LifeBalance() {
                     {/* Danh sách 8 khía cạnh tĩnh (đẹp mắt, màu pastel) */}
                     <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-3xs">
                       <header className="pb-3 border-b border-app-line/60">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">Điểm số hiện tại của 8 lĩnh vực</h3>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">
+                          Điểm số hiện tại của 8 lĩnh vực
+                        </h3>
                       </header>
                       <ul className="mt-4 grid gap-2 sm:grid-cols-2">
                         {lifeAreas.map((area) => {
@@ -637,16 +646,21 @@ export function LifeBalance() {
                           const label = getLifeAreaLabel(area.name);
 
                           return (
-                            <li 
-                              key={area.name} 
+                            <li
+                              key={area.name}
                               className={cn(
                                 "flex items-center justify-between p-3 rounded-xl border transition-colors shadow-3xs",
                                 colorConfig.bgLight,
-                                colorConfig.border
+                                colorConfig.border,
                               )}
                             >
                               <div className="flex items-center gap-2.5">
-                                <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-xs")} style={{ backgroundColor: colorConfig.accent }}>
+                                <span
+                                  className={cn(
+                                    "flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-xs",
+                                  )}
+                                  style={{ backgroundColor: colorConfig.accent }}
+                                >
                                   <AreaIcon className="h-4 w-4" />
                                 </span>
                                 <span className="text-xs font-bold text-neutral-700">{label}</span>
@@ -656,9 +670,12 @@ export function LifeBalance() {
                           );
                         })}
                       </ul>
-                      
+
                       <div className="mt-4 pt-4 border-t border-app-line/45 flex justify-end">
-                        <Link to="/onboarding" className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+                        <Link
+                          to="/onboarding"
+                          className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                        >
                           Làm lại khảo sát toàn diện →
                         </Link>
                       </div>
@@ -678,18 +695,16 @@ export function LifeBalance() {
                             <span>Chặng {activeClusterIndex + 1} / 3</span>
                             <span>{Math.round(((activeClusterIndex + 1) / 3) * 100)}% Hoàn thành</span>
                           </div>
-                          
+
                           {/* Progress Bar */}
                           <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
-                            <div 
+                            <div
                               className="bg-emerald-600 h-1.5 rounded-full transition-all duration-300"
                               style={{ width: `${((activeClusterIndex + 1) / 3) * 100}%` }}
                             />
                           </div>
 
-                          <h3 className="font-serif text-lg font-bold text-app-ink mt-2">
-                            {cluster.title}
-                          </h3>
+                          <h3 className="font-serif text-lg font-bold text-app-ink mt-2">{cluster.title}</h3>
                           <p className="text-xs text-neutral-400 font-semibold">{cluster.description}</p>
                         </header>
 
@@ -705,17 +720,17 @@ export function LifeBalance() {
                             const label = getLifeAreaLabel(area.name);
 
                             return (
-                              <div 
+                              <div
                                 key={area.name}
                                 className={cn(
                                   "rounded-xl border p-4 shadow-3xs space-y-4",
                                   colorConfig.bgLight,
-                                  colorConfig.border
+                                  colorConfig.border,
                                 )}
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2.5">
-                                    <span 
+                                    <span
                                       className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm"
                                       style={{ backgroundColor: colorConfig.accent }}
                                     >
@@ -723,12 +738,17 @@ export function LifeBalance() {
                                     </span>
                                     <div>
                                       <h4 className="text-xs font-bold text-neutral-800">{label}</h4>
-                                      <p className="text-[10px] text-neutral-500 font-semibold leading-normal">{LIFE_AREA_DETAILS[area.name]}</p>
+                                      <p className="text-[10px] text-neutral-500 font-semibold leading-normal">
+                                        {LIFE_AREA_DETAILS[area.name]}
+                                      </p>
                                     </div>
                                   </div>
-                                  
+
                                   <div className="flex items-baseline gap-1 bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/50 px-2.5 py-1 rounded-lg">
-                                    <span className="font-serif text-lg font-extrabold text-neutral-800" style={{ color: colorConfig.accent }}>
+                                    <span
+                                      className="font-serif text-lg font-extrabold text-neutral-800"
+                                      style={{ color: colorConfig.accent }}
+                                    >
                                       {area.score}
                                     </span>
                                     <span className="text-[10px] text-neutral-400 font-bold">/10</span>

@@ -2,12 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
+import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";
+import { TwelveWeekSetup } from "./12WeekSetup";
 import { FeasibilityCheck } from "./FeasibilityCheck";
 import { LifeInsight } from "./LifeInsight";
 import { SMARTGoalSetup } from "./SMARTGoalSetup";
-import { TwelveWeekSetup } from "./12WeekSetup";
-import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";
 
 const planSetupSyncMock = vi.hoisted(() => ({
   syncPlanForGoal: vi.fn(),

@@ -1,9 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-
-import { ProgressSummaryCard } from "./ProgressSummaryCard";
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
+import { ProgressSummaryCard } from "./ProgressSummaryCard";
 
 function makeSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
   return {

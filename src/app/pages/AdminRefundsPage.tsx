@@ -1,7 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
 import { Loader2, RefreshCw, WalletCards } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  type AdminRefundRequestSummary,
+  adminCompleteRefundRequest,
+  adminListRefundRequests,
+  adminRejectRefundRequest,
+} from "@/services/adminService";
+import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminPageHeader } from "../components/admin/AdminPageHeader";
+import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
+import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
+import { REFUND_STATUS_LABELS, REFUND_STATUS_TONES } from "../components/admin/statusMappings";
+import { adminSurface } from "../components/admin/tokens";
+import { formatDate, getErrorMessage } from "../components/admin/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,21 +27,6 @@ import {
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import {
-  adminCompleteRefundRequest,
-  adminListRefundRequests,
-  adminRejectRefundRequest,
-  type AdminRefundRequestSummary,
-} from "@/services/adminService";
-
-import { AdminEmptyState } from "../components/admin/AdminEmptyState";
-import { AdminPageHeader } from "../components/admin/AdminPageHeader";
-import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
-import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
-import { REFUND_STATUS_LABELS, REFUND_STATUS_TONES } from "../components/admin/statusMappings";
-import { adminSurface } from "../components/admin/tokens";
-import { formatDate, getErrorMessage } from "../components/admin/utils";
 
 type RefundActionStatus = Extract<AdminRefundRequestSummary["status"], "completed" | "rejected">;
 

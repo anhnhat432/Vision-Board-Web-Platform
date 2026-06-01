@@ -1,5 +1,5 @@
-import { Navigate, Outlet, useLocation } from "react-router";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 
 export function ProtectedRoute() {

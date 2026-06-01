@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
-import { Sparkles, Sprout, Play } from "lucide-react";
+import { Play, Sparkles, Sprout } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface ZenBreathingGateProps {
   onComplete: () => void;
@@ -10,7 +10,8 @@ type BreathPhase = "idle" | "inhale" | "hold" | "exhale" | "completed";
 // Bộ tổng hợp tiếng chuông Zen thanh tịnh 528Hz bằng Web Audio API khi hoàn thành hơi thở
 const playZenBell528 = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
 
@@ -47,7 +48,7 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
     timerRef.current = window.setInterval(() => {
       setSecondsLeft((prev) => {
         const nextSec = prev - 1;
-        
+
         // Quản lý tiến trình phần trăm (10 giây tổng cộng)
         const currentProgress = ((10 - nextSec) / 10) * 100;
         setProgress(currentProgress);
@@ -119,9 +120,13 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
       {/* Sân khấu vòng tròn thở (Zen Breathing Circle) */}
       <div className="my-10 flex h-48 w-48 items-center justify-center relative">
         {/* Hào quang nền lan tỏa chậm */}
-        <div 
+        <div
           className={`absolute rounded-full bg-emerald-500/5 blur-xl transition-all duration-[3000ms] pointer-events-none ${
-            phase === "inhale" ? "h-44 w-44 opacity-80" : phase === "hold" ? "h-48 w-48 opacity-100 scale-105" : "h-36 w-36 opacity-30"
+            phase === "inhale"
+              ? "h-44 w-44 opacity-80"
+              : phase === "hold"
+                ? "h-48 w-48 opacity-100 scale-105"
+                : "h-36 w-36 opacity-30"
           }`}
         />
 
@@ -161,7 +166,9 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
 
       {/* Hướng dẫn thở chánh niệm */}
       <div className="h-14 max-w-md">
-        <p className={`text-sm leading-relaxed font-serif italic text-app-ink transition-all duration-500 ${phase !== "idle" ? "text-emerald-700 dark:text-emerald-400 font-semibold" : "text-app-ink-soft"}`}>
+        <p
+          className={`text-sm leading-relaxed font-serif italic text-app-ink transition-all duration-500 ${phase !== "idle" ? "text-emerald-700 dark:text-emerald-400 font-semibold" : "text-app-ink-soft"}`}
+        >
           {getInstructionText()}
         </p>
       </div>

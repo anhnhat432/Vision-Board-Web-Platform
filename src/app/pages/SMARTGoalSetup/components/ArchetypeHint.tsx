@@ -38,7 +38,9 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
     body = (
       <ul className="list-disc space-y-1.5 pl-4">
         {planDefaults.recommendedLeadIndicators.map((indicator) => (
-          <li key={indicator} className="font-medium text-app-ink">{indicator}</li>
+          <li key={indicator} className="font-medium text-app-ink">
+            {indicator}
+          </li>
         ))}
       </ul>
     );
@@ -47,7 +49,9 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
     body = (
       <ul className="list-disc space-y-1.5 pl-4">
         {hints.antiPatterns.slice(0, 3).map((pattern) => (
-          <li key={pattern} className="font-medium text-app-ink">{pattern}</li>
+          <li key={pattern} className="font-medium text-app-ink">
+            {pattern}
+          </li>
         ))}
       </ul>
     );
@@ -62,8 +66,8 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
         variant === "antiPattern"
           ? "border-amber-300/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
           : variant === "metric"
-          ? "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
-          : "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
+            ? "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
+            : "border-app-accent/20 bg-app-accent-soft/30 text-app-accent",
       )}
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
@@ -74,14 +78,16 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
         </p>
       ) : null}
       <div className="flex items-start gap-3">
-        <div className={cn(
-          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
-          variant === "antiPattern"
-            ? "border-amber-400/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-            : variant === "metric"
-            ? "border-app-accent/30 bg-app-accent-soft text-app-accent"
-            : "border-app-accent/30 bg-app-accent-soft text-app-accent"
-        )}>
+        <div
+          className={cn(
+            "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
+            variant === "antiPattern"
+              ? "border-amber-400/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              : variant === "metric"
+                ? "border-app-accent/30 bg-app-accent-soft text-app-accent"
+                : "border-app-accent/30 bg-app-accent-soft text-app-accent",
+          )}
+        >
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>
         <div className="min-w-0 text-sm leading-relaxed text-app-ink-soft">

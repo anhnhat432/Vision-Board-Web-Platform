@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "../ui/utils";
 import { Badge } from "../ui/badge";
+import { cn } from "../ui/utils";
 
 export interface ReviewSummaryItem {
   label: string;
