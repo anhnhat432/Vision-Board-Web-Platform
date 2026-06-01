@@ -133,7 +133,7 @@ export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const tabPanelId = useId();
   const [isCloudDeleteConfirmed, setIsCloudDeleteConfirmed] = useState(false);
-  const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
+  const { authLoading, isConfigured: isAuthConfigured, user, userProfile, logout } = useAuthContext();
   const {
     isReady,
     activeGoal,
@@ -748,6 +748,7 @@ export function TwelveWeekSystem() {
     setIsDeleteDataDialogOpen,
     setIsDeletingData,
     isSignedIn: Boolean(user),
+    logout,
     navigate,
   });
 

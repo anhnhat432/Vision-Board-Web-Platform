@@ -45,7 +45,8 @@
     "smoke:launch": "node scripts/launch-smoke-test.mjs",
     "smoke:mvp2-sync": "node scripts/smoke-mvp2-sync-staging.mjs",
     "smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs",
-    "test:e2e:lww": "playwright test e2e/sync-lww.spec.ts"
+    "test:e2e:lww": "playwright test e2e/sync-lww.spec.ts",
+    "demo:video": "node scripts/demo-video-capture.mjs"
   },
   "dependencies": {
     "@fontsource-variable/source-serif-4": "^5.2.9",

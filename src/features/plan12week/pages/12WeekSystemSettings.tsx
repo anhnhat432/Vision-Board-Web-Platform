@@ -49,7 +49,7 @@ const emptyMutationQueueSummary = {
 
 export function TwelveWeekSystemSettings() {
   const navigate = useNavigate();
-  const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
+  const { authLoading, isConfigured: isAuthConfigured, user, userProfile, logout } = useAuthContext();
   const {
     isReady,
     activeGoal,
@@ -223,6 +223,7 @@ export function TwelveWeekSystemSettings() {
     setIsDeleteDataDialogOpen,
     setIsDeletingData,
     isSignedIn: Boolean(user),
+    logout,
     navigate,
   });
 

@@ -545,7 +545,7 @@ export function SMARTGoalSetup() {
   }
 
   return (
-    <PageShell maxWidth="xl">
+    <PageShell maxWidth="hero">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}

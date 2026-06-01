@@ -46,6 +46,7 @@ interface UseTwelveWeekSettingsActionsOptions {
   setIsDeleteDataDialogOpen: (open: boolean) => void;
   setIsDeletingData: (loading: boolean) => void;
   isSignedIn: boolean;
+  logout?: () => Promise<void>;
   navigate: NavigateFunction;
 }
 
@@ -64,6 +65,7 @@ export function useTwelveWeekSettingsActions({
   setIsDeleteDataDialogOpen,
   setIsDeletingData,
   isSignedIn,
+  logout,
   navigate,
 }: UseTwelveWeekSettingsActionsOptions) {
   const commitPlanSnapshotUpdate = useCallback(
@@ -301,6 +303,13 @@ export function useTwelveWeekSettingsActions({
 
     try {
       const accountDeleteResult = shouldDeleteRemoteAccount ? await deleteAccount() : null;
+      if (logout) {
+        try {
+          await logout();
+        } catch (logoutError) {
+          console.error("Lỗi khi đăng xuất trong settings actions:", logoutError);
+        }
+      }
       deleteAllUserData();
       setIsDeleteDataDialogOpen(false);
 
@@ -318,7 +327,7 @@ export function useTwelveWeekSettingsActions({
     } finally {
       setIsDeletingData(false);
     }
-  }, [isSignedIn, navigate, setIsDeleteDataDialogOpen, setIsDeletingData]);
+  }, [isSignedIn, logout, navigate, setIsDeleteDataDialogOpen, setIsDeletingData]);
 
   const handleOpenDeleteDataDialog = useCallback(() => {
     setIsDeleteDataDialogOpen(true);

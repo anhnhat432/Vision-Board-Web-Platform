@@ -24,7 +24,7 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { exportAccountData } from "@/services/syncService";
+import { deleteCloudWorkspace, exportAccountData } from "@/services/syncService";
 import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
@@ -234,12 +234,27 @@ export function SettingsPage() {
     if (!open) setClearDataConfirmStep("review");
   };
 
-  const handleClearAllData = () => {
-    deleteAllUserData();
-    reloadUserData();
+  const handleClearAllData = async () => {
     setIsClearDataDialogOpen(false);
     setClearDataConfirmStep("review");
-    toast.success("Đã xóa dữ liệu trên thiết bị này.");
+
+    if (isConfigured && user) {
+      const toastId = toast.loading("Đang xóa dữ liệu trên đám mây...");
+      try {
+        await deleteCloudWorkspace();
+        toast.success("Đã xóa dữ liệu trên tài khoản đám mây.", { id: toastId });
+      } catch (error) {
+        console.error("Lỗi khi xóa dữ liệu cloud:", error);
+        toast.error("Không thể xóa dữ liệu trên tài khoản đám mây. Vui lòng kiểm tra kết nối mạng và thử lại.", {
+          id: toastId,
+        });
+        return;
+      }
+    }
+
+    deleteAllUserData();
+    reloadUserData();
+    toast.success("Đã xóa toàn bộ dữ liệu.");
     navigate("/");
   };
 

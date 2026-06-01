@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_CATALOG } from "@/features/order/catalog/defaults";
-import { fetchOrderCatalog } from "./orderCatalogService";
+import { fetchOrderCatalog, getInstantCatalog } from "./orderCatalogService";
 
 beforeEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  localStorage.removeItem("vb:order-catalog");
 });
 
 describe("fetchOrderCatalog", () => {
@@ -33,17 +34,76 @@ describe("fetchOrderCatalog", () => {
     expect(items[0]?.itemId).toBe("frame:20x30");
   });
 
-  it("falls back to DEFAULT_CATALOG when fetch fails", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("net")));
-    vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("caches result in localStorage on success", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          data: [
+            {
+              itemId: "frame:30x40",
+              type: "frame",
+              label: "Y",
+              priceVnd: 2000,
+              sortOrder: 2,
+              isActive: true,
+            },
+          ],
+        }),
+      }),
+    );
 
-    expect(await fetchOrderCatalog()).toEqual(DEFAULT_CATALOG);
+    await fetchOrderCatalog();
+
+    const { items, source } = getInstantCatalog();
+    expect(source).toBe("cache");
+    expect(items).toHaveLength(1);
+    expect(items[0]?.itemId).toBe("frame:30x40");
   });
 
-  it("falls back when response not ok", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
-    vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("rejects when fetch fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("net")));
 
-    expect(await fetchOrderCatalog()).toEqual(DEFAULT_CATALOG);
+    await expect(fetchOrderCatalog()).rejects.toThrow("net");
+  });
+
+  it("rejects when response not ok", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
+
+    await expect(fetchOrderCatalog()).rejects.toThrow("HTTP 500");
+  });
+});
+
+describe("getInstantCatalog", () => {
+  it("returns DEFAULT_CATALOG when no cache exists", () => {
+    const { items, source } = getInstantCatalog();
+    expect(source).toBe("default");
+    expect(items).toEqual(DEFAULT_CATALOG);
+  });
+
+  it("returns cached data when cache is fresh", () => {
+    const cached = {
+      data: [{ itemId: "theme:test", type: "theme", label: "T", priceVnd: 100, sortOrder: 1, isActive: true }],
+      cachedAt: Date.now(),
+    };
+    localStorage.setItem("vb:order-catalog", JSON.stringify(cached));
+
+    const { items, source } = getInstantCatalog();
+    expect(source).toBe("cache");
+    expect(items).toHaveLength(1);
+    expect(items[0]?.itemId).toBe("theme:test");
+  });
+
+  it("returns DEFAULT_CATALOG when cache is expired", () => {
+    const cached = {
+      data: [{ itemId: "theme:old", type: "theme", label: "Old", priceVnd: 100, sortOrder: 1, isActive: true }],
+      cachedAt: Date.now() - 11 * 60 * 1000, // 11 minutes ago
+    };
+    localStorage.setItem("vb:order-catalog", JSON.stringify(cached));
+
+    const { items, source } = getInstantCatalog();
+    expect(source).toBe("default");
+    expect(items).toEqual(DEFAULT_CATALOG);
   });
 });
