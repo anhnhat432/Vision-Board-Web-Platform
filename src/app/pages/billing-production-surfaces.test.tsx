@@ -357,7 +357,7 @@ describe("production billing surfaces", () => {
   it(
     "creates a public payment session only after confirmation",
     async () => {
-      const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
+      const apiClient = stubRealBillingEnv("casso");
       vi.doMock("@/lib/auth/AuthContext", () => ({
         useAuthContext: () => ({
           user: null,
