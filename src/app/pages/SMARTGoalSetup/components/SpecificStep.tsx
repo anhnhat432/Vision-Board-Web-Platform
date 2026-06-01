@@ -10,6 +10,7 @@ import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
 import { labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
+import { FOCUS_AREA_EXAMPLES } from "../constants";
 
 interface SpecificStepProps {
   smartData: SMARTData;
@@ -28,6 +29,7 @@ interface SpecificStepProps {
    * undefined, or `"other"`.
    */
   intentArchetype?: GoalArchetype | null;
+  focusArea?: string;
 }
 
 export function SpecificStep({
@@ -40,6 +42,7 @@ export function SpecificStep({
   onArchetypeChange,
   onArchetypeResetToInferred,
   intentArchetype,
+  focusArea,
 }: SpecificStepProps) {
   const [hasBlurredGoalStatement, setHasBlurredGoalStatement] = useState(false);
   const specificLength = smartData.specific.goal_statement.trim().length;
@@ -112,6 +115,9 @@ export function SpecificStep({
           <div className="flex flex-col gap-1.5">
             {(() => {
               const suggestions = (() => {
+                if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                  return FOCUS_AREA_EXAMPLES[focusArea].specific;
+                }
                 switch (activeArchetype) {
                   case "habit_building":
                     return [

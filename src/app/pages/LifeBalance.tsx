@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker } from "react-router";
-import { AlertTriangle, ArrowRight, Compass, Save } from "lucide-react";
+import { AlertTriangle, ArrowRight, Compass, Save, Sparkles, ChevronRight, ChevronLeft, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
@@ -21,6 +21,7 @@ import { PageShell } from "../components/PageShell";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -33,6 +34,165 @@ const LifeBalanceHistoryChart = lazy(() =>
     default: (await import("../components/LifeBalanceHistoryChart")).LifeBalanceHistoryChart,
   })),
 );
+
+const getAreaColorConfig = (name: string) => {
+  switch (name) {
+    case "Career":
+      return {
+        bgLight: "bg-blue-50 dark:bg-blue-950/20",
+        text: "text-blue-600 dark:text-blue-400",
+        border: "border-blue-100 dark:border-blue-900/30",
+        accent: "#2563eb",
+        glow: "shadow-blue-500/10 dark:shadow-blue-500/20",
+      };
+    case "Finance":
+      return {
+        bgLight: "bg-amber-50 dark:bg-amber-950/20",
+        text: "text-amber-600 dark:text-amber-400",
+        border: "border-amber-100 dark:border-amber-900/30",
+        accent: "#d97706",
+        glow: "shadow-amber-500/10 dark:shadow-amber-500/20",
+      };
+    case "Health":
+      return {
+        bgLight: "bg-emerald-50 dark:bg-emerald-950/20",
+        text: "text-emerald-600 dark:text-emerald-400",
+        border: "border-emerald-100 dark:border-emerald-900/30",
+        accent: "#059669",
+        glow: "shadow-emerald-500/10 dark:shadow-emerald-500/20",
+      };
+    case "Education":
+      return {
+        bgLight: "bg-indigo-50 dark:bg-indigo-950/20",
+        text: "text-indigo-600 dark:text-indigo-400",
+        border: "border-indigo-100 dark:border-indigo-900/30",
+        accent: "#4f46e5",
+        glow: "shadow-indigo-500/10 dark:shadow-indigo-500/20",
+      };
+    case "Relationships":
+      return {
+        bgLight: "bg-rose-50 dark:bg-rose-950/20",
+        text: "text-rose-600 dark:text-rose-400",
+        border: "border-rose-100 dark:border-rose-900/30",
+        accent: "#e11d48",
+        glow: "shadow-rose-500/10 dark:shadow-rose-500/20",
+      };
+    case "Family":
+      return {
+        bgLight: "bg-teal-50 dark:bg-teal-950/20",
+        text: "text-teal-600 dark:text-teal-400",
+        border: "border-teal-100 dark:border-teal-900/30",
+        accent: "#0d9488",
+        glow: "shadow-teal-500/10 dark:shadow-teal-500/20",
+      };
+    case "Personal Growth":
+      return {
+        bgLight: "bg-orange-50 dark:bg-orange-950/20",
+        text: "text-orange-600 dark:text-orange-400",
+        border: "border-orange-100 dark:border-orange-900/30",
+        accent: "#ea580c",
+        glow: "shadow-orange-500/10 dark:shadow-orange-500/20",
+      };
+    case "Leisure":
+      return {
+        bgLight: "bg-sky-50 dark:bg-sky-950/20",
+        text: "text-sky-600 dark:text-sky-400",
+        border: "border-sky-100 dark:border-sky-900/30",
+        accent: "#0284c7",
+        glow: "shadow-sky-500/10 dark:shadow-sky-500/20",
+      };
+    default:
+      return {
+        bgLight: "bg-app-accent-soft",
+        text: "text-app-accent",
+        border: "border-app-line",
+        accent: "var(--app-accent)",
+        glow: "shadow-app-accent/5",
+      };
+  }
+};
+
+const LIFE_AREA_DETAILS: Record<string, string> = {
+  Career: "Việc học, công việc, hướng đi nghề nghiệp và cảm giác tiến triển.",
+  Finance: "Thu nhập, chi tiêu, tiết kiệm và mức an tâm với tiền bạc.",
+  Health: "Năng lượng, giấc ngủ, vận động và cách bạn chăm cơ thể.",
+  Education: "Việc học thêm, kỹ năng mới và khả năng duy trì nhịp phát triển.",
+  Relationships: "Bạn bè, người yêu, cộng đồng và chất lượng kết nối gần đây.",
+  Family: "Sự hiện diện, hỗ trợ và cảm giác bình yên trong gia đình.",
+  "Personal Growth": "Tự hiểu mình, thói quen cá nhân và khả năng giữ lời với bản thân.",
+  Leisure: "Nghỉ ngơi, vui chơi, sở thích và khoảng trống để hồi phục.",
+};
+
+function getFocusInsight(areaName: string, score: number): { reason: string; tip: string } {
+  switch (areaName) {
+    case "Career":
+      return {
+        reason: `Điểm Sự nghiệp của bạn hiện là ${score}/10đ. Khi khía cạnh này lệch nhịp, nó tạo ra cảm giác bế tắc hoặc thiếu định hướng phát triển, gián tiếp rút cạn năng lượng sáng tạo và tinh thần của bạn hằng ngày.`,
+        tip: "Hãy bắt đầu bằng việc thiết lập 1 mục tiêu SMART ngắn hạn cho công việc (ví dụ: tối ưu kỹ năng mới hoặc hoàn tất 1 dự án tồn đọng) để khơi lại cảm giác tiến triển.",
+      };
+    case "Finance":
+      return {
+        reason: `Tài chính của bạn đang ở mức ${score}/10đ. Sự bất ổn tài chính hoặc nỗi lo lắng về tiền bạc là nguyên nhân hàng đầu gây ra trạng thái stress thường trực, làm giảm chất lượng giấc ngủ và sự an tâm trong các mối quan hệ.`,
+        tip: "Đề xuất: Tập trung lập ngân sách chi tiết trong 12 tuần tới, cắt giảm chi tiêu không thiết yếu và xây dựng một quỹ khẩn cấp nhỏ để khôi phục cảm giác kiểm soát.",
+      };
+    case "Health":
+      return {
+        reason: `Điểm Sức khỏe hiện là ${score}/10đ. Sức khỏe thể chất và tinh thần là nền móng của mọi khía cạnh khác. Khi nền móng này lung lay, hiệu suất công việc hay khả năng tận hưởng cuộc sống đều suy giảm nghiêm trọng.`,
+        tip: "Đề xuất: Đặt một mục tiêu siêu nhỏ và dễ thực hiện (ví dụ: ngủ trước 23h hoặc đi bộ 15 phút mỗi ngày) làm tiêu điểm số 1 trong chu kỳ 12 tuần này.",
+      };
+    case "Education":
+      return {
+        reason: `Điểm Học tập & Trí tuệ hiện là ${score}/10đ. Việc thiếu đi sự cập nhật kiến thức mới có thể làm bạn cảm thấy tụt hậu trước sự thay đổi nhanh chóng của công việc và cuộc sống.`,
+        tip: "Đề xuất: Dành ra 20 phút mỗi ngày đọc sách hoặc tham gia một khóa học ngắn hạn về kỹ năng bạn đang thiếu để mở rộng tư duy hằng ngày.",
+      };
+    case "Relationships":
+      return {
+        reason: `Mối quan hệ xã hội hiện đạt ${score}/10đ. Con người là sinh vật xã hội, việc thiếu kết nối chất lượng hoặc gặp xung đột thường xuyên sẽ tạo cảm giác cô đơn và trống trải sâu sắc.`,
+        tip: "Đề xuất: Lên lịch hẹn cà phê chất lượng với 1 người bạn tích cực hoặc chủ động giải quyết 1 khúc mắc tồn đọng trong mối quan hệ gần gũi.",
+      };
+    case "Family":
+      return {
+        reason: `Gia đình hiện ở mức ${score}/10đ. Gia đình là tổ ấm và là điểm tựa tinh thần tối hậu. Khi mối quan hệ gia đình căng thẳng hoặc nguội lạnh, bạn sẽ thiếu đi sự hỗ trợ vững chắc khi gặp bão giông bên ngoài.`,
+        tip: "Đề xuất: Hãy thiết lập các khoảng thời gian 'không điện thoại' khi ở bên người thân, chủ động lắng nghe và chia sẻ nhiều hơn.",
+      };
+    case "Personal Growth":
+      return {
+        reason: `Điểm Phát triển cá nhân hiện là ${score}/10đ. Việc thiếu kỷ luật với bản thân hoặc chưa tự hiểu mình làm bạn dễ bị cuốn theo các thói quen xấu và mục tiêu vô định.`,
+        tip: "Đề xuất: Thực hành viết nhật ký Stoic hằng ngày hoặc thiết lập 1 thói quen kỷ luật nhỏ (như thiền 5 phút) để củng cố sức mạnh nội tâm.",
+      };
+    case "Leisure":
+      return {
+        reason: `Giải trí & Nghỉ ngơi hiện ở mức ${score}/10đ. Làm việc quá sức mà thiếu đi sự nghỉ ngơi trọn vẹn là con đường ngắn nhất dẫn đến kiệt sức (burnout), triệt tiêu động lực làm việc lâu dài.`,
+        tip: "Đề xuất: Dành ra ít nhất nửa ngày cuối tuần hoàn toàn rời xa công việc để theo đuổi sở thích cá nhân, hồi phục hoàn toàn năng lượng.",
+      };
+    default:
+      return {
+        reason: "Khía cạnh này đang cần sự quan tâm đặc biệt để đưa cuộc sống của bạn trở lại quỹ đạo cân bằng.",
+        tip: "Hãy bắt đầu bằng việc đặt ra 1 hành động nhỏ cụ thể hằng ngày.",
+      };
+  }
+}
+
+const CORE_CLUSTERS = [
+  {
+    id: "personal",
+    title: "Phát triển & Sự nghiệp",
+    description: "Sự nghiệp, tài chính và trí tuệ nâng tầm bản thân.",
+    areas: ["Career", "Finance", "Education"],
+  },
+  {
+    id: "vitality",
+    title: "Thân - Tâm - Trí",
+    description: "Sức khỏe thể chất, tinh thần và giải trí tái tạo.",
+    areas: ["Health", "Personal Growth", "Leisure"],
+  },
+  {
+    id: "social",
+    title: "Gia đình & Kết nối",
+    description: "Các mối quan hệ thân cận và tổ ấm gia đình.",
+    areas: ["Family", "Relationships"],
+  },
+];
 
 type FlushableDebouncedSave<T> = {
   schedule: (value: T) => void;
@@ -87,6 +247,8 @@ export function LifeBalance() {
   const currentSnapshot = useMemo(() => createLifeBalanceSnapshot(lifeAreas), [lifeAreas]);
   const hasChanges = lifeAreas.length > 0 && lastSavedSnapshot !== null && currentSnapshot !== lastSavedSnapshot;
   const debouncedSaveRef = useRef<FlushableDebouncedSave<LifeArea[]> | null>(null);
+  const [isCheckInMode, setIsCheckInMode] = useState(false);
+  const [activeClusterIndex, setActiveClusterIndex] = useState(0);
 
   useScrollToTopOnChange(0, {
     targetRef: pageTopRef,
@@ -380,73 +542,307 @@ export function LifeBalance() {
           </TabsList>
 
           <TabsContent value="current" className="mt-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
-                <header>
-                  <h2 className="text-base font-semibold text-app-ink">Bánh xe cuộc đời</h2>
-                  <p className="text-xs text-app-ink-muted">8 lĩnh vực hiện tại</p>
-                </header>
-                <div className="mt-4">
-                  <SimpleRadarChart className="mx-auto max-w-[600px]" data={radarData} height={460} />
-                </div>
-                <div className="mt-3 text-right">
-                  <Link to="/onboarding" className="text-sm text-app-accent hover:underline">
-                    Chấm lại điểm →
-                  </Link>
-                </div>
-              </section>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full max-w-full overflow-hidden">
+              <div className="space-y-6">
+                <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm">
+                  <header className="pb-3 border-b border-app-line/60 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm font-bold text-app-ink uppercase tracking-wider">Bản đồ Cân bằng cuộc sống</h2>
+                      <p className="text-[10px] text-app-ink-muted mt-0.5">Trạng thái hiện tại của 8 khía cạnh cốt lõi</p>
+                    </div>
+                    {isCheckInMode && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 px-2 py-0.5 rounded-full">
+                        <Sparkles className="h-3 w-3 animate-pulse" />
+                        Đang Check-in...
+                      </span>
+                    )}
+                  </header>
+                  <div className="mt-4">
+                    <SimpleRadarChart className="mx-auto max-w-[420px]" data={radarData} height={340} />
+                  </div>
+                </section>
 
-              <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
-                <header>
-                  <h2 className="text-base font-semibold text-app-ink">Cập nhật điểm</h2>
-                  <p className="text-xs text-app-ink-muted">Kéo thanh để chấm lại</p>
-                </header>
-                <ul className="mt-5">
-                  {lifeAreas.map((area, index) => {
-                    const AreaIcon = getLifeAreaIcon(area.name);
+                {/* Box Giải thích & Nhận định Tiêu điểm Chuyên sâu */}
+                <section className="surface-raised rounded-2xl border border-amber-500/10 bg-amber-500/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <header className="flex items-center gap-2 pb-3 border-b border-app-line/20">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      <Target className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-amber-700">Trọng tâm Hành động đề xuất</h2>
+                      <p className="text-[10px] text-neutral-400 font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
+                    </div>
+                  </header>
+
+                  <div className="mt-4 space-y-3">
+                    <p className="text-xs font-bold text-neutral-700 leading-normal">
+                      Khía cạnh cần ưu tiên cải thiện: <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">{getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)</span>
+                    </p>
+                    
+                    <p className="text-xs text-neutral-500 leading-relaxed font-medium">
+                      {getFocusInsight(weakestArea.name, weakestArea.score).reason}
+                    </p>
+
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 rounded-xl p-3 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex gap-2 items-start shadow-3xs">
+                      <Sparkles className="h-4 w-4 shrink-0 text-emerald-600 animate-pulse mt-0.5" />
+                      <p className="leading-relaxed">
+                        <strong>Hành động đề xuất:</strong> {getFocusInsight(weakestArea.name, weakestArea.score).tip}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <div className="space-y-6 min-w-0 w-full max-w-full overflow-hidden">
+                {!isCheckInMode ? (
+                  // BẢNG ĐIỀU KHIỂN DASHBOARD CHÍNH (Tĩnh, click để check-in)
+                  <div className="space-y-6 animate-fade-in w-full max-w-full overflow-hidden">
+                    {/* Banner Bắt đầu Check-in */}
+                    <div className="surface-raised rounded-2xl border border-emerald-500/10 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/[0.05] dark:from-emerald-950/10 dark:via-neutral-900 dark:to-neutral-950 p-6 shadow-3xs flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">Check-in Cân bằng</span>
+                        <h3 className="font-serif text-lg font-bold text-app-ink leading-tight flex items-center gap-1.5">
+                          <Compass className="h-5 w-5 text-emerald-600 animate-spin-slow" />
+                          Cập nhật Bánh xe cuộc sống hằng tuần
+                        </h3>
+                        <p className="text-xs text-neutral-500 leading-relaxed font-semibold">
+                          Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh qua 3 chặng tương tác nhẹ để luôn làm chủ nhịp điệu cuộc sống.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCheckInMode(true);
+                          setActiveClusterIndex(0);
+                        }}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer w-full sm:w-auto"
+                      >
+                        Bắt đầu Check-in nhanh
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Danh sách 8 khía cạnh tĩnh (đẹp mắt, màu pastel) */}
+                    <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-3xs">
+                      <header className="pb-3 border-b border-app-line/60">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">Điểm số hiện tại của 8 lĩnh vực</h3>
+                      </header>
+                      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                        {lifeAreas.map((area) => {
+                          const AreaIcon = getLifeAreaIcon(area.name);
+                          const colorConfig = getAreaColorConfig(area.name);
+                          const label = getLifeAreaLabel(area.name);
+
+                          return (
+                            <li 
+                              key={area.name} 
+                              className={cn(
+                                "flex items-center justify-between p-3 rounded-xl border transition-colors shadow-3xs",
+                                colorConfig.bgLight,
+                                colorConfig.border
+                              )}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-xs")} style={{ backgroundColor: colorConfig.accent }}>
+                                  <AreaIcon className="h-4 w-4" />
+                                </span>
+                                <span className="text-xs font-bold text-neutral-700">{label}</span>
+                              </div>
+                              <span className="font-serif text-lg font-extrabold text-neutral-800">{area.score}đ</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      
+                      <div className="mt-4 pt-4 border-t border-app-line/45 flex justify-end">
+                        <Link to="/onboarding" className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+                          Làm lại khảo sát toàn diện →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // WIZARD CHECK-IN 3 CHẶNG TƯƠNG TÁC
+                  (() => {
+                    const cluster = CORE_CLUSTERS[activeClusterIndex];
+                    if (!cluster) return null;
 
                     return (
-                      <li key={area.name} className="group border-b border-app-line py-3.5 last:border-0">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2.5">
-                            <span className="flex h-6.5 w-6.5 items-center justify-center rounded bg-app-accent-soft text-app-accent transition-colors duration-250 group-hover:bg-app-accent group-hover:text-white">
-                              <AreaIcon className="h-4 w-4" />
-                            </span>
-                            <span className="text-sm font-medium text-app-ink">{getLifeAreaLabel(area.name)}</span>
+                      <div className="surface-raised rounded-2xl border border-emerald-600/20 bg-app-surface p-5 md:p-6 shadow-md animate-fade-in w-full max-w-full overflow-hidden">
+                        {/* Progress Header */}
+                        <header className="pb-4 border-b border-app-line/60 space-y-2">
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                            <span>Chặng {activeClusterIndex + 1} / 3</span>
+                            <span>{Math.round(((activeClusterIndex + 1) / 3) * 100)}% Hoàn thành</span>
                           </div>
-                          <span className="font-serif text-xl font-medium tabular-nums text-app-ink">
-                            {area.score}
-                          </span>
+                          
+                          {/* Progress Bar */}
+                          <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
+                            <div 
+                              className="bg-emerald-600 h-1.5 rounded-full transition-all duration-300"
+                              style={{ width: `${((activeClusterIndex + 1) / 3) * 100}%` }}
+                            />
+                          </div>
+
+                          <h3 className="font-serif text-lg font-bold text-app-ink mt-2">
+                            {cluster.title}
+                          </h3>
+                          <p className="text-xs text-neutral-400 font-semibold">{cluster.description}</p>
+                        </header>
+
+                        {/* Danh sách thẻ slider trong cụm */}
+                        <div className="mt-5 space-y-4">
+                          {cluster.areas.map((areaName) => {
+                            const areaIndex = lifeAreas.findIndex((a) => a.name === areaName);
+                            const area = lifeAreas[areaIndex];
+                            if (!area) return null;
+
+                            const AreaIcon = getLifeAreaIcon(area.name);
+                            const colorConfig = getAreaColorConfig(area.name);
+                            const label = getLifeAreaLabel(area.name);
+
+                            return (
+                              <div 
+                                key={area.name}
+                                className={cn(
+                                  "rounded-xl border p-4 shadow-3xs space-y-4",
+                                  colorConfig.bgLight,
+                                  colorConfig.border
+                                )}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2.5">
+                                    <span 
+                                      className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm"
+                                      style={{ backgroundColor: colorConfig.accent }}
+                                    >
+                                      <AreaIcon className="h-5 w-5" />
+                                    </span>
+                                    <div>
+                                      <h4 className="text-xs font-bold text-neutral-800">{label}</h4>
+                                      <p className="text-[10px] text-neutral-500 font-semibold leading-normal">{LIFE_AREA_DETAILS[area.name]}</p>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-baseline gap-1 bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/50 px-2.5 py-1 rounded-lg">
+                                    <span className="font-serif text-lg font-extrabold text-neutral-800" style={{ color: colorConfig.accent }}>
+                                      {area.score}
+                                    </span>
+                                    <span className="text-[10px] text-neutral-400 font-bold">/10</span>
+                                  </div>
+                                </div>
+
+                                {/* Slider + Button di động */}
+                                <div className="space-y-3 pt-1">
+                                  <div className="flex items-center gap-3">
+                                    <button
+                                      type="button"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none"
+                                      onClick={() => handleScoreChange(areaIndex, [Math.max(1, area.score - 1)])}
+                                      aria-label={`Giảm ${label}`}
+                                    >
+                                      −
+                                    </button>
+
+                                    <div className="grow px-1">
+                                      <Slider
+                                        value={[area.score]}
+                                        onValueChange={(value) => handleScoreChange(areaIndex, value)}
+                                        min={1}
+                                        max={10}
+                                        step={1}
+                                        trackColor={colorConfig.accent}
+                                        className="w-full cursor-pointer"
+                                        aria-label={`Điểm ${label}`}
+                                      />
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none"
+                                      onClick={() => handleScoreChange(areaIndex, [Math.min(10, area.score + 1)])}
+                                      aria-label={`Tăng ${label}`}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+
+                                  <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase tracking-wider px-1">
+                                    <span>😢 Cần chăm sóc (1-3)</span>
+                                    <span>😐 Ổn định (4-7)</span>
+                                    <span>😊 Phát triển (8-10)</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        <Slider
-                          className="mt-2.5"
-                          value={[area.score]}
-                          onValueChange={(value) => handleScoreChange(index, value)}
-                          min={1}
-                          max={10}
-                          step={1}
-                          aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
-                        />
-                      </li>
+
+                        {/* Chân Wizard */}
+                        <div className="mt-6 pt-4 border-t border-app-line/65 flex items-center justify-between gap-3">
+                          <button
+                            type="button"
+                            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all cursor-pointer"
+                            onClick={() => {
+                              if (activeClusterIndex > 0) {
+                                setActiveClusterIndex(activeClusterIndex - 1);
+                              } else {
+                                setIsCheckInMode(false);
+                              }
+                            }}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Quay lại
+                          </button>
+
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-500 hover:text-neutral-700 cursor-pointer"
+                              onClick={() => setIsCheckInMode(false)}
+                            >
+                              Hủy bỏ
+                            </button>
+
+                            <button
+                              type="button"
+                              className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white transition-all active:scale-[0.97] shadow-md cursor-pointer"
+                              onClick={() => {
+                                if (activeClusterIndex < 2) {
+                                  setActiveClusterIndex(activeClusterIndex + 1);
+                                  // Tự động cuộn lên đầu card wizard để người dùng không bị lệch focus
+                                  const cardHeader = document.querySelector("h3[class*='font-serif text-lg']");
+                                  if (cardHeader) {
+                                    cardHeader.scrollIntoView({ behavior: "smooth" });
+                                  }
+                                } else {
+                                  handleSave();
+                                  setIsCheckInMode(false);
+                                }
+                              }}
+                            >
+                              {activeClusterIndex < 2 ? (
+                                <>
+                                  Tiếp tục
+                                  <ChevronRight className="h-4 w-4" />
+                                </>
+                              ) : (
+                                <>
+                                  Lưu & Xem kết quả
+                                  <Save className="h-4 w-4" />
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     );
-                  })}
-                </ul>
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={!hasChanges}
-                    className={
-                      hasChanges
-                        ? "inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:brightness-105 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                        : "inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-app-ink-muted/50 px-5 py-2.5 text-sm font-medium text-app-ink-muted opacity-60"
-                    }
-                  >
-                    <Save className="h-4 w-4" />
-                    Lưu thay đổi
-                  </button>
-                </div>
-              </section>
+                  })()
+                )}
+              </div>
             </div>
           </TabsContent>
 

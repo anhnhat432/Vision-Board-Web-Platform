@@ -240,6 +240,25 @@ function getBottleneckIcon(axis: string): LucideIcon {
   }
 }
 
+function getBottleneckRiskText(axis: string): string {
+  switch (axis) {
+    case "time":
+    case "routine":
+      return "Bị cuốn vào guồng quay công việc và sinh hoạt hàng ngày khiến kế hoạch 12 tuần bị trôi ngày, trì hoãn vô thời hạn do không bảo vệ được lịch thực thi cố định.";
+    case "energy":
+      return "Kiệt sức hoàn toàn sau giờ làm dẫn đến trì hoãn Check-in liên tục. Hưng phấn ban đầu nhanh chóng biến mất bởi sự mệt mỏi thể chất và tinh thần.";
+    case "resources":
+      return "Sa lầy và bế tắc khi gặp các rào cản kỹ năng chuyên môn hoặc thiếu công cụ hỗ trợ thực tế, không tự giải quyết được dẫn đến chán nản rồi bỏ cuộc.";
+    case "clarity":
+    case "confidence":
+      return "Do dự trì hoãn không dám bắt đầu hành động, hoặc làm việc theo cảm xúc tùy hứng mà không đo đạc được sự tiến bộ thật sự để tạo đà chiến thắng.";
+    case "wheel":
+      return "Lĩnh vực này có nền tảng hiện tại quá mất cân bằng. Đặt mục tiêu lớn ngay lúc này sẽ gây kiệt quệ tinh thần và ảnh hưởng tiêu cực sang khía cạnh khác.";
+    default:
+      return "Dễ mất đà kỷ luật khi gặp các biến cố, trở ngại thực tế không lường trước hoặc khi thiếu tính cam kết tự quản lý.";
+  }
+}
+
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
   const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1024;
   const isDesktop = windowWidth >= 768;
@@ -440,7 +459,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </div>
         </div>
 
-        {/* ── KHU VỰC 2: Trở ngại lớn nhất là gì? ── */}
+        {/* ── KHU VỰC 2: Trở ngại lớn nhất & Rủi ro chính (Key Risks) ── */}
         <div className={cn(
           "rounded-2xl border p-5.5 relative overflow-hidden transition-all duration-300 hover:shadow-md",
           result.type === "too_ambitious" 
@@ -456,14 +475,25 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             )}>
               <BlockerIcon className="h-5 w-5" aria-hidden="true" />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2 flex-1">
               <h3 className="font-bold text-[15px] uppercase tracking-wider flex items-center gap-2">
                 Trở ngại lớn nhất: <span className="underline decoration-2 underline-offset-4">{result.bottleneck.label}</span>
               </h3>
               <p className="text-sm leading-relaxed text-slate-650 dark:text-slate-300 font-semibold italic">
                 "{getBottleneckEmpathyText(result.bottleneck.axis)}"
               </p>
-              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-bold mt-2">
+
+              {/* Rủi ro thực tế nếu giữ nguyên */}
+              <div className="mt-2.5 p-3.5 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/10 text-xs">
+                <p className="font-extrabold uppercase text-[9px] tracking-wider text-rose-600 dark:text-rose-450 mb-1">
+                  ⚠️ Rủi ro chính nếu giữ nguyên quy mô:
+                </p>
+                <p className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed text-left">
+                  {getBottleneckRiskText(result.bottleneck.axis)}
+                </p>
+              </div>
+
+              <p className="text-sm leading-relaxed text-slate-850 dark:text-slate-200 font-bold mt-3 text-left">
                 👉 Lời khuyên thiết thực: {result.bottleneck.action}
               </p>
             </div>

@@ -454,6 +454,7 @@ export function SMARTGoalSetup() {
             onArchetypeChange={(next) => setArchetypeOverride(next)}
             onArchetypeResetToInferred={() => setArchetypeOverride(null)}
             intentArchetype={intentArchetype}
+            focusArea={focusArea}
           />
         );
       case "measurable":
@@ -465,6 +466,7 @@ export function SMARTGoalSetup() {
             intentMetricHint={intentMetricHint}
             intentArchetype={intentArchetype}
             archetype={archetype}
+            focusArea={focusArea}
           />
         );
       case "achievable":
@@ -474,6 +476,7 @@ export function SMARTGoalSetup() {
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
             archetype={archetype}
+            focusArea={focusArea}
           />
         );
       case "relevant":
@@ -482,6 +485,8 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
+            archetype={archetype}
+            focusArea={focusArea}
           />
         );
       case "timeBound":
@@ -490,6 +495,12 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
+            clarityItems={clarityItems}
+            clarityDoneCount={clarityDoneCount}
+            summaryRows={summaryRows}
+            onJumpToStep={handleJumpToStep}
+            qualityFeedback={qualityFeedback}
+            focusArea={focusArea}
           />
         );
       default:

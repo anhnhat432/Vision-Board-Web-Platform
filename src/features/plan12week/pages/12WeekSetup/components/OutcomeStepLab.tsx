@@ -254,6 +254,7 @@ const GOAL_TYPE_EMOJIS: Record<string, string> = {
 
 export function OutcomeStepLab({ draft, onChange }: OutcomeStepLabProps) {
   const [hasPlayedSuccess, setHasPlayedSuccess] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const isW4Filled = draft.week4Milestone.trim().length > 0;
   const isW8Filled = draft.week8Milestone.trim().length > 0;
   const isW12Filled = draft.week12Outcome.trim().length > 0;
@@ -301,57 +302,15 @@ export function OutcomeStepLab({ draft, onChange }: OutcomeStepLabProps) {
         <MilestoneRoadmap week4={draft.week4Milestone} week8={draft.week8Milestone} week12={draft.week12Outcome} />
 
         <div className="space-y-5 pt-1">
-          {/* Cột mốc Tuần 4 & Tuần 8 - Đặt cùng một hàng ngang */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label
-                htmlFor="milestone-week-4"
-                className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
-              >
-                <Target className="h-4 w-4 text-indigo-500 shrink-0" />
-                <span>🎯 Mốc tuần 4: Tạo đà ban đầu</span>
-              </label>
-              <Input
-                id="milestone-week-4"
-                value={draft.week4Milestone}
-                className={inputClass}
-                onChange={(event) => onChange("week4Milestone", event.target.value)}
-                placeholder="Ví dụ: Đọc xong 3 cuốn sách đầu tiên..."
-              />
-              <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-                * Mốc tháng đầu tiên giúp bạn xây dựng thói quen và quán tính hành động.
-              </p>
-            </div>
-            
-            <div className="space-y-1.5">
-              <label
-                htmlFor="milestone-week-8"
-                className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
-              >
-                <Flag className="h-4 w-4 text-indigo-500 shrink-0" />
-                <span>🚀 Mốc tuần 8: Bứt phá tăng tốc</span>
-              </label>
-              <Input
-                id="milestone-week-8"
-                value={draft.week8Milestone}
-                className={inputClass}
-                onChange={(event) => onChange("week8Milestone", event.target.value)}
-                placeholder="Ví dụ: Hoàn thành 60% chương trình học..."
-              />
-              <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-                * Điểm bứt phá quan trọng, giúp tăng tốc trước khi về đích.
-              </p>
-            </div>
-          </div>
-
-          {/* Đích đến cuối cùng Tuần 12 */}
-          <div className="space-y-1.5">
+          {/* Đích đến cuối cùng Tuần 12 - BẮT BUỘC (CẦN ĐIỀN NGAY) */}
+          <div className="space-y-1.5 p-4 rounded-xl bg-app-accent-soft/10 border border-app-accent/15">
             <label
               htmlFor="week-12-outcome"
               className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
             >
-              <Award className="h-4 w-4 text-emerald-500 shrink-0" />
-              <span>🏆 Đích đến tự hào (Tuần 12)</span>
+              <Award className="h-4.5 w-4.5 text-app-accent shrink-0 animate-pulse" />
+              <span className="text-app-ink">🏆 Đích đến tự hào bắt buộc (Tuần 12)</span>
+              <span className="text-xs font-semibold text-app-accent-hover">(Required Now)</span>
             </label>
             <Textarea
               id="week-12-outcome"
@@ -360,7 +319,7 @@ export function OutcomeStepLab({ draft, onChange }: OutcomeStepLabProps) {
               aria-invalid={Boolean(milestoneError)}
               className={cn(
                 textareaClass,
-                "min-h-[55px] text-xs leading-relaxed",
+                "min-h-[55px] text-xs leading-relaxed border-app-accent/30 focus-visible:ring-app-accent",
                 milestoneError && "border-red-400 focus-visible:border-red-500 focus-visible:ring-red-150",
               )}
               onChange={(event) => onChange("week12Outcome", event.target.value)}
@@ -371,68 +330,135 @@ export function OutcomeStepLab({ draft, onChange }: OutcomeStepLabProps) {
                 {milestoneError}
               </p>
             ) : (
-              <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-                * Kết quả tối thượng bạn cam kết sẽ chạm tay vào sau 12 tuần phi hành.
+              <p className="text-[10px] italic text-app-ink-soft leading-relaxed">
+                * Kết quả tối thượng bạn cam kết sẽ chạm tay vào sau 12 tuần hành động bền bỉ.
               </p>
             )}
           </div>
 
-          {/* Động lực cốt lõi */}
-          <div className="space-y-1.5 border-t border-app-line/40 pt-4">
-            <label
-              htmlFor="vision-12-week"
-              className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
+          {/* ACCORDION: Tùy chỉnh thêm (Customize Later) mặc định đóng gọn gàng để tránh gây ngợp */}
+          <div className="border-t border-app-line/60 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                soundService.click();
+                setIsAdvancedOpen(!isAdvancedOpen);
+              }}
+              className="flex w-full items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400 py-1.5 px-3 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/10 hover:bg-indigo-50 transition-all select-none"
             >
-              <Lightbulb className="h-4 w-4 text-amber-500 shrink-0" />
-              <span>💡 Động lực: Tại sao bạn nhất định phải làm điều này?</span>
-            </label>
-            <Textarea
-              id="vision-12-week"
-              rows={2}
-              value={draft.vision12Week}
-              onChange={(event) => onChange("vision12Week", event.target.value)}
-              className="min-h-[50px] text-xs leading-relaxed"
-              placeholder="Ví dụ: Giúp tôi tự tin hơn, bứt phá thu nhập và nâng tầm cuộc sống..."
-            />
-            <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-              * Lý do đủ lớn sẽ giúp bạn duy trì kỷ luật và năng lượng vào những ngày mệt mỏi.
-            </p>
-          </div>
+              <span className="flex items-center gap-1.5">
+                <ClipboardCheck className="h-4 w-4 text-indigo-500" />
+                <span>⚙️ Tự chỉnh sửa thêm (Mốc chặng W4/W8 & Động lực - Customize Later)</span>
+              </span>
+              <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-bold transition-all border border-indigo-500/10 bg-white dark:bg-slate-900", isAdvancedOpen ? "text-slate-500" : "text-indigo-600 animate-pulse")}>
+                {isAdvancedOpen ? "Thu gọn ▴" : "Chỉnh sửa ▾"}
+              </span>
+            </button>
 
-          {/* Phân loại mục tiêu - Bằng các Chip Tag sinh động chọn 1 chạm thay vì dropdown nặng nề */}
-          <div className="space-y-2 border-t border-app-line/40 pt-4">
-            <div className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}>
-              <ClipboardCheck className="h-4 w-4 text-indigo-500 shrink-0" />
-              <span>Phân loại mục tiêu (Giúp gợi ý hành động chuẩn hơn)</span>
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {GOAL_TYPES.map((item) => {
-                const isActive = draft.goalType === item.value;
-                const emoji = GOAL_TYPE_EMOJIS[item.value] || "🎯";
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => {
-                      soundService.click();
-                      onChange("goalType", item.value);
-                    }}
-                    className={cn(
-                      "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95",
-                      isActive
-                        ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-105"
-                        : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30"
-                    )}
+            {isAdvancedOpen && (
+              <div className="mt-5 space-y-5 animate-in slide-in-from-top-2 duration-300">
+                {/* Cột mốc Tuần 4 & Tuần 8 - Đặt cùng một hàng ngang */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="milestone-week-4"
+                      className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
+                    >
+                      <Target className="h-4 w-4 text-indigo-500 shrink-0" />
+                      <span>🎯 Mốc tuần 4: Tạo đà ban đầu</span>
+                    </label>
+                    <Input
+                      id="milestone-week-4"
+                      value={draft.week4Milestone}
+                      className={inputClass}
+                      onChange={(event) => onChange("week4Milestone", event.target.value)}
+                      placeholder="Ví dụ: Đọc xong 3 cuốn sách đầu tiên..."
+                    />
+                    <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
+                      * Mốc tháng đầu tiên giúp bạn xây dựng thói quen và quán tính hành động.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="milestone-week-8"
+                      className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
+                    >
+                      <Flag className="h-4 w-4 text-indigo-500 shrink-0" />
+                      <span>🚀 Mốc tuần 8: Bứt phá tăng tốc</span>
+                    </label>
+                    <Input
+                      id="milestone-week-8"
+                      value={draft.week8Milestone}
+                      className={inputClass}
+                      onChange={(event) => onChange("week8Milestone", event.target.value)}
+                      placeholder="Ví dụ: Hoàn thành 60% chương trình học..."
+                    />
+                    <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
+                      * Điểm bứt phá quan trọng, giúp tăng tốc trước khi về đích.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Động lực cốt lõi */}
+                <div className="space-y-1.5 border-t border-app-line/40 pt-4">
+                  <label
+                    htmlFor="vision-12-week"
+                    className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
                   >
-                    <span className="text-sm leading-none">{emoji}</span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-[10px] italic text-app-ink-muted leading-relaxed mt-1">
-              * Chạm 1 chạm để phân loại nhanh. Hệ thống sẽ tối ưu hóa các mẫu hành động dựa trên phân loại này.
-            </p>
+                    <Lightbulb className="h-4 w-4 text-amber-500 shrink-0" />
+                    <span>💡 Động lực: Tại sau bạn nhất định phải làm điều này?</span>
+                  </label>
+                  <Textarea
+                    id="vision-12-week"
+                    rows={2}
+                    value={draft.vision12Week}
+                    onChange={(event) => onChange("vision12Week", event.target.value)}
+                    className="min-h-[50px] text-xs leading-relaxed"
+                    placeholder="Ví dụ: Giúp tôi tự tin hơn, bứt phá thu nhập và nâng tầm cuộc sống..."
+                  />
+                  <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
+                    * Lý do đủ lớn sẽ giúp bạn duy trì kỷ luật và năng lượng vào những ngày mệt mỏi.
+                  </p>
+                </div>
+
+                {/* Phân loại mục tiêu - Bằng các Chip Tag sinh động chọn 1 chạm thay vì dropdown nặng nề */}
+                <div className="space-y-2 border-t border-app-line/40 pt-4">
+                  <div className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}>
+                    <ClipboardCheck className="h-4 w-4 text-indigo-500 shrink-0" />
+                    <span>Phân loại mục tiêu (Giúp gợi ý hành động chuẩn hơn)</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {GOAL_TYPES.map((item) => {
+                      const isActive = draft.goalType === item.value;
+                      const emoji = GOAL_TYPE_EMOJIS[item.value] || "🎯";
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() => {
+                            soundService.click();
+                            onChange("goalType", item.value);
+                          }}
+                          className={cn(
+                            "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95",
+                            isActive
+                              ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-105"
+                              : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30"
+                          )}
+                        >
+                          <span className="text-sm leading-none">{emoji}</span>
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] italic text-app-ink-muted leading-relaxed mt-1">
+                    * Chạm 1 chạm để phân loại nhanh. Hệ thống sẽ tối ưu hóa các mẫu hành động dựa trên phân loại này.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

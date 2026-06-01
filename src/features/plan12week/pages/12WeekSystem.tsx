@@ -1208,20 +1208,62 @@ export function TwelveWeekSystem() {
               12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
             </p>
 
-            <div className="my-5 p-4 rounded-xl bg-app-bg-subtle/50 border border-app-line/40 text-left">
-              <p className="text-[10px] font-bold text-app-ink-muted uppercase">Mục tiêu của bạn:</p>
-              <p className="mt-1 text-sm font-medium leading-snug text-app-ink break-words">
+            <div className="my-4 p-3 rounded-xl bg-app-bg-subtle/50 border border-app-line/40 text-left">
+              <p className="text-[9px] font-bold text-app-ink-muted uppercase">Mục tiêu của bạn:</p>
+              <p className="mt-0.5 text-xs font-semibold leading-snug text-app-ink break-words line-clamp-2">
                 {activeGoal?.title}
               </p>
             </div>
 
-            <p className="text-xs text-app-ink-soft leading-relaxed max-w-xs mx-auto mb-6">
-              Hành trình vạn dặm khởi đầu từ một bước chân. Bạn đã sẵn sàng thực hiện những hành động nhỏ đầu tiên hôm nay chưa?
-            </p>
+            {/* KHU VỰC CHỈ DẪN: Bây giờ bạn cần làm gì */}
+            <div className="my-5 space-y-3.5 text-left border-t border-b border-app-line/60 py-4">
+              <p className="text-xs font-bold text-app-ink flex items-center gap-1.5 select-none">
+                <span>📌</span>
+                <span>Bây giờ bạn cần làm gì tiếp theo?</span>
+              </p>
+              
+              <div className="space-y-3">
+                <div className="flex gap-2.5">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">1</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-app-ink leading-tight">Nhận nhiệm vụ ngày</p>
+                    <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
+                      Vào ngay tab <span className="font-bold">"Hôm nay"</span> để xem các hành động lặp lại cần hoàn thành trong ngày.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">2</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-app-ink leading-tight">Tích lũy điểm kỷ luật</p>
+                    <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
+                      Đánh dấu tích xanh mỗi khi hoàn thành việc lặp lại hằng ngày để giữ nhịp kỷ luật đều đặn.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-[10px] font-extrabold select-none">3</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-app-ink leading-tight">Nhìn lại &amp; Chấm điểm tuần</p>
+                    <p className="mt-0.5 text-[10px] text-app-ink-soft leading-relaxed">
+                      Gặp nhau vào ngày <span className="font-bold underline">{
+                        system?.reviewDay === "Sunday" ? "Chủ Nhật" :
+                        system?.reviewDay === "Saturday" ? "Thứ Bảy" : 
+                        system?.reviewDay === "Friday" ? "Thứ Sáu" :
+                        system?.reviewDay === "Monday" ? "Thứ Hai" :
+                        "Cuối tuần"
+                      }</span> để chấm điểm tự phản tư, điều chỉnh nhịp tuần tới.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <button
               type="button"
-              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5"
+              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer"
               style={{ backgroundColor: "var(--color-accent)" }}
               onClick={() => {
                 setShowSuccessOverlay(false);

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { CheckCircle2, AlertCircle, Compass, Award, ArrowRight } from "lucide-react";
 
 import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
 import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
@@ -361,6 +362,7 @@ function useDashboardDerivedData({
     activeSystemWeek,
     activeSystemTodayTasks,
     activeSystemTodayOpenTasks,
+    activeSystemWeekOpenTasks,
     activeSystemTodayCompletedCount,
     activeSystemWeekCompletion,
     reviewDueToday,
@@ -706,6 +708,105 @@ function DashboardContent({
 
 type DashboardData = ReturnType<typeof useDashboardDerivedData>;
 
+function NextBestAction({
+  data,
+}: {
+  data: DashboardData;
+}) {
+  const navigate = useNavigate();
+  const {
+    activeSystemTodayOpenTasks,
+    reviewDueToday,
+    hasReviewedCurrentWeek,
+    activeSystemWeek,
+    activeSystemWeekOpenTasks,
+    radarData,
+  } = data;
+
+  const hasRadarData = radarData && radarData.length > 0 && radarData.some(d => d.value > 0);
+
+  // Determine the next best action scenario
+  let title = "";
+  let description = "";
+  let ctaLabel = "";
+  let ctaPath = "";
+  let Icon = Compass;
+  let bgClass = "bg-emerald-500/10 border-emerald-500/15 dark:bg-emerald-950/20 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300";
+  let iconColor = "text-emerald-600 dark:text-emerald-400";
+  let buttonColor = "bg-emerald-700 hover:bg-emerald-800 text-white";
+
+  if (!hasRadarData) {
+    title = "Chưa thiết lập bánh xe cuộc sống";
+    description = "Hãy dành 3 phút chấm điểm 8 khía cạnh cuộc sống để tìm ra khía cạnh lệch nhịp cần ưu tiên.";
+    ctaLabel = "Chấm điểm ngay";
+    ctaPath = "/onboarding";
+    Icon = Compass;
+    bgClass = "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
+    iconColor = "text-amber-600 dark:text-amber-400";
+    buttonColor = "bg-amber-500 hover:bg-amber-600 text-neutral-900";
+  } else if (activeSystemTodayOpenTasks.length > 0) {
+    title = `Còn ${activeSystemTodayOpenTasks.length} việc cần hoàn thành hôm nay`;
+    description = "Kiên trì thực hiện các hành động nhỏ để giữ vững Streak và hoàn thành mục tiêu 12 tuần.";
+    ctaLabel = "Mở Today";
+    ctaPath = "/today-v2";
+    Icon = CheckCircle2;
+  } else if (reviewDueToday && !hasReviewedCurrentWeek) {
+    title = `Đến ngày Phản tư Tuần ${activeSystemWeek}`;
+    description = "Hãy dành 5 phút tĩnh lặng để nhìn nhận lại chặng đường 7 ngày qua và đúc rút bài học.";
+    ctaLabel = "Viết phản tư";
+    ctaPath = "/12-week-system?tab=review";
+    Icon = Award;
+    bgClass = "bg-purple-500/10 border-purple-500/15 dark:bg-purple-950/20 dark:border-purple-800/30 text-purple-800 dark:text-purple-300";
+    iconColor = "text-purple-600 dark:text-purple-400";
+    buttonColor = "bg-purple-700 hover:bg-purple-800 text-white";
+  } else if (activeSystemWeekOpenTasks.length > 0) {
+    title = `Chu kỳ Tuần ${activeSystemWeek} đang chạy`;
+    description = `Bạn còn ${activeSystemWeekOpenTasks.length} hành động chưa hoàn thành trong tuần này. Hãy tiếp tục nỗ lực!`;
+    ctaLabel = "Xem kế hoạch";
+    ctaPath = "/12-week-system?tab=week";
+    Icon = AlertCircle;
+  } else {
+    title = "Mọi việc đã hoàn thành xuất sắc!";
+    description = "Hôm nay bạn không còn nhiệm vụ nào chưa xử lý. Hãy nghỉ ngơi, chuẩn bị cho ngày tiếp theo.";
+    ctaLabel = "Xem mục tiêu";
+    ctaPath = "/goals";
+    Icon = CheckCircle2;
+  }
+
+  return (
+    <section 
+      className={`rounded-3xl border p-5 shadow-3xs backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all duration-300 hover:shadow-2xs ${bgClass} select-none relative`}
+      aria-label="Hành động đề xuất tiếp theo"
+    >
+      {/* 📌 Floating pin for visual consistency */}
+      <span className="absolute -top-3 left-6 text-lg filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">📌</span>
+
+      <div className="flex gap-4 items-start sm:items-center">
+        <div className="p-2.5 rounded-2xl bg-white dark:bg-neutral-900 shadow-3xs shrink-0 flex items-center justify-center">
+          <Icon className={`h-5 w-5 animate-pulse ${iconColor}`} />
+        </div>
+        <div className="space-y-1">
+          <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-60">Hành động đề xuất</span>
+          <h3 className="text-xs font-bold leading-tight">
+            {title}
+          </h3>
+          <p className="text-xs font-semibold leading-relaxed opacity-80 max-w-xl">
+            {description}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => navigate(ctaPath)}
+        className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-6 py-2.5 text-xs font-bold transition-all duration-200 hover:-translate-y-px active:scale-[0.98] cursor-pointer shadow-sm ${buttonColor}`}
+      >
+        <span>{ctaLabel}</span>
+        <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </section>
+  );
+}
+
 function DashboardActiveLayout({
   data,
   displayName,
@@ -740,7 +841,7 @@ function DashboardActiveLayout({
   const planHref = "/12-week-system?tab=week";
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div data-tour-id="dashboard-start-card">
         <DashboardHero
           caption={caption}
@@ -752,6 +853,9 @@ function DashboardActiveLayout({
           planHref={planHref}
         />
       </div>
+
+      {/* Next Best Action Banner */}
+      <NextBestAction data={data} />
 
       {topTrigger ? (
         <RescueAlert

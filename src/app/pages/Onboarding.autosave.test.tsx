@@ -48,7 +48,7 @@ describe("Onboarding autosave", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu nhanh/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
 
     const firstSlider = screen.getAllByRole("slider")[0];
     firstSlider.focus();

@@ -42,11 +42,12 @@ export function DashboardHero({
     const day = new Date().getDate();
     return quotes[day % quotes.length];
   }, []);
+
   return (
     <section
       data-testid="dashboard-primary-action-card"
       data-tour-id="dashboard-next-card"
-      className="relative overflow-hidden rounded-3xl border border-emerald-100/50 dark:border-neutral-800/80 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-emerald-950/10 p-6 md:p-10 grid gap-8 md:grid-cols-[minmax(0,1fr)_340px] md:items-center shadow-3xs select-none"
+      className="relative overflow-hidden rounded-3xl border border-emerald-100/50 dark:border-neutral-800/80 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-emerald-950/10 p-6 md:p-8 lg:p-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-center shadow-3xs select-none w-full"
     >
       {/* Decorative ambient light */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px] dark:bg-app-accent/10" />
@@ -56,8 +57,8 @@ export function DashboardHero({
       <span className="absolute top-4 left-4 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
 
       {/* Welcome content */}
-      <div className="relative z-10 space-y-5 pt-2">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="relative z-10 space-y-4 pt-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-ping" />
             {caption}
@@ -68,16 +69,16 @@ export function DashboardHero({
           </span>
         </div>
 
-        <h1 className="font-serif text-3xl font-normal leading-[1.25] tracking-tight text-app-ink sm:text-4xl md:text-[2.75rem]">
-          Chào tuần mới, <span className="font-semibold underline decoration-amber-400/50 decoration-wavy underline-offset-4 italic">{displayName}</span>.
+        <h1 className="font-serif text-2xl sm:text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink md:text-[2.5rem]">
+          Chào tuần mới, <span className="font-semibold underline decoration-amber-400/50 decoration-wavy underline-offset-4 italic">{displayName}</span>
         </h1>
         
-        <p className="text-xs font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
-          Tập trung năng lượng vào các cam kết cốt lõi dưới đây. Một chu kỳ hành động tĩnh tại và chất lượng đang chờ đón bạn.
+        <p className="text-xs sm:text-sm font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
+          Hãy tập trung năng lượng vào các cam kết cốt lõi. Một chu kỳ hành động tĩnh tại và chất lượng đang chờ đón bạn.
         </p>
 
         {/* Life Quote Banner with deep and delicate design */}
-        <div className="border-l-2 border-amber-400/60 bg-amber-500/5 pl-4 py-2.5 mt-5 max-w-xl rounded-r-xl">
+        <div className="border-l-2 border-amber-400/60 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl">
           <p className="font-serif italic text-amber-800 dark:text-amber-400 text-xs leading-relaxed">
             “{selectedQuote}”
           </p>
@@ -87,22 +88,22 @@ export function DashboardHero({
       {/* Featured Goal focus card - premium frosted layout */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/card relative z-10 rounded-2xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-900/60 backdrop-blur-md p-6 shadow-xs transition-all duration-300 hover:border-app-accent/35 hover:shadow-md -rotate-[1deg] hover:rotate-0"
+        className="group/card relative z-10 rounded-2xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-md p-5 sm:p-6 shadow-3xs transition-all duration-300 hover:border-app-accent/35 hover:shadow-2xs -rotate-[1deg] hover:rotate-0"
       >
         {/* 📌 Floating pin on the goal card itself */}
         <span className="absolute -top-3 left-4 text-lg select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
 
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 flex items-center gap-1.5">
+        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-400 flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
           Tiêu điểm chu kỳ
         </p>
         
-        <p className="mt-3 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200">
+        <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200">
           {featuredGoalTitle}
         </p>
 
         {/* Slender modern progress line */}
-        <div className="mt-4.5 flex items-center gap-3">
+        <div className="mt-4 flex items-center gap-3">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800" aria-hidden="true">
             <div
               className="h-full rounded-full bg-gradient-to-r from-app-accent to-green-600 transition-all duration-500 ease-out"
@@ -114,7 +115,7 @@ export function DashboardHero({
 
         <Link
           to={planHref}
-          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-xs hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group"
+          className="mt-4.5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-sm hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group cursor-pointer"
         >
           <span>Mở kế hoạch 12 tuần</span>
           <ArrowRight className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover:translate-x-0.5" />

@@ -95,9 +95,9 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
   const nextStep = steps.find((step) => !step.completed) ?? steps[steps.length - 1];
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {/* 1. Editorial Greeting Banner - Premium Vision Board Studio card */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/20 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-[0_12px_36px_rgba(47,93,80,0.02)] backdrop-blur-sm">
+    <div className="space-y-6 max-w-6xl mx-auto w-full">
+      {/* 1. Editorial Greeting Banner - Premium Light-first Studio style */}
+      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs backdrop-blur-md">
         {/* Ambient background light */}
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px]" />
         
@@ -106,12 +106,12 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
             📌 Studio Ước Mơ & Thực Thi
           </span>
           
-          <h1 className="font-serif text-3xl font-normal leading-[1.25] tracking-tight text-app-ink sm:text-[2.5rem]">
-            Chào {capitalizeVietnameseName(displayName)}, hãy bắt đầu <span className="underline decoration-amber-400/50 decoration-wavy underline-offset-4">thiết lập hành trình 12 tuần</span> đầu tiên
+          <h1 className="font-serif text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink sm:text-[2.5rem]">
+            Chào {capitalizeVietnameseName(displayName)}, hãy thiết lập <br className="hidden sm:inline"/> <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-4">chu kỳ 12 tuần</span> đầu tiên
           </h1>
           
-          <p className="text-xs font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic max-w-2xl">
-            Nơi những khát vọng mơ hồ của bạn được đóng gói thành các thói quen cụ thể. Từng bước ghim chặt mục tiêu của bạn lên bảng ước mơ và thực hiện đều đặn mỗi ngày.
+          <p className="text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic max-w-2xl">
+            Nơi khát vọng được đóng gói thành các thói quen cụ thể. Chậm rãi ghim mục tiêu của bạn lên bảng ước mơ và thực hiện đều đặn mỗi ngày.
           </p>
           
           <div className="pt-2 flex items-center">
@@ -121,7 +121,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
-                className="ml-1 font-bold text-app-accent hover:text-app-accent-hover underline underline-offset-2 transition-colors"
+                className="ml-1 font-bold text-app-accent hover:text-app-accent-hover underline underline-offset-2 transition-colors cursor-pointer"
               >
                 Mở cẩm nang →
               </button>
@@ -133,16 +133,16 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
       {/* 2. Setup Steps Panel - Guided studio layout */}
       <section
         data-testid="fresh-workspace-empty-state"
-        className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 bg-[#fbfbfa]/40 p-6 md:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.005)]"
+        className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 bg-[#fbfbfa]/40 p-6 md:p-8 shadow-3xs w-full"
         aria-labelledby="dashboard-new-user-title"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-neutral-200/80 dark:border-neutral-800/60 pb-6 mb-8">
           <div className="space-y-1">
-            <h2 id="dashboard-new-user-title" className="text-sm font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2.5">
+            <h2 id="dashboard-new-user-title" className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2.5">
               <BookOpen className="h-4.5 w-4.5 text-app-accent" />
               Bản đồ ghim chu kỳ
             </h2>
-            <p className="text-xs font-semibold text-neutral-500">
+            <p className="text-[10px] font-semibold text-neutral-500">
               Hoàn thành 4 chặng cốt lõi để chuẩn hóa mục tiêu và kích hoạt nhịp Today.
             </p>
           </div>
@@ -150,13 +150,13 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           <button
             type="button"
             onClick={() => onContinue(nextStep.href)}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] cursor-pointer"
           >
             Tiếp tục thiết lập
           </button>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 relative select-none">
+        <div className="grid gap-4 sm:grid-cols-2 relative select-none">
           {steps.map((step, index) => {
             const theme = getStepTheme(index);
             const isNextStep = step.title === nextStep.title;
@@ -166,9 +166,9 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                 key={step.title}
                 type="button"
                 onClick={() => onContinue(step.href)}
-                className={`group flex text-left gap-4 rounded-2xl border p-6 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${
+                className={`group flex text-left gap-4 rounded-2xl border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${
                   step.completed
-                    ? "border-neutral-200 bg-neutral-50/20 dark:bg-neutral-900/5 opacity-50 hover:opacity-85 hover:border-neutral-300"
+                    ? "border-neutral-200 bg-neutral-50/20 dark:bg-neutral-900/5 opacity-55 hover:opacity-85 hover:border-neutral-300"
                     : isNextStep
                     ? "bg-white dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15 -rotate-[0.5deg] scale-[1.01]"
                     : `bg-white/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
@@ -178,7 +178,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                 <span className="absolute -top-3 left-4 text-lg select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">📌</span>
                 
                 {/* Index / Check bubble */}
-                <div className="relative shrink-0 pt-1">
+                <div className="relative shrink-0 pt-0.5">
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                       step.completed
@@ -188,12 +188,12 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                         : `border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-500`
                     }`}
                   >
-                    {step.completed ? <Check className="h-4.5 w-4.5" strokeWidth={3} /> : index + 1}
+                    {step.completed ? <Check className="h-4 w-4" strokeWidth={3} /> : index + 1}
                   </span>
                 </div>
                 
                 {/* Text Content */}
-                <div className="min-w-0 flex-1 space-y-2 pt-1">
+                <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <h3 className={`text-xs font-bold leading-none ${step.completed ? "text-neutral-400 line-through" : "text-neutral-800 dark:text-neutral-200"}`}>
                       {step.title}

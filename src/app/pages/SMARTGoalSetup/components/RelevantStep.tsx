@@ -8,14 +8,17 @@ import type { SMARTData } from "../types";
 import { helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 
+import { FOCUS_AREA_EXAMPLES } from "../constants";
+
 interface RelevantStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   currentStepHasDraftContent: boolean;
   archetype?: GoalArchetype;
+  focusArea?: string;
 }
 
-export function RelevantStep({ smartData, setSmartData, currentStepHasDraftContent, archetype }: RelevantStepProps) {
+export function RelevantStep({ smartData, setSmartData, currentStepHasDraftContent, archetype, focusArea }: RelevantStepProps) {
   const [hasBlurredMotivation, setHasBlurredMotivation] = useState(false);
   const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
   const showMotivationError = motivationInvalid && (hasBlurredMotivation || currentStepHasDraftContent);
@@ -55,10 +58,13 @@ export function RelevantStep({ smartData, setSmartData, currentStepHasDraftConte
           <div className="flex flex-col gap-1.5">
             {(() => {
               const suggestions = (() => {
+                if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                  return FOCUS_AREA_EXAMPLES[focusArea].relevant;
+                }
                 switch (archetype) {
                   case "habit_building":
                     return [
-                      { reason: "Để duy trì lối sống lành mạnh, nâng động và tăng năng lượng làm việc mỗi ngày", alignment: "Sức khỏe & Thân tâm" },
+                      { reason: "Để duy trì lối sống lành mạnh, năng động và tăng năng lượng làm việc mỗi ngày", alignment: "Sức khỏe & Thân tâm" },
                       { reason: "Để cải thiện sự tập trung, rèn luyện tính nhất quán và giảm căng thẳng tinh thần", alignment: "Phát triển bản thân" }
                     ];
                   case "skill_learning":
@@ -98,7 +104,7 @@ export function RelevantStep({ smartData, setSmartData, currentStepHasDraftConte
                     }));
                     setHasBlurredMotivation(true);
                   }}
-                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-lg border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] w-full block shadow-sm"
+                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3 py-2 rounded-lg border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] w-full block shadow-sm cursor-pointer"
                 >
                   ✨ <span className="font-medium">{suggestion.reason}</span> <span className="text-[10px] text-app-ink-muted">({suggestion.alignment})</span>
                 </button>

@@ -1455,9 +1455,12 @@ export function TwelveWeekSetupLab() {
                       </div>
                       <div className="mt-1.5 flex items-center gap-2">
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-app-line/50">
-                          <div className="h-full bg-app-accent" style={{ width: `${feasibility.adjustedScore * 10}%` }} />
+                          <div
+                            className="h-full bg-app-accent"
+                            style={{ width: `${Math.min(100, Math.max(0, (feasibility.adjustedScore / 20) * 100))}%` }}
+                          />
                         </div>
-                        <span className="text-xs font-bold text-app-accent">{feasibility.adjustedScore}/10</span>
+                        <span className="text-xs font-bold text-app-accent">{feasibility.adjustedScore}/20</span>
                       </div>
                     </div>
                   )}

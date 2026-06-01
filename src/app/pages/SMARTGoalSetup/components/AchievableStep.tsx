@@ -22,11 +22,14 @@ import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { helperTextClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
 
+import { FOCUS_AREA_EXAMPLES } from "../constants";
+
 interface AchievableStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   currentStepHasDraftContent: boolean;
   archetype: GoalArchetype;
+  focusArea?: string;
 }
 
 export function AchievableStep({
@@ -34,6 +37,7 @@ export function AchievableStep({
   setSmartData,
   currentStepHasDraftContent,
   archetype,
+  focusArea,
 }: AchievableStepProps) {
   const [hasBlurredWeeklyHours, setHasBlurredWeeklyHours] = useState(false);
   
@@ -213,33 +217,41 @@ export function AchievableStep({
         {/* 1-Click Skills Suggestions */}
         <div className="mt-3 flex flex-wrap gap-2 items-center">
           <span className="text-[10px] font-bold text-app-accent">Gợi ý nhanh:</span>
-          {(archetype === "habit_building"
-            ? ["Kỷ luật tự giác", "Quản lý thời gian", "Thiết lập thói quen"]
-            : archetype === "skill_learning"
-              ? ["Tự học nghiên cứu", "Đọc hiểu tài liệu", "Thực hành thực tế"]
-              : archetype === "project_completion"
-                ? ["Lập kế hoạch công việc", "Giải quyết vấn đề", "Quản lý tiến độ"]
-                : ["Quản lý thời gian", "Kỷ luật thực thi"]
-          ).map((skill) => (
-            <button
-              key={skill}
-              type="button"
-              onClick={() => {
-                const current = smartData.achievable.required_skills.trim();
-                const updated = current ? `${current}, ${skill}` : skill;
-                setSmartData((previous) => ({
-                  ...previous,
-                  achievable: {
-                    ...previous.achievable,
-                    required_skills: updated,
-                  },
-                }));
-              }}
-              className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
-            >
-              + {skill}
-            </button>
-          ))}
+          {(() => {
+            const skillSuggestions = (() => {
+              if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                return FOCUS_AREA_EXAMPLES[focusArea].achievable[0].skills.split(",").map((s) => s.trim());
+              }
+              return archetype === "habit_building"
+                ? ["Kỷ luật tự giác", "Quản lý thời gian", "Thiết lập thói quen"]
+                : archetype === "skill_learning"
+                  ? ["Tự học nghiên cứu", "Đọc hiểu tài liệu", "Thực hành thực tế"]
+                  : archetype === "project_completion"
+                    ? ["Lập kế hoạch công việc", "Giải quyết vấn đề", "Quản lý tiến độ"]
+                    : ["Quản lý thời gian", "Kỷ luật thực thi"];
+            })();
+
+            return skillSuggestions.map((skill) => (
+              <button
+                key={skill}
+                type="button"
+                onClick={() => {
+                  const current = smartData.achievable.required_skills.trim();
+                  const updated = current ? `${current}, ${skill}` : skill;
+                  setSmartData((previous) => ({
+                    ...previous,
+                    achievable: {
+                      ...previous.achievable,
+                      required_skills: updated,
+                    },
+                  }));
+                }}
+                className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97] cursor-pointer"
+              >
+                + {skill}
+              </button>
+            ));
+          })()}
         </div>
 
         <p className={helperTextClass}>
@@ -272,33 +284,41 @@ export function AchievableStep({
         {/* 1-Click Resources Suggestions */}
         <div className="mt-3 flex flex-wrap gap-2 items-center">
           <span className="text-[10px] font-bold text-app-accent">Gợi ý nhanh:</span>
-          {(archetype === "habit_building"
-            ? ["Ứng dụng ghi nhận", "Người đồng hành", "Chuông báo nhắc nhở"]
-            : archetype === "skill_learning"
-              ? ["Khóa học online", "Mentor hướng dẫn", "Cộng đồng học tập"]
-              : archetype === "project_completion"
-                ? ["Tài liệu hướng dẫn", "Mentor đánh giá", "Trello/Notion"]
-                : ["Lịch tuần cá nhân", "Không gian yên tĩnh"]
-          ).map((res) => (
-            <button
-              key={res}
-              type="button"
-              onClick={() => {
-                const current = smartData.achievable.support_resources.trim();
-                const updated = current ? `${current}, ${res}` : res;
-                setSmartData((previous) => ({
-                  ...previous,
-                  achievable: {
-                    ...previous.achievable,
-                    support_resources: updated,
-                  },
-                }));
-              }}
-              className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97]"
-            >
-              + {res}
-            </button>
-          ))}
+          {(() => {
+            const resSuggestions = (() => {
+              if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                return FOCUS_AREA_EXAMPLES[focusArea].achievable[0].resources.split(",").map((r) => r.trim());
+              }
+              return archetype === "habit_building"
+                ? ["Ứng dụng ghi nhận", "Người đồng hành", "Chuông báo nhắc nhở"]
+                : archetype === "skill_learning"
+                  ? ["Khóa học online", "Mentor hướng dẫn", "Cộng đồng học tập"]
+                  : archetype === "project_completion"
+                    ? ["Tài liệu hướng dẫn", "Mentor đánh giá", "Trello/Notion"]
+                    : ["Lịch tuần cá nhân", "Không gian yên tĩnh"];
+            })();
+
+            return resSuggestions.map((res) => (
+              <button
+                key={res}
+                type="button"
+                onClick={() => {
+                  const current = smartData.achievable.support_resources.trim();
+                  const updated = current ? `${current}, ${res}` : res;
+                  setSmartData((previous) => ({
+                    ...previous,
+                    achievable: {
+                      ...previous.achievable,
+                      support_resources: updated,
+                    },
+                  }));
+                }}
+                className="text-xs bg-app-accent-soft/30 hover:bg-app-accent-soft text-app-accent px-2.5 py-1 rounded-full border border-app-accent/10 transition-all duration-150 active:scale-[0.97] cursor-pointer"
+              >
+                + {res}
+              </button>
+            ));
+          })()}
         </div>
 
         <p className={helperTextClass}>

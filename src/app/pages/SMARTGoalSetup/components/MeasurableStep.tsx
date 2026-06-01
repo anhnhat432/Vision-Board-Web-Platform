@@ -23,6 +23,7 @@ import { Input } from "../../../components/ui/input";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
+import { FOCUS_AREA_EXAMPLES } from "../constants";
 
 interface MeasurableStepProps {
   smartData: SMARTData;
@@ -42,6 +43,7 @@ interface MeasurableStepProps {
    */
   intentArchetype?: GoalArchetype | null;
   archetype?: GoalArchetype;
+  focusArea?: string;
 }
 
 export function MeasurableStep({
@@ -51,6 +53,7 @@ export function MeasurableStep({
   intentMetricHint,
   intentArchetype,
   archetype,
+  focusArea,
 }: MeasurableStepProps) {
   const [blurredFields, setBlurredFields] = useState({ metricName: false, targetValue: false });
   const parsedInit = parseMetricAndUnit(smartData.measurable.metric_name);
@@ -158,6 +161,14 @@ export function MeasurableStep({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {(() => {
               const suggestions = (() => {
+                if (focusArea && FOCUS_AREA_EXAMPLES[focusArea]) {
+                  return FOCUS_AREA_EXAMPLES[focusArea].measurable.map((e) => ({
+                    label: `${e.name}: ${e.baseline} -> ${e.target} ${e.unit}`,
+                    name: `${e.name} (${e.unit})`,
+                    baseline: e.baseline,
+                    target: e.target,
+                  }));
+                }
                 const text = smartData.specific.goal_statement.toLowerCase();
                 
                 // Phân tích từ khóa động

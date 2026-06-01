@@ -3,20 +3,44 @@ import { Calendar, Hourglass } from "lucide-react";
 
 import { parseNumberInput } from "@/lib/smart-goal";
 import { cn } from "@/app/components/ui/utils";
+import type { QualityLevel } from "@/lib/smart-goal/quality";
 
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { DEFAULT_TARGET_WEEKS } from "../constants";
-import type { SMARTData } from "../types";
+import type { SMARTData, GoalClarityItem, SmartGoalSummaryRow, SmartStepKey } from "../types";
 import { helperTextClass, inputClass, labelClass, requiredMarkerClass } from "./formStyles";
+import { ReviewStep } from "./ReviewStep";
+import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 
 interface TimeBoundStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   currentStepHasDraftContent: boolean;
+  clarityItems: GoalClarityItem[];
+  clarityDoneCount: number;
+  summaryRows: SmartGoalSummaryRow[];
+  onJumpToStep: (stepKey: SmartStepKey) => void;
+  qualityFeedback: {
+    level: QualityLevel;
+    overallScore: number;
+    warnings: string[];
+    suggestions: string[];
+    canProceedToFeasibility: boolean;
+  } | null;
+  focusArea?: string;
 }
 
-export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftContent }: TimeBoundStepProps) {
+export function TimeBoundStep({
+  smartData,
+  setSmartData,
+  currentStepHasDraftContent,
+  clarityItems,
+  clarityDoneCount,
+  summaryRows,
+  onJumpToStep,
+  qualityFeedback,
+}: TimeBoundStepProps) {
   const [blurredFields, setBlurredFields] = useState({ targetWeeks: false, targetDate: false });
   const parsedTargetWeeks = parseNumberInput(smartData.timeBound.target_weeks) ?? 0;
   const targetWeeksInvalid =
@@ -36,7 +60,7 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-[fade-in_0.3s_ease-out]">
       <p className="text-sm leading-6 text-app-ink-soft">Chọn cách chốt thời hạn phù hợp với bạn.</p>
 
       {/* Selector chọn chế độ */}
@@ -266,6 +290,39 @@ export function TimeBoundStep({ smartData, setSmartData, currentStepHasDraftCont
           ) : null}
         </div>
       )}
+
+      {/* Bảng Checklist Chẩn đoán SMART & Xem lại mục tiêu trực quan, to rõ */}
+      <div className="mt-8 pt-6 border-t border-app-line/80 space-y-4">
+        <div className="rounded-[18px] bg-gradient-to-br from-teal-50/[0.04] to-indigo-50/[0.02] dark:from-teal-950/[0.06] dark:to-indigo-950/[0.03] border border-app-line p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-app-accent animate-pulse" />
+            <h4 className="text-sm font-bold text-app-accent uppercase tracking-wider">
+              Checklist Chẩn đoán SMART &amp; Xem lại mục tiêu
+            </h4>
+          </div>
+          <p className="text-xs text-app-ink-soft leading-relaxed mb-5">
+            Đánh giá toàn diện các tiêu chí cụ thể (S), đo lường (M), khả thi (A), liên quan (R) và thời hạn (T) trước khi chốt mục tiêu.
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <ReviewStep
+              clarityDoneCount={clarityDoneCount}
+              clarityItemCount={clarityItems.length}
+              summaryRows={summaryRows}
+              onJumpToStep={onJumpToStep}
+            />
+            {qualityFeedback && (
+              <QualityFeedbackPanel
+                level={qualityFeedback.level}
+                overallScore={qualityFeedback.overallScore}
+                warnings={qualityFeedback.warnings}
+                suggestions={qualityFeedback.suggestions}
+                canProceedToFeasibility={qualityFeedback.canProceedToFeasibility}
+              />
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -170,7 +170,7 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
         <button
           type="button"
           onClick={onComplete}
-          className="mt-2 text-xs font-semibold text-app-ink-soft underline hover:text-app-ink transition-colors"
+          className="mt-1 text-xs font-semibold text-app-ink-soft underline hover:text-app-ink transition-colors relative py-2 px-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 rounded-lg after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2"
         >
           Vào thẳng chấm điểm
         </button>
@@ -188,7 +188,7 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
           <button
             type="button"
             onClick={onComplete}
-            className="text-xs text-app-ink-soft underline hover:text-app-ink transition-colors"
+            className="text-xs text-app-ink-soft underline hover:text-app-ink transition-colors relative py-2 px-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 rounded-lg after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2"
           >
             Bỏ qua bài thở
           </button>

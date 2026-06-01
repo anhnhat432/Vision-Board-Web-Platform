@@ -124,9 +124,9 @@ export function FeasibilityStepShell({
                   <Label
                     htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
                     className={cn(
-                      "flex w-full min-h-[6.5rem] cursor-pointer flex-col justify-between rounded-2xl border p-5.5 text-sm font-medium transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/30 relative overflow-hidden focus-visible:outline-none",
+                      "flex w-full h-auto min-h-[6.5rem] cursor-pointer flex-col justify-between rounded-2xl border p-5.5 text-sm font-medium transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/30 relative overflow-hidden focus-visible:outline-none",
                       isSelected
-                        ? "border-indigo-500 bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-purple-500/10 dark:from-indigo-950/20 dark:via-indigo-950/10 dark:to-purple-950/20 text-indigo-600 dark:text-indigo-400 shadow-[0_12px_30px_rgba(99,102,241,0.15)] -translate-y-0.5"
+                        ? "border-indigo-500 bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-purple-500/10 dark:from-indigo-950/20 dark:via-indigo-950/10 dark:to-purple-950/20 text-indigo-650 dark:text-indigo-400 shadow-[0_12px_30px_rgba(99,102,241,0.15)] -translate-y-0.5"
                         : "border-slate-200/80 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 hover:border-indigo-500/40 hover:bg-white dark:hover:bg-slate-900/80 hover:-translate-y-1 hover:shadow-lg"
                     )}
                   >
@@ -171,7 +171,39 @@ export function FeasibilityStepShell({
                         </motion.div>
                       ) : null}
                     </span>
-                    <span className="mt-4.5 leading-relaxed text-slate-800 dark:text-slate-150 font-bold relative z-10 text-[15px]">{option.label}</span>
+                    
+                    <span className="mt-4 leading-relaxed text-slate-850 dark:text-slate-150 font-bold relative z-10 text-[15px] block text-left">
+                      {option.label}
+                    </span>
+
+                    {/* Hộp tác động & Ví dụ động */}
+                    {isSelected && (option.impact || option.example) && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                        animate={{ height: "auto", opacity: 1, marginTop: 14 }}
+                        transition={{ duration: 0.28, ease: "easeOut" }}
+                        className="w-full border-t border-indigo-500/20 pt-3.5 space-y-2 text-left relative z-10 text-xs text-slate-800 dark:text-slate-200"
+                      >
+                        {option.impact && (
+                          <div className="flex items-start gap-1.5 text-indigo-700 dark:text-indigo-300 font-semibold leading-relaxed">
+                            <span className="shrink-0 text-sm">🎯</span>
+                            <div>
+                              <span className="uppercase text-[9px] font-extrabold tracking-wider mr-1.5 text-indigo-500/90 block sm:inline-block">Tác động:</span>
+                              <span>{option.impact}</span>
+                            </div>
+                          </div>
+                        )}
+                        {option.example && (
+                          <div className="flex items-start gap-1.5 text-slate-500 dark:text-slate-400 leading-relaxed italic">
+                            <span className="shrink-0 text-sm">💡</span>
+                            <div>
+                              <span className="uppercase text-[9px] font-extrabold tracking-wider mr-1.5 text-slate-400 block sm:inline-block">Ví dụ:</span>
+                              <span>{option.example}</span>
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
                   </Label>
                 </div>
               );

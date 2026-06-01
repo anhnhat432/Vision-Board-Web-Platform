@@ -8,7 +8,14 @@ export interface Question {
   axisLabel: string;
   question: string;
   helper: string;
-  options: { value: string; label: string; score: number; diagnostic: string }[];
+  options: {
+    value: string;
+    label: string;
+    score: number;
+    diagnostic: string;
+    impact?: string;
+    example?: string;
+  }[];
 }
 
 export type ResultType = "realistic" | "challenging" | "too_ambitious";
