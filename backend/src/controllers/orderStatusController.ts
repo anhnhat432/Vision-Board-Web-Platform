@@ -30,26 +30,40 @@ function serializeOrder(order: {
   status: string;
   amount: number;
   currency: string;
+  provider?: string | null;
   bankAccount: string;
   bankName: string;
   accountName: string;
   description?: string | null;
   qrDataUrl: string;
+  metadata?: {
+    payos?: {
+      checkoutUrl?: string;
+    } | null;
+    [key: string]: unknown;
+  } | null;
   expiresAt?: Date | string | null;
   completedAt?: Date | string | null;
   createdAt?: Date | string | null;
   receiptSentAt?: Date | string | null;
 }) {
+  const payosCheckoutUrl =
+    order.provider === "payos" && typeof order.metadata?.payos?.checkoutUrl === "string"
+      ? order.metadata.payos.checkoutUrl
+      : null;
+
   return {
     orderId: order.orderId,
     status: order.status,
     amount: order.amount,
     currency: order.currency,
+    provider: order.provider,
     bankAccount: order.bankAccount,
     bankName: order.bankName,
     accountName: order.accountName,
     description: order.description ?? order.orderId,
     qrDataUrl: order.qrDataUrl,
+    checkoutUrl: payosCheckoutUrl,
     expiresAt: toIsoString(order.expiresAt),
     completedAt: toIsoString(order.completedAt),
     createdAt: toIsoString(order.createdAt),
@@ -58,16 +72,23 @@ function serializeOrder(order: {
 }
 
 function serializePublicOrder(order: Parameters<typeof serializeOrder>[0]) {
+  const payosCheckoutUrl =
+    order.provider === "payos" && typeof order.metadata?.payos?.checkoutUrl === "string"
+      ? order.metadata.payos.checkoutUrl
+      : null;
+
   return {
     orderId: order.orderId,
     status: order.status,
     amount: order.amount,
     currency: order.currency,
+    provider: order.provider,
     bankAccount: order.bankAccount,
     bankName: order.bankName,
     accountName: order.accountName,
     description: order.description ?? order.orderId,
     qrDataUrl: order.qrDataUrl,
+    checkoutUrl: payosCheckoutUrl,
     expiresAt: toIsoString(order.expiresAt),
   };
 }

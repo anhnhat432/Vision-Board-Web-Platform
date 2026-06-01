@@ -27,6 +27,7 @@ import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -987,51 +988,37 @@ function GoalTrackerContent({
         {/* Cột chính bên trái */}
         <div className="space-y-8 lg:space-y-10">
           {/* Hero Section gọn gàng & chuyên nghiệp */}
-          <div
-            data-tour-id="goaltracker-hero"
-            className="rounded-[18px] border border-app-line/80 bg-gradient-to-br from-white via-white to-app-accent-soft/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-app-accent-soft/5 p-6 sm:p-8 relative overflow-hidden shadow-app-sm"
-          >
-            {/* Soft glow decoration */}
-            <div className="absolute right-0 top-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-app-accent/5 blur-3xl pointer-events-none" />
-
-            <div className="grid gap-6 md:grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_240px] lg:items-center relative z-10">
-              <div className="space-y-2.5">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-app-accent"></span>
-                  </span>
-                  MỤC TIÊU
-                </p>
-                <h1 className="font-serif text-3xl font-semibold leading-tight tracking-tight text-app-ink sm:text-4xl">
-                  Hành trình mục tiêu
-                </h1>
-                <p className="text-sm leading-relaxed text-app-ink-soft max-w-xl font-sans">
-                  Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều
-                  đặn.
-                </p>
-              </div>
-
-              {/* CTAs ở Hero section */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
-                <Button
-                  className="bg-app-accent text-white rounded-lg px-5 py-3 text-sm font-bold hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto"
-                  onClick={handleStartGuidedGoalFlow}
-                >
-                  <Zap className="h-4.5 w-4.5" />
-                  Bắt đầu chu kỳ 12 tuần
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-lg border border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-5 py-3 text-sm font-bold transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto"
-                  onClick={handleStartGuidedGoalFlow}
-                >
-                  <Plus className="h-4.5 w-4.5" />
-                  Thiết lập mục tiêu
-                </Button>
-              </div>
-
-              {/* Visual Anchor */}
-              <div className="hidden lg:block relative overflow-hidden rounded-2xl border border-app-line bg-app-bg shadow-xs aspect-[4/3] w-full max-w-[240px] shrink-0">
+          <PageHero
+            tourId="goaltracker-hero"
+            className="bg-gradient-to-br from-white via-white to-app-accent-soft/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-app-accent-soft/5 border-app-line/80 rounded-[18px]"
+            eyebrow="MỤC TIÊU"
+            title={
+              <span className="font-serif text-3xl font-semibold leading-tight tracking-tight text-app-ink sm:text-4xl">
+                Hành trình mục tiêu
+              </span>
+            }
+            description="Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều đặn."
+            primaryCta={
+              <Button
+                className="bg-app-accent text-white rounded-lg px-5 py-3 text-sm font-bold hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+                onClick={handleStartGuidedGoalFlow}
+              >
+                <Zap className="h-4.5 w-4.5" />
+                Bắt đầu chu kỳ 12 tuần
+              </Button>
+            }
+            secondaryCta={
+              <Button
+                variant="outline"
+                className="rounded-lg border border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-5 py-3 text-sm font-bold transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+                onClick={handleStartGuidedGoalFlow}
+              >
+                <Plus className="h-4.5 w-4.5" />
+                Thiết lập mục tiêu
+              </Button>
+            }
+            aside={
+              <div className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg shadow-xs aspect-[4/3] w-full max-w-[240px] shrink-0">
                 <img
                   src="/vision_board_canvas.png"
                   alt="Bản đồ tầm nhìn và mục tiêu"
@@ -1039,8 +1026,8 @@ function GoalTrackerContent({
                   loading="lazy"
                 />
               </div>
-            </div>
-          </div>
+            }
+          />
 
           {/* Focus Strip đặt ngang */}
           <GoalSummaryStrip

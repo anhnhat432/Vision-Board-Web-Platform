@@ -17,10 +17,12 @@ interface OrderStatusResponse {
   status: "pending" | "completed" | "expired" | "failed";
   amount: number;
   currency: string;
+  provider?: string | null;
   bankAccount: string;
   bankName: string;
   accountName: string;
   qrDataUrl: string;
+  checkoutUrl?: string | null;
   expiresAt: string | null;
   completedAt?: string | null;
   createdAt?: string | null;
@@ -141,6 +143,13 @@ export function BillingCheckoutQR() {
         setCopyMessage(`Không thể tự sao chép ${displayLabel}. Bạn có thể chọn và sao chép thủ công.`);
       });
   }, []);
+
+  const isHostedPayosCheckout = order?.provider?.toLowerCase() === "payos" && Boolean(order.checkoutUrl);
+
+  const openHostedCheckout = useCallback(() => {
+    if (!order?.checkoutUrl) return;
+    window.location.assign(order.checkoutUrl);
+  }, [order?.checkoutUrl]);
 
   const syncCompletedOrderAccess = useCallback(async () => {
     if (!order || order.status !== "completed") return false;
@@ -378,14 +387,34 @@ export function BillingCheckoutQR() {
             </p>
 
             <div className="mt-6 flex justify-center">
-              <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
-                <img
-                  src={order.qrDataUrl}
-                  alt="Mã thanh toán tự động"
-                  className="h-56 w-56 object-contain sm:h-64 sm:w-64"
-                  loading="eager"
-                />
-              </div>
+              {isHostedPayosCheckout ? (
+                <div className="flex min-h-56 w-56 flex-col items-center justify-center rounded-lg border border-app-line bg-app-surface p-5 sm:min-h-64 sm:w-64">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+                    <QrCode className="h-6 w-6" />
+                  </div>
+                  <p className="mt-4 text-sm font-semibold text-app-ink">Mở cổng thanh toán PayOS</p>
+                  <p className="mt-2 text-xs leading-5 text-app-ink-muted">
+                    Dùng liên kết thanh toán do PayOS cấp để quét mã hoặc xác nhận giao dịch.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={openHostedCheckout}
+                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-app-accent px-4 py-2 text-sm font-semibold text-white hover:bg-app-accent"
+                  >
+                    <QrCode className="h-4 w-4" />
+                    Mở PayOS
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
+                  <img
+                    src={order.qrDataUrl}
+                    alt="Mã thanh toán tự động"
+                    className="h-56 w-56 object-contain sm:h-64 sm:w-64"
+                    loading="eager"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="mt-6 text-center">
