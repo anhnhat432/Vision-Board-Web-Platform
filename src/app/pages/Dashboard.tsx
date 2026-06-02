@@ -580,10 +580,24 @@ function DashboardContent({
   return (
     <div
       className={
-        showMobileStickyCTA ? "min-h-screen bg-app-bg pb-24 text-app-ink" : "min-h-screen bg-app-bg text-app-ink"
+        showMobileStickyCTA 
+          ? "min-h-screen bg-app-bg pb-24 text-app-ink relative overflow-hidden" 
+          : "min-h-screen bg-app-bg text-app-ink relative overflow-hidden"
       }
     >
-      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      {/* Lớp nền Ambient & Texture nâng cấp (ui-design) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
+        {/* Lưới điểm mịn (Dot Grid) */}
+        <div className="absolute inset-0 bg-[radial-gradient(#8080800c_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#ffffff04_1.2px,transparent_1.2px)] bg-[size:24px_24px] opacity-70" />
+
+        {/* Bóng sáng Forest Green (Top Right) */}
+        <div className="absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen" />
+
+        {/* Bóng sáng Amber (Bottom Left) */}
+        <div className="absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen" />
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 relative z-10">
         {shouldShowFreeGoalLimit ? (
           <FreeGoalLimitCard
             current={goalLimitUsage.current}
