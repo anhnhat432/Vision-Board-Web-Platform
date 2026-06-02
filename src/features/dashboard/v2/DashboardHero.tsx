@@ -47,14 +47,17 @@ export function DashboardHero({
     <section
       data-testid="dashboard-primary-action-card"
       data-tour-id="dashboard-next-card"
-      className="relative overflow-hidden rounded-3xl border border-emerald-100/50 dark:border-neutral-800/80 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-emerald-950/10 p-6 md:p-8 lg:p-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-center shadow-3xs select-none w-full"
+      className="relative overflow-hidden rounded-3xl border border-emerald-100/50 dark:border-neutral-800/80 bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/30 dark:from-neutral-950 dark:via-neutral-950 dark:to-emerald-950/10 p-6 md:p-8 lg:p-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-center shadow-app-sm hover:shadow-app-md transition-shadow duration-300 select-none w-full"
     >
-      {/* Decorative ambient light */}
-      <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px] dark:bg-app-accent/10" />
-      <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px] dark:bg-amber-500/5" />
+      {/* Decorative ambient light - Gradient Mesh effect */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 blur-[80px] dark:from-emerald-500/20" />
+      <div className="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-gradient-to-tr from-amber-500/5 to-pink-500/5 blur-[80px]" />
+      
+      {/* Grid Pattern overlay for texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
 
       {/* 📌 Pin indicator on top header corner */}
-      <span className="hidden sm:inline absolute top-4 left-4 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+      <span className="hidden sm:inline absolute top-4 left-4 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default">
         📌
       </span>
 
@@ -62,18 +65,18 @@ export function DashboardHero({
       <div className="relative z-10 space-y-4 pt-2">
         <div className="flex flex-wrap items-center gap-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-ping" />
+            <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-pulse" />
             {caption}
           </p>
-          <span className="rounded-full border border-emerald-100/80 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/80 px-3.5 py-0.5 text-xs font-semibold text-app-accent flex items-center gap-1.5 shadow-3xs">
+          <span className="rounded-full border border-emerald-100/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/85 px-3.5 py-0.5 text-xs font-semibold text-app-accent flex items-center gap-1.5 shadow-[0_2px_8px_-4px_rgba(16,185,129,0.2)]">
             <Calendar className="h-3.5 w-3.5 text-app-accent/80" />
             {weekLabel}
           </span>
         </div>
 
-        <h1 className="font-serif text-2xl sm:text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink md:text-[2.5rem]">
+        <h1 className="font-serif text-3xl sm:text-4xl font-bold leading-[1.2] tracking-tight text-app-ink md:text-[2.75rem]">
           Chào tuần mới,{" "}
-          <span className="font-semibold underline decoration-amber-400/50 decoration-wavy underline-offset-4 italic">
+          <span className="font-serif font-bold underline decoration-amber-400/60 decoration-wavy underline-offset-8 italic bg-gradient-to-r from-amber-600 to-amber-700 dark:from-amber-400 dark:to-amber-500 bg-clip-text text-transparent">
             {displayName}
           </span>
         </h1>
@@ -84,17 +87,17 @@ export function DashboardHero({
         </p>
 
         {/* Life Quote Banner with deep and delicate design */}
-        <div className="border-l-2 border-amber-400/60 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl">
+        <div className="border-l-2 border-amber-500/50 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl shadow-2xs backdrop-blur-xs">
           <p className="font-serif italic text-amber-800 dark:text-amber-400 text-xs leading-relaxed">
             “{selectedQuote}”
           </p>
         </div>
       </div>
 
-      {/* Featured Goal focus card - premium dreamy wood layout */}
+      {/* Featured Goal focus card - premium dreamy polaroid layout */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/card relative z-10 rounded-3xl border border-neutral-200/60 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-md transition-all duration-300 hover:shadow-lg -rotate-[1deg] hover:rotate-0 overflow-hidden"
+        className="group/card relative z-10 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-app-md hover:shadow-app-lg transition-all duration-300 -rotate-[1deg] hover:rotate-0 hover:scale-[1.01] overflow-hidden backdrop-blur-md"
       >
         {/* Background gradient dreamy mờ ảo giả lập Vision Board */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-amber-500/5 to-violet-500/5 opacity-80 pointer-events-none" />
@@ -105,10 +108,10 @@ export function DashboardHero({
         </p>
 
         {/* Visual Dreamy Vision Anchor */}
-        <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
+        <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10 transition-transform duration-500 group-hover/card:scale-[1.02]">
           <span className="text-3xl animate-bounce duration-1000">🎨</span>
           <div className="absolute inset-0 bg-black/2 flex items-end p-2">
-            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/80 dark:bg-neutral-900/80 px-2 py-0.5 rounded-md backdrop-blur-xs">
+            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/85 dark:bg-neutral-900/85 px-2 py-0.5 rounded-md backdrop-blur-xs">
               BẢNG TẦM NHÌN
             </span>
           </div>
@@ -134,7 +137,7 @@ export function DashboardHero({
 
         <Link
           to={planHref}
-          className="mt-4.5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-sm hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group cursor-pointer relative z-10"
+          className="mt-4.5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-app-sm hover:shadow-app-md hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group cursor-pointer relative z-10"
         >
           <span>Mở kế hoạch 12 tuần</span>
           <ArrowRight className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover:translate-x-0.5" />

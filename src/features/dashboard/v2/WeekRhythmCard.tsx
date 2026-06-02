@@ -50,24 +50,24 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 -rotate-[0.8deg] hover:rotate-0",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
     iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
+      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   "Tỷ lệ lead": {
-    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 rotate-[0.6deg] hover:rotate-0",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
     iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
+      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   Nhịp: {
-    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 -rotate-[0.6deg] hover:rotate-0",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
     iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
+      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   Chuỗi: {
-    bg: "bg-white/60 dark:bg-neutral-950/20 border-neutral-200/80 dark:border-neutral-800/80 hover:border-app-accent/25 hover:bg-white dark:hover:bg-neutral-950 rotate-[0.8deg] hover:rotate-0",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
     iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border border-neutral-200/80 dark:border-neutral-800/80",
+      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
 };
 
@@ -129,10 +129,10 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
       const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
       return (
         <div
-          className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-app-accent/40"
+          className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-app-accent/40 shadow-inner"
           aria-hidden="true"
         >
-          <div className="w-full rounded-full bg-app-accent animate-pulse" style={{ height: `${fillHeight}%` }} />
+          <div className="w-full rounded-full bg-gradient-to-t from-app-accent to-[#5ba590] animate-pulse" style={{ height: `${fillHeight}%` }} />
         </div>
       );
     }
@@ -140,14 +140,14 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
     const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
     return (
       <div
-        className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-transparent"
+        className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-transparent shadow-inner"
         aria-hidden="true"
       >
         <div
           className={`w-full rounded-full transition-all duration-300 ${
             day.percent === 100
-              ? "bg-app-accent/70 group-hover:bg-app-accent"
-              : "bg-app-accent/35 group-hover:bg-app-accent/50"
+              ? "bg-gradient-to-t from-app-accent/80 to-[#5ba590]/90 group-hover:from-app-accent group-hover:to-[#5ba590]"
+              : "bg-gradient-to-t from-app-accent/40 to-[#5ba590]/40 group-hover:from-app-accent/60 group-hover:to-[#5ba590]/60"
           }`}
           style={{ height: `${fillHeight}%` }}
         />
@@ -157,11 +157,11 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
 
   return (
     <div className="group flex flex-col items-center gap-1.5 text-center transition-all duration-300 hover:scale-105">
-      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent" : "text-neutral-400"}`}>
+      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-neutral-400"}`}>
         {day.label}
       </span>
       {barContent}
-      <span className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent" : "text-neutral-500"}`}>
+      <span className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-neutral-500"}`}>
         {day.completed}/{day.total}
       </span>
     </div>
@@ -221,15 +221,21 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white/40 dark:bg-neutral-900/10 backdrop-blur-sm p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/20 relative select-none"
+      className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/80 bg-white/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
       aria-labelledby="dashboard-week-rhythm-title"
     >
+      {/* Grid Pattern overlay for texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808004_1px,transparent_1px),linear-gradient(to_bottom,#80808004_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
+
+      {/* Ambient glow mesh */}
+      <div className="pointer-events-none absolute -right-20 -bottom-20 h-48 w-48 rounded-full bg-app-accent/5 blur-[50px]" />
+
       {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
         📌
       </span>
 
-      <div className="flex flex-col gap-1 border-b border-neutral-200/80 dark:border-neutral-800/60 pb-4 mb-6 pt-2">
+      <div className="flex flex-col gap-1 border-b border-neutral-200/50 dark:border-neutral-800/55 pb-4 mb-6 pt-2 relative z-10">
         <h2
           id="dashboard-week-rhythm-title"
           className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2"
@@ -243,7 +249,7 @@ export function WeekRhythmCard({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 relative">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 relative z-10">
         {stats.map((item, _index) => {
           const Icon = item.icon;
           const styles = KPI_CARD_STYLES[item.caption];

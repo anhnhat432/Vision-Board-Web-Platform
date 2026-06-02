@@ -726,6 +726,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
   let ctaLabel = "";
   let ctaPath = "";
   let Icon = Compass;
+  let borderLeftColor = "border-l-emerald-600 dark:border-l-emerald-400";
   let bgClass =
     "bg-emerald-500/10 border-emerald-500/15 dark:bg-emerald-950/20 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300";
   let iconColor = "text-emerald-600 dark:text-emerald-400";
@@ -737,6 +738,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
     ctaLabel = "Chấm điểm ngay";
     ctaPath = "/onboarding";
     Icon = Compass;
+    borderLeftColor = "border-l-amber-500 dark:border-l-amber-450";
     bgClass =
       "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
     iconColor = "text-amber-600 dark:text-amber-400";
@@ -753,6 +755,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
     ctaLabel = "Viết phản tư";
     ctaPath = "/12-week-system?tab=review";
     Icon = Award;
+    borderLeftColor = "border-l-purple-600 dark:border-l-purple-400";
     bgClass =
       "bg-purple-500/10 border-purple-500/15 dark:bg-purple-950/20 dark:border-purple-800/30 text-purple-800 dark:text-purple-300";
     iconColor = "text-purple-600 dark:text-purple-400";
@@ -773,7 +776,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
 
   return (
     <section
-      className={`rounded-3xl border p-5 shadow-3xs backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all duration-300 hover:shadow-2xs ${bgClass} select-none relative`}
+      className={`rounded-3xl border border-l-4 p-5 pl-4.5 shadow-3xs backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all duration-300 hover:shadow-2xs ${borderLeftColor} ${bgClass} select-none relative`}
       aria-label="Hành động đề xuất tiếp theo"
     >
       {/* 📌 Floating pin for visual consistency */}
@@ -838,7 +841,7 @@ function DashboardActiveLayout({
 
   return (
     <div className="space-y-6">
-      <div data-tour-id="dashboard-start-card">
+      <div data-tour-id="dashboard-start-card" className="appear-fade-up" style={{ animationDelay: "0ms" }}>
         <DashboardHero
           caption={caption}
           currentWeek={data.dashboardKpiCurrentWeek}
@@ -851,15 +854,19 @@ function DashboardActiveLayout({
       </div>
 
       {/* Next Best Action Banner */}
-      <NextBestAction data={data} />
+      <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "100ms" }}>
+        <NextBestAction data={data} />
+      </div>
 
       {topTrigger ? (
-        <RescueAlert
-          trigger={topTrigger}
-          ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
-          onAction={onTriggerAction}
-          onDismiss={onTriggerDismiss}
-        />
+        <div className="appear-fade-up" style={{ animationDelay: "150ms" }}>
+          <RescueAlert
+            trigger={topTrigger}
+            ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
+            onAction={onTriggerAction}
+            onDismiss={onTriggerDismiss}
+          />
+        </div>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -868,7 +875,7 @@ function DashboardActiveLayout({
           <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
 
           {/* Today Tasks - Primary Focus */}
-          <div className="relative">
+          <div className="relative appear-fade-up" style={{ animationDelay: "200ms" }}>
             <TodayMiniCard
               title={data.todayPreviewTitle}
               tasks={data.activeSystemTaskPreview}
@@ -878,12 +885,12 @@ function DashboardActiveLayout({
           </div>
 
           {/* Active Goals Card - Quieter border */}
-          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
+          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "300ms" }}>
             <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
           </div>
 
           {/* Week Rhythm Card - Quieter border */}
-          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "400ms" }}>
             <WeekRhythmCard
               system={data.activeSystem}
               currentWeek={data.dashboardKpiCurrentWeek}
@@ -899,7 +906,7 @@ function DashboardActiveLayout({
           </div>
 
           {/* Twelve Week Trend Card - Quieter / conditional display within card */}
-          <div className="opacity-85 hover:opacity-100 transition-opacity duration-200">
+          <div className="opacity-85 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "500ms" }}>
             <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
           </div>
         </div>
@@ -907,7 +914,7 @@ function DashboardActiveLayout({
         {/* Right Column: Secondary Insights & Inspiration */}
         <aside className="space-y-6">
           {data.reviewDueToday ? (
-            <div className="relative">
+            <div className="relative appear-fade-up" style={{ animationDelay: "150ms" }}>
               <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] z-10">
                 📌
               </span>
@@ -918,20 +925,20 @@ function DashboardActiveLayout({
             </div>
           ) : null}
 
-          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
+          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "250ms" }}>
             <BalanceCard rows={balanceRows} />
           </div>
 
-          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "350ms" }}>
             <DailyStoicCard />
           </div>
 
-          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "450ms" }}>
             <QuoteBlock />
           </div>
 
           {/* 🎨 Cozy planning corner generated image asset for Active Users */}
-          <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none opacity-90 hover:opacity-100 transition-all duration-200">
+          <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none opacity-90 hover:opacity-100 transition-all duration-200 appear-fade-up" style={{ animationDelay: "550ms" }}>
             <img
               src="/study_desk_hero.png"
               alt="Góc học tập & lập kế hoạch ấm áp"
