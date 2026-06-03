@@ -119,11 +119,12 @@ export async function sendAssistantMessageStream(
     return;
   }
 
-  const url = `${getApiBaseUrl()}/assistant/chat/stream`;
+  const url = `${getApiBaseUrl()}/ai/assistant`;
   const body = {
     message: request.message,
     context: sanitizedContext,
     history: sanitizedHistory,
+    mode: "real",
   };
 
   let response: Response;
@@ -132,7 +133,6 @@ export async function sendAssistantMessageStream(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "text/event-stream",
       },
       body: JSON.stringify(body),
       signal,
@@ -147,70 +147,52 @@ export async function sendAssistantMessageStream(
       wrapped.status = error.status;
       throw wrapped;
     }
-    throw error;
-  }
-
-  if (!response.ok || !response.body) {
-    const err = new Error("Không thể kết nối với trợ lý AI.") as Error & {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const wrapped = new Error("Bạn đang ngoại tuyến. Vui lòng kết nối mạng để sử dụng Trợ lý AI.") as Error & {
+        errorCode?: string;
+      };
+      wrapped.errorCode = "ASSISTANT_OFFLINE";
+      throw wrapped;
+    }
+    const wrapped = new Error("Không thể kết nối với máy chủ (backend unavailable). Vui lòng thử lại sau.") as Error & {
       errorCode?: string;
     };
-    err.errorCode = "ASSISTANT_CONNECTION_ERROR";
+    wrapped.errorCode = "ASSISTANT_BACKEND_UNAVAILABLE";
+    throw wrapped;
+  }
+
+  if (!response.ok) {
+    let errMessage = "Không thể kết nối với trợ lý AI.";
+    let errCode = "ASSISTANT_CONNECTION_ERROR";
+    try {
+      const errJson = await response.json();
+      if (errJson?.message) {
+        errMessage = errJson.message;
+        errCode = errJson.errorCode || errCode;
+      }
+    } catch {}
+
+    const err = new Error(errMessage) as Error & { errorCode?: string; status?: number };
+    err.errorCode = errCode;
+    err.status = response.status;
     throw err;
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let buffer = "";
-  const handleAbort = () => {
-    void reader.cancel().catch(() => {});
-  };
+  const json = await response.json();
+  if (json.success && json.data) {
+    const { assistantText, proposedActions } = json.data;
 
-  signal?.addEventListener("abort", handleAbort, { once: true });
-
-  try {
-    while (true) {
-      if (signal?.aborted) throw createAbortError();
-
-      const { done, value } = await reader.read();
-      if (signal?.aborted) throw createAbortError();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-
-      const events = buffer.split("\n\n");
-      buffer = events.pop() || "";
-
-      for (const event of events) {
-        if (!event.trim()) continue;
-
-        const line = event.startsWith("data: ") ? event.slice(6) : event;
-        if (!line) continue;
-
-        let parsed: StreamingAssistantEvent;
-        try {
-          parsed = JSON.parse(line) as StreamingAssistantEvent;
-        } catch {
-          // Skip invalid JSON
-          continue;
-        }
-
-        if (parsed.type === "delta") {
-          onDelta(parsed.text);
-        } else if (parsed.type === "done") {
-          return;
-        } else if (parsed.type === "error") {
-          const err = new Error(parsed.message) as Error & { errorCode?: string };
-          err.errorCode = parsed.errorCode;
-          throw err;
-        }
+    let finalContent = assistantText;
+    if (proposedActions && proposedActions.length > 0) {
+      for (const action of proposedActions) {
+        finalContent += `\n\n\`\`\`action\n${JSON.stringify(action, null, 2)}\n\`\`\``;
       }
     }
-  } catch (error) {
-    if (isAbortError(error)) {
-      throw createAbortError();
-    }
-    throw error;
-  } finally {
-    signal?.removeEventListener("abort", handleAbort);
+
+    onDelta(finalContent);
+  } else {
+    const err = new Error(json.message || "Không thể kết nối với trợ lý AI.") as Error & { errorCode?: string };
+    err.errorCode = json.errorCode || "ASSISTANT_CONNECTION_ERROR";
+    throw err;
   }
 }

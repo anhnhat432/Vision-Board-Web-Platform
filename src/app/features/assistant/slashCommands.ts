@@ -3,7 +3,7 @@ export interface SlashCommand {
   description: string;
   icon?: string;
   promptText?: string;
-  action?: "clear" | "help";
+  action?: "clear" | "help" | "audit";
 }
 
 export const SLASH_COMMANDS: SlashCommand[] = [
@@ -11,6 +11,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { command: "/week", description: "Tóm tắt tuần này", promptText: "Tóm tắt tuần này giúp tôi" },
   { command: "/goals", description: "Liệt kê mục tiêu", promptText: "Liệt kê các mục tiêu của tôi" },
   { command: "/reflection", description: "Gợi ý reflection cuối tuần", promptText: "Gợi ý reflection cho tôi" },
+  { command: "/audit", description: "Xem lịch sử thực thi hành động", action: "audit" },
   { command: "/clear", description: "Xóa lịch sử chat", action: "clear" },
   { command: "/help", description: "Xem các lệnh có sẵn", action: "help" },
 ];

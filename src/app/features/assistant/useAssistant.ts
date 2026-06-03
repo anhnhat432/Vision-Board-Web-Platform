@@ -53,6 +53,23 @@ function getFeedbackMapStorageKey(userId: string | null): string {
 }
 
 function getErrorMessage(error: unknown): string {
+  const code = getErrorCode(error);
+  if (code === "ASSISTANT_OFFLINE") {
+    return "Bạn đang ngoại tuyến. Vui lòng kết nối mạng để tiếp tục sử dụng Trợ lý AI.";
+  }
+  if (code === "ASSISTANT_AUTH_ERROR") {
+    return "Bạn cần đăng nhập tài khoản để sử dụng Trợ lý AI ở chế độ chính thức.";
+  }
+  if (code === "AI_PROVIDER_NOT_CONFIGURED" || code === "ASSISTANT_PROVIDER_NOT_CONFIGURED") {
+    return "Dịch vụ AI chưa được cấu hình trên hệ thống. Vui lòng liên hệ quản trị viên.";
+  }
+  if (code === "AI_INTERNAL_ERROR" || code === "ASSISTANT_INTERNAL_ERROR") {
+    return "Dịch vụ AI hiện không phản hồi. Vui lòng thử lại sau.";
+  }
+  if (code === "ASSISTANT_BACKEND_UNAVAILABLE" || code === "ASSISTANT_CONNECTION_ERROR") {
+    return "Không thể kết nối với máy chủ backend. Vui lòng thử lại sau ít phút.";
+  }
+
   if (error && typeof error === "object" && "message" in error) {
     const message = (error as { message?: unknown }).message;
     if (typeof message === "string" && message.trim()) return message;

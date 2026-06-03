@@ -202,4 +202,35 @@ describe("mockProvider", () => {
     expect(response).toContain("Lý do:");
     expect(response).toContain("Nếu chỉ có 10 phút:");
   });
+
+  it("detects tick task intent and returns action proposal when open tasks exist", async () => {
+    const promise = mockProvider.send("tick task hôm nay", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("mark_task_done");
+    expect(response).toContain("Đọc chapter 3");
+  });
+
+  it("detects tick task intent and returns message when no open tasks exist", async () => {
+    const promise = mockProvider.send("tick task hôm nay", {
+      ...sampleContext,
+      todayTasks: sampleContext.todayTasks.map((t) => ({ ...t, done: true })),
+    });
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("không có công việc nào chưa hoàn thành");
+  });
+
+  it("detects tick task intent and returns error message when no 12-week plan active", async () => {
+    const promise = mockProvider.send("tick task hôm nay", {
+      ...sampleContext,
+      currentWeek: null,
+    });
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("chưa có kế hoạch 12 tuần nào đang hoạt động");
+  });
 });

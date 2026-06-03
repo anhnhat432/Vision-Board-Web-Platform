@@ -56,10 +56,13 @@ CÁC LOẠI ACTION HỖ TRỢ:
    payload: { title: string (max 200), scheduledDate: "today" | "tomorrow" | "YYYY-MM-DD", isCore?: boolean }
    label: chuỗi mô tả ngắn cho UI button.
 2. mark_task_done — đánh dấu 1 task đã làm xong.
-   payload: { taskId: string (lấy từ context.todayTasks[].id), done: true }
+   payload: { taskId: string (lấy từ context.todayTasks[].id hoặc context.stuckSignals.overdueTasks[].id), done: true }
    label: "Đánh dấu xong: <task title>"
-   CHỈ đề xuất khi context.todayTasks có taskId match.
-3. navigate_to — gợi ý mở 1 route trong app.
+   CHỈ đề xuất khi context.todayTasks hoặc context.stuckSignals.overdueTasks có taskId match.
+3. create_goal — tạo một mục tiêu (goal) mới.
+   payload: { title: string (max 200), category: "health" | "career" | "relationships" | "finance" | "personal" | "family" | "other", description?: string (max 500), deadline?: "YYYY-MM-DD" }
+   label: "Tạo mục tiêu: <goal title>"
+4. navigate_to — gợi ý mở 1 route trong app.
    payload: { route: "/twelve-week" | "/today" | "/reflection" | "/dashboard" }
    label: "Mở trang ..."
 QUY TẮC ACTION:
@@ -220,6 +223,17 @@ export function summarizeContext(context: AssistantContext): string {
     ].filter(Boolean)
     : [];
 
+  const authSyncParts: string[] = [];
+  if (context.authSyncMode) {
+    const authDesc = context.authSyncMode.authState === "signed_in" ? "Đã đăng nhập" : "Chưa đăng nhập (dùng cục bộ)";
+    const syncDesc = context.authSyncMode.syncState === "synced" ? "Đã đồng bộ lên đám mây"
+                   : context.authSyncMode.syncState === "syncing" ? "Đang đồng bộ"
+                   : context.authSyncMode.syncState === "error" ? "Lỗi đồng bộ"
+                   : context.authSyncMode.syncState === "offline" ? "Mất kết nối mạng"
+                   : "Đồng bộ bị tắt";
+    authSyncParts.push(`- Trạng thái tài khoản: ${authDesc}, đồng bộ: ${syncDesc}`);
+  }
+
   return [
     "Context người dùng:",
     `- Route: ${context.route}`,
@@ -238,5 +252,6 @@ export function summarizeContext(context: AssistantContext): string {
     ...trendParts,
     ...streakParts,
     ...deadlineParts,
+    ...authSyncParts,
   ].join("\n");
 }

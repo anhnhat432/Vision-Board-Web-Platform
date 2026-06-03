@@ -1,10 +1,11 @@
-import { ArrowRight, CheckSquare, Plus } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, CheckSquare, MessageSquare, Plus, Scale, Target } from "lucide-react";
 import type { AssistantAction } from "./parseActions";
 
 interface AssistantActionCardProps {
   action: AssistantAction;
   onExecute: (action: AssistantAction) => Promise<void>;
-  status: "pending" | "executing" | "done" | "error";
+  onReject: (action: AssistantAction) => void;
+  status: "pending" | "executing" | "done" | "error" | "rejected";
   errorMessage?: string;
 }
 
@@ -13,13 +14,229 @@ function getIconForAction(type: AssistantAction["type"]) {
     case "create_task":
       return <Plus size={16} className="text-indigo-600" />;
     case "mark_task_done":
+    case "update_task_status":
       return <CheckSquare size={16} className="text-green-600" />;
     case "navigate_to":
       return <ArrowRight size={16} className="text-blue-600" />;
+    case "create_goal":
+    case "create_smart_goal_from_insight":
+      return <Target size={16} className="text-amber-600" />;
+    case "create_life_insight_note":
+      return <BookOpen size={16} className="text-purple-600" />;
+    case "suggest_feasibility_inputs":
+      return <Scale size={16} className="text-rose-600" />;
+    case "create_twelve_week_plan_draft":
+    case "reschedule_task":
+      return <CalendarDays size={16} className="text-sky-600" />;
+    case "add_weekly_review":
+      return <MessageSquare size={16} className="text-teal-600" />;
   }
 }
 
-export function AssistantActionCard({ action, onExecute, status, errorMessage }: AssistantActionCardProps) {
+function renderActionPreview(action: AssistantAction) {
+  const { type, payload } = action;
+
+  switch (type) {
+    case "create_smart_goal_from_insight": {
+      const p = payload as {
+        title: string;
+        category: string;
+        description?: string;
+        deadline?: string;
+        focusArea?: string;
+      };
+      return (
+        <div className="mt-2 space-y-1 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div>
+            <span className="font-semibold text-gray-700">Mục tiêu:</span> {p.title}
+          </div>
+          {p.focusArea && (
+            <div>
+              <span className="font-semibold text-gray-700">Trọng tâm:</span> {p.focusArea}
+            </div>
+          )}
+          {p.category && (
+            <div>
+              <span className="font-semibold text-gray-700">Danh mục:</span> {p.category}
+            </div>
+          )}
+          {p.description && (
+            <div>
+              <span className="font-semibold text-gray-700">Mô tả:</span> {p.description}
+            </div>
+          )}
+          {p.deadline && (
+            <div>
+              <span className="font-semibold text-gray-700">Thời hạn:</span> {p.deadline}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    case "suggest_feasibility_inputs": {
+      const p = payload as { answers: Record<number, string> };
+      const qLabels: Record<number, string> = {
+        1: "Quỹ thời gian",
+        2: "Năng lượng",
+        3: "Nguồn lực/Kỹ năng",
+        4: "Độ rõ mục tiêu",
+        5: "Trở ngại lớn nhất",
+        6: "Lịch cố định",
+        7: "Độ tự tin",
+      };
+      return (
+        <div className="mt-2 space-y-1 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div className="font-semibold text-gray-700 mb-1">Đề xuất câu trả lời khả thi:</div>
+          {Object.entries(p.answers).map(([qId, val]) => (
+            <div key={qId}>
+              <span className="text-gray-500">{qLabels[Number(qId)] || `Câu ${qId}`}:</span>{" "}
+              <span className="font-medium text-gray-700">{val}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    case "create_twelve_week_plan_draft": {
+      const p = payload as {
+        week12Outcome?: string;
+        lagMetricName?: string;
+        lagMetricTarget?: string;
+        lagMetricUnit?: string;
+        startDate?: string;
+        reviewDay?: string;
+        tacticLoadPreference?: string;
+        week4Milestone?: string;
+        week8Milestone?: string;
+        successEvidence?: string;
+        leadIndicators?: Array<{ name: string; target: string; unit: string }>;
+      };
+      return (
+        <div className="mt-2 space-y-1.5 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div className="font-semibold text-gray-700 mb-1">Bản nháp kế hoạch 12 tuần:</div>
+          {p.week12Outcome && (
+            <div>
+              <span className="font-semibold text-gray-700">Mục tiêu 12 tuần:</span> {p.week12Outcome}
+            </div>
+          )}
+          {p.lagMetricName && (
+            <div>
+              <span className="font-semibold text-gray-700">Chỉ số Lag:</span> {p.lagMetricName} (Mục tiêu:{" "}
+              {p.lagMetricTarget} {p.lagMetricUnit})
+            </div>
+          )}
+          {p.startDate && (
+            <div>
+              <span className="font-semibold text-gray-700">Ngày bắt đầu:</span> {p.startDate} (Review: {p.reviewDay})
+            </div>
+          )}
+          {p.tacticLoadPreference && (
+            <div>
+              <span className="font-semibold text-gray-700">Mức tải:</span> {p.tacticLoadPreference}
+            </div>
+          )}
+          {p.leadIndicators && p.leadIndicators.length > 0 && (
+            <div className="mt-1 border-t border-gray-200 pt-1">
+              <span className="font-semibold text-gray-700 block mb-0.5">Chỉ số Lead đề xuất:</span>
+              <ul className="list-disc pl-4 space-y-0.5">
+                {p.leadIndicators.map((li) => (
+                  <li key={`${li.name}_${li.target}_${li.unit}`}>
+                    {li.name} ({li.target} {li.unit})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    case "create_life_insight_note": {
+      const p = payload as { title: string; content: string; mood?: string };
+      return (
+        <div className="mt-2 space-y-1 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div>
+            <span className="font-semibold text-gray-700">Tiêu đề:</span> {p.title}
+          </div>
+          {p.mood && (
+            <div>
+              <span className="font-semibold text-gray-700">Tâm trạng:</span> {p.mood}
+            </div>
+          )}
+          <div className="line-clamp-3">
+            <span className="font-semibold text-gray-700">Nội dung:</span> {p.content}
+          </div>
+        </div>
+      );
+    }
+
+    case "add_weekly_review": {
+      const p = payload as {
+        weekNumber: number;
+        mainObstacle?: string;
+        nextWeekPriority?: string;
+        reflection?: string;
+      };
+      return (
+        <div className="mt-2 space-y-1 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div>
+            <span className="font-semibold text-gray-700">Review tuần:</span> {p.weekNumber}
+          </div>
+          {p.mainObstacle && (
+            <div>
+              <span className="font-semibold text-gray-700">Trở ngại chính:</span> {p.mainObstacle}
+            </div>
+          )}
+          {p.nextWeekPriority && (
+            <div>
+              <span className="font-semibold text-gray-700">Ưu tiên tuần tới:</span> {p.nextWeekPriority}
+            </div>
+          )}
+          {p.reflection && (
+            <div className="line-clamp-2">
+              <span className="font-semibold text-gray-700">Phản chiếu:</span> {p.reflection}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    case "reschedule_task": {
+      const p = payload as { taskId: string; scheduledDate: string };
+      return (
+        <div className="mt-2 space-y-1 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div>
+            <span className="font-semibold text-gray-700">ID nhiệm vụ:</span> {p.taskId}
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Ngày dời lịch mới:</span> {p.scheduledDate}
+          </div>
+        </div>
+      );
+    }
+
+    case "update_task_status": {
+      const p = payload as { taskId: string; completed: boolean };
+      return (
+        <div className="mt-2 space-y-1 rounded bg-gray-50 p-2 text-xs text-gray-600 border border-gray-100">
+          <div>
+            <span className="font-semibold text-gray-700">ID nhiệm vụ:</span> {p.taskId}
+          </div>
+          <div>
+            <span className="font-semibold text-gray-700">Trạng thái mới:</span>{" "}
+            {p.completed ? "Hoàn thành" : "Chưa hoàn thành"}
+          </div>
+        </div>
+      );
+    }
+
+    default:
+      return null;
+  }
+}
+
+export function AssistantActionCard({ action, onExecute, onReject, status, errorMessage }: AssistantActionCardProps) {
   const handleClick = async () => {
     if (status === "executing" || status === "done") return;
     await onExecute(action);
@@ -31,28 +248,49 @@ export function AssistantActionCard({ action, onExecute, status, errorMessage }:
         <div className="mt-0.5">{getIconForAction(action.type)}</div>
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-900">{action.label}</p>
+          {renderActionPreview(action)}
           {status === "error" && errorMessage && <p className="mt-1 text-xs text-red-600">{errorMessage}</p>}
         </div>
-        <button
-          type="button"
-          onClick={handleClick}
-          disabled={status === "executing" || status === "done"}
-          className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-            status === "done"
-              ? "bg-green-100 text-green-700 cursor-default"
-              : status === "error"
-                ? "bg-red-100 text-red-700 cursor-default"
-                : "bg-indigo-600 text-white hover:bg-indigo-700"
-          }`}
-        >
-          {status === "executing" && (
-            <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent align-middle mr-1" />
-          )}
-          {status === "pending" && "Đồng ý"}
-          {status === "executing" && "Đang làm..."}
-          {status === "done" && "Đã làm"}
-          {status === "error" && "Lỗi"}
-        </button>
+        {status === "pending" ? (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onReject(action)}
+              className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+            >
+              Từ chối
+            </button>
+            <button
+              type="button"
+              onClick={handleClick}
+              className="rounded bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 transition"
+            >
+              Đồng ý
+            </button>
+          </div>
+        ) : (
+          <span
+            className={`rounded px-3 py-1.5 text-xs font-medium ${
+              status === "done"
+                ? "bg-green-100 text-green-700"
+                : status === "rejected"
+                  ? "bg-gray-100 text-gray-500"
+                  : status === "error"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-indigo-100 text-indigo-700"
+            }`}
+          >
+            {status === "executing" && (
+              <>
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent align-middle mr-1" />
+                Đang làm...
+              </>
+            )}
+            {status === "done" && "Đã làm"}
+            {status === "rejected" && "Đã từ chối"}
+            {status === "error" && "Lỗi"}
+          </span>
+        )}
       </div>
     </div>
   );

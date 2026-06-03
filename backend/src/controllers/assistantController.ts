@@ -5,6 +5,10 @@ import {
   type AssistantRequest,
   validateAssistantRequest,
 } from "../services/assistantService";
+import {
+  processAIAssistantRequest,
+  type AIAssistantRequest,
+} from "../services/aiAssistantService";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 
 function withErrorCode(message: string, errorCode: string) {
@@ -99,5 +103,53 @@ export async function streamChatController(req: Request, res: Response) {
       errorCode: "ASSISTANT_INTERNAL_ERROR",
     })}\n\n`);
     res.end();
+  }
+}
+
+export async function aiAssistantController(req: Request, res: Response) {
+  const { message, context, mode, history } = req.body;
+
+  // Validate request
+  if (typeof message !== "string" || !message.trim()) {
+    return res.status(400).json(
+      withErrorCode("Tin nhắn không hợp lệ.", "AI_INVALID_MESSAGE"),
+    );
+  }
+
+  if (!context || typeof context !== "object") {
+    return res.status(400).json(
+      withErrorCode("Dữ liệu ngữ cảnh không hợp lệ.", "AI_INVALID_CONTEXT"),
+    );
+  }
+
+  if (mode !== "demo" && mode !== "real") {
+    return res.status(400).json(
+      withErrorCode("Chế độ ứng dụng không hợp lệ.", "AI_INVALID_MODE"),
+    );
+  }
+
+  try {
+    const requestData: AIAssistantRequest = {
+      message,
+      context,
+      mode,
+      history,
+    };
+
+    const result = await processAIAssistantRequest(requestData);
+
+    if ("errorCode" in result) {
+      const status = result.errorCode === "AI_PROVIDER_NOT_CONFIGURED" || result.errorCode === "ASSISTANT_PROVIDER_NOT_CONFIGURED" ? 503 : 400;
+      return res.status(status).json(
+        withErrorCode(result.message, result.errorCode),
+      );
+    }
+
+    return res.json(successResponse(result));
+  } catch (error) {
+    console.error("[ai-assistant] Unexpected error:", error instanceof Error ? error.name : "UnknownError");
+    return res.status(500).json(
+      withErrorCode("Đã xảy ra lỗi hệ thống khi xử lý yêu cầu.", "AI_INTERNAL_ERROR"),
+    );
   }
 }

@@ -1,5 +1,14 @@
+import { isRealMode } from "../../utils/app-mode";
 import type { AssistantContext } from "./buildAssistantContext";
 import type { ChatHistoryMessage } from "./types";
+
+const isTestEnv = typeof process !== "undefined" && process.env.NODE_ENV === "test";
+
+async function waitDelay(): Promise<void> {
+  if (isTestEnv) return;
+  const delay = 400 + Math.floor(Math.random() * 400);
+  await new Promise((resolve) => setTimeout(resolve, delay));
+}
 
 export interface AssistantProvider {
   send(userText: string, ctx: AssistantContext, history?: ChatHistoryMessage[]): Promise<string>;
@@ -163,6 +172,113 @@ function buildGreetingResponse(): string {
 
 export const mockProvider: AssistantProvider = {
   async send(userText: string, ctx: AssistantContext, _history?: ChatHistoryMessage[]): Promise<string> {
+    const lower = userText.toLowerCase().trim();
+
+    // Check if user wants to mark task as done
+    const isTickIntent = /tick|hoàn thành|xong|đóng|đánh dấu/.test(lower) && /task|việc|nhiệm vụ|công việc/.test(lower);
+
+    if (isTickIntent) {
+      // 1. Kiểm tra xem người dùng có 12-week plan không
+      const hasPlan = ctx.currentWeek !== null;
+      if (!hasPlan) {
+        const response =
+          "Bạn chưa có kế hoạch 12 tuần nào đang hoạt động, do đó không có công việc nào để hoàn thành. Hãy bắt đầu bằng cách tạo mục tiêu và thiết lập kế hoạch 12 tuần trước nhé.";
+        await waitDelay();
+        return response;
+      }
+
+      // 2. Tìm task chưa hoàn thành trong ngày hôm nay
+      const openTasks = (ctx.todayTasks || []).filter((t) => !t.done);
+      if (openTasks.length === 0) {
+        // Thử tìm ở overdueTasks
+        const overdueOpenTasks = ctx.stuckSignals?.overdueTasks || [];
+        if (overdueOpenTasks.length > 0) {
+          const taskToDone = overdueOpenTasks[0];
+          const actionBlock = `\`\`\`action
+{
+  "type": "mark_task_done",
+  "payload": {
+    "taskId": "${taskToDone.id}",
+    "done": true
+  },
+  "label": "Hoàn thành: ${taskToDone.title}"
+}
+\`\`\``;
+          const response = `Tôi tìm thấy một công việc quá hạn chưa hoàn thành: **"${taskToDone.title}"**. Bạn có muốn đánh dấu hoàn thành công việc này không?\n\nNhấn vào nút **Đồng ý** ở bên dưới để thực hiện.\n\n${actionBlock}`;
+          await waitDelay();
+          return response;
+        }
+
+        const response = "Hiện tại không có công việc nào chưa hoàn thành cho ngày hôm nay để đánh dấu hoàn thành.";
+        await waitDelay();
+        return response;
+      }
+
+      // Chọn task đầu tiên chưa hoàn thành
+      const taskToDone = openTasks[0];
+      const actionBlock = `\`\`\`action
+{
+  "type": "mark_task_done",
+  "payload": {
+    "taskId": "${taskToDone.id}",
+    "done": true
+  },
+  "label": "Hoàn thành: ${taskToDone.title}"
+}
+\`\`\``;
+      let response = `Tôi thấy công việc chưa hoàn thành hôm nay: **"${taskToDone.title}"**. Bạn có muốn đánh dấu hoàn thành công việc này không?\n\nNhấn vào nút **Đồng ý** ở bên dưới để thực hiện.\n\n${actionBlock}`;
+      if (firstCallInSession && !isRealMode()) {
+        firstCallInSession = false;
+        response += "\n\n_(Đây là chế độ demo, gợi ý mang tính tham khảo.)_";
+      }
+
+      await waitDelay();
+      return response;
+    }
+
+    // Check if user wants to create a goal
+    if ((lower.includes("tạo") || lower.includes("thêm")) && (lower.includes("mục tiêu") || lower.includes("goal"))) {
+      let goalTitle = "Mục tiêu mới";
+      const match = userText.match(/(?:mục tiêu|goal)\s+(.+)/i);
+      if (match?.[1]) {
+        goalTitle = match[1].trim().replace(/[?.!]/g, "");
+      }
+
+      const category =
+        lower.includes("sức khỏe") || lower.includes("thể thao") || lower.includes("tập")
+          ? "health"
+          : lower.includes("học") || lower.includes("thi") || lower.includes("sự nghiệp") || lower.includes("làm")
+            ? "career"
+            : lower.includes("tiền") || lower.includes("tài chính") || lower.includes("mua")
+              ? "finance"
+              : lower.includes("yêu") || lower.includes("bạn") || lower.includes("gia đình")
+                ? "relationships"
+                : "personal";
+
+      const actionBlock = `\`\`\`action
+{
+  "type": "create_goal",
+  "payload": {
+    "title": "${goalTitle}",
+    "category": "${category}",
+    "description": "Được tạo nhanh từ hội thoại với Trợ lý AI"
+  },
+  "label": "Tạo mục tiêu: ${goalTitle}"
+}
+\`\`\``;
+
+      let response = `Mình hiểu bạn đang muốn tạo mục tiêu mới: **"${goalTitle}"**.\n\nĐể thực hiện điều này, bạn chỉ cần nhấn vào nút **Đồng ý** ở bên dưới. Mình sẽ tạo nhanh mục tiêu này vào hệ thống của bạn.`;
+      response += `\n\n${actionBlock}`;
+
+      if (firstCallInSession && !isRealMode()) {
+        firstCallInSession = false;
+        response += "\n\n_(Đây là chế độ demo, gợi ý mang tính tham khảo.)_";
+      }
+
+      await waitDelay();
+      return response;
+    }
+
     const intent = detectIntent(userText);
     let response: string;
 
@@ -190,13 +306,12 @@ export const mockProvider: AssistantProvider = {
     }
 
     const isActionIntent = intent !== "definition" && intent !== "greeting";
-    if (firstCallInSession && isActionIntent) {
+    if (firstCallInSession && isActionIntent && !isRealMode()) {
       firstCallInSession = false;
       response += "\n\n_(Đây là chế độ demo, gợi ý mang tính tham khảo.)_";
     }
 
-    const delay = 400 + Math.floor(Math.random() * 400);
-    await new Promise((resolve) => setTimeout(resolve, delay));
+    await waitDelay();
 
     return response;
   },

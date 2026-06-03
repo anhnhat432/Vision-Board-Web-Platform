@@ -49,6 +49,7 @@ describe("getHelpMessage", () => {
     expect(help).toContain("**/week**");
     expect(help).toContain("**/goals**");
     expect(help).toContain("**/reflection**");
+    expect(help).toContain("**/audit**");
     expect(help).toContain("**/clear**");
     expect(help).toContain("**/help**");
   });

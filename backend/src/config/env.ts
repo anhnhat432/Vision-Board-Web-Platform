@@ -71,6 +71,11 @@ const groqModel = getOptionalEnv("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
 
 const resolvedAssistantProvider: "groq" | "gemini" = assistantProvider === "gemini" ? "gemini" : "groq";
 
+const aiProvider = getOptionalEnv("AI_PROVIDER")?.toLowerCase() || assistantProvider;
+const resolvedAiProvider: "groq" | "gemini" = aiProvider === "gemini" ? "gemini" : "groq";
+const aiApiKey = getOptionalEnv("AI_API_KEY") || (resolvedAiProvider === "gemini" ? geminiApiKey : groqApiKey);
+const aiModel = getOptionalEnv("AI_MODEL") || (resolvedAiProvider === "gemini" ? geminiModel : groqModel);
+
 export const env = {
   NODE_ENV: nodeEnv,
   PORT: parsePort(process.env.PORT),
@@ -87,6 +92,9 @@ export const env = {
   GEMINI_MODEL: geminiModel,
   GROQ_API_KEY: groqApiKey,
   GROQ_MODEL: groqModel,
+  AI_PROVIDER: resolvedAiProvider,
+  AI_API_KEY: aiApiKey,
+  AI_MODEL: aiModel,
   R2_ACCOUNT_ID: getOptionalEnv("R2_ACCOUNT_ID"),
   R2_ACCESS_KEY_ID: getOptionalEnv("R2_ACCESS_KEY_ID"),
   R2_SECRET_ACCESS_KEY: getOptionalEnv("R2_SECRET_ACCESS_KEY"),

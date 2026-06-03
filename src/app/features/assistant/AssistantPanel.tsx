@@ -1,4 +1,4 @@
-import { Send, Sparkles, Square, ThumbsDown, ThumbsUp, Trash2, X } from "lucide-react";
+import { CheckCircle2, Loader2, Mic, MicOff, Send, Sparkles, Square, ThumbsDown, ThumbsUp, Trash2, WifiOff, X } from "lucide-react";
 import { motion } from "motion/react";
 import {
   type ChangeEvent,
@@ -9,6 +9,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { isRealMode } from "@/app/utils/app-mode";
+import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +27,7 @@ import { executeAction } from "./executeAction";
 import type { AssistantAction } from "./parseActions";
 import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
 import { useAssistant } from "./useAssistant";
+import { useSpeechToText } from "./useSpeechToText";
 
 interface AssistantPanelProps {
   open: boolean;
@@ -47,11 +50,94 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     messageFeedback,
   } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
+
+  const handleSpeechFinalResult = useCallback((text: string) => {
+    setInputText((prev) => {
+      const trimmed = prev.trim();
+      return trimmed ? `${trimmed} ${text}` : text;
+    });
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 72)}px`;
+      }
+    }, 50);
+  }, []);
+
+  const {
+    isSupported: isSpeechSupported,
+    isListening: isSpeechListening,
+    interimTranscript,
+    error: speechError,
+    startListening: startSpeechListening,
+    stopListening: stopSpeechListening,
+  } = useSpeechToText({
+    onFinalResult: handleSpeechFinalResult,
+  });
+
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [actionStatus, setActionStatus] = useState<
-    Record<string, { status: "pending" | "executing" | "done" | "error"; errorMessage?: string }>
+    Record<string, { status: "pending" | "executing" | "done" | "error" | "rejected"; errorMessage?: string }>
   >({});
+  const syncState = useOptionalAutoCloudSyncContext();
+  const realMode = isRealMode();
+
+  const [showSyncSuccess, setShowSyncSuccess] = useState(false);
+  const prevSyncingRef = useRef(false);
+  const prevPendingCountRef = useRef(0);
+
+  useEffect(() => {
+    if (!syncState) return;
+    const wasSyncing = prevSyncingRef.current;
+    const wasPending = prevPendingCountRef.current > 0;
+
+    if ((wasSyncing || wasPending) && !syncState.syncing && syncState.pendingCount === 0 && syncState.online) {
+      setShowSyncSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSyncSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+
+    prevSyncingRef.current = syncState.syncing;
+    prevPendingCountRef.current = syncState.pendingCount;
+  }, [syncState?.syncing, syncState?.pendingCount, syncState?.online, syncState]);
+
+  const renderSyncStatus = () => {
+    if (!syncState || !realMode) return null;
+
+    if (!syncState.online) {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-amber-600 bg-amber-50 border-t border-amber-100/60 transition-all duration-300">
+          <WifiOff size={12} className="shrink-0" />
+          <span>Đang chạy ngoại tuyến. Dữ liệu đã lưu cục bộ trên máy.</span>
+        </div>
+      );
+    }
+
+    if (syncState.syncing) {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-indigo-600 bg-indigo-50 border-t border-indigo-100/60 transition-all duration-300">
+          <Loader2 size={12} className="shrink-0 animate-spin" />
+          <span>Đang đồng bộ thay đổi lên đám mây...</span>
+        </div>
+      );
+    }
+
+    if (showSyncSuccess) {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-600 bg-green-50 border-t border-green-100/60 transition-all duration-300 animate-in fade-in slide-in-from-bottom-1 duration-200">
+          <CheckCircle2 size={12} className="shrink-0" />
+          <span>Đã lưu và đồng bộ thành công lên tài khoản!</span>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -73,6 +159,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       setActionStatus((prev) => ({ ...prev, [action.id]: { status: "error", errorMessage } }));
     }
+  }, []);
+
+  const handleRejectAction = useCallback((action: AssistantAction) => {
+    setActionStatus((prev) => ({ ...prev, [action.id]: { status: "rejected" } }));
   }, []);
 
   const resizeTextarea = useCallback(() => {
@@ -125,6 +215,43 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             id: crypto.randomUUID(),
             role: "assistant",
             content: getHelpMessage(),
+            createdAt: Date.now(),
+            status: "complete",
+          },
+        ]);
+        setInputText("");
+        textareaRef.current?.focus();
+      } else if (cmd.action === "audit") {
+        let content = "**Nhật ký hành động (Audit Log):**\n\n";
+        try {
+          const raw = localStorage.getItem("assistant.action_audit_log");
+          const logs = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(logs) || logs.length === 0) {
+            content += "*Chưa có hành động nào được thực hiện.*";
+          } else {
+            const recentLogs = logs.slice(0, 10);
+            content += recentLogs
+              .map((log: { success: boolean; timestamp: string; label: string; type: string; message: string }) => {
+                const icon = log.success ? "✅" : "❌";
+                const time = new Date(log.timestamp).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                });
+                return `${icon} **[${time}]** ${log.label || log.type} - *${log.message}*`;
+              })
+              .join("\n");
+          }
+        } catch {
+          content += "*Lỗi khi đọc nhật ký hành động.*";
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content,
             createdAt: Date.now(),
             status: "complete",
           },
@@ -302,6 +429,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                               key={action.id}
                               action={action}
                               onExecute={handleExecuteAction}
+                              onReject={handleRejectAction}
                               status={actionStatus[action.id]?.status ?? "pending"}
                               errorMessage={actionStatus[action.id]?.errorMessage}
                             />
@@ -379,6 +507,8 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
           )}
         </div>
 
+        {renderSyncStatus()}
+
         <div className="border-t p-3">
           <div className="relative">
             {isShowingCommands && (
@@ -402,6 +532,16 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 ))}
               </div>
             )}
+            {isSpeechListening && (
+              <div className="px-1 py-1 text-xs text-indigo-500/80 italic animate-pulse">
+                {interimTranscript ? `Đang nghe: ${interimTranscript}...` : "Đang lắng nghe..."}
+              </div>
+            )}
+            {speechError && (
+              <div className="px-1 py-1 text-xs text-red-500">
+                {speechError}
+              </div>
+            )}
             <div className="flex items-end gap-2">
               <textarea
                 ref={textareaRef}
@@ -414,6 +554,34 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 className="flex-1 resize-none rounded-lg border border-app-line px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-app-bg disabled:text-app-ink-soft"
                 style={{ maxHeight: "72px", minHeight: "36px" }}
               />
+              {!isTyping && (
+                <button
+                  type="button"
+                  disabled={!isSpeechSupported}
+                  onClick={isSpeechListening ? stopSpeechListening : startSpeechListening}
+                  className={`rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 ${
+                    isSpeechListening
+                      ? "bg-red-100 text-red-700 animate-pulse hover:bg-red-200"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  title={
+                    !isSpeechSupported
+                      ? "Trình duyệt này không hỗ trợ nhập giọng nói"
+                      : isSpeechListening
+                        ? "Dừng nghe giọng nói"
+                        : "Nhập bằng giọng nói (tiếng Việt)"
+                  }
+                  aria-label={
+                    !isSpeechSupported
+                      ? "Trình duyệt không hỗ trợ"
+                      : isSpeechListening
+                        ? "Dừng nghe"
+                        : "Nhập bằng giọng nói"
+                  }
+                >
+                  {isSpeechListening ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
+              )}
               {isTyping ? (
                 <button
                   type="button"

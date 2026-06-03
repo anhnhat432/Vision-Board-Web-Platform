@@ -82,6 +82,10 @@ export interface AssistantContext {
     hint?: string;
   };
   route: string;
+  authSyncMode?: {
+    authState: "signed_in" | "anonymous";
+    syncState: "synced" | "syncing" | "error" | "offline" | "disabled";
+  };
 }
 
 export interface AssistantRequest {
@@ -262,7 +266,20 @@ export function sanitizeContext(context: unknown): AssistantContext {
     upcomingDeadlines: sanitizeUpcomingDeadlines(raw.upcomingDeadlines),
     pageContext: sanitizePageContext(raw.pageContext, sanitizeText(raw.route || "/", MAX_ROUTE_LENGTH) || "/"),
     pageContextHint: sanitizePageContextHint(raw.pageContextHint),
+    authSyncMode: sanitizeAuthSyncMode(raw.authSyncMode),
   };
+}
+
+function sanitizeAuthSyncMode(value: unknown): AssistantContext["authSyncMode"] {
+  const raw = record(value);
+  if (Object.keys(raw).length === 0) return undefined;
+
+  const authState = raw.authState === "signed_in" ? "signed_in" : "anonymous";
+  const syncState = ["synced", "syncing", "error", "offline", "disabled"].includes(String(raw.syncState))
+    ? (raw.syncState as any)
+    : "disabled";
+
+  return { authState, syncState };
 }
 
 function sanitizeFeasibility(value: unknown): AssistantContext["feasibility"] {

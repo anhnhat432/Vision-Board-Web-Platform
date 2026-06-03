@@ -159,12 +159,26 @@ describe("AssistantPanel", () => {
   });
 
   it("shows a loading indicator while waiting for the response", async () => {
+    let resolveStream: () => void = () => {};
+    const streamPromise = new Promise<void>((resolve) => {
+      resolveStream = resolve;
+    });
+
+    const streamSpy = vi.spyOn(assistantApi, "sendAssistantMessageStream").mockImplementation((_request, onDelta) => {
+      onDelta("chế độ demo");
+      return streamPromise;
+    });
+
     render(<AssistantPanel open={true} onClose={mockOnClose} />);
 
     await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "test{enter}");
 
     expect(screen.getByLabelText("Trợ lý đang trả lời")).toBeInTheDocument();
-    expect(await screen.findByText(/chế độ demo/, undefined, { timeout: 3000 })).toBeInTheDocument();
+
+    resolveStream();
+
+    expect(await screen.findByText(/chế độ demo/)).toBeInTheDocument();
+    streamSpy.mockRestore();
   });
 
   it("shows stop button while typing and calls stopGeneration on click", async () => {
@@ -420,7 +434,8 @@ describe("AssistantPanel", () => {
     // Assistant should respond with context from previous message
     await waitFor(
       () => {
-        expect(screen.getByText(/Việc nên làm ngay|task|Ưu tiên/)).toBeInTheDocument();
+        const elements = screen.getAllByText(/Việc nên làm ngay|task|Ưu tiên/);
+        expect(elements.length).toBeGreaterThan(0);
       },
       { timeout: 3000 },
     );
@@ -464,5 +479,84 @@ describe("AssistantPanel", () => {
 
     // Input should be cleared
     expect(textarea).toHaveValue("");
+  });
+
+  it("supports rejecting an action proposal", async () => {
+    vi.spyOn(assistantApi, "sendAssistantMessageStream").mockImplementation((_request, onDelta) => {
+      onDelta(`Hãy xem đề xuất sau:
+
+\`\`\`action
+{
+  "type": "create_goal",
+  "payload": {
+    "title": "Học tiếng Anh",
+    "category": "career"
+  },
+  "label": "Tạo mục tiêu: Học tiếng Anh"
+}
+\`\`\``);
+      return Promise.resolve();
+    });
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "tạo mục tiêu học tiếng anh{enter}");
+
+    // Đợi proposal xuất hiện
+    expect(await screen.findByText("Tạo mục tiêu: Học tiếng Anh")).toBeInTheDocument();
+
+    // Sẽ thấy nút "Từ chối" và "Đồng ý"
+    const rejectBtn = screen.getByRole("button", { name: "Từ chối" });
+    const approveBtn = screen.getByRole("button", { name: "Đồng ý" });
+
+    expect(rejectBtn).toBeInTheDocument();
+    expect(approveBtn).toBeInTheDocument();
+
+    // Click Từ chối
+    await userEvent.click(rejectBtn);
+
+    // Trạng thái chuyển thành "Đã từ chối" và các nút biến mất
+    expect(await screen.findByText("Đã từ chối")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Từ chối" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Đồng ý" })).not.toBeInTheDocument();
+  });
+
+  it("supports executing a twelve-week plan draft proposal and displaying preview", async () => {
+    vi.spyOn(assistantApi, "sendAssistantMessageStream").mockImplementation((_request, onDelta) => {
+      onDelta(`Hãy xem đề xuất sau:
+
+\`\`\`action
+{
+  "type": "create_twelve_week_plan_draft",
+  "payload": {
+    "week12Outcome": "Giảm 3kg mỡ thừa",
+    "lagMetricName": "Cân nặng",
+    "lagMetricTarget": "70",
+    "lagMetricUnit": "kg",
+    "leadIndicators": [
+      {"name": "Chạy bộ", "target": "30", "unit": "phút"}
+    ]
+  },
+  "label": "Tạo bản nháp kế hoạch 12 tuần"
+}
+\`\`\``);
+      return Promise.resolve();
+    });
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "lập kế hoạch 12 tuần{enter}");
+
+    // Đợi proposal xuất hiện
+    expect(await screen.findByText("Tạo bản nháp kế hoạch 12 tuần")).toBeInTheDocument();
+
+    // Kiểm tra hiển thị preview
+    expect(screen.getByText("Giảm 3kg mỡ thừa")).toBeInTheDocument();
+    expect(screen.getByText(/Chạy bộ/)).toBeInTheDocument();
+
+    const approveBtn = screen.getByRole("button", { name: "Đồng ý" });
+    await userEvent.click(approveBtn);
+
+    expect(await screen.findByText("Đã làm")).toBeInTheDocument();
   });
 });

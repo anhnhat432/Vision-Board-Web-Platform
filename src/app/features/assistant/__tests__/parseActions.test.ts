@@ -179,6 +179,25 @@ describe("parseAssistantReply", () => {
     expect(result.actions[0].label.length).toBe(80);
   });
 
+  it("validates create_goal payload", () => {
+    const raw = `\`\`\`action
+{
+  "type": "create_goal",
+  "payload": { "title": "Học tiếng Nhật", "category": "career", "description": "Học N3", "deadline": "2026-12-31" },
+  "label": "Tạo mục tiêu: Học tiếng Nhật"
+}
+\`\`\``;
+
+    const result = parseAssistantReply(raw);
+
+    expect(result.actions).toHaveLength(1);
+    expect(result.actions[0].type).toBe("create_goal");
+    expect(result.actions[0].payload.title).toBe("Học tiếng Nhật");
+    expect(result.actions[0].payload.category).toBe("career");
+    expect(result.actions[0].payload.description).toBe("Học N3");
+    expect(result.actions[0].payload.deadline).toBe("2026-12-31");
+  });
+
   it("handles empty input", () => {
     const result = parseAssistantReply("");
     expect(result.textContent).toBe("");

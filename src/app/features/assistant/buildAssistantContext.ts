@@ -6,6 +6,7 @@
  * when storage is empty or malformed; never throws.
  */
 
+import { isDemoMode } from "@/app/utils/app-mode";
 import { getUserData } from "@/app/utils/storage";
 import { APP_STORAGE_KEYS } from "@/app/utils/storage-constants";
 import { formatDateInputValue, getCalendarDateKey, parseCalendarDate } from "@/app/utils/storage-date-utils";
@@ -22,6 +23,13 @@ import type {
   UniversalDailyCheckIn,
   UniversalWeeklyReview,
 } from "@/app/utils/storage-types";
+import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
+import { getFirebaseAuth } from "@/lib/auth/firebase";
+
+export interface AuthSyncMode {
+  authState: "signed_in" | "anonymous";
+  syncState: "synced" | "syncing" | "error" | "offline" | "disabled";
+}
 
 export interface AssistantContext {
   currentWeek: number | null;
@@ -75,6 +83,7 @@ export interface AssistantContext {
   }>;
   pageContext: AssistantPageContext;
   pageContextHint?: AssistantPageContextHint;
+  authSyncMode?: AuthSyncMode;
 }
 
 export interface AssistantPageContext {
@@ -108,6 +117,66 @@ export interface AssistantPageContextHint {
   hint?: string;
 }
 
+export function buildAuthSyncMode(): AuthSyncMode {
+  const isDemo = isDemoMode();
+  if (isDemo) {
+    return {
+      authState: "anonymous",
+      syncState: "disabled",
+    };
+  }
+
+  const auth = getFirebaseAuth();
+  const currentUser = auth?.currentUser ?? null;
+  const authState = currentUser ? "signed_in" : "anonymous";
+
+  const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
+  if (!isOnline) {
+    return {
+      authState,
+      syncState: "offline",
+    };
+  }
+
+  if (!currentUser) {
+    return {
+      authState,
+      syncState: "disabled",
+    };
+  }
+
+  try {
+    const queue = readMutationQueueStore(currentUser.uid);
+    const summary = summarizeMutationQueueStore(queue);
+
+    const hasError = queue.items.some(
+      (item) =>
+        item.status === "failed_validation" ||
+        item.status === "failed_terminal" ||
+        item.status === "blocked_conflict" ||
+        item.status === "blocked_auth" ||
+        item.status === "blocked_config",
+    );
+
+    let syncState: AuthSyncMode["syncState"] = "synced";
+    if (hasError) {
+      syncState = "error";
+    } else if (summary.pendingCount > 0 || summary.inFlightCount > 0) {
+      syncState = "syncing";
+    }
+
+    return {
+      authState,
+      syncState,
+    };
+  } catch {
+    return {
+      authState,
+      syncState: "error",
+    };
+  }
+}
+
 /**
  * Build context from localStorage.
  *
@@ -123,11 +192,12 @@ export function buildAssistantContext(
   route = getCurrentRoute(),
   pageContextHint?: AssistantPageContextHint,
 ): AssistantContext {
+  const authSyncMode = buildAuthSyncMode();
   try {
     const data = getUserData();
 
     if (!data?.goals || data.goals.length === 0) {
-      return emptyContext(route);
+      return emptyContext(route, pageContextHint, authSyncMode);
     }
 
     const activeGoal = getActiveTwelveWeekGoal(data.goals);
@@ -140,12 +210,13 @@ export function buildAssistantContext(
 
     if (!activeGoal?.twelveWeekSystem) {
       return {
-        ...emptyContext(route),
+        ...emptyContext(route, pageContextHint, authSyncMode),
         goals,
         lastReflectionDate,
         feasibility: buildFeasibilityContext(data.goals[0]),
         pageContext: buildPageContext(route, data.goals),
         pageContextHint,
+        authSyncMode,
       };
     }
 
@@ -172,14 +243,19 @@ export function buildAssistantContext(
       upcomingDeadlines: buildUpcomingDeadlines(data.goals, referenceDate),
       pageContext: buildPageContext(route, data.goals),
       pageContextHint,
+      authSyncMode,
     };
   } catch {
     // Storage read error -> safe defaults.
-    return emptyContext(route);
+    return emptyContext(route, pageContextHint, authSyncMode);
   }
 }
 
-function emptyContext(route = getCurrentRoute(), pageContextHint?: AssistantPageContextHint): AssistantContext {
+function emptyContext(
+  route = getCurrentRoute(),
+  pageContextHint?: AssistantPageContextHint,
+  authSyncMode = buildAuthSyncMode(),
+): AssistantContext {
   return {
     currentWeek: null,
     weeksTotal: 12,
@@ -204,6 +280,7 @@ function emptyContext(route = getCurrentRoute(), pageContextHint?: AssistantPage
     upcomingDeadlines: [],
     pageContext: buildPageContext(route, []),
     pageContextHint,
+    authSyncMode,
   };
 }
 

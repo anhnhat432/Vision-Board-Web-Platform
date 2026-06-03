@@ -45,6 +45,17 @@ export function sanitizeAssistantContext(ctx: AssistantContext & { route: string
     pageContext: sanitizePageContext(ctx.pageContext),
     pageContextHint: sanitizePageContextHint(ctx.pageContextHint),
     route: text(ctx.route || "", 50),
+    authSyncMode: sanitizeAuthSyncMode(ctx.authSyncMode),
+  };
+}
+
+function sanitizeAuthSyncMode(authSyncMode: AssistantContext["authSyncMode"]): AssistantContext["authSyncMode"] {
+  if (!authSyncMode) return undefined;
+  return {
+    authState: authSyncMode.authState === "signed_in" ? "signed_in" : "anonymous",
+    syncState: ["synced", "syncing", "error", "offline", "disabled"].includes(authSyncMode.syncState)
+      ? authSyncMode.syncState
+      : "disabled",
   };
 }
 

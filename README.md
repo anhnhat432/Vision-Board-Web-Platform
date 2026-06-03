@@ -503,6 +503,40 @@ Current intentional limitations:
 - localStorage remains the primary UX source of truth for most non-plan data
 - full backend sync requires Firebase and MongoDB env configuration
 
+## AI Assistant Integration (Production)
+
+The app includes an AI Assistant ("Cú" - Owl mascot) designed to help users navigate and execute actions along the core product flow.
+
+### 1. Environment Configuration
+
+To enable the AI Assistant in production (`VITE_APP_MODE=real`), you must configure the following variables in the backend environment:
+
+- `AI_PROVIDER`: The AI provider to use (`gemini` or `groq`).
+- `AI_API_KEY`: API key for the chosen provider.
+- `AI_MODEL`: Model name (e.g. `gemini-1.5-flash` or `llama3-8b-8192`).
+
+If you use Groq specifically, you can also set:
+- `GROQ_API_KEY`: Groq API Key.
+- `GROQ_MODEL`: Groq Model.
+
+In demo mode (`VITE_APP_MODE=demo`), the assistant runs fully client-side using deterministic fallback prompts to ensure zero external dependency.
+
+### 2. Action Safety Model
+
+The assistant is strictly built under a proposal-based safety design:
+
+- **AI Proposes**: The LLM suggests structured actions (e.g. `create_goal`, `mark_task_done`, `reschedule_task`) wrapped in JSON action blocks.
+- **User Approves**: Actions are presented as visual cards with interactive previews/diffs. **No modifying action runs automatically.** The user must click "Approve" (Đồng ý) to execute.
+- **Audit Log**: Every approved and executed action is logged locally under `assistant.action_audit_log` for auditing.
+
+### 3. Local-First Sync Architecture
+
+The assistant executes actions locally first:
+
+- State mutations (e.g. updating task status or creating a plan draft) are written to local storage immediately.
+- Once local save succeeds, the mutation is pushed to the local sync outbox queue.
+- If online, the outbox queue automatically drains to sync with the MongoDB backend. If offline, changes remain safely cached locally and sync automatically when internet connection is restored.
+
 ## Troubleshooting
 
 Frontend opens but backend sync fails:
