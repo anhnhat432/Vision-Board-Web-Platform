@@ -1,7 +1,7 @@
 import { buildResult } from "@/app/pages/FeasibilityCheck/helpers";
 import { APP_STORAGE_KEYS, addGoal, addReflection, getUserData, saveUserData } from "@/app/utils/storage";
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
-import { buildDerivedScoreboard, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
+import { buildDerivedScoreboard, getActiveTwelveWeekGoal, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
 import type { TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import type { AssistantAction } from "./parseActions";
 
@@ -64,17 +64,39 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
 
     case "create_task": {
       const payload = action.payload as { title: string; scheduledDate: string; isCore: boolean };
-      const { title, isCore } = payload;
+      const { title, isCore, scheduledDate: rawDate } = payload;
 
       const data = getUserData();
       if (!data?.goals || data.goals.length === 0) {
         return { success: false, message: "Không tìm thấy mục tiêu nào. Hãy tạo mục tiêu trước." };
       }
 
-      const goal = data.goals[0];
-      const system = goal.twelveWeekSystem;
-      if (!system) {
+      let activeGoal = getActiveTwelveWeekGoal(data.goals);
+      if (!activeGoal || !activeGoal.twelveWeekSystem) {
+        activeGoal = data.goals.find((g) => g.twelveWeekSystem) || null;
+      }
+
+      if (!activeGoal || !activeGoal.twelveWeekSystem) {
         return { success: false, message: "Chưa có 12-week plan. Hãy tạo plan trước." };
+      }
+
+      const system = activeGoal.twelveWeekSystem;
+
+      let finalDate = "";
+      if (rawDate === "today") {
+        finalDate = new Date().toISOString().slice(0, 10);
+      } else if (rawDate === "tomorrow") {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        finalDate = tomorrow.toISOString().slice(0, 10);
+      } else if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+        const parsed = Date.parse(rawDate);
+        if (Number.isNaN(parsed)) {
+          return { success: false, message: "Ngày lập lịch không hợp lệ." };
+        }
+        finalDate = rawDate;
+      } else {
+        return { success: false, message: "Ngày lập lịch không hợp lệ hoặc thiếu." };
       }
 
       const taskId = `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -82,7 +104,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         id: taskId,
         title,
         weekNumber: system.currentWeek || 1,
-        scheduledDate: new Date().toISOString().slice(0, 10),
+        scheduledDate: finalDate,
         leadIndicatorName: title,
         isCore: isCore || false,
         completed: false,
@@ -104,18 +126,21 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Không tìm thấy dữ liệu." };
       }
 
-      const goal = data.goals[0];
-      const system = goal.twelveWeekSystem;
-      if (!system) {
+      let activeGoal = getActiveTwelveWeekGoal(data.goals);
+      if (!activeGoal || !activeGoal.twelveWeekSystem) {
+        activeGoal = data.goals.find((g) => g.twelveWeekSystem) || null;
+      }
+
+      if (!activeGoal || !activeGoal.twelveWeekSystem) {
         return { success: false, message: "Chưa có 12-week plan." };
       }
+
+      const system = activeGoal.twelveWeekSystem;
 
       let task = system.taskInstances?.find((t) => t.id === taskId);
       if (!task) {
         // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
-        task = system.taskInstances?.find(
-          (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim()
-        );
+        task = system.taskInstances?.find((t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim());
       }
       if (!task) {
         return { success: false, message: "Không tìm thấy task." };
@@ -375,7 +400,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
           if (tIndex === -1) {
             // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
             tIndex = system.taskInstances.findIndex(
-              (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim()
+              (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim(),
             );
           }
           if (tIndex !== -1) {
@@ -425,7 +450,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
 
         // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
         const taskByTitle = goal.twelveWeekSystem?.taskInstances?.find(
-          (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim()
+          (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim(),
         );
         if (taskByTitle) {
           targetGoalId = goal.id;

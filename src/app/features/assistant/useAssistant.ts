@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { useAssistantPageContextValue } from "./AssistantPageContextProvider";
 import { sendAssistantMessageStream } from "./assistantApi";
 import { captureAssistantFeedback } from "./assistantFeedback";
 import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
@@ -171,6 +172,7 @@ export function useAssistant(options?: UseAssistantOptions) {
   const route = options?.route ?? (typeof window !== "undefined" ? window.location.pathname : "/");
   const { user } = useAuthContext();
   const userId = user?.uid ?? null;
+  const pageContextHintValue = useAssistantPageContextValue() || undefined;
   const [messages, setMessages] = useState<Message[]>(() => loadPersistedMessages(userId));
   const [isTyping, setIsTyping] = useState(false);
   const [lastError, setLastError] = useState<AssistantError | null>(null);
@@ -281,7 +283,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
       try {
         const context: AssistantContext & { route: string } = {
-          ...buildAssistantContext(undefined, route),
+          ...buildAssistantContext(undefined, route, pageContextHintValue),
           route,
         };
         turnSnapshotsRef.current[messageId] = {
@@ -337,7 +339,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
         abortControllerRef.current = null;
       }
     },
-    [isTyping, messages, route],
+    [isTyping, messages, route, pageContextHintValue],
   );
 
   const retry = useCallback(() => {
@@ -371,7 +373,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
           // Capture feedback via existing helper (keeps compatibility)
           const context = snapshot?.context ?? {
-            ...buildAssistantContext(undefined, route),
+            ...buildAssistantContext(undefined, route, pageContextHintValue),
             route,
           };
 
@@ -421,7 +423,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
         // Silent fail for feedback storage
       }
     },
-    [route, userId],
+    [route, userId, pageContextHintValue],
   );
 
   return {

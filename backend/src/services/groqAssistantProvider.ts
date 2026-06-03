@@ -47,6 +47,7 @@ function buildRequestBody(
   userMessage: string,
   context: AssistantContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
+  modelName: string,
 ): GroqRequest {
   const messages: GroqMessage[] = [
     { role: "system", content: buildSystemPrompt() },
@@ -62,7 +63,7 @@ function buildRequestBody(
   messages.push({ role: "user", content: userMessage });
 
   return {
-    model: env.GROQ_MODEL,
+    model: modelName,
     messages,
     temperature: 0.5,
     max_tokens: 420,
@@ -84,7 +85,10 @@ export async function sendToGroqStream(
   onDelta: (text: string) => void,
   signal?: AbortSignal,
 ): Promise<void> {
-  if (!env.GROQ_API_KEY) {
+  const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
+  const activeModel = env.AI_PROVIDER === "groq" ? (env.AI_MODEL || env.GROQ_MODEL) : env.GROQ_MODEL;
+
+  if (!activeApiKey) {
     throw {
       message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
       errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
@@ -104,10 +108,10 @@ export async function sendToGroqStream(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${activeApiKey}`,
       },
       body: JSON.stringify({
-        ...buildRequestBody(userMessage, context, history),
+        ...buildRequestBody(userMessage, context, history, activeModel),
         stream: true,
       }),
       signal: abortController.signal,
@@ -187,7 +191,10 @@ export async function sendToGroq(
   context: AssistantContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
-  if (!env.GROQ_API_KEY) {
+  const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
+  const activeModel = env.AI_PROVIDER === "groq" ? (env.AI_MODEL || env.GROQ_MODEL) : env.GROQ_MODEL;
+
+  if (!activeApiKey) {
     return {
       message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
       errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
@@ -198,13 +205,13 @@ export async function sendToGroq(
   const timeoutId = setTimeout(() => abortController.abort(), GROQ_TIMEOUT_MS);
 
   try {
-const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${activeApiKey}`,
       },
-      body: JSON.stringify(buildRequestBody(userMessage, context, history)),
+      body: JSON.stringify(buildRequestBody(userMessage, context, history, activeModel)),
       signal: abortController.signal,
     });
 

@@ -111,6 +111,76 @@ Bạn cứ bấm đồng ý nhé.`;
 
     assert.equal(result.proposedActions.length, 0);
   });
+
+  it("retains valid create_twelve_week_plan_draft action", () => {
+    ensureBackendEnvForServiceImports();
+    const rawText = `\`\`\`action
+{
+  "type": "create_twelve_week_plan_draft",
+  "payload": {
+    "week12Outcome": "Giảm 5kg",
+    "lagMetricName": "Cân nặng",
+    "lagMetricTarget": "70",
+    "lagMetricUnit": "kg",
+    "startDate": "2026-06-08",
+    "reviewDay": "Sunday",
+    "tacticLoadPreference": "balanced",
+    "leadIndicators": [
+      {
+        "name": "Chạy bộ 3 lần/tuần",
+        "target": "3",
+        "unit": "lần",
+        "type": "core",
+        "cadence": "spread"
+      }
+    ]
+  },
+  "label": "Tạo bản nháp kế hoạch"
+}
+\`\`\``;
+
+    const result = parseAndValidateAIResponse(rawText);
+    assert.equal(result.proposedActions.length, 1);
+    assert.equal(result.proposedActions[0].type, "create_twelve_week_plan_draft");
+    const payload = result.proposedActions[0].payload as any;
+    assert.equal(payload.week12Outcome, "Giảm 5kg");
+    assert.equal(payload.leadIndicators.length, 1);
+    assert.equal(payload.leadIndicators[0].name, "Chạy bộ 3 lần/tuần");
+  });
+
+  it("filters out action with invalid payload", () => {
+    ensureBackendEnvForServiceImports();
+    const rawText = `\`\`\`action
+{
+  "type": "create_task",
+  "payload": {
+    "title": 1234,
+    "scheduledDate": "today"
+  },
+  "label": "Task sai payload"
+}
+\`\`\``;
+
+    const result = parseAndValidateAIResponse(rawText);
+    assert.equal(result.proposedActions.length, 0);
+  });
+
+  it("rejects mark_task_done with done: false", () => {
+    ensureBackendEnvForServiceImports();
+    const rawText = `\`\`\`action
+{
+  "type": "mark_task_done",
+  "payload": {
+    "taskId": "t1",
+    "done": false
+  },
+  "label": "Bỏ hoàn thành"
+}
+\`\`\``;
+
+    const result = parseAndValidateAIResponse(rawText);
+    assert.equal(result.proposedActions.length, 0);
+  });
 });
 
 describe("aiAssistantService getDeterministicFallback", () => {
@@ -155,30 +225,44 @@ describe("aiAssistantService getDeterministicFallback", () => {
 describe("aiAssistantService processAIAssistantRequest", () => {
   it("uses deterministic fallback in demo mode when API Key is missing", async () => {
     ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalKey = env.AI_API_KEY;
+    (env as any).AI_API_KEY = "";
 
-    const response = await processAIAssistantRequest({
-      message: "tạo mục tiêu chạy bộ",
-      context: sampleContext,
-      mode: "demo",
-    });
+    try {
+      const response = await processAIAssistantRequest({
+        message: "tạo mục tiêu chạy bộ",
+        context: sampleContext,
+        mode: "demo",
+      });
 
-    assert.ok(!("errorCode" in response));
-    assert.equal(response.proposedActions.length, 1);
-    assert.equal(response.proposedActions[0].type, "create_goal");
-    assert.ok(response.assistantText.includes("chạy bộ"));
+      assert.ok(!("errorCode" in response));
+      assert.equal(response.proposedActions.length, 1);
+      assert.equal(response.proposedActions[0].type, "create_goal");
+      assert.ok(response.assistantText.includes("chạy bộ"));
+    } finally {
+      (env as any).AI_API_KEY = originalKey;
+    }
   });
 
   it("returns config error in real mode when API Key is missing", async () => {
     ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalKey = env.AI_API_KEY;
+    (env as any).AI_API_KEY = "";
 
-    const response = await processAIAssistantRequest({
-      message: "tạo mục tiêu chạy bộ",
-      context: sampleContext,
-      mode: "real",
-    });
+    try {
+      const response = await processAIAssistantRequest({
+        message: "tạo mục tiêu chạy bộ",
+        context: sampleContext,
+        mode: "real",
+      });
 
-    assert.ok("errorCode" in response);
-    assert.equal(response.errorCode, "AI_PROVIDER_NOT_CONFIGURED");
+      assert.ok("errorCode" in response);
+      assert.equal(response.errorCode, "AI_PROVIDER_NOT_CONFIGURED");
+    } finally {
+      (env as any).AI_API_KEY = originalKey;
+    }
   });
 });
 

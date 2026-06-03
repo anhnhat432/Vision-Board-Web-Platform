@@ -7,6 +7,12 @@ vi.mock("@/app/utils/storage", () => {
   const mockUserData = {
     goals: [
       {
+        id: "goal_inactive",
+        title: "Inactive Goal",
+        category: "career",
+        tasks: [],
+      },
+      {
         id: "goal_123",
         title: "Gym Goal",
         category: "health",
@@ -74,6 +80,7 @@ vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
 vi.mock("@/app/utils/storage-twelve-week", () => ({
   buildDerivedScoreboard: vi.fn(() => []),
   getDefaultScoreboard: vi.fn(() => []),
+  getActiveTwelveWeekGoal: vi.fn((goals) => (goals ? goals.find((g: any) => g.id === "goal_123") : null)),
 }));
 
 import { APP_STORAGE_KEYS, addGoal, addReflection, saveUserData } from "@/app/utils/storage";
@@ -322,5 +329,101 @@ describe("executeAction - Phase 5 Action Suite", () => {
     expect(result.success).toBe(true);
     expect(result.message).toContain("Đã đánh dấu xong: Tập ngực");
     expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes create_task today successfully", async () => {
+    const action: AssistantAction = {
+      id: "a9_today",
+      type: "create_task",
+      label: "Tạo task hôm nay",
+      payload: {
+        title: "Chạy bộ buổi sáng",
+        scheduledDate: "today",
+        isCore: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã tạo task: Chạy bộ buổi sáng");
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes create_task tomorrow successfully", async () => {
+    const action: AssistantAction = {
+      id: "a9_tomorrow",
+      type: "create_task",
+      label: "Tạo task ngày mai",
+      payload: {
+        title: "Học lập trình",
+        scheduledDate: "tomorrow",
+        isCore: false,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã tạo task: Học lập trình");
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes create_task with exact date successfully", async () => {
+    const action: AssistantAction = {
+      id: "a9_exact",
+      type: "create_task",
+      label: "Tạo task ngày cụ thể",
+      payload: {
+        title: "Đọc sách",
+        scheduledDate: "2026-06-10",
+        isCore: false,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã tạo task: Đọc sách");
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("rejects create_task with invalid date", async () => {
+    const action: AssistantAction = {
+      id: "a9_invalid",
+      type: "create_task",
+      label: "Tạo task ngày sai",
+      payload: {
+        title: "Task lỗi",
+        scheduledDate: "not-a-date",
+        isCore: false,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("Ngày lập lịch không hợp lệ");
+  });
+
+  it("executes create_task using active goal instead of first goal", async () => {
+    const action: AssistantAction = {
+      id: "a9_active",
+      type: "create_task",
+      label: "Tạo task vào active goal",
+      payload: {
+        title: "Tập squat",
+        scheduledDate: "today",
+        isCore: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã tạo task: Tập squat");
+
+    const { getActiveTwelveWeekGoal } = await import("@/app/utils/storage-twelve-week");
+    expect(getActiveTwelveWeekGoal).toHaveBeenCalled();
   });
 });

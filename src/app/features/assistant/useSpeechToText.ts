@@ -55,7 +55,8 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
   }, [error]);
 
   // Feature detection an toàn
-  const isSupported = typeof window !== "undefined" && 
+  const isSupported =
+    typeof window !== "undefined" &&
     (Boolean((window as any).SpeechRecognition) || Boolean((window as any).webkitSpeechRecognition));
 
   useEffect(() => {

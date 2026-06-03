@@ -36,8 +36,8 @@ export interface AssistantProviderError {
 
 const GEMINI_TIMEOUT_MS = 15_000;
 
-function getGeminiApiUrl(): string {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.GEMINI_MODEL)}:generateContent`;
+function getGeminiApiUrl(modelName: string): string {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`;
 }
 
 function buildRequestBody(
@@ -81,7 +81,10 @@ export async function sendToGemini(
   context: AssistantContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
-  if (!env.GEMINI_API_KEY) {
+  const activeApiKey = env.AI_PROVIDER === "gemini" ? (env.AI_API_KEY || env.GEMINI_API_KEY) : env.GEMINI_API_KEY;
+  const activeModel = env.AI_PROVIDER === "gemini" ? (env.AI_MODEL || env.GEMINI_MODEL) : env.GEMINI_MODEL;
+
+  if (!activeApiKey) {
     return {
       message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
       errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
@@ -92,11 +95,11 @@ export async function sendToGemini(
   const timeoutId = setTimeout(() => abortController.abort(), GEMINI_TIMEOUT_MS);
 
   try {
-    const response = await fetch(getGeminiApiUrl(), {
+    const response = await fetch(getGeminiApiUrl(activeModel), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": env.GEMINI_API_KEY,
+        "x-goog-api-key": activeApiKey,
       },
       body: JSON.stringify(buildRequestBody(userMessage, context, history)),
       signal: abortController.signal,

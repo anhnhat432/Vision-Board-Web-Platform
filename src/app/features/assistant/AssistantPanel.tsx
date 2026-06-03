@@ -1,4 +1,17 @@
-import { CheckCircle2, Loader2, Mic, MicOff, Send, Sparkles, Square, ThumbsDown, ThumbsUp, Trash2, WifiOff, X } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  Mic,
+  MicOff,
+  Send,
+  Sparkles,
+  Square,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+  WifiOff,
+  X,
+} from "lucide-react";
 import { motion } from "motion/react";
 import {
   type ChangeEvent,
@@ -537,11 +550,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 {interimTranscript ? `Đang nghe: ${interimTranscript}...` : "Đang lắng nghe..."}
               </div>
             )}
-            {speechError && (
-              <div className="px-1 py-1 text-xs text-red-500">
-                {speechError}
-              </div>
-            )}
+            {speechError && <div className="px-1 py-1 text-xs text-red-500">{speechError}</div>}
             <div className="flex items-end gap-2">
               <textarea
                 ref={textareaRef}

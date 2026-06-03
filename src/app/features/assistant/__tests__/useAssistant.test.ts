@@ -6,8 +6,16 @@ const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
 }));
 
+const pageContextMock = vi.hoisted(() => ({
+  useAssistantPageContextValue: vi.fn(() => null as any),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+}));
+
+vi.mock("../AssistantPageContextProvider", () => ({
+  useAssistantPageContextValue: pageContextMock.useAssistantPageContextValue,
 }));
 
 vi.mock("../buildAssistantContext", () => ({
@@ -212,5 +220,55 @@ describe("useAssistant streaming", () => {
     const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
     expect(assistantMessage?.content).toBe("first second third");
     expect(assistantMessage?.status).toBe("complete");
+  });
+
+  it("calls sendAssistantMessageStream with pageContextHint when available", async () => {
+    pageContextMock.useAssistantPageContextValue.mockReturnValue({
+      pageType: "SMART_GOAL_SETUP",
+      currentStep: "specific",
+      hint: "Hãy làm rõ mục tiêu",
+    });
+
+    // Mock buildAssistantContext to return pageContextHint when provided
+    const { buildAssistantContext: originalBuildAssistantContext } = await import("../buildAssistantContext");
+    const mockedBuildAssistantContext = vi.mocked(originalBuildAssistantContext);
+    mockedBuildAssistantContext.mockImplementationOnce((_ref, _route, hint) => ({
+      currentWeek: 5,
+      weeksTotal: 12,
+      goals: [],
+      todayTasks: [],
+      lastReflectionDate: null,
+      feasibility: null,
+      latestWeeklyReview: null,
+      stuckSignals: {
+        latestObstacle: null,
+        missedCommitments: [],
+        overdueOpenCount: 0,
+        overdueTasks: [],
+      },
+      trend: { completionLast4Weeks: [], direction: "unknown" },
+      streak: { daysWithCompletedTask: 0 },
+      upcomingDeadlines: [],
+      pageContext: { route: "/today", currentStep: null, nextSuggestedStep: null, formDraft: {} },
+      pageContextHint: hint,
+    }));
+
+    mockedSendAssistantMessageStream.mockImplementation(async () => {
+      // No-op
+    });
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("test");
+    });
+
+    expect(mockedSendAssistantMessageStream).toHaveBeenCalled();
+    const callArg = mockedSendAssistantMessageStream.mock.calls[0][0];
+    expect(callArg.context.pageContextHint).toEqual({
+      pageType: "SMART_GOAL_SETUP",
+      currentStep: "specific",
+      hint: "Hãy làm rõ mục tiêu",
+    });
   });
 });
