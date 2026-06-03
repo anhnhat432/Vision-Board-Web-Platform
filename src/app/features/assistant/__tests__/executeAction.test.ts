@@ -31,7 +31,7 @@ vi.mock("@/app/utils/storage", () => {
   };
 
   return {
-    getUserData: vi.fn(() => mockUserData),
+    getUserData: vi.fn(() => JSON.parse(JSON.stringify(mockUserData))),
     saveUserData: vi.fn(),
     addReflection: vi.fn(),
     addGoal: vi.fn(() => "new_goal_999"),
@@ -232,6 +232,24 @@ describe("executeAction - Phase 5 Action Suite", () => {
     expect(saveUserData).toHaveBeenCalled();
   });
 
+  it("executes reschedule_task successfully using title fallback", async () => {
+    const action: AssistantAction = {
+      id: "a6_title",
+      type: "reschedule_task",
+      label: "Dời lịch task bằng tên",
+      payload: {
+        taskId: "Tập ngực",
+        scheduledDate: "2026-06-05",
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã dời lịch task sang ngày 2026-06-05");
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
   it("executes update_task_status successfully", async () => {
     const action: AssistantAction = {
       id: "a7",
@@ -248,6 +266,61 @@ describe("executeAction - Phase 5 Action Suite", () => {
     expect(result.success).toBe(true);
     expect(result.message).toContain("Đã đánh dấu hoàn thành nhiệm vụ");
     expect(toggleTwelveWeekTaskInData).toHaveBeenCalledWith(expect.anything(), "goal_123", "task_abc", true);
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes update_task_status successfully using title fallback", async () => {
+    const action: AssistantAction = {
+      id: "a7_title",
+      type: "update_task_status",
+      label: "Đổi status task bằng tên",
+      payload: {
+        taskId: "Tập ngực",
+        completed: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã đánh dấu hoàn thành nhiệm vụ");
+    expect(toggleTwelveWeekTaskInData).toHaveBeenCalledWith(expect.anything(), "goal_123", "task_abc", true);
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes mark_task_done successfully", async () => {
+    const action: AssistantAction = {
+      id: "a8",
+      type: "mark_task_done",
+      label: "Đánh dấu xong",
+      payload: {
+        taskId: "task_abc",
+        done: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã đánh dấu xong: Tập ngực");
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes mark_task_done successfully using title fallback", async () => {
+    const action: AssistantAction = {
+      id: "a8_title",
+      type: "mark_task_done",
+      label: "Đánh dấu xong bằng tên",
+      payload: {
+        taskId: "Tập ngực",
+        done: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã đánh dấu xong: Tập ngực");
     expect(saveUserData).toHaveBeenCalled();
   });
 });

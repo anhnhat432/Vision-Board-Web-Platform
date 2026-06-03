@@ -110,7 +110,13 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Chưa có 12-week plan." };
       }
 
-      const task = system.taskInstances?.find((t) => t.id === taskId);
+      let task = system.taskInstances?.find((t) => t.id === taskId);
+      if (!task) {
+        // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
+        task = system.taskInstances?.find(
+          (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim()
+        );
+      }
       if (!task) {
         return { success: false, message: "Không tìm thấy task." };
       }
@@ -119,7 +125,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Task đã được đánh dấu hoàn thành rồi." };
       }
 
-      const taskIndex = system.taskInstances.findIndex((t) => t.id === taskId);
+      const taskIndex = system.taskInstances.findIndex((t) => t.id === task.id);
       if (taskIndex === -1) {
         return { success: false, message: "Không tìm thấy task." };
       }
@@ -365,7 +371,13 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       for (const goal of data.goals) {
         const system = goal.twelveWeekSystem;
         if (system?.taskInstances) {
-          const tIndex = system.taskInstances.findIndex((t) => t.id === taskId);
+          let tIndex = system.taskInstances.findIndex((t) => t.id === taskId);
+          if (tIndex === -1) {
+            // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
+            tIndex = system.taskInstances.findIndex(
+              (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim()
+            );
+          }
           if (tIndex !== -1) {
             const task = system.taskInstances[tIndex];
             let newDate = scheduledDate;
@@ -403,9 +415,21 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       }
 
       let targetGoalId = "";
+      let resolvedTaskId = taskId;
       for (const goal of data.goals) {
-        if (goal.twelveWeekSystem?.taskInstances?.some((t) => t.id === taskId)) {
+        const hasTaskDirect = goal.twelveWeekSystem?.taskInstances?.some((t) => t.id === taskId);
+        if (hasTaskDirect) {
           targetGoalId = goal.id;
+          break;
+        }
+
+        // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
+        const taskByTitle = goal.twelveWeekSystem?.taskInstances?.find(
+          (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim()
+        );
+        if (taskByTitle) {
+          targetGoalId = goal.id;
+          resolvedTaskId = taskByTitle.id;
           break;
         }
       }
@@ -414,7 +438,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Không tìm thấy task tương ứng." };
       }
 
-      toggleTwelveWeekTaskInData(data, targetGoalId, taskId, completed);
+      toggleTwelveWeekTaskInData(data, targetGoalId, resolvedTaskId, completed);
       saveUserData(data);
 
       return {
