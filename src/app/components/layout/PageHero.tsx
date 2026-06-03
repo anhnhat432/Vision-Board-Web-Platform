@@ -127,7 +127,7 @@ export function PageHero({
               {title}
             </Heading>
             {description ? (
-              <p className="max-w-prose text-base leading-relaxed tracking-tight text-app-ink-muted sm:text-base">
+              <p className="max-w-prose text-base leading-relaxed tracking-normal text-app-ink-muted sm:text-base">
                 {description}
               </p>
             ) : null}

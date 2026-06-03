@@ -1,5 +1,8 @@
 import { Award, ClipboardCheck, Flag, Lightbulb, Target } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import { MotionFadeIn } from "@/app/components/motion";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
@@ -57,6 +60,7 @@ export function OutcomeStepLab({
   recommendedTemplate: _recommendedTemplate,
   onTemplateSelect: _onTemplateSelect,
 }: OutcomeStepLabProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [hasPlayedSuccess, setHasPlayedSuccess] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const isW4Filled = draft.week4Milestone.trim().length > 0;
@@ -84,45 +88,47 @@ export function OutcomeStepLab({
     <>
       {/* 🎯 SMART GOAL RECAP CARD - Visual Anchor dạng ảnh Polaroid Pinterest */}
       {smartGoal && (
-        <div className="relative mx-auto max-w-lg overflow-hidden rounded-2xl border border-amber-100/60 dark:border-slate-800 bg-amber-50/15 dark:bg-slate-900/30 p-5 pt-7 pb-5 text-xs text-app-ink-soft select-none shadow-[0_8px_30px_rgb(0,0,0,0.03)] border-t-[3px] border-t-amber-400/50 animate-in fade-in duration-300 flex flex-col items-center text-center">
-          {/* Ghim giấy giả lập Notion/Pinterest */}
-          <div
-            className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-3 bg-slate-400/20 dark:bg-slate-700/30 rounded-full border border-slate-400/10 shadow-3xs"
-            aria-hidden="true"
-          />
+        <MotionFadeIn>
+          <div className="relative mx-auto max-w-lg overflow-hidden rounded-card border border-app-line bg-app-bg-subtle/40 p-5 pt-7 pb-5 text-xs text-app-ink-soft select-none shadow-app-sm border-t-[3px] border-t-app-accent/60 flex flex-col items-center text-center">
+            {/* Ghim giấy giả lập Notion/Pinterest */}
+            <div
+              className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-3 bg-app-line/40 dark:bg-app-line/20 rounded-full border border-app-line/20 shadow-3xs"
+              aria-hidden="true"
+            />
 
-          <p className="font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider text-[8px] mb-2 flex items-center gap-1">
-            🎯 Mục tiêu SMART của bạn
-          </p>
-          <h4 className="font-serif text-base font-semibold text-app-ink leading-relaxed max-w-md italic">
-            "{smartGoal.specific}"
-          </h4>
-          {smartGoal.measurable && (
-            <p className="mt-2 text-[11px] text-app-ink-muted leading-relaxed font-medium">
-              Thước đo thành công:{" "}
-              <span className="font-bold text-app-ink-soft border-b border-dashed border-app-accent/30">
-                {smartGoal.measurable}
-              </span>
+            <p className="font-bold text-app-accent uppercase tracking-wider text-[10px] mb-2 flex items-center gap-1">
+              🎯 Mục tiêu SMART của bạn
             </p>
-          )}
-
-          {feasibility?.smartGoalQualityNote && (
-            <div className="mt-4 pt-3.5 border-t border-indigo-200/50 dark:border-indigo-900/40 flex gap-2 items-start text-xs bg-indigo-50/60 dark:bg-indigo-950/20 p-3 rounded-2xl text-indigo-950 dark:text-indigo-200 w-full text-left">
-              <span className="text-sm shrink-0">✨</span>
-              <div className="min-w-0">
-                <span className="font-extrabold uppercase tracking-wider text-[9px] text-indigo-600 dark:text-indigo-400 block mb-0.5">
-                  Trợ lý AI Copilot nhận xét:
+            <h4 className="font-serif text-base font-semibold text-app-ink leading-relaxed max-w-md italic">
+              “{smartGoal.specific}”
+            </h4>
+            {smartGoal.measurable && (
+              <p className="mt-2 text-xs text-app-ink-muted leading-relaxed font-medium">
+                Thước đo thành công:{" "}
+                <span className="font-bold text-app-ink-soft border-b border-dashed border-app-accent/30">
+                  {smartGoal.measurable}
                 </span>
-                <p className="leading-relaxed italic text-xs font-medium">"{feasibility.smartGoalQualityNote}"</p>
+              </p>
+            )}
+
+            {feasibility?.smartGoalQualityNote && (
+              <div className="mt-4 pt-3.5 border-t border-app-line flex gap-2 items-start text-xs bg-app-accent-soft/20 p-3 rounded-card text-app-accent w-full text-left">
+                <span className="text-sm shrink-0">✨</span>
+                <div className="min-w-0">
+                  <span className="font-extrabold uppercase tracking-wider text-[10px] text-app-accent block mb-0.5">
+                    Trợ lý AI Copilot nhận xét:
+                  </span>
+                  <p className="leading-relaxed italic text-xs font-medium">“{feasibility.smartGoalQualityNote}”</p>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </MotionFadeIn>
       )}
 
       {/* 🎓 PHÂN LOẠI MỤC TIÊU - Đưa ra ngoài luồng chính, tương tác 1 chạm sinh động */}
       <section
-        className="rounded-2xl border border-app-line bg-app-surface p-4.5 sm:p-5 shadow-sm space-y-3"
+        className="rounded-card border border-app-line bg-app-surface p-4.5 sm:p-5 shadow-app-sm space-y-3"
         aria-labelledby="goal-type-section-title"
       >
         <div className="flex items-center gap-2">
@@ -136,7 +142,7 @@ export function OutcomeStepLab({
             >
               Phân loại mục tiêu của bạn
             </h3>
-            <p className="text-[10px] text-app-ink-muted">
+            <p className="text-xs text-app-ink-muted">
               Chạm 1 chạm để phân loại nhanh. AI sẽ tối ưu các gợi ý hành động dựa trên phân loại này.
             </p>
           </div>
@@ -146,7 +152,9 @@ export function OutcomeStepLab({
             const isActive = draft.goalType === item.value;
             const emoji = GOAL_TYPE_EMOJIS[item.value] || "🎯";
             return (
-              <button
+              <motion.button
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
                 key={item.value}
                 type="button"
                 onClick={() => {
@@ -154,7 +162,7 @@ export function OutcomeStepLab({
                   onChange("goalType", item.value);
                 }}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-all duration-200 active:scale-95",
+                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-all duration-200 active:scale-95 font-sans focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                   isActive
                     ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-105"
                     : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30",
@@ -162,7 +170,7 @@ export function OutcomeStepLab({
               >
                 <span className="text-sm leading-none">{emoji}</span>
                 <span>{item.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -170,7 +178,7 @@ export function OutcomeStepLab({
 
       {/* BIỂU MẪU LỘ TRÌNH CỐT LÕI (ĐÃ TỰ ĐIỀN) */}
       <section
-        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm space-y-5"
+        className="relative overflow-hidden rounded-card border border-app-line bg-app-surface p-5 sm:p-6 shadow-app-sm space-y-5"
         aria-labelledby="outcome-required-title"
       >
         <div className="flex items-center justify-between border-b border-app-line/60 pb-3">
@@ -182,18 +190,18 @@ export function OutcomeStepLab({
               <Award className="h-4 w-4" />
               <span>Thiết kế Lộ trình 12 tuần</span>
             </h3>
-            <p className="mt-0.5 text-[11px] text-app-ink-muted leading-relaxed">
+            <p className="mt-0.5 text-xs text-app-ink-muted leading-relaxed">
               Hệ thống đã tự động tính toán lộ trình 12 tuần từ mục tiêu SMART. Bạn chỉ việc rà soát và chỉnh sửa.
             </p>
           </div>
-          <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 border border-emerald-500/15 shrink-0">
+          <span className="rounded-pill bg-app-status-success/10 px-2.5 py-0.5 text-[10px] font-extrabold text-app-status-success border border-app-status-success/20 shrink-0">
             Tự điền 90%
           </span>
         </div>
 
         <div className="space-y-5 pt-1">
           {/* Đích đến cuối cùng Tuần 12 - BẮT BUỘC (CẦN ĐIỀN NGAY) */}
-          <div className="space-y-2 p-4.5 rounded-xl bg-app-accent-soft/10 border border-app-accent/15">
+          <div className="space-y-2 p-4.5 rounded-card bg-app-accent-soft/20 border border-app-accent/10">
             <label htmlFor="week-12-outcome" className={cn(labelClass, "flex flex-col gap-1 text-app-ink font-bold")}>
               <div className="flex items-center gap-1.5">
                 <Award className="h-4.5 w-4.5 text-app-accent shrink-0 animate-pulse" />
@@ -209,10 +217,10 @@ export function OutcomeStepLab({
               className={cn(
                 textareaClass,
                 "min-h-[60px] text-sm leading-relaxed border-app-accent/30 focus-visible:ring-app-accent rounded-xl",
-                milestoneError && "border-red-400 focus-visible:border-red-500 focus-visible:ring-red-150",
+                milestoneError && "border-app-status-error focus-visible:border-app-status-error focus-visible:ring-app-status-error/20",
               )}
               onChange={(event) => onChange("week12Outcome", event.target.value)}
-              placeholder="Nhập đích đến của bạn (Ví dụ: Chạy bộ liên tục 10km không nghỉ, học xong 12 chương tiếng Anh...)"
+              placeholder="Nhập đích đến của bạn (Ví dụ: Chạy bộ liên tục 10km không nghỉ, học xong 12 chương tiếng Anh…)"
             />
             {/* Nút điền nhanh từ SMART goal */}
             {smartGoal && (
@@ -223,19 +231,19 @@ export function OutcomeStepLab({
                     soundService.click();
                     onChange("week12Outcome", smartGoal.measurable || smartGoal.specific);
                   }}
-                  className="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 hover:text-indigo-700 hover:underline flex items-center gap-1"
+                  className="text-[11px] font-bold text-app-accent hover:text-app-accent-hover hover:underline flex items-center gap-1"
                 >
                   ✨ Lấy từ thước đo SMART Goal
                 </button>
               </div>
             )}
             {milestoneError ? (
-              <p role="alert" className="text-[10px] font-bold text-red-500">
+              <p role="alert" className="text-xs font-bold text-app-status-error">
                 {milestoneError}
               </p>
             ) : (
-              <p className="text-[10px] italic text-app-ink-soft leading-relaxed">
-                * Kế hoạch 12 tuần thành công khi bạn cán đổ cột mốc cụ thể này.
+              <p className="text-xs italic text-app-ink-soft leading-relaxed">
+                Kế hoạch 12 tuần thành công khi bạn cán đổ cột mốc cụ thể này.
               </p>
             )}
           </div>
@@ -248,16 +256,16 @@ export function OutcomeStepLab({
                 soundService.click();
                 setIsAdvancedOpen(!isAdvancedOpen);
               }}
-              className="flex w-full items-center justify-between text-xs font-bold text-indigo-650 dark:text-indigo-400 py-2 px-3.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/10 hover:bg-indigo-50 transition-all select-none"
+              className="flex w-full items-center justify-between text-xs font-bold text-app-accent py-2 px-3.5 rounded-control bg-app-accent-soft/30 border border-app-line hover:bg-app-accent-soft/45 transition-all select-none"
             >
               <span className="flex items-center gap-1.5">
-                <ClipboardCheck className="h-4 w-4 text-indigo-500" />
+                <ClipboardCheck className="h-4 w-4 text-app-accent" />
                 <span>⚙️ Tự chỉnh sửa thêm (Mốc chặng W4/W8 & Động lực - Tùy chọn)</span>
               </span>
               <span
                 className={cn(
-                  "text-[10px] px-2.5 py-0.5 rounded-full font-bold transition-all border border-indigo-500/10 bg-white dark:bg-slate-900",
-                  isAdvancedOpen ? "text-slate-500" : "text-indigo-600 animate-pulse",
+                  "text-[10px] px-2.5 py-0.5 rounded-pill font-bold transition-all border border-app-line bg-app-surface",
+                  isAdvancedOpen ? "text-app-ink-soft" : "text-app-accent animate-pulse",
                 )}
               >
                 {isAdvancedOpen ? "Thu gọn ▴" : "Chỉnh sửa ▾"}
@@ -273,7 +281,7 @@ export function OutcomeStepLab({
                       htmlFor="milestone-week-4"
                       className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
                     >
-                      <Target className="h-4 w-4 text-indigo-500 shrink-0" />
+                      <Target className="h-4 w-4 text-app-accent shrink-0" />
                       <span>🎯 Mốc tuần 4: Tạo đà ban đầu</span>
                     </label>
                     <Input
@@ -281,10 +289,10 @@ export function OutcomeStepLab({
                       value={draft.week4Milestone}
                       className={inputClass}
                       onChange={(event) => onChange("week4Milestone", event.target.value)}
-                      placeholder="Ví dụ: Đọc xong 3 cuốn sách đầu tiên..."
+                      placeholder="Ví dụ: Đọc xong 3 cuốn sách đầu tiên…"
                     />
-                    <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-                      * Mốc tháng đầu tiên giúp bạn xây dựng thói quen và quán tính hành động.
+                    <p className="text-xs italic text-app-ink-muted leading-relaxed">
+                      Mốc tháng đầu tiên giúp bạn xây dựng thói quen và quán tính hành động.
                     </p>
                   </div>
 
@@ -293,7 +301,7 @@ export function OutcomeStepLab({
                       htmlFor="milestone-week-8"
                       className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
                     >
-                      <Flag className="h-4 w-4 text-indigo-500 shrink-0" />
+                      <Flag className="h-4 w-4 text-app-accent shrink-0" />
                       <span>🚀 Mốc tuần 8: Bứt phá tăng tốc</span>
                     </label>
                     <Input
@@ -301,10 +309,10 @@ export function OutcomeStepLab({
                       value={draft.week8Milestone}
                       className={inputClass}
                       onChange={(event) => onChange("week8Milestone", event.target.value)}
-                      placeholder="Ví dụ: Hoàn thành 60% chương trình học..."
+                      placeholder="Ví dụ: Hoàn thành 60% chương trình học…"
                     />
-                    <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-                      * Điểm bứt phá quan trọng, giúp tăng tốc trước khi về đích.
+                    <p className="text-xs italic text-app-ink-muted leading-relaxed">
+                      Điểm bứt phá quan trọng, giúp tăng tốc trước khi về đích.
                     </p>
                   </div>
                 </div>
@@ -315,7 +323,7 @@ export function OutcomeStepLab({
                     htmlFor="vision-12-week"
                     className={cn(labelClass, "flex items-center gap-1.5 text-app-ink font-bold")}
                   >
-                    <Lightbulb className="h-4 w-4 text-amber-500 shrink-0" />
+                    <Lightbulb className="h-4 w-4 text-app-accent shrink-0" />
                     <span>💡 Động lực: Tại sao bạn nhất định phải làm điều này?</span>
                   </label>
                   <Textarea
@@ -324,10 +332,10 @@ export function OutcomeStepLab({
                     value={draft.vision12Week}
                     onChange={(event) => onChange("vision12Week", event.target.value)}
                     className="min-h-[50px] text-xs leading-relaxed"
-                    placeholder="Ví dụ: Giúp tôi tự tin hơn, bứt phá thu nhập và nâng tầm cuộc sống..."
+                    placeholder="Ví dụ: Giúp tôi tự tin hơn, bứt phá thu nhập và nâng tầm cuộc sống…"
                   />
-                  <p className="text-[10px] italic text-app-ink-muted leading-relaxed">
-                    * Lý do đủ lớn sẽ giúp bạn duy trì kỷ luật và năng lượng vào những ngày mệt mỏi.
+                  <p className="text-xs italic text-app-ink-muted leading-relaxed">
+                    Lý do đủ lớn sẽ giúp bạn duy trì kỷ luật và năng lượng vào những ngày mệt mỏi.
                   </p>
                 </div>
               </div>

@@ -1,7 +1,11 @@
 import { Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { motion } from "motion/react";
 import { celebrateSmall } from "../../../lib/effects/celebrate";
+import { MotionStaggerList, MotionStaggerItem } from "../../components/motion";
+
+const MotionLink = motion(Link);
 
 import { Skeleton } from "../../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../../features/assistant/AssistantPageContextProvider";
@@ -311,7 +315,9 @@ function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
 
 function TaskCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () => void }) {
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
       type="button"
       aria-label={checked ? "Đánh dấu chưa xong" : "Đánh dấu xong"}
       aria-pressed={checked}
@@ -323,7 +329,7 @@ function TaskCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () =>
       }`}
     >
       {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
-    </button>
+    </motion.button>
   );
 }
 
@@ -354,12 +360,14 @@ function TodayTasksCard({
             {completedCount} trong {totalCount} việc đã xong
           </p>
         </div>
-        <Link
+        <MotionLink
+          whileHover={{ scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
           to="/12-week-system?tab=week"
-          className="inline-flex shrink-0 items-center rounded-full border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex shrink-0 items-center rounded-full border border-app-line bg-app-surface px-4 py-2 text-sm font-medium text-app-ink transition-all duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 font-sans"
         >
           Xem kế hoạch tuần
-        </Link>
+        </MotionLink>
       </div>
 
       {totalCount === 0 ? (
@@ -369,49 +377,52 @@ function TodayTasksCard({
             Chọn một việc nhẹ từ kế hoạch tuần hoặc lên lịch lại để bắt đầu.
           </p>
           <div className="mt-4">
-            <Link
+            <MotionLink
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
               to="/12-week-system?tab=week"
-              className="inline-flex items-center justify-center rounded-xl bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.98] shadow-sm hover:shadow-md"
+              className="inline-flex items-center justify-center rounded-xl bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover shadow-sm hover:shadow-md font-sans"
               style={{ backgroundColor: "var(--app-accent)" }}
             >
               Chọn việc từ tuần này →
-            </Link>
+            </MotionLink>
           </div>
         </div>
       ) : (
-        <div className="mt-5 space-y-1">
+        <MotionStaggerList className="mt-5 space-y-1">
           {tasks.map((task) => (
-            <div
-              key={task.id}
-              className={`flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3 ${
-                task.isCurrent ? "bg-app-bg ring-1 ring-app-accent/15" : ""
-              }`}
-            >
-              <TaskCheckbox
-                checked={task.completed}
-                onToggle={() => {
-                  if (!task.canToggle || !activeGoalId) return;
-                  onTaskToggle(task.id, !task.completed);
-                }}
-              />
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`text-sm font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
-                >
-                  {task.title}
-                </p>
-                <p className="mt-0.5 text-xs text-app-ink-muted">
-                  {task.domain} · {task.meta}
-                </p>
+            <MotionStaggerItem key={task.id}>
+              <div
+                className={`flex items-start gap-3 rounded-xl border border-app-line bg-app-bg px-3 py-3 ${
+                  task.isCurrent ? "bg-app-bg ring-1 ring-app-accent/15" : ""
+                }`}
+              >
+                <TaskCheckbox
+                  checked={task.completed}
+                  onToggle={() => {
+                    if (!task.canToggle || !activeGoalId) return;
+                    onTaskToggle(task.id, !task.completed);
+                  }}
+                />
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={`text-sm font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
+                  >
+                    {task.title}
+                  </p>
+                  <p className="mt-0.5 text-xs text-app-ink-muted">
+                    {task.domain} · {task.meta}
+                  </p>
+                </div>
+                {task.isCurrent ? (
+                  <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
+                    Đang làm
+                  </span>
+                ) : null}
               </div>
-              {task.isCurrent ? (
-                <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
-                  Đang làm
-                </span>
-              ) : null}
-            </div>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStaggerList>
       )}
 
       {totalCount > 0 && completedCount === totalCount && (
@@ -520,12 +531,14 @@ function ReflectionPrompt() {
       >
         Hôm nay điều gì khiến bạn cảm thấy gần với phiên bản tốt hơn của chính mình?
       </h2>
-      <Link
+      <MotionLink
+        whileHover={{ scale: 1.015 }}
+        whileTap={{ scale: 0.985 }}
         to="/journal"
-        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 font-sans"
       >
         Viết phản tư →
-      </Link>
+      </MotionLink>
     </section>
   );
 }
@@ -673,21 +686,25 @@ function TodayV2EmptyState({ onNavigate }: { onNavigate: (href: string) => void 
           </p>
 
           <div className="mt-6 flex flex-col gap-2.5">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
               type="button"
               onClick={() => onNavigate("/12-week-setup")}
-              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-4 rounded-xl shadow-sm active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5"
+              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-4 rounded-xl shadow-sm active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5 font-sans"
               style={{ backgroundColor: "var(--color-accent)" }}
             >
               Thiết lập mục tiêu 12 tuần 🚀
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
               type="button"
               onClick={() => onNavigate("/")}
-              className="w-full border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg font-semibold py-2.5 px-4 rounded-xl active:scale-[0.98] transition-all text-xs flex items-center justify-center"
+              className="w-full border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg font-semibold py-2.5 px-4 rounded-xl active:scale-[0.98] transition-all text-xs flex items-center justify-center font-sans"
             >
               Quay lại Trang chính
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

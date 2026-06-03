@@ -171,16 +171,21 @@ async function runStepAction(stepKey) {
   if (stepKey === "specific") {
     await browserEval(`
       (() => {
-        const btn = Array.from(document.querySelectorAll("button")).find(b => b.innerText.includes("Hoàn thành 1 dự án trọng điểm"));
-        if (btn) {
-          btn.click();
-          return "clicked suggestion";
-        }
+        const setNativeValue = (element, value) => {
+          if (!element) return;
+          const prototype = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+          const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+          if (descriptor && descriptor.set) {
+            descriptor.set.call(element, value);
+          } else {
+            element.value = value;
+          }
+          element.dispatchEvent(new Event("input", { bubbles: true }));
+          element.dispatchEvent(new Event("change", { bubbles: true }));
+        };
         const textarea = document.querySelector("#smart-specific");
         if (textarea) {
-          textarea.value = "Hoàn thành thiết kế hệ thống mới cho sản phẩm công ty để tối ưu hóa hiệu năng vận hành.";
-          textarea.dispatchEvent(new Event("input", { bubbles: true }));
-          textarea.dispatchEvent(new Event("change", { bubbles: true }));
+          setNativeValue(textarea, "Hoàn thành thiết kế hệ thống mới cho sản phẩm công ty để tối ưu hóa hiệu năng vận hành.");
           return "filled manual";
         }
         return "not found element";
@@ -283,10 +288,10 @@ async function main() {
     await sleep(1000);
 
     const steps = [
-      { key: "specific", name: "01-specific", nextBtn: "Tiếp tục" },
-      { key: "measurable", name: "02-measurable", nextBtn: "Tiếp tục" },
-      { key: "achievable", name: "03-achievable", nextBtn: "Tiếp tục" },
-      { key: "relevant", name: "04-relevant", nextBtn: "Tiếp tục" },
+      { key: "specific", name: "01-specific", nextBtn: "Lưu mục tiêu cụ thể" },
+      { key: "measurable", name: "02-measurable", nextBtn: "Xác nhận chỉ số đo" },
+      { key: "achievable", name: "03-achievable", nextBtn: "Thiết lập thời gian cam kết" },
+      { key: "relevant", name: "04-relevant", nextBtn: "Xác nhận động lực này" },
       { key: "timeBound", name: "05-timebound", nextBtn: null }, // Step cuối cùng chứa cả Review & QualityFeedback
     ];
 

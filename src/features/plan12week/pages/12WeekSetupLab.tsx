@@ -251,6 +251,7 @@ export function TwelveWeekSetupLab() {
   const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
   const [_isVisionPromptDismissed, _setIsVisionPromptDismissed] = useState(false);
   const [attemptedStepIndexes, setAttemptedStepIndexes] = useState<Record<number, boolean>>({});
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draft, setDraft] = useState<TwelveWeekSetupDraft>({
     templateId: "",
     goalType: "Personal Growth",
@@ -328,7 +329,7 @@ export function TwelveWeekSetupLab() {
         vision12Week:
           previousDraft.vision12Week ||
           recommendedTpl?.vision12Week ||
-          `Trong 12 tuần tới, tôi muốn biến mục tiêu "${prerequisites.parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
+          `Trong 12 tuần tới, tôi muốn biến mục tiêu “${prerequisites.parsedSmartGoal.specific}” thành một nhịp thực thi rõ ràng.`,
         week12Outcome:
           previousDraft.week12Outcome ||
           recommendedTpl?.week12Outcome ||
@@ -450,10 +451,13 @@ export function TwelveWeekSetupLab() {
       window.clearTimeout(saveTimeoutRef.current);
     }
 
+    setIsSavingDraft(true);
+
     // Debounce: save after 500ms of inactivity
     saveTimeoutRef.current = window.setTimeout(() => {
       localStorage.setItem(APP_STORAGE_KEYS.pending12WeekSetupDraft, JSON.stringify(draft));
       saveTimeoutRef.current = null;
+      setIsSavingDraft(false);
     }, 500);
 
     return () => {
@@ -462,6 +466,21 @@ export function TwelveWeekSetupLab() {
       }
     };
   }, [draft, feasibility, isLoading, smartGoal]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (currentStep > 0) {
+        event.preventDefault();
+        event.returnValue = "";
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [currentStep]);
 
   const handleJumpToStep = useCallback(
     (stepIndex: number) => {
@@ -550,14 +569,18 @@ export function TwelveWeekSetupLab() {
     currentStep === 0
       ? "Làm rõ trạng thái bạn muốn đạt được khi 12 tuần kết thúc."
       : currentStep === 1
-        ? "Chọn 2-4 hành động lặp lại và sắp xếp lịch trình hằng tuần của bạn."
-        : "Xem trước kế hoạch tự động hằng ngày và kích hoạt để bắt đầu.";
+        ? "Chọn 2-4 hành động lặp lại hằng tuần để dẫn dắt đến kết quả mong muốn."
+        : currentStep === 2
+          ? "Chọn ngày khởi hành, ngày nhìn lại và tùy biến lịch 7 ngày ưu tiên."
+          : "Xem trước giao diện check-in Hôm nay thực tế và kích hoạt để bắt đầu.";
   const currentStepWhy =
     currentStep === 0
       ? "Kết quả rõ giúp biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
       : currentStep === 1
-        ? "Hành động lặp lại là thứ bạn kiểm soát. Ngày bắt đầu và lịch nhìn lại giúp bạn giữ kỷ luật tự nhiên."
-        : "Kế hoạch Hôm nay mô phỏng giao diện check-in thực tế. Sau khi kích hoạt, bạn sẽ bắt đầu ngay tuần 1.";
+        ? "Hành động lặp lại là thứ bạn kiểm soát hoàn toàn hằng ngày, tạo nên sự tích lũy lớn."
+        : currentStep === 2
+          ? "Ngày bắt đầu chuẩn bị tinh thần và lịch review giúp bạn duy trì nhịp độ kỷ luật tự nhiên."
+          : "Kế hoạch Hôm nay mô phỏng giao diện check-in thực tế. Sau khi kích hoạt, bạn sẽ bắt đầu ngay tuần 1.";
 
   if (isRealMode() && auth.authLoading) {
     return (
@@ -676,22 +699,21 @@ export function TwelveWeekSetupLab() {
   });
   const rawCurrentStepValidationError = (() => {
     if (currentStep === 0) {
-      if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
+      if (!draft.goalType || !draft.week12Outcome.trim()) return "Làm rõ kết quả 12 tuần trước.";
       return milestoneError;
     }
 
     if (currentStep === 1) {
-      // Validate tactics
       if (draft.leadIndicators.length < 2 || draft.leadIndicators.length > 4) {
         return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
       }
       if (draft.leadIndicators.some((indicator) => !indicator.name.trim())) {
         return "Cần đặt tên cho từng việc lặp lại trước khi tiếp tục.";
       }
-      const tacticErr = invalidTargetError ?? invalidUnitError;
-      if (tacticErr) return tacticErr;
+      return invalidTargetError ?? invalidUnitError;
+    }
 
-      // Validate schedule
+    if (currentStep === 2) {
       if (!draft.lagMetricName.trim() || !cycleStartDate || !draft.reviewDay) {
         return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
       }
@@ -699,8 +721,8 @@ export function TwelveWeekSetupLab() {
       return startDateValidation.error;
     }
 
-    // Step 2: Preview & Activation
-    if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
+    // Step 3: Preview & Activation
+    if (!draft.goalType || !draft.week12Outcome.trim()) return "Làm rõ kết quả 12 tuần trước.";
     if (draft.leadIndicators.length < 2 || draft.leadIndicators.length > 4) {
       return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
     }
@@ -790,7 +812,7 @@ export function TwelveWeekSetupLab() {
     });
 
     if (announce) {
-      toast.success(`Đã áp dụng khung "${template.name}".`, {
+      toast.success(`Đã áp dụng khung “${template.name}”.`, {
         description: "Bạn vẫn có thể sửa mọi việc lặp lại và cột mốc ngay trong bước này.",
       });
     }
@@ -838,7 +860,7 @@ export function TwelveWeekSetupLab() {
     }
 
     if (unlockedTemplate) {
-      toast.info(`Khung "${unlockedTemplate.name}" vẫn cần gói ${unlockedTemplate.requiredPlan}.`);
+      toast.info(`Khung “${unlockedTemplate.name}” vẫn cần gói ${unlockedTemplate.requiredPlan}.`);
     }
   };
 
@@ -921,12 +943,16 @@ export function TwelveWeekSetupLab() {
       if (
         currentStep !== 1 &&
         (rawCurrentStepValidationError === invalidTargetError ||
-          rawCurrentStepValidationError === invalidUnitError ||
-          rawCurrentStepValidationError === startDateValidation.error ||
+          rawCurrentStepValidationError === invalidUnitError)
+      ) {
+        setCurrentStep(1);
+      } else if (
+        currentStep !== 2 &&
+        (rawCurrentStepValidationError === startDateValidation.error ||
           rawCurrentStepValidationError === "Chọn ngày nhìn lại hợp lệ." ||
           rawCurrentStepValidationError === "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.")
       ) {
-        setCurrentStep(1);
+        setCurrentStep(2);
       } else if (currentStep !== 0 && rawCurrentStepValidationError === milestoneError) {
         setCurrentStep(0);
       }
@@ -1114,6 +1140,7 @@ export function TwelveWeekSetupLab() {
     if (canRunBackendSync) {
       void (async () => {
         let backendGoalId: string | null = null;
+        let isSyncError = false;
 
         try {
           const backendGoal = await createGoal(backendGoalPayload);
@@ -1121,29 +1148,43 @@ export function TwelveWeekSetupLab() {
           saveGoalLink(goalId, backendGoal.id);
         } catch (goalSyncError) {
           console.warn("Backend goal creation failed; keeping local-first 12-week plan.", goalSyncError);
+          isSyncError = true;
         }
 
-        const backendPlanId = await planSetupActions.syncPlanForGoal({
-          localGoalId: goalId,
-          backendGoalId: backendGoalId ?? undefined,
-          vision: draft.vision12Week.trim(),
-          startDate: parseCalendarDate(cycleStartDate)?.toISOString() ?? new Date().toISOString(),
-          totalWeeks: 12,
-        });
-
-        if (!backendPlanId) {
-          console.warn("Backend plan sync did not return a plan id; skipping backend goal plan link.");
-          return;
-        }
-
-        if (!backendGoalId) {
-          return;
-        }
-
+        let backendPlanId: string | null = null;
         try {
-          await updateGoal(backendGoalId, { planId: backendPlanId });
-        } catch (linkError) {
-          console.warn("Failed to link backend goal to plan.", linkError);
+          backendPlanId = await planSetupActions.syncPlanForGoal({
+            localGoalId: goalId,
+            backendGoalId: backendGoalId ?? undefined,
+            vision: draft.vision12Week.trim(),
+            startDate: parseCalendarDate(cycleStartDate)?.toISOString() ?? new Date().toISOString(),
+            totalWeeks: 12,
+          });
+        } catch (planSyncError) {
+          console.warn("Backend plan sync failed.", planSyncError);
+          isSyncError = true;
+        }
+
+        if (backendPlanId && backendGoalId) {
+          try {
+            await updateGoal(backendGoalId, { planId: backendPlanId });
+          } catch (linkError) {
+            console.warn("Failed to link backend goal to plan.", linkError);
+            isSyncError = true;
+          }
+        } else if (!backendPlanId) {
+          isSyncError = true;
+        }
+
+        if (isSyncError) {
+          toast.warning("Lưu ngoại tuyến thành công!", {
+            description: "Kế hoạch đã sẵn sàng trên thiết bị này nhưng chưa thể đồng bộ lên đám mây (Lỗi kết nối). Bạn có thể thử đồng bộ lại sau trong Cài đặt.",
+            duration: 6000,
+          });
+        } else {
+          toast.success("Đồng bộ đám mây hoàn tất.", {
+            description: "Kế hoạch 12 tuần của bạn đã được sao lưu an toàn trên cloud.",
+          });
         }
       })();
     }
@@ -1184,7 +1225,7 @@ export function TwelveWeekSetupLab() {
         {/* Tiêu đề chính tối giản */}
         <section aria-labelledby="twelve-week-setup-title" className="space-y-4">
           {/* Banner visual anchor ở trên */}
-          <div className="overflow-hidden rounded-2xl border border-app-line/45 aspect-[16/5] w-full bg-app-bg shadow-sm">
+          <div className="overflow-hidden rounded-card border border-app-line aspect-[16/5] w-full bg-app-bg shadow-app-sm">
             <img
               src="/twelve_week_roadmap.png"
               alt="Lộ trình hành trình 12 tuần"
@@ -1193,16 +1234,29 @@ export function TwelveWeekSetupLab() {
             />
           </div>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
-              {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
-            </p>
-            <h1
-              id="twelve-week-setup-title"
-              className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
-            >
-              Tạo kế hoạch 12 tuần
-            </h1>
+          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
+                {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
+              </p>
+              <h1
+                id="twelve-week-setup-title"
+                className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
+              >
+                Tạo kế hoạch 12 tuần
+              </h1>
+            </div>
+            {isSavingDraft ? (
+              <span className="flex items-center gap-1.5 text-[10px] font-bold text-app-ink-muted shrink-0 select-none self-start sm:self-auto">
+                <span className="h-2 w-2 rounded-full bg-app-accent animate-pulse" />
+                Đang lưu nháp tự động...
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-[10px] font-bold text-app-status-success shrink-0 select-none self-start sm:self-auto">
+                <span className="h-2 w-2 rounded-full bg-app-status-success" />
+                Đã lưu nháp an toàn
+              </span>
+            )}
           </div>
 
           <div className="mt-3.5 max-w-2xl bg-app-bg-subtle/50 dark:bg-app-bg-subtle/10 border border-app-line/60 rounded-xl p-3.5 flex items-start gap-2.5 shadow-3xs">
@@ -1246,7 +1300,13 @@ export function TwelveWeekSetupLab() {
             stepError={currentStepValidationError}
             isNextDisabled={false}
             isSubmitDisabled={false}
-            nextButtonLabel={currentStep === 0 ? "Sắp xếp lịch thực hiện 📅" : "Xem trước kế hoạch Hôm nay 👀"}
+            nextButtonLabel={
+              currentStep === 0
+                ? "Sắp xếp hành động cam kết ➔"
+                : currentStep === 1
+                  ? "Thiết lập lịch trình 📅"
+                  : "Xem trước kế hoạch Hôm nay 👀"
+            }
           >
             {currentStep === 0 && (
               <OutcomeStepLab
@@ -1262,40 +1322,40 @@ export function TwelveWeekSetupLab() {
             )}
 
             {currentStep === 1 && (
-              <div className="space-y-8">
-                <LeadIndicatorsStepLab
-                  draft={draft}
-                  showValidationErrors={Boolean(attemptedStepIndexes[1])}
-                  onAddIndicator={handleAddIndicator}
-                  onRemoveIndicator={handleRemoveIndicator}
-                  onIndicatorChange={handleIndicatorChange}
-                  coreCount={coreCount}
-                  optionalCount={optionalCount}
-                  setupGuideSupport={setupGuideSupport}
-                  setupGuideTemplate={setupGuideTemplate}
-                  selectedTemplate={selectedTemplate}
-                  weekOneTaskPreview={weekOneTaskPreview}
-                  weekOneTaskWarning={weekOneTaskWarning}
-                  weekOneTaskGroups={previewTaskGroups}
-                />
-
-                <ScheduleStepLab
-                  draft={draft}
-                  cycleStartDate={cycleStartDate}
-                  cycleEndDate={cycleEndDate}
-                  onChange={handleChange}
-                  setupGuideSupport={setupGuideSupport}
-                  setupGuideTemplate={setupGuideTemplate}
-                  hasPreviewTasks={previewTasks.length > 0}
-                  weekOneTaskPreview={weekOneTaskPreview}
-                  weekOneTaskWarning={weekOneTaskWarning}
-                />
-              </div>
+              <LeadIndicatorsStepLab
+                draft={draft}
+                showValidationErrors={Boolean(attemptedStepIndexes[1])}
+                onAddIndicator={handleAddIndicator}
+                onRemoveIndicator={handleRemoveIndicator}
+                onIndicatorChange={handleIndicatorChange}
+                coreCount={coreCount}
+                optionalCount={optionalCount}
+                setupGuideSupport={setupGuideSupport}
+                setupGuideTemplate={setupGuideTemplate}
+                selectedTemplate={selectedTemplate}
+                weekOneTaskPreview={weekOneTaskPreview}
+                weekOneTaskWarning={weekOneTaskWarning}
+                weekOneTaskGroups={previewTaskGroups}
+              />
             )}
 
-            {currentStep === 2 && isRealMode() && !auth.user ? <RealModeLoginGate target="12WeekSetup" /> : null}
+            {currentStep === 2 && (
+              <ScheduleStepLab
+                draft={draft}
+                cycleStartDate={cycleStartDate}
+                cycleEndDate={cycleEndDate}
+                onChange={handleChange}
+                setupGuideSupport={setupGuideSupport}
+                setupGuideTemplate={setupGuideTemplate}
+                hasPreviewTasks={previewTasks.length > 0}
+                weekOneTaskPreview={weekOneTaskPreview}
+                weekOneTaskWarning={weekOneTaskWarning}
+              />
+            )}
 
-            {currentStep === 2 && !(isRealMode() && !auth.user) ? (
+            {currentStep === 3 && isRealMode() && !auth.user ? <RealModeLoginGate target="12WeekSetup" /> : null}
+
+            {currentStep === 3 && !(isRealMode() && !auth.user) ? (
               <PlanPreviewStepLab
                 draft={draft}
                 smartGoal={smartGoal}

@@ -1,6 +1,8 @@
 import { AlertTriangle, ArrowRight, ChevronLeft, ChevronRight, Compass, Save, Sparkles, Target } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker } from "react-router";
+import { motion } from "motion/react";
+import { MotionFadeIn, MotionStaggerList, MotionStaggerItem } from "../components/motion";
 import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
@@ -503,29 +505,29 @@ export function LifeBalance() {
         </header>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
+          <MotionFadeIn delay={0.05} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
-          </article>
-          <article className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
+          </MotionFadeIn>
+          <MotionFadeIn delay={0.1} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Lĩnh vực mạnh nhất</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={strongestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
             <p className="mt-1.5 text-xs font-medium text-app-ink-soft">{getLifeAreaLabel(strongestArea.name)}</p>
-          </article>
-          <article className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50">
+          </MotionFadeIn>
+          <MotionFadeIn delay={0.15} className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">Lĩnh vực cần ưu tiên</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
             <p className="mt-1.5 text-xs font-medium text-app-warm">{getLifeAreaLabel(weakestArea.name)}</p>
-          </article>
+          </MotionFadeIn>
         </div>
 
         <Tabs defaultValue="current" className="mt-8">
@@ -619,17 +621,19 @@ export function LifeBalance() {
                         </p>
                       </div>
 
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={() => {
                           setIsCheckInMode(true);
                           setActiveClusterIndex(0);
                         }}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer w-full sm:w-auto"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer w-full sm:w-auto font-sans"
                       >
                         Bắt đầu Check-in nhanh
                         <ChevronRight className="h-4 w-4" />
-                      </button>
+                      </motion.button>
                     </div>
 
                     {/* Danh sách 8 khía cạnh tĩnh (đẹp mắt, màu pastel) */}
@@ -639,14 +643,14 @@ export function LifeBalance() {
                           Điểm số hiện tại của 8 lĩnh vực
                         </h3>
                       </header>
-                      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <MotionStaggerList className="mt-4 grid gap-2 sm:grid-cols-2">
                         {lifeAreas.map((area) => {
                           const AreaIcon = getLifeAreaIcon(area.name);
                           const colorConfig = getAreaColorConfig(area.name);
                           const label = getLifeAreaLabel(area.name);
 
                           return (
-                            <li
+                            <MotionStaggerItem
                               key={area.name}
                               className={cn(
                                 "flex items-center justify-between p-3 rounded-xl border transition-colors shadow-3xs",
@@ -666,10 +670,10 @@ export function LifeBalance() {
                                 <span className="text-xs font-bold text-neutral-700">{label}</span>
                               </div>
                               <span className="font-serif text-lg font-extrabold text-neutral-800">{area.score}đ</span>
-                            </li>
+                            </MotionStaggerItem>
                           );
                         })}
-                      </ul>
+                      </MotionStaggerList>
 
                       <div className="mt-4 pt-4 border-t border-app-line/45 flex justify-end">
                         <Link
@@ -688,7 +692,7 @@ export function LifeBalance() {
                     if (!cluster) return null;
 
                     return (
-                      <div className="surface-raised rounded-2xl border border-emerald-600/20 bg-app-surface p-5 md:p-6 shadow-md animate-fade-in w-full max-w-full overflow-hidden">
+                      <MotionFadeIn key={activeClusterIndex} className="surface-raised rounded-2xl border border-emerald-600/20 bg-app-surface p-5 md:p-6 shadow-md w-full max-w-full overflow-hidden">
                         {/* Progress Header */}
                         <header className="pb-4 border-b border-app-line/60 space-y-2">
                           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-700">
@@ -758,14 +762,16 @@ export function LifeBalance() {
                                 {/* Slider + Button di động */}
                                 <div className="space-y-3 pt-1">
                                   <div className="flex items-center gap-3">
-                                    <button
+                                    <motion.button
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
                                       type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none font-sans"
                                       onClick={() => handleScoreChange(areaIndex, [Math.max(1, area.score - 1)])}
                                       aria-label={`Giảm ${label}`}
                                     >
                                       −
-                                    </button>
+                                    </motion.button>
 
                                     <div className="grow px-1">
                                       <Slider
@@ -780,14 +786,16 @@ export function LifeBalance() {
                                       />
                                     </div>
 
-                                    <button
+                                    <motion.button
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
                                       type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none font-sans"
                                       onClick={() => handleScoreChange(areaIndex, [Math.min(10, area.score + 1)])}
                                       aria-label={`Tăng ${label}`}
                                     >
                                       +
-                                    </button>
+                                    </motion.button>
                                   </div>
 
                                   <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase tracking-wider px-1">
@@ -803,9 +811,11 @@ export function LifeBalance() {
 
                         {/* Chân Wizard */}
                         <div className="mt-6 pt-4 border-t border-app-line/65 flex items-center justify-between gap-3">
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.015 }}
+                            whileTap={{ scale: 0.985 }}
                             type="button"
-                            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all cursor-pointer"
+                            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all cursor-pointer font-sans"
                             onClick={() => {
                               if (activeClusterIndex > 0) {
                                 setActiveClusterIndex(activeClusterIndex - 1);
@@ -816,20 +826,24 @@ export function LifeBalance() {
                           >
                             <ChevronLeft className="h-4 w-4" />
                             Quay lại
-                          </button>
+                          </motion.button>
 
                           <div className="flex gap-2">
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.015 }}
+                              whileTap={{ scale: 0.985 }}
                               type="button"
-                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-500 hover:text-neutral-700 cursor-pointer"
+                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-500 hover:text-neutral-700 cursor-pointer font-sans"
                               onClick={() => setIsCheckInMode(false)}
                             >
                               Hủy bỏ
-                            </button>
+                            </motion.button>
 
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.015 }}
+                              whileTap={{ scale: 0.985 }}
                               type="button"
-                              className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white transition-all active:scale-[0.97] shadow-md cursor-pointer"
+                              className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white transition-all active:scale-[0.97] shadow-md cursor-pointer font-sans"
                               onClick={() => {
                                 if (activeClusterIndex < 2) {
                                   setActiveClusterIndex(activeClusterIndex + 1);
@@ -855,10 +869,10 @@ export function LifeBalance() {
                                   <Save className="h-4 w-4" />
                                 </>
                               )}
-                            </button>
+                            </motion.button>
                           </div>
                         </div>
-                      </div>
+                      </MotionFadeIn>
                     );
                   })()
                 )}

@@ -60,7 +60,7 @@ export function SpecificStep({
   const activeInferredArchetype = inferredArchetype ?? activeArchetype;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       <div>
         <label htmlFor="smart-specific" className={labelClass}>
           Mục tiêu cụ thể của bạn (Hành động hoặc Dự án)
@@ -96,11 +96,11 @@ export function SpecificStep({
           >
             <span>💡</span> {showTips ? "Thu gọn mẹo viết mục tiêu tốt ▲" : "Xem mẹo viết mục tiêu tốt ▼"}
           </button>
-          
-          <div 
+
+          <div
             className={cn(
               "transition-all duration-300 ease-in-out overflow-hidden origin-top",
-              showTips ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+              showTips ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0",
             )}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -131,9 +131,7 @@ export function SpecificStep({
         </div>
 
         <div className="mt-2.5 flex justify-between items-center text-[11px] text-app-ink-muted font-bold px-1 select-none">
-          <span id="smart-specific-hint">
-            Viết rõ kết quả bạn muốn đạt.
-          </span>
+          <span id="smart-specific-hint">Viết rõ kết quả bạn muốn đạt.</span>
           <span
             id="smart-specific-counter"
             className={specificLength >= 10 ? "text-emerald-600 font-bold" : "text-app-ink-muted"}
@@ -143,7 +141,7 @@ export function SpecificStep({
         </div>
 
         {/* 1-Click Suggestions trượt ngang */}
-        <div className="mt-4 bg-app-bg/50 p-3.5 rounded-2xl border border-app-line/60">
+        <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3.5 rounded-xl border border-dashed border-app-line/80">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
             <span>💡</span> Gợi ý điền nhanh:
           </p>
@@ -225,4 +223,3 @@ export function SpecificStep({
     </div>
   );
 }
-

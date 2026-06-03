@@ -14,6 +14,7 @@ import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { MotionFadeIn } from "../components/motion";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -75,6 +76,7 @@ export function FeasibilityCheck() {
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
+  const [showRestoreBanner, setShowRestoreBanner] = useState(false);
   const [focusArea, setFocusArea] = useState<string>("");
   const [wheelScore, setWheelScore] = useState<number | null>(null);
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
@@ -105,6 +107,33 @@ export function FeasibilityCheck() {
     if (!draft) {
       setSetupState("needs_smart_goal");
       return;
+    }
+
+    // Kiểm tra xem mục tiêu đang được đánh giá khả thi có bị thay đổi không
+    const activeGoalRaw = localStorage.getItem("feasibilityActiveGoal");
+    const isNewGoal = !activeGoalRaw || activeGoalRaw !== draft;
+
+    if (isNewGoal) {
+      // Sao lưu câu trả lời cũ trước khi xóa
+      const oldAnswers = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
+      const oldResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+      if (oldAnswers) {
+        localStorage.setItem("feasibilityBackupAnswers", oldAnswers);
+        setShowRestoreBanner(true);
+      }
+      if (oldResult) {
+        localStorage.setItem("feasibilityBackupResult", oldResult);
+      }
+
+      // Xóa kết quả và câu trả lời cũ trong localStorage
+      localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+      localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
+      // Cập nhật mục tiêu đang hoạt động hiện tại
+      localStorage.setItem("feasibilityActiveGoal", draft);
+    } else {
+      // Nếu không phải goal mới, xem có backup cũ chưa được xử lý không để dọn dẹp
+      localStorage.removeItem("feasibilityBackupAnswers");
+      localStorage.removeItem("feasibilityBackupResult");
     }
 
     let parsedDraft: unknown;
@@ -143,50 +172,52 @@ export function FeasibilityCheck() {
       return;
     }
 
-    const savedAnswers = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
-    if (savedAnswers) {
-      try {
-        const parsed = JSON.parse(savedAnswers);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          const restoredAnswers = parsed as Record<number, string>;
-          setAnswers(restoredAnswers);
-          setLastSavedSnapshot(JSON.stringify(restoredAnswers));
-          setLastSavedAt(new Date());
+    if (!isNewGoal) {
+      const savedAnswers = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
+      if (savedAnswers) {
+        try {
+          const parsed = JSON.parse(savedAnswers);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            const restoredAnswers = parsed as Record<number, string>;
+            setAnswers(restoredAnswers);
+            setLastSavedSnapshot(JSON.stringify(restoredAnswers));
+            setLastSavedAt(new Date());
+          }
+        } catch {
+          // Ignore malformed draft.
         }
-      } catch {
-        // Ignore malformed draft.
       }
-    }
 
-    const savedResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
-    if (savedResult) {
-      try {
-        const parsedResult = JSON.parse(savedResult);
-        if (parsedResult && typeof parsedResult === "object") {
-          const resultData: ResultData = {
-            type: parsedResult.resultType ?? parsedResult.type,
-            title: parsedResult.resultTitle ?? parsedResult.title,
-            summary: parsedResult.resultSummary ?? parsedResult.summary,
-            recommendation: parsedResult.recommendation,
-            readinessScore: parsedResult.readinessScore,
-            adjustedScore: parsedResult.adjustedScore,
-            wheelScore: parsedResult.wheelScore,
-            diagnosticScore: parsedResult.diagnosticScore,
-            maxDiagnosticScore: parsedResult.maxDiagnosticScore,
-            axisScores: parsedResult.axisScores ?? [],
-            bottleneck: parsedResult.bottleneck,
-            planLoad: parsedResult.planLoad,
-            weeklyCapacity: parsedResult.weeklyCapacity,
-            firstWeekGuidance: parsedResult.firstWeekGuidance,
-            scopeRecommendation: parsedResult.scopeRecommendation,
-            smartGoalQualityLevel: parsedResult.smartGoalQualityLevel,
-            smartGoalQualityNote: parsedResult.smartGoalQualityNote,
-            savedAt: parsedResult.savedAt,
-          };
-          setResult(resultData);
+      const savedResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+      if (savedResult) {
+        try {
+          const parsedResult = JSON.parse(savedResult);
+          if (parsedResult && typeof parsedResult === "object") {
+            const resultData: ResultData = {
+              type: parsedResult.resultType ?? parsedResult.type,
+              title: parsedResult.resultTitle ?? parsedResult.title,
+              summary: parsedResult.resultSummary ?? parsedResult.summary,
+              recommendation: parsedResult.recommendation,
+              readinessScore: parsedResult.readinessScore,
+              adjustedScore: parsedResult.adjustedScore,
+              wheelScore: parsedResult.wheelScore,
+              diagnosticScore: parsedResult.diagnosticScore,
+              maxDiagnosticScore: parsedResult.maxDiagnosticScore,
+              axisScores: parsedResult.axisScores ?? [],
+              bottleneck: parsedResult.bottleneck,
+              planLoad: parsedResult.planLoad,
+              weeklyCapacity: parsedResult.weeklyCapacity,
+              firstWeekGuidance: parsedResult.firstWeekGuidance,
+              scopeRecommendation: parsedResult.scopeRecommendation,
+              smartGoalQualityLevel: parsedResult.smartGoalQualityLevel,
+              smartGoalQualityNote: parsedResult.smartGoalQualityNote,
+              savedAt: parsedResult.savedAt,
+            };
+            setResult(resultData);
+          }
+        } catch {
+          // Ignore malformed result.
         }
-      } catch {
-        // Ignore malformed result.
       }
     }
 
@@ -381,6 +412,69 @@ export function FeasibilityCheck() {
     navigate("/12-week-setup");
   };
 
+  const handleRestoreAnswers = () => {
+    const backupAnswers = localStorage.getItem("feasibilityBackupAnswers");
+    const backupResult = localStorage.getItem("feasibilityBackupResult");
+
+    if (backupAnswers) {
+      try {
+        const parsed = JSON.parse(backupAnswers);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const restoredAnswers = parsed as Record<number, string>;
+          setAnswers(restoredAnswers);
+          setLastSavedSnapshot(backupAnswers);
+          setLastSavedAt(new Date());
+          localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, backupAnswers);
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (backupResult) {
+      try {
+        const parsedResult = JSON.parse(backupResult);
+        if (parsedResult && typeof parsedResult === "object") {
+          const resultData: ResultData = {
+            type: parsedResult.resultType ?? parsedResult.type,
+            title: parsedResult.resultTitle ?? parsedResult.title,
+            summary: parsedResult.resultSummary ?? parsedResult.summary,
+            recommendation: parsedResult.recommendation,
+            readinessScore: parsedResult.readinessScore,
+            adjustedScore: parsedResult.adjustedScore,
+            wheelScore: parsedResult.wheelScore,
+            diagnosticScore: parsedResult.diagnosticScore,
+            maxDiagnosticScore: parsedResult.maxDiagnosticScore,
+            axisScores: parsedResult.axisScores ?? [],
+            bottleneck: parsedResult.bottleneck,
+            planLoad: parsedResult.planLoad,
+            weeklyCapacity: parsedResult.weeklyCapacity,
+            firstWeekGuidance: parsedResult.firstWeekGuidance,
+            scopeRecommendation: parsedResult.scopeRecommendation,
+            smartGoalQualityLevel: parsedResult.smartGoalQualityLevel,
+            smartGoalQualityNote: parsedResult.smartGoalQualityNote,
+            savedAt: parsedResult.savedAt,
+          };
+          setResult(resultData);
+          localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, backupResult);
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    localStorage.removeItem("feasibilityBackupAnswers");
+    localStorage.removeItem("feasibilityBackupResult");
+    setShowRestoreBanner(false);
+    toast.success("Đã khôi phục các câu trả lời khả thi trước đó.");
+  };
+
+  const handleDiscardBackup = () => {
+    localStorage.removeItem("feasibilityBackupAnswers");
+    localStorage.removeItem("feasibilityBackupResult");
+    setShowRestoreBanner(false);
+  };
+
   const handleAdjustGoal = () => {
     navigate("/smart-goal-setup");
   };
@@ -402,6 +496,7 @@ export function FeasibilityCheck() {
             pendingGoal={pendingGoal}
             onContinue={handleContinueToPlan}
             onAdjustGoal={handleAdjustGoal}
+            answers={answers}
           />
         </div>
       </PageShell>
@@ -409,11 +504,13 @@ export function FeasibilityCheck() {
   }
 
   return (
-    <PageShell maxWidth="md">
+    <PageShell maxWidth="xl">
       <div className="space-y-6">
-        <div>
-          <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
-          <div className="flex justify-end">{autoSave}</div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
+          </div>
+          <div className="shrink-0 flex items-center justify-end">{autoSave}</div>
         </div>
 
         <section aria-labelledby="feasibility-title">
@@ -430,48 +527,91 @@ export function FeasibilityCheck() {
             Cùng chuẩn bị hành trang phù hợp để đảm bảo kế hoạch 12 tuần của bạn chắc thắng.
           </p>
 
-          <div className="mt-6 rounded-2xl border border-indigo-500/10 bg-indigo-50/50 dark:bg-indigo-950/20 p-5 shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-500/80 dark:text-indigo-400/80 mb-2">
-                  Mục tiêu của bạn
-                </p>
-                <p className="line-clamp-2 text-sm font-bold leading-relaxed text-indigo-900 dark:text-indigo-100">
-                  {pendingGoal.specific}
-                </p>
+          <MotionFadeIn>
+            <div className="mt-6 rounded-card border border-app-line bg-app-bg-subtle p-5 shadow-app-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted mb-2">
+                    Mục tiêu của bạn
+                  </p>
+                  <p className="line-clamp-2 text-sm font-bold leading-relaxed text-app-ink">
+                    {pendingGoal.specific}
+                  </p>
+                </div>
+                <Link
+                  to="/smart-goal-setup"
+                  className="shrink-0 text-xs font-bold text-app-accent hover:text-app-accent-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-colors p-2 -m-2"
+                >
+                  Sửa mục tiêu ✏️
+                </Link>
               </div>
-              <Link
-                to="/smart-goal-setup"
-                className="shrink-0 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 transition-colors p-2 -m-2"
-              >
-                Sửa mục tiêu ✏️
-              </Link>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                <span className="rounded-pill bg-app-accent text-white px-3 py-1 font-semibold shadow-app-sm">
+                  {getLifeAreaLabel(focusArea)}
+                </span>
+                <span className="rounded-pill border border-app-line bg-app-surface px-3 py-1 font-semibold text-app-ink-soft">
+                  Điểm nền tảng: {wheelScore}/10
+                </span>
+              </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
-              <span className="rounded-full bg-indigo-500 text-white px-3 py-1 font-bold shadow-sm">
-                {getLifeAreaLabel(focusArea)}
-              </span>
-              <span className="rounded-full border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 px-3 py-1 font-semibold text-indigo-750 dark:text-indigo-300">
-                Điểm nền tảng: {wheelScore}/10
-              </span>
-            </div>
-          </div>
+          </MotionFadeIn>
+
+          {/* Banner khôi phục câu trả lời cũ */}
+          {showRestoreBanner && (
+            <MotionFadeIn>
+              <div className="mt-4 rounded-card border border-app-status-warning/30 bg-app-status-warning/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-app-status-warning flex items-center gap-1.5">
+                    <span>💡</span> Phát hiện câu trả lời cũ
+                  </p>
+                  <p className="text-xs text-app-ink-soft leading-normal">
+                    Bạn vừa cập nhật mục tiêu SMART. Bạn có muốn khôi phục lại các câu trả lời khả thi trước đó không?
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleDiscardBackup}
+                    className="px-3.5 py-1.5 text-xs font-semibold rounded-control border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle transition-all duration-200"
+                  >
+                    Bỏ qua
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRestoreAnswers}
+                    className="px-4 py-1.5 text-xs font-bold rounded-control bg-app-accent text-white hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm"
+                  >
+                    Khôi phục ✏️
+                  </button>
+                </div>
+              </div>
+            </MotionFadeIn>
+          )}
         </section>
 
-        <FeasibilityBalanceScale answers={answers} />
+        {/* Layout Grid 2 cột trên Desktop (cột cán cân sticky), di động cán cân đảo xuống dưới câu hỏi */}
+        <div className="mt-8 flex flex-col gap-6 md:grid md:grid-cols-12 md:items-start md:gap-8">
+          {/* Cột trái chứa câu hỏi khảo sát */}
+          <div className="order-1 md:col-span-7 w-full">
+            <FeasibilityStepShell
+              currentQuestion={currentQuestion}
+              currentStep={currentStep}
+              totalSteps={totalSteps}
+              answeredQuestionCount={answeredQuestionCount}
+              selectedAnswer={selectedAnswer}
+              onAnswerChange={handleAnswerChange}
+              onBack={handleBack}
+              onNext={handleNext}
+              targetRef={questionTopRef}
+              headingRef={questionHeadingRef}
+            />
+          </div>
 
-        <FeasibilityStepShell
-          currentQuestion={currentQuestion}
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          answeredQuestionCount={answeredQuestionCount}
-          selectedAnswer={selectedAnswer}
-          onAnswerChange={handleAnswerChange}
-          onBack={handleBack}
-          onNext={handleNext}
-          targetRef={questionTopRef}
-          headingRef={questionHeadingRef}
-        />
+          {/* Cột phải chứa Cán cân (Desktop nằm bên cạnh sticky; Mobile nằm dưới câu hỏi làm preview) */}
+          <div className="order-2 md:col-span-5 w-full md:sticky md:top-24">
+            <FeasibilityBalanceScale answers={answers} />
+          </div>
+        </div>
       </div>
     </PageShell>
   );

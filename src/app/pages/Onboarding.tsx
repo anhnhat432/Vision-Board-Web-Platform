@@ -16,15 +16,15 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { AnimatePresence, motion } from "motion/react";
 
 import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
-import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
 import { Slider } from "../components/ui/slider";
 import { cn } from "../components/ui/utils";
@@ -40,87 +40,29 @@ type OnboardingStep = "welcome" | "assessment";
 type AutoSaveDraftStatus = "idle" | "saving" | "saved";
 
 interface AreaColorConfig {
-  bgLight: string;
-  text: string;
-  border: string;
   accent: string;
-  glow: string;
 }
 
 const getAreaColorConfig = (name: string): AreaColorConfig => {
   switch (name) {
     case "Career":
-      return {
-        bgLight: "bg-blue-50/60 dark:bg-blue-950/20",
-        text: "text-blue-600 dark:text-blue-450",
-        border: "border-blue-100 dark:border-blue-900/30",
-        accent: "#3b82f6",
-        glow: "shadow-blue-500/10 dark:shadow-blue-500/20",
-      };
+      return { accent: "var(--color-career-accent)" };
     case "Finance":
-      return {
-        bgLight: "bg-amber-50/60 dark:bg-amber-950/20",
-        text: "text-amber-600 dark:text-amber-450",
-        border: "border-amber-100 dark:border-amber-900/30",
-        accent: "#f59e0b",
-        glow: "shadow-amber-500/10 dark:shadow-amber-500/20",
-      };
+      return { accent: "var(--color-finance-accent)" };
     case "Health":
-      return {
-        bgLight: "bg-emerald-50/60 dark:bg-emerald-950/20",
-        text: "text-emerald-600 dark:text-emerald-450",
-        border: "border-emerald-100 dark:border-emerald-900/30",
-        accent: "#10b981",
-        glow: "shadow-emerald-500/10 dark:shadow-emerald-500/20",
-      };
+      return { accent: "var(--color-health-accent)" };
     case "Education":
-      return {
-        bgLight: "bg-indigo-50/60 dark:bg-indigo-950/20",
-        text: "text-indigo-600 dark:text-indigo-450",
-        border: "border-indigo-100 dark:border-indigo-900/30",
-        accent: "#6366f1",
-        glow: "shadow-indigo-500/10 dark:shadow-indigo-500/20",
-      };
+      return { accent: "var(--color-education-accent)" };
     case "Relationships":
-      return {
-        bgLight: "bg-rose-50/60 dark:bg-rose-950/20",
-        text: "text-rose-600 dark:text-rose-450",
-        border: "border-rose-100 dark:border-rose-900/30",
-        accent: "#f43f5e",
-        glow: "shadow-rose-500/10 dark:shadow-rose-500/20",
-      };
+      return { accent: "var(--color-relationships-accent)" };
     case "Family":
-      return {
-        bgLight: "bg-teal-50/60 dark:bg-teal-950/20",
-        text: "text-teal-600 dark:text-teal-450",
-        border: "border-teal-100 dark:border-teal-900/30",
-        accent: "#14b8a6",
-        glow: "shadow-teal-500/10 dark:shadow-teal-500/20",
-      };
+      return { accent: "var(--color-family-accent)" };
     case "Personal Growth":
-      return {
-        bgLight: "bg-orange-50/60 dark:bg-orange-950/20",
-        text: "text-orange-600 dark:text-orange-450",
-        border: "border-orange-100 dark:border-orange-900/30",
-        accent: "#f97316",
-        glow: "shadow-orange-500/10 dark:shadow-orange-500/20",
-      };
+      return { accent: "var(--color-personal-growth-accent)" };
     case "Leisure":
-      return {
-        bgLight: "bg-sky-50/60 dark:bg-sky-950/20",
-        text: "text-sky-600 dark:text-sky-450",
-        border: "border-sky-100 dark:border-sky-900/30",
-        accent: "#0ea5e9",
-        glow: "shadow-sky-500/10 dark:shadow-sky-500/20",
-      };
+      return { accent: "var(--color-leisure-accent)" };
     default:
-      return {
-        bgLight: "bg-app-accent-soft",
-        text: "text-app-accent",
-        border: "border-app-line",
-        accent: "var(--app-accent)",
-        glow: "shadow-app-accent/5",
-      };
+      return { accent: "var(--app-accent)" };
   }
 };
 
@@ -188,6 +130,12 @@ const LIFE_AREA_ICON_MAP: Record<string, LucideIcon> = {
   "Personal Growth": Sprout,
   Leisure: Smile,
 };
+
+const JOURNEY_STEPS = [
+  { title: "Đánh giá", description: "Chấm 8 lĩnh vực đủ thật." },
+  { title: "Trọng tâm", description: "Nhìn ra nơi cần chăm sóc trước." },
+  { title: "Kế hoạch", description: "Biến insight thành nhịp 12 tuần." },
+];
 
 export const ONBOARDING_DRAFT_STORAGE_KEY = "onboarding_draft";
 const ONBOARDING_DRAFT_VERSION = 1;
@@ -284,9 +232,245 @@ function getScaleGuidance(score: number): string {
 }
 
 function getScaleGuidanceColor(score: number): string {
-  if (score <= 3) return "text-rose-600 dark:text-rose-450 bg-rose-50/70 dark:bg-rose-950/20";
-  if (score <= 7) return "text-amber-600 dark:text-amber-450 bg-amber-50/70 dark:bg-amber-950/20";
-  return "text-emerald-600 dark:text-emerald-450 bg-emerald-50/70 dark:bg-emerald-950/20";
+  if (score <= 3) return "text-[color:var(--color-danger-fg)] bg-[color:var(--color-danger-bg)]";
+  if (score <= 7) return "text-[color:var(--color-warning-fg)] bg-[color:var(--color-warning-bg)]";
+  return "text-[color:var(--color-success-fg)] bg-[color:var(--color-success-bg)]";
+}
+
+function polarPoint(cx: number, cy: number, radius: number, angleDegrees: number) {
+  const angle = ((angleDegrees - 90) * Math.PI) / 180;
+  return {
+    x: cx + radius * Math.cos(angle),
+    y: cy + radius * Math.sin(angle),
+  };
+}
+
+function buildAtlasWedgePath(startAngle: number, endAngle: number, innerRadius: number, outerRadius: number) {
+  const center = 140;
+  const outerStart = polarPoint(center, center, outerRadius, startAngle);
+  const outerEnd = polarPoint(center, center, outerRadius, endAngle);
+  const innerEnd = polarPoint(center, center, innerRadius, endAngle);
+  const innerStart = polarPoint(center, center, innerRadius, startAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+  return [
+    `M ${outerStart.x} ${outerStart.y}`,
+    `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y}`,
+    `L ${innerEnd.x} ${innerEnd.y}`,
+    `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y}`,
+    "Z",
+  ].join(" ");
+}
+
+function LifeAtlasPanel({
+  lifeAreas,
+  reviewedAreaIndices,
+  activeAreaIndex,
+  averageScore,
+  strongestArea,
+  growthArea,
+  mode,
+  summaryTestId,
+}: {
+  lifeAreas: LifeArea[];
+  reviewedAreaIndices: Set<number>;
+  activeAreaIndex: number | null;
+  averageScore: number;
+  strongestArea: LifeArea;
+  growthArea: LifeArea;
+  mode: "welcome" | "assessment";
+  summaryTestId?: string;
+}) {
+  const reviewedAreaCount = reviewedAreaIndices.size;
+  const showPreview = mode === "welcome";
+  const growthAreaIndex = Math.max(
+    0,
+    lifeAreas.findIndex((area) => area.name === growthArea.name),
+  );
+  const pinPoint = polarPoint(140, 140, 108, growthAreaIndex * 45);
+
+  return (
+    <section
+      aria-label="Bản đồ cuộc sống 8 vùng"
+      className="relative overflow-hidden rounded-card border border-app-line bg-app-surface p-4 shadow-app-md sm:p-5"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(0,0,0,0.035),transparent)] opacity-40 dark:opacity-20" />
+      <div className="relative space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-app-accent">Atlas gấp mở</p>
+            <h2 className="mt-1 font-serif text-2xl font-semibold leading-tight text-app-ink">
+              Bản đồ cuộc sống của bạn
+            </h2>
+          </div>
+          <span className="shrink-0 rounded-pill border border-app-line bg-app-bg-subtle px-3 py-1 text-xs font-semibold text-app-ink-soft">
+            {showPreview ? "8 vùng" : `${reviewedAreaCount}/8`}
+          </span>
+        </div>
+
+        <div className="relative mx-auto aspect-square w-full max-w-[360px] rounded-[28px] border border-app-line bg-app-bg-subtle p-3 shadow-app-sm">
+          <svg
+            role="img"
+            aria-label="Atlas cuộc sống gồm 8 vùng, vùng đã chấm được tô rõ hơn"
+            className={cn(
+              "h-full w-full",
+              !showPreview && !reviewedAreaIndices.size && "opacity-85",
+              !showPreview && "motion-safe:transition-opacity motion-reduce:transition-none",
+            )}
+            viewBox="0 0 280 280"
+          >
+            <title>Atlas cuộc sống 8 vùng</title>
+            <circle cx="140" cy="140" r="122" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
+            {[54, 84, 114].map((radius) => (
+              <circle
+                key={radius}
+                cx="140"
+                cy="140"
+                r={radius}
+                fill="none"
+                stroke="var(--app-line)"
+                strokeDasharray="4 7"
+                strokeWidth="1"
+              />
+            ))}
+            {Array.from({ length: 4 }).map((_, index) => {
+              const angle = index * 45;
+              const start = polarPoint(140, 140, 28, angle);
+              const end = polarPoint(140, 140, 124, angle);
+              return (
+                <line
+                  key={angle}
+                  x1={start.x}
+                  x2={end.x}
+                  y1={start.y}
+                  y2={end.y}
+                  stroke="var(--app-line)"
+                  strokeDasharray={index % 2 === 0 ? "8 5" : "3 6"}
+                  strokeWidth="1"
+                />
+              );
+            })}
+            {lifeAreas.map((area, index) => {
+              const scoreRatio = Math.max(0.08, Math.min(area.score / 10, 1));
+              const startAngle = index * 45 - 20;
+              const endAngle = index * 45 + 20;
+              const isReviewed = reviewedAreaIndices.has(index);
+              const isActive = activeAreaIndex === index;
+              const visible = showPreview || isReviewed || isActive;
+              const accent = getAreaColorConfig(area.name).accent;
+              const outerRadius = 42 + scoreRatio * 72;
+              const labelPoint = polarPoint(140, 140, 134, index * 45);
+
+              return (
+                <g key={area.name}>
+                  <path
+                    d={buildAtlasWedgePath(startAngle, endAngle, 28, outerRadius)}
+                    fill={accent}
+                    fillOpacity={visible ? (isActive ? 0.34 : 0.22) : 0.07}
+                    stroke={accent}
+                    strokeOpacity={visible ? 0.8 : 0.2}
+                    strokeWidth={isActive ? 2.5 : 1.5}
+                    className="motion-safe:transition-all motion-reduce:transition-none"
+                  />
+                  <circle
+                    cx={labelPoint.x}
+                    cy={labelPoint.y}
+                    r={isActive ? 5 : 3.5}
+                    fill={visible ? accent : "var(--app-line)"}
+                    className="motion-safe:transition-all motion-reduce:transition-none"
+                  />
+                </g>
+              );
+            })}
+            <circle cx="140" cy="140" r="24" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
+            <text
+              x="140"
+              y="134"
+              fill="var(--app-ink-muted)"
+              fontSize="11"
+              fontWeight="700"
+              textAnchor="middle"
+            >
+              LIFE
+            </text>
+            <text
+              x="140"
+              y="151"
+              fill="var(--app-accent)"
+              fontSize="18"
+              fontWeight="700"
+              textAnchor="middle"
+            >
+              {averageScore.toFixed(1)}
+            </text>
+            <g className="motion-safe:transition-transform motion-reduce:transition-none">
+              <line
+                x1={pinPoint.x}
+                x2={pinPoint.x + 10}
+                y1={pinPoint.y + 6}
+                y2={pinPoint.y + 20}
+                stroke="var(--app-ink)"
+                strokeLinecap="round"
+                strokeWidth="2"
+              />
+              <circle cx={pinPoint.x} cy={pinPoint.y} r="9" fill="var(--app-accent)" />
+              <circle cx={pinPoint.x} cy={pinPoint.y} r="3" fill="var(--app-surface)" />
+            </g>
+          </svg>
+        </div>
+
+        {showPreview ? (
+          <div className="grid gap-2 text-sm text-app-ink-soft sm:grid-cols-3">
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <strong className="block text-app-ink">1. Rà 8 vùng</strong>
+              Chọn điểm đủ thật.
+            </div>
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <strong className="block text-app-ink">2. Thấy insight</strong>
+              Biết nơi nên chăm trước.
+            </div>
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <strong className="block text-app-ink">3. Lập kế hoạch</strong>
+              Đi tiếp 12 tuần.
+            </div>
+          </div>
+        ) : (
+          <div
+            className="grid grid-cols-2 gap-3 text-left"
+            data-testid={summaryTestId}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Điểm trung bình</span>
+              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">
+                {averageScore.toFixed(1)}
+                <span className="text-xs font-normal text-app-ink-muted">/10</span>
+              </p>
+            </div>
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Đã rà</span>
+              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">
+                {reviewedAreaCount}/8
+              </p>
+            </div>
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Cần chăm sóc</span>
+              <p className="mt-1 break-words text-sm font-bold text-[color:var(--color-warning-fg)]">
+                {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
+              </p>
+            </div>
+            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Đang mạnh</span>
+              <p className="mt-1 break-words text-sm font-bold text-[color:var(--color-success-fg)]">
+                {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }
 
 export function Onboarding() {
@@ -300,27 +484,42 @@ export function Onboarding() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
   const flowTopRef = useRef<HTMLDivElement | null>(null);
+  const activeAreaHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const didFocusActiveAreaRef = useRef(false);
   const autosaveTimerRef = useRef<number | null>(null);
   const [showBreathing, setShowBreathing] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isRadarExpanded, setIsRadarExpanded] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState<number | null>(0);
   const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: close questions when active area changes
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    const listener = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
+    mediaQuery.addEventListener("change", listener);
+    return () => mediaQuery.removeEventListener("change", listener);
+  }, []);
+
+  useEffect(() => {
+    void activeAreaIndex;
     setIsQuestionsOpen(false);
   }, [activeAreaIndex]);
 
-  const radarData = useMemo(
-    () =>
-      lifeAreas.map((area) => ({
-        subject: getLifeAreaLabel(area.name),
-        value: area.score,
-        fullMark: 10,
-      })),
-    [lifeAreas],
-  );
+  useEffect(() => {
+    void activeAreaIndex;
+    if (step !== "assessment") {
+      didFocusActiveAreaRef.current = false;
+      return;
+    }
+
+    if (!didFocusActiveAreaRef.current) {
+      didFocusActiveAreaRef.current = true;
+      return;
+    }
+
+    activeAreaHeadingRef.current?.focus({ preventScroll: true });
+  }, [activeAreaIndex, step]);
 
   const guardedRef = useRef(false);
   useEffect(() => {
@@ -510,26 +709,20 @@ export function Onboarding() {
   );
 
   const draftBanner = availableDraft ? (
-    <InlineStatusMessage
-      tone="info"
-      prefix="Bản nháp cũ của bạn:"
-      className="bg-neutral-50 dark:bg-neutral-900 border-neutral-200/80 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400"
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between w-full">
-        <p className="leading-relaxed text-xs font-semibold">
-          Bạn có một bản nháp khảo sát Cân bằng cuộc sống chưa hoàn tất.
-        </p>
-        <div className="flex flex-row gap-2">
+    <InlineStatusMessage tone="info" prefix="Bản nháp cũ của bạn:">
+      <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-medium leading-6">Bạn có một bản nháp Cân bằng cuộc sống chưa hoàn tất.</p>
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-emerald-700 hover:bg-emerald-800 px-4 py-2 text-xs font-bold text-white transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center rounded-pill bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
             onClick={handleResumeDraft}
           >
-            Tiếp tục
+            Tiếp tục bản nháp
           </button>
           <button
             type="button"
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-neutral-200 bg-white dark:bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center rounded-pill border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
             onClick={handleRestartDraft}
           >
             Làm lại từ đầu
@@ -546,7 +739,7 @@ export function Onboarding() {
           {progressHeader}
 
           {showBreathing ? (
-            <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-6 md:p-8 shadow-sm">
+            <div className="rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-6">
               <ZenBreathingGate onComplete={handleStartAssessment} />
             </div>
           ) : (
@@ -559,195 +752,103 @@ export function Onboarding() {
 
               {draftBanner}
 
-              <div className="max-w-2xl mx-auto flex flex-col items-center text-center space-y-8 py-4 md:py-8 animate-fade-in w-full">
-                {/* Header */}
-                <div className="space-y-4 flex flex-col items-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
-                      Bước 1 / 3 · Bánh xe cuộc sống · ≈2 phút
+              <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+                <div className="space-y-6 rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-7 lg:p-8">
+                  <div className="space-y-4">
+                    <span className="inline-flex rounded-pill bg-app-accent-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-app-accent">
+                      Bước 1 / 3 · Atlas cuộc sống · 3 phút
                     </span>
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-3 py-0.5 text-[10px] font-bold tracking-[0.14em] text-emerald-700 dark:text-emerald-300 border border-emerald-100/50 dark:border-emerald-900/30 w-fit mt-1">
-                      <Compass className="h-3.5 w-3.5 animate-spin-slow" aria-hidden="true" />
-                      LIFE BALANCE STUDIO
+                    <div className="space-y-3">
+                      <h1 className="font-serif text-3xl font-semibold leading-tight text-app-ink sm:text-4xl lg:text-5xl">
+                        Mở bản đồ cuộc sống 12 tuần của bạn
+                      </h1>
+                      <p className="max-w-2xl text-sm leading-6 text-app-ink-soft sm:text-base">
+                        Rà 8 lĩnh vực để nhìn ra nơi cần chăm sóc đầu tiên, rồi chuyển thành Life Insight rõ ràng.
+                      </p>
                     </div>
                   </div>
 
-                  <h1 className="font-serif text-3xl md:text-5xl font-semibold tracking-tight text-app-ink leading-[1.25] [text-wrap:balance]">
-                    Thiết kế cuộc sống
-                    <br className="sm:hidden" />{" "}
-                    12 tuần của bạn
-                  </h1>
-
-                  <p className="text-sm sm:text-base font-medium leading-[1.7] text-neutral-600 dark:text-neutral-400 font-serif italic max-w-lg [text-wrap:pretty]">
-                    Rà 8 khía cạnh cốt lõi, tìm ra nơi cần thay đổi đầu tiên.
-                  </p>
-                </div>
-
-                {/* Progressive Disclosure: Nút xem hướng dẫn lộ trình nhỏ gọn */}
-                <div className="relative z-20">
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 px-3.5 py-2.5 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer border border-neutral-200/60 dark:border-neutral-800 focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none"
-                    onClick={() => setIsHelpOpen(!isHelpOpen)}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 animate-pulse" aria-hidden="true" />
-                    Ứng dụng sẽ hoạt động thế nào?
-                    {isHelpOpen ? (
-                      <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
-                    ) : (
-                      <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
-                    )}
-                  </button>
-
-                  {isHelpOpen && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 sm:w-96 bg-[#fafaf9] dark:bg-neutral-900 rounded-2xl border border-neutral-200/85 dark:border-neutral-800 p-5 shadow-lg text-left space-y-3 z-30 animate-fade-in">
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 border-b border-neutral-200/60 dark:border-neutral-800 pb-1.5 flex items-center gap-1">
-                        <Sparkles className="h-3 w-3" />
-                        Hành trình 3 bước
-                      </h4>
-                      <div className="grid gap-3 text-xs text-neutral-600 dark:text-neutral-400 font-medium">
-                        <div className="flex gap-2">
-                          <span className="font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
-                            1. Đánh giá:
-                          </span>
-                          <span>Chấm 8 khía cạnh → phác thảo Bản đồ Cuộc sống.</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
-                            2. Trọng tâm:
-                          </span>
-                          <span>Tìm 1 khía cạnh lệch nhịp nhất để tập trung.</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
-                            3. Kế hoạch:
-                          </span>
-                          <span>Biến mục tiêu thành hành động nhỏ trong 12 tuần.</span>
-                        </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {JOURNEY_STEPS.map((item, index) => (
+                      <div key={item.title} className="rounded-control border border-app-line bg-app-bg-subtle p-3">
+                        <span className="text-xs font-semibold text-app-accent">0{index + 1}</span>
+                        <h2 className="mt-1 text-base font-semibold leading-snug text-app-ink">{item.title}</h2>
+                        <p className="mt-1 text-sm leading-5 text-app-ink-soft">{item.description}</p>
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Visual Anchor: Polaroid Style Image of Hand-drawn Life Balance Wheel */}
-                <div className="relative group max-w-sm w-full px-4">
-                  {/* Ghim giấy trang trí phía sau */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 w-6 h-6 bg-amber-600/20 rounded-full border border-amber-600/30 flex items-center justify-center rotate-6 pointer-events-none shadow-sm">
-                    <div className="w-1.5 h-1.5 bg-neutral-600 rounded-full" />
+                    ))}
                   </div>
 
-                  {/* Băng keo dán xéo góc */}
-                  <div className="absolute -top-2 left-10 z-10 w-16 h-5 bg-amber-100/60 dark:bg-amber-950/40 border border-amber-250/20 -rotate-12 backdrop-blur-xs pointer-events-none shadow-3xs" />
+                  <div className="rounded-control border border-app-line bg-app-bg-subtle p-3">
+                    <button
+                      type="button"
+                      className="flex min-h-11 w-full items-center justify-between gap-3 text-left text-sm font-semibold text-app-ink transition-colors hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      onClick={() => setIsHelpOpen(!isHelpOpen)}
+                      aria-expanded={isHelpOpen}
+                      aria-controls="onboarding-journey-help"
+                    >
+                      <span>Life Insight sẽ được tạo thế nào?</span>
+                      {isHelpOpen ? (
+                        <ChevronUp className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      )}
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isHelpOpen && (
+                        <motion.div
+                          id="onboarding-journey-help"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
+                          className="overflow-hidden"
+                        >
+                          <p className="pt-3 text-sm leading-6 text-app-ink-soft">
+                            Điểm số chỉ là cảm nhận hiện tại, không phải phán xét. Sau khi rà xong, màn tiếp theo sẽ
+                            gợi ý một trọng tâm để bạn viết mục tiêu 12 tuần.
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-                  {/* Polaroid Frame */}
-                  <div className="mx-auto bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 p-4 pb-6 rounded-sm shadow-md rotate-1 hover:rotate-0 transition-transform duration-300 w-full max-w-[280px]">
-                    <div className="relative w-full aspect-square bg-[#fafaf9] dark:bg-neutral-950 rounded-xs border border-neutral-100 dark:border-neutral-900 overflow-hidden flex items-center justify-center">
-                      {/* Minh họa Bánh xe cuộc sống vector vẽ nét */}
-                      <svg
-                        className="w-40 h-40 opacity-85 dark:opacity-75"
-                        viewBox="0 0 100 100"
-                        role="img"
-                        aria-label="Bản đồ Cân bằng Cuộc sống"
-                      >
-                        {/* 8 Trục */}
-                        {Array.from({ length: 8 }).map((_, i) => {
-                          const angle = (i * Math.PI) / 4;
-                          const x2 = 50 + 40 * Math.cos(angle);
-                          const y2 = 50 + 40 * Math.sin(angle);
-                          return (
-                            <line
-                              // biome-ignore lint/suspicious/noArrayIndexKey: Static loop
-                              key={i}
-                              x1="50"
-                              y1="50"
-                              x2={x2}
-                              y2={y2}
-                              stroke="var(--app-line)"
-                              strokeWidth="0.5"
-                              strokeDasharray="2,2"
-                            />
-                          );
-                        })}
-                        {/* 4 Mức lưới */}
-                        {[10, 20, 30, 40].map((r, i) => (
-                          <circle
-                            // biome-ignore lint/suspicious/noArrayIndexKey: Static loop
-                            key={i}
-                            cx="50"
-                            cy="50"
-                            r={r}
-                            fill="none"
-                            stroke="var(--app-line)"
-                            strokeWidth="0.5"
-                          />
-                        ))}
-                        {/* Vùng Bánh xe cuộc sống mẫu vẽ tay nét chì màu Sage Green mờ */}
-                        <path
-                          d="M 50 20 L 78 50 L 50 68 L 30 70 L 22 50 L 32 32 Z"
-                          fill="rgba(16, 185, 129, 0.12)"
-                          stroke="rgba(16, 185, 129, 0.5)"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        {/* Các điểm ghim đỉnh */}
-                        {[
-                          [50, 20],
-                          [78, 50],
-                          [50, 68],
-                          [30, 70],
-                          [22, 50],
-                          [32, 32],
-                        ].map(([cx, cy], i) => (
-                          <circle
-                            // biome-ignore lint/suspicious/noArrayIndexKey: Static loop
-                            key={i}
-                            cx={cx}
-                            cy={cy}
-                            r="2"
-                            fill="white"
-                            stroke="rgba(16, 185, 129, 0.7)"
-                            strokeWidth="1"
-                          />
-                        ))}
-                      </svg>
-                    </div>
-                    {/* Caption viết tay dưới Polaroid */}
-                    <p className="mt-4 font-serif text-sm font-semibold tracking-wide text-neutral-600 dark:text-neutral-400 italic">
-                      Bản đồ Cuộc sống
-                    </p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <button
+                      type="button"
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
+                      onClick={handleStartAssessment}
+                    >
+                      Mở bản đồ cuộc sống
+                      <span className="sr-only"> - Bắt đầu rà 8 lĩnh vực</span>
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex min-h-12 items-center justify-center rounded-pill border border-app-line bg-app-surface px-5 py-3 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      onClick={() => setShowBreathing(true)}
+                    >
+                      Tập thở thư giãn
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex min-h-11 items-center justify-center rounded-pill px-4 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      onClick={handleDefer}
+                    >
+                      Để sau
+                    </button>
                   </div>
                 </div>
 
-                {/* Nút bấm CTA chính và phụ phản hồi linh hoạt */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-center pt-4 w-full max-w-md px-4">
-                  <button
-                    type="button"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer w-full sm:w-auto"
-                    onClick={handleStartAssessment}
-                  >
-                    Bắt đầu rà 8 lĩnh vực · 3 phút
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-3 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-850 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
-                    onClick={() => setShowBreathing(true)}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                    Tập thở thư giãn
-                  </button>
-
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-[11px] font-bold text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
-                    onClick={handleDefer}
-                  >
-                    Để sau
-                  </button>
-                </div>
-              </div>
+                <LifeAtlasPanel
+                  lifeAreas={lifeAreas}
+                  reviewedAreaIndices={reviewedAreaIndices}
+                  activeAreaIndex={activeAreaIndex}
+                  averageScore={averageScore}
+                  strongestArea={strongestArea}
+                  growthArea={growthArea}
+                  mode="welcome"
+                />
+              </section>
             </>
           )}
         </div>
@@ -757,126 +858,43 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
-      <div ref={flowTopRef} tabIndex={-1} className="space-y-6 focus:outline-none w-full max-w-full overflow-hidden">
+      <div ref={flowTopRef} tabIndex={-1} className="w-full max-w-full space-y-6 focus:outline-none">
         {progressHeader}
         {draftBanner}
 
-        {/* Sticky Mini Radar ở góc trên bên phải cho Mobile */}
-        <div className="lg:hidden fixed top-20 right-4 z-40">
-          <button
-            type="button"
-            onClick={() => setIsRadarExpanded(!isRadarExpanded)}
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-lg active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none relative"
-            aria-label="Xem bản đồ cân bằng cuộc sống"
-          >
-            <div className="w-10 h-10 flex items-center justify-center opacity-85">
-              <SimpleRadarChart
-                data={radarData}
-                height={40}
-                fill="var(--app-accent)"
-                stroke="var(--app-accent)"
-                fillOpacity={0.1}
-                className="w-full h-full pointer-events-none"
-              />
-            </div>
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-605 text-white text-[9px] font-extrabold shadow-sm border border-white dark:border-neutral-900 animate-pulse">
-              {reviewedAreaCount}
-            </span>
-          </button>
-        </div>
-
-        {/* Mobile Radar Modal/Popover khi click Mini Radar */}
-        {isRadarExpanded && (
-          // biome-ignore lint/a11y/useKeyWithClickEvents: backdrop overlay keyboard trigger
-          // biome-ignore lint/a11y/noStaticElementInteractions: backdrop clicks
-          <div
-            className="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
-            onClick={() => setIsRadarExpanded(false)}
-          >
-            {/* biome-ignore lint/a11y/noStaticElementInteractions: modal content event stop bubbling */}
-            {/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation doesn't need key */}
-            <div
-              className="w-full max-w-[340px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-2xl space-y-4 animate-scale-up"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-850 pb-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent flex items-center gap-1.5">
-                  📊 Bản đồ Cân bằng Cuộc sống
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setIsRadarExpanded(false)}
-                  className="inline-flex min-h-11 items-center justify-center text-xs font-bold text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white px-4 py-2 bg-neutral-200/70 dark:bg-neutral-800 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
-                >
-                  Đóng
-                </button>
-              </div>
-
-              <div className="flex items-center justify-center min-h-[260px] my-1">
-                <SimpleRadarChart
-                  data={radarData}
-                  height={260}
-                  fill="var(--app-accent)"
-                  stroke="var(--app-accent)"
-                  fillOpacity={0.15}
-                  className="w-full max-w-[280px]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-left" data-testid="onboarding-assessment-summary-mobile">
-                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Điểm TB</span>
-                  <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
-                    {averageScore.toFixed(1)}
-                    <span className="text-[10px] font-normal text-app-ink-muted">/10</span>
-                  </p>
-                </div>
-                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Tiến trình</span>
-                  <p className="font-serif text-sm font-bold text-app-ink mt-0.5">
-                    {Math.round((reviewedAreaCount / 8) * 100)}%
-                  </p>
-                </div>
-                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">
-                    Cần tập trung
-                  </span>
-                  <p className="text-xs font-bold text-app-warm truncate mt-0.5">
-                    {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
-                  </p>
-                </div>
-                <div className="px-2.5 py-1.5 rounded-lg bg-app-surface border border-app-line shadow-3xs">
-                  <span className="text-[10px] text-app-ink-muted uppercase font-bold tracking-wider">Mạnh nhất</span>
-                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-450 truncate mt-0.5">
-                    {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
-            <Sparkles className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+        <header className="space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-app-accent">
+            <Sparkles className="h-3.5 w-3.5 motion-safe:animate-pulse motion-reduce:animate-none" aria-hidden="true" />
             Bước 1 / 3 · Bánh xe cuộc sống
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-app-ink [text-wrap:balance]">
-            Đánh giá mức độ hài lòng
+          <h1 className="font-serif text-3xl font-semibold leading-tight text-app-ink sm:text-4xl">
+            Rà 8 lĩnh vực để mở Life Insight
           </h1>
-          <p className="text-xs sm:text-sm text-app-ink-soft max-w-2xl leading-[1.7] [text-wrap:pretty]">
-            Chấm điểm trung thực — kết quả sẽ định hình mục tiêu 12 tuần của bạn.
+          <p className="max-w-2xl text-sm leading-6 text-app-ink-soft sm:text-base">
+            Chấm theo cảm nhận hiện tại. Bản đồ bên cạnh sẽ chỉ ra vùng mạnh và vùng cần chăm sóc đầu tiên.
           </p>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px] lg:items-start w-full">
-          <div className="space-y-6 order-1 lg:order-1 min-w-0">
-            {/* Thanh điều hướng tiến trình 8 khía cạnh (Step Indicator) */}
-            <div className="bg-app-surface border border-app-line rounded-2xl p-4 shadow-app-sm w-full max-w-full overflow-hidden">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted mb-3 text-center sm:text-left">
-                Chuyển nhanh giữa các lĩnh vực:
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
+          <aside className="order-1 lg:sticky lg:top-6 lg:order-2">
+            <LifeAtlasPanel
+              lifeAreas={lifeAreas}
+              reviewedAreaIndices={reviewedAreaIndices}
+              activeAreaIndex={activeAreaIndex}
+              averageScore={averageScore}
+              strongestArea={strongestArea}
+              growthArea={growthArea}
+              mode="assessment"
+              summaryTestId="onboarding-assessment-summary"
+            />
+          </aside>
+
+          <div className="order-2 min-w-0 space-y-5 lg:order-1">
+            <div className="rounded-card border border-app-line bg-app-surface p-4 shadow-app-sm">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+                Chọn lĩnh vực đang rà
               </p>
-              <div className="flex gap-2 overflow-x-auto pb-2 pr-16 lg:pr-2 scrollbar-none snap-x">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {lifeAreas.map((area, index) => {
                   const AreaIcon = getCalmLifeAreaIcon(area.name);
                   const isSelected = activeAreaIndex === index;
@@ -890,50 +908,31 @@ export function Onboarding() {
                       type="button"
                       onClick={() => setActiveAreaIndex(index)}
                       className={cn(
-                        "relative flex min-h-11 items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 outline-none shrink-0 border select-none snap-start focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900",
-                        "after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
-                        isSelected ? "shadow-sm scale-[1.02] font-bold" : "hover:bg-app-bg-subtle/60",
-                      )}
-                      style={
+                        "min-h-12 rounded-control border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                         isSelected
-                          ? {
-                              backgroundColor: colorConfig.accent,
-                              borderColor: colorConfig.accent,
-                              color: "#FFFFFF",
-                            }
-                          : {
-                              borderColor: isReviewed ? "rgba(16, 185, 129, 0.25)" : "var(--app-line)",
-                              backgroundColor: isReviewed ? "var(--green-050)" : "var(--app-surface)",
-                              color: isReviewed ? "var(--app-status-success)" : "var(--app-ink-soft)",
-                            }
-                      }
-                      title={label}
-                    >
-                      <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      <span className="text-xs font-semibold tracking-tight">
-                        {index + 1}. {label}
-                      </span>
-                      {isReviewed && (
-                        <>
-                          <span className="sr-only">Đã rà</span>
-                          <span
-                            className={cn(
-                              "flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-extrabold px-1 shrink-0",
-                              isSelected ? "bg-white text-app-accent" : "bg-emerald-500 text-white",
-                            )}
-                            style={isSelected ? { color: colorConfig.accent } : {}}
-                          >
-                            {area.score}
-                          </span>
-                        </>
+                          ? "border-app-accent bg-app-accent-soft text-app-accent"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink",
                       )}
+                      style={isSelected ? { borderColor: colorConfig.accent, color: colorConfig.accent } : undefined}
+                      aria-pressed={isSelected}
+                    >
+                      <span className="flex items-center gap-2">
+                        <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="min-w-0 text-xs font-semibold leading-5">
+                          {index + 1}. {label}
+                        </span>
+                      </span>
+                      {isReviewed ? (
+                        <span className="mt-1 inline-flex rounded-pill bg-app-bg-subtle px-2 py-0.5 text-xs font-semibold text-app-status-success">
+                          Đã rà · {area.score}đ
+                        </span>
+                      ) : null}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Thẻ hiển thị khía cạnh hiện tại (Active Wizard Card) */}
             {(() => {
               const index = activeAreaIndex ?? 0;
               const area = lifeAreas[index];
@@ -944,77 +943,83 @@ export function Onboarding() {
               const colorConfig = getAreaColorConfig(area.name);
 
               return (
-                <div
-                  className="rounded-3xl border bg-app-surface p-6 md:p-8 space-y-6 transition-all duration-300 shadow-app-md animate-fade-in relative overflow-hidden"
-                  style={{ borderColor: colorConfig.accent, boxShadow: `0 12px 36px -12px ${colorConfig.accent}15` }}
-                >
-                  {/* Băng keo dán xéo góc trên card scrapbook */}
-                  <div className="absolute top-0 left-12 w-14 h-4 bg-neutral-100/70 dark:bg-neutral-800/40 border-x border-b border-neutral-250/20 rotate-2 pointer-events-none" />
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-app-line/45 pb-4">
-                    <div className="flex items-center gap-4">
+                <div className="rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm motion-safe:animate-fade-in motion-reduce:animate-none sm:p-6 lg:p-7">
+                  <div className="flex flex-col gap-4 border-b border-app-line pb-5 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex items-start gap-4">
                       <div
-                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-md"
-                        style={{ backgroundColor: colorConfig.accent }}
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent"
+                        style={{ color: colorConfig.accent }}
                       >
                         <AreaIcon className="h-7 w-7" aria-hidden="true" />
                       </div>
                       <div>
-                        <span
-                          className="text-[10px] font-bold uppercase tracking-wider"
-                          style={{ color: colorConfig.accent }}
-                        >
-                          LĨNH VỰC {index + 1} / 8
+                        <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+                          Lĩnh vực {index + 1} / 8
                         </span>
-                        <h2 className="text-2xl font-serif font-bold text-app-ink mt-0.5">{areaLabel}</h2>
+                        <h2
+                          ref={activeAreaHeadingRef}
+                          tabIndex={-1}
+                          className="mt-1 font-serif text-2xl font-semibold leading-tight text-app-ink focus:outline-none sm:text-3xl"
+                        >
+                          {areaLabel}
+                        </h2>
                       </div>
                     </div>
 
-                    <div className="flex items-baseline gap-1.5 self-start sm:self-center bg-app-bg-subtle px-3 py-1.5 rounded-xl border border-app-line/60">
-                      <span className="text-[10px] text-app-ink-muted font-bold uppercase">Điểm hiện tại:</span>
-                      <span
-                        className="font-serif text-3xl font-extrabold tabular-nums leading-none"
-                        style={{ color: colorConfig.accent }}
-                      >
+                    <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Điểm hiện tại</span>
+                      <p className="mt-1 font-serif text-3xl font-semibold leading-none tabular-nums" style={{ color: colorConfig.accent }}>
                         {area.score}
-                      </span>
-                      <span className="text-xs text-app-ink-muted font-semibold">/ 10</span>
+                        <span className="text-sm font-normal text-app-ink-muted">/10</span>
+                      </p>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl bg-app-bg-subtle/30 p-4 border border-app-line/20 space-y-3">
-                    <p className="text-xs sm:text-sm text-app-ink-soft leading-[1.7] font-semibold">
+                  <div className="mt-5 rounded-control border border-app-line bg-app-bg-subtle p-4">
+                    <p className="text-sm font-medium leading-6 text-app-ink-soft">
                       {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
                     </p>
-
-                    {/* Progressive Disclosure: Nút Collapsible câu hỏi gợi ý */}
-                    <div>
+                    <div className="mt-3">
                       <button
                         type="button"
                         onClick={() => setIsQuestionsOpen((prev) => !prev)}
-                        className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30 px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                        className="inline-flex min-h-11 items-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                        aria-expanded={isQuestionsOpen}
+                        aria-controls="active-area-questions"
                       >
-                        {isQuestionsOpen ? "Ẩn câu hỏi gợi ý ▲" : "Gợi ý câu hỏi tự vấn ▼"}
+                        {isQuestionsOpen ? "Ẩn câu hỏi tự vấn" : "Gợi ý câu hỏi tự vấn"}
+                        {isQuestionsOpen ? (
+                          <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                        )}
                       </button>
 
-                      {isQuestionsOpen && (
-                        <ul className="mt-3 pl-5 list-disc space-y-1.5 bg-[#fafaf9] dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-[11px] text-neutral-600 dark:text-neutral-400 animate-fade-in shadow-3xs">
-                          {(LIFE_AREA_QUESTIONS[area.name] ?? []).map((q) => (
-                            <li key={q} className="leading-relaxed font-medium">
-                              {q}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                      <AnimatePresence initial={false}>
+                        {isQuestionsOpen && (
+                          <motion.div
+                            id="active-area-questions"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
+                            className="overflow-hidden"
+                          >
+                            <ul className="mt-3 list-disc space-y-2 rounded-control border border-app-line bg-app-surface p-4 pl-6 text-sm leading-6 text-app-ink-soft">
+                              {(LIFE_AREA_QUESTIONS[area.name] ?? []).map((question) => (
+                                <li key={question}>{question}</li>
+                              ))}
+                            </ul>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
 
-                  {/* Phần điều chỉnh điểm */}
-                  <div className="space-y-6 pt-2">
-                    {/* Bong bóng chọn điểm cho màn hình cảm ứng & desktop tiện lợi */}
-                    <div className="space-y-2">
-                      <span className="text-xs font-semibold text-app-ink-muted">Chọn điểm:</span>
-                      <div className="grid grid-cols-6 sm:flex sm:flex-wrap gap-2 justify-start sm:justify-between py-1">
+                  <div className="mt-6 space-y-5">
+                    <div className="space-y-3">
+                      <span className="text-sm font-semibold text-app-ink">Chọn điểm theo cảm nhận hiện tại</span>
+                      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:flex lg:flex-wrap">
                         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((scoreVal) => {
                           const isCurrentScore = area.score === scoreVal;
                           return (
@@ -1023,17 +1028,14 @@ export function Onboarding() {
                               type="button"
                               onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
                               className={cn(
-                                "flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none",
+                                "flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 motion-reduce:transition-none",
                                 isCurrentScore
-                                  ? "text-white scale-110 shadow-sm"
-                                  : "bg-app-bg hover:bg-app-bg-subtle text-app-ink-soft border-app-line dark:border-neutral-800",
+                                  ? "border-app-accent bg-app-accent text-white shadow-app-sm motion-safe:scale-105"
+                                  : "border-app-line bg-app-bg text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink",
                               )}
-                              style={
-                                isCurrentScore
-                                  ? { backgroundColor: colorConfig.accent, borderColor: colorConfig.accent }
-                                  : {}
-                              }
+                              style={isCurrentScore ? { backgroundColor: colorConfig.accent, borderColor: colorConfig.accent } : undefined}
                               aria-label={`Chấm ${scoreVal} điểm`}
+                              aria-pressed={isCurrentScore}
                             >
                               {scoreVal}
                             </button>
@@ -1042,28 +1044,22 @@ export function Onboarding() {
                       </div>
                     </div>
 
-                    {/* Slider ẩn trên di động để chống chạm nhầm khi cuộn trang, chỉ hiện trên Desktop */}
-                    <div className="hidden md:block space-y-2 pt-2 border-t border-app-line/20">
-                      <div className="flex items-center justify-between text-xs font-semibold">
-                        <span className="text-app-ink-muted">Hoặc kéo thanh trượt:</span>
-                        <span
-                          className={cn(
-                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold",
-                            getScaleGuidanceColor(area.score),
-                          )}
-                        >
-                          {area.score}đ — {getScaleGuidance(area.score)}
+                    <div className="hidden space-y-2 border-t border-app-line pt-4 md:block">
+                      <div className="flex items-center justify-between gap-3 text-sm font-semibold">
+                        <span className="text-app-ink-muted">Hoặc kéo thanh trượt</span>
+                        <span className={cn("inline-flex items-center rounded-pill px-3 py-1 text-xs font-semibold", getScaleGuidanceColor(area.score))}>
+                          {area.score}đ · {getScaleGuidance(area.score)}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-3 py-1">
                         <button
                           type="button"
-                          className="flex h-11 w-11 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-semibold text-app-ink transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                           onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
                           aria-label="Giảm 1 điểm"
                         >
-                          −
+                          -
                         </button>
 
                         <div className="grow px-1">
@@ -1081,7 +1077,7 @@ export function Onboarding() {
 
                         <button
                           type="button"
-                          className="flex h-11 w-11 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-bold text-app-ink hover:bg-app-bg hover:border-app-accent/35 active:scale-95 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-semibold text-app-ink transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                           onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
                           aria-label="Tăng 1 điểm"
                         >
@@ -1090,29 +1086,28 @@ export function Onboarding() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between text-[11px] sm:text-xs font-semibold text-app-ink-muted tracking-wide px-1">
-                      <span className="flex items-center gap-1">😢 0–3</span>
-                      <span className="flex items-center gap-1">😐 4–7</span>
-                      <span className="flex items-center gap-1">😊 8–10</span>
+                    <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-app-ink-muted">
+                      <span className="rounded-pill bg-app-bg-subtle px-3 py-2 text-center">0-3 Cần chăm sóc</span>
+                      <span className="rounded-pill bg-app-bg-subtle px-3 py-2 text-center">4-7 Ổn định</span>
+                      <span className="rounded-pill bg-app-bg-subtle px-3 py-2 text-center">8-10 Đang mạnh</span>
                     </div>
                   </div>
 
-                  {/* Nút điều hướng chân Active Card */}
-                  <div className="pt-6 border-t border-app-line/40 flex items-center justify-between gap-3">
+                  <div className="mt-6 flex flex-col gap-3 border-t border-app-line pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <button
                       type="button"
-                      className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 sm:px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none disabled:opacity-40 cursor-pointer"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-pill border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={index === 0}
                       onClick={() => setActiveAreaIndex(index - 1)}
                     >
-                      <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span className="hidden sm:inline">Lĩnh vực </span>trước
+                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                      Lĩnh vực trước
                     </button>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <button
                         type="button"
-                        className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:underline transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                        className="inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                         onClick={() => {
                           handleSkipArea(index);
                           if (index < 7) {
@@ -1125,7 +1120,7 @@ export function Onboarding() {
 
                       <button
                         type="button"
-                        className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-app-accent px-4 sm:px-6 py-2.5 text-xs font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.97] shadow-md focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                         style={{ backgroundColor: colorConfig.accent }}
                         onClick={() => {
                           markAreaReviewed(index);
@@ -1138,8 +1133,8 @@ export function Onboarding() {
                       >
                         {index < 7 ? (
                           <>
-                            <span className="hidden sm:inline">Lĩnh vực </span>tiếp theo
-                            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                            Rà lĩnh vực tiếp theo
+                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </>
                         ) : (
                           "Xem insight của tôi"
@@ -1155,124 +1150,54 @@ export function Onboarding() {
               <div
                 role="status"
                 aria-live="polite"
-                className="bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/80 dark:border-neutral-800 rounded-2xl p-4 flex items-start gap-2.5 shadow-3xs"
+                className="flex items-start gap-3 rounded-card border border-app-line bg-app-bg-subtle p-4 shadow-app-sm"
               >
-                <Info className="h-4 w-4 text-neutral-400 shrink-0 mt-0.5" aria-hidden="true" />
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-[1.7] font-medium">
-                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm.
-                  Bấm <strong>“Xem insight”</strong> để tiếp tục với điểm mặc định (5).
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
+                <p className="text-sm font-medium leading-6 text-app-ink-soft">
+                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể xem insight với điểm mặc
+                  định 5 cho phần còn lại.
                 </p>
               </div>
             )}
-          </div>
-
-          <div className="order-2 lg:order-2 lg:sticky lg:top-6 space-y-4">
-            {/* Trên Desktop: Luôn hiển thị đầy đủ bản đồ Radar và Summary */}
-            <div className="hidden lg:block surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/10 p-6 shadow-app-md text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-36 h-36 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="flex items-center justify-between pb-2 border-b border-app-line/60">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-app-accent">Bản đồ Cân bằng</h3>
-                <span className="inline-flex items-center text-xs font-semibold text-app-ink-muted bg-app-bg-subtle px-2 py-0.5 rounded-full">
-                  Đã rà soát: {reviewedAreaCount}/8
-                </span>
-              </div>
-
-              <div className="flex items-center justify-center min-h-[290px] my-2">
-                <SimpleRadarChart
-                  data={radarData}
-                  height={290}
-                  fill="var(--app-accent)"
-                  stroke="var(--app-accent)"
-                  fillOpacity={0.15}
-                  className="w-full max-w-[340px]"
-                />
-              </div>
-
-              <div
-                className="mt-4 pt-4 border-t border-app-line/60 grid grid-cols-2 gap-3 text-left"
-                data-testid="onboarding-assessment-summary"
-              >
-                <span className="sr-only">Đã rà soát: {reviewedAreaCount}/8 Điểm trung bình</span>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
-                  <span className="text-[11px] text-app-ink-muted uppercase font-bold tracking-wider">
-                    Điểm trung bình
-                  </span>
-                  <p className="font-serif text-xl font-bold text-app-ink mt-0.5 tabular-nums">
-                    {averageScore.toFixed(1)}
-                    <span className="text-xs font-normal text-app-ink-muted">/10</span>
-                  </p>
-                </div>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
-                  <span className="text-[11px] text-app-ink-muted uppercase font-bold tracking-wider">
-                    Đã hoàn thành
-                  </span>
-                  <p className="font-serif text-xl font-bold text-app-ink mt-0.5 tabular-nums">
-                    {Math.round((reviewedAreaCount / 8) * 100)}%
-                  </p>
-                </div>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
-                  <span className="text-[11px] text-app-ink-muted uppercase font-bold tracking-wider">
-                    Khía cạnh cần tập trung
-                  </span>
-                  <p className="text-xs font-bold text-app-warm truncate mt-1">
-                    {getLifeAreaLabel(growthArea.name)} ({growthArea.score}đ)
-                  </p>
-                </div>
-                <div className="px-3 py-2 rounded-xl bg-app-surface border border-app-line shadow-app-sm hover:shadow-app-md transition-shadow">
-                  <span className="text-[11px] text-app-ink-muted uppercase font-bold tracking-wider">
-                    Khía cạnh mạnh nhất
-                  </span>
-                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-450 truncate mt-1">
-                    {getLifeAreaLabel(strongestArea.name)} ({strongestArea.score}đ)
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 flex items-center justify-center gap-1.5 text-xs italic text-app-ink-muted">
-                <Sparkles className="h-3.5 w-3.5 text-app-accent opacity-70" aria-hidden="true" />
-                <span>“Điểm càng thật, insight càng đúng.”</span>
-              </div>
-            </div>
           </div>
         </div>
 
         <footer className="mt-8 border-t border-app-line pt-6">
           <div className="flex flex-col gap-4">
             {!canCompleteAssessment && (
-              <div className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400 justify-end font-medium">
-                <Info className="h-3.5 w-3.5 text-neutral-600 dark:text-neutral-400" aria-hidden="true" />
-                <span>Khía cạnh chưa chấm sẽ dùng điểm mặc định (5).</span>
-              </div>
+              <p className="text-center text-sm font-medium leading-6 text-app-ink-soft sm:text-right">
+                Khía cạnh chưa chấm sẽ dùng điểm mặc định 5.
+              </p>
             )}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3 order-2 sm:order-1 justify-center sm:justify-start">
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
-                    onClick={() => setStep("welcome")}
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                    Quay lại chào mừng
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-bold text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
-                    onClick={handleDefer}
-                  >
-                    Để sau
-                  </button>
-                </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="order-2 flex flex-col gap-2 sm:order-1 sm:flex-row sm:items-center">
                 <button
-                  id="btn-complete-onboarding"
                   type="button"
-                  className="order-1 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3 text-xs font-bold text-white transition-all duration-200 hover:shadow-md active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-emerald-700 dark:focus-visible:ring-emerald-450 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none shadow-sm sm:order-2 cursor-pointer"
-                  onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-pill border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                  onClick={() => setStep("welcome")}
                 >
-                  {canCompleteAssessment ? "Xem insight của tôi" : "Xem insight của tôi (Dùng điểm mặc định)"}
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  Quay lại chào mừng
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                  onClick={handleDefer}
+                >
+                  Để sau
                 </button>
               </div>
+              <button
+                id="btn-complete-onboarding"
+                type="button"
+                className="order-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:order-2 sm:w-auto"
+                onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
+              >
+                Xem insight của tôi
+                {!canCompleteAssessment ? <span className="sr-only"> (Dùng điểm mặc định)</span> : null}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </footer>
       </div>

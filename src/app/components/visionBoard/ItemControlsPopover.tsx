@@ -29,7 +29,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
   };
 
   return (
-    <Card className={`rounded-xl shadow-[var(--shadow-3)] ${className ?? ""}`}>
+    <Card className={`rounded-xl shadow-app-md ${className ?? ""}`}>
       <CardContent className="p-4 stack-tight">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-bold text-app-ink">Chỉnh phần tử</h4>
@@ -66,7 +66,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
               onClick={() => onUpdate(item.id, { lifeAreaId: undefined })}
               className={`rounded-full border px-2.5 py-0.5 text-xs transition ${
                 !item.lifeAreaId
-                  ? "border-slate-400 bg-app-bg text-app-ink"
+                  ? "border-app-line-strong bg-app-bg text-app-ink"
                   : "border-app-line bg-app-surface text-app-ink-muted"
               }`}
             >

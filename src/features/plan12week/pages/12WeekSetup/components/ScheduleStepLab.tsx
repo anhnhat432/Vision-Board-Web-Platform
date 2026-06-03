@@ -1,5 +1,7 @@
 import { Calendar, CalendarDays, ChevronDown, Clock, Flag, Play, Settings, Sliders } from "lucide-react";
 import { useState } from "react";
+import { motion } from "motion/react";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 
 import { Input } from "@/app/components/ui/input";
 import { cn } from "@/app/components/ui/utils";
@@ -58,6 +60,7 @@ export function ScheduleStepLab({
   todayDateKey,
   onChange,
 }: ScheduleStepProps) {
+  const prefersReducedMotion = useReducedMotion();
   const localTodayDateKey = todayDateKey ?? formatDateInputValue(new Date());
 
   // Tính toán Thứ Hai tới
@@ -72,6 +75,7 @@ export function ScheduleStepLab({
   );
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [selectedMobileDay, setSelectedMobileDay] = useState(0);
 
   const referenceDate = new Date(`${localTodayDateKey}T00:00:00`);
   const startDateValidation = getStartDateValidation(
@@ -143,10 +147,10 @@ export function ScheduleStepLab({
 
         {/* Lời khuyên nhịp độ hành động từ Copilot */}
         {setupGuideSupport?.week1CadenceHint && (
-          <div className="rounded-xl border border-indigo-200/50 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-950/20 p-3.5 text-xs text-indigo-950 dark:text-indigo-200 flex gap-2.5 items-start">
+          <div className="rounded-xl border border-app-accent/30 bg-app-accent-soft/20 p-3.5 text-xs text-app-ink-soft flex gap-2.5 items-start">
             <span className="text-base shrink-0 select-none">💡</span>
             <div>
-              <p className="font-bold">Đề xuất nhịp độ tối ưu:</p>
+              <p className="font-bold text-app-accent">Đề xuất nhịp độ tối ưu:</p>
               <p className="mt-0.5 leading-relaxed font-medium">{setupGuideSupport.week1CadenceHint}</p>
             </div>
           </div>
@@ -159,8 +163,8 @@ export function ScheduleStepLab({
             <span>Ngày bắt đầu chu kỳ 12 tuần</span>
           </div>
 
-          <div className="rounded-xl border border-blue-500/10 bg-blue-500/[0.02] px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1 mb-2 select-none">
-            <div className="font-semibold text-blue-600 dark:text-blue-400">💡 Gợi ý chọn ngày bắt đầu:</div>
+          <div className="rounded-xl border border-app-status-info/20 bg-app-status-info/5 px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1 mb-2 select-none">
+            <div className="font-semibold text-app-status-info">💡 Gợi ý chọn ngày bắt đầu:</div>
             <p>
               Khuyên dùng chọn **Thứ 2 tuần tới** để bạn có trọn vẹn 1 tuần khởi động từ đầu. Nếu muốn làm ngay hôm nay
               để lấy đà, hãy chọn **Hôm nay**.
@@ -184,7 +188,7 @@ export function ScheduleStepLab({
             >
               <span className="block font-bold text-xs">Thứ 2 tuần tới</span>
               <span className="text-[10px] opacity-85 block mt-0.5">
-                ({formatShortDateLabel(nextMondayKey)} - Khuyên dùng)
+                ({formatShortDateLabel(nextMondayKey)} – Khuyên dùng)
               </span>
             </button>
 
@@ -215,7 +219,7 @@ export function ScheduleStepLab({
               className={cn(
                 "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                 isCustomDate
-                  ? "border-indigo-500 bg-indigo-500 text-white shadow-sm scale-102"
+                  ? "border-app-accent bg-app-accent text-white shadow-sm scale-102"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
@@ -254,15 +258,15 @@ export function ScheduleStepLab({
         <div className="space-y-1.5 border-t border-app-line/40 pt-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-app-ink flex items-center gap-1.5">
-              <Flag className="h-4 w-4 text-emerald-500" />
+              <Flag className="h-4 w-4 text-app-status-success" />
               <span>Ngày cán đích (Tự động 12 tuần)</span>
             </span>
-            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/10">
+            <span className="text-xs font-extrabold text-app-status-success bg-app-status-success/10 px-2.5 py-0.5 rounded-md border border-app-status-success/20">
               {cycleEndDate}
             </span>
           </div>
           <p className="text-[10px] text-app-ink-muted leading-relaxed">
-            * Kế hoạch sẽ kết thúc chính xác sau 84 ngày phi hành bền bỉ.
+            Kế hoạch sẽ kết thúc chính xác sau 84 ngày phi hành bền bỉ.
           </p>
         </div>
 
@@ -273,13 +277,13 @@ export function ScheduleStepLab({
             <span>Ngày nhìn lại tuần (Reflection Day)</span>
           </legend>
 
-          <div className="rounded-xl border border-indigo-500/10 bg-indigo-500/[0.02] px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1.5 mb-2 select-none">
-            <div className="font-semibold text-indigo-600 dark:text-indigo-400">
+          <div className="rounded-xl border border-app-accent/15 bg-app-accent-soft/10 px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1.5 mb-2 select-none">
+            <div className="font-semibold text-app-accent">
               📊 Lựa chọn thời điểm phản tư tốt nhất:
             </div>
             <p>
-              Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: **9:00 - 10:00 sáng Chủ nhật** (thư thái
-              nhâm nhi cà phê) hoặc **16:00 - 17:00 chiều thứ Bảy** để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.
+              Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: 9:00–10:00 sáng Chủ nhật (thư thái
+              nhâm nhi cà phê) hoặc 16:00–17:00 chiều thứ Bảy để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.
             </p>
           </div>
 
@@ -320,11 +324,11 @@ export function ScheduleStepLab({
               soundService.click();
               setIsAdvancedOpen(!isAdvancedOpen);
             }}
-            className="flex w-full items-center justify-between text-xs font-bold text-indigo-650 dark:text-indigo-400 py-1.5 px-3 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/10 hover:bg-indigo-50 transition-all select-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:outline-none"
+            className="flex w-full items-center justify-between text-xs font-bold text-app-accent py-1.5 px-3 rounded-lg bg-app-accent-soft/20 border border-app-line hover:bg-app-accent-soft/30 transition-all select-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none"
           >
             <span className="flex items-center gap-1.5">
-              <Settings className="h-4 w-4 animate-spin-slow" />
-              <span>⚙️ Tùy chỉnh nâng cao (Đã tự động tối ưu - Customize Later)</span>
+              <Settings className="h-4 w-4 animate-spin-slow text-app-accent" />
+              <span>⚙️ Tùy chỉnh nâng cao (Đã tự động tối ưu – Customize Later)</span>
             </span>
             <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isAdvancedOpen && "rotate-180")} />
           </button>
@@ -337,8 +341,8 @@ export function ScheduleStepLab({
                   <Clock className="h-4 w-4 text-app-accent" />
                   <span>Thời lượng dành cho mục tiêu mỗi ngày</span>
                 </legend>
-                <div className="rounded-xl border border-amber-500/10 bg-amber-500/[0.02] px-3 py-2 text-[10px] text-app-ink-soft leading-normal mb-1">
-                  * Ví dụ: Dành **30-60 phút** tập trung cao độ mỗi ngày (ví dụ khung giờ cố định **20:00 - 21:00 tối**)
+                <div className="rounded-xl border border-app-status-warning/20 bg-app-status-warning/5 px-3 py-2 text-[10px] text-app-ink-soft leading-normal mb-1">
+                  * Ví dụ: Dành 30–60 phút tập trung cao độ mỗi ngày (ví dụ khung giờ cố định 20:00–21:00 tối)
                   để xây dựng thói quen kỷ luật tự nhiên mà không gây căng thẳng.
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -416,27 +420,122 @@ export function ScheduleStepLab({
 
       {/* WIDGET LIVE PREVIEW: Xem trước tuần đầu tiên của bạn */}
       <section
-        className="relative overflow-hidden rounded-2xl border border-indigo-150 bg-[#fafaff] dark:bg-[#1a1b24]/40 p-5 sm:p-6 shadow-sm space-y-4 select-none animate-in fade-in duration-400"
+        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg-subtle/50 p-5 sm:p-6 shadow-sm space-y-4 select-none animate-in fade-in duration-400"
         aria-labelledby="week-preview-title"
       >
-        <div className="flex items-center gap-2 mb-2 border-b border-indigo-150/40 pb-2">
-          <span className="flex h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse" />
+        <div className="flex items-center gap-2 mb-2 border-b border-app-line/60 pb-2">
+          <span className="flex h-2.5 w-2.5 rounded-full bg-app-accent animate-pulse" />
           <h3
             id="week-preview-title"
-            className="text-xs font-extrabold uppercase tracking-wider text-indigo-650 dark:text-indigo-400"
+            className="text-xs font-extrabold uppercase tracking-wider text-app-accent"
           >
             👀 Xem trước & Tự sắp xếp Lịch hành động (Interactive LWW Schedule)
           </h3>
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="text-[11px] text-app-ink-soft leading-relaxed">
           Phân bổ hoạt động thực tế 7 ngày của Tuần 1.
-          <strong className="text-indigo-600 dark:text-indigo-400 block mt-1">
+          <strong className="text-app-accent block mt-1">
             📌 Mẹo nhỏ: Chạm vào bất kỳ ngày nào bên dưới để bật/tắt ghim gán hành động lên ngày đó hằng tuần!
           </strong>
         </p>
 
-        {/* Lưới 7 ngày dọc trên di động, dàn ngang trên desktop */}
-        <div className="grid gap-2.5 sm:grid-cols-7 pt-1">
+        {/* Mobile Horizontal Carousel */}
+        <div className="sm:hidden space-y-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
+            {WEEK_DAYS.map((day) => {
+              const isSelected = selectedMobileDay === day.index;
+              const isReflectionDay = draft.reviewDay === day.key;
+              const isPreferredDay = draft.preferredDays.includes(day.index);
+              const dailyTactics = getTacticsForDay(day.index);
+              const hasTactics = dailyTactics.length > 0;
+
+              return (
+                <button
+                  key={day.key}
+                  type="button"
+                  onClick={() => {
+                    soundService.click();
+                    setSelectedMobileDay(day.index);
+                  }}
+                  className={cn(
+                    "flex-shrink-0 snap-center rounded-xl border px-3 py-2 flex flex-col items-center justify-center min-w-[70px] transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent font-sans",
+                    isSelected
+                      ? "border-app-accent bg-app-accent-soft/30 text-app-accent ring-2 ring-app-accent/25 font-extrabold"
+                      : isReflectionDay
+                        ? "border-app-status-warning/40 bg-app-status-warning/5 text-app-ink-soft"
+                        : isPreferredDay
+                          ? "border-app-accent bg-app-accent-soft/10 text-app-ink-soft"
+                          : "border-app-line bg-app-surface text-app-ink-soft"
+                  )}
+                >
+                  <span className="text-xs">{day.label}</span>
+                  <div className="flex gap-0.5 mt-1 items-center h-2">
+                    {isPreferredDay && <span className="text-[10px] leading-none">📌</span>}
+                    {isReflectionDay && <span className="text-[10px] leading-none">📊</span>}
+                    {hasTactics && <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Chi tiết ngày đang chọn trên Mobile */}
+          <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-app-line/40 pb-2">
+              <h4 className="text-xs font-bold text-app-ink flex items-center gap-1.5">
+                <span>{WEEK_DAYS[selectedMobileDay].fullName}</span>
+                {draft.reviewDay === WEEK_DAYS[selectedMobileDay].key && (
+                  <span className="text-[9px] font-extrabold text-app-status-warning bg-app-status-warning/10 px-1.5 py-0.5 rounded border border-app-status-warning/20">
+                    📊 Báo cáo tuần
+                  </span>
+                )}
+              </h4>
+              <span className="text-[10px] text-app-ink-muted">
+                {getTacticsForDay(selectedMobileDay).length} việc
+              </span>
+            </div>
+
+            {/* Nút Ghim ưu tiên */}
+            <button
+              type="button"
+              onClick={() => handleDayClick(selectedMobileDay)}
+              className={cn(
+                "w-full rounded-xl py-2 px-3 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none font-sans",
+                draft.preferredDays.includes(selectedMobileDay)
+                  ? "bg-app-accent text-white border-app-accent shadow-sm shadow-app-accent/20"
+                  : "bg-app-surface text-app-ink-soft border-app-line hover:border-app-accent/30"
+              )}
+            >
+              <span>{draft.preferredDays.includes(selectedMobileDay) ? "📌 Đã ghim ưu tiên" : "📌 Ghim làm ngày ưu tiên"}</span>
+            </button>
+
+            {/* Danh sách công việc của ngày */}
+            <div className="space-y-2">
+              {getTacticsForDay(selectedMobileDay).length > 0 ? (
+                getTacticsForDay(selectedMobileDay).map((tactic) => (
+                  <div
+                    key={tactic.id}
+                    className="text-xs font-semibold bg-app-bg-subtle/70 text-app-ink-soft px-3 py-2.5 rounded-xl border border-app-line flex items-center justify-between"
+                  >
+                    <span className="truncate pr-2">🏃 {tactic.name}</span>
+                    <span className="text-[10px] font-extrabold text-app-accent shrink-0">
+                      {tactic.target} {tactic.unit}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-app-ink-muted italic text-center py-2">
+                  {draft.reviewDay === WEEK_DAYS[selectedMobileDay].key 
+                    ? "Hạn chốt nhìn lại tuần - Dành thời gian tự ngẫm và đánh giá." 
+                    : "Ngày nghỉ ngơi. Ghim thêm việc để lên lịch."}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Lưới 7 ngày dọc trên di động, dàn ngang trên desktop (Desktop Grid) */}
+        <div className="hidden sm:grid gap-2.5 sm:grid-cols-7 pt-1">
           {WEEK_DAYS.map((day) => {
             const isReflectionDay = draft.reviewDay === day.key;
             const isPreferredDay = draft.preferredDays.includes(day.index);
@@ -444,19 +543,21 @@ export function ScheduleStepLab({
             const hasTactics = dailyTactics.length > 0;
 
             return (
-              <button
+              <motion.button
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
                 key={day.key}
                 type="button"
                 onClick={() => handleDayClick(day.index)}
                 className={cn(
-                  "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[85px] transition-all duration-300 hover:scale-102 hover:shadow-xs active:scale-[0.97] cursor-pointer text-left sm:text-center focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus:outline-none",
+                  "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[85px] transition-all duration-300 hover:scale-102 hover:shadow-xs active:scale-[0.97] cursor-pointer text-left sm:text-center focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none font-sans",
                   isReflectionDay
-                    ? "border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300 shadow-3xs"
+                    ? "border-app-status-warning/45 bg-app-status-warning/5 text-app-ink shadow-3xs"
                     : isPreferredDay
-                      ? "border-indigo-400 bg-indigo-500/[0.04] dark:bg-indigo-950/30 text-app-ink shadow-sm ring-2 ring-indigo-500/10"
+                      ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-sm ring-2 ring-app-accent-soft/35"
                       : hasTactics
-                        ? "border-indigo-100 bg-white dark:bg-slate-900 text-app-ink shadow-3xs hover:border-indigo-200"
-                        : "border-slate-100 bg-slate-50/40 dark:bg-slate-900/10 text-slate-400 opacity-60 hover:opacity-100 hover:border-slate-200",
+                        ? "border-app-line bg-app-surface text-app-ink shadow-3xs hover:border-app-accent/30"
+                        : "border-app-line/40 bg-app-surface text-app-ink-muted opacity-60 hover:opacity-100 hover:border-app-line",
                 )}
               >
                 {/* Ngày trong tuần */}
@@ -469,7 +570,7 @@ export function ScheduleStepLab({
                   {/* Nhãn Ghim cho ngày ưu tiên */}
                   {isPreferredDay && (
                     <span
-                      className="text-[9px] font-bold text-indigo-650 bg-indigo-100/50 px-1 rounded sm:ml-1 scale-95 shrink-0"
+                      className="text-[9px] font-bold text-app-accent bg-app-accent-soft px-1 rounded sm:ml-1 scale-95 shrink-0"
                       title="Ngày được ghim ưu tiên"
                     >
                       📌
@@ -480,7 +581,7 @@ export function ScheduleStepLab({
                 {/* Nội dung ngày */}
                 <div className="flex-1 text-right sm:text-left space-y-1.5 min-w-0 w-full">
                   {isReflectionDay && (
-                    <div className="inline-flex sm:flex flex-col gap-0.5 items-center sm:items-start text-[8px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/10 w-fit select-none mx-auto sm:mx-0">
+                    <div className="inline-flex sm:flex flex-col gap-0.5 items-center sm:items-start text-[8px] font-extrabold text-app-status-warning bg-app-status-warning/10 px-1.5 py-0.5 rounded border border-app-status-warning/20 w-fit select-none mx-auto sm:mx-0">
                       <span>📊 Báo cáo tuần</span>
                       <span className="text-[8px] uppercase tracking-wide hidden sm:inline-block mt-0.5">
                         Hạn chốt {reflectionDayLabel}
@@ -493,7 +594,7 @@ export function ScheduleStepLab({
                       {dailyTactics.map((tactic) => (
                         <div
                           key={tactic.id}
-                          className="text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-100/40 truncate max-w-full block w-full text-right sm:text-left"
+                          className="text-[9px] font-bold bg-app-accent-soft text-app-accent px-1.5 py-0.5 rounded border border-app-accent/10 truncate max-w-full block w-full text-right sm:text-left"
                           title={`${tactic.name} (${tactic.target} ${tactic.unit})`}
                         >
                           🏃 {tactic.name}
@@ -508,7 +609,7 @@ export function ScheduleStepLab({
                     )
                   )}
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </div>

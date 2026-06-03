@@ -7,7 +7,6 @@ interface ZenBreathingGateProps {
 
 type BreathPhase = "idle" | "inhale" | "hold" | "exhale" | "completed";
 
-// Bộ tổng hợp tiếng chuông Zen thanh tịnh 528Hz bằng Web Audio API khi hoàn thành hơi thở
 const playZenBell528 = () => {
   try {
     const AudioContextClass =
@@ -19,7 +18,6 @@ const playZenBell528 = () => {
     const gainNode = ctx.createGain();
 
     osc.type = "sine";
-    // Tần số Solfeggio 528Hz phục hồi và chánh niệm
     osc.frequency.setValueAtTime(528, ctx.currentTime);
 
     gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
@@ -40,23 +38,29 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
   const [secondsLeft, setSecondsLeft] = useState(10);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<number | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // Vòng lặp quản lý nhịp thở 10 giây
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const listener = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", listener);
+    return () => mediaQuery.removeEventListener("change", listener);
+  }, []);
+
   useEffect(() => {
     if (phase === "idle" || phase === "completed") return;
 
     timerRef.current = window.setInterval(() => {
       setSecondsLeft((prev) => {
         const nextSec = prev - 1;
-
-        // Quản lý tiến trình phần trăm (10 giây tổng cộng)
         const currentProgress = ((10 - nextSec) / 10) * 100;
         setProgress(currentProgress);
 
-        // Xác định giai đoạn thở dựa trên giây hiện tại
-        // Hít vào: 10s -> 7s (4 giây đầu)
-        // Giữ hơi: 6s -> 5s (2 giây tiếp)
-        // Thở ra: 4s -> 1s (4 giây cuối)
         if (nextSec >= 7) {
           setPhase("inhale");
         } else if (nextSec >= 5) {
@@ -64,7 +68,6 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
         } else if (nextSec > 0) {
           setPhase("exhale");
         } else {
-          // Hoàn thành
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("completed");
           setProgress(100);
@@ -87,87 +90,84 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
     setProgress(0);
   };
 
-  // Lấy lời hướng dẫn cho từng nhịp thở
   const getInstructionText = () => {
     switch (phase) {
       case "idle":
-        return "Hãy chọn tư thế thoải mái, hít một hơi sâu tự nhiên trước khi bắt đầu.";
+        return "Nếu cần, dành 10 giây để vào nhịp trước khi chấm điểm.";
       case "inhale":
-        return "Hít vào thật nhẹ nhàng... Nhận biết luồng sinh khí...";
+        return "Hít vào nhẹ. Chuẩn bị nhìn lại hiện tại của bạn.";
       case "hold":
-        return "Nín thở tĩnh lặng... Lắng nghe sự yên bình bên trong...";
+        return "Giữ nhịp. Không cần hoàn hảo, chỉ cần đủ thật.";
       case "exhale":
-        return "Thở ra buông bỏ... Giải phóng mọi áp lực và lo toan...";
+        return "Thở ra. Chọn điểm bắt đầu rõ ràng hơn.";
       case "completed":
-        return "Tâm trí bạn giờ đây đã sẵn sàng và tĩnh tại.";
+        return "Bạn đã sẵn sàng mở bản đồ cuộc sống.";
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center transition-all duration-500 animate-[fadeIn_0.4s_ease-out]">
-      {/* Biểu tượng Sprout chánh niệm nhỏ mờ */}
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 shadow-inner">
-        <Sprout className="h-5 w-5 animate-pulse" />
+    <div className="flex flex-col items-center justify-center p-6 text-center transition-all duration-500 motion-safe:animate-[fadeIn_0.4s_ease-out] motion-reduce:transition-none">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent shadow-inner">
+        <Sprout className="h-5 w-5 motion-safe:animate-pulse motion-reduce:animate-none" />
       </div>
 
       <h2 className="mt-4 font-serif text-2xl font-medium tracking-tight text-app-ink sm:text-3xl">
-        Khai mở nhịp thở tĩnh tâm
+        Vào nhịp trước khi chấm điểm
       </h2>
-      <p className="mt-2.5 max-w-sm text-xs leading-5 text-app-ink-soft">
-        Dành ra 10 giây tĩnh lặng điều hòa hơi thở Stoic để gieo hạt mầm tầm nhìn sáng suốt nhất.
+      <p className="mt-2.5 max-w-sm text-sm leading-6 text-app-ink-soft">
+        Bài thở này là tùy chọn. Bạn có thể bỏ qua và đi thẳng vào Atlas cuộc sống.
       </p>
 
-      {/* Sân khấu vòng tròn thở (Zen Breathing Circle) */}
-      <div className="my-10 flex h-48 w-48 items-center justify-center relative">
-        {/* Hào quang nền lan tỏa chậm */}
+      <div className="relative my-10 flex h-48 w-48 items-center justify-center">
         <div
-          className={`absolute rounded-full bg-emerald-500/5 blur-xl transition-all duration-[3000ms] pointer-events-none ${
-            phase === "inhale"
-              ? "h-44 w-44 opacity-80"
-              : phase === "hold"
-                ? "h-48 w-48 opacity-100 scale-105"
-                : "h-36 w-36 opacity-30"
+          className={`pointer-events-none absolute rounded-full bg-app-accent-soft blur-xl transition-all duration-[3000ms] motion-reduce:transition-none ${
+            prefersReducedMotion
+              ? "h-36 w-36 opacity-50"
+              : phase === "inhale"
+                ? "h-44 w-44 opacity-80"
+                : phase === "hold"
+                  ? "h-48 w-48 scale-105 opacity-100"
+                  : "h-36 w-36 opacity-30"
           }`}
         />
 
-        {/* Vòng tròn thở chính thay đổi kích thước mượt mà theo nhịp thở */}
         <div
-          className={`relative z-10 flex items-center justify-center rounded-full border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 shadow-inner transition-all duration-1000 ${
-            phase === "idle"
-              ? "h-28 w-28 scale-100"
-              : phase === "inhale"
-                ? "h-40 w-40 bg-emerald-500/20 shadow-emerald-500/15"
-                : phase === "hold"
-                  ? "h-40 w-40 scale-105 bg-emerald-500/25 ring-8 ring-emerald-500/5 shadow-emerald-500/25 animate-pulse"
-                  : phase === "exhale"
-                    ? "h-28 w-28 bg-emerald-500/10 shadow-emerald-500/5"
-                    : "h-32 w-32 bg-emerald-500/20 ring-4 ring-emerald-500/10 border-emerald-500/40" // completed
+          className={`relative z-10 flex items-center justify-center rounded-full border border-app-line bg-app-surface shadow-inner transition-all duration-1000 motion-reduce:transition-none ${
+            prefersReducedMotion
+              ? "h-32 w-32 opacity-100"
+              : phase === "idle"
+                ? "h-28 w-28 scale-100"
+                : phase === "inhale"
+                  ? "h-40 w-40 bg-app-accent-soft"
+                  : phase === "hold"
+                    ? "h-40 w-40 scale-105 bg-app-accent-soft ring-8 ring-app-accent-soft motion-safe:animate-pulse"
+                    : phase === "exhale"
+                      ? "h-28 w-28 bg-app-accent-soft"
+                      : "h-32 w-32 border-app-accent bg-app-accent-soft ring-4 ring-app-accent-soft"
           }`}
         >
-          {/* Nhãn giây hoặc icon */}
           {phase === "idle" ? (
             <button
               type="button"
               onClick={handleStart}
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-app-accent text-white shadow-app-sm transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:scale-100"
               aria-label="Bắt đầu bài tập thở"
             >
-              <Play className="h-6 w-6 fill-white ml-0.5" />
+              <Play className="ml-0.5 h-6 w-6 fill-white" />
             </button>
           ) : phase === "completed" ? (
-            <Sparkles className="h-8 w-8 text-emerald-600 animate-bounce" />
+            <Sparkles className={`h-8 w-8 text-app-accent ${prefersReducedMotion ? "" : "animate-bounce"}`} />
           ) : (
-            <span className="text-xl font-bold font-serif text-emerald-800 dark:text-emerald-300 tabular-nums">
-              {secondsLeft}s
-            </span>
+            <span className="font-serif text-xl font-bold tabular-nums text-app-accent">{secondsLeft}s</span>
           )}
         </div>
       </div>
 
-      {/* Hướng dẫn thở chánh niệm */}
-      <div className="h-14 max-w-md">
+      <div className="h-16 max-w-md">
         <p
-          className={`text-sm leading-relaxed font-serif italic text-app-ink transition-all duration-500 ${phase !== "idle" ? "text-emerald-700 dark:text-emerald-400 font-semibold" : "text-app-ink-soft"}`}
+          className={`text-sm leading-6 text-app-ink transition-all duration-500 motion-reduce:transition-none ${
+            phase !== "idle" ? "font-semibold text-app-accent" : "text-app-ink-soft"
+          }`}
         >
           {getInstructionText()}
         </p>
@@ -177,39 +177,37 @@ export function ZenBreathingGate({ onComplete }: ZenBreathingGateProps) {
         <button
           type="button"
           onClick={onComplete}
-          className="mt-1 text-xs font-semibold text-app-ink-soft underline hover:text-app-ink transition-colors relative py-2 px-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 rounded-lg after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2"
+          className="relative mt-1 rounded-control px-4 py-2 text-sm font-semibold text-app-ink-soft underline transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 after:absolute after:left-1/2 after:top-1/2 after:h-11 after:min-w-11 after:-translate-x-1/2 after:-translate-y-1/2"
         >
-          Vào thẳng chấm điểm
+          Vào thẳng Atlas cuộc sống
         </button>
       )}
 
-      {/* Thanh tiến trình siêu mỏng ở dưới */}
       {phase !== "idle" && phase !== "completed" && (
         <div className="mt-4 flex flex-col items-center gap-3">
-          <div className="w-48 h-[2px] bg-app-line rounded-full overflow-hidden">
+          <div className="h-0.5 w-48 overflow-hidden rounded-full bg-app-line">
             <div
-              className="h-full bg-emerald-500 transition-all duration-1000 ease-linear"
+              className="h-full bg-app-accent transition-all duration-1000 ease-linear motion-reduce:transition-none"
               style={{ width: `${progress}%` }}
             />
           </div>
           <button
             type="button"
             onClick={onComplete}
-            className="text-xs text-app-ink-soft underline hover:text-app-ink transition-colors relative py-2 px-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 rounded-lg after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2"
+            className="relative rounded-control px-4 py-2 text-sm text-app-ink-soft underline transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 after:absolute after:left-1/2 after:top-1/2 after:h-11 after:min-w-11 after:-translate-x-1/2 after:-translate-y-1/2"
           >
             Bỏ qua bài thở
           </button>
         </div>
       )}
 
-      {/* Nút bấm chuyển trang xuất hiện khi completed */}
       {phase === "completed" && (
         <button
           type="button"
           onClick={onComplete}
-          className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-500 hover:to-teal-500 hover:scale-[1.03] active:scale-97 transition-all duration-200 animate-[fadeIn_0.5s_ease-out] ring-4 ring-emerald-500/10"
+          className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 motion-safe:animate-[fadeIn_0.5s_ease-out] motion-reduce:transition-none"
         >
-          Khai mở tầm nhìn cuộc sống
+          Mở bản đồ cuộc sống
           <Sparkles className="h-4 w-4" />
         </button>
       )}

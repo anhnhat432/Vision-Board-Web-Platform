@@ -215,7 +215,7 @@ async function pageAction(source) {
         );
         const elements = Array.from(document.querySelectorAll("button, [role='button'], a"));
         const element = elements.find((item) => {
-          const text = String(item.innerText || item.textContent || item.getAttribute("aria-label") || "")
+          const text = \`\${item.innerText || ""} \${item.textContent || ""} \${item.getAttribute("aria-label") || ""}\`
             .normalize("NFD")
             .replace(/[\\u0300-\\u036f]/g, "")
             .replace(/[đĐ]/g, (m) => (m === "đ" ? "d" : "D"))

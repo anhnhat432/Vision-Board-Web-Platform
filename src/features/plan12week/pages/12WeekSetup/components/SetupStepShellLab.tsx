@@ -1,4 +1,5 @@
 import {
+  Activity,
   ArrowLeft,
   ArrowRight,
   CalendarDays,
@@ -40,9 +41,14 @@ const STEP_META: Array<{
 }> = [
   { icon: Target, eyebrow: "Đích đến", caption: "Chốt kết quả đủ rõ và chọn bộ khung mẫu hành động phù hợp." },
   {
+    icon: Activity,
+    eyebrow: "Hành động",
+    caption: "Chọn việc lặp lại hằng tuần và xác định mức cam kết cụ thể cho từng việc.",
+  },
+  {
     icon: CalendarDays,
     eyebrow: "Lịch trình",
-    caption: "Chọn việc lặp lại hằng tuần và tự do sắp xếp lịch trên bảng 7 ngày trực quan.",
+    caption: "Sắp xếp lịch 7 ngày trực quan và điều chỉnh nhịp độ, thời gian rảnh.",
   },
   { icon: Flag, eyebrow: "Hoàn tất", caption: "Xem trước giao diện check-in Today thực tế và kích hoạt hành trình." },
 ];
@@ -90,7 +96,7 @@ export function SetupStepShellLab({
   return (
     <section
       ref={stepShellRef}
-      className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface p-4 sm:p-5 md:p-6 shadow-sm"
+      className="overflow-hidden surface-raised rounded-card border border-app-line bg-app-surface p-4 sm:p-5 md:p-6 shadow-app-sm"
       aria-labelledby="twelve-week-step-title"
     >
       <div>
@@ -98,7 +104,7 @@ export function SetupStepShellLab({
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-app-accent/10">
             <StepIcon className="h-3 w-3 text-app-accent animate-pulse" aria-hidden="true" />
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent/90">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent/90">
             Kế hoạch 12 tuần · Bước {currentStep + 1}/{stepCount} · {stepMeta.eyebrow}
           </p>
         </div>
@@ -122,7 +128,7 @@ export function SetupStepShellLab({
 
           {/* Stepper active track line */}
           <div
-            className="absolute left-4 top-5 h-[3px] -translate-y-1/2 bg-gradient-to-r from-app-accent to-emerald-500 transition-all duration-300 rounded-full"
+            className="absolute left-4 top-5 h-[3px] -translate-y-1/2 bg-app-accent transition-all duration-300 rounded-full"
             style={{
               width: `calc(${(currentStep / (stepCount - 1)) * 100}% - ${currentStep === stepCount - 1 ? "32px" : "16px"})`,
             }}
@@ -152,7 +158,7 @@ export function SetupStepShellLab({
                       isActive
                         ? "border-app-accent bg-app-accent text-white scale-110 shadow-md shadow-app-accent/20 ring-4 ring-app-accent-soft/35"
                         : isCompleted
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/20 dark:text-emerald-450 active:scale-[0.96]"
+                          ? "border-app-status-success bg-app-status-success/5 text-app-status-success hover:bg-app-status-success hover:text-white dark:bg-app-status-success/20 dark:text-app-status-success active:scale-[0.96]"
                           : "border-app-line bg-app-surface text-app-ink-muted",
                       canJump ? "cursor-pointer" : "cursor-default",
                     )}
@@ -175,7 +181,7 @@ export function SetupStepShellLab({
                         isActive
                           ? "block text-app-accent scale-105"
                           : isCompleted
-                            ? "hidden sm:block text-emerald-600 dark:text-emerald-450"
+                            ? "hidden sm:block text-app-status-success"
                             : "hidden sm:block text-app-ink-muted",
                       )}
                     >
@@ -193,15 +199,15 @@ export function SetupStepShellLab({
         </div>
 
         {/* 💡 Mẹo nhỏ trực quan - Không dùng Accordion giấu kín, đưa trực tiếp ra ngoài cực kỳ ngắn gọn và sinh động */}
-        <div className="mt-8 rounded-2xl border border-indigo-100 dark:border-indigo-950/50 bg-indigo-50/30 dark:bg-indigo-950/10 p-4 text-xs text-app-ink-soft flex gap-3 items-start animate-in fade-in duration-300">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold">
+        <div className="mt-8 rounded-card border border-app-line bg-app-accent-soft/30 p-4 text-xs text-app-ink-soft flex gap-3 items-start animate-in fade-in duration-300">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent font-bold">
             💡
           </span>
           <div className="space-y-1">
-            <p className="font-bold text-indigo-700 dark:text-indigo-400">Ý nghĩa cốt lõi & Mẹo nhỏ:</p>
+            <p className="font-bold text-app-accent">Ý nghĩa cốt lõi & Mẹo nhỏ:</p>
             <p className="leading-relaxed font-medium opacity-90">{stepMeta.caption}</p>
             {whyThisMatters && (
-              <div className="mt-1.5 leading-relaxed font-semibold text-app-ink-muted border-t border-indigo-100/40 pt-1.5 dark:border-indigo-950/30">
+              <div className="mt-1.5 leading-relaxed font-semibold text-app-ink-muted border-t border-app-line pt-1.5">
                 {whyThisMatters}
               </div>
             )}
@@ -213,25 +219,25 @@ export function SetupStepShellLab({
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
           >
             {children}
             {stepError ? (
               <div
                 role="alert"
-                className="mt-4 rounded-xl border border-amber-200/50 bg-amber-500/[0.03] dark:bg-amber-950/10 p-3.5 text-amber-800 dark:text-amber-300 shadow-sm flex items-start gap-2.5 animate-in shake duration-300"
+                className="mt-4 rounded-card border border-app-line bg-app-bg-subtle p-3.5 text-app-ink shadow-app-sm flex items-start gap-2.5 animate-in shake duration-300"
               >
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 text-xs font-bold">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-xs font-bold">
                   💡
                 </span>
                 <div className="min-w-0">
-                  <span className="font-bold text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">
+                  <span className="font-bold text-[10px] uppercase tracking-wider text-app-accent block mb-0.5">
                     Trợ lý AI Copilot gợi ý
                   </span>
-                  <p className="text-xs font-semibold leading-relaxed">{stepError}</p>
+                  <p className="text-xs font-semibold leading-relaxed text-app-ink-soft">{stepError}</p>
                 </div>
               </div>
             ) : null}
@@ -240,26 +246,30 @@ export function SetupStepShellLab({
       </div>
 
       {/* Điều khiển các bước to rõ hơn, thumb-friendly trên mobile */}
-      <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs font-semibold text-app-ink-muted/95">
+      <div className="mt-8 flex flex-col gap-4 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-semibold text-app-ink-muted/95 sm:order-first">
           Bước {currentStep + 1} trên {stepCount} · Mọi thiết lập đều có thể tinh chỉnh lại sau này!
         </p>
-        <div className="flex flex-col gap-2.5 sm:flex-row w-full sm:w-auto">
-          <button
+        <div className="flex flex-row gap-2.5 w-full sm:w-auto">
+          <motion.button
+            whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
             type="button"
-            className="inline-flex min-h-12 w-full items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2"
+            className="inline-flex min-h-12 flex-[1] sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2 font-sans"
             onClick={onBack}
             disabled={isSubmitting}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Quay lại
-          </button>
+            <span className="hidden xs:inline">Quay lại</span>
+          </motion.button>
 
           {isLastStep ? (
-            <button
+            <motion.button
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
               type="button"
               aria-label="Lưu kế hoạch"
-              className="inline-flex min-h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-app-accent to-emerald-500 px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:brightness-105 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2"
+              className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-control bg-app-accent hover:bg-app-accent-hover px-5 py-3 text-xs font-bold text-white transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2 font-sans"
               onClick={handleSubmitClick}
               disabled={isSubmitting || isSubmitDisabled}
               aria-busy={isSubmitting}
@@ -269,19 +279,21 @@ export function SetupStepShellLab({
               ) : (
                 <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
               )}
-              {isSubmitting ? "Đang khởi tạo..." : "Kích hoạt kế hoạch ngay 🚀"}
-            </button>
+              {isSubmitting ? "Đang khởi tạo..." : "Kích hoạt 🚀"}
+            </motion.button>
           ) : (
-            <button
+            <motion.button
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
               type="button"
               aria-label={nextButtonLabel}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:brightness-105 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2"
+              className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2 font-sans"
               onClick={onNext}
               disabled={isNextDisabled}
             >
-              {nextButtonLabel}
+              <span className="truncate">{nextButtonLabel}</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </button>
+            </motion.button>
           )}
         </div>
       </div>

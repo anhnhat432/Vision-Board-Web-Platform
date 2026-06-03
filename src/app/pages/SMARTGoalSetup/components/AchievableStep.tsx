@@ -53,36 +53,36 @@ export function AchievableStep({
     if (hours <= 3) {
       return {
         label: "Nhẹ nhàng (Dễ dàng duy trì)",
-        color: "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/30",
-        colorBorder: "border-emerald-500/30",
-        colorBar: "bg-emerald-500",
-        shadow: "shadow-emerald-500/20",
+        color: "text-app-status-success bg-app-status-success/10 dark:bg-app-status-success/20",
+        colorBorder: "border-app-status-success/30",
+        colorBar: "bg-app-status-success",
+        shadow: "shadow-app-status-success/20",
       };
     }
     if (hours <= 8) {
       return {
         label: "Thách thức (Cần kỷ luật đều đặn)",
-        color: "text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/30",
-        colorBorder: "border-blue-500/30",
-        colorBar: "bg-blue-500",
-        shadow: "shadow-blue-500/20",
+        color: "text-app-status-info bg-app-status-info/10 dark:bg-app-status-info/20",
+        colorBorder: "border-app-status-info/30",
+        colorBar: "bg-app-status-info",
+        shadow: "shadow-app-status-info/20",
       };
     }
     if (hours <= 15) {
       return {
         label: "Nỗ lực lớn (Phải ưu tiên hàng đầu)",
-        color: "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/30",
-        colorBorder: "border-amber-500/30",
-        colorBar: "bg-amber-500",
-        shadow: "shadow-amber-500/20",
+        color: "text-app-status-warning bg-app-status-warning/10 dark:bg-app-status-warning/20",
+        colorBorder: "border-app-status-warning/30",
+        colorBar: "bg-app-status-warning",
+        shadow: "shadow-app-status-warning/20",
       };
     }
     return {
       label: "Rủi ro quá tải (Khó giữ nhịp dài hạn)",
-      color: "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/30",
-      colorBorder: "border-rose-500/30",
-      colorBar: "bg-rose-500",
-      shadow: "shadow-rose-500/20",
+      color: "text-app-status-error bg-app-status-error/10 dark:bg-app-status-error/20",
+      colorBorder: "border-app-status-error/30",
+      colorBar: "bg-app-status-error",
+      shadow: "shadow-app-status-error/20",
     };
   };
 
@@ -101,7 +101,7 @@ export function AchievableStep({
   return (
     <div className="space-y-6">
       {/* PHẦN 1: THỜI GIAN CAM KẾT */}
-      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
+      <div className="pb-6 mb-6 border-b border-dashed border-app-line/80 space-y-2 relative">
         <label
           htmlFor="smart-weekly-hours-slider"
           className={cn(
@@ -121,13 +121,17 @@ export function AchievableStep({
           {/* Màn hình hiển thị số giờ hiện tại cỡ lớn */}
           <div
             className={cn(
-              "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-2xl border transition-all duration-300 shadow-sm",
+              "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-lg border border-dashed transition-all duration-300 shadow-[2px_4px_12px_rgba(44,38,33,0.04)] relative rotate-[-1.5deg] bg-white dark:bg-[#1E1C18]",
               feasibility.colorBorder,
               feasibility.color,
             )}
           >
-            <span className="text-3xl font-extrabold tracking-tight">{parsedWeeklyHours}</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider">giờ/tuần</span>
+            {/* Kẹp giấy giả lập */}
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-350 dark:bg-slate-700 rounded-full border border-slate-400 dark:border-slate-650 opacity-80 z-10 flex items-center justify-center">
+              <div className="w-1.5 h-2.5 border border-slate-500 rounded-full" />
+            </div>
+            <span className="text-3xl font-serif italic font-extrabold tracking-tight mt-1">{parsedWeeklyHours}</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest">giờ/tuần</span>
           </div>
 
           {/* Slider và Nhãn trạng thái */}
@@ -209,7 +213,7 @@ export function AchievableStep({
       </div>
 
       {/* PHẦN 2: KỸ NĂNG CẦN CÓ */}
-      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
+      <div className="pb-6 mb-6 border-b border-dashed border-app-line/80 space-y-2 relative">
         <label
           htmlFor="smart-required-skills"
           className={cn(
@@ -245,11 +249,11 @@ export function AchievableStep({
           >
             <span>💡</span> {showTipsSkills ? "Thu gọn mẹo kỹ năng ▲" : "Xem mẹo kỹ năng ▼"}
           </button>
-          
-          <div 
+
+          <div
             className={cn(
               "transition-all duration-300 ease-in-out overflow-hidden origin-top",
-              showTipsSkills ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+              showTipsSkills ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0",
             )}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -280,7 +284,7 @@ export function AchievableStep({
         </div>
 
         {/* 1-Click Skills Suggestions */}
-        <div className="mt-4 bg-app-bg/50 p-3.5 rounded-2xl border border-app-line/60">
+        <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3.5 rounded-xl border border-dashed border-app-line/80">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
             <span>💡</span> Gợi ý kỹ năng nhanh:
           </p>
@@ -330,7 +334,7 @@ export function AchievableStep({
       </div>
 
       {/* PHẦN 3: NGUỒN LỰC HỖ TRỢ */}
-      <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-2">
+      <div className="space-y-2 relative">
         <label
           htmlFor="smart-support-resources"
           className={cn(
@@ -366,11 +370,11 @@ export function AchievableStep({
           >
             <span>💡</span> {showTipsResources ? "Thu gọn mẹo nguồn lực ▲" : "Xem mẹo nguồn lực ▼"}
           </button>
-          
-          <div 
+
+          <div
             className={cn(
               "transition-all duration-300 ease-in-out overflow-hidden origin-top",
-              showTipsResources ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+              showTipsResources ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0",
             )}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -403,7 +407,7 @@ export function AchievableStep({
         </div>
 
         {/* 1-Click Resources Suggestions */}
-        <div className="mt-4 bg-app-bg/50 p-3.5 rounded-2xl border border-app-line/60">
+        <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3.5 rounded-xl border border-dashed border-app-line/80">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
             <span>💡</span> Gợi ý nguồn lực nhanh:
           </p>

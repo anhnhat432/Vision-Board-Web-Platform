@@ -105,19 +105,34 @@ const getLanternColorConfig = (areaName: string): FocusLanternColor => {
 export function FocusLantern({ Icon, label }: FocusLanternProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [triggerGlow, setTriggerGlow] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const config = getLanternColorConfig(label);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   // Kích hoạt hiệu ứng bừng sáng thắp nến mỗi khi đổi lĩnh vực trọng tâm
   // biome-ignore lint/correctness/useExhaustiveDependencies: restart animation when focus area label changes
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setTriggerGlow(false);
+      return;
+    }
     setTriggerGlow(true);
     const timer = setTimeout(() => setTriggerGlow(false), 1000);
     return () => clearTimeout(timer);
-  }, [label]);
+  }, [label, prefersReducedMotion]);
 
   // Tạo hiệu ứng hạt bay lơ lửng bên trong và xung quanh ngọn đèn
   // biome-ignore lint/correctness/useExhaustiveDependencies: restart particle flow when focus area changes
   useEffect(() => {
+    if (prefersReducedMotion) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -214,7 +229,7 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
     return () => {
       cancelAnimationFrame(animId);
     };
-  }, [label, config.particleColor]);
+  }, [label, config.particleColor, prefersReducedMotion]);
 
   return (
     <div className="relative select-none shrink-0">
@@ -222,7 +237,7 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
       <canvas
         ref={canvasRef}
         style={{ width: "96px", height: "140px" }}
-        className="absolute -top-[92px] -left-6 pointer-events-none z-30"
+        className="absolute -top-[92px] -left-6 pointer-events-none z-30 motion-reduce:hidden"
       />
 
       {/* Vòng tròn hào quang phát sáng chậm đệm phía sau */}
@@ -230,7 +245,7 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
         className={`absolute rounded-xl transition-all duration-1000 pointer-events-none ${
           triggerGlow
             ? `-inset-3.5 opacity-100 scale-125 ${config.glowBg.replace("/40", "/75")} shadow-lg ${config.shadowGlow}`
-            : `-inset-1.5 opacity-50 scale-100 animate-[pulse_3s_infinite] ${config.glowBg}`
+            : `-inset-1.5 opacity-50 scale-100 motion-safe:animate-[pulse_3s_infinite] ${config.glowBg}`
         }`}
       />
 

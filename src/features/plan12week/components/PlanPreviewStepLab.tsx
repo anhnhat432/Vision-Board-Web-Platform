@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle2, Flame, Sparkles } from "lucide-react";
+import { Calendar, CheckCircle2, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
@@ -131,41 +131,41 @@ export function PlanPreviewStepLab({
   }, [draft.leadIndicators]);
 
   return (
-    <div className="space-y-6 select-none">
+    <div className="space-y-6 select-none animate-in fade-in duration-300">
       {/* 📱 MOCKUP ĐIỆN THOẠI TODAY SIMULATION (Nhân vật chính tạo cảm hứng) */}
-      <section className="mx-auto max-w-sm overflow-hidden rounded-3xl border-[8px] border-slate-900 bg-slate-950 p-[3px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] animate-in slide-in-from-bottom-5 duration-500 relative group">
+      <section className="mx-auto max-w-sm overflow-hidden rounded-[24px] border-[8px] border-app-ink bg-app-bg p-[3px] shadow-app-lg motion-safe:animate-in motion-safe:slide-in-from-bottom-5 duration-500 relative group">
         {/* Notch giả lập iPhone */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4.5 bg-slate-900 rounded-b-xl z-20 flex items-center justify-around px-2 text-[9px] text-white/50 font-bold select-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4.5 bg-app-ink rounded-b-xl z-20 flex items-center justify-around px-2 text-[10px] text-app-surface/50 font-bold select-none">
           <span>09:41</span>
-          <div className="w-2.5 h-2.5 bg-slate-950 rounded-full border border-slate-800" />
+          <div className="w-2.5 h-2.5 bg-app-surface rounded-full border border-app-line/20" />
           <span>🔋 100%</span>
         </div>
 
         {/* Nội dung màn hình giả lập */}
-        <div className="rounded-[18px] bg-amber-50/15 dark:bg-slate-900 p-5 pt-8 min-h-[360px] text-xs text-app-ink relative z-10 flex flex-col justify-between">
+        <div className="rounded-[18px] bg-app-bg-subtle p-5 pt-8 min-h-[360px] text-xs text-app-ink relative z-10 flex flex-col justify-between">
           <div className="space-y-4">
             {/* Header giả lập */}
             <div className="flex items-center justify-between border-b border-app-line/40 pb-2.5 pt-1">
               <div>
-                <p className="text-[9px] font-extrabold uppercase tracking-wider text-app-accent">Hôm nay · Today</p>
-                <h5 className="font-serif text-base font-bold text-app-ink">Ngày khởi động 🚀</h5>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">Hôm nay · Today</p>
+                <h5 className="font-serif text-base font-semibold text-app-ink">Ngày khởi động 🚀</h5>
               </div>
-              <Sparkles className="h-5 w-5 text-indigo-500 animate-pulse" />
+              <Sparkles className="h-5 w-5 text-app-accent animate-pulse" />
             </div>
 
             {/* Đích đến 12 tuần mini */}
-            <div className="rounded-xl bg-white dark:bg-slate-950 p-3 shadow-3xs border border-app-line/60">
-              <span className="text-[8px] font-extrabold text-indigo-650 uppercase tracking-wide">
+            <div className="rounded-card bg-app-surface p-3 shadow-app-sm border border-app-line/60">
+              <span className="text-[10px] font-bold text-app-accent uppercase tracking-wider">
                 🏆 Đích đến Tuần 12 của bạn
               </span>
               <p className="mt-0.5 text-xs font-semibold text-app-ink leading-relaxed line-clamp-2 italic">
-                "{draft.week12Outcome || "Kế hoạch 12 tuần mơ ước..."}"
+                “{draft.week12Outcome || "Kế hoạch 12 tuần mơ ước…"}”
               </p>
             </div>
 
             {/* Checklist giả lập */}
             <div className="space-y-2">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-app-ink-muted">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                 Nhiệm vụ cần check-in hôm nay:
               </p>
 
@@ -173,19 +173,19 @@ export function PlanPreviewStepLab({
                 firstTwoTasks.map((tactic) => (
                   <div
                     key={tactic.id}
-                    className="w-full rounded-xl border border-indigo-100 bg-white hover:bg-indigo-50/30 dark:bg-slate-950 p-3 flex items-center justify-between shadow-3xs transition-all duration-200 text-left group-hover:border-indigo-200"
+                    className="w-full rounded-card border border-app-line bg-app-surface hover:bg-app-accent-subtle/30 p-3 flex items-center justify-between shadow-app-sm transition-all duration-200 text-left hover:border-app-accent/20"
                   >
                     <div className="min-w-0 pr-2">
-                      <p className="text-xs font-bold text-app-ink leading-normal truncate">{tactic.name}</p>
-                      <p className="text-[9px] text-app-ink-muted mt-0.5 font-semibold">
+                      <p className="text-xs font-semibold text-app-ink leading-normal truncate">{tactic.name}</p>
+                      <p className="text-[10px] text-app-ink-soft mt-0.5 font-medium">
                         Mục tiêu: {tactic.target} {tactic.unit}
                       </p>
                     </div>
-                    <CheckCircle2 className="h-5 w-5 text-slate-300 dark:text-slate-700 shrink-0 group-hover:text-indigo-400 group-hover:scale-105 transition-all" />
+                    <CheckCircle2 className="h-5 w-5 text-app-line-strong shrink-0 hover:text-app-accent hover:scale-105 transition-all" />
                   </div>
                 ))
               ) : (
-                <div className="rounded-xl border border-dashed border-slate-350 p-4 text-center text-slate-400">
+                <div className="rounded-card border border-dashed border-app-line p-4 text-center text-app-ink-muted">
                   Chưa có hành động lặp lại
                 </div>
               )}
@@ -193,32 +193,32 @@ export function PlanPreviewStepLab({
 
             {/* Thanh tiến độ */}
             <div className="space-y-1.5 pt-1.5">
-              <div className="flex justify-between text-[9px] font-bold text-app-ink-muted">
+              <div className="flex justify-between text-[10px] font-bold text-app-ink-muted">
                 <span>TIẾN ĐỘ TUẦN 1</span>
                 <span>0% / 100%</span>
               </div>
-              <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-app-accent to-emerald-500 w-1/12 h-full rounded-full animate-pulse" />
+              <div className="w-full bg-app-accent-soft h-2 rounded-pill overflow-hidden">
+                <div className="bg-app-accent w-1/12 h-full rounded-pill animate-pulse" />
               </div>
             </div>
           </div>
 
           {/* Footer mockup */}
-          <div className="border-t border-app-line/40 pt-3 flex items-center justify-between text-[9px] font-extrabold text-app-ink-muted uppercase">
+          <div className="border-t border-app-line/40 pt-3 flex items-center justify-between text-[10px] font-bold text-app-ink-muted uppercase">
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5 text-app-accent" /> Tuần 1 / 12
             </span>
-            <span className="text-indigo-650">Nhịp thực thi: 100% 🔥</span>
+            <span className="text-app-accent">Nhịp thực thi: 100% 🔥</span>
           </div>
         </div>
       </section>
 
       {/* Chữ truyền cảm hứng */}
       <div className="text-center max-w-md mx-auto space-y-1.5">
-        <h4 className="font-serif text-lg font-bold text-app-ink leading-snug">
+        <h4 className="font-serif text-lg font-semibold text-app-ink leading-snug">
           Giao diện check-in Today của bạn đã sẵn sàng!
         </h4>
-        <p className="text-xs text-app-ink-soft leading-relaxed font-semibold">
+        <p className="text-xs text-app-ink-soft leading-relaxed font-medium">
           Giao diện mockup trên điện thoại mô phỏng chính xác những gì bạn sẽ trải nghiệm hằng ngày. Bấm Kích hoạt ở
           dưới để bắt đầu tuần đầu tiên rực rỡ nhé!
         </p>
@@ -232,13 +232,13 @@ export function PlanPreviewStepLab({
       {validationMessage ? (
         <p
           role="alert"
-          className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-700"
+          className="rounded-card border border-app-status-error/30 bg-app-status-error/5 px-3.5 py-2.5 text-xs font-semibold text-app-status-error"
         >
           {validationMessage}
         </p>
       ) : null}
       {!canConfirm && !validationMessage ? (
-        <p className="rounded-xl border border-app-line bg-app-bg px-3.5 py-2.5 text-xs text-slate-500 font-semibold">
+        <p className="rounded-card border border-app-line bg-app-bg-subtle px-3.5 py-2.5 text-xs text-app-ink-soft font-medium">
           Kiểm tra lại các bước trước khi lưu kế hoạch.
         </p>
       ) : null}

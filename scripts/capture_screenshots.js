@@ -2,8 +2,8 @@ import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-const BASE_URL = "http://localhost:5173";
-const OUTPUT_DIR = "C:/Users/admin/.gemini/antigravity/brain/604bc145-c9a7-4c94-8524-8fe0527134bd/scratch/screenshots";
+const BASE_URL = "http://localhost:5174";
+const OUTPUT_DIR = "C:/Users/admin/.gemini/antigravity/brain/51852fd5-d1cb-4088-9d15-cc0b362402ea/scratch/screenshots";
 
 const VIEWPORTS = [
   { name: "mobile", width: 375, height: 812 },

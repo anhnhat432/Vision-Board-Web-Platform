@@ -108,21 +108,21 @@ function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore
   switch (level) {
     case "strong":
       return {
-        marker: "bg-emerald-500",
-        panel: "border-emerald-100 bg-emerald-50/30 dark:bg-emerald-950/10 dark:border-emerald-950/20",
-        text: "text-emerald-700 dark:text-emerald-400",
+        marker: "bg-app-status-success",
+        panel: "border-app-status-success/20 bg-app-status-success/5",
+        text: "text-app-status-success",
       };
     case "okay":
       return {
-        marker: "bg-amber-500",
-        panel: "border-amber-100 bg-amber-50/30 dark:bg-amber-950/10 dark:border-amber-950/20",
-        text: "text-amber-700 dark:text-amber-400",
+        marker: "bg-app-status-warning",
+        panel: "border-app-status-warning/20 bg-app-status-warning/5",
+        text: "text-app-status-warning",
       };
     default:
       return {
-        marker: "bg-rose-500",
-        panel: "border-rose-100 bg-rose-50/30 dark:bg-rose-950/10 dark:border-rose-950/20",
-        text: "text-rose-700 dark:text-rose-400",
+        marker: "bg-app-status-error",
+        panel: "border-app-status-error/20 bg-app-status-error/5",
+        text: "text-app-status-error",
       };
   }
 }
@@ -160,7 +160,7 @@ function getCommitmentQuoteForPreviousCommitment(system: TwelveWeekSystem, commi
   });
   const want = indicator?.commitment?.want?.trim();
 
-  return want ? `« ${truncateCommitmentQuote(want)} »` : null;
+  return want ? `“${truncateCommitmentQuote(want)}”` : null;
 }
 
 function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boolean {
@@ -170,18 +170,18 @@ function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boole
 function getCommitmentButtonClass(status: WeeklyCommitmentStatus, currentStatus: WeeklyCommitmentStatus): string {
   const isActive = status === currentStatus;
   if (!isActive) {
-    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg text-xs px-2.5 py-1.5 rounded-lg transition-colors";
+    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg transition-colors";
   }
 
   switch (status) {
     case "kept":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80 dark:bg-emerald-950/30 dark:text-emerald-400 font-semibold text-xs px-2.5 py-1.5 rounded-lg shadow-2xs";
+      return "border-app-status-success/30 bg-app-status-success/10 text-app-status-success hover:bg-app-status-success/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs";
     case "missed":
-      return "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100/80 dark:bg-rose-950/30 dark:text-rose-400 font-semibold text-xs px-2.5 py-1.5 rounded-lg shadow-2xs";
+      return "border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs";
     case "not_set":
-      return "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200/80 dark:bg-slate-800/50 dark:text-slate-300 font-semibold text-xs px-2.5 py-1.5 rounded-lg shadow-2xs";
+      return "border-app-line-strong bg-app-bg-subtle text-app-ink-soft hover:bg-app-line-strong/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs";
     default:
-      return "border-app-ink bg-app-ink text-white font-semibold text-xs px-2.5 py-1.5 rounded-lg shadow-2xs";
+      return "border-app-ink bg-app-ink text-white font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs";
   }
 }
 
@@ -194,7 +194,7 @@ const WashiTape = ({ className = "" }: { className?: string }) => (
 
 const PaperPin = ({ className = "" }: { className?: string }) => (
   <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
-    <div className="w-3.5 h-3.5 bg-rose-500 rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
+    <div className="w-3.5 h-3.5 bg-app-warm rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
       <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
     </div>
   </div>
@@ -402,7 +402,7 @@ export function TwelveWeekWeekTab({
       {!reviewIsCompleted && !canShowFormReview && (
         <>
           {/* Card Hero Tuần lớn sang trọng */}
-          <div className="rounded-3xl border border-app-line/45 bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-soft/20 p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-6 pt-10">
+          <div className="rounded-3xl border border-app-line/45 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/20 p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-6 pt-10">
             <PaperPin />
             <WashiTape className="opacity-75 rotate-[-1deg] -top-3.5" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
@@ -477,7 +477,7 @@ export function TwelveWeekWeekTab({
                   return (
                     <div
                       key={indicator.id || indicator.name}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl border border-app-line/40 bg-[#FAF9F5]/70 hover:bg-app-accent-subtle/25 gap-3 transition-all duration-300 shadow-3xs"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl border border-app-line/40 bg-app-bg-subtle/70 hover:bg-app-accent-subtle/25 gap-3 transition-all duration-300 shadow-3xs"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span
@@ -512,7 +512,7 @@ export function TwelveWeekWeekTab({
           {/* Nhắc nhở review tinh tế */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl border border-app-line/40 bg-app-bg/20 mt-2">
             <div className="space-y-0.5">
-              <p className="text-sm font-semibold text-app-ink font-serif">Nhìn lại & Đánh giá tuần</p>
+              <p className="text-sm font-semibold text-app-ink">Nhìn lại & Đánh giá tuần</p>
               <p className="text-xs text-app-ink-soft">
                 Review chính thức sẽ mở vào {getReviewDayLabel(system.reviewDay)}.
               </p>
@@ -611,7 +611,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-score"
                 data-done="true"
-                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
+                className="pb-6 border-b border-app-line/25 bg-transparent space-y-4"
               >
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-accent-soft text-[10px] font-bold text-app-accent">
@@ -654,7 +654,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-commitments"
                 data-done={allPreviousCommitmentsAnswered ? "true" : "false"}
-                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
+                className="pb-6 border-b border-app-line/25 bg-transparent space-y-4"
               >
                 <Label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-warm-soft text-[10px] font-bold text-app-warm-strong">
@@ -662,7 +662,7 @@ export function TwelveWeekWeekTab({
                   </span>
                   <span>Đánh giá cam kết cũ</span>
                 </Label>
-                <p className="text-xs text-app-ink-muted">Những cam kết nào bạn đã nỗ lực hoàn thành trong tuần qua?</p>
+                <p className="text-xs text-app-ink-muted">Chọn trạng thái cho các cam kết tuần trước.</p>
 
                 {previousCommitments.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-app-line bg-app-surface px-4 py-3.5 text-xs leading-relaxed text-app-ink-soft">
@@ -742,7 +742,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-insights"
                 data-done={weeklyForm.insights.trim().length > 0 ? "true" : "false"}
-                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
+                className="pb-6 border-b border-app-line/25 bg-transparent space-y-4"
               >
                 <Label
                   htmlFor="weekly-insights"
@@ -753,9 +753,7 @@ export function TwelveWeekWeekTab({
                   </span>
                   <span>Góc nhìn/điều học được</span>
                 </Label>
-                <p className="text-xs text-app-ink-muted">
-                  Bài học lớn nào giúp bạn hành động tốt hơn trong các tuần tới?
-                </p>
+                <p className="text-xs text-app-ink-muted">Ghi nhận bài học kinh nghiệm rút ra trong tuần.</p>
                 <Textarea
                   id="weekly-insights"
                   rows={3}
@@ -772,7 +770,7 @@ export function TwelveWeekWeekTab({
               <div
                 data-testid="weekly-review-step-next"
                 data-done={hasNextWeekCommitment ? "true" : "false"}
-                className="p-6 rounded-3xl border border-app-line/50 bg-[#FAF9F5]/70 hover:bg-app-bg/15 shadow-3xs transition-all duration-300 space-y-4"
+                className="pb-2 bg-transparent space-y-4"
               >
                 <Label
                   htmlFor="weekly-next-commitments"
@@ -783,7 +781,7 @@ export function TwelveWeekWeekTab({
                   </span>
                   <span>Cam kết của tuần tới</span>
                 </Label>
-                <p className="text-xs text-app-ink-muted">Cam kết thực hiện từ 1 đến 5 hành động ưu tiên cao nhất.</p>
+                <p className="text-xs text-app-ink-muted">Chọn tối đa 5 hành động quan trọng nhất cho tuần mới.</p>
                 <NextWeekCommitmentsEditor
                   value={nextWeekCommitments}
                   onChange={(next) => onWeeklyFormChange("nextWeekCommitments", next)}
@@ -969,7 +967,7 @@ export function TwelveWeekWeekTab({
                   Bài học rút ra
                 </span>
                 <blockquote className="font-serif italic text-app-ink leading-relaxed bg-app-accent-soft/30 p-4.5 rounded-2xl border border-app-accent/15">
-                  "{summaryInsights}"
+                  “{summaryInsights}”
                 </blockquote>
               </div>
             )}

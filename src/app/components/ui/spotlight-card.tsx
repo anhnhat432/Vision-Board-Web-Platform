@@ -13,7 +13,7 @@ export function SpotlightCard({ children, className, ...props }: SpotlightCardPr
       )}
       {...props}
     >
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 w-full min-w-0">{children}</div>
     </div>
   );
 }

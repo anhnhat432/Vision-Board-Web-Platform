@@ -52,7 +52,7 @@ export function VisionBoardCanvas({
   return (
     <div
       ref={exportRef}
-      className={`relative h-[520px] min-w-0 overflow-hidden sm:h-[580px] lg:h-[620px] xl:h-[600px] ${className ?? ""}`}
+      className={`relative h-[450px] min-w-0 overflow-hidden sm:h-[580px] lg:h-[620px] xl:h-[600px] ${className ?? ""}`}
       style={{ background: theme.canvasBackground }}
       data-theme-id={theme.id}
     >
@@ -144,6 +144,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
     if ((event.target as HTMLElement).closest("button")) return;
 
     const container = event.currentTarget.parentElement;

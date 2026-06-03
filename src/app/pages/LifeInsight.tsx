@@ -46,7 +46,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-blue-50 dark:bg-blue-950/20",
         text: "text-blue-600 dark:text-blue-400",
         border: "border-blue-200 dark:border-blue-900/30",
-        accent: "text-blue-700 dark:text-blue-300",
+        accent: "var(--color-career-accent)",
         hoverBg: "hover:bg-blue-50/50 hover:border-blue-300 dark:hover:bg-blue-950/10",
         selectedBg:
           "border-blue-500 bg-gradient-to-br from-blue-500/10 to-blue-500/5 ring-1 ring-blue-500/20 shadow-md shadow-blue-500/10",
@@ -58,7 +58,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-amber-50 dark:bg-amber-950/20",
         text: "text-amber-600 dark:text-amber-400",
         border: "border-amber-200 dark:border-amber-900/30",
-        accent: "text-amber-700 dark:text-amber-300",
+        accent: "var(--color-finance-accent)",
         hoverBg: "hover:bg-amber-50/50 hover:border-amber-300 dark:hover:bg-amber-950/10",
         selectedBg:
           "border-amber-500 bg-gradient-to-br from-amber-500/10 to-amber-500/5 ring-1 ring-amber-500/20 shadow-md shadow-amber-500/10",
@@ -70,7 +70,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-emerald-50 dark:bg-emerald-950/20",
         text: "text-emerald-600 dark:text-emerald-400",
         border: "border-emerald-200 dark:border-emerald-900/30",
-        accent: "text-emerald-700 dark:text-emerald-300",
+        accent: "var(--color-health-accent)",
         hoverBg: "hover:bg-emerald-50/50 hover:border-emerald-300 dark:hover:bg-emerald-950/10",
         selectedBg:
           "border-emerald-500 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 ring-1 ring-emerald-500/20 shadow-md shadow-emerald-500/10",
@@ -83,7 +83,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-indigo-50 dark:bg-indigo-950/20",
         text: "text-indigo-600 dark:text-indigo-400",
         border: "border-indigo-200 dark:border-indigo-900/30",
-        accent: "text-indigo-700 dark:text-indigo-300",
+        accent: "var(--color-education-accent)",
         hoverBg: "hover:bg-indigo-50/50 hover:border-indigo-300 dark:hover:bg-indigo-950/10",
         selectedBg:
           "border-indigo-500 bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 ring-1 ring-indigo-500/20 shadow-md shadow-indigo-500/10",
@@ -95,7 +95,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-rose-50 dark:bg-rose-950/20",
         text: "text-rose-600 dark:text-rose-400",
         border: "border-rose-200 dark:border-rose-900/30",
-        accent: "text-rose-700 dark:text-rose-300",
+        accent: "var(--color-relationships-accent)",
         hoverBg: "hover:bg-rose-50/50 hover:border-rose-300 dark:hover:bg-rose-950/10",
         selectedBg:
           "border-rose-500 bg-gradient-to-br from-rose-500/10 to-rose-500/5 ring-1 ring-rose-500/20 shadow-md shadow-rose-500/10",
@@ -107,7 +107,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-teal-50 dark:bg-teal-950/20",
         text: "text-teal-600 dark:text-teal-400",
         border: "border-teal-200 dark:border-teal-900/30",
-        accent: "text-teal-700 dark:text-teal-300",
+        accent: "var(--color-family-accent)",
         hoverBg: "hover:bg-teal-50/50 hover:border-teal-300 dark:hover:bg-teal-950/10",
         selectedBg:
           "border-teal-500 bg-gradient-to-br from-teal-500/10 to-teal-500/5 ring-1 ring-teal-500/20 shadow-md shadow-teal-500/10",
@@ -119,7 +119,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-orange-50 dark:bg-orange-950/20",
         text: "text-orange-600 dark:text-orange-400",
         border: "border-orange-200 dark:border-orange-900/30",
-        accent: "text-orange-700 dark:text-orange-300",
+        accent: "var(--color-personal-growth-accent)",
         hoverBg: "hover:bg-orange-50/50 hover:border-orange-300 dark:hover:bg-orange-950/10",
         selectedBg:
           "border-orange-500 bg-gradient-to-br from-orange-500/10 to-orange-500/5 ring-1 ring-orange-500/20 shadow-md shadow-orange-500/10",
@@ -131,7 +131,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-sky-50 dark:bg-sky-950/20",
         text: "text-sky-600 dark:text-sky-400",
         border: "border-sky-200 dark:border-sky-900/30",
-        accent: "text-sky-700 dark:text-sky-300",
+        accent: "var(--color-leisure-accent)",
         hoverBg: "hover:bg-sky-50/50 hover:border-sky-300 dark:hover:bg-sky-950/10",
         selectedBg:
           "border-sky-500 bg-gradient-to-br from-sky-500/10 to-sky-500/5 ring-1 ring-sky-500/20 shadow-md shadow-sky-500/10",
@@ -143,7 +143,7 @@ const getAreaColorConfig = (name: string): AreaColorConfig => {
         bgLight: "bg-app-accent-soft",
         text: "text-app-accent",
         border: "border-app-line",
-        accent: "text-app-accent",
+        accent: "var(--app-accent)",
         hoverBg: "hover:bg-app-bg hover:border-app-ink-muted",
         selectedBg:
           "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 ring-1 ring-app-accent/20 shadow-md shadow-app-accent/15",
@@ -315,6 +315,7 @@ export function LifeInsight() {
   const lifeAreas = userData?.currentWheelOfLife ?? [];
   const hasLifeBalance = hasRealLifeBalance(userData);
   const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null);
+  const [isAreasGridOpen, setIsAreasGridOpen] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<UserIntentId | null>(null);
   const [pendingFocusAreaName, setPendingFocusAreaName] = useState<string | null>(null);
   const pageTopRef = useRef<HTMLDivElement | null>(null);
@@ -499,16 +500,16 @@ export function LifeInsight() {
 
         <CoreFlowProgress currentStepId="life_insight" onExit={() => navigate("/")} />
 
-        <div className="space-y-6">
+        <div className="space-y-6 pb-20 lg:pb-0">
           {/* Header section - Chánh niệm & Serif Heading */}
           <div className="max-w-3xl animate-fade-in space-y-2.5">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
               BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
             </p>
             <h1 className="font-serif text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-app-ink">
-              Nhìn lại để bước tiếp
+              Chọn một điểm tựa cho 12 tuần tới
             </h1>
-            <p className="text-sm leading-relaxed text-app-ink-soft max-w-2xl font-serif italic">
+            <p className="max-w-2xl text-sm leading-relaxed text-app-ink-soft">
               “Lắng nghe bản thân để chọn ra một điểm tựa vững chắc hoặc một cơ hội cần cải thiện cho chu kỳ 12 tuần
               này.”
             </p>
@@ -519,7 +520,7 @@ export function LifeInsight() {
             {isCustomSelection ? (
               <>
                 <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 shadow-sm border border-amber-500/20">
-                  <Sparkles className="mr-1.5 h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5 motion-safe:animate-pulse" aria-hidden="true" />
                   Trọng tâm chọn: {focusAreaLabel}
                 </span>
                 <span className="inline-flex items-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-3xs">
@@ -567,7 +568,7 @@ export function LifeInsight() {
                 {lifePattern && (
                   <div className={`mt-4 rounded-xl border p-4 leading-relaxed ${lifePattern.bgColor}`}>
                     <h4 className={`text-xs font-bold flex items-center gap-1.5 ${lifePattern.accentColor}`}>
-                      <Sparkles className="h-3.5 w-3.5 shrink-0 animate-pulse" aria-hidden="true" />
+                      <Sparkles className="h-3.5 w-3.5 shrink-0 motion-safe:animate-pulse" aria-hidden="true" />
                       {lifePattern.title}
                     </h4>
                     <p className="mt-1.5 text-xs text-app-ink-soft leading-relaxed">{lifePattern.description}</p>
@@ -637,12 +638,27 @@ export function LifeInsight() {
               {/* Life areas grid switcher */}
               <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm">
                 <div className="pb-3 border-b border-app-line/60">
-                  <h3 className="text-sm font-bold text-app-ink">Hoặc tự chọn một trọng tâm khác</h3>
-                  <p className="mt-1 text-xs text-app-ink-muted">
-                    Nhấp vào lĩnh vực bạn muốn đặt mục tiêu hành động trong 12 tuần này
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-app-ink">Hoặc tự chọn một trọng tâm khác</h3>
+                      <p className="mt-1 text-xs text-app-ink-muted">
+                        Nhấp vào lĩnh vực bạn muốn đặt mục tiêu hành động trong 12 tuần này
+                      </p>
+                    </div>
+                    {/* Nút Toggle chỉ hiển thị trên Mobile */}
+                    <button
+                      type="button"
+                      onClick={() => setIsAreasGridOpen(!isAreasGridOpen)}
+                      className="lg:hidden inline-flex min-h-11 items-center justify-center text-xs font-bold text-app-accent hover:underline px-3 py-2 cursor-pointer font-sans"
+                    >
+                      {isAreasGridOpen ? "Thu gọn ▲" : "Thay đổi ▼"}
+                    </button>
+                  </div>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                <div className={cn(
+                  "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 transition-all duration-200 overflow-hidden",
+                  !isAreasGridOpen && "max-h-0 lg:max-h-none opacity-0 lg:opacity-100"
+                )}>
                   {lifeAreas.map((area) => {
                     const isSelected = focusArea.name === area.name;
                     const AreaIcon = getLifeAreaIcon(area.name);
@@ -699,7 +715,7 @@ export function LifeInsight() {
 
             {/* RIGHT COLUMN: ACTION & CTA */}
             <div className="lg:sticky lg:top-6 space-y-6 order-2 lg:order-2">
-              <div className="surface-raised rounded-2xl border border-[#E6DFD3] dark:border-slate-800 bg-[#FCFAF6] dark:bg-slate-900/40 p-6 shadow-app-md relative overflow-hidden transition-all duration-300">
+              <div className="surface-raised rounded-2xl border border-app-line bg-app-bg-subtle p-6 shadow-app-md relative overflow-hidden transition-all duration-300">
                 {/* Paperclip sticker mockup */}
                 <div className="absolute -top-1.5 right-6 z-10 rotate-[-12deg] text-amber-600/70 dark:text-amber-500/50">
                   <svg
@@ -731,7 +747,7 @@ export function LifeInsight() {
                       </svg>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900 border border-[#E6DFD3] dark:border-slate-800 p-6 pb-6 rounded-sm shadow-app-md text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[220px]">
+                    <div className="bg-app-surface border border-app-line p-6 pb-6 rounded-sm shadow-app-md text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[220px]">
                       {/* Vòng tròn hào quang & Đèn thắp sáng FocusLantern ở chính tâm */}
                       <div className="py-3.5 flex justify-center items-center h-28 relative">
                         <FocusLantern Icon={FocusAreaIcon} label={focusArea.name} />
@@ -766,7 +782,7 @@ export function LifeInsight() {
                   </div>
 
                   {/* Đề xuất mục tiêu SMART 12 tuần cụ thể và lý do */}
-                  <div className="mt-5 p-4 rounded-xl border border-amber-200/50 bg-[#F7F3E9] dark:bg-slate-900/60 dark:border-slate-800 space-y-2 relative shadow-sm">
+                  <div className="mt-5 p-4 rounded-xl border border-app-line bg-app-surface space-y-2 relative shadow-sm">
                     <div className="absolute -top-2 left-6 z-10">
                       <div className="h-3.5 w-14 bg-amber-200/30 dark:bg-amber-850/20 backdrop-blur-[1px] transform rotate-2 border-x border-amber-300/20" />
                     </div>
@@ -777,13 +793,13 @@ export function LifeInsight() {
                     <p className="text-xs font-serif italic font-medium text-app-ink leading-relaxed">
                       “{smartGoalStarter.specificGoalStatement}”
                     </p>
-                    <p className="text-xs text-app-ink-muted italic leading-relaxed pt-2 border-t border-[#E6DFD3] dark:border-slate-800">
+                    <p className="text-xs text-app-ink-muted italic leading-relaxed pt-2 border-t border-app-line">
                       Lý do: {smartGoalStarter.motivationReason}
                     </p>
                   </div>
 
                   {/* Intent Options - Đồng bộ hóa tiêu đề và class chosen để khớp tests */}
-                  <div className="mt-6 pt-5 border-t border-[#E6DFD3] dark:border-slate-800">
+                  <div className="mt-6 pt-5 border-t border-app-line">
                     <h3 className="text-xs font-bold text-app-ink uppercase tracking-wider">
                       Mục đích chính của bạn với lĩnh vực này
                     </h3>
@@ -825,7 +841,7 @@ export function LifeInsight() {
                               )}
                               style={
                                 isSelected
-                                  ? { backgroundColor: `${colorConfig.accent}20`, color: colorConfig.accent }
+                                  ? { backgroundColor: `color-mix(in srgb, ${colorConfig.accent} 20%, transparent)`, color: colorConfig.accent }
                                   : {}
                               }
                             >
@@ -833,7 +849,7 @@ export function LifeInsight() {
                             </span>
                             <span
                               className={cn(
-                                "text-xs font-semibold truncate leading-none",
+                                "text-xs font-semibold leading-snug whitespace-normal",
                                 isSelected ? colors.selectedText : "text-app-ink",
                               )}
                               style={isSelected ? { color: colorConfig.accent } : {}}
@@ -846,12 +862,12 @@ export function LifeInsight() {
                     </div>
 
                     {selectedIntent !== null && (
-                      <div className="mt-3.5 flex items-center justify-between pt-3 border-t border-[#E6DFD3] dark:border-slate-800">
+                      <div className="mt-3.5 flex items-center justify-between pt-3 border-t border-app-line">
                         <p className="text-xs text-app-ink-muted">Đã ghi nhận định hướng hỗ trợ lập mục tiêu.</p>
                         <button
                           type="button"
                           onClick={handleIntentClear}
-                          className="rounded-lg border border-[#E6DFD3] dark:border-slate-800 bg-[#FCFAF6] dark:bg-slate-900 min-h-11 px-4 py-2 text-xs font-bold text-app-ink-soft hover:bg-[#F7F3E9] hover:text-app-ink transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
+                          className="rounded-lg border border-app-line bg-app-surface min-h-11 px-4 py-2 text-xs font-bold text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink transition-colors focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 focus-visible:outline-none cursor-pointer"
                         >
                           Bỏ chọn
                         </button>
@@ -860,18 +876,18 @@ export function LifeInsight() {
                   </div>
                 </div>
 
-                {/* Main CTA Section - Đồng bộ hóa nút bấm chính Tiếp → Viết mục tiêu để khớp tests */}
-                <div className="mt-6 pt-5 border-t border-[#E6DFD3] dark:border-slate-800">
+                {/* Main CTA Section - Ẩn trên Mobile vì đã có Sticky Bottom CTA */}
+                <div className="hidden lg:block mt-6 pt-5 border-t border-app-line">
                   <div className="flex flex-col gap-3">
                     <Button
                       onClick={handleStartGoalSetup}
                       className="group inline-flex items-center justify-center gap-2 bg-app-accent py-4 px-6 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 w-full transition-all duration-200 cursor-pointer"
                     >
-                      Tiếp → Viết mục tiêu
+                      Tạo mục tiêu SMART
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
                     </Button>
                     <p className="text-xs text-app-ink-muted text-center font-medium">
-                      Bước tiếp theo: Thiết lập mục tiêu SMART cho 12 tuần tới (khoảng 4 phút)
+                      Bước tiếp theo: biến trọng tâm này thành mục tiêu 12 tuần rõ ràng.
                     </p>
                   </div>
                 </div>
@@ -894,6 +910,19 @@ export function LifeInsight() {
             </span>
           </div>
 
+        </div>
+      </div>
+
+      {/* Sticky Bottom CTA cho Mobile */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-app-surface/95 backdrop-blur-md border-t border-app-line p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl">
+        <div className="max-w-md mx-auto">
+          <Button
+            onClick={handleStartGoalSetup}
+            className="group inline-flex min-h-11 items-center justify-center gap-2 bg-app-accent px-6 py-3.5 text-sm font-bold leading-snug text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 w-full transition-all duration-200 cursor-pointer"
+          >
+            Tạo mục tiêu SMART
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </PageShell>

@@ -31,7 +31,7 @@ export function RelevantStep({
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="pb-6 mb-6 border-b border-dashed border-app-line/80 relative">
         <label htmlFor="smart-relevant-reason" className={cn(labelClass, "text-base font-bold text-app-ink")}>
           Vì sao mục tiêu này thực sự quan trọng với bạn?
           <span className={requiredMarkerClass} aria-hidden="true">
@@ -59,7 +59,7 @@ export function RelevantStep({
         />
 
         {/* 1-Click Motivation Suggestions trượt ngang */}
-        <div className="mt-3 bg-app-bg/40 p-3.5 rounded-xl border border-app-line/60">
+        <div className="mt-3 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3.5 rounded-xl border border-dashed border-app-line/80">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
             <span>❤️</span> Gợi ý lý do nhanh:
           </p>
@@ -161,11 +161,11 @@ export function RelevantStep({
           >
             <span>💡</span> {showTips ? "Thu gọn mẹo viết lý do tốt ▲" : "Xem mẹo viết lý do tốt ▼"}
           </button>
-          
-          <div 
+
+          <div
             className={cn(
               "transition-all duration-300 ease-in-out overflow-hidden origin-top",
-              showTips ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+              showTips ? "mt-3 max-h-[300px] opacity-100" : "max-h-0 opacity-0",
             )}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -227,4 +227,3 @@ export function RelevantStep({
     </div>
   );
 }
-

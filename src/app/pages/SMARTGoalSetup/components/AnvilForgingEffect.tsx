@@ -13,12 +13,12 @@ interface AnvilForgingEffectProps {
 
 export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const shouldReduceMotion =
+    typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [phase, setPhase] = useState<"gathering" | "crystallized">("gathering");
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
-
-  /* ---------- crystallize chime sound ---------- */
   const playChime = useCallback(() => {
     try {
       // biome-ignore lint/suspicious/noExplicitAny: webkitAudioContext fallback
@@ -71,6 +71,13 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
 
   /* ---------- Canvas particle animation ---------- */
   useEffect(() => {
+    if (shouldReduceMotion) {
+      setPhase("crystallized");
+      playChime();
+      const timer = setTimeout(onComplete, 1200);
+      return () => clearTimeout(timer);
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -120,10 +127,10 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
     const rings: RingParticle[] = [];
 
     const LIGHT_COLORS = [
-      "rgba(16, 185, 129, 0.9)",  // emerald
+      "rgba(16, 185, 129, 0.9)", // emerald
       "rgba(52, 211, 153, 0.85)", // emerald lighter
-      "rgba(99, 102, 241, 0.8)",  // indigo
-      "rgba(139, 92, 246, 0.7)",  // violet
+      "rgba(99, 102, 241, 0.8)", // indigo
+      "rgba(139, 92, 246, 0.7)", // violet
       "rgba(255, 255, 255, 0.9)", // white
       "rgba(167, 139, 250, 0.6)", // lavender
       "rgba(45, 212, 191, 0.75)", // teal
@@ -244,7 +251,8 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       // --- Orbital rings ---
       for (const r of rings) {
         r.angle += r.speed;
-        const orbAlpha = r.alpha * (phaseRef.current === "crystallized" ? Math.max(0, 1 - (elapsed - GATHER_DURATION) / 1200) : eased);
+        const orbAlpha =
+          r.alpha * (phaseRef.current === "crystallized" ? Math.max(0, 1 - (elapsed - GATHER_DURATION) / 1200) : eased);
         if (orbAlpha <= 0) continue;
 
         const rx = cx + Math.cos(r.angle) * r.radius * (1 - eased * 0.3);
@@ -308,7 +316,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       cancelAnimationFrame(animId);
       if (audioCtxRef.current) audioCtxRef.current.close();
     };
-  }, [onComplete, playChime]);
+  }, [onComplete, playChime, shouldReduceMotion]);
 
   /* ---------- Goal text ---------- */
   const displayGoal = goalStatement && goalStatement.length > 60 ? `${goalStatement.slice(0, 57)}...` : goalStatement;
@@ -319,7 +327,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" />
 
       {/* Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full pointer-events-none" />
+      {!shouldReduceMotion && <canvas ref={canvasRef} className="absolute inset-0 h-full w-full pointer-events-none" />}
 
       {/* Content overlay */}
       <div className="relative z-10 flex flex-col items-center gap-6 px-6 text-center pointer-events-none">
@@ -328,9 +336,10 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
           className={`
             inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide
             border shadow-lg transition-all duration-700
-            ${phase === "crystallized"
-              ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 shadow-emerald-500/20"
-              : "border-indigo-400/30 bg-indigo-500/10 text-indigo-300 shadow-indigo-500/10"
+            ${
+              phase === "crystallized"
+                ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 shadow-emerald-500/20"
+                : "border-indigo-400/30 bg-indigo-500/10 text-indigo-300 shadow-indigo-500/10"
             }
           `}
         >
@@ -347,31 +356,25 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
           className={`
             font-serif text-2xl sm:text-3xl font-bold tracking-wide
             transition-all duration-1000
-            ${phase === "crystallized"
-              ? "text-emerald-100 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-              : "text-slate-200 drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+            ${
+              phase === "crystallized"
+                ? "text-emerald-100 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                : "text-slate-200 drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]"
             }
           `}
         >
-          {phase === "gathering"
-            ? "Đang kết tinh ý chí..."
-            : "Sẵn sàng hành động!"}
+          {phase === "gathering" ? "Đang kết tinh ý chí..." : "Sẵn sàng hành động!"}
         </h3>
 
         {/* Goal statement reveal */}
         <div
           className={`
             max-w-sm transition-all duration-1000 ease-out
-            ${phase === "crystallized"
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
-            }
+            ${phase === "crystallized" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
           `}
         >
           {displayGoal && (
-            <p className="font-serif text-base italic leading-relaxed text-slate-300/90">
-              &ldquo;{displayGoal}&rdquo;
-            </p>
+            <p className="font-serif text-base italic leading-relaxed text-slate-300/90">&ldquo;{displayGoal}&rdquo;</p>
           )}
         </div>
 
@@ -379,15 +382,10 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         <p
           className={`
             text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-700
-            ${phase === "crystallized"
-              ? "text-emerald-400/80"
-              : "text-indigo-400/60"
-            }
+            ${phase === "crystallized" ? "text-emerald-400/80" : "text-indigo-400/60"}
           `}
         >
-          {phase === "gathering"
-            ? "Thu thập năng lượng từ mục tiêu của bạn"
-            : "Chuyển sang đánh giá tính khả thi"}
+          {phase === "gathering" ? "Thu thập năng lượng từ mục tiêu của bạn" : "Chuyển sang đánh giá tính khả thi"}
         </p>
 
         {/* Progress bar */}
@@ -395,9 +393,10 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
           <div
             className={`
               h-full rounded-full transition-all duration-500
-              ${phase === "crystallized"
-                ? "bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
-                : "bg-gradient-to-r from-indigo-500 via-violet-400 to-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.3)]"
+              ${
+                phase === "crystallized"
+                  ? "bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                  : "bg-gradient-to-r from-indigo-500 via-violet-400 to-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.3)]"
               }
             `}
             style={{

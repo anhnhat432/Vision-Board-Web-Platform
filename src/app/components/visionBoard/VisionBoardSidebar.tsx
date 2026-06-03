@@ -82,7 +82,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
               return (
                 <div
                   key={area.name}
-                  className="rounded-[var(--r-tile)] border border-slate-100 bg-app-bg p-3"
+                  className="rounded-card border border-app-line bg-app-bg p-3"
                   data-testid={`life-area-row-${area.name}`}
                 >
                   <div className="flex items-center justify-between gap-2">

@@ -363,26 +363,39 @@
 
   /* Skip to content link for keyboard users */
   a.skip-to-content {
-    position: fixed;
-    top: -100%;
-    left: 0.75rem;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
     z-index: 9999;
+  }
+
+  a.skip-to-content:focus,
+  a.skip-to-content:focus-visible {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+    height: auto;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
     border-radius: 0.5rem;
     background: var(--app-accent);
     color: white;
     font-size: 0.875rem;
     font-weight: 600;
-    padding: 0.5rem 1rem;
     text-decoration: none;
-    transition: top 120ms ease;
     box-shadow:
       0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  }
-
-  a.skip-to-content:focus,
-  a.skip-to-content:focus-visible {
-    top: 0.75rem;
     outline: 2px solid var(--app-accent);
     outline-offset: 2px;
   }

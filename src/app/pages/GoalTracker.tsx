@@ -28,6 +28,7 @@ import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { PageHero } from "../components/layout/PageHero";
+import { SyncStatusPill } from "../components/root-layout/SyncStatusPill";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -356,7 +357,7 @@ function TodayFocusCard({
           <Target className="h-5 w-5" />
         </div>
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-app-ink">Tất cả mục tiêu đã hoàn tất!</h4>
+          <h3 className="text-sm font-bold text-app-ink">Tất cả mục tiêu đã hoàn tất!</h3>
           <p className="text-xs text-app-ink-soft leading-relaxed max-w-md mx-auto">
             Không có tiêu điểm hành động cần xử lý. Hãy thiết lập một chu kỳ 12 tuần mới hoặc thêm mục tiêu thường để
             tiếp tục hành trình.
@@ -432,9 +433,9 @@ function TodayFocusCard({
         </div>
 
         <div className="space-y-1">
-          <h4 className="font-serif text-base sm:text-lg font-bold text-app-ink leading-snug break-words">
+          <h3 className="font-serif text-base sm:text-lg font-bold text-app-ink leading-snug break-words">
             {goal.title}
-          </h4>
+          </h3>
           <p className="text-xs text-app-ink-soft font-semibold">
             {isTwelveWeek ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
             <span className={cn("font-bold", areaStyle.text)}>{getLifeAreaLabel(goal.category)}</span>
@@ -447,10 +448,12 @@ function TodayFocusCard({
               <button
                 type="button"
                 onClick={() => handleToggleTask(goal.id, firstOpenTask.id)}
-                className="flex size-4.5 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-white transition-all duration-200 hover:border-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="flex h-11 w-11 -my-3 -ml-3 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 aria-label="Chốt việc"
               >
-                <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
+                <span className="flex size-4.5 items-center justify-center rounded-full border border-app-line bg-app-surface hover:border-app-accent transition-all duration-200">
+                  <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
+                </span>
               </button>
               <span className="text-sm font-medium truncate text-app-ink">{firstOpenTask.title}</span>
             </div>
@@ -688,6 +691,16 @@ function GoalTrackerContent({
 
     clearGoalPlanningDrafts();
     navigate(goalFlowStartHref);
+  };
+
+  const handleStartDirectGoalFlow = () => {
+    if (hasReachedLimit(viewUserData, "maxActiveGoals")) {
+      setIsGoalLimitPaywallOpen(true);
+      return;
+    }
+
+    clearGoalPlanningDrafts();
+    navigate("/smart-goal-setup");
   };
 
   const handleToggleTask = (goalId: string, taskId: string) => {
@@ -993,14 +1006,17 @@ function GoalTrackerContent({
             className="bg-gradient-to-br from-white via-white to-app-accent-soft/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-app-accent-soft/5 border-app-line/80 rounded-[18px]"
             eyebrow="MỤC TIÊU"
             title={
-              <span className="font-serif text-3xl font-semibold leading-tight tracking-tight text-app-ink sm:text-4xl">
-                Hành trình mục tiêu
+              <span className="flex items-center gap-3">
+                <span className="font-serif text-3xl font-semibold leading-tight tracking-normal text-app-ink sm:text-4xl">
+                  Hành trình mục tiêu
+                </span>
+                {isRealMode() && <SyncStatusPill />}
               </span>
             }
             description="Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều đặn."
             primaryCta={
               <Button
-                className="bg-app-accent text-white rounded-lg px-5 py-3 text-sm font-bold hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="bg-app-accent text-white rounded-lg px-5 py-2.5 text-sm font-bold hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto !whitespace-normal sm:!whitespace-nowrap !h-auto sm:!h-10"
                 onClick={handleStartGuidedGoalFlow}
               >
                 <Zap className="h-4.5 w-4.5" />
@@ -1010,11 +1026,11 @@ function GoalTrackerContent({
             secondaryCta={
               <Button
                 variant="outline"
-                className="rounded-lg border border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-5 py-3 text-sm font-bold transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto"
-                onClick={handleStartGuidedGoalFlow}
+                className="rounded-lg border border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-5 py-2.5 text-sm font-bold transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto !whitespace-normal sm:!whitespace-nowrap !h-auto sm:!h-10"
+                onClick={handleStartDirectGoalFlow}
               >
                 <Plus className="h-4.5 w-4.5" />
-                Thiết lập mục tiêu
+                Tạo nhanh mục tiêu
               </Button>
             }
             aside={
@@ -1048,13 +1064,13 @@ function GoalTrackerContent({
           />
 
           {/* Search + Filter Container dạng Toolbar sạch sẽ */}
-          <div className="rounded-[18px] border border-app-line/75 bg-app-surface p-4 shadow-app-sm flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+          <div className="rounded-[18px] border border-app-line/75 bg-app-surface p-4 shadow-app-sm flex flex-col gap-3.5">
             {/* Search Input */}
-            <div className="relative w-full lg:w-96">
+            <div className="relative w-full">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-app-ink-muted" />
               <input
                 type="search"
-                placeholder="Tìm theo tên hoặc mô tả mục tiêu..."
+                placeholder="Tìm theo tên hoặc mô tả mục tiêu…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-xl border border-app-line bg-app-bg pl-11 pr-4 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent transition-all duration-200"
@@ -1062,7 +1078,7 @@ function GoalTrackerContent({
             </div>
 
             {/* Filter Chips */}
-            <div className="w-full lg:w-auto overflow-x-auto">
+            <div className="w-full overflow-x-auto">
               <GoalFilterChips activeFilter={activeFilter} setActiveFilter={setActiveFilter} counts={filterCounts} />
             </div>
           </div>
@@ -1086,9 +1102,9 @@ function GoalTrackerContent({
                     <Button
                       variant="outline"
                       className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-6 py-2.5 rounded-lg font-bold text-sm"
-                      onClick={handleStartGuidedGoalFlow}
+                      onClick={handleStartDirectGoalFlow}
                     >
-                      Tạo mục tiêu đầu tiên
+                      Tạo mục tiêu thường
                     </Button>
                   </div>
                 }
@@ -1170,7 +1186,7 @@ function GoalTrackerContent({
                     title="Không tìm thấy mục tiêu"
                     description={
                       searchQuery.trim()
-                        ? `Không tìm thấy mục tiêu nào khớp với "${searchQuery}"`
+                        ? `Không tìm thấy mục tiêu nào khớp với “${searchQuery}”`
                         : "Không tìm thấy mục tiêu nào phù hợp với bộ lọc hiện tại."
                     }
                     actions={
@@ -1270,7 +1286,7 @@ function GoalSummaryStrip({
           >
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold tracking-[0.05em] text-app-ink-soft">{item.title}</p>
-              <p className="mt-1.5 font-serif text-2xl sm:text-3xl font-black text-app-ink tabular-nums leading-none">
+              <p className="mt-1.5 font-serif text-xl sm:text-2xl lg:text-3xl font-black text-app-ink tabular-nums leading-none">
                 {item.value}
               </p>
               <p className="mt-2 text-xs font-medium text-app-ink-muted leading-tight">{item.note}</p>
@@ -1314,7 +1330,7 @@ function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalFilterCh
   ] as const;
 
   return (
-    <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 max-w-full lg:justify-end">
+    <div className="flex gap-2 overflow-x-auto pb-1 max-w-full [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {chips.map((chip) => {
         const isActive = activeFilter === chip.id;
         return (
@@ -1414,7 +1430,7 @@ function GoalCard({
     <div id={`goal-card-${goal.id}`} className="perspective-1000 w-full relative">
       <div className={cn("preserve-3d card-transition w-full relative", isFlipped ? "rotate-y-180" : "")}>
         {/* FRONT SIDE */}
-        <div className="backface-hidden w-full">
+        <div className="backface-hidden w-full" aria-hidden={isFlipped} inert={isFlipped ? true : undefined}>
           <SpotlightCard
             className={cn(
               "rounded-[18px] border p-5 sm:p-6 transition-all duration-300 hover:border-app-accent/30 hover:shadow-app-md relative",
@@ -1426,7 +1442,7 @@ function GoalCard({
             {/* Nút xóa thùng rác nhỏ ở góc trên bên phải, visually quieter */}
             <button
               type="button"
-              className="absolute top-4 right-4 h-7.5 w-7.5 rounded-lg text-app-ink-muted/30 hover:text-app-status-error hover:bg-app-status-error/5 transition-all duration-200 flex items-center justify-center z-20"
+              className="absolute top-2 right-2 h-11 w-11 rounded-lg text-app-ink-muted/30 hover:text-app-status-error hover:bg-app-status-error/5 transition-all duration-200 flex items-center justify-center z-20"
               onClick={() => setGoalToDelete(goal.id)}
               aria-label={`Xóa mục tiêu ${goal.title}`}
             >
@@ -1435,7 +1451,7 @@ function GoalCard({
 
             <div className="grid gap-6 lg:grid-cols-[1fr_1px_280px] lg:gap-8">
               {/* Cột trái: Goal Info */}
-              <div className="space-y-3.5 pr-2">
+              <div className="space-y-3.5 pr-2 min-w-0">
                 <div className="flex items-start gap-3.5">
                   <div
                     className={cn(
@@ -1576,14 +1592,18 @@ function GoalCard({
                         <button
                           type="button"
                           onClick={() => handleToggleTask(goal.id, task.id)}
-                          className="flex size-4.5 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-white transition-all duration-200 hover:border-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          className="flex h-11 w-11 -my-3 -ml-3 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                           aria-label={task.completed ? "Hủy chốt việc" : "Chốt việc"}
                         >
-                          {task.completed ? (
-                            <CheckCircle2 className="size-4.5 text-app-accent shrink-0" />
-                          ) : (
-                            <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
-                          )}
+                          <span className="flex size-4.5 items-center justify-center">
+                            {task.completed ? (
+                              <CheckCircle2 className="size-4.5 text-app-accent shrink-0" />
+                            ) : (
+                              <span className="flex size-4.5 items-center justify-center rounded-full border border-app-line bg-app-surface hover:border-app-accent transition-all duration-200">
+                                <Circle className="size-3.5 text-app-ink-muted hover:text-app-accent shrink-0" />
+                              </span>
+                            )}
+                          </span>
                         </button>
                         <span
                           className={cn(
@@ -1620,7 +1640,7 @@ function GoalCard({
         </div>
 
         {/* BACK SIDE */}
-        <div className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10">
+        <div className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10" aria-hidden={!isFlipped} inert={!isFlipped ? true : undefined}>
           <SpotlightCard
             className={cn(
               "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
@@ -1732,7 +1752,7 @@ function GoalsSidebar({
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <div className="space-y-2">
-            <h4 className="text-sm font-bold text-app-ink">Mọi thứ đang đi đúng hướng!</h4>
+            <h3 className="text-sm font-bold text-app-ink">Mọi thứ đang đi đúng hướng!</h3>
             <p className="text-xs text-app-ink-soft leading-relaxed px-2">
               Không có mục tiêu nào cần chú ý khẩn cấp hay việc chưa hoàn thành hôm nay. Hãy giữ vững nhịp độ tuyệt vời
               này.
@@ -1761,10 +1781,12 @@ function GoalsSidebar({
                     <button
                       type="button"
                       onClick={() => handleToggleTask(task.goalId, task.taskId)}
-                      className="flex size-4 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-white transition-all duration-200 hover:border-app-accent mt-0.5"
+                      className="flex h-11 w-11 -my-3.5 -ml-3.5 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                       aria-label="Chốt việc"
                     >
-                      <Circle className="size-3 text-app-ink-muted hover:text-app-accent shrink-0" />
+                      <span className="flex size-4 items-center justify-center rounded-full border border-app-line bg-app-surface hover:border-app-accent transition-all duration-200">
+                        <Circle className="size-3 text-app-ink-muted hover:text-app-accent shrink-0" />
+                      </span>
                     </button>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-app-ink leading-snug break-words">{task.title}</p>
@@ -1782,7 +1804,7 @@ function GoalsSidebar({
 
           {/* Widget 2: Cần đánh giá (Review due) */}
           {needsReviewGoals.length > 0 && (
-            <div className="rounded-[18px] border border-app-line bg-amber-50/15 dark:bg-amber-950/5 border-amber-500/25 dark:border-amber-500/15 p-5 shadow-app-sm">
+            <div className="rounded-[18px] bg-amber-50/30 dark:bg-amber-950/15 p-5 border border-transparent">
               <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-amber-600 dark:text-amber-400 mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
@@ -1809,7 +1831,7 @@ function GoalsSidebar({
 
           {/* Widget 3: Mục tiêu cần chỉnh nhịp */}
           {atRiskGoals.length > 0 && (
-            <div className="rounded-[18px] border border-app-line bg-orange-50/15 dark:bg-orange-950/5 border-orange-500/20 dark:border-orange-850/20 p-5 shadow-app-sm">
+            <div className="rounded-[18px] bg-orange-50/30 dark:bg-orange-950/15 p-5 border border-transparent">
               <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-orange-700 dark:text-orange-400 mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
@@ -2089,7 +2111,23 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           Viết thư tuần 12
         </Button>
 
-        <Dialog open={isWriteOpen} onOpenChange={setIsWriteOpen}>
+        <Dialog
+          open={isWriteOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              const isDirty = tempText.trim() !== (letterText || "").trim();
+              if (
+                isDirty &&
+                !window.confirm(
+                  "Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?"
+                )
+              ) {
+                return;
+              }
+            }
+            setIsWriteOpen(open);
+          }}
+        >
           <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
             <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
               <div className="flex items-center gap-2">
@@ -2105,7 +2143,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             <div className="pt-2">
               <textarea
                 className="w-full min-h-[160px] rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
-                placeholder="Gửi bản thân thân mến ở tuần 12..."
+                placeholder="Gửi bản thân thân mến ở tuần 12…"
                 value={tempText}
                 onChange={(e) => setTempText(e.target.value)}
                 maxLength={500}
@@ -2202,7 +2240,23 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
       </Dialog>
 
       {/* Dialog Chỉnh sửa khi đã có thư */}
-      <Dialog open={isWriteOpen} onOpenChange={setIsWriteOpen}>
+      <Dialog
+        open={isWriteOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            const isDirty = tempText.trim() !== (letterText || "").trim();
+            if (
+              isDirty &&
+              !window.confirm(
+                "Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?"
+              )
+            ) {
+              return;
+            }
+          }
+          setIsWriteOpen(open);
+        }}
+      >
         <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
           <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
             <div className="flex items-center gap-2">
@@ -2217,7 +2271,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           <div className="pt-2">
             <textarea
               className="w-full min-h-[160px] rounded-xl border border-app-line bg-app-bg p-3.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 resize-none transition-all"
-              placeholder="Gửi bản thân thân mến..."
+              placeholder="Gửi bản thân thân mến…"
               value={tempText}
               onChange={(e) => setTempText(e.target.value)}
               maxLength={500}

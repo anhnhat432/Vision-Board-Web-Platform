@@ -138,7 +138,7 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
     );
   const want = indicator?.commitment?.want?.trim();
 
-  return want ? `« ${truncateCommitmentReminder(want)} »` : null;
+  return want ? `“${truncateCommitmentReminder(want)}”` : null;
 }
 
 // Decorative elements for Dreamy Planner aesthetic
@@ -150,7 +150,7 @@ const WashiTape = ({ className = "" }: { className?: string }) => (
 
 const PaperPin = ({ className = "" }: { className?: string }) => (
   <div className={`absolute -top-2 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
-    <div className="w-3.5 h-3.5 bg-rose-500 rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
+    <div className="w-3.5 h-3.5 bg-app-warm rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
       <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
     </div>
   </div>
@@ -162,11 +162,11 @@ function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
   }
   switch (value) {
     case "low":
-      return "border-indigo-300/60 bg-indigo-50/30 text-indigo-800 dark:border-indigo-900/40 dark:bg-indigo-950/20 dark:text-indigo-300 font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-indigo-200 dark:ring-indigo-900/20";
+      return "border-app-status-info/40 bg-app-status-info/10 text-app-status-info dark:bg-app-status-info/20 dark:text-app-status-info font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-app-status-info/20";
     case "high":
-      return "border-amber-300/60 bg-amber-50/30 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300 font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-amber-200 dark:ring-amber-900/20";
+      return "border-app-status-warning/40 bg-app-status-warning/10 text-app-status-warning dark:bg-app-status-warning/20 dark:text-app-status-warning font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-app-status-warning/20";
     default:
-      return "border-emerald-300/60 bg-emerald-50/30 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300 font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-emerald-200 dark:ring-emerald-900/20";
+      return "border-app-status-success/40 bg-app-status-success/10 text-app-status-success dark:bg-app-status-success/20 dark:text-app-status-success font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-app-status-success/20";
   }
 }
 
@@ -215,6 +215,8 @@ export function TwelveWeekTodayTab({
   const rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
   const primaryTask = firstPriorityTask && !firstPriorityTask.completed ? firstPriorityTask : null;
+  const hasPrimaryTask = Boolean(firstPriorityTask);
+  const isPrimaryTaskCompleted = Boolean(firstPriorityTask?.completed);
   const primaryTaskCommitmentQuote = primaryTask ? getTaskCommitmentQuote(system, primaryTask) : null;
   const primaryTaskOverdue = Boolean(primaryTask && primaryTask.scheduledDate < todayDateKey);
   const primaryTaskCompletedToday = Boolean(
@@ -223,6 +225,7 @@ export function TwelveWeekTodayTab({
   const isFirstWeek = currentWeek === 1;
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
   const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
+  const [isHeroDismissed, setIsHeroDismissed] = useState(false);
   const lastClickCoords = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -340,10 +343,10 @@ export function TwelveWeekTodayTab({
     if (!hasPlanTasks) {
       return {
         key: "setup-needed",
-        title: "Chu kỳ này cần được tạo lại",
+        title: "Chu kỳ chưa có việc",
         description: hasLeadMetrics
-          ? "Kế hoạch có chỉ số lặp lại nhưng chưa có việc để chạy. Mở Setup để tạo lại hàng việc."
-          : "Chu kỳ chưa có việc lặp lại. Mở Setup để thêm 2-4 việc cốt lõi trước.",
+          ? "Kế hoạch có chỉ số lặp lại nhưng chưa có hàng việc. Mở Setup để tạo lại hàng việc."
+          : "Chu kỳ chưa có việc lặp lại. Mở Setup để thêm 2–4 việc cốt lõi trước.",
         actionLabel: hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup",
         onAction: onNavigateToSetup,
       };
@@ -499,7 +502,7 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-subtle/25 border border-app-line/50 rounded-3xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md"
+        className="order-1 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-subtle/25 border border-app-line/50 rounded-3xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md"
         >
           <WashiTape className="opacity-80" />
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
@@ -618,90 +621,119 @@ export function TwelveWeekTodayTab({
         </div>
       )}
 
-      {primaryTask && (
+      {hasPrimaryTask && firstPriorityTask && !isHeroDismissed && (
         <div
           data-testid="today-primary-hero"
           className={`order-2 border ${
-            primaryTaskOverdue
-              ? "border-app-warm-border bg-gradient-to-br from-app-surface via-[#FFFBF9] to-app-warm-subtle/40"
-              : "border-app-accent/25 bg-gradient-to-br from-app-surface via-[#FAF9F5] to-app-accent-subtle/35"
+            isPrimaryTaskCompleted
+              ? "border-app-accent/20 bg-gradient-to-br from-app-surface via-app-accent-subtle/15 to-app-accent-subtle/5"
+              : primaryTaskOverdue
+                ? "border-app-warm-border bg-gradient-to-br from-app-surface via-app-warm-subtle/30 to-app-warm-subtle/40"
+                : "border-app-accent/25 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-subtle/35"
           } rounded-3xl p-6 sm:p-8 flex flex-col gap-3.5 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md pt-8`}
         >
           <PaperPin />
           <WashiTape className="opacity-70 rotate-[2deg] -top-3.5" />
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
-          <div className="flex flex-col gap-1 relative z-10">
-            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
-              <Sparkles className="h-3.5 w-3.5 text-app-accent shrink-0 animate-pulse" />
-              {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
-              {primaryTaskOverdue && (
-                <span className="ml-2 rounded border border-app-warm-border/30 bg-app-warm-soft/30 px-1.5 py-0.5 text-[9px] font-bold tracking-normal text-app-warm-strong uppercase">
-                  Đang trễ
-                </span>
-              )}
-            </p>
-            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight leading-tight sm:leading-snug text-app-ink mt-2">
-              {primaryTask.title}
-            </h1>
-            <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl font-sans">
-              {primaryTaskOverdue ? (
-                `Việc này đang trễ — hôm nay làm phiên bản gọn nhất. Duy trì nhịp lặp quan trọng hơn làm hết.`
-              ) : (
-                <>
-                  Thuộc nhóm việc lặp lại “{primaryTask.leadIndicatorName}”. Xong việc này là bạn đã giữ đúng tiến độ.
-                  <span className="sr-only">Chỉ cần xong việc này là hôm nay đã đủ</span>
-                </>
-              )}
-            </p>
-            {isFirstWeek && (
-              <p data-testid="today-first-week-encouragement" className="text-xs text-app-ink-soft mt-1 font-sans">
-                Tuần đầu tiên: Bắt đầu nhỏ để tạo đà và giữ thói quen lâu dài.
-              </p>
-            )}
-          </div>
-
-          {primaryTaskCommitmentQuote && (
-            <p className={`text-xs italic leading-relaxed pl-3.5 py-2 my-1 relative z-10 border-l-2 ${
-              primaryTaskOverdue ? "border-app-warm/40 bg-app-warm-soft/15 text-app-warm-strong" : "border-app-accent/40 bg-app-accent-soft/20 text-app-ink-soft"
-            } rounded-r-xl font-serif`}>
-              {primaryTaskCommitmentQuote}
-            </p>
-          )}
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-2 pt-4 border-t border-app-line/20 relative z-10">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                data-testid="today-primary-mark-done"
-                size="sm"
-                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-xs shadow-xs hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 rounded-xl px-5 py-2 h-9"
-                onClick={() => handleTaskCompletionChange(primaryTask.id, true)}
+          
+          {isPrimaryTaskCompleted ? (
+            <>
+              <button
+                type="button"
+                className="absolute top-4 right-4 text-app-ink-muted hover:text-app-ink p-1.5 rounded-full hover:bg-app-bg transition-colors duration-150 cursor-pointer z-20"
+                onClick={() => setIsHeroDismissed(true)}
+                aria-label="Ẩn thông báo hoàn thành"
               >
-                <Check className="mr-1.5 h-3.5 w-3.5" />
-                Đánh dấu xong
-              </Button>
-              {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto border-app-line bg-app-surface text-app-ink hover:bg-app-bg hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 shadow-3xs text-xs rounded-xl px-4 py-2 h-9"
-                  onClick={() => onRescheduleTaskWithinWeek(primaryTask.id)}
-                >
-                  <CalendarClock className="mr-1.5 h-3.5 w-3.5 text-app-ink-soft" />
-                  Dời sang ngày khác
-                </Button>
-              )}
-            </div>
+                <X className="h-4 w-4" />
+              </button>
+              <div className="flex flex-col items-center justify-center text-center py-4 relative z-10">
+                <div className="rounded-full bg-app-accent-soft p-3 text-app-accent mb-3 animate-bounce">
+                  <Check className="h-6 w-6" />
+                </div>
+                <h2 className="font-serif text-lg sm:text-xl font-bold text-app-ink">
+                  Tuyệt vời! Bạn đã hoàn thành việc quan trọng nhất hôm nay
+                </h2>
+                <p className="text-xs text-app-ink-soft mt-1.5 max-w-md font-sans">
+                  Hãy ghi nhận nỗ lực của bản thân bằng một check-in ngắn bên dưới để khép lại một ngày trọn vẹn.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col gap-1 relative z-10">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
+                  <Sparkles className="h-3.5 w-3.5 text-app-accent shrink-0 animate-pulse" />
+                  {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
+                  {primaryTaskOverdue && (
+                    <span className="ml-2 rounded border border-app-warm-border/30 bg-app-warm-soft/30 px-1.5 py-0.5 text-[9px] font-bold tracking-normal text-app-warm-strong uppercase">
+                      Đang trễ
+                    </span>
+                  )}
+                </p>
+                <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight leading-tight sm:leading-snug text-app-ink mt-2">
+                  {firstPriorityTask.title}
+                </h1>
+                <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl font-sans">
+                  {primaryTaskOverdue ? (
+                    `Việc này đang trễ – hôm nay hãy làm phiên bản tối giản. Duy trì nhịp quan trọng hơn làm hết.`
+                  ) : (
+                    <>
+                      Thuộc nhóm việc lặp lại “{firstPriorityTask.leadIndicatorName}”. Xong việc này là bạn đã giữ đúng tiến độ.
+                      <span className="sr-only">Chỉ cần xong việc này là hôm nay đã đủ</span>
+                    </>
+                  )}
+                </p>
+                {isFirstWeek && (
+                  <p data-testid="today-first-week-encouragement" className="text-xs text-app-ink-soft mt-1 font-sans">
+                    Tuần đầu tiên: Bắt đầu nhỏ để tạo đà và giữ thói quen lâu dài.
+                  </p>
+                )}
+              </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-medium text-app-ink-muted/80">
-              <span>Tuần {currentWeek}/12</span>
-              <span className="text-app-line/30">•</span>
-              <span>
-                Đã xong {todayCompletedCount}/{checkInTotal}
-              </span>
-              <span className="text-app-line/30">•</span>
-              <span>Tiến độ {weekCompletion.percent}%</span>
-            </div>
-          </div>
+              {primaryTaskCommitmentQuote && (
+                <p className={`text-xs italic leading-relaxed pl-3.5 py-2 my-1 relative z-10 border-l-2 ${
+                  primaryTaskOverdue ? "border-app-warm/40 bg-app-warm-soft/15 text-app-warm-strong" : "border-app-accent/40 bg-app-accent-soft/20 text-app-ink-soft"
+                } rounded-r-xl font-serif`}>
+                  {primaryTaskCommitmentQuote}
+                </p>
+              )}
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-2 pt-4 border-t border-app-line/20 relative z-10">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    data-testid="today-primary-mark-done"
+                    size="sm"
+                    className="w-full sm:w-auto bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-xs shadow-xs hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 rounded-xl px-5 py-2 h-9"
+                    onClick={() => handleTaskCompletionChange(firstPriorityTask.id, true)}
+                  >
+                    <Check className="mr-1.5 h-3.5 w-3.5" />
+                    Đánh dấu xong
+                  </Button>
+                  {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto border-app-line bg-app-surface text-app-ink hover:bg-app-bg hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 shadow-3xs text-xs rounded-xl px-4 py-2 h-9"
+                      onClick={() => onRescheduleTaskWithinWeek(firstPriorityTask.id)}
+                    >
+                      <CalendarClock className="mr-1.5 h-3.5 w-3.5 text-app-ink-soft" />
+                      Dời sang ngày khác
+                    </Button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-medium text-app-ink-muted/80">
+                  <span>Tuần {currentWeek}/12</span>
+                  <span className="text-app-line/30">•</span>
+                  <span>
+                    Đã xong {todayCompletedCount}/{checkInTotal}
+                  </span>
+                  <span className="text-app-line/30">•</span>
+                  <span>Tiến độ {weekCompletion.percent}%</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -885,59 +917,58 @@ export function TwelveWeekTodayTab({
                               </Badge>
                             </div>
                             {isOverdue && canUseOverdueTaskActions ? (
-                              <div data-testid={`overdue-actions-${task.id}`} className="mt-3 space-y-2">
-                                {onRescheduleTaskWithinWeek ? (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="w-full justify-between bg-app-surface shadow-3xs text-xs border-app-line hover:bg-app-bg rounded-xl px-3 py-1.5 h-8.5 font-semibold transition-all"
-                                    onClick={() => onRescheduleTaskWithinWeek(task.id)}
-                                    data-action="reschedule-within-week"
-                                    aria-label={`Đẩy ${task.title} sang ngày mai`}
-                                  >
-                                    <span className="inline-flex items-center">
+                              <div data-testid={`overdue-actions-${task.id}`} className="mt-2.5 space-y-2">
+                                <div className="flex flex-wrap gap-2">
+                                  {onRescheduleTaskWithinWeek && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="flex-1 sm:flex-initial justify-center bg-app-surface shadow-3xs text-[11px] border-app-line hover:bg-app-bg rounded-xl px-3 py-1.5 h-8 font-semibold transition-all"
+                                      onClick={() => onRescheduleTaskWithinWeek(task.id)}
+                                      data-action="reschedule-within-week"
+                                      aria-label={`Đẩy ${task.title} sang ngày mai`}
+                                    >
                                       <CalendarClock className="mr-1 h-3.5 w-3.5 text-app-ink-soft" />
                                       Đẩy sang ngày mai
-                                    </span>
-                                    <ArrowRight className="h-3.5 w-3.5" />
-                                  </Button>
-                                ) : null}
-                                {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
-                                  <details className="group rounded-xl border border-app-line/60 bg-app-bg/10 px-3.5 py-2 transition-all duration-150">
-                                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-semibold text-app-ink-muted">
-                                      Lựa chọn khác
-                                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
-                                    </summary>
-                                    <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                                      {onRescheduleTaskToNextWeek ? (
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          className="bg-app-surface border-app-line text-xs hover:bg-app-bg shadow-3xs text-app-ink font-semibold rounded-xl px-3 py-1"
-                                          onClick={() => onRescheduleTaskToNextWeek(task.id)}
-                                          data-action="reschedule-next-week"
-                                          aria-label={`Dời ${task.title} sang tuần sau`}
-                                        >
-                                          <CalendarPlus className="mr-1 h-3.5 w-3.5" />
-                                          Sang tuần sau
-                                        </Button>
-                                      ) : null}
-                                      {onSkipNonCoreTask && !task.isCore ? (
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          className="text-app-ink-soft hover:text-app-ink text-xs font-semibold rounded-xl px-3 py-1"
-                                          onClick={() => onSkipNonCoreTask(task.id)}
-                                          data-action="skip-non-core"
-                                          aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
-                                        >
-                                          <X className="mr-1 h-3.5 w-3.5" />
-                                          Bỏ qua
-                                        </Button>
-                                      ) : null}
-                                    </div>
-                                  </details>
-                                ) : null}
+                                    </Button>
+                                  )}
+                                  {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
+                                    <details className="group rounded-xl border border-app-line/60 bg-app-bg-subtle/30 px-3.5 py-1.5 transition-all duration-150 flex-1 sm:flex-initial">
+                                      <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 text-[11px] font-semibold text-app-ink-muted h-6">
+                                        Lựa chọn khác
+                                        <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                                      </summary>
+                                      <div className="mt-2 flex flex-wrap gap-1.5 justify-center">
+                                        {onRescheduleTaskToNextWeek && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="bg-app-surface border-app-line text-[10px] hover:bg-app-bg shadow-3xs text-app-ink font-semibold rounded-lg px-2.5 py-0.5 h-7"
+                                            onClick={() => onRescheduleTaskToNextWeek(task.id)}
+                                            data-action="reschedule-next-week"
+                                            aria-label={`Dời ${task.title} sang tuần sau`}
+                                          >
+                                            <CalendarPlus className="mr-1 h-3 w-3" />
+                                            Sang tuần sau
+                                          </Button>
+                                        )}
+                                        {onSkipNonCoreTask && !task.isCore && (
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="text-app-ink-soft hover:text-app-ink text-[10px] font-semibold rounded-lg px-2.5 py-0.5 h-7"
+                                            onClick={() => onSkipNonCoreTask(task.id)}
+                                            data-action="skip-non-core"
+                                            aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
+                                          >
+                                            <X className="mr-1 h-3 w-3" />
+                                            Bỏ qua
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </details>
+                                  ) : null}
+                                </div>
                                 {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) ? (
                                   <span
                                     data-testid={`overdue-core-note-${task.id}`}
@@ -1006,7 +1037,7 @@ export function TwelveWeekTodayTab({
                     data-testid="today-primary-done-nudge"
                     className="rounded-xl border border-app-accent/20 bg-app-accent-soft/40 px-4 py-3 text-xs leading-relaxed text-app-accent font-medium"
                   >
-                    Việc quan trọng nhất đã chốt xong — hãy lưu check-in ngắn để khép lại hôm nay.
+                    Việc quan trọng nhất đã chốt xong – hãy lưu check-in ngắn để khép lại hôm nay.
                   </p>
                 )}
               </CardContent>
@@ -1043,9 +1074,9 @@ export function TwelveWeekTodayTab({
                 {todayCheckIn && (
                   <div
                     data-testid="today-check-in-saved"
-                    className="flex items-center gap-1.5 rounded-xl border border-emerald-200/50 bg-emerald-50/20 px-3.5 py-2 text-xs text-emerald-800 dark:border-emerald-950/20 dark:bg-emerald-950/5 dark:text-emerald-400 font-medium"
+                    className="flex items-center gap-1.5 rounded-xl border border-app-status-success/30 bg-app-status-success/10 px-3.5 py-2 text-xs text-app-status-success font-medium"
                   >
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-app-status-success" />
                     <div className="flex-1">
                       <span className="font-semibold">Đã lưu check-in:</span> Năng lượng{" "}
                       <span className="font-bold">

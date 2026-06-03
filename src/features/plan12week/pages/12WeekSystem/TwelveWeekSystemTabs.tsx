@@ -340,7 +340,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-[46px] rounded-2xl bg-[#FAF9F6]/80 dark:bg-app-bg-subtle/60 p-1 border border-app-line/80 backdrop-blur-md shadow-3xs"
+            className="inline-flex min-h-[46px] rounded-2xl bg-app-bg-subtle/80 dark:bg-app-bg-subtle/60 p-1 border border-app-line/80 backdrop-blur-md shadow-3xs"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);

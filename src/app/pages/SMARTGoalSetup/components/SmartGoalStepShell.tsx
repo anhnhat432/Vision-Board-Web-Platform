@@ -12,7 +12,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import type { ReactNode, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/app/components/ui/utils";
@@ -78,6 +78,14 @@ const STEP_ICONS: Record<SmartStepKey, typeof Target> = {
   achievable: ShieldCheck,
   relevant: Heart,
   timeBound: Clock,
+};
+
+const STEP_CTA_LABELS: Record<SmartStepKey, string> = {
+  specific: "Lưu mục tiêu cụ thể",
+  measurable: "Xác nhận chỉ số đo",
+  achievable: "Thiết lập thời gian cam kết",
+  relevant: "Xác nhận động lực này",
+  timeBound: "Kiểm tra độ khả thi",
 };
 
 // Tổng hợp chuông ngân chánh niệm tần số 639Hz (hoà hợp, kết nối)
@@ -174,10 +182,15 @@ function ConfettiCanvas() {
 }
 
 // Hook hiệu ứng gõ chữ sinh động
-function useTypingEffect(text: string, speed = 6) {
+function useTypingEffect(text: string, speed = 6, shouldReduce = false) {
   const [displayedText, setDisplayedText] = useState("");
 
   useEffect(() => {
+    if (shouldReduce) {
+      setDisplayedText(text);
+      return;
+    }
+
     setDisplayedText("");
     if (!text) return;
 
@@ -197,7 +210,7 @@ function useTypingEffect(text: string, speed = 6) {
     return () => {
       clearInterval(timer);
     };
-  }, [text, speed]);
+  }, [text, speed, shouldReduce]);
 
   return displayedText;
 }
@@ -226,10 +239,27 @@ export function SmartGoalStepShell({
   onNext,
 }: SmartGoalStepShellProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [showStickyMini, setShowStickyMini] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [selectedTone, setSelectedTone] = useState<"empathetic" | "pragmatic" | "strategic">("empathetic");
   const [isAiCoachExpanded, setIsAiCoachExpanded] = useState(false);
+  const [isPolaroidExpanded, setIsPolaroidExpanded] = useState(false);
+  const [isPageFlipping, setIsPageFlipping] = useState(false);
+
+  useEffect(() => {
+    if (stepIndex !== undefined) {
+      setIsPageFlipping(true);
+      const timer = setTimeout(() => setIsPageFlipping(false), 220);
+      return () => clearTimeout(timer);
+    }
+  }, [stepIndex]);
+
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      setIsAiCoachExpanded(true);
+    }
+  }, []);
 
   const prevValidRef = useRef(isCurrentStepValid);
   const prevGoldRef = useRef(false);
@@ -254,8 +284,12 @@ export function SmartGoalStepShell({
 
         if (targetElement) {
           targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          targetElement.focus({ preventScroll: true });
-          
+
+          const isMobileDevice = window.innerWidth < 1024;
+          if (!isMobileDevice) {
+            targetElement.focus({ preventScroll: true });
+          }
+
           targetElement.classList.add("animate-shake");
           setTimeout(() => {
             targetElement.classList.remove("animate-shake");
@@ -351,6 +385,17 @@ export function SmartGoalStepShell({
   const isAchFilled = achHours.length > 0;
   const isRelFilled = relReason.length > 0;
   const isTimeFilled = timeDate.length > 0;
+
+  // Tự động mở rộng Polaroid panel trên mobile khi người dùng bắt đầu có nội dung nhập liệu
+  const hasSomeContent = isSpecFilled || isMeasFilled || isAchFilled || isRelFilled || isTimeFilled;
+  const prevHasSomeContent = useRef(hasSomeContent);
+
+  useEffect(() => {
+    if (!prevHasSomeContent.current && hasSomeContent && window.innerWidth < 1024) {
+      setIsPolaroidExpanded(true);
+    }
+    prevHasSomeContent.current = hasSomeContent;
+  }, [hasSomeContent]);
 
   const goalStr = smartGoalStarter.specificGoalStatement;
   const metric = smartGoalStarter.metricName;
@@ -482,8 +527,8 @@ export function SmartGoalStepShell({
         };
       }
       return {
-        coachComment: "KPI đo lường hiệu suất dẫn dắt (leading indicator) tối ưu cho bạn:",
-        goalDraft: `Thiết lập chỉ số đạt ${targetVal} ${cleanMetric} với mốc cơ sở hiện tại là ${baseVal}.`,
+        coachComment: "Chỉ số định hướng giúp bạn dễ dàng theo dõi tiến độ mỗi tuần:",
+        goalDraft: `Đặt mốc cần đạt là ${targetVal} ${cleanMetric} (với mốc cơ sở hiện tại là ${baseVal}).`,
         coreTextToApply: "",
       };
     }
@@ -504,7 +549,7 @@ export function SmartGoalStepShell({
         };
       }
       return {
-        coachComment: "Để tối ưu hóa tính khả thi và giảm thiểu 40% rủi ro từ bỏ, định mức chiến lược:",
+        coachComment: "Để giữ nhịp độ hành động đều đặn và tránh bị quá tải, thời gian gợi ý cho bạn là:",
         goalDraft: `Phân bổ quỹ thời gian biểu là ${hoursVal} giờ/tuần cùng với việc chuẩn bị nguồn lực hỗ trợ đầy đủ.`,
         coreTextToApply: "",
       };
@@ -530,9 +575,9 @@ export function SmartGoalStepShell({
         };
       }
 
-      const strategicReason = `Căn chỉnh trục phát triển: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
+      const strategicReason = `Định hướng phát triển: ${cleanReason.charAt(0).toUpperCase() + cleanReason.slice(1)}`;
       return {
-        coachComment: "Định hình tầm nhìn chiến lược và căn chỉnh hệ giá trị phát triển cốt lõi:",
+        coachComment: "Tìm ra động lực sâu sắc giúp bạn giữ cam kết đến cùng:",
         goalDraft: strategicReason,
         coreTextToApply: strategicReason,
       };
@@ -554,8 +599,8 @@ export function SmartGoalStepShell({
         };
       }
       return {
-        coachComment: "Thiết lập mốc thời gian kết thúc chiến dịch. Đây là điểm rơi phong độ lý tưởng để đánh giá:",
-        goalDraft: `Cam kết hoàn thành trong vòng ${weeksVal} tuần để đánh giá hiệu suất tổng thể của bạn.`,
+        coachComment: "Đặt mốc thời gian hoàn thành rõ ràng để tập trung hành động:",
+        goalDraft: `Cam kết hoàn thành trong vòng ${weeksVal} tuần để tổng kết và ghi nhận sự tiến bộ của bạn.`,
         coreTextToApply: "",
       };
     }
@@ -569,8 +614,8 @@ export function SmartGoalStepShell({
 
   const { coachComment, goalDraft, coreTextToApply } = getPersonaData(selectedTone);
 
-  const typedCommentText = useTypingEffect(coachComment, 6);
-  const typedDraftText = useTypingEffect(goalDraft, 6);
+  const typedCommentText = useTypingEffect(coachComment, 6, shouldReduceMotion);
+  const typedDraftText = useTypingEffect(goalDraft, 6, shouldReduceMotion);
 
   const parsedWeeklyHours = Number.parseFloat(smartData.achievable.weekly_time_commitment_hours) || 0;
 
@@ -602,7 +647,11 @@ export function SmartGoalStepShell({
 
       if (targetElement) {
         targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        targetElement.focus({ preventScroll: true });
+
+        const isMobileDevice = window.innerWidth < 1024;
+        if (!isMobileDevice) {
+          targetElement.focus({ preventScroll: true });
+        }
 
         const originalTransition = targetElement.style.transition;
         const originalBorderColor = targetElement.style.borderColor;
@@ -628,13 +677,17 @@ export function SmartGoalStepShell({
 
   const renderPolaroidCard = (isMobile = false) => {
     const areaLabel = smartGoalStarter.specificGoalStatement ? "trọng tâm" : "mục tiêu";
+    const bgStyle = hasSomeContent
+      ? "bg-[#FCFAF7] dark:bg-[#25221C]"
+      : "bg-gradient-to-tr from-[#FCEDE5] via-[#FAF6F0] to-[#E8F0EC] dark:from-[#2E201A] dark:via-[#211F25] dark:to-[#192E28]";
+
     return (
       <motion.div
         ref={isMobile ? undefined : cardRef}
-        onMouseMove={isMobile ? undefined : handleMouseMove}
-        onMouseLeave={isMobile ? undefined : handleMouseLeave}
+        onMouseMove={isMobile || shouldReduceMotion ? undefined : handleMouseMove}
+        onMouseLeave={isMobile || shouldReduceMotion ? undefined : handleMouseLeave}
         style={
-          isMobile
+          isMobile || shouldReduceMotion
             ? {}
             : {
                 rotateX,
@@ -643,11 +696,14 @@ export function SmartGoalStepShell({
               }
         }
         className={cn(
-          "group relative rounded-sm p-5 sm:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.05),0_2px_8px_rgba(0,0,0,0.02)] select-none border-[10px] border-white dark:border-slate-800 bg-[#faf6ee] dark:bg-[#1a1c17] transition-all duration-300 transform",
-          isMobile ? "max-w-md mx-auto my-4 rotate-[0.5deg]" : "rotate-[1deg] hover:rotate-0",
+          "group relative rounded-sm p-5 sm:p-6 shadow-[4px_10px_30px_rgba(44,38,33,0.08)] select-none border-[12px] border-b-[44px] border-white dark:border-[#2B2923] transition-all duration-300 transform",
+          bgStyle,
+          isMobile
+            ? "max-w-md mx-auto my-4 rotate-[0.5deg]"
+            : "rotate-[1deg] hover:rotate-0 hover:shadow-[6px_14px_36px_rgba(44,38,33,0.12)]",
         )}
       >
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-yellow-100/40 dark:bg-yellow-950/20 border-b border-yellow-250/10 shadow-[0_1px_2px_rgba(0,0,0,0.02)] rotate-[-1.5deg] z-10 backdrop-blur-[0.5px]" />
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-accent-soft/40 dark:bg-app-accent-soft/20 border-b border-app-line shadow-[0_1px_2px_rgba(0,0,0,0.02)] rotate-[-1.5deg] z-10 backdrop-blur-[0.5px]" />
 
         <AnimatePresence>
           {isGoldStandard && (
@@ -655,25 +711,25 @@ export function SmartGoalStepShell({
               initial={{ scale: 0, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0 }}
-              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-3 py-1 text-[10px] font-extrabold text-slate-900 shadow-md animate-[pulse_2.2s_infinite] z-25 border border-yellow-200/20"
+              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-app-warm-soft text-app-warm border border-app-warm-border/30 px-3 py-1 text-[10px] font-extrabold shadow-md animate-[pulse_2.2s_infinite] z-25"
             >
               <span>🏆 Chuẩn Vàng</span>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-amber-800/60 dark:text-amber-500/60 mb-3 flex items-center gap-1.5 select-none pointer-events-none">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-ink-muted mb-3 flex items-center gap-1.5 select-none pointer-events-none">
           <span>✨</span> BẢN PHÁC THẢO TƯƠNG LAI
         </p>
 
-        <div className="text-[14px] sm:text-[15px] leading-relaxed text-slate-850 dark:text-slate-200 font-serif tracking-wide select-text relative z-20">
+        <div className="text-[14px] sm:text-[15px] leading-relaxed text-app-ink font-serif tracking-wide select-text relative z-20 max-h-[180px] overflow-y-auto pr-1 scrollbar-none">
           Tôi quyết tâm{" "}
           <span
             className={cn(
               "inline-flex items-center px-1 rounded transition-colors duration-200",
               isSpecFilled
                 ? "text-teal-800 dark:text-teal-300 font-bold bg-teal-500/5"
-                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+                : "text-app-ink-muted italic border-b border-dashed border-app-line bg-app-bg animate-[pulse_2.0s_infinite]",
             )}
           >
             {isSpecFilled ? specText : "hành động cụ thể"}
@@ -684,7 +740,7 @@ export function SmartGoalStepShell({
               "inline-flex items-center px-1 rounded transition-colors duration-200",
               isMeasFilled
                 ? "text-blue-800 dark:text-blue-300 font-bold bg-blue-500/5"
-                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+                : "text-app-ink-muted italic border-b border-dashed border-app-line bg-app-bg animate-[pulse_2.0s_infinite]",
             )}
           >
             {isMeasFilled ? `${measTarget} ${measUnit || "đơn vị"}` : "chỉ số"}
@@ -694,8 +750,8 @@ export function SmartGoalStepShell({
             className={cn(
               "inline-flex items-center px-1 rounded transition-colors duration-200",
               isAchFilled
-                ? "text-amber-800 dark:text-amber-300 font-bold bg-amber-500/5"
-                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+                ? "text-amber-800 dark:text-amber-300 font-bold bg-amber-50/5"
+                : "text-app-ink-muted italic border-b border-dashed border-app-line bg-app-bg animate-[pulse_2.0s_infinite]",
             )}
           >
             {isAchFilled ? `${achHours} giờ mỗi tuần` : "thời gian cam kết"}
@@ -705,8 +761,8 @@ export function SmartGoalStepShell({
             className={cn(
               "inline-flex items-center px-1 rounded transition-colors duration-200",
               isRelFilled
-                ? "text-rose-800 dark:text-rose-350 font-bold bg-rose-500/5"
-                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+                ? "text-rose-800 dark:text-rose-350 font-bold bg-rose-50/5"
+                : "text-app-ink-muted italic border-b border-dashed border-app-line bg-app-bg animate-[pulse_2.0s_infinite]",
             )}
           >
             {isRelFilled ? relReason : "lý do của bạn"}
@@ -717,7 +773,7 @@ export function SmartGoalStepShell({
               "inline-flex items-center px-1 rounded transition-colors duration-200",
               isTimeFilled
                 ? "text-purple-800 dark:text-purple-300 font-bold bg-purple-500/5"
-                : "text-slate-400 dark:text-slate-500 italic border-b border-dashed border-slate-300 bg-slate-500/5 animate-[pulse_2.0s_infinite]",
+                : "text-app-ink-muted italic border-b border-dashed border-app-line bg-app-bg animate-[pulse_2.0s_infinite]",
             )}
           >
             {isTimeFilled ? timeDate : "ngày hoàn thành"}
@@ -725,7 +781,7 @@ export function SmartGoalStepShell({
           <span className="text-xs opacity-75 ml-1 select-none">📅</span>.
         </div>
 
-        {!isMobile && (
+        {!isMobile && !shouldReduceMotion && (
           <motion.div
             className="absolute inset-0 pointer-events-none z-10"
             style={{
@@ -734,16 +790,16 @@ export function SmartGoalStepShell({
           />
         )}
 
-        <div className="border-t border-amber-900/10 dark:border-slate-700/30 pt-3 mt-4 flex items-center justify-between text-[10px] text-slate-450 dark:text-slate-500 font-sans tracking-wide">
+        <div className="absolute -bottom-9 left-2 right-2 flex items-center justify-between text-[10px] font-serif italic tracking-wide select-none px-1.5 z-20">
           <a
             href="https://deerflow.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline opacity-60 hover:opacity-100 transition-opacity font-medium"
+            className="hover:underline opacity-80 hover:opacity-100 transition-opacity font-bold text-[#5C3A2E] dark:text-[#A39B8C]"
           >
             ✦ Deerflow
           </a>
-          <span className="font-serif italic text-amber-800/60 dark:text-amber-500/60 flex items-center gap-0.5 select-none">
+          <span className="font-bold text-[#5C3A2E] dark:text-[#A39B8C] flex items-center gap-0.5">
             <span>✦</span> {areaLabel} <span>✦</span>
           </span>
         </div>
@@ -762,8 +818,50 @@ export function SmartGoalStepShell({
         .animate-shake {
           animation: shake 0.4s ease-in-out;
         }
+        .sketchbook-paper {
+          background-image: linear-gradient(var(--app-line) 1px, transparent 1px);
+          background-size: 100% 2.5rem;
+          line-height: 2.5rem;
+        }
+        .vintage-washi {
+          position: absolute;
+          width: 80px;
+          height: 22px;
+          background-color: rgba(224, 212, 196, 0.45);
+          backdrop-filter: blur(0.5px);
+          border: 1px dashed rgba(44, 38, 33, 0.12);
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
+          z-index: 25;
+          pointer-events: none;
+        }
+        .vintage-washi-top-left {
+          top: -6px;
+          left: -12px;
+          transform: rotate(-10deg);
+        }
+        .vintage-washi-top-right {
+          top: -6px;
+          right: -12px;
+          transform: rotate(10deg);
+        }
+        .notebook-spiral {
+          background-image: radial-gradient(circle, var(--app-line-strong) 4px, transparent 4.5px);
+          background-size: 8px 24px;
+          width: 8px;
+          height: calc(100% - 32px);
+          position: absolute;
+          left: 14px;
+          top: 16px;
+          opacity: 0.65;
+          z-index: 10;
+          pointer-events: none;
+        }
+        .page-flip-effect {
+          transform: perspective(1000px) rotateY(-4deg) translateX(1px);
+          opacity: 0.95;
+        }
       `}</style>
-      {showConfetti && <ConfettiCanvas />}
+      {showConfetti && !shouldReduceMotion && <ConfettiCanvas />}
 
       <AnimatePresence>
         {showStickyMini && (
@@ -791,7 +889,19 @@ export function SmartGoalStepShell({
       </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.18fr_0.82fr] gap-6 lg:gap-8 items-start">
-        <div className="space-y-6 rounded-[20px] border border-app-line bg-app-surface p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+        <div
+          className={cn(
+            "min-w-0 space-y-6 rounded-card border border-[#E8E3D9] bg-[#FDFBF9] dark:bg-[#23211B] p-5 sm:p-7 sm:pl-12 relative shadow-[4px_4px_20px_rgba(44,38,33,0.05)] overflow-hidden transition-all duration-200 transform-gpu",
+            isPageFlipping && !shouldReduceMotion && "page-flip-effect",
+          )}
+        >
+          {/* Lò xo gáy sổ tay cổ điển */}
+          <div className="hidden sm:block notebook-spiral" aria-hidden="true" />
+
+          {/* Băng dính Washi trang trí vintage */}
+          <div className="vintage-washi vintage-washi-top-left" aria-hidden="true" />
+          <div className="vintage-washi vintage-washi-top-right" aria-hidden="true" />
+
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-app-accent flex items-center gap-1.5">
@@ -886,19 +996,60 @@ export function SmartGoalStepShell({
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-5"
             >
-              {/* Polaroid Live Preview hiển thị ở trên cùng trên mobile */}
+              {/* Polaroid Live Preview hiển thị ở trên cùng trên mobile dưới dạng collapsible */}
               <div className="block lg:hidden select-none mb-3">
-                {renderPolaroidCard(true)}
+                {step.key === "timeBound" ? (
+                  renderPolaroidCard(true)
+                ) : (
+                  <div className="rounded-xl border border-app-line bg-app-surface overflow-hidden shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setIsPolaroidExpanded(!isPolaroidExpanded)}
+                      className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-app-ink-soft hover:bg-app-bg transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none"
+                    >
+                      <span className="flex items-center gap-2">
+                        📸 <span>Bản phác thảo Polaroid {isSpecFilled ? "(Đã cập nhật)" : "(Chưa có nội dung)"}</span>
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 text-app-ink-muted transition-transform duration-200",
+                          isPolaroidExpanded && "rotate-180",
+                        )}
+                      />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isPolaroidExpanded && (
+                        <motion.div
+                          initial="collapsed"
+                          animate="open"
+                          exit="collapsed"
+                          variants={{
+                            open: { opacity: 1, height: "auto" },
+                            collapsed: { opacity: 0, height: 0 },
+                          }}
+                          transition={{ duration: 0.2, ease: "easeInOut" }}
+                          className="overflow-hidden border-t border-app-line p-3 bg-app-bg/30"
+                        >
+                          {renderPolaroidCard(true)}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
               </div>
 
               {children}
 
               {/* Cố vấn mục tiêu AI tích hợp sẵn, hiển thị nhẹ nhàng */}
-              <div className="relative overflow-hidden rounded-[18px] border border-teal-500/10 dark:border-teal-900/20 bg-teal-500/[0.015] dark:bg-teal-950/[0.03] p-4.5 space-y-3">
-                <div className="flex items-center justify-between border-b border-teal-500/5 pb-2">
+              <div className="relative overflow-hidden rounded-card border border-dashed border-app-line bg-[#FAF7F2]/45 dark:bg-[#1E1D18]/25 p-4 space-y-3 shadow-none">
+                <button
+                  type="button"
+                  onClick={() => setIsAiCoachExpanded(!isAiCoachExpanded)}
+                  className="w-full flex items-center justify-between border-b border-app-line pb-2 text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:outline-none focus-visible:rounded-sm"
+                >
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-teal-500 animate-[pulse_2s_infinite]" />
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+                    <Sparkles className="h-3.5 w-3.5 text-app-accent animate-[pulse_2s_infinite]" />
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">
                       Cố vấn mục tiêu AI ·{" "}
                       {selectedTone === "empathetic"
                         ? "Ấm áp"
@@ -907,57 +1058,137 @@ export function SmartGoalStepShell({
                           : "Chiến lược"}
                     </span>
                   </div>
-
-                  {/* Selector chọn giọng điệu nhỏ gọn */}
-                  <div className="flex items-center gap-1.5 text-app-ink-muted">
-                    {(["empathetic", "pragmatic", "strategic"] as const).map((tone, idx) => {
-                      const isActive = selectedTone === tone;
-                      const toneLabel =
-                        tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
-                      return (
-                        <span key={tone} className="flex items-center">
-                          {idx > 0 && <span className="mr-1.5 opacity-40">|</span>}
-                          <button
-                            type="button"
-                            onClick={() => setSelectedTone(tone)}
-                            className={cn(
-                              "font-bold transition-all duration-150 hover:text-teal-600 cursor-pointer text-[10px] sm:text-[9px] py-1.5 sm:py-0 px-2 sm:px-0 focus-visible:ring-1 focus-visible:ring-teal-500/50 focus-visible:outline-none focus-visible:rounded-sm",
-                              isActive
-                                ? "text-teal-600 dark:text-teal-400 underline decoration-2 underline-offset-2"
-                                : "text-app-ink-muted",
-                            )}
-                          >
-                            {toneLabel}
-                          </button>
-                        </span>
-                      );
-                    })}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-app-ink-muted hidden sm:inline">
+                      {isAiCoachExpanded ? "Thu gọn gợi ý" : "Xem gợi ý"}
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 text-app-ink-muted transition-transform duration-200",
+                        isAiCoachExpanded && "rotate-180",
+                      )}
+                    />
                   </div>
-                </div>
+                </button>
 
-                <div className="space-y-2.5">
-                  <p className="text-xs text-app-ink-soft leading-relaxed select-none italic">{typedCommentText}</p>
+                <AnimatePresence initial={false}>
+                  {isAiCoachExpanded && (
+                    <motion.div
+                      initial="collapsed"
+                      animate="open"
+                      exit="collapsed"
+                      variants={{
+                        open: { opacity: 1, height: "auto" },
+                        collapsed: { opacity: 0, height: 0 },
+                      }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="space-y-3 overflow-hidden pt-1"
+                    >
+                      {/* Selector chọn giọng điệu nhỏ gọn */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-app-line/40 pb-2.5">
+                        <span className="text-[10px] font-bold text-app-ink-soft">Chọn giọng điệu:</span>
+                        <div className="flex items-center gap-1.5 text-app-ink-muted">
+                          {(["empathetic", "pragmatic", "strategic"] as const).map((tone, idx) => {
+                            const isActive = selectedTone === tone;
+                            const toneLabel =
+                              tone === "empathetic" ? "Ấm áp" : tone === "pragmatic" ? "Thực tế" : "Chiến lược";
+                            return (
+                              <span key={tone} className="flex items-center">
+                                {idx > 0 && <span className="mr-1.5 opacity-40">|</span>}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedTone(tone);
+                                  }}
+                                  className={cn(
+                                    "font-bold transition-all duration-150 hover:text-app-accent cursor-pointer text-[10px] py-1 px-2 focus-visible:ring-1 focus-visible:ring-app-accent/50 focus-visible:outline-none focus-visible:rounded-sm",
+                                    isActive
+                                      ? "text-app-accent underline decoration-2 underline-offset-2"
+                                      : "text-app-ink-muted",
+                                  )}
+                                >
+                                  {toneLabel}
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                  {typedDraftText && (
-                    <div className="relative rounded-xl border-l-2 border-emerald-500/50 bg-emerald-500/[0.015] px-3.5 py-2">
-                      <p className="font-serif italic text-xs leading-relaxed text-slate-800 dark:text-slate-200 select-text">
-                        “{typedDraftText}”
-                      </p>
-                    </div>
+                      <div className="space-y-2.5">
+                        <p className="text-xs text-app-ink-soft leading-relaxed italic">{typedCommentText}</p>
+
+                        {typedDraftText && (
+                          <div className="relative rounded-lg border-l-2 border-[#D97756] bg-[#FCEDE5]/35 dark:bg-[#3A2820]/30 px-3.5 py-2.5 shadow-none">
+                            <p className="font-serif italic text-sm leading-relaxed text-[#5C3A2E] dark:text-[#F8D5C2] select-text">
+                              “{typedDraftText}”
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApplyTransformedStarter();
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-app-accent/20 bg-app-accent-soft/30 hover:bg-app-accent-soft/50 text-app-accent px-3 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent/50 focus-visible:outline-none"
+                          aria-label={`Dùng gợi ý cho bước ${step.label}`}
+                        >
+                          <Sparkles className="h-3 w-3" />
+                          Dùng gợi ý này
+                        </button>
+                      </div>
+                    </motion.div>
                   )}
-                </div>
+                </AnimatePresence>
+              </div>
 
-                <div className="flex justify-end pt-1">
-                  <button
-                    type="button"
-                    onClick={handleApplyTransformedStarter}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1.5 text-[11px] font-bold transition-all duration-150 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:outline-none"
-                    aria-label={`Dùng gợi ý cho bước ${step.label}`}
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    Dùng gợi ý này
-                  </button>
-                </div>
+              {/* Nút điều hướng tĩnh cho Desktop */}
+              <div className="mt-6 hidden lg:flex lg:flex-row lg:justify-between lg:gap-3 border-t border-app-line pt-5">
+                <motion.button
+                  whileHover={{ scale: 1.015 }}
+                  whileTap={{ scale: 0.985 }}
+                  type="button"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer font-sans"
+                  onClick={onBack}
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  Quay lại
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.015 }}
+                  whileTap={{ scale: 0.985 }}
+                  type="button"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer font-sans"
+                  onClick={handleNextClick}
+                >
+                  {STEP_CTA_LABELS[step.key]}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </motion.button>
+              </div>
+
+              {/* Sticky Bottom CTA cho Mobile */}
+              <div className="fixed bottom-0 left-0 right-0 z-40 p-4 border-t border-app-line bg-app-surface/90 backdrop-blur-md shadow-lg flex justify-between gap-3 lg:hidden">
+                <button
+                  type="button"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface py-3 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
+                  onClick={onBack}
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  Quay lại
+                </button>
+                <button
+                  type="button"
+                  className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent py-3 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 transition-all duration-200 cursor-pointer font-sans"
+                  onClick={handleNextClick}
+                >
+                  {STEP_CTA_LABELS[step.key]}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </button>
               </div>
 
               {currentStepError && (
@@ -986,25 +1217,6 @@ export function SmartGoalStepShell({
               )}
             </motion.div>
           </AnimatePresence>
-
-          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer"
-              onClick={onBack}
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Quay lại
-            </button>
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer"
-              onClick={handleNextClick}
-            >
-              {step.key === "timeBound" ? "Kiểm tra độ khả thi" : "Tiếp tục"}
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
         </div>
 
         <div className="hidden lg:block lg:sticky lg:top-6 space-y-6">
@@ -1012,32 +1224,48 @@ export function SmartGoalStepShell({
 
           {/* Đã loại bỏ ảnh minh họa tĩnh để tối giản hóa thiết kế theo docs/DESIGN.md */}
 
-          <div className="rounded-2xl border border-app-line bg-app-surface p-5 shadow-sm space-y-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-app-ink">Kiểm tra độ rõ mục tiêu (Clarity)</h3>
-              <div className="flex items-center justify-between text-xs text-app-ink-muted">
-                <span>
-                  {clarityDoneCount}/{clarityItems.length} tiêu chí hoàn thành
-                </span>
-                <span className="font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
+          {/* Clarity Compass */}
+          <div className="rounded-2xl border border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C] p-5 shadow-[2px_4px_16px_rgba(44,38,33,0.02)] space-y-4">
+            <div className="flex items-center gap-3.5">
+              {/* Compass SVG */}
+              <div className="relative w-16 h-16 shrink-0 rounded-full border border-[#E8E3D9] bg-white dark:bg-[#1C1A15] flex items-center justify-center shadow-inner select-none pointer-events-none">
+                {/* Các vạch la bàn */}
+                <div className="absolute inset-1 rounded-full border border-dashed border-[#E8E3D9]/60 opacity-60" />
+                {/* Hướng Bắc Nam */}
+                <span className="absolute top-0.5 text-[7px] font-bold text-app-ink-muted">N</span>
+                <span className="absolute bottom-0.5 text-[7px] font-bold text-app-ink-muted">S</span>
+
+                {/* Kim la bàn */}
+                <motion.div
+                  style={{ rotate: shouldReduceMotion ? clarityProgress * 2.7 - 135 : 0 }}
+                  animate={shouldReduceMotion ? {} : { rotate: clarityProgress * 2.7 - 135 }}
+                  transition={{ type: "spring", stiffness: 80, damping: 15 }}
+                  className="w-1 h-12 relative flex justify-center z-10"
+                >
+                  {/* Kim nhọn phía trên (đỏ gạch ấm) */}
+                  <div className="w-1 h-6 bg-[#D97756] rounded-t-full shadow-sm" />
+                  {/* Kim nhọn phía dưới (mực sẫm) */}
+                  <div className="w-1 h-6 bg-app-ink-muted rounded-b-full" />
+                  {/* Tâm đồng */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-amber-600 border border-white shadow-sm z-20" />
+                </motion.div>
+              </div>
+
+              <div className="space-y-1 flex-1">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink-soft">
+                  La bàn Định Hướng (Clarity)
+                </h3>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-serif text-2xl font-bold text-app-accent">{Math.round(clarityProgress)}%</span>
+                  <span className="text-[10px] text-app-ink-muted font-medium">
+                    ({clarityDoneCount}/{clarityItems.length} tiêu chí vàng)
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div
-              role="progressbar"
-              aria-valuenow={Math.round(clarityProgress)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Kiểm tra độ rõ mục tiêu"
-              className="h-2 w-full overflow-hidden rounded-full bg-app-line"
-            >
-              <div
-                className="h-full rounded-full bg-app-accent transition-all duration-305"
-                style={{ width: `${clarityProgress}%` }}
-              />
-            </div>
-
-            <div className="grid gap-2 pt-2">
+            {/* Các tiêu chí click chuyển step */}
+            <div className="grid gap-2 border-t border-[#E8E3D9]/60 pt-3">
               {clarityItems.map((item) => (
                 <button
                   key={item.id}
@@ -1067,26 +1295,46 @@ export function SmartGoalStepShell({
           </div>
 
           {isAchFilled && (
-            <div className="rounded-2xl border border-teal-500/10 bg-teal-500/[0.02] p-4.5 shadow-sm space-y-2 select-none">
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-slate-500">Độ khả thi ước tính</span>
-                <span className="text-teal-600 font-extrabold">{feasibilityScore}%</span>
+            <div className="rounded-2xl border border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C] p-5 shadow-[2px_4px_16px_rgba(44,38,33,0.02)] space-y-3.5 select-none">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-app-ink-soft">Ống nghiệm Khả thi</span>
+                <span className="font-serif text-lg font-bold text-teal-600">{feasibilityScore}%</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden">
+
+              {/* Ống nghiệm thủy tinh */}
+              <div className="relative h-6 w-full rounded-full border-2 border-slate-300 dark:border-[#4A4239] bg-slate-100/30 dark:bg-[#1E1C18]/40 p-[2px] overflow-hidden shadow-inner flex items-center">
+                {/* Vạch chia độ của ống nghiệm */}
                 <div
+                  className="absolute inset-0 z-10 pointer-events-none opacity-20 dark:opacity-30"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(90deg, transparent, transparent 14px, #4A4A4A 14px, #4A4A4A 15px)",
+                  }}
+                />
+
+                <motion.div
+                  style={{ width: 0 }}
+                  animate={{ width: `${feasibilityScore}%` }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut" }}
                   className={cn(
-                    "h-full rounded-full transition-all duration-500 bg-gradient-to-r shadow-sm",
+                    "h-full rounded-full bg-gradient-to-r transition-colors duration-500 shadow-[0_0_8px_rgba(20,184,166,0.35)] relative overflow-hidden",
                     feasibilityScore >= 80
                       ? "from-emerald-400 to-teal-500"
                       : feasibilityScore >= 60
                         ? "from-amber-400 to-emerald-500"
                         : "from-rose-400 to-amber-500",
                   )}
-                  style={{ width: `${feasibilityScore}%` }}
-                />
+                >
+                  {/* Bọt khí chuyển động nhẹ */}
+                  {!shouldReduceMotion && (
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2)_0%,transparent_70%)] animate-[pulse_2s_infinite]" />
+                  )}
+                </motion.div>
               </div>
-              <p className="text-[11px] text-slate-400 leading-normal">
-                Cam kết {parsedWeeklyHours} giờ/tuần. Có thể chỉnh lại bất cứ lúc nào.
+
+              <p className="text-[11px] text-app-ink-muted leading-relaxed font-medium">
+                Dành khoảng <span className="font-bold text-app-ink">{parsedWeeklyHours} giờ/tuần</span>. Mức độ thời
+                gian khả thi giúp bạn tránh kiệt sức và dễ giữ nhịp bền bỉ hơn.
               </p>
             </div>
           )}

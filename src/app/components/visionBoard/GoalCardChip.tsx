@@ -36,7 +36,7 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
 
   return (
     <div
-      className="rounded-2xl border border-app-accent/30 bg-app-accent-soft p-3 text-left text-app-accent shadow-[var(--shadow-1)]"
+      className="rounded-2xl border border-app-accent/30 bg-app-accent-soft p-3 text-left text-app-accent shadow-app-sm"
       style={{ width: `${width}px` }}
     >
       {areaLabel && area && (

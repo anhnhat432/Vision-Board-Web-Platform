@@ -21,7 +21,7 @@ function RouteHydrateFallback() {
     <div className="flex min-h-[360px] items-center justify-center px-6 py-12" role="status" aria-live="polite">
       <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white/90 p-6 text-center shadow-[0_18px_44px_-34px_rgba(15,23,42,0.35)]">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Dear Our Future</p>
-        <p className="mt-3 text-base font-semibold text-slate-900">Đang mở trang...</p>
+        <p className="mt-3 text-base font-semibold text-slate-900">Đang mở trang…</p>
       </div>
     </div>
   );
