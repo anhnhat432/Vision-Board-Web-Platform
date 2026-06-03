@@ -28,7 +28,6 @@ import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { PageHero } from "../components/layout/PageHero";
-import { SyncStatusPill } from "../components/root-layout/SyncStatusPill";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1006,11 +1005,8 @@ function GoalTrackerContent({
             className="bg-gradient-to-br from-white via-white to-app-accent-soft/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-app-accent-soft/5 border-app-line/80 rounded-[18px]"
             eyebrow="MỤC TIÊU"
             title={
-              <span className="flex items-center gap-3">
-                <span className="font-serif text-3xl font-semibold leading-tight tracking-normal text-app-ink sm:text-4xl">
-                  Hành trình mục tiêu
-                </span>
-                {isRealMode() && <SyncStatusPill />}
+              <span className="font-serif text-3xl font-semibold leading-tight tracking-normal text-app-ink sm:text-4xl">
+                Hành trình mục tiêu
               </span>
             }
             description="Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều đặn."
