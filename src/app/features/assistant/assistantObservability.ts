@@ -30,8 +30,18 @@ export interface AssistantEvent {
   success?: boolean;
   latencyMs?: number;
   errorCode?: string;
-  metadata?: Record<string, any>;
+  metadata?: AssistantEventMetadata;
 }
+
+export type AssistantEventMetadataValue =
+  | string
+  | number
+  | boolean
+  | null
+  | AssistantEventMetadataValue[]
+  | { [key: string]: AssistantEventMetadataValue };
+
+export type AssistantEventMetadata = Record<string, AssistantEventMetadataValue>;
 
 export interface AssistantMetrics {
   totalMessagesSent: number;
@@ -91,22 +101,33 @@ function redactSensitive(value: string): string {
     );
 }
 
-function sanitizeValue(val: unknown): any {
+function sanitizeRecord(record: Record<string, unknown>): AssistantEventMetadata {
+  const sanitizedObj: AssistantEventMetadata = {};
+  for (const key of Object.keys(record).slice(0, 15)) {
+    const sanitizedKey = redactSensitive(key).slice(0, 100);
+    sanitizedObj[sanitizedKey] = sanitizeValue(record[key]);
+  }
+  return sanitizedObj;
+}
+
+function sanitizeValue(val: unknown): AssistantEventMetadataValue {
   if (typeof val === "string") {
     // Redact sensitive text and limit length to 200 chars to avoid storing raw long chat
     return redactSensitive(val).slice(0, 200);
+  }
+  if (typeof val === "number") {
+    return Number.isFinite(val) ? val : null;
+  }
+  if (typeof val === "boolean" || val === null) {
+    return val;
   }
   if (val && typeof val === "object") {
     if (Array.isArray(val)) {
       return val.slice(0, 10).map(sanitizeValue);
     }
-    const sanitizedObj: Record<string, any> = {};
-    for (const key of Object.keys(val).slice(0, 15)) {
-      sanitizedObj[key] = sanitizeValue((val as Record<string, any>)[key]);
-    }
-    return sanitizedObj;
+    return sanitizeRecord(val as Record<string, unknown>);
   }
-  return val;
+  return null;
 }
 
 export function recordAssistantEvent(input: {
@@ -120,7 +141,7 @@ export function recordAssistantEvent(input: {
   success?: boolean;
   latencyMs?: number;
   errorCode?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }): void {
   if (typeof localStorage === "undefined") return;
 
@@ -130,7 +151,7 @@ export function recordAssistantEvent(input: {
   const sessionId = getSessionId();
 
   // Sanitize metadata
-  const sanitizedMetadata = input.metadata ? sanitizeValue(input.metadata) : undefined;
+  const sanitizedMetadata = input.metadata ? sanitizeRecord(input.metadata) : undefined;
 
   const newEvent: AssistantEvent = {
     id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,

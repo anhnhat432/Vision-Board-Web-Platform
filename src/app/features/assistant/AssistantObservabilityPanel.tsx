@@ -16,7 +16,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   type AssistantEvent,
   type AssistantMetrics,
@@ -25,8 +25,9 @@ import {
   getAssistantEvents,
   summarizeAssistantMetrics,
 } from "./assistantObservability";
-import { EVAL_CASES } from "./evals/assistantEvalCases";
+import { EVAL_CASES, type AssistantEvalCase } from "./evals/assistantEvalCases";
 import { type EvalSummary, runAssistantEvals } from "./evals/evalRunner";
+import type { AssistantAction } from "./parseActions";
 
 interface ObservabilityPanelProps {
   userId: string | null;
@@ -44,17 +45,17 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalSummary, setEvalSummary] = useState<EvalSummary | null>(null);
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     const rawEvents = getAssistantEvents(userId);
     setEvents(rawEvents);
     setMetrics(summarizeAssistantMetrics(userId));
-  };
+  }, [userId]);
 
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 3000); // Auto refresh every 3s
     return () => clearInterval(interval);
-  }, [userId]);
+  }, [loadData]);
 
   const handleClear = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử sự kiện của trợ lý không?")) {
@@ -81,14 +82,17 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     // Mock AI generator to resolve cases locally without making remote API calls
-    const mockGenerateReply = async (input: string, context: any) => {
+    const mockGenerateReply = async (
+      input: string,
+      context: AssistantEvalCase["context"],
+    ): Promise<{ content: string; actions: AssistantAction[] }> => {
       const matchedCase = EVAL_CASES.find((c) => c.input === input);
       if (!matchedCase) {
         return { content: "Không tìm thấy case phù hợp.", actions: [] };
       }
 
       let content = "Đây là câu trả lời giả lập đáp ứng các tiêu chuẩn.";
-      let actions: any[] = [];
+      let actions: AssistantAction[] = [];
       const exp = matchedCase.expected;
 
       if (exp.shouldContain && exp.shouldContain.length > 0) {
@@ -107,7 +111,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
           }
           return {
             id: `mock_act_${Math.random().toString(36).slice(2, 6)}`,
-            type,
+            type: type as AssistantAction["type"],
             label: `Mock action: ${type}`,
             payload: { taskId },
           };
@@ -144,9 +148,9 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
     const query = searchQuery.toLowerCase();
     return (
       ev.type.toLowerCase().includes(query) ||
-      (ev.actionType && ev.actionType.toLowerCase().includes(query)) ||
-      (ev.workflowType && ev.workflowType.toLowerCase().includes(query)) ||
-      (ev.errorCode && ev.errorCode.toLowerCase().includes(query))
+      ev.actionType?.toLowerCase().includes(query) ||
+      ev.workflowType?.toLowerCase().includes(query) ||
+      ev.errorCode?.toLowerCase().includes(query)
     );
   });
 
@@ -165,6 +169,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={handleExport}
             title="Xuất JSON"
             className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
@@ -172,6 +177,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
             <Download className="w-4 h-4" />
           </button>
           <button
+            type="button"
             onClick={handleClear}
             title="Xóa log sự kiện"
             className="p-2 rounded-lg bg-red-950/40 hover:bg-red-900/40 text-red-400 border border-red-900/30 transition-colors"
@@ -180,6 +186,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
           </button>
           {onClose && (
             <button
+              type="button"
               onClick={onClose}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
             >
@@ -192,6 +199,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
       {/* Tabs Navigation */}
       <div className="flex border-b border-slate-800 bg-slate-900/20 px-4">
         <button
+          type="button"
           onClick={() => setActiveTab("metrics")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "metrics"
@@ -203,6 +211,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
           Tổng hợp Metrics
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab("events")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "events"
@@ -214,6 +223,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
           Lịch sử Sự kiện ({events.length})
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab("evals")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "evals"
@@ -381,7 +391,6 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
               <div className="space-y-3">
                 {filteredEvents.map((ev) => {
                   const isExpanded = expandedEventId === ev.id;
-                  const isSuccess = ev.success !== false;
 
                   return (
                     <div
@@ -393,9 +402,11 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
                       }`}
                     >
                       {/* Event Main Info */}
-                      <div
+                      <button
+                        type="button"
+                        aria-expanded={isExpanded}
                         onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
-                        className="flex items-center justify-between p-4 cursor-pointer select-none"
+                        className="flex w-full items-center justify-between p-4 cursor-pointer select-none text-left"
                       >
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
@@ -422,7 +433,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
                             <ChevronDown className="w-4 h-4 text-slate-400" />
                           )}
                         </div>
-                      </div>
+                      </button>
 
                       {/* Event Detail Metadata */}
                       {isExpanded && (
@@ -492,6 +503,7 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
               </p>
 
               <button
+                type="button"
                 onClick={handleRunEvals}
                 disabled={evalLoading}
                 className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800/40 text-white rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-indigo-600/10"
@@ -570,8 +582,8 @@ export function AssistantObservabilityPanel({ userId, onClose }: ObservabilityPa
                         <div className="mt-3 p-3 bg-red-950/10 border border-red-900/10 rounded-lg text-xs text-red-400 space-y-1">
                           <p className="font-semibold">Lỗi kiểm chứng:</p>
                           <ul className="list-disc pl-4 space-y-0.5">
-                            {res.failures.map((fail, i) => (
-                              <li key={i}>{fail}</li>
+                            {res.failures.map((fail) => (
+                              <li key={`${res.caseId}:${fail}`}>{fail}</li>
                             ))}
                           </ul>
                         </div>

@@ -88,8 +88,13 @@ describe("assistantObservability", () => {
     expect(metaString).toContain("[REDACTED]");
 
     // Strings over 200 chars should be sliced/truncated
-    expect(meta?.longChat).toHaveLength(200);
-    expect(meta?.longChat.endsWith("hello world ")).toBe(false);
+    const longChat = meta?.longChat;
+    expect(typeof longChat).toBe("string");
+    if (typeof longChat !== "string") {
+      throw new Error("Expected longChat metadata to be stored as a string");
+    }
+    expect(longChat).toHaveLength(200);
+    expect(longChat.endsWith("hello world ")).toBe(false);
   });
 
   it("does not crash if localStorage is unavailable", () => {

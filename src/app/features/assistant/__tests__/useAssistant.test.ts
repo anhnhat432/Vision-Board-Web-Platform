@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { AssistantPageContextHint } from "../buildAssistantContext";
 import { useAssistant } from "../useAssistant";
 
 const authContextMock = vi.hoisted(() => ({
@@ -7,7 +8,7 @@ const authContextMock = vi.hoisted(() => ({
 }));
 
 const pageContextMock = vi.hoisted(() => ({
-  useAssistantPageContextValue: vi.fn(() => null as any),
+  useAssistantPageContextValue: vi.fn<() => AssistantPageContextHint | null>(() => null),
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({

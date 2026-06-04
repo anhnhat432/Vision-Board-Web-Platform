@@ -30,7 +30,10 @@ export interface EvalSummary {
  */
 export async function runAssistantEvals(
   cases: AssistantEvalCase[],
-  generateReply: (input: string, context: any) => Promise<{ content: string; actions: AssistantAction[] }>,
+  generateReply: (
+    input: string,
+    context: AssistantEvalCase["context"],
+  ) => Promise<{ content: string; actions: AssistantAction[] }>,
 ): Promise<EvalSummary> {
   const results: EvalResult[] = [];
   let passedCount = 0;
@@ -136,7 +139,8 @@ export async function runAssistantEvals(
         actualActions: actions,
         failures,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       failedCount++;
       results.push({
         caseId: c.id,
@@ -144,7 +148,7 @@ export async function runAssistantEvals(
         passed: false,
         actualReply: "",
         actualActions: [],
-        failures: [`Error running case: ${err.message || String(err)}`],
+        failures: [`Error running case: ${message}`],
       });
     }
   }
