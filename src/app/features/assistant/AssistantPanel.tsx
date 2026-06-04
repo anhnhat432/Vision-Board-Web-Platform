@@ -443,11 +443,15 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
-                >
+              {messages.map((message) => {
+                if (message.role === "assistant" && message.status === "streaming" && !message.content.trim()) {
+                  return null;
+                }
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
+                  >
                   <div
                     className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
                       message.role === "user"
@@ -580,7 +584,8 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     </>
                   )}
                 </div>
-              ))}
+              );
+            })}
               {isTyping ? (
                 <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
                   <div className="max-w-[80%] rounded-2xl rounded-bl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 px-4 py-3">
