@@ -134,16 +134,17 @@ export function AssistantMascot({
             touchAction: "none",
             cursor: isDragging ? "grabbing" : "grab",
           }}
-          className="assistant-mascot-shell z-50 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-app-accent px-4 py-2.5 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+          className="assistant-mascot-shell z-50 inline-flex items-center gap-2.5 whitespace-nowrap rounded-full bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 dark:from-emerald-600 dark:via-teal-500 dark:to-cyan-500 px-5 py-3 text-white border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(16,185,129,0.3)] dark:shadow-[0_8px_32px_rgba(20,184,166,0.35)] transition-all duration-300 hover:scale-[1.06] active:scale-95 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] dark:hover:shadow-[0_0_30px_rgba(20,184,166,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
         >
-          <span className="absolute inset-0 -z-10 animate-pulse rounded-full bg-app-accent/25" />
+          <span className="absolute inset-0 -z-10 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-emerald-400/25 opacity-75" />
+          <span className="absolute inset-0 -z-10 animate-[pulse_2.5s_ease-in-out_infinite] rounded-full bg-teal-500/20" />
           <Sparkles
-            className={`relative h-4 w-4 text-white ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
-            strokeWidth={2.2}
+            className={`relative h-4.5 w-4.5 text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)] ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
+            strokeWidth={2.4}
           />
-          <span className="relative text-sm font-semibold tracking-tight">Hỏi AI</span>
+          <span className="relative text-sm font-bold tracking-wide">Hỏi Cú AI</span>
           {nudge.active ? (
-            <span className="absolute -top-1 -right-1 size-3 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
+            <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-app-warm ring-2 ring-app-surface animate-pulse" />
           ) : null}
         </button>
       </TooltipTrigger>

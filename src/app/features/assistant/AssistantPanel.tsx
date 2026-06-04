@@ -369,14 +369,14 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/30 sm:hidden" onClick={handleBackdropClick} aria-hidden="true" />
+      <div className="fixed inset-0 z-50 bg-black/40 sm:hidden" onClick={handleBackdropClick} aria-hidden="true" />
 
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col rounded-t-2xl bg-app-surface shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl"
+        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col border border-app-line/45 dark:border-white/10 rounded-t-3xl bg-app-surface/85 backdrop-blur-2xl shadow-[0_24px_60px_rgba(0,0,0,0.18)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.38)] sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-3xl transition-all duration-300"
         style={{ height: "min(80vh, 720px)" }}
         role="dialog"
         aria-modal="true"
@@ -386,36 +386,45 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
           <div className="h-1.5 w-12 rounded-full bg-gray-300" />
         </div>
 
-        <div className="flex h-14 items-center gap-3 border-b px-4">
-          <span className="flex size-8 items-center justify-center rounded-full bg-app-accent text-white">
-            <Sparkles className="h-4 w-4" />
+        <div className="flex h-15 items-center gap-3 border-b border-app-line/45 dark:border-white/10 px-4 bg-gradient-to-r from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
+          <span className="flex size-8.5 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+            <Sparkles className="h-4.5 w-4.5 animate-pulse" strokeWidth={2.2} />
           </span>
-          <span className="font-semibold text-gray-900">Trợ lý</span>
+          <div className="flex flex-col">
+            <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">Trợ lý Cú AI</span>
+            <div className="flex items-center gap-1">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-[ping_1.8s_ease-in-out_infinite] absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]"></span>
+              </span>
+              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Trực tuyến</span>
+            </div>
+          </div>
           <div className="flex-1" />
           {messages.length > 0 ? (
             <button
               type="button"
               onClick={handleClearHistory}
               aria-label="Xóa lịch sử chat"
-              className="rounded p-1 text-app-ink-soft transition-colors hover:bg-app-bg hover:text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="rounded-lg p-1.5 text-app-ink-soft transition-all hover:bg-app-bg hover:text-app-ink hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
-              <Trash2 size={18} />
+              <Trash2 size={16} />
             </button>
           ) : null}
           <button
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="rounded p-1 text-app-ink-soft transition-colors hover:bg-app-bg hover:text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="rounded-lg p-1.5 text-app-ink-soft transition-all hover:bg-app-bg hover:text-app-ink hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           {messages.length === 0 ? (
             <div className="flex flex-col gap-3">
-              <div className="rounded-lg bg-app-bg px-3 py-2 text-sm text-app-ink-soft">
+              <div className="rounded-xl bg-app-bg-subtle px-3.5 py-2.5 text-sm text-app-ink-soft border border-app-line/40">
                 Bạn có thể hỏi mình về việc hôm nay, tiến độ tuần này, mục tiêu chính, hoặc reflection.
               </div>
               <div className="flex flex-col gap-2">
@@ -425,7 +434,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     type="button"
                     onClick={() => handleSuggestionClick(suggestion)}
                     disabled={isTyping}
-                    className="rounded-full bg-app-bg px-3 py-1.5 text-left text-sm text-app-ink-soft transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-3.5 py-2 text-left text-sm text-app-ink-soft transition-all duration-200 hover:bg-app-accent/15 hover:text-app-accent hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {suggestion}
                   </button>
@@ -433,17 +442,17 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
                 >
                   <div
-                    className={`min-w-[8rem] max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                    className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
                       message.role === "user"
-                        ? "rounded-br-sm bg-indigo-100 text-indigo-900"
-                        : "rounded-bl-sm bg-app-bg text-gray-900"
+                        ? "rounded-tr-none bg-gradient-to-tr from-emerald-500 via-emerald-600 to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.18)]"
+                        : "rounded-tl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 text-app-ink"
                     }`}
                   >
                     {message.role === "user" ? (
@@ -574,19 +583,18 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               ))}
               {isTyping ? (
                 <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
-                  <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-app-bg px-3 py-2">
-                    <div className="flex gap-1">
+                  <div className="max-w-[80%] rounded-2xl rounded-bl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 px-4 py-3">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className="h-2 w-2 animate-bounce rounded-full bg-gray-500"
-                        style={{ animationDelay: "0ms" }}
+                        className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
+                        style={{ animationDelay: "-0.32s" }}
                       />
                       <span
-                        className="h-2 w-2 animate-bounce rounded-full bg-gray-500"
-                        style={{ animationDelay: "150ms" }}
+                        className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
+                        style={{ animationDelay: "-0.16s" }}
                       />
                       <span
-                        className="h-2 w-2 animate-bounce rounded-full bg-gray-500"
-                        style={{ animationDelay: "300ms" }}
+                        className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
                       />
                     </div>
                   </div>
@@ -613,12 +621,12 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
         {renderSyncStatus()}
 
-        <div className="border-t p-3">
+        <div className="border-t border-app-line/45 dark:border-white/10 p-3 bg-gradient-to-t from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
           <div className="relative">
             {isShowingCommands && (
               <div
                 ref={dropdownRef}
-                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-lg border border-app-line bg-app-surface shadow-lg z-10"
+                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-xl border border-app-line/80 bg-app-surface/95 backdrop-blur-xl shadow-app-xl z-10"
               >
                 {filteredCommands.map((cmd, idx) => (
                   <button
@@ -627,22 +635,22 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     onClick={() => handleSelectCommand(cmd)}
                     onMouseEnter={() => setSelectedCommandIndex(idx)}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors ${
-                      idx === selectedCommandIndex ? "bg-indigo-50" : "hover:bg-app-bg"
+                      idx === selectedCommandIndex ? "bg-app-accent/10 text-app-accent font-medium" : "hover:bg-app-bg-subtle"
                     }`}
                   >
-                    <span className="font-mono text-indigo-600 text-xs">{cmd.command}</span>
+                    <span className="font-mono text-app-accent text-xs bg-app-accent-soft px-1.5 py-0.5 rounded">{cmd.command}</span>
                     <span className="text-app-ink-soft flex-1">{cmd.description}</span>
                   </button>
                 ))}
               </div>
             )}
             {isSpeechListening && (
-              <div className="px-1 py-1 text-xs text-indigo-500/80 italic animate-pulse">
+              <div className="px-1 py-1 text-xs text-app-accent italic animate-pulse font-medium">
                 {interimTranscript ? `Đang nghe: ${interimTranscript}...` : "Đang lắng nghe..."}
               </div>
             )}
-            {speechError && <div className="px-1 py-1 text-xs text-red-500">{speechError}</div>}
-            <div className="flex items-end gap-2">
+            {speechError && <div className="px-1 py-1 text-xs text-red-500 font-medium">{speechError}</div>}
+            <div className="flex items-end gap-2 p-1.5 bg-app-bg-subtle/45 dark:bg-black/20 border border-app-line/50 dark:border-white/10 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.08)] transition-all duration-300">
               <textarea
                 ref={textareaRef}
                 value={inputText}
@@ -651,7 +659,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 placeholder={isTyping ? "Đợi trợ lý xong rồi gõ nhé..." : "Nhập tin nhắn..."}
                 rows={1}
                 disabled={isTyping}
-                className="flex-1 resize-none rounded-lg border border-app-line px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-app-bg disabled:text-app-ink-soft"
+                className="flex-1 resize-none bg-transparent border-0 px-2 py-1 text-sm focus:outline-none focus:ring-0 text-app-ink placeholder:text-app-ink-muted disabled:cursor-not-allowed"
                 style={{ maxHeight: "72px", minHeight: "36px" }}
               />
               {!isTyping && (
@@ -659,10 +667,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                   type="button"
                   disabled={!isSpeechSupported}
                   onClick={isSpeechListening ? stopSpeechListening : startSpeechListening}
-                  className={`rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 ${
+                  className={`rounded-lg p-2 transition-all hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40 ${
                     isSpeechListening
                       ? "bg-red-100 text-red-700 animate-pulse hover:bg-red-200"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      : "bg-app-bg-subtle text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
                   }`}
                   title={
                     !isSpeechSupported
@@ -686,7 +694,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 <button
                   type="button"
                   onClick={stopGeneration}
-                  className="rounded-lg bg-red-50 p-2 text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                  className="rounded-lg bg-red-50 dark:bg-red-950/30 p-2 text-red-700 dark:text-red-400 shadow-sm transition-all hover:scale-110 active:scale-90 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   aria-label="Dừng"
                 >
                   <Square size={18} />
@@ -696,7 +704,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={!inputText.trim()}
-                  className="rounded-lg bg-indigo-600 p-2 text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 p-2 text-white shadow-sm transition-all hover:scale-110 active:scale-90 hover:shadow-[0_0_12px_rgba(16,185,129,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="Gửi"
                 >
                   <Send size={18} />

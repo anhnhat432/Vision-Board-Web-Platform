@@ -274,46 +274,48 @@ export function AssistantActionCard({ action, onExecute, onReject, status, error
   };
 
   return (
-    <div className="mt-2 rounded-lg border border-app-line bg-app-bg p-3">
-      <div className="flex items-start gap-2">
-        <div className="mt-0.5">{getIconForAction(action.type)}</div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-900">{action.label}</p>
+    <div className="mt-3 rounded-2xl border border-app-line/35 dark:border-white/10 bg-app-surface/60 backdrop-blur-sm p-3.5 shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all duration-300">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 p-2 rounded-xl bg-app-bg-subtle/80 dark:bg-white/5 border border-app-line/35 dark:border-white/5 flex items-center justify-center shadow-sm backdrop-blur-sm">
+          {getIconForAction(action.type)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-app-ink truncate">{action.label}</p>
           {renderActionPreview(action)}
-          {status === "error" && errorMessage && <p className="mt-1 text-xs text-red-600">{errorMessage}</p>}
+          {status === "error" && errorMessage && <p className="mt-1 text-xs text-red-600 font-medium">{errorMessage}</p>}
         </div>
         {status === "pending" ? (
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 ml-2 shrink-0">
             <button
               type="button"
               onClick={() => onReject(action)}
-              className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+              className="rounded-full border border-app-line dark:border-white/10 bg-app-surface/80 dark:bg-white/5 px-3 py-1.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg-subtle dark:hover:bg-white/10 transition-all active:scale-90"
             >
               Từ chối
             </button>
             <button
               type="button"
               onClick={handleClick}
-              className="rounded bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 transition"
+              className="rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:shadow-[0_0_8px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-90"
             >
               Đồng ý
             </button>
           </div>
         ) : status === "done" ? (
-          getDoneBadge()
+          <div className="ml-2 shrink-0">{getDoneBadge()}</div>
         ) : (
           <span
-            className={`rounded px-3 py-1.5 text-xs font-medium ${
+            className={`rounded px-2.5 py-1.5 text-xs font-semibold shrink-0 ${
               status === "rejected"
-                ? "bg-gray-100 text-gray-500"
+                ? "bg-app-bg-subtle text-app-ink-soft"
                 : status === "error"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-indigo-100 text-indigo-700"
+                  ? "bg-red-50 text-red-700 border border-red-150"
+                  : "bg-app-accent-soft text-app-accent"
             }`}
           >
             {status === "executing" && (
               <>
-                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent align-middle mr-1" />
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-app-accent border-t-transparent align-middle mr-1.5" />
                 Đang làm...
               </>
             )}

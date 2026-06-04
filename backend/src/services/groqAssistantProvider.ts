@@ -66,7 +66,7 @@ function buildRequestBody(
     model: modelName,
     messages,
     temperature: 0.5,
-    max_tokens: 420,
+    max_tokens: 1000,
   };
 }
 
