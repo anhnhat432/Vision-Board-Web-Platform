@@ -74,7 +74,7 @@ function addGoalCandidates(goal: Goal, candidates: RetrievalCandidate[]): void {
     candidates.push({
       source: "weekly_review",
       title: `Weekly Review tuan ${review.weekNumber} cua ${goal.title}`,
-      snippet: `Weekly Review tuan ${review.weekNumber}: Tro ngai: ${review.mainObstacle || "None"}. Uu tien tuan toi: ${review.nextWeekPriority || "None"}. Khoi luong: ${review.workloadDecision || "None"}`,
+      snippet: `Weekly Review tuan ${review.weekNumber}: Tro ngai: ${review.mainObstacle || "None"}. Uu tien tuan toi: ${review.nextWeekPriority || "None"}. Khoi luong: ${review.workloadDecision || "None"}. Diem ky luat: ${review.disciplineScore ?? "None"}. Diem tien do: ${review.progressScore ?? "None"}. Ket qua lon nhat: ${review.biggestOutputThisWeek || "None"}. Insights: ${review.insights || "None"}. Reflection: ${review.reflection || "None"}`,
       date: review.lastReviewAt ? review.lastReviewAt.slice(0, 10) : undefined,
       goalId: goal.id,
     });

@@ -701,6 +701,61 @@ export function autoCaptureUserMemory(text: string, userId: string | null = null
       );
     }
   }
+
+  // 3. Trở ngại thường gặp (Obstacles)
+  if (
+    normalized.includes("bận quá") ||
+    normalized.includes("không có thời gian") ||
+    normalized.includes("lười quá") ||
+    normalized.includes("quên việc") ||
+    normalized.includes("mệt mỏi") ||
+    normalized.includes("không tập trung") ||
+    normalized.includes("lười nhác") ||
+    normalized.includes("quên mất")
+  ) {
+    const items = getMemoryItems(targetUserId);
+    const content = text.trim();
+    if (!items.some((it) => it.content.toLowerCase() === content.toLowerCase())) {
+      addMemoryItem(
+        {
+          type: "user_preference",
+          content,
+          source: "user_chat_capture",
+          tags: ["obstacle"],
+        },
+        targetUserId,
+      );
+    }
+  }
+
+  // 4. Thói quen thời gian làm việc (Preferred Work Time)
+  if (
+    normalized.includes("thường làm việc") ||
+    normalized.includes("thường học") ||
+    normalized.includes("tập trung vào ban đêm") ||
+    normalized.includes("tập trung vào buổi tối") ||
+    normalized.includes("chỉ rảnh cuối tuần") ||
+    normalized.includes("sáng sớm") ||
+    normalized.includes("ban đêm") ||
+    normalized.includes("cuối tuần") ||
+    normalized.includes("buổi sáng") ||
+    normalized.includes("buổi tối") ||
+    normalized.includes("buổi chiều")
+  ) {
+    const items = getMemoryItems(targetUserId);
+    const content = text.trim();
+    if (!items.some((it) => it.content.toLowerCase() === content.toLowerCase())) {
+      addMemoryItem(
+        {
+          type: "user_preference",
+          content,
+          source: "user_chat_capture",
+          tags: ["preferred_time"],
+        },
+        targetUserId,
+      );
+    }
+  }
 }
 
 export function autoCaptureFromAppData(userId: string | null = null): void {

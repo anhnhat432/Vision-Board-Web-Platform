@@ -48,6 +48,9 @@ describe("getHelpMessage", () => {
     expect(help).toContain("**/today**");
     expect(help).toContain("**/week**");
     expect(help).toContain("**/goals**");
+    expect(help).toContain("**/summary**");
+    expect(help).toContain("**/stuck**");
+    expect(help).toContain("**/suggest**");
     expect(help).toContain("**/reflection**");
     expect(help).toContain("**/audit**");
     expect(help).toContain("**/clear**");
@@ -59,5 +62,8 @@ describe("getHelpMessage", () => {
     expect(help).toContain("Xem việc cần làm hôm nay");
     expect(help).toContain("Tóm tắt tuần này");
     expect(help).toContain("Liệt kê mục tiêu");
+    expect(help).toContain("Tóm tắt kế hoạch 12 tuần và mục tiêu");
+    expect(help).toContain("Tìm điểm kẹt và đề xuất hướng xử lý");
+    expect(help).toContain("Gợi ý hành động dựa trên trang hiện tại");
   });
 });

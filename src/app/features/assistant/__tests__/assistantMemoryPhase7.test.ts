@@ -135,6 +135,16 @@ describe("Assistant Memory Phase 7 - Memory Items & Retrieval", () => {
     const items2 = getMemoryItems("user_capture");
     expect(items2).toHaveLength(2);
     expect(items2.some(it => it.type === "goal_context" && it.content.includes("IELTS"))).toBe(true);
+
+    // Test capture Obstacles
+    autoCaptureUserMemory("Tuần này bận quá không có thời gian", "user_capture");
+    const items3 = getMemoryItems("user_capture");
+    expect(items3.some(it => it.type === "user_preference" && it.tags?.includes("obstacle") && it.content.includes("bận quá"))).toBe(true);
+
+    // Test capture Preferred Work Time
+    autoCaptureUserMemory("Tôi thường học buổi sáng sớm", "user_capture");
+    const items4 = getMemoryItems("user_capture");
+    expect(items4.some(it => it.type === "user_preference" && it.tags?.includes("preferred_time") && it.content.includes("sáng sớm"))).toBe(true);
   });
 
   it("retrieves knowledge using keywords, active goal, decay, and tag matching", () => {
