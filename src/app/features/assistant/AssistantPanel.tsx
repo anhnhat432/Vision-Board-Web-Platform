@@ -42,6 +42,8 @@ import { filterCommands, getHelpMessage, type SlashCommand } from "./slashComman
 import type { FeedbackReason } from "./types";
 import { useAssistant } from "./useAssistant";
 import { useSpeechToText } from "./useSpeechToText";
+import { OwlIcon } from "./OwlIcon";
+import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 
 interface AssistantPanelProps {
   open: boolean;
@@ -77,6 +79,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     messageFeedback,
   } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
+  const { blinking } = useOwlIdleAnimation({ pause: !open });
   const [activeFeedbackMessageId, setActiveFeedbackMessageId] = useState<string | null>(null);
   const [feedbackReason, setFeedbackReason] = useState<FeedbackReason>("other");
   const [feedbackCorrection, setFeedbackCorrection] = useState("");
@@ -388,7 +391,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
         <div className="flex h-15 items-center gap-3 border-b border-app-line/45 dark:border-white/10 px-4 bg-gradient-to-r from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
           <span className="flex size-8.5 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-            <Sparkles className="h-4.5 w-4.5 animate-pulse" strokeWidth={2.2} />
+            <OwlIcon size={18} blinking={blinking} className="text-white" />
           </span>
           <div className="flex flex-col">
             <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">Trợ lý Cú AI</span>

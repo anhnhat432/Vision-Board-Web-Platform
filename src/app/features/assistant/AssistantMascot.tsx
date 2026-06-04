@@ -3,6 +3,8 @@ import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import type { Position } from "./useDraggableMascot";
 import type { NudgeState } from "./useProactiveNudge";
+import { OwlIcon } from "./OwlIcon";
+import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 
 interface AssistantMascotProps {
   onClick: () => void;
@@ -26,6 +28,7 @@ export function AssistantMascot({
   wasDragged,
 }: AssistantMascotProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const { blinking } = useOwlIdleAnimation({ pause: isDragging || isOpen });
   const tooltipTimeoutRef = useRef<number | null>(null);
   const tooltipAutoCloseRef = useRef<number | null>(null);
   const pointerFocusRef = useRef(false);
@@ -138,9 +141,10 @@ export function AssistantMascot({
         >
           <span className="absolute inset-0 -z-10 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-emerald-400/25 opacity-75" />
           <span className="absolute inset-0 -z-10 animate-[pulse_2.5s_ease-in-out_infinite] rounded-full bg-teal-500/20" />
-          <Sparkles
-            className={`relative h-4.5 w-4.5 text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)] ${isDragging || isOpen ? "" : "animate-sparkle-twinkle"}`}
-            strokeWidth={2.4}
+          <OwlIcon
+            size={20}
+            blinking={blinking}
+            className="relative text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)] transition-all duration-300"
           />
           <span className="relative text-sm font-bold tracking-wide">Hỏi Cú AI</span>
           {nudge.active ? (
