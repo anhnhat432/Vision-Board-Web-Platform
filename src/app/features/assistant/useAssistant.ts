@@ -94,6 +94,21 @@ function getErrorMessage(error: unknown): string {
   if (code === "ASSISTANT_BACKEND_UNAVAILABLE" || code === "ASSISTANT_CONNECTION_ERROR") {
     return "Không thể kết nối với máy chủ backend. Vui lòng thử lại sau ít phút.";
   }
+  if (code === "ASSISTANT_PROVIDER_RATE_LIMIT") {
+    return "Trợ lý AI đang quá tải. Vui lòng đợi vài giây rồi thử lại.";
+  }
+  if (code === "ASSISTANT_PROVIDER_AUTH_ERROR") {
+    return "Dịch vụ AI chưa xác thực được. Vui lòng liên hệ quản trị viên.";
+  }
+  if (code === "ASSISTANT_PROVIDER_SERVER_ERROR") {
+    return "Dịch vụ AI đang gặp sự cố tạm thời. Vui lòng thử lại sau ít phút.";
+  }
+  if (code === "ASSISTANT_PROVIDER_PAYLOAD_TOO_LARGE") {
+    return "Nội dung gửi tới trợ lý quá dài. Vui lòng rút gọn tin nhắn.";
+  }
+  if (code === "ASSISTANT_PROVIDER_TIMEOUT") {
+    return "Trợ lý AI phản hồi quá lâu. Vui lòng thử lại.";
+  }
 
   if (error && typeof error === "object" && "message" in error) {
     const message = (error as { message?: unknown }).message;
@@ -102,6 +117,7 @@ function getErrorMessage(error: unknown): string {
 
   return "Xin lỗi, có lỗi xảy ra khi kết nối với trợ lý. Thử lại nhé.";
 }
+
 
 function getErrorCode(error: unknown): string | undefined {
   if (!error || typeof error !== "object" || !("errorCode" in error)) return undefined;

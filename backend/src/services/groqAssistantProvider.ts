@@ -41,7 +41,58 @@ export interface AssistantProviderError {
   errorCode: string;
 }
 
-const GROQ_TIMEOUT_MS = 15_000;
+const GROQ_TIMEOUT_MS = 30_000;
+
+interface GroqErrorBody {
+  error?: { message?: string; type?: string; code?: string };
+}
+
+async function extractGroqErrorDetails(response: Response): Promise<{ status: number; body: string; parsed?: GroqErrorBody }> {
+  const status = response.status;
+  let body = "";
+  let parsed: GroqErrorBody | undefined;
+  try {
+    body = await response.text();
+    parsed = JSON.parse(body) as GroqErrorBody;
+  } catch {}
+  return { status, body: body.slice(0, 500), parsed };
+}
+
+function getGroqErrorMessage(status: number, parsed?: GroqErrorBody): { message: string; errorCode: string } {
+  const providerMsg = parsed?.error?.message?.slice(0, 200);
+  if (status === 429) {
+    return {
+      message: "Trợ lý AI đang quá tải (rate limit). Vui lòng đợi vài giây rồi thử lại.",
+      errorCode: "ASSISTANT_PROVIDER_RATE_LIMIT",
+    };
+  }
+  if (status === 401 || status === 403) {
+    return {
+      message: "Xác thực với dịch vụ AI không thành công. Vui lòng kiểm tra API Key.",
+      errorCode: "ASSISTANT_PROVIDER_AUTH_ERROR",
+    };
+  }
+  if (status === 413) {
+    return {
+      message: "Nội dung gửi tới trợ lý quá dài. Vui lòng rút gọn tin nhắn.",
+      errorCode: "ASSISTANT_PROVIDER_PAYLOAD_TOO_LARGE",
+    };
+  }
+  if (status >= 500) {
+    return {
+      message: providerMsg
+        ? `Dịch vụ AI đang gặp sự cố: ${providerMsg}. Thử lại sau nhé.`
+        : "Dịch vụ AI đang gặp sự cố tạm thời. Thử lại sau nhé.",
+      errorCode: "ASSISTANT_PROVIDER_SERVER_ERROR",
+    };
+  }
+  return {
+    message: providerMsg
+      ? `Trợ lý AI gặp lỗi: ${providerMsg}`
+      : "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
+    errorCode: "ASSISTANT_PROVIDER_ERROR",
+  };
+}
 
 function buildRequestBody(
   userMessage: string,
@@ -120,11 +171,9 @@ export async function sendToGroqStream(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error("[Groq] API error status:", response.status);
-      throw {
-        message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
-        errorCode: "ASSISTANT_PROVIDER_ERROR",
-      };
+      const details = await extractGroqErrorDetails(response);
+      console.error("[Groq Stream] API error:", { status: details.status, body: details.body });
+      throw getGroqErrorMessage(details.status, details.parsed);
     }
 
     if (!response.body) {
@@ -218,11 +267,9 @@ export async function sendToGroq(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error("[Groq] API error status:", response.status);
-      return {
-        message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
-        errorCode: "ASSISTANT_PROVIDER_ERROR",
-      };
+      const details = await extractGroqErrorDetails(response);
+      console.error("[Groq] API error:", { status: details.status, body: details.body });
+      return getGroqErrorMessage(details.status, details.parsed);
     }
 
     const data = await response.json() as GroqResponse;
@@ -246,7 +293,7 @@ export async function sendToGroq(
       };
     }
 
-    console.error("[Groq] Request failed:", error instanceof Error ? error.name : "UnknownError");
+    console.error("[Groq] Request failed:", error instanceof Error ? `${error.name}: ${error.message}` : "UnknownError");
     return {
       message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
       errorCode: "ASSISTANT_PROVIDER_ERROR",
