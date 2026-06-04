@@ -2,7 +2,7 @@ import { buildResult } from "@/app/pages/FeasibilityCheck/helpers";
 import { APP_STORAGE_KEYS, addGoal, addReflection, getUserData, saveUserData } from "@/app/utils/storage";
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
 import { buildDerivedScoreboard, getActiveTwelveWeekGoal, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
-import type { TwelveWeekTaskInstance } from "@/app/utils/storage-types";
+import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import type { AssistantAction } from "./parseActions";
 
 export interface ActionExecutionResult {
@@ -54,6 +54,66 @@ function mapFocusAreaToDomain(area: string): "career" | "health" | "finance" | "
   return "life";
 }
 
+function getPreferredTwelveWeekGoalId(): string | null {
+  if (typeof localStorage === "undefined") return null;
+
+  try {
+    return (
+      localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId) ||
+      localStorage.getItem(APP_STORAGE_KEYS.latest12WeekGoalId)
+    );
+  } catch {
+    return null;
+  }
+}
+
+function getAssistantActiveTwelveWeekGoal(goals: Goal[]): Goal | null {
+  const activeGoal = getActiveTwelveWeekGoal(goals, getPreferredTwelveWeekGoalId());
+  if (activeGoal?.twelveWeekSystem) return activeGoal;
+  return goals.find((goal) => goal.twelveWeekSystem) ?? null;
+}
+
+function getOrderedTwelveWeekGoals(goals: Goal[]): Goal[] {
+  const preferredGoalId = getPreferredTwelveWeekGoalId();
+  const preferredGoal = preferredGoalId ? goals.find((goal) => goal.id === preferredGoalId) : null;
+  const activeGoal = getAssistantActiveTwelveWeekGoal(goals);
+  const ordered: Goal[] = [];
+
+  for (const goal of [preferredGoal, activeGoal, ...goals]) {
+    if (goal?.twelveWeekSystem && !ordered.some((item) => item.id === goal.id)) {
+      ordered.push(goal);
+    }
+  }
+
+  return ordered;
+}
+
+function findTwelveWeekTaskTarget(
+  goals: Goal[],
+  taskIdOrTitle: string,
+): { goal: Goal; system: TwelveWeekSystem; task: TwelveWeekTaskInstance } | null {
+  const normalizedNeedle = taskIdOrTitle.toLowerCase().trim();
+  let titleFallback: { goal: Goal; system: TwelveWeekSystem; task: TwelveWeekTaskInstance } | null = null;
+
+  for (const goal of getOrderedTwelveWeekGoals(goals)) {
+    const system = goal.twelveWeekSystem;
+    if (!system) continue;
+
+    const taskInstances = system.taskInstances || [];
+    const directMatch = taskInstances.find((task) => task.id === taskIdOrTitle);
+    if (directMatch) return { goal, system, task: directMatch };
+
+    if (!titleFallback) {
+      const titleMatch = taskInstances.find((task) => task.title.toLowerCase().trim() === normalizedNeedle);
+      if (titleMatch) {
+        titleFallback = { goal, system, task: titleMatch };
+      }
+    }
+  }
+
+  return titleFallback;
+}
+
 async function runAction(action: AssistantAction): Promise<ActionExecutionResult> {
   switch (action.type) {
     case "navigate_to": {
@@ -71,10 +131,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Không tìm thấy mục tiêu nào. Hãy tạo mục tiêu trước." };
       }
 
-      let activeGoal = getActiveTwelveWeekGoal(data.goals);
-      if (!activeGoal || !activeGoal.twelveWeekSystem) {
-        activeGoal = data.goals.find((g) => g.twelveWeekSystem) || null;
-      }
+      const activeGoal = getAssistantActiveTwelveWeekGoal(data.goals);
 
       if (!activeGoal || !activeGoal.twelveWeekSystem) {
         return { success: false, message: "Chưa có 12-week plan. Hãy tạo plan trước." };
@@ -119,51 +176,36 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
 
     case "mark_task_done": {
       const payload = action.payload as { taskId: string; done: boolean };
-      const { taskId } = payload;
+      const { taskId, done } = payload;
 
       const data = getUserData();
       if (!data?.goals || data.goals.length === 0) {
         return { success: false, message: "Không tìm thấy dữ liệu." };
       }
 
-      let activeGoal = getActiveTwelveWeekGoal(data.goals);
-      if (!activeGoal || !activeGoal.twelveWeekSystem) {
-        activeGoal = data.goals.find((g) => g.twelveWeekSystem) || null;
+      if (done !== true) {
+        return { success: false, message: "Action đánh dấu task cần done=true." };
       }
 
-      if (!activeGoal || !activeGoal.twelveWeekSystem) {
-        return { success: false, message: "Chưa có 12-week plan." };
-      }
-
-      const system = activeGoal.twelveWeekSystem;
-
-      let task = system.taskInstances?.find((t) => t.id === taskId);
-      if (!task) {
-        // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
-        task = system.taskInstances?.find((t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim());
-      }
-      if (!task) {
+      const target = findTwelveWeekTaskTarget(data.goals, taskId);
+      if (!target) {
+        if (!data.goals.some((goal) => goal.twelveWeekSystem)) {
+          return { success: false, message: "Chưa có 12-week plan." };
+        }
         return { success: false, message: "Không tìm thấy task." };
       }
 
-      if (task.completed) {
+      if (target.task.completed) {
         return { success: false, message: "Task đã được đánh dấu hoàn thành rồi." };
       }
 
-      const taskIndex = system.taskInstances.findIndex((t) => t.id === task.id);
-      if (taskIndex === -1) {
-        return { success: false, message: "Không tìm thấy task." };
+      const didToggle = toggleTwelveWeekTaskInData(data, target.goal.id, target.task.id, true);
+      if (!didToggle) {
+        return { success: false, message: "Không thể cập nhật task." };
       }
 
-      system.taskInstances[taskIndex] = {
-        ...task,
-        completed: true,
-        completedAt: new Date().toISOString(),
-        lastModifiedAt: Date.now(),
-      };
-
       saveUserData(data);
-      return { success: true, message: `Đã đánh dấu xong: ${task.title}` };
+      return { success: true, message: `Đã đánh dấu xong: ${target.task.title}` };
     }
 
     case "create_goal": {
@@ -439,31 +481,16 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Không tìm thấy dữ liệu người dùng." };
       }
 
-      let targetGoalId = "";
-      let resolvedTaskId = taskId;
-      for (const goal of data.goals) {
-        const hasTaskDirect = goal.twelveWeekSystem?.taskInstances?.some((t) => t.id === taskId);
-        if (hasTaskDirect) {
-          targetGoalId = goal.id;
-          break;
-        }
-
-        // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
-        const taskByTitle = goal.twelveWeekSystem?.taskInstances?.find(
-          (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim(),
-        );
-        if (taskByTitle) {
-          targetGoalId = goal.id;
-          resolvedTaskId = taskByTitle.id;
-          break;
-        }
-      }
-
-      if (!targetGoalId) {
+      const target = findTwelveWeekTaskTarget(data.goals, taskId);
+      if (!target) {
         return { success: false, message: "Không tìm thấy task tương ứng." };
       }
 
-      toggleTwelveWeekTaskInData(data, targetGoalId, resolvedTaskId, completed);
+      const didToggle = toggleTwelveWeekTaskInData(data, target.goal.id, target.task.id, completed);
+      if (!didToggle) {
+        return { success: false, message: "Không thể cập nhật task." };
+      }
+
       saveUserData(data);
 
       return {

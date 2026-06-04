@@ -117,6 +117,19 @@ export interface AssistantPageContextHint {
   hint?: string;
 }
 
+function getPreferredTwelveWeekGoalId(): string | null {
+  if (typeof localStorage === "undefined") return null;
+
+  try {
+    return (
+      localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId) ||
+      localStorage.getItem(APP_STORAGE_KEYS.latest12WeekGoalId)
+    );
+  } catch {
+    return null;
+  }
+}
+
 export function buildAuthSyncMode(): AuthSyncMode {
   const isDemo = isDemoMode();
   if (isDemo) {
@@ -200,7 +213,7 @@ export function buildAssistantContext(
       return emptyContext(route, pageContextHint, authSyncMode);
     }
 
-    const activeGoal = getActiveTwelveWeekGoal(data.goals);
+    const activeGoal = getActiveTwelveWeekGoal(data.goals, getPreferredTwelveWeekGoalId());
     const goals = data.goals.map((goal: Goal) => ({
       id: goal.id,
       title: goal.title,
@@ -417,7 +430,7 @@ function getCurrentStep(route: string): string | null {
 }
 
 function buildGoalSummary(goals: Goal[]): AssistantPageContext["formDraft"] {
-  const activeGoal = getActiveTwelveWeekGoal(goals) ?? goals[0];
+  const activeGoal = getActiveTwelveWeekGoal(goals, getPreferredTwelveWeekGoalId()) ?? goals[0];
 
   return {
     goalCount: goals.length,

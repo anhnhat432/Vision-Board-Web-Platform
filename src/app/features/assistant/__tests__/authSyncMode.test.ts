@@ -30,12 +30,15 @@ vi.mock("@/app/utils/storage", () => ({
 }));
 
 import { isDemoMode } from "@/app/utils/app-mode";
+import { APP_STORAGE_KEYS } from "@/app/utils/storage-constants";
 import { getUserData } from "@/app/utils/storage";
+import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
 import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 
 describe("AI Assistant Context - AuthSyncMode & Sanitization & Limits", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   describe("buildAuthSyncMode", () => {
@@ -165,7 +168,7 @@ describe("AI Assistant Context - AuthSyncMode & Sanitization & Limits", () => {
     });
 
     it("returns safe defaults when localStorage is empty (empty state)", () => {
-      vi.mocked(getUserData).mockReturnValue(null as any);
+      vi.mocked(getUserData).mockReturnValue(null as unknown as ReturnType<typeof getUserData>);
       vi.mocked(isDemoMode).mockReturnValue(true);
 
       const result = buildAssistantContext();
@@ -174,6 +177,74 @@ describe("AI Assistant Context - AuthSyncMode & Sanitization & Limits", () => {
       expect(result.todayTasks.length).toBe(0);
       expect(result.authSyncMode?.authState).toBe("anonymous");
       expect(result.authSyncMode?.syncState).toBe("disabled");
+    });
+
+    it("uses the latest selected 12-week goal when building todayTasks", () => {
+      vi.mocked(isDemoMode).mockReturnValue(true);
+      localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, "g_selected");
+
+      const makeSystem = (taskId: string, taskTitle: string): TwelveWeekSystem => ({
+        goalType: "custom",
+        vision12Week: taskTitle,
+        lagMetric: { name: "Metric", target: "1", unit: "task", currentValue: "0" },
+        leadIndicators: [],
+        milestones: { week4: "", week8: "", week12: "" },
+        successEvidence: "",
+        reviewDay: "Sunday",
+        week12Outcome: "",
+        startDate: "2026-06-01",
+        endDate: "2026-08-23",
+        timezone: "Asia/Saigon",
+        weekStartsOn: "Monday",
+        status: "active",
+        currentWeek: 1,
+        totalWeeks: 12,
+        weeklyPlans: [],
+        taskInstances: [
+          {
+            id: taskId,
+            weekNumber: 1,
+            scheduledDate: "2026-06-03",
+            title: taskTitle,
+            leadIndicatorName: taskTitle,
+            isCore: false,
+            completed: false,
+          },
+        ],
+        dailyCheckIns: [],
+        weeklyReviews: [],
+        scoreboard: [],
+      });
+
+      const goals: Goal[] = [
+        {
+          id: "g_first",
+          title: "Newer default goal",
+          description: "",
+          deadline: "",
+          category: "health",
+          tasks: [],
+          createdAt: "2026-06-03T00:00:00.000Z",
+          twelveWeekSystem: makeSystem("task_first", "Wrong task"),
+        },
+        {
+          id: "g_selected",
+          title: "Selected UI goal",
+          description: "",
+          deadline: "",
+          category: "learning",
+          tasks: [],
+          createdAt: "2026-06-01T00:00:00.000Z",
+          twelveWeekSystem: makeSystem("task_selected", "Selected task"),
+        },
+      ];
+
+      vi.mocked(getUserData).mockReturnValue({ goals } as UserData);
+
+      const result = buildAssistantContext(new Date("2026-06-03T12:00:00.000Z"), "/dashboard");
+
+      expect(result.todayTasks).toEqual([{ id: "task_selected", title: "Selected task", done: false }]);
+      expect(result.pageContext.formDraft.activeGoalTitle).toBe("Selected UI goal");
     });
   });
 });

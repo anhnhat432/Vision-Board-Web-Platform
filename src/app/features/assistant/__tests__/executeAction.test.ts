@@ -32,6 +32,26 @@ vi.mock("@/app/utils/storage", () => {
           scoreboard: [],
         },
       },
+      {
+        id: "goal_selected",
+        title: "Selected Goal",
+        category: "learning",
+        tasks: [],
+        twelveWeekSystem: {
+          currentWeek: 1,
+          totalWeeks: 12,
+          taskInstances: [
+            {
+              id: "task_selected",
+              title: "Tập ngực",
+              scheduledDate: "2026-06-03",
+              completed: false,
+            },
+          ],
+          weeklyReviews: [],
+          scoreboard: [],
+        },
+      },
     ],
     currentWheelOfLife: [{ name: "Sức khỏe", score: 8, color: "red" }],
   };
@@ -47,12 +67,14 @@ vi.mock("@/app/utils/storage", () => {
       pendingFeasibilityAnswers: "pending_feasibility_answers",
       pendingFeasibilityResult: "pending_feasibility_result",
       pending12WeekSetupDraft: "pending_12_week_setup_draft",
+      latest12WeekGoalId: "latest_12_week_goal_id",
+      latest12WeekSystemGoalId: "latest_12_week_system_goal_id",
     },
   };
 });
 
 vi.mock("@/app/utils/storage-goal-ops", () => ({
-  toggleTwelveWeekTaskInData: vi.fn(),
+  toggleTwelveWeekTaskInData: vi.fn(() => true),
 }));
 
 vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
@@ -80,7 +102,14 @@ vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
 vi.mock("@/app/utils/storage-twelve-week", () => ({
   buildDerivedScoreboard: vi.fn(() => []),
   getDefaultScoreboard: vi.fn(() => []),
-  getActiveTwelveWeekGoal: vi.fn((goals) => (goals ? goals.find((g: any) => g.id === "goal_123") : null)),
+  getActiveTwelveWeekGoal: vi.fn((goals: Array<{ id: string }> | null | undefined, preferredGoalId?: string | null) => {
+    if (!goals) return null;
+    if (preferredGoalId) {
+      const preferredGoal = goals.find((goal) => goal.id === preferredGoalId);
+      if (preferredGoal) return preferredGoal;
+    }
+    return goals.find((goal) => goal.id === "goal_123") ?? null;
+  }),
 }));
 
 import { APP_STORAGE_KEYS, addGoal, addReflection, saveUserData } from "@/app/utils/storage";
@@ -310,6 +339,7 @@ describe("executeAction - Phase 5 Action Suite", () => {
 
     expect(result.success).toBe(true);
     expect(result.message).toContain("Đã đánh dấu xong: Tập ngực");
+    expect(toggleTwelveWeekTaskInData).toHaveBeenCalledWith(expect.anything(), "goal_123", "task_abc", true);
     expect(saveUserData).toHaveBeenCalled();
   });
 
@@ -328,6 +358,47 @@ describe("executeAction - Phase 5 Action Suite", () => {
 
     expect(result.success).toBe(true);
     expect(result.message).toContain("Đã đánh dấu xong: Tập ngực");
+    expect(toggleTwelveWeekTaskInData).toHaveBeenCalledWith(expect.anything(), "goal_123", "task_abc", true);
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes mark_task_done against the selected 12-week goal when titles overlap", async () => {
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, "goal_selected");
+    const action: AssistantAction = {
+      id: "a8_selected",
+      type: "mark_task_done",
+      label: "Đánh dấu xong task trong goal đang chọn",
+      payload: {
+        taskId: "Tập ngực",
+        done: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã đánh dấu xong: Tập ngực");
+    expect(toggleTwelveWeekTaskInData).toHaveBeenCalledWith(expect.anything(), "goal_selected", "task_selected", true);
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("executes update_task_status against the selected 12-week goal when titles overlap", async () => {
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, "goal_selected");
+    const action: AssistantAction = {
+      id: "a7_selected",
+      type: "update_task_status",
+      label: "Đổi status task trong goal đang chọn",
+      payload: {
+        taskId: "Tập ngực",
+        completed: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã đánh dấu hoàn thành nhiệm vụ");
+    expect(toggleTwelveWeekTaskInData).toHaveBeenCalledWith(expect.anything(), "goal_selected", "task_selected", true);
     expect(saveUserData).toHaveBeenCalled();
   });
 
