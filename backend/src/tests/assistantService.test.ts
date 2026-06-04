@@ -69,6 +69,17 @@ describe("assistantService sanitizeContext", () => {
           },
         },
       },
+      pendingClarification: {
+        kind: "task_selection",
+        intent: "mark_task_done",
+        question: "Bạn muốn tick task nào?",
+        createdAt: "2026-06-04T10:00:00.000Z",
+        expiresAt: "2026-06-04T10:15:00.000Z",
+        candidates: [
+          { id: "task_1", label: "Đọc sách" },
+          { id: "task_2", label: "Check api-key: abcdefghijklmnopqrstuvwxyz" },
+        ],
+      },
     });
 
     assert.equal(context.feasibility?.readinessScore, 20);
@@ -86,6 +97,8 @@ describe("assistantService sanitizeContext", () => {
     assert.equal(context.pageContext.formDraft.goalsWithoutTwelveWeekPlan, 100);
     assert.equal(context.pageContext.formDraft.twelveWeekDraftSummary?.leadIndicatorCount, 20);
     assert.equal(context.pageContext.formDraft.twelveWeekDraftSummary?.personalConstraint?.length, 200);
+    assert.equal(context.pendingClarification?.candidates.length, 2);
+    assert.match(context.pendingClarification?.candidates[1].label ?? "", /\[REDACTED\]/);
   });
 });
 

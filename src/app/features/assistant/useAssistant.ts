@@ -2,10 +2,26 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { useAssistantPageContextValue } from "./AssistantPageContextProvider";
 import { sendAssistantMessageStream } from "./assistantApi";
+import {
+  buildClarificationQuestion,
+  clearPendingAssistantClarification,
+  createTaskSelectionClarification,
+  readStoredPendingAssistantClarification,
+  resolveClarificationReply,
+  setPendingAssistantClarification,
+  type AssistantClarificationCandidate,
+  type PendingAssistantClarificationIntent,
+} from "./assistantConversationState";
 import { captureAssistantFeedback } from "./assistantFeedback";
 import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
-import { parseAssistantReply } from "./parseActions";
-import type { ChatHistoryMessage, FeedbackEntry, FeedbackRating, Message } from "./types";
+import {
+  updateAssistantMemoryFromFeedback,
+  autoCaptureUserMemory,
+  clearMemory,
+} from "./assistantMemory";
+import { executeAction, type ActionExecutionResult } from "./executeAction";
+import { type AssistantAction, parseAssistantReply } from "./parseActions";
+import type { ChatHistoryMessage, FeedbackEntry, FeedbackRating, FeedbackReason, Message } from "./types";
 
 const SUGGESTIONS = [
   "Hôm nay tôi nên làm gì?",
@@ -16,6 +32,7 @@ const SUGGESTIONS = [
 
 const MAX_PERSISTED = 30;
 const MAX_FEEDBACK = 100;
+const SAFE_AUTO_EXECUTE_TYPES = new Set<AssistantAction["type"]>(["mark_task_done", "update_task_status"]);
 
 interface PersistedHistory {
   userId: string | null;
@@ -93,6 +110,254 @@ function createMessage(role: Message["role"], content: string, isWelcome?: boole
     createdAt: Date.now(),
     isWelcome,
   };
+}
+
+function buildAutoExecutionSummary(action: AssistantAction, result: ActionExecutionResult): string {
+  if (result.success && result.alreadyDone) {
+    return result.message;
+  }
+  if (result.success) {
+    return result.message;
+  }
+  return `Mình chưa thực hiện được "${action.label}": ${result.message}`;
+}
+
+async function executeSafeAutoActions(
+  actions: AssistantAction[],
+  userId: string | null = null,
+): Promise<{ actions: AssistantAction[]; summary: string | null }> {
+  const autoActions = actions.filter((action) => action.autoExecute && SAFE_AUTO_EXECUTE_TYPES.has(action.type));
+
+  if (autoActions.length === 0) {
+    return { actions, summary: null };
+  }
+
+  if (autoActions.length > 1) {
+    return {
+      actions: actions.map((action) => ({ ...action, autoExecute: false })),
+      summary: "Mình chưa tự chạy vì có nhiều hành động cùng lúc. Bạn hãy chọn đúng hành động bằng nút Đồng ý.",
+    };
+  }
+
+  const [action] = autoActions;
+  const result = await executeAction(action, userId);
+  return {
+    actions: actions.filter((item) => item.id !== action.id).map((item) => ({ ...item, autoExecute: false })),
+    summary: buildAutoExecutionSummary(action, result),
+  };
+}
+
+type AssistantTaskCandidate = AssistantClarificationCandidate & {
+  done: boolean;
+  scheduledDate?: string;
+};
+
+function normalizeCommandText(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u0111/g, "d")
+    .replace(/\u0110/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getTaskCommandIntent(text: string): PendingAssistantClarificationIntent | null {
+  const normalized = normalizeCommandText(text);
+  const mentionsTask = /\b(task|viec|nhiem vu|cong viec)\b/.test(normalized);
+  if (!mentionsTask) return null;
+
+  if (/\b(bo tick|bo danh dau|chua xong|chua hoan thanh|undo|uncheck)\b/.test(normalized)) {
+    return "update_task_status";
+  }
+
+  if (/\b(tick|hoan thanh|xong|danh dau|mark|done|complete|completed)\b/.test(normalized)) {
+    return "mark_task_done";
+  }
+
+  return null;
+}
+
+function hasBulkTaskCommand(text: string): boolean {
+  return /\b(tick het|xong het|hoan thanh het|tat ca|all)\b/.test(normalizeCommandText(text));
+}
+
+function shouldUseTodayOnly(text: string): boolean {
+  return /\b(hom nay|today)\b/.test(normalizeCommandText(text));
+}
+
+function toTaskCandidate(task: { id: string; title: string; done?: boolean; scheduledDate?: string }): AssistantTaskCandidate {
+  return {
+    id: task.id,
+    label: task.title,
+    done: task.done === true,
+    scheduledDate: task.scheduledDate,
+  };
+}
+
+function uniqueTaskCandidates(candidates: AssistantTaskCandidate[]): AssistantTaskCandidate[] {
+  const seen = new Set<string>();
+  const unique: AssistantTaskCandidate[] = [];
+  for (const candidate of candidates) {
+    if (!candidate.id || !candidate.label || seen.has(candidate.id)) continue;
+    seen.add(candidate.id);
+    unique.push(candidate);
+  }
+  return unique;
+}
+
+function getClarificationCandidates(
+  text: string,
+  context: AssistantContext,
+  intent: PendingAssistantClarificationIntent,
+): AssistantTaskCandidate[] {
+  const todayTasks = (context.todayTasks || []).map(toTaskCandidate);
+  const overdueTasks = shouldUseTodayOnly(text)
+    ? []
+    : (context.stuckSignals?.overdueTasks || []).map((task) =>
+        toTaskCandidate({
+          id: task.id,
+          title: task.title,
+          done: false,
+          scheduledDate: task.scheduledDate,
+        }),
+      );
+
+  const all = uniqueTaskCandidates([...todayTasks, ...overdueTasks]);
+  if (intent === "mark_task_done") return all.filter((task) => !task.done);
+  return all.filter((task) => task.done);
+}
+
+function getAllTaskCandidates(text: string, context: AssistantContext): AssistantTaskCandidate[] {
+  const todayTasks = (context.todayTasks || []).map(toTaskCandidate);
+  const overdueTasks = shouldUseTodayOnly(text)
+    ? []
+    : (context.stuckSignals?.overdueTasks || []).map((task) =>
+        toTaskCandidate({
+          id: task.id,
+          title: task.title,
+          done: false,
+          scheduledDate: task.scheduledDate,
+        }),
+      );
+  return uniqueTaskCandidates([...todayTasks, ...overdueTasks]);
+}
+
+function buildTaskAction(
+  intent: PendingAssistantClarificationIntent,
+  candidate: AssistantClarificationCandidate,
+): AssistantAction {
+  if (intent === "mark_task_done") {
+    return {
+      id: crypto.randomUUID(),
+      type: "mark_task_done",
+      label: `Hoàn thành: ${candidate.label}`,
+      payload: {
+        taskId: candidate.id,
+        done: true,
+      },
+      autoExecute: true,
+    };
+  }
+
+  return {
+    id: crypto.randomUUID(),
+    type: "update_task_status",
+    label: `Bỏ hoàn thành: ${candidate.label}`,
+    payload: {
+      taskId: candidate.id,
+      completed: false,
+    },
+    autoExecute: true,
+  };
+}
+
+async function executeTaskClarificationAction(
+  intent: PendingAssistantClarificationIntent,
+  candidate: AssistantClarificationCandidate,
+  userId: string | null = null,
+): Promise<string> {
+  const action = buildTaskAction(intent, candidate);
+  const result = await executeAction(action, userId);
+  return buildAutoExecutionSummary(action, result);
+}
+
+async function resolvePendingClarificationTurn(userId: string | null, text: string): Promise<string | null> {
+  const pending = readStoredPendingAssistantClarification(userId);
+  if (!pending) return null;
+
+  const resolution = resolveClarificationReply(text, pending);
+  if (resolution.status === "expired") {
+    clearPendingAssistantClarification(userId);
+    return "Yêu cầu chọn task trước đó đã hết hạn. Bạn nói lại task cần thao tác nhé.";
+  }
+
+  if (resolution.status === "cancelled") {
+    clearPendingAssistantClarification(userId);
+    return "Đã hủy lựa chọn task trước đó.";
+  }
+
+  if (resolution.status === "unresolved") {
+    return resolution.question;
+  }
+
+  const summary = await executeTaskClarificationAction(resolution.pending.intent, resolution.candidate, userId);
+  clearPendingAssistantClarification(userId);
+  return summary;
+}
+
+async function resolveDirectTaskCommandTurn(
+  userId: string | null,
+  text: string,
+  context: AssistantContext,
+): Promise<string | null> {
+  const intent = getTaskCommandIntent(text);
+  if (!intent) return null;
+
+  const candidates = getClarificationCandidates(text, context, intent);
+  const allCandidates = getAllTaskCandidates(text, context);
+  const temporaryPending = createTaskSelectionClarification({
+    intent,
+    candidates: allCandidates,
+    question: buildClarificationQuestion(intent, allCandidates),
+  });
+  const directResolution = resolveClarificationReply(text, temporaryPending);
+
+  if (directResolution.status === "selected") {
+    const matchedCandidate = allCandidates.find((candidate) => candidate.id === directResolution.candidate.id);
+    if (intent === "mark_task_done" && matchedCandidate?.done) {
+      return `Task "${matchedCandidate.label}" đã hoàn thành từ trước rồi.`;
+    }
+    if (intent === "update_task_status" && matchedCandidate && !matchedCandidate.done) {
+      return `Task "${matchedCandidate.label}" hiện chưa được đánh dấu hoàn thành, nên mình không cần bỏ tick.`;
+    }
+    return executeTaskClarificationAction(intent, directResolution.candidate, userId);
+  }
+
+  if (candidates.length === 0) {
+    return intent === "mark_task_done"
+      ? "Mình chưa thấy task chưa hoàn thành nào phù hợp để tick."
+      : "Mình chưa thấy task nào đang hoàn thành để bỏ tick.";
+  }
+
+  if (candidates.length === 1 && !hasBulkTaskCommand(text)) {
+    return executeTaskClarificationAction(intent, candidates[0], userId);
+  }
+
+  const questionPrefix =
+    hasBulkTaskCommand(text) && intent === "mark_task_done"
+      ? "Mình chưa tick hàng loạt để tránh đánh dấu nhầm.\n"
+      : "";
+  const question = `${questionPrefix}${buildClarificationQuestion(intent, candidates)}`;
+  const pending = createTaskSelectionClarification({
+    intent,
+    candidates,
+    question,
+  });
+  setPendingAssistantClarification(userId, pending);
+  return `${pending.question}\n\nBạn có thể trả lời bằng số thứ tự, ví dụ "cái thứ 2", hoặc gõ tên task.`;
 }
 
 function normalizePersistedMessage(value: unknown): Message | null {
@@ -262,6 +527,9 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
       const trimmed = text.trim();
       if (!trimmed || isTyping) return;
 
+      // Tự động capture memory từ chat input
+      autoCaptureUserMemory(trimmed, userId);
+
       setMessages((prev) => [...prev, createMessage("user", trimmed)]);
       setLastUserText(trimmed);
       setIsTyping(true);
@@ -283,13 +551,35 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
       try {
         const context: AssistantContext & { route: string } = {
-          ...buildAssistantContext(undefined, route, pageContextHintValue),
+          ...buildAssistantContext(undefined, route, pageContextHintValue, trimmed, userId),
           route,
         };
         turnSnapshotsRef.current[messageId] = {
           userMessage: trimmed,
           context,
         };
+
+        const pendingTurn = await resolvePendingClarificationTurn(userId, trimmed);
+        if (pendingTurn) {
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === messageId ? { ...message, content: pendingTurn, actions: [], status: "complete" } : message,
+            ),
+          );
+          return;
+        }
+
+        const directTaskTurn = await resolveDirectTaskCommandTurn(userId, trimmed, context);
+        if (directTaskTurn) {
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === messageId
+                ? { ...message, content: directTaskTurn, actions: [], status: "complete" }
+                : message,
+            ),
+          );
+          return;
+        }
 
         const history: ChatHistoryMessage[] = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }));
 
@@ -308,10 +598,14 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
         );
 
         const parsed = parseAssistantReply(finalContent);
+        const autoExecution = await executeSafeAutoActions(parsed.actions, userId);
+        const finalText = autoExecution.summary
+          ? `${parsed.textContent}\n\n${autoExecution.summary}`.trim()
+          : parsed.textContent;
         setMessages((prev) =>
           prev.map((message) =>
             message.id === messageId
-              ? { ...message, content: parsed.textContent, actions: parsed.actions, status: "complete" }
+              ? { ...message, content: finalText, actions: autoExecution.actions, status: "complete" }
               : message,
           ),
         );
@@ -339,7 +633,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
         abortControllerRef.current = null;
       }
     },
-    [isTyping, messages, route, pageContextHintValue],
+    [isTyping, messages, route, pageContextHintValue, userId],
   );
 
   const retry = useCallback(() => {
@@ -353,6 +647,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
     setLastUserText(null);
     turnSnapshotsRef.current = {};
     try {
+      clearMemory(userId);
       localStorage.removeItem(getStorageKey(userId));
       localStorage.removeItem(getOnboardKey(userId));
       setOnboarded(false);
@@ -360,7 +655,21 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
   }, [userId]);
 
   const submitFeedback = useCallback(
-    (messageId: string, rating: FeedbackRating) => {
+    (
+      messageId: string,
+      rating: FeedbackRating,
+      options?: {
+        reason?: FeedbackReason;
+        correction?: string;
+        expectedActionType?: string;
+        expectedTaskTitle?: string;
+        actionExecution?: {
+          actionType: string;
+          success: boolean;
+          message: string;
+        };
+      }
+    ) => {
       try {
         setMessages((prev) => {
           const targetIndex = prev.findIndex((message) => message.id === messageId);
@@ -373,7 +682,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
           // Capture feedback via existing helper (keeps compatibility)
           const context = snapshot?.context ?? {
-            ...buildAssistantContext(undefined, route, pageContextHintValue),
+            ...buildAssistantContext(undefined, route, pageContextHintValue, undefined, userId),
             route,
           };
 
@@ -384,7 +693,20 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             userMessage: snapshot?.userMessage ?? previousUserMessage,
             assistantMessage: target.content,
             context,
+            reason: options?.reason,
+            correction: options?.correction,
+            expectedActionType: options?.expectedActionType,
+            expectedTaskTitle: options?.expectedTaskTitle,
+            actionExecution: options?.actionExecution,
           });
+
+          updateAssistantMemoryFromFeedback(
+            rating === "up" ? "helpful" : "not_helpful",
+            snapshot?.userMessage ?? previousUserMessage,
+            target.content,
+            options,
+            userId,
+          );
 
           // Save to new feedback storage with user-scoped key
           const entry: FeedbackEntry = {
@@ -394,6 +716,11 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             rating,
             timestamp: Date.now(),
             route,
+            reason: options?.reason,
+            correction: options?.correction,
+            expectedActionType: options?.expectedActionType,
+            expectedTaskTitle: options?.expectedTaskTitle,
+            actionExecution: options?.actionExecution,
           };
 
           if (typeof localStorage !== "undefined") {

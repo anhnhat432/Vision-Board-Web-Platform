@@ -4,7 +4,7 @@ import type { AssistantAction } from "../parseActions";
 
 // Mock các module liên quan đến storage và feasibility
 vi.mock("@/app/utils/storage", () => {
-  const mockUserData = {
+  const initialMockUserData = {
     goals: [
       {
         id: "goal_inactive",
@@ -56,9 +56,14 @@ vi.mock("@/app/utils/storage", () => {
     currentWheelOfLife: [{ name: "Sức khỏe", score: 8, color: "red" }],
   };
 
+  // Mutable reference: saveUserData updates this, getUserData reads it
+  let currentData = JSON.parse(JSON.stringify(initialMockUserData));
+
   return {
-    getUserData: vi.fn(() => JSON.parse(JSON.stringify(mockUserData))),
-    saveUserData: vi.fn(),
+    getUserData: vi.fn(() => JSON.parse(JSON.stringify(currentData))),
+    saveUserData: vi.fn((data: unknown) => {
+      currentData = JSON.parse(JSON.stringify(data));
+    }),
     addReflection: vi.fn(),
     addGoal: vi.fn(() => "new_goal_999"),
     APP_STORAGE_KEYS: {
@@ -70,11 +75,22 @@ vi.mock("@/app/utils/storage", () => {
       latest12WeekGoalId: "latest_12_week_goal_id",
       latest12WeekSystemGoalId: "latest_12_week_system_goal_id",
     },
+    // Expose reset for beforeEach
+    __resetMockData: () => {
+      currentData = JSON.parse(JSON.stringify(initialMockUserData));
+    },
   };
 });
 
 vi.mock("@/app/utils/storage-goal-ops", () => ({
-  toggleTwelveWeekTaskInData: vi.fn(() => true),
+  toggleTwelveWeekTaskInData: vi.fn((data: { goals?: Array<{ id: string; twelveWeekSystem?: { taskInstances?: Array<{ id: string; completed: boolean }> } }> }, goalId: string, taskId: string, completed: boolean) => {
+    const goal = data.goals?.find((g) => g.id === goalId);
+    if (!goal?.twelveWeekSystem?.taskInstances) return false;
+    const task = goal.twelveWeekSystem.taskInstances.find((t) => t.id === taskId);
+    if (!task) return false;
+    task.completed = completed;
+    return true;
+  }),
 }));
 
 vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
@@ -115,10 +131,14 @@ vi.mock("@/app/utils/storage-twelve-week", () => ({
 import { APP_STORAGE_KEYS, addGoal, addReflection, saveUserData } from "@/app/utils/storage";
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
 
+// biome-ignore lint/suspicious/noExplicitAny: test helper reset function
+const { __resetMockData } = await import("@/app/utils/storage") as any;
+
 describe("executeAction - Phase 5 Action Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    __resetMockData();
   });
 
   it("executes create_life_insight_note successfully", async () => {
@@ -496,5 +516,246 @@ describe("executeAction - Phase 5 Action Suite", () => {
 
     const { getActiveTwelveWeekGoal } = await import("@/app/utils/storage-twelve-week");
     expect(getActiveTwelveWeekGoal).toHaveBeenCalled();
+  });
+
+  it("executes reschedule_task against the selected 12-week goal when titles overlap", async () => {
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, "goal_selected");
+    const action: AssistantAction = {
+      id: "a10_reschedule",
+      type: "reschedule_task",
+      label: "Dời lịch task trong goal đang chọn",
+      payload: {
+        taskId: "Tập ngực",
+        scheduledDate: "2026-06-08",
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("Đã dời lịch task sang ngày 2026-06-08");
+    expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("does not call saveUserData when action execution fails", async () => {
+    const action: AssistantAction = {
+      id: "fail_action",
+      type: "mark_task_done",
+      label: "Đánh dấu task không tồn tại",
+      payload: {
+        taskId: "non_existent_task_id",
+        done: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(false);
+    expect(saveUserData).not.toHaveBeenCalled();
+  });
+
+  it("limits audit log to 50 records in localStorage", async () => {
+    const existingLogs = Array.from({ length: 49 }, (_, i) => ({
+      timestamp: new Date().toISOString(),
+      type: "navigate_to",
+      label: `Log ${i}`,
+      success: true,
+      message: "success",
+    }));
+    localStorage.setItem("assistant.action_audit_log", JSON.stringify(existingLogs));
+
+    const action: AssistantAction = {
+      id: "a11",
+      type: "mark_task_done",
+      label: "Missing task",
+      payload: {
+        taskId: "missing_task",
+        done: true,
+      },
+    };
+    await executeAction(action);
+    await executeAction(action);
+
+    const storedLogs = JSON.parse(localStorage.getItem("assistant.action_audit_log") || "[]");
+    expect(storedLogs).toHaveLength(50);
+  });
+});
+
+describe("executeAction - Phase 5 State Verification", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    __resetMockData();
+  });
+
+  it("mark_task_done returns verified=true after successful execution", async () => {
+    const action: AssistantAction = {
+      id: "v1",
+      type: "mark_task_done",
+      label: "Hoàn thành task",
+      payload: { taskId: "task_abc", done: true },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.alreadyDone).toBeUndefined();
+    expect(result.message).toContain("Đã đánh dấu xong");
+  });
+
+  it("mark_task_done returns success=false when state verification fails", async () => {
+    vi.mocked(saveUserData).mockImplementationOnce(() => false);
+
+    const action: AssistantAction = {
+      id: "v1_verify_fail",
+      type: "mark_task_done",
+      label: "Hoàn thành task",
+      payload: { taskId: "task_abc", done: true },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(false);
+    expect(result.verified).toBe(false);
+    expect(result.message).toContain("chưa xác minh được");
+  });
+
+  it("mark_task_done on already-completed task returns alreadyDone=true", async () => {
+    // First call: mark done
+    const action1: AssistantAction = {
+      id: "v2a",
+      type: "mark_task_done",
+      label: "Hoàn thành task lần 1",
+      payload: { taskId: "task_abc", done: true },
+    };
+    await executeAction(action1);
+
+    // Second call: same task should be alreadyDone
+    const action2: AssistantAction = {
+      id: "v2b",
+      type: "mark_task_done",
+      label: "Hoàn thành task lần 2",
+      payload: { taskId: "task_abc", done: true },
+    };
+    const result = await executeAction(action2);
+
+    expect(result.success).toBe(true);
+    expect(result.alreadyDone).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.message).toContain("đã được hoàn thành từ trước");
+  });
+
+  it("create_task returns verified=true after successful execution", async () => {
+    const action: AssistantAction = {
+      id: "v3",
+      type: "create_task",
+      label: "Tạo task",
+      payload: {
+        title: "Chạy bộ test",
+        scheduledDate: "today",
+        isCore: false,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.message).toContain("Đã tạo task");
+  });
+
+  it("create_goal returns verified=true after successful execution", async () => {
+    const action: AssistantAction = {
+      id: "v4",
+      type: "create_goal",
+      label: "Tạo mục tiêu",
+      payload: {
+        title: "Học IELTS",
+        category: "career",
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.message).toContain("Đã tạo mục tiêu");
+  });
+
+  it("reschedule_task returns verified=true after successful execution", async () => {
+    const action: AssistantAction = {
+      id: "v5",
+      type: "reschedule_task",
+      label: "Dời lịch task",
+      payload: {
+        taskId: "task_abc",
+        scheduledDate: "2026-06-10",
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.message).toContain("Đã dời lịch task sang ngày 2026-06-10");
+  });
+
+  it("add_weekly_review returns verified=true after successful execution", async () => {
+    const action: AssistantAction = {
+      id: "v6",
+      type: "add_weekly_review",
+      label: "Thêm review tuần 1",
+      payload: {
+        goalId: "goal_123",
+        weekNumber: 1,
+        mainObstacle: "Mệt mỏi",
+        nextWeekPriority: "Nghỉ ngơi",
+        workloadDecision: "keep same",
+        biggestOutputThisWeek: "Tập 3 buổi",
+        reflection: "OK",
+        adjustments: "",
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.message).toContain("Đã cập nhật review tuần 1");
+  });
+
+  it("update_task_status returns verified=true after successful execution", async () => {
+    const action: AssistantAction = {
+      id: "v7",
+      type: "update_task_status",
+      label: "Cập nhật status",
+      payload: {
+        taskId: "task_abc",
+        completed: true,
+      },
+    };
+
+    const result = await executeAction(action);
+
+    expect(result.success).toBe(true);
+    expect(result.verified).toBe(true);
+    expect(result.message).toContain("Đã đánh dấu hoàn thành");
+  });
+
+  it("audit log includes verified and alreadyDone fields", async () => {
+    const action: AssistantAction = {
+      id: "v8",
+      type: "mark_task_done",
+      label: "Hoàn thành task",
+      payload: { taskId: "task_abc", done: true },
+    };
+
+    await executeAction(action);
+
+    const storedLogs = JSON.parse(localStorage.getItem("assistant.action_audit_log") || "[]");
+    expect(storedLogs.length).toBeGreaterThan(0);
+    expect(storedLogs[0].verified).toBe(true);
+    expect(storedLogs[0].alreadyDone).toBeUndefined();
   });
 });

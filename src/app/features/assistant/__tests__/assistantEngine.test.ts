@@ -210,6 +210,70 @@ describe("mockProvider", () => {
 
     expect(response).toContain("mark_task_done");
     expect(response).toContain("Đọc chapter 3");
+    expect(response).not.toContain('"autoExecute": true');
+  });
+
+  it("auto-executes tick intent when there is exactly one open task", async () => {
+    const promise = mockProvider.send("tick task hôm nay", {
+      ...sampleContext,
+      todayTasks: [
+        { id: "t1", title: "Đọc chapter 3", done: false },
+        { id: "t2", title: "Làm bài tập", done: true },
+      ],
+    });
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("mark_task_done");
+    expect(response).toContain('"taskId": "t1"');
+    expect(response).toContain('"autoExecute": true');
+  });
+
+  it("fuzzy matches a named task and marks only that task as auto-executable", async () => {
+    const promise = mockProvider.send("xong task đọc sách", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain('"taskId": "t1"');
+    expect(response).toContain('"autoExecute": true');
+    expect(response).not.toContain('"taskId": "t3"');
+  });
+
+  it("does not create an action when the matched task is already done", async () => {
+    const promise = mockProvider.send("xong task bài tập", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("đã hoàn thành từ trước");
+    expect(response).not.toContain("```action");
+  });
+
+  it("refuses bulk task ticking instead of auto-executing multiple actions", async () => {
+    const promise = mockProvider.send("tick hết task hôm nay", sampleContext);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("chưa tick hàng loạt");
+    expect(response).not.toContain("```action");
+  });
+
+  it("keeps action blocks when memory prefers brief responses", async () => {
+    const promise = mockProvider.send("tick task hôm nay", {
+      ...sampleContext,
+      assistantMemory: {
+        preferredCoachingStyle: "brief",
+        recurringObstacles: [],
+        userPreferences: [],
+        rejectedPatterns: ["nói quá dài"],
+        recentCorrections: [],
+        oftenMissedTasks: [],
+      },
+    });
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("```action");
+    expect(response).toContain("mark_task_done");
   });
 
   it("detects tick task intent and returns message when no open tasks exist", async () => {
@@ -232,5 +296,47 @@ describe("mockProvider", () => {
     const response = await promise;
 
     expect(response).toContain("chưa có kế hoạch 12 tuần nào đang hoạt động");
+  });
+
+  it("handles obstacle queries using retrievedKnowledge", async () => {
+    const contextWithRetrieval: AssistantContext = {
+      ...sampleContext,
+      retrievedKnowledge: [
+        {
+          source: "weekly_review",
+          title: "Weekly Review tuần 1",
+          snippet: "Bị kẹt vì thiếu từ vựng tiếng Anh",
+          score: 85,
+        },
+      ],
+    };
+
+    const promise = mockProvider.send("Tuần trước tôi bị kẹt vì gì?", contextWithRetrieval);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("trở ngại trước đây là");
+    expect(response).toContain("Bị kẹt vì thiếu từ vựng tiếng Anh");
+  });
+
+  it("handles toeic queries using retrievedKnowledge", async () => {
+    const contextWithRetrieval: AssistantContext = {
+      ...sampleContext,
+      retrievedKnowledge: [
+        {
+          source: "goal",
+          title: "Học thi TOEIC 750",
+          snippet: "Goal: Học thi TOEIC 750 (Category: career, Progress: 20%)",
+          score: 90,
+        },
+      ],
+    };
+
+    const promise = mockProvider.send("Mục tiêu TOEIC của tôi thế nào?", contextWithRetrieval);
+    await vi.advanceTimersByTimeAsync(1000);
+    const response = await promise;
+
+    expect(response).toContain("bạn có mục tiêu TOEIC sau");
+    expect(response).toContain("Học thi TOEIC 750");
   });
 });

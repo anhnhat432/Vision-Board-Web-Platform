@@ -72,4 +72,109 @@ describe("sanitizeAssistantContext with pageContextHint", () => {
     expect(result.pageContextHint?.currentStep).toBe("achievable");
     expect(result.pageContextHint?.hint).toBe("Đang kiểm tra mục tiêu");
   });
+
+  it("should sanitize retrievedKnowledge correctly", () => {
+    const ctx: AssistantContext & { route: string } = {
+      currentWeek: 4,
+      weeksTotal: 12,
+      goals: [],
+      todayTasks: [],
+      lastReflectionDate: null,
+      feasibility: null,
+      latestWeeklyReview: null,
+      stuckSignals: {
+        latestObstacle: null,
+        missedCommitments: [],
+        overdueOpenCount: 0,
+        overdueTasks: [],
+      },
+      trend: {
+        completionLast4Weeks: [],
+        direction: "unknown",
+      },
+      streak: {
+        daysWithCompletedTask: 0,
+      },
+      upcomingDeadlines: [],
+      pageContext: {
+        route: "/smart-goal-setup",
+        currentStep: null,
+        nextSuggestedStep: null,
+        formDraft: {},
+      },
+      route: "/smart-goal-setup",
+      retrievedKnowledge: [
+        {
+          source: "invalid_source",
+          title: "Invalid memory",
+          snippet: "This should not reach the prompt",
+          score: 50,
+        } as unknown as NonNullable<AssistantContext["retrievedKnowledge"]>[number],
+        {
+          source: "goal",
+          title: "Thiết lập api-key",
+          snippet: "Mật khẩu của tôi là password: mySuperSecretKey123",
+          score: 150, // Vượt quá 100
+        },
+      ],
+    };
+
+    const result = sanitizeAssistantContext(ctx);
+    expect(result.retrievedKnowledge).toBeDefined();
+    expect(result.retrievedKnowledge?.length).toBe(1);
+    expect(result.retrievedKnowledge?.[0].score).toBe(100); // Đã bị clamp về 100
+    expect(result.retrievedKnowledge?.[0].title).not.toContain("api-key"); // Đã bị redact
+    expect(result.retrievedKnowledge?.[0].title).toContain("[REDACTED]");
+    expect(result.retrievedKnowledge?.[0].snippet).toContain("[REDACTED]");
+  });
+
+  it("should sanitize pending clarification safely", () => {
+    const ctx: AssistantContext & { route: string } = {
+      currentWeek: 4,
+      weeksTotal: 12,
+      goals: [],
+      todayTasks: [],
+      lastReflectionDate: null,
+      feasibility: null,
+      latestWeeklyReview: null,
+      stuckSignals: {
+        latestObstacle: null,
+        missedCommitments: [],
+        overdueOpenCount: 0,
+        overdueTasks: [],
+      },
+      trend: {
+        completionLast4Weeks: [],
+        direction: "unknown",
+      },
+      streak: {
+        daysWithCompletedTask: 0,
+      },
+      upcomingDeadlines: [],
+      pageContext: {
+        route: "/today",
+        currentStep: null,
+        nextSuggestedStep: null,
+        formDraft: {},
+      },
+      route: "/today",
+      pendingClarification: {
+        kind: "task_selection",
+        intent: "mark_task_done",
+        question: "Bạn muốn tick task nào?",
+        createdAt: "2026-06-04T10:00:00.000Z",
+        expiresAt: "2026-06-04T10:15:00.000Z",
+        candidates: [
+          { id: "task_1", label: "Đọc sách" },
+          { id: "task_2", label: "Check api-key: abcdefghijklmnopqrstuvwxyz" },
+        ],
+      },
+    };
+
+    const result = sanitizeAssistantContext(ctx);
+
+    expect(result.pendingClarification?.intent).toBe("mark_task_done");
+    expect(result.pendingClarification?.candidates).toHaveLength(2);
+    expect(result.pendingClarification?.candidates[1].label).toContain("[REDACTED]");
+  });
 });

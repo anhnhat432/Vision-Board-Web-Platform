@@ -7,6 +7,8 @@ interface AssistantActionCardProps {
   onReject: (action: AssistantAction) => void;
   status: "pending" | "executing" | "done" | "error" | "rejected";
   errorMessage?: string;
+  verified?: boolean;
+  alreadyDone?: boolean;
 }
 
 function getIconForAction(type: AssistantAction["type"]) {
@@ -236,10 +238,39 @@ function renderActionPreview(action: AssistantAction) {
   }
 }
 
-export function AssistantActionCard({ action, onExecute, onReject, status, errorMessage }: AssistantActionCardProps) {
+export function AssistantActionCard({ action, onExecute, onReject, status, errorMessage, verified, alreadyDone }: AssistantActionCardProps) {
   const handleClick = async () => {
     if (status === "executing" || status === "done") return;
     await onExecute(action);
+  };
+
+  const getDoneBadge = () => {
+    if (alreadyDone) {
+      return (
+        <span className="rounded px-3 py-1.5 text-xs font-medium bg-amber-100 text-amber-700">
+          Đã làm từ trước
+        </span>
+      );
+    }
+    if (verified) {
+      return (
+        <span className="rounded px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700">
+          ✓ Đã xác nhận
+        </span>
+      );
+    }
+    if (verified === false) {
+      return (
+        <span className="rounded px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700">
+          Chưa xác nhận
+        </span>
+      );
+    }
+    return (
+      <span className="rounded px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700">
+        Đã làm
+      </span>
+    );
   };
 
   return (
@@ -268,16 +299,16 @@ export function AssistantActionCard({ action, onExecute, onReject, status, error
               Đồng ý
             </button>
           </div>
+        ) : status === "done" ? (
+          getDoneBadge()
         ) : (
           <span
             className={`rounded px-3 py-1.5 text-xs font-medium ${
-              status === "done"
-                ? "bg-green-100 text-green-700"
-                : status === "rejected"
-                  ? "bg-gray-100 text-gray-500"
-                  : status === "error"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-indigo-100 text-indigo-700"
+              status === "rejected"
+                ? "bg-gray-100 text-gray-500"
+                : status === "error"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-indigo-100 text-indigo-700"
             }`}
           >
             {status === "executing" && (
@@ -286,7 +317,6 @@ export function AssistantActionCard({ action, onExecute, onReject, status, error
                 Đang làm...
               </>
             )}
-            {status === "done" && "Đã làm"}
             {status === "rejected" && "Đã từ chối"}
             {status === "error" && "Lỗi"}
           </span>

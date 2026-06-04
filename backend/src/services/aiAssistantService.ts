@@ -96,9 +96,10 @@ function sanitizeCreateTaskPayload(payload: any) {
 }
 
 function sanitizeMarkTaskDonePayload(payload: any) {
-  if (!payload || typeof payload.taskId !== "string") return null;
-  const taskId = payload.taskId.slice(0, 100);
-  const done = payload.done === true;
+  if (!payload || typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
+  if (typeof payload.done !== "boolean") return null;
+  const taskId = payload.taskId.slice(0, 100).trim();
+  const done = payload.done;
   if (!done) return null;
   return { taskId, done };
 }
@@ -318,8 +319,9 @@ function sanitizeRescheduleTaskPayload(payload: any) {
 
 function sanitizeUpdateTaskStatusPayload(payload: any) {
   if (!payload || typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
-  const taskId = payload.taskId.slice(0, 100);
-  const completed = payload.completed === true;
+  if (typeof payload.completed !== "boolean") return null;
+  const taskId = payload.taskId.slice(0, 100).trim();
+  const completed = payload.completed;
   return { taskId, completed };
 }
 

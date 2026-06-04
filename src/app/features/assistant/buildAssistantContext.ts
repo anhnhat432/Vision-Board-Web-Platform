@@ -25,6 +25,17 @@ import type {
 } from "@/app/utils/storage-types";
 import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 import { getFirebaseAuth } from "@/lib/auth/firebase";
+import {
+  getPendingAssistantClarification,
+  type PendingAssistantClarificationSummary,
+} from "./assistantConversationState";
+import {
+  getAssistantMemory,
+  summarizeAssistantMemoryForContext,
+  autoCaptureFromAppData,
+  type AssistantMemorySummary,
+} from "./assistantMemory";
+import { retrieveAssistantKnowledge, type AssistantRetrievedMemory } from "./assistantRetrieval";
 
 export interface AuthSyncMode {
   authState: "signed_in" | "anonymous";
@@ -84,6 +95,9 @@ export interface AssistantContext {
   pageContext: AssistantPageContext;
   pageContextHint?: AssistantPageContextHint;
   authSyncMode?: AuthSyncMode;
+  assistantMemory?: AssistantMemorySummary;
+  retrievedKnowledge?: AssistantRetrievedMemory[];
+  pendingClarification?: PendingAssistantClarificationSummary;
 }
 
 export interface AssistantPageContext {
@@ -204,13 +218,19 @@ export function buildAssistantContext(
   referenceDate = new Date(),
   route = getCurrentRoute(),
   pageContextHint?: AssistantPageContextHint,
+  query?: string,
+  userId: string | null = null,
 ): AssistantContext {
+  // Tự động quét và capture dữ liệu mới vào memory
+  autoCaptureFromAppData(userId);
+
   const authSyncMode = buildAuthSyncMode();
+  const pendingClarification = getPendingAssistantClarification(userId, referenceDate) ?? undefined;
   try {
     const data = getUserData();
 
     if (!data?.goals || data.goals.length === 0) {
-      return emptyContext(route, pageContextHint, authSyncMode);
+      return emptyContext(route, pageContextHint, authSyncMode, undefined, userId, referenceDate);
     }
 
     const activeGoal = getActiveTwelveWeekGoal(data.goals, getPreferredTwelveWeekGoalId());
@@ -220,16 +240,22 @@ export function buildAssistantContext(
       progress: calculateGoalProgress(goal),
     }));
     const lastReflectionDate = data.reflections && data.reflections.length > 0 ? data.reflections[0].date : null;
+    const memory = getAssistantMemory(userId);
+    const assistantMemorySummary = summarizeAssistantMemoryForContext(memory);
+    const retrievedKnowledge = query ? retrieveAssistantKnowledge(query, { referenceDate, userId, activeGoalId: activeGoal?.id }) : undefined;
 
     if (!activeGoal?.twelveWeekSystem) {
       return {
-        ...emptyContext(route, pageContextHint, authSyncMode),
+        ...emptyContext(route, pageContextHint, authSyncMode, query, userId, referenceDate),
         goals,
         lastReflectionDate,
         feasibility: buildFeasibilityContext(data.goals[0]),
         pageContext: buildPageContext(route, data.goals),
         pageContextHint,
         authSyncMode,
+        assistantMemory: assistantMemorySummary,
+        retrievedKnowledge,
+        pendingClarification,
       };
     }
 
@@ -257,10 +283,13 @@ export function buildAssistantContext(
       pageContext: buildPageContext(route, data.goals),
       pageContextHint,
       authSyncMode,
+      assistantMemory: assistantMemorySummary,
+      retrievedKnowledge,
+      pendingClarification,
     };
   } catch {
     // Storage read error -> safe defaults.
-    return emptyContext(route, pageContextHint, authSyncMode);
+    return emptyContext(route, pageContextHint, authSyncMode, undefined, userId, referenceDate);
   }
 }
 
@@ -268,7 +297,15 @@ function emptyContext(
   route = getCurrentRoute(),
   pageContextHint?: AssistantPageContextHint,
   authSyncMode = buildAuthSyncMode(),
+  query?: string,
+  userId: string | null = null,
+  referenceDate = new Date(),
 ): AssistantContext {
+  const memory = getAssistantMemory(userId);
+  const assistantMemorySummary = summarizeAssistantMemoryForContext(memory);
+  const retrievedKnowledge = query ? retrieveAssistantKnowledge(query, { referenceDate, userId }) : undefined;
+  const pendingClarification = getPendingAssistantClarification(userId, referenceDate) ?? undefined;
+
   return {
     currentWeek: null,
     weeksTotal: 12,
@@ -294,6 +331,9 @@ function emptyContext(
     pageContext: buildPageContext(route, []),
     pageContextHint,
     authSyncMode,
+    assistantMemory: assistantMemorySummary,
+    retrievedKnowledge,
+    pendingClarification,
   };
 }
 
@@ -387,14 +427,25 @@ function buildPageContext(route: string, goals: Goal[]): AssistantPageContext {
   const normalizedRoute = boundedText(route, 80) ?? "/";
   const currentStep = getCurrentStep(normalizedRoute);
 
-  if (normalizedRoute === "/" || normalizedRoute === "/dashboard") {
+  const twelveWeekRoutes = [
+    "/",
+    "/dashboard",
+    "/goals",
+    "/twelve-week",
+    "/12-week-dashboard",
+    "/12-week-system",
+    "/12-week-setup",
+    "/12-week-plan-overview",
+    "/12-week-plan-setup",
+  ];
+
+  if (twelveWeekRoutes.includes(normalizedRoute)) {
     Object.assign(formDraft, buildGoalSummary(goals));
-    formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
-    Object.assign(formDraft, readSmartGoalDraftSummary(), readFeasibilityDraftSummary(), readTwelveWeekDraftSummary());
   }
 
-  if (normalizedRoute === "/goals") {
-    Object.assign(formDraft, buildGoalSummary(goals));
+  if (normalizedRoute === "/" || normalizedRoute === "/dashboard") {
+    formDraft.focusArea = readStorageText(APP_STORAGE_KEYS.selectedFocusArea);
+    Object.assign(formDraft, readSmartGoalDraftSummary(), readFeasibilityDraftSummary(), readTwelveWeekDraftSummary());
   }
 
   if (normalizedRoute === "/smart-goal-setup") {

@@ -39,6 +39,7 @@ import { AssistantMessageContent } from "./AssistantMessageContent";
 import { executeAction } from "./executeAction";
 import type { AssistantAction } from "./parseActions";
 import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
+import type { FeedbackReason } from "./types";
 import { useAssistant } from "./useAssistant";
 import { useSpeechToText } from "./useSpeechToText";
 
@@ -46,6 +47,19 @@ interface AssistantPanelProps {
   open: boolean;
   onClose: () => void;
   route?: string;
+}
+
+const FEEDBACK_REASON_VALUES: FeedbackReason[] = [
+  "wrong_action",
+  "wrong_context",
+  "too_long",
+  "too_generic",
+  "unsafe",
+  "other",
+];
+
+function normalizeFeedbackReason(value: string): FeedbackReason {
+  return FEEDBACK_REASON_VALUES.includes(value as FeedbackReason) ? (value as FeedbackReason) : "other";
 }
 
 export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
@@ -63,6 +77,9 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     messageFeedback,
   } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
+  const [activeFeedbackMessageId, setActiveFeedbackMessageId] = useState<string | null>(null);
+  const [feedbackReason, setFeedbackReason] = useState<FeedbackReason>("other");
+  const [feedbackCorrection, setFeedbackCorrection] = useState("");
 
   const handleSpeechFinalResult = useCallback((text: string) => {
     setInputText((prev) => {
@@ -92,7 +109,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [actionStatus, setActionStatus] = useState<
-    Record<string, { status: "pending" | "executing" | "done" | "error" | "rejected"; errorMessage?: string }>
+    Record<string, { status: "pending" | "executing" | "done" | "error" | "rejected"; errorMessage?: string; verified?: boolean; alreadyDone?: boolean }>
   >({});
   const syncState = useOptionalAutoCloudSyncContext();
   const realMode = isRealMode();
@@ -164,7 +181,14 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     try {
       const result = await executeAction(action);
       if (result.success) {
-        setActionStatus((prev) => ({ ...prev, [action.id]: { status: "done" } }));
+        setActionStatus((prev) => ({
+          ...prev,
+          [action.id]: {
+            status: "done",
+            verified: result.verified,
+            alreadyDone: result.alreadyDone,
+          },
+        }));
       } else {
         setActionStatus((prev) => ({ ...prev, [action.id]: { status: "error", errorMessage: result.message } }));
       }
@@ -445,6 +469,8 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                               onReject={handleRejectAction}
                               status={actionStatus[action.id]?.status ?? "pending"}
                               errorMessage={actionStatus[action.id]?.errorMessage}
+                              verified={actionStatus[action.id]?.verified}
+                              alreadyDone={actionStatus[action.id]?.alreadyDone}
                             />
                           ))}
                         </div>
@@ -465,7 +491,11 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => submitFeedback(message.id, "down")}
+                          onClick={() => {
+                            setActiveFeedbackMessageId(activeFeedbackMessageId === message.id ? null : message.id);
+                            setFeedbackReason("other");
+                            setFeedbackCorrection("");
+                          }}
                           aria-label="Phản hồi tệ"
                           className={`rounded p-1 text-xs transition ${
                             messageFeedback[message.id] === "down"
@@ -477,6 +507,67 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                           <ThumbsDown size={14} />
                         </button>
                       </div>
+
+                      {activeFeedbackMessageId === message.id && (
+                        <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs">
+                          <div className="font-semibold text-app-ink mb-1">Gửi phản hồi chi tiết:</div>
+                          <label className="block text-gray-600 mb-1">
+                            Lý do:
+                            <select
+                              value={feedbackReason}
+                              onChange={(e) => setFeedbackReason(normalizeFeedbackReason(e.target.value))}
+                              className="ml-1 rounded border border-gray-300 bg-white p-1 text-xs"
+                            >
+                              <option value="other">Lý do khác</option>
+                              <option value="too_long">Trả lời quá dài / rườm rà</option>
+                              <option value="wrong_action">Đề xuất sai hành động</option>
+                              <option value="wrong_context">Hiểu sai ngữ cảnh hiện tại</option>
+                              <option value="too_generic">Lời khuyên chung chung</option>
+                              <option value="unsafe">Nội dung không an toàn</option>
+                            </select>
+                          </label>
+                          <label className="block text-gray-600 mb-2">
+                            Ý kiến sửa đổi (tối đa 300 ký tự):
+                            <textarea
+                              value={feedbackCorrection}
+                              onChange={(e) => setFeedbackCorrection(e.target.value.slice(0, 300))}
+                              placeholder="Nên trả lời như thế nào..."
+                              rows={2}
+                              className="mt-1 w-full rounded border border-gray-300 bg-white p-1 text-xs resize-none"
+                            />
+                          </label>
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveFeedbackMessageId(null);
+                                // Vẫn submit thumbs down nếu người dùng bấm Hủy sau khi mở form
+                                setFeedbackReason("other");
+                                setFeedbackCorrection("");
+                                submitFeedback(message.id, "down");
+                              }}
+                              className="rounded px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                submitFeedback(message.id, "down", {
+                                  reason: feedbackReason,
+                                  correction: feedbackCorrection,
+                                });
+                                setActiveFeedbackMessageId(null);
+                                setFeedbackReason("other");
+                                setFeedbackCorrection("");
+                              }}
+                              className="rounded px-2 py-1 bg-red-600 text-white hover:bg-red-700 transition"
+                            >
+                              Gửi
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

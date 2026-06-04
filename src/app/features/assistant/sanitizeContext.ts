@@ -21,6 +21,8 @@ const MAX_STREAK_DAYS = 365;
 const MAX_DAYS_UNTIL = 365;
 const MAX_MISSING_FIELDS = 8;
 
+type RetrievedKnowledgeSource = NonNullable<AssistantContext["retrievedKnowledge"]>[number]["source"];
+
 export function sanitizeAssistantContext(ctx: AssistantContext & { route: string }): SanitizedAssistantContext {
   return {
     currentWeek: ctx.currentWeek,
@@ -46,6 +48,9 @@ export function sanitizeAssistantContext(ctx: AssistantContext & { route: string
     pageContextHint: sanitizePageContextHint(ctx.pageContextHint),
     route: text(ctx.route || "", 50),
     authSyncMode: sanitizeAuthSyncMode(ctx.authSyncMode),
+    assistantMemory: sanitizeAssistantMemory(ctx.assistantMemory),
+    retrievedKnowledge: sanitizeRetrievedKnowledge(ctx.retrievedKnowledge),
+    pendingClarification: sanitizePendingClarification(ctx.pendingClarification),
   };
 }
 
@@ -203,5 +208,93 @@ export function sanitizePageContextHint(
     pageType: text(pageContextHint.pageType, 40),
     currentStep: pageContextHint.currentStep ? text(pageContextHint.currentStep, 40) : undefined,
     hint: pageContextHint.hint ? text(pageContextHint.hint, 200) : undefined,
+  };
+}
+
+function sanitizeAssistantMemory(
+  memory: AssistantContext["assistantMemory"],
+): AssistantContext["assistantMemory"] {
+  if (!memory) return undefined;
+  return {
+    preferredCoachingStyle: ["direct", "gentle", "structured", "brief"].includes(String(memory.preferredCoachingStyle))
+      ? memory.preferredCoachingStyle
+      : undefined,
+    recurringObstacles: (memory.recurringObstacles || []).slice(0, 3).map((item) => text(item, 100)),
+    userPreferences: (memory.userPreferences || []).slice(0, 3).map((item) => text(item, 100)),
+    rejectedPatterns: (memory.rejectedPatterns || []).slice(0, 3).map((item) => text(item, 100)),
+    recentCorrections: (memory.recentCorrections || []).slice(0, 3).map((item) => text(item, 100)),
+    oftenMissedTasks: (memory.oftenMissedTasks || []).slice(0, 3).map((item) => text(item, 100)),
+  };
+}
+
+function redactSensitive(textVal: string): string {
+  return textVal
+    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]")
+    .replace(/[\w\-]{20,}/g, "[REDACTED]")
+    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)\s*:\s*[^\s,]+/gi, "$1: [REDACTED]")
+    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi, "[REDACTED]")
+    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)/gi, "[REDACTED]");
+}
+
+function isRetrievedKnowledgeSource(value: unknown): value is RetrievedKnowledgeSource {
+  return (
+    value === "goal" ||
+    value === "reflection" ||
+    value === "weekly_review" ||
+    value === "task" ||
+    value === "assistant_memory"
+  );
+}
+
+function sanitizeRetrievedKnowledge(
+  items: AssistantContext["retrievedKnowledge"],
+): AssistantContext["retrievedKnowledge"] {
+  if (!items) return undefined;
+  const sanitized: NonNullable<AssistantContext["retrievedKnowledge"]> = [];
+
+  for (const item of items.slice(0, 5)) {
+    if (!isRetrievedKnowledgeSource(item.source)) continue;
+
+    sanitized.push({
+      source: item.source,
+      title: text(redactSensitive(item.title), 160),
+      snippet: text(redactSensitive(item.snippet), 220),
+      score: clamp(item.score, 0, 100, 0),
+      date: item.date ? text(item.date, 40) : undefined,
+      goalId: item.goalId ? text(item.goalId, 100) : undefined,
+      taskId: item.taskId ? text(item.taskId, 100) : undefined,
+    });
+  }
+
+  return sanitized;
+}
+
+function sanitizePendingClarification(
+  pending: AssistantContext["pendingClarification"],
+): AssistantContext["pendingClarification"] {
+  if (!pending) return undefined;
+  if (pending.kind !== "task_selection") return undefined;
+  if (pending.intent !== "mark_task_done" && pending.intent !== "update_task_status") return undefined;
+
+  const candidates = (pending.candidates || [])
+    .slice(0, 7)
+    .map((candidate) => ({
+      id: text(candidate.id, 100),
+      label: text(redactSensitive(candidate.label), 160),
+      goalId: candidate.goalId ? text(candidate.goalId, 100) : undefined,
+      weekId: candidate.weekId ? text(candidate.weekId, 100) : undefined,
+      dayKey: candidate.dayKey ? text(candidate.dayKey, 40) : undefined,
+    }))
+    .filter((candidate) => candidate.id && candidate.label);
+
+  if (candidates.length === 0) return undefined;
+
+  return {
+    kind: "task_selection",
+    intent: pending.intent,
+    question: text(redactSensitive(pending.question), 500),
+    candidates,
+    createdAt: text(pending.createdAt, 40),
+    expiresAt: text(pending.expiresAt, 40),
   };
 }

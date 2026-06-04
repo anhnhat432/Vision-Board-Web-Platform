@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   ASSISTANT_GOLDEN_EXAMPLES_STORAGE_KEY,
   captureAssistantFeedback,
+  exportAssistantFeedbackDataset,
   getAssistantGoldenExamples,
 } from "../assistantFeedback";
 
@@ -68,6 +69,64 @@ describe("assistantFeedback", () => {
       },
     });
     expect(localStorage.getItem(ASSISTANT_GOLDEN_EXAMPLES_STORAGE_KEY)).toContain("TOEIC");
+  });
+
+  it("exports golden examples and user-scoped feedback entries as a sanitized dataset", () => {
+    captureAssistantFeedback({
+      userId: "user_1",
+      route: "/12-week-system",
+      rating: "not_helpful",
+      userMessage: "api key: abc123 should not leak",
+      assistantMessage: "token=XYZ_TOKEN_SECRET should not leak",
+      context: null,
+      reason: "wrong_action",
+      correction: "Use the selected task only",
+    });
+
+    localStorage.setItem(
+      "assistant.feedback:anon",
+      JSON.stringify([
+        {
+          messageId: "message_1",
+          userText: "please tick task_1",
+          replyText: "secret: raw_secret_value",
+          rating: "down",
+          timestamp: 100,
+          route: "/12-week-system",
+          reason: "wrong_action",
+          correction: "Use the taskId from context",
+        },
+      ]),
+    );
+    localStorage.setItem("assistant.feedback.map:anon", JSON.stringify({ message_1: "down" }));
+
+    const storedGolden = JSON.parse(localStorage.getItem(ASSISTANT_GOLDEN_EXAMPLES_STORAGE_KEY) ?? "[]") as Array<
+      Record<string, unknown>
+    >;
+    storedGolden.push({
+      id: "legacy_context_record",
+      userId: "user_1",
+      route: "/12-week-system",
+      rating: "helpful",
+      createdAt: new Date().toISOString(),
+      userMessage: "ok",
+      assistantMessage: "ok",
+      context: {
+        route: "/12-week-system",
+        goals: [{ id: "goal_1", title: "password: should_not_escape", progress: 0 }],
+      },
+    });
+    localStorage.setItem(ASSISTANT_GOLDEN_EXAMPLES_STORAGE_KEY, JSON.stringify(storedGolden));
+
+    const exported = JSON.parse(exportAssistantFeedbackDataset()) as Array<Record<string, unknown>>;
+
+    expect(exported.some((entry) => entry.source === "golden_example")).toBe(true);
+    expect(exported.some((entry) => entry.source === "feedback_entry" && entry.messageId === "message_1")).toBe(true);
+    expect(JSON.stringify(exported)).not.toContain("abc123");
+    expect(JSON.stringify(exported)).not.toContain("XYZ_TOKEN_SECRET");
+    expect(JSON.stringify(exported)).not.toContain("raw_secret_value");
+    expect(JSON.stringify(exported)).not.toContain("should_not_escape");
+    expect(JSON.stringify(exported)).not.toContain("assistant.feedback.map");
   });
 
   it("keeps only the newest 200 records", () => {

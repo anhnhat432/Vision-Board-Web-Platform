@@ -4,10 +4,13 @@ import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
 import { buildDerivedScoreboard, getActiveTwelveWeekGoal, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import type { AssistantAction } from "./parseActions";
+import { updateAssistantMemoryFromActionResult } from "./assistantMemory";
 
 export interface ActionExecutionResult {
   success: boolean;
   message: string;
+  verified?: boolean;
+  alreadyDone?: boolean;
 }
 
 export interface AuditLogEntry {
@@ -16,9 +19,11 @@ export interface AuditLogEntry {
   label: string;
   success: boolean;
   message: string;
+  verified?: boolean;
+  alreadyDone?: boolean;
 }
 
-function writeAuditLog(actionType: string, label: string, success: boolean, message: string): void {
+function writeAuditLog(actionType: string, label: string, result: ActionExecutionResult): void {
   if (typeof localStorage === "undefined") return;
   try {
     const raw = localStorage.getItem("assistant.action_audit_log");
@@ -28,13 +33,21 @@ function writeAuditLog(actionType: string, label: string, success: boolean, mess
       timestamp: new Date().toISOString(),
       type: actionType,
       label,
-      success,
-      message,
+      success: result.success,
+      message: result.message,
+      verified: result.verified,
+      alreadyDone: result.alreadyDone,
     });
 
     const trimmedLogs = logs.slice(0, 50);
     localStorage.setItem("assistant.action_audit_log", JSON.stringify(trimmedLogs));
   } catch {}
+}
+
+function buildVerifiedResult(verified: boolean, successMessage: string, failureMessage: string): ActionExecutionResult {
+  return verified
+    ? { success: true, verified: true, message: successMessage }
+    : { success: false, verified: false, message: failureMessage };
 }
 
 function mapFocusAreaToDomain(area: string): "career" | "health" | "finance" | "learning" | "relationship" | "life" {
@@ -171,7 +184,17 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       system.taskInstances = [...(system.taskInstances || []), newTask];
 
       saveUserData(data);
-      return { success: true, message: `Đã tạo task: ${title}` };
+
+      // Verify state
+      const verifyData = getUserData();
+      const verifyGoal = verifyData?.goals?.find((g) => g.id === activeGoal.id);
+      const verified = verifyGoal?.twelveWeekSystem?.taskInstances?.some((t) => t.id === taskId) ?? false;
+
+      return buildVerifiedResult(
+        verified,
+        `Đã tạo task: ${title}`,
+        `Đã thử tạo task "${title}" nhưng chưa xác minh được task đã được lưu.`,
+      );
     }
 
     case "mark_task_done": {
@@ -196,7 +219,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       }
 
       if (target.task.completed) {
-        return { success: false, message: "Task đã được đánh dấu hoàn thành rồi." };
+        return { success: true, alreadyDone: true, verified: true, message: `Task "${target.task.title}" đã được hoàn thành từ trước.` };
       }
 
       const didToggle = toggleTwelveWeekTaskInData(data, target.goal.id, target.task.id, true);
@@ -205,7 +228,17 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       }
 
       saveUserData(data);
-      return { success: true, message: `Đã đánh dấu xong: ${target.task.title}` };
+
+      // Verify state
+      const verifyData = getUserData();
+      const verifyTarget = findTwelveWeekTaskTarget(verifyData?.goals || [], taskId);
+      const verified = verifyTarget?.task?.completed === true;
+
+      return buildVerifiedResult(
+        verified,
+        `Đã đánh dấu xong: ${target.task.title}`,
+        `Đã thử đánh dấu "${target.task.title}" nhưng chưa xác minh được task đã hoàn thành.`,
+      );
     }
 
     case "create_goal": {
@@ -237,7 +270,16 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       data.goals = [...(data.goals || []), newGoal];
 
       saveUserData(data);
-      return { success: true, message: `Đã tạo mục tiêu: ${title}` };
+
+      // Verify state
+      const verifyData = getUserData();
+      const verified = verifyData?.goals?.some((g) => g.id === goalId) ?? false;
+
+      return buildVerifiedResult(
+        verified,
+        `Đã tạo mục tiêu: ${title}`,
+        `Đã thử tạo mục tiêu "${title}" nhưng chưa xác minh được mục tiêu đã được lưu.`,
+      );
     }
 
     case "create_life_insight_note": {
@@ -423,54 +465,77 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       system.scoreboard = buildDerivedScoreboard(system, getDefaultScoreboard(system.totalWeeks || 12));
 
       saveUserData(data);
-      return { success: true, message: `Đã cập nhật review tuần ${weekNumber} thành công.` };
+
+      // Verify state
+      const verifyData = getUserData();
+      const verifyGoal = verifyData?.goals?.find((g) => g.id === goalId);
+      const verified = verifyGoal?.twelveWeekSystem?.weeklyReviews?.some((r) => r.weekNumber === weekNumber) ?? false;
+
+      return buildVerifiedResult(
+        verified,
+        `Đã cập nhật review tuần ${weekNumber} thành công.`,
+        `Đã thử cập nhật review tuần ${weekNumber} nhưng chưa xác minh được dữ liệu đã lưu.`,
+      );
     }
 
     case "reschedule_task": {
       const { taskId, scheduledDate } = action.payload as { taskId: string; scheduledDate: string };
 
       const data = getUserData();
-      if (!data?.goals) {
+      if (!data?.goals || data.goals.length === 0) {
         return { success: false, message: "Không tìm thấy dữ liệu người dùng." };
       }
 
-      let taskFound = false;
-      for (const goal of data.goals) {
-        const system = goal.twelveWeekSystem;
-        if (system?.taskInstances) {
-          let tIndex = system.taskInstances.findIndex((t) => t.id === taskId);
-          if (tIndex === -1) {
-            // Fallback: Tìm theo tiêu đề (không phân biệt hoa thường)
-            tIndex = system.taskInstances.findIndex(
-              (t) => t.title.toLowerCase().trim() === taskId.toLowerCase().trim(),
-            );
-          }
-          if (tIndex !== -1) {
-            const task = system.taskInstances[tIndex];
-            let newDate = scheduledDate;
-            if (scheduledDate === "tomorrow") {
-              const tomorrow = new Date();
-              tomorrow.setDate(tomorrow.getDate() + 1);
-              newDate = tomorrow.toISOString().slice(0, 10);
-            }
-            system.taskInstances[tIndex] = {
-              ...task,
-              rescheduledFrom: task.scheduledDate,
-              scheduledDate: newDate,
-              lastModifiedAt: Date.now(),
-            };
-            taskFound = true;
-            break;
-          }
+      const target = findTwelveWeekTaskTarget(data.goals, taskId);
+      if (!target) {
+        if (!data.goals.some((goal) => goal.twelveWeekSystem)) {
+          return { success: false, message: "Chưa có 12-week plan." };
         }
+        return { success: false, message: "Không tìm thấy task." };
       }
 
-      if (!taskFound) {
-        return { success: false, message: "Không tìm thấy task tương ứng." };
+      let newDate = scheduledDate;
+      if (scheduledDate === "tomorrow") {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        newDate = tomorrow.toISOString().slice(0, 10);
+      } else if (scheduledDate === "today") {
+        newDate = new Date().toISOString().slice(0, 10);
+      } else if (typeof scheduledDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(scheduledDate)) {
+        const parsed = Date.parse(scheduledDate);
+        if (Number.isNaN(parsed)) {
+          return { success: false, message: "Ngày lập lịch không hợp lệ." };
+        }
+        newDate = scheduledDate;
+      } else {
+        return { success: false, message: "Ngày dời lịch không hợp lệ." };
       }
+
+      const system = target.goal.twelveWeekSystem!;
+      const tIndex = system.taskInstances?.findIndex((t) => t.id === target.task.id);
+      if (tIndex === undefined || tIndex === -1) {
+        return { success: false, message: "Không thể cập nhật task." };
+      }
+
+      system.taskInstances![tIndex] = {
+        ...target.task,
+        rescheduledFrom: target.task.scheduledDate,
+        scheduledDate: newDate,
+        lastModifiedAt: Date.now(),
+      };
 
       saveUserData(data);
-      return { success: true, message: `Đã dời lịch task sang ngày ${scheduledDate}.` };
+
+      // Verify state
+      const verifyData = getUserData();
+      const verifyTarget = findTwelveWeekTaskTarget(verifyData?.goals || [], target.task.id);
+      const verified = verifyTarget?.task?.scheduledDate === newDate;
+
+      return buildVerifiedResult(
+        verified,
+        `Đã dời lịch task sang ngày ${newDate}.`,
+        `Đã thử dời lịch "${target.task.title}" nhưng chưa xác minh được ngày mới đã được lưu.`,
+      );
     }
 
     case "update_task_status": {
@@ -493,10 +558,18 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
 
       saveUserData(data);
 
-      return {
-        success: true,
-        message: completed ? "Đã đánh dấu hoàn thành nhiệm vụ." : "Đã bỏ đánh dấu hoàn thành nhiệm vụ.",
-      };
+      // Verify state
+      const verifyData = getUserData();
+      const verifyTarget = findTwelveWeekTaskTarget(verifyData?.goals || [], taskId);
+      const verified = verifyTarget?.task?.completed === completed;
+
+      return buildVerifiedResult(
+        verified,
+        completed ? "Đã đánh dấu hoàn thành nhiệm vụ." : "Đã bỏ đánh dấu hoàn thành nhiệm vụ.",
+        completed
+          ? `Đã thử đánh dấu "${target.task.title}" là hoàn thành nhưng chưa xác minh được trạng thái mới.`
+          : `Đã thử bỏ đánh dấu "${target.task.title}" nhưng chưa xác minh được trạng thái mới.`,
+      );
     }
 
     default:
@@ -504,15 +577,17 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
   }
 }
 
-export async function executeAction(action: AssistantAction): Promise<ActionExecutionResult> {
+export async function executeAction(action: AssistantAction, userId: string | null = null): Promise<ActionExecutionResult> {
   try {
     const result = await runAction(action);
-    writeAuditLog(action.type, action.label, result.success, result.message);
+    writeAuditLog(action.type, action.label, result);
+    updateAssistantMemoryFromActionResult(action.type, action.label, result.success, result.message, userId);
     return result;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    const result = { success: false, message: `Lỗi: ${errorMessage}` };
-    writeAuditLog(action.type, action.label, result.success, result.message);
+    const result: ActionExecutionResult = { success: false, message: `Lỗi: ${errorMessage}` };
+    writeAuditLog(action.type, action.label, result);
+    updateAssistantMemoryFromActionResult(action.type, action.label, result.success, result.message, userId);
     return result;
   }
 }

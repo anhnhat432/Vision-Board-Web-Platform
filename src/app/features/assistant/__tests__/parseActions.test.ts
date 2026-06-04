@@ -153,7 +153,8 @@ describe("parseAssistantReply", () => {
 {
   "type": "mark_task_done",
   "payload": { "taskId": "task_123", "done": true },
-  "label": "Đánh dấu xong: Task 123"
+  "label": "Đánh dấu xong: Task 123",
+  "autoExecute": true
 }
 \`\`\``;
 
@@ -162,6 +163,7 @@ describe("parseAssistantReply", () => {
     expect(result.actions).toHaveLength(1);
     expect(result.actions[0].payload.taskId).toBe("task_123");
     expect(result.actions[0].payload.done).toBe(true);
+    expect(result.actions[0].autoExecute).toBe(true);
   });
 
   it("truncates long label", () => {
@@ -210,5 +212,34 @@ describe("parseAssistantReply", () => {
 
     expect(result.textContent).toBe(raw);
     expect(result.actions).toHaveLength(0);
+  });
+
+  it("skips actions with incorrect payload types for done and completed", () => {
+    const raw1 = `\`\`\`action
+{
+  "type": "mark_task_done",
+  "payload": { "taskId": "task_123", "done": "true" },
+  "label": "Should skip"
+}
+\`\`\``;
+    expect(parseAssistantReply(raw1).actions).toHaveLength(0);
+
+    const raw2 = `\`\`\`action
+{
+  "type": "update_task_status",
+  "payload": { "taskId": "task_123", "completed": 1 },
+  "label": "Should skip"
+}
+\`\`\``;
+    expect(parseAssistantReply(raw2).actions).toHaveLength(0);
+
+    const raw3 = `\`\`\`action
+{
+  "type": "update_task_status",
+  "payload": { "taskId": "   ", "completed": true },
+  "label": "Should skip empty task"
+}
+\`\`\``;
+    expect(parseAssistantReply(raw3).actions).toHaveLength(0);
   });
 });

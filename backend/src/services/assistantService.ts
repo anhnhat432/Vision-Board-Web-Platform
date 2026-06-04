@@ -86,6 +86,37 @@ export interface AssistantContext {
     authState: "signed_in" | "anonymous";
     syncState: "synced" | "syncing" | "error" | "offline" | "disabled";
   };
+  assistantMemory?: {
+    preferredCoachingStyle?: "direct" | "gentle" | "structured" | "brief";
+    recurringObstacles: string[];
+    userPreferences: string[];
+    rejectedPatterns: string[];
+    recentCorrections: string[];
+    oftenMissedTasks: string[];
+  };
+  retrievedKnowledge?: Array<{
+    source: "goal" | "reflection" | "weekly_review" | "task" | "assistant_memory";
+    title: string;
+    snippet: string;
+    score: number;
+    date?: string;
+    goalId?: string;
+    taskId?: string;
+  }>;
+  pendingClarification?: {
+    kind: "task_selection";
+    intent: "mark_task_done" | "update_task_status";
+    question: string;
+    candidates: Array<{
+      id: string;
+      label: string;
+      goalId?: string;
+      weekId?: string;
+      dayKey?: string;
+    }>;
+    createdAt: string;
+    expiresAt: string;
+  };
 }
 
 export interface AssistantRequest {
@@ -267,6 +298,9 @@ export function sanitizeContext(context: unknown): AssistantContext {
     pageContext: sanitizePageContext(raw.pageContext, sanitizeText(raw.route || "/", MAX_ROUTE_LENGTH) || "/"),
     pageContextHint: sanitizePageContextHint(raw.pageContextHint),
     authSyncMode: sanitizeAuthSyncMode(raw.authSyncMode),
+    assistantMemory: sanitizeAssistantMemory(raw.assistantMemory),
+    retrievedKnowledge: sanitizeRetrievedKnowledge(raw.retrievedKnowledge),
+    pendingClarification: sanitizePendingClarification(raw.pendingClarification),
   };
 }
 
@@ -275,11 +309,124 @@ function sanitizeAuthSyncMode(value: unknown): AssistantContext["authSyncMode"] 
   if (Object.keys(raw).length === 0) return undefined;
 
   const authState = raw.authState === "signed_in" ? "signed_in" : "anonymous";
-  const syncState = ["synced", "syncing", "error", "offline", "disabled"].includes(String(raw.syncState))
-    ? (raw.syncState as any)
-    : "disabled";
+  const syncState = isAuthSyncState(raw.syncState) ? raw.syncState : "disabled";
 
   return { authState, syncState };
+}
+
+type AuthSyncState = NonNullable<AssistantContext["authSyncMode"]>["syncState"];
+
+function isAuthSyncState(value: unknown): value is AuthSyncState {
+  return value === "synced" || value === "syncing" || value === "error" || value === "offline" || value === "disabled";
+}
+
+type AssistantMemoryCoachingStyle = NonNullable<AssistantContext["assistantMemory"]>["preferredCoachingStyle"];
+
+function isAssistantMemoryCoachingStyle(value: unknown): value is AssistantMemoryCoachingStyle {
+  return value === "direct" || value === "gentle" || value === "structured" || value === "brief";
+}
+
+function sanitizeAssistantMemory(value: unknown): AssistantContext["assistantMemory"] {
+  const raw = record(value);
+  if (Object.keys(raw).length === 0) return undefined;
+
+  const preferredCoachingStyle = isAssistantMemoryCoachingStyle(raw.preferredCoachingStyle)
+    ? raw.preferredCoachingStyle
+    : undefined;
+  return {
+    preferredCoachingStyle,
+    recurringObstacles: (Array.isArray(raw.recurringObstacles) ? raw.recurringObstacles : [])
+      .slice(0, 3)
+      .map((item) => sanitizeText(redactSensitive(String(item)), 100)),
+    userPreferences: (Array.isArray(raw.userPreferences) ? raw.userPreferences : [])
+      .slice(0, 3)
+      .map((item) => sanitizeText(redactSensitive(String(item)), 100)),
+    rejectedPatterns: (Array.isArray(raw.rejectedPatterns) ? raw.rejectedPatterns : [])
+      .slice(0, 3)
+      .map((item) => sanitizeText(redactSensitive(String(item)), 100)),
+    recentCorrections: (Array.isArray(raw.recentCorrections) ? raw.recentCorrections : [])
+      .slice(0, 3)
+      .map((item) => sanitizeText(redactSensitive(String(item)), 100)),
+    oftenMissedTasks: (Array.isArray(raw.oftenMissedTasks) ? raw.oftenMissedTasks : [])
+      .slice(0, 3)
+      .map((item) => sanitizeText(redactSensitive(String(item)), 100)),
+  };
+}
+
+function redactSensitive(textVal: string): string {
+  return textVal
+    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]")
+    .replace(/[\w\-]{20,}/g, "[REDACTED]")
+    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)\s*:\s*[^\s,]+/gi, "$1: [REDACTED]")
+    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi, "[REDACTED]")
+    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)/gi, "[REDACTED]");
+}
+
+type RetrievedKnowledgeSource = NonNullable<AssistantContext["retrievedKnowledge"]>[number]["source"];
+
+function isRetrievedKnowledgeSource(value: unknown): value is RetrievedKnowledgeSource {
+  return (
+    value === "goal" ||
+    value === "reflection" ||
+    value === "weekly_review" ||
+    value === "task" ||
+    value === "assistant_memory"
+  );
+}
+
+function sanitizeRetrievedKnowledge(value: unknown): AssistantContext["retrievedKnowledge"] {
+  if (!Array.isArray(value)) return undefined;
+  const sanitized: NonNullable<AssistantContext["retrievedKnowledge"]> = [];
+
+  for (const item of value.slice(0, 5)) {
+    const raw = record(item);
+    if (!isRetrievedKnowledgeSource(raw.source)) continue;
+
+    sanitized.push({
+      source: raw.source,
+      title: sanitizeText(redactSensitive(String(raw.title || "")), 160),
+      snippet: sanitizeText(redactSensitive(String(raw.snippet || "")), 220),
+      score: clampNumber(raw.score, 0, 100, 0),
+      date: raw.date ? sanitizeText(raw.date, 40) : undefined,
+      goalId: raw.goalId ? sanitizeText(raw.goalId, 100) : undefined,
+      taskId: raw.taskId ? sanitizeText(raw.taskId, 100) : undefined,
+    });
+  }
+
+  return sanitized;
+}
+
+function sanitizePendingClarification(value: unknown): AssistantContext["pendingClarification"] {
+  const raw = record(value);
+  if (Object.keys(raw).length === 0) return undefined;
+  if (raw.kind !== "task_selection") return undefined;
+  if (raw.intent !== "mark_task_done" && raw.intent !== "update_task_status") return undefined;
+  const rawCandidates = Array.isArray(raw.candidates) ? raw.candidates : [];
+
+  const candidates = rawCandidates
+    .slice(0, 7)
+    .map((item) => {
+      const candidate = record(item);
+      return {
+        id: sanitizeText(candidate.id, 100),
+        label: sanitizeText(redactSensitive(String(candidate.label || "")), 160),
+        goalId: candidate.goalId ? sanitizeText(candidate.goalId, 100) : undefined,
+        weekId: candidate.weekId ? sanitizeText(candidate.weekId, 100) : undefined,
+        dayKey: candidate.dayKey ? sanitizeText(candidate.dayKey, 40) : undefined,
+      };
+    })
+    .filter((candidate) => candidate.id && candidate.label);
+
+  if (candidates.length === 0) return undefined;
+
+  return {
+    kind: "task_selection",
+    intent: raw.intent,
+    question: sanitizeText(redactSensitive(String(raw.question || "")), 500),
+    candidates,
+    createdAt: sanitizeText(raw.createdAt, 40),
+    expiresAt: sanitizeText(raw.expiresAt, 40),
+  };
 }
 
 function sanitizeFeasibility(value: unknown): AssistantContext["feasibility"] {

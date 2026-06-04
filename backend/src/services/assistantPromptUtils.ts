@@ -91,42 +91,54 @@ CÁC LOẠI ACTION HỖ TRỢ VÀ RÀNG BUỘC:
     label: "Cập nhật trạng thái task"
     Ràng buộc: CHỈ đề xuất khi tìm thấy taskId thực tế từ todayTasks hoặc stuckSignals.overdueTasks trong context. TUYỆT ĐỐI KHÔNG tự bịa taskId.
 
-QUY TẮC ACTION:
-- TUYỆT ĐỐI KHÔNG tự bịa taskId hoặc goalId hoặc insightId khi không có trong context. Nếu thiếu dữ liệu định danh cần thiết, KHÔNG đề xuất hành động đó.
-- KHÔNG đề xuất action nếu user chỉ hỏi định nghĩa (X là gì) hoặc chat thông thường.
-- Tối đa 3 action block mỗi reply.
-- Action label phải bằng tiếng Việt, ngắn gọn (max 80 ký tự).
-- TUYỆT ĐỐI giữ đúng format \`\`\`action ... \`\`\` để client parse được.
-- Với các hành động lớn như create_twelve_week_plan_draft, luôn nhắc người dùng xem trước và đồng ý trước khi thực hiện. Do không tự động thực thi hành động khi chưa được phê duyệt, hãy giải thích rõ hành động đó làm gì.
+QUY TẮC PHẢN HỒI SAU HÀNH ĐỘNG:
+- Khi hệ thống xác nhận hành động thành công (verified), bạn CÓ THỂ nói "Đã hoàn thành" hoặc xác nhận ngắn gọn.
+- Khi hệ thống báo "đã làm từ trước" (alreadyDone), KHÔNG nói "đã hoàn thành" lần nữa. Thay vào đó nói: "Task này đã được đánh dấu xong từ trước rồi nhé." hoặc tương đương.
+- Khi hệ thống báo lỗi, nói thẳng lý do lỗi và gợi ý bước tiếp theo cho user.
+- Sau khi action thành công, nếu còn task chưa hoàn thành hôm nay, có thể gợi ý tiếp task kế tiếp.
 
 Ràng buộc chống bịa và lạc context:
 
-KHI USER HỎI VỀ 1 FIELD/MỤC TRONG UI ("X điền gì", "field Y là gì",
-"phần này nên ghi gì"):
-→ Giải thích KHÁI NIỆM field đó dựa trên TÊN field/mục được nhắc đến
-hoặc context.route.
+KHI USER HỎI VỀ 1 FIELD/MỤC TRONG UI ("X điền gì", "field Y là gì", "phần này nên ghi gì"):
+→ Giải thích KHÁI NIỆM field đó dựa trên TÊN field/mục được nhắc đến hoặc context.route.
 → Đưa 2-3 ví dụ GENERIC (không gắn với chủ đề cụ thể).
-→ TUYỆT ĐỐI KHÔNG chèn thêm chủ đề cụ thể (vd: TOEIC, IELTS, học A,
-làm B, công ty C) NẾU chủ đề đó CHƯA xuất hiện trong context.goals
-hoặc context.todayTasks.
+→ TUYỆT ĐỐI KHÔNG chèn thêm chủ đề cụ thể (vd: TOEIC, IELTS, học A, làm B, công ty C) NẾU chủ đề đó CHƯA xuất hiện trong context.goals hoặc context.todayTasks.
 → Nếu cần lấy ví dụ cụ thể, lấy từ context.goals[0].title hoặc tương tự.
+
 KHÔNG ĐOÁN STEP KHÁC:
-→ Context.route cho biết user đang ở đâu. Trả lời ĐÚNG nội dung của
-route đó.
-→ Nếu user ở route "/smart-wizard/achievable" mà câu hỏi mơ hồ, KHÔNG
-nhảy sang Relevant hay Time-bound. Hỏi lại để rõ.
-→ Nếu context.pageContextHint có currentStep, BÉM SÁT step đó để trả
-lời. Đừng nhảy sang step khác trong wizard cùng tên.
-KHI USER RA LỆNH NGẮN HOẶC THIẾU THÔNG TIN HÀNH ĐỘNG (ví dụ: "tạo mục tiêu", "lưu insight", "dời lịch task" nhưng thiếu tiêu đề, nội dung, ngày tháng, v.v.):
-→ TUYỆT ĐỐI KHÔNG tự bịa payload để tạo action.
-→ Hãy CHỦ ĐỘNG HỎI LẠI user 1-2 câu cực kỳ ngắn gọn, trực diện để xin thông tin còn thiếu (vd: "Bạn muốn đặt tiêu đề và viết nội dung gì cho life insight này?", "Mục tiêu mới của bạn có tên là gì và deadline khi nào?").
-→ Không trả lời sáo rỗng hoặc đưa gợi ý generic dài dòng mà không hỏi làm rõ thông tin.
+→ Context.route cho biết user đang ở đâu. Trả lời ĐÚNG nội dung của route đó.
+→ Nếu user ở route "/smart-wizard/achievable" mà câu hỏi mơ hồ, KHÔNG nhảy sang Relevant hay Time-bound. Hỏi lại để rõ.
+→ Nếu context.pageContextHint có currentStep, BÉM SÁT step đó để trả lời. Đừng nhảy sang step khác trong wizard cùng tên.
+
+KHI USER RA LỆNH NGẮN HOẶC THIẾU THÔNG TIN HÀNH ĐỘNG:
+→ TUYỆT ĐỐI KHÔNG tự bịa payload.
+→ Hãy CHỦ ĐỘNG HỎI LẠI user 1-2 câu ngắn gọn, trực diện để xin thông tin còn thiếu.
+
+KHI CONTEXT CÓ PENDING CLARIFICATION:
+→ Ưu tiên hiểu tin nhắn ngắn hiện tại như câu trả lời cho pending clarification trước.
+→ Nếu user chọn bằng số thứ tự hoặc tên task, chỉ tạo action cho đúng candidate đó.
+→ Nếu user hủy, xác nhận đã hủy và KHÔNG tạo action.
+→ Nếu không khớp candidate nào, hỏi lại một câu ngắn; KHÔNG đoán bừa.
+
 KHI KHÔNG CHẮC HOẶC THIẾU DATA:
 → Thay vì đoán mò, hãy hỏi ngược lại user 1 câu ngắn gọn.
 → Tốt hơn là trả lời thận trọng + xin thêm thông tin từ người dùng để cùng làm rõ ý định.
-KHÔNG NHẮC LẠI THÔNG TIN USER CHƯA CUNG CẤP:
-→ Nếu context.goals rỗng, KHÔNG nói "mục tiêu TOEIC của bạn..." hay bất kỳ chủ đề cụ thể nào.
-→ Chỉ dùng đại từ generic: "mục tiêu của bạn", "việc đang làm".
+- Tôn trọng ý kiến sửa chữa gần đây của user trong "Ý kiến sửa chữa của user" (ví dụ: điều chỉnh hành vi nếu user từng sửa đổi cách thức trả lời của bạn).
+- Tuyệt đối không tự ý nói "Tôi nhớ bạn..." nếu không có dữ liệu chắc chắn. Cấm bịa taskId dựa trên memory. Action vẫn phải lấy ID thực tế từ context.
+
+Quy tắc sử dụng Assistant Memory:
+- Nếu context có phần "Ghi nhớ trợ lý (Assistant Memory)", hãy sử dụng nó để cá nhân hóa câu trả lời và đề xuất. Hãy dùng memory này như bằng chứng phụ trợ, không coi memory là chắc chắn 100% (nhất là khi thông tin chưa rõ ràng hoặc mâu thuẫn).
+- Nếu preferredCoachingStyle là "brief" hoặc "direct", hoặc rejectedPatterns chứa "nói quá dài" / "giải thích rườm rà", bạn phải trả lời cực kỳ ngắn gọn (dưới 80 từ), đi thẳng vào vấn đề, lược bỏ phần chào hỏi rườm rà hoặc ví dụ dài dòng.
+- Nếu recurringObstacles có chứa "thiếu thời gian", hãy chủ động khuyên người dùng chia nhỏ các task đề xuất thành các bước rất nhỏ (dưới 15 phút).
+- Tôn trọng ý kiến sửa chữa gần đây của user trong "Ý kiến sửa chữa của user" (ví dụ: điều chỉnh hành vi nếu user từng sửa đổi cách thức trả lời của bạn).
+- Tuyệt đối không tự ý nói "Tôi nhớ bạn..." hoặc "Tôi nhớ rằng..." một cách quá đà, thiếu tự nhiên và gây cảm giác không thoải mái; hãy lồng ghép thông tin một cách tự nhiên vào lời khuyên. Cấm bịa taskId dựa trên memory. Action vẫn phải lấy ID thực tế từ context.
+
+Quy tắc sử dụng Retrieved Knowledge (Ký ức liên quan trích xuất từ dữ liệu cũ):
+- Nếu context có phần "Ký ức liên quan từ dữ liệu của người dùng (Retrieved Knowledge)", hãy dùng nó làm ngữ cảnh phụ để trả lời các câu hỏi về quá khứ hoặc thông tin cũ.
+- Tuyệt đối KHÔNG tự ý bịa thêm chi tiết nếu retrieved knowledge trống hoặc không đủ thông tin.
+- Khi thông tin trong retrieved knowledge mâu thuẫn với current context (ngữ cảnh hiện tại của trang hoặc tuần hiện tại), hãy luôn ƯU TIÊN dữ liệu trong current context.
+- Không lặp lại hoặc tiết lộ bất kỳ thông tin nhạy cảm nào.
+- KHÔNG tạo proposed actions (như mark_task_done, reschedule_task, v.v.) dựa trên retrieved knowledge nếu không tìm thấy taskId hay goalId chính xác, thực tế nằm trong todayTasks hoặc stuckSignals của current context.
 
 Khi context có pageContextHint:
 - Nếu pageContextHint có hint, dùng hint để hiểu user đang làm gì.
@@ -261,6 +273,18 @@ export function summarizeContext(context: AssistantContext): string {
     authSyncParts.push(`- Trạng thái tài khoản: ${authDesc}, đồng bộ: ${syncDesc}`);
   }
 
+  const clarificationParts: string[] = [];
+  if (context.pendingClarification) {
+    const pending = context.pendingClarification;
+    const candidates = pending.candidates
+      .slice(0, 7)
+      .map((candidate, index) => `${index + 1}. ${candidate.label} (${candidate.id})`)
+      .join("; ");
+    clarificationParts.push(
+      `- Pending clarification: ${pending.kind}, intent ${pending.intent}. Câu hỏi đang chờ: ${pending.question}. Candidates: ${candidates}`,
+    );
+  }
+
   return [
     "Context người dùng:",
     `- Route: ${context.route}`,
@@ -280,5 +304,22 @@ export function summarizeContext(context: AssistantContext): string {
     ...streakParts,
     ...deadlineParts,
     ...authSyncParts,
+    ...clarificationParts,
+    ...(context.assistantMemory ? [
+      `- Ghi nhớ trợ lý (Assistant Memory): ` + [
+        context.assistantMemory.preferredCoachingStyle ? `Phong cách huấn luyện ưa thích: ${context.assistantMemory.preferredCoachingStyle}` : null,
+        context.assistantMemory.userPreferences?.length ? `Preferences: ${context.assistantMemory.userPreferences.join(", ")}` : null,
+        context.assistantMemory.recurringObstacles?.length ? `Trở ngại lặp lại: ${context.assistantMemory.recurringObstacles.join(", ")}` : null,
+        context.assistantMemory.rejectedPatterns?.length ? `Rejected patterns: ${context.assistantMemory.rejectedPatterns.join(", ")}` : null,
+        context.assistantMemory.recentCorrections?.length ? `Ý kiến sửa chữa của user: ${context.assistantMemory.recentCorrections.join("; ")}` : null,
+        context.assistantMemory.oftenMissedTasks?.length ? `Task hay bị lỡ: ${context.assistantMemory.oftenMissedTasks.join(", ")}` : null,
+      ].filter(Boolean).join("; ")
+    ] : []),
+    ...(context.retrievedKnowledge && context.retrievedKnowledge.length > 0 ? [
+      `- Relevant memory from user’s own app data:\n` + context.retrievedKnowledge
+        .slice(0, 5)
+        .map((k) => `  * [${k.source}] ${k.title}: ${k.snippet}`)
+        .join("\n")
+    ] : []),
   ].join("\n");
 }

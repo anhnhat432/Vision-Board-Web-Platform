@@ -1,5 +1,6 @@
 import { isRealMode } from "../../utils/app-mode";
 import type { AssistantContext } from "./buildAssistantContext";
+import type { AssistantAction } from "./parseActions";
 import type { ChatHistoryMessage } from "./types";
 
 const isTestEnv = typeof process !== "undefined" && process.env.NODE_ENV === "test";
@@ -103,7 +104,7 @@ function buildGoalsResponse(ctx: AssistantContext): string {
   if (goals.length === 0) {
     return formatAssistantResponse({
       action: "Bắt đầu ở bước SMART goal để tạo một mục tiêu đủ rõ cho 12 tuần.",
-      reason: "Bạn chưa đặt mục tiêu nào trong dữ liệu hiện tại.",
+      reason: "Bạn chưa đặt mục tiêu nào trong dữ liệu hiện tại, hiện chưa có mục tiêu nào.",
       tenMinuteAction: "Viết một câu: Tôi muốn đạt điều gì trong 12 tuần tới?",
     });
   }
@@ -170,12 +171,330 @@ function buildGreetingResponse(): string {
   return variations[Math.floor(Math.random() * variations.length)];
 }
 
+type AssistantTaskCandidate = {
+  id: string;
+  title: string;
+  done: boolean;
+  scheduledDate?: string;
+  isCore?: boolean;
+};
+
+type AssistantActionDraft = Omit<AssistantAction, "id">;
+
+const TASK_QUERY_STOPWORDS = new Set([
+  "task",
+  "viec",
+  "nhiem",
+  "vu",
+  "cong",
+  "hom",
+  "nay",
+  "today",
+  "tick",
+  "mark",
+  "done",
+  "complete",
+  "completed",
+  "hoan",
+  "thanh",
+  "xong",
+  "dong",
+  "danh",
+  "dau",
+  "bo",
+  "uncheck",
+  "undo",
+  "cai",
+  "so",
+  "thu",
+  "dau",
+  "tien",
+  "het",
+  "tat",
+  "ca",
+]);
+
+function normalizeText(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u0111/g, "d")
+    .replace(/\u0110/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeTaskQuery(text: string): string[] {
+  return normalizeText(text)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 1 && !TASK_QUERY_STOPWORDS.has(token));
+}
+
+function uniqueTaskCandidates(candidates: AssistantTaskCandidate[]): AssistantTaskCandidate[] {
+  const seen = new Set<string>();
+  const unique: AssistantTaskCandidate[] = [];
+  for (const candidate of candidates) {
+    if (seen.has(candidate.id)) continue;
+    seen.add(candidate.id);
+    unique.push(candidate);
+  }
+  return unique;
+}
+
+function getTaskCandidates(ctx: AssistantContext): AssistantTaskCandidate[] {
+  return uniqueTaskCandidates([
+    ...(ctx.todayTasks || []).map((task) => ({
+      id: task.id,
+      title: task.title,
+      done: task.done,
+    })),
+    ...(ctx.stuckSignals?.overdueTasks || []).map((task) => ({
+      id: task.id,
+      title: task.title,
+      done: false,
+      scheduledDate: task.scheduledDate,
+      isCore: task.isCore,
+    })),
+  ]);
+}
+
+function detectOrdinalIndex(text: string, maxLength: number): number | null {
+  const normalized = normalizeText(text);
+  const numericMatch = normalized.match(/\b(?:so|cai|task|viec|thu)?\s*(\d{1,2})\b/);
+  if (numericMatch) {
+    const index = Number(numericMatch[1]) - 1;
+    if (index >= 0 && index < maxLength) return index;
+  }
+
+  const ordinals: Array<[RegExp, number]> = [
+    [/\b(dau tien|thu nhat|mot)\b/, 0],
+    [/\b(thu hai|hai)\b/, 1],
+    [/\b(thu ba|ba)\b/, 2],
+    [/\b(thu tu|bon|tu)\b/, 3],
+    [/\b(thu nam|nam)\b/, 4],
+  ];
+
+  for (const [pattern, index] of ordinals) {
+    if (index < maxLength && pattern.test(normalized)) return index;
+  }
+
+  return null;
+}
+
+function scoreTaskMatch(userText: string, task: AssistantTaskCandidate): number {
+  const normalizedQuery = normalizeText(userText);
+  const normalizedTitle = normalizeText(task.title);
+  if (!normalizedTitle) return 0;
+  if (normalizedQuery.includes(normalizeText(task.id))) return 120;
+  if (normalizedQuery.includes(normalizedTitle)) return 100;
+
+  const queryTokens = tokenizeTaskQuery(userText);
+  if (queryTokens.length === 0) return 0;
+
+  const titleTokens = new Set(tokenizeTaskQuery(task.title));
+  const overlap = queryTokens.filter((token) => titleTokens.has(token) || normalizedTitle.includes(token));
+  if (overlap.length === 0) return 0;
+
+  const queryCoverage = overlap.length / queryTokens.length;
+  const titleCoverage = titleTokens.size > 0 ? overlap.length / titleTokens.size : 0;
+  return Math.round(queryCoverage * 70 + titleCoverage * 30);
+}
+
+function resolveTaskReference(
+  userText: string,
+  candidates: AssistantTaskCandidate[],
+): AssistantTaskCandidate | null {
+  if (candidates.length === 0) return null;
+
+  const ordinalIndex = detectOrdinalIndex(userText, candidates.length);
+  if (ordinalIndex !== null) return candidates[ordinalIndex];
+
+  const scored = candidates
+    .map((task) => ({ task, score: scoreTaskMatch(userText, task) }))
+    .sort((left, right) => right.score - left.score);
+
+  const best = scored[0];
+  const second = scored[1];
+  if (!best || best.score < 40) return null;
+  if (second && best.score - second.score < 10) return null;
+  return best.task;
+}
+
+function hasBulkTaskIntent(text: string): boolean {
+  const normalized = normalizeText(text);
+  return /\b(tick het|xong het|hoan thanh het|tat ca|all)\b/.test(normalized);
+}
+
+function buildActionBlock(action: AssistantActionDraft): string {
+  return `\`\`\`action\n${JSON.stringify(action, null, 2)}\n\`\`\``;
+}
+
+function buildMarkDoneActionBlock(task: AssistantTaskCandidate, autoExecute: boolean): string {
+  return buildActionBlock({
+    type: "mark_task_done",
+    payload: {
+      taskId: task.id,
+      done: true,
+    },
+    label: `Hoàn thành: ${task.title}`,
+    autoExecute,
+  });
+}
+
+function buildUnmarkDoneActionBlock(task: AssistantTaskCandidate, autoExecute: boolean): string {
+  return buildActionBlock({
+    type: "update_task_status",
+    payload: {
+      taskId: task.id,
+      completed: false,
+    },
+    label: `Bỏ hoàn thành: ${task.title}`,
+    autoExecute,
+  });
+}
+
+function formatTaskChoices(tasks: AssistantTaskCandidate[]): string {
+  return tasks
+    .slice(0, 7)
+    .map((task, index) => `${index + 1}. ${task.title}${task.done ? " (đã xong)" : ""}`)
+    .join("\n");
+}
+
 export const mockProvider: AssistantProvider = {
   async send(userText: string, ctx: AssistantContext, _history?: ChatHistoryMessage[]): Promise<string> {
     const lower = userText.toLowerCase().trim();
+    const intent = detectIntent(userText);
+
+    // Xử lý câu hỏi dựa trên retrievedKnowledge
+    if (intent !== "today" && ctx.retrievedKnowledge && ctx.retrievedKnowledge.length > 0) {
+      if (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle")) {
+        const obstacles = ctx.retrievedKnowledge.filter(
+          (k) => k.source === "weekly_review" || k.snippet.toLowerCase().includes("trở ngại") || k.snippet.toLowerCase().includes("obstacle")
+        );
+        if (obstacles.length > 0) {
+          await waitDelay();
+          return `Dựa trên lịch sử của bạn, trở ngại trước đây là: ${obstacles[0].snippet}`;
+        }
+      }
+      if (lower.includes("toeic")) {
+        const toeicGoals = ctx.retrievedKnowledge.filter(
+          (k) => k.title.toLowerCase().includes("toeic") || k.snippet.toLowerCase().includes("toeic")
+        );
+        if (toeicGoals.length > 0) {
+          await waitDelay();
+          return `Dựa trên dữ liệu tìm được, bạn có mục tiêu TOEIC sau: ${toeicGoals[0].snippet}`;
+        }
+      }
+    }
+
+    // Nếu hỏi về trở ngại cũ hoặc toeic mà retrievedKnowledge trống/không tìm thấy
+    if (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle") || lower.includes("toeic")) {
+      const hasObs = ctx.retrievedKnowledge?.some(
+        (k) => k.source === "weekly_review" || k.snippet.toLowerCase().includes("trở ngại") || k.snippet.toLowerCase().includes("obstacle")
+      );
+      const hasToeic = ctx.retrievedKnowledge?.some(
+        (k) => k.title.toLowerCase().includes("toeic") || k.snippet.toLowerCase().includes("toeic")
+      );
+
+      if (intent !== "today" && lower.includes("toeic") && !hasToeic) {
+        await waitDelay();
+        return "Mình chưa thấy mục tiêu hay thông tin nào liên quan đến TOEIC trong dữ liệu của bạn.";
+      }
+      if (intent !== "today" && (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle")) && !hasObs) {
+        await waitDelay();
+        return "Mình không thấy thông tin trở ngại cũ nào trong dữ liệu của bạn.";
+      }
+    }
+
+    // 1. Kiểm tra cảnh báo từ chối hiểu sai ngữ cảnh của memory (case 8)
+    const hasWrongContextPattern = ctx.assistantMemory?.rejectedPatterns?.some((p) => p.toLowerCase().includes("ngữ cảnh"));
+    if (hasWrongContextPattern && (lower.includes("mục tiêu") || lower.includes("goal"))) {
+      await waitDelay();
+      return "Bạn muốn thiết lập mục tiêu thuộc lĩnh vực nào cụ thể? Vui lòng làm rõ giúp mình.";
+    }
+
+    // 2. Ý định dời lịch task (reschedule task) - case 6 & case 10
+    const isRescheduleIntent = /dời|hoãn|chuyển lịch|reschedule/.test(lower) && /task|việc|nhiệm vụ|công việc/.test(lower);
+    if (isRescheduleIntent) {
+      const openTasks = getTaskCandidates(ctx).filter((task) => !task.done);
+      const matchTask = resolveTaskReference(userText, openTasks);
+      if (matchTask) {
+        const actionBlock = buildActionBlock({
+          type: "reschedule_task",
+          payload: {
+            taskId: matchTask.id,
+            scheduledDate: "tomorrow",
+          },
+          label: `Dời lịch: ${matchTask.title}`,
+        });
+        await waitDelay();
+        return `Tôi đã tìm thấy công việc: **"${matchTask.title}"**. Bạn có muốn dời lịch công việc này sang ngày mai không?\n\n${actionBlock}`;
+      }
+      await waitDelay();
+      return "Bạn muốn dời lịch của task nào cụ thể? Vui lòng cung cấp tên task nhé.";
+    }
+
+    // 3. Ý định bỏ đánh dấu task (update task status to false) - case 11
+    const isUncheckIntent =
+      /bỏ tick|bỏ đánh dấu|chưa xong|chưa hoàn thành|undo|uncheck/.test(lower) &&
+      /task|việc|nhiệm vụ|công việc/.test(lower);
+    if (isUncheckIntent) {
+      const allTasks = getTaskCandidates(ctx);
+      const completedTasks = allTasks.filter((task) => task.done);
+      const matchTask = resolveTaskReference(userText, allTasks);
+      if (matchTask) {
+        if (!matchTask.done) {
+          await waitDelay();
+          return `Task **"${matchTask.title}"** hiện chưa được đánh dấu hoàn thành, nên mình không cần bỏ tick.`;
+        }
+        const actionBlock = buildUnmarkDoneActionBlock(matchTask, true);
+        await waitDelay();
+        return `Mình đã xác định task **"${matchTask.title}"** và sẽ bỏ đánh dấu hoàn thành.\n\n${actionBlock}`;
+      }
+      if (completedTasks.length === 1) {
+        const task = completedTasks[0];
+        const actionBlock = buildUnmarkDoneActionBlock(task, true);
+        await waitDelay();
+        return `Mình thấy chỉ có một task đang hoàn thành: **"${task.title}"**. Mình sẽ bỏ đánh dấu task này.\n\n${actionBlock}`;
+      }
+      if (completedTasks.length > 1) {
+        await waitDelay();
+        return `Bạn muốn bỏ đánh dấu task nào?\n${formatTaskChoices(completedTasks)}`;
+      }
+      await waitDelay();
+      return "Mình chưa thấy task nào đang được đánh dấu hoàn thành để bỏ tick.";
+    }
+
+    // 4. Ý định tạo task (create task) - case 9
+    const isCreateTaskIntent = (lower.includes("tạo") || lower.includes("thêm")) && (lower.includes("task") || lower.includes("việc") || lower.includes("nhiệm vụ")) && !lower.includes("mục tiêu") && !lower.includes("goal");
+    if (isCreateTaskIntent) {
+      let taskTitle = "Công việc mới";
+      const match = userText.match(/(?:task|việc|nhiệm vụ)\s+(.+)/i);
+      if (match?.[1]) {
+        taskTitle = match[1].trim().replace(/[?.!]/g, "");
+      }
+      const actionBlock = `\`\`\`action
+{
+  "type": "create_task",
+  "payload": {
+    "title": "${taskTitle}",
+    "scheduledDate": "today",
+    "isCore": false
+  },
+  "label": "Thêm task: ${taskTitle}"
+}
+\`\`\``;
+      await waitDelay();
+      return `Đã đề xuất thêm task mới **"${taskTitle}"** vào ngày hôm nay.\n\n${actionBlock}`;
+    }
 
     // Check if user wants to mark task as done
-    const isTickIntent = /tick|hoàn thành|xong|đóng|đánh dấu/.test(lower) && /task|việc|nhiệm vụ|công việc/.test(lower);
+    const isTickIntent =
+      /tick|hoàn thành|xong|đóng|đánh dấu|mark|done|complete/.test(lower) &&
+      /task|việc|nhiệm vụ|công việc/.test(lower);
 
     if (isTickIntent) {
       // 1. Kiểm tra xem người dùng có 12-week plan không
@@ -187,46 +506,57 @@ export const mockProvider: AssistantProvider = {
         return response;
       }
 
-      // 2. Tìm task chưa hoàn thành trong ngày hôm nay
-      const openTasks = (ctx.todayTasks || []).filter((t) => !t.done);
-      if (openTasks.length === 0) {
-        // Thử tìm ở overdueTasks
-        const overdueOpenTasks = ctx.stuckSignals?.overdueTasks || [];
-        if (overdueOpenTasks.length > 0) {
-          const taskToDone = overdueOpenTasks[0];
-          const actionBlock = `\`\`\`action
-{
-  "type": "mark_task_done",
-  "payload": {
-    "taskId": "${taskToDone.id}",
-    "done": true
-  },
-  "label": "Hoàn thành: ${taskToDone.title}"
-}
-\`\`\``;
-          const response = `Tôi tìm thấy một công việc quá hạn chưa hoàn thành: **"${taskToDone.title}"**. Bạn có muốn đánh dấu hoàn thành công việc này không?\n\nNhấn vào nút **Đồng ý** ở bên dưới để thực hiện.\n\n${actionBlock}`;
-          await waitDelay();
-          return response;
-        }
+      const allTasks = getTaskCandidates(ctx);
+      const uniqueOpen = allTasks.filter((task) => !task.done);
 
-        const response = "Hiện tại không có công việc nào chưa hoàn thành cho ngày hôm nay để đánh dấu hoàn thành.";
+      const resolvedTask = resolveTaskReference(userText, allTasks);
+      if (resolvedTask) {
+        if (resolvedTask.done) {
+          await waitDelay();
+          return `Task **"${resolvedTask.title}"** đã hoàn thành từ trước rồi.`;
+        }
+        const actionBlock = buildMarkDoneActionBlock(resolvedTask, true);
+        await waitDelay();
+        return `Mình đã xác định task **"${resolvedTask.title}"** và sẽ đánh dấu hoàn thành.\n\n${actionBlock}`;
+      }
+
+      if (uniqueOpen.length === 0) {
+        const response = "Hiện tại không có công việc nào chưa hoàn thành để đánh dấu hoàn thành.";
         await waitDelay();
         return response;
       }
 
-      // Chọn task đầu tiên chưa hoàn thành
-      const taskToDone = openTasks[0];
-      const actionBlock = `\`\`\`action
-{
-  "type": "mark_task_done",
-  "payload": {
-    "taskId": "${taskToDone.id}",
-    "done": true
-  },
-  "label": "Hoàn thành: ${taskToDone.title}"
-}
-\`\`\``;
-      let response = `Tôi thấy công việc chưa hoàn thành hôm nay: **"${taskToDone.title}"**. Bạn có muốn đánh dấu hoàn thành công việc này không?\n\nNhấn vào nút **Đồng ý** ở bên dưới để thực hiện.\n\n${actionBlock}`;
+      if (hasBulkTaskIntent(userText)) {
+        await waitDelay();
+        return `Mình chưa tick hàng loạt để tránh đánh dấu nhầm. Bạn hãy chọn một task cụ thể:\n${formatTaskChoices(
+          uniqueOpen,
+        )}`;
+      }
+
+      // 3. Nếu chỉ có đúng 1 task chưa hoàn thành
+      if (uniqueOpen.length === 1) {
+        const task = uniqueOpen[0];
+        const actionBlock = buildMarkDoneActionBlock(task, true);
+        let response = `Mình thấy chỉ có một công việc chưa hoàn thành: **"${task.title}"**. Mình sẽ đánh dấu hoàn thành task này.\n\n${actionBlock}`;
+        if (firstCallInSession && !isRealMode()) {
+          firstCallInSession = false;
+          response += "\n\n_(Đây là chế độ demo, gợi ý mang tính tham khảo.)_";
+        }
+        await waitDelay();
+        return response;
+      }
+
+      // 4. Nếu có nhiều hơn 1 task chưa hoàn thành, liệt kê và đề xuất nút bấm cho từng task (tối đa 3)
+      const lines = uniqueOpen.map((task) => `- ${task.title}`);
+      const proposed = uniqueOpen.slice(0, 3);
+      const actionBlocks = proposed
+        .map((task) => buildMarkDoneActionBlock(task, false))
+        .join("\n\n");
+
+      let response = `Tôi thấy bạn có nhiều công việc chưa hoàn thành:\n${lines.join(
+        "\n",
+      )}\n\nBạn muốn đánh dấu hoàn thành công việc nào? Hãy nhấn nút **Đồng ý** tương ứng bên dưới, hoặc nói rõ tên task:\n\n${actionBlocks}`;
+
       if (firstCallInSession && !isRealMode()) {
         firstCallInSession = false;
         response += "\n\n_(Đây là chế độ demo, gợi ý mang tính tham khảo.)_";
@@ -279,13 +609,29 @@ export const mockProvider: AssistantProvider = {
       return response;
     }
 
-    const intent = detectIntent(userText);
     let response: string;
 
     switch (intent) {
-      case "today":
-        response = buildTodayResponse(ctx);
+      case "today": {
+        const openTasks = (ctx.todayTasks || []).filter((t) => !t.done);
+        if (openTasks.length > 0) {
+          const task = openTasks[0];
+          const actionBlock = `\`\`\`action
+{
+  "type": "mark_task_done",
+  "payload": {
+    "taskId": "${task.id}",
+    "done": true
+  },
+  "label": "Hoàn thành: ${task.title}"
+}
+\`\`\``;
+          response = `${buildTodayResponse(ctx)}\n\n${actionBlock}`;
+        } else {
+          response = buildTodayResponse(ctx);
+        }
         break;
+      }
       case "week":
         response = buildWeekResponse(ctx);
         break;
@@ -303,6 +649,25 @@ export const mockProvider: AssistantProvider = {
         break;
       default:
         response = buildFallbackResponse();
+    }
+
+    const memory = ctx.assistantMemory;
+    if (memory) {
+      const responseHasActionBlocks = response.includes("```action");
+      if (
+        !responseHasActionBlocks &&
+        (memory.preferredCoachingStyle === "brief" ||
+          memory.preferredCoachingStyle === "direct" ||
+          memory.rejectedPatterns?.some((p) => {
+            const lp = p.toLowerCase();
+            return lp.includes("quá dài") || lp.includes("rườm rà");
+          }))
+      ) {
+        response = response.split("\n\n").slice(0, 2).join("\n\n") + "\n\n_(Phản hồi ngắn gọn theo sở thích của bạn)_";
+      }
+      if (memory.recurringObstacles?.some((o) => o.toLowerCase().includes("thiếu thời gian"))) {
+        response += "\n\n**Mẹo nhỏ**: Nhận thấy bạn hay gặp trở ngại thiếu thời gian, hãy thử chia nhỏ task hôm nay ra thành các việc chỉ 10-15 phút nhé.";
+      }
     }
 
     const isActionIntent = intent !== "definition" && intent !== "greeting";

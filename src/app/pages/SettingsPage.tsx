@@ -56,6 +56,7 @@ import {
   updateAppPreferences,
 } from "../utils/storage";
 import { inputClass } from "./SMARTGoalSetup/components/formStyles";
+import { clearMemory } from "@/app/features/assistant/assistantMemory";
 
 const themeOptions = [
   { value: "system", label: "Theo thiết bị", description: "Dùng cài đặt hệ thống." },
@@ -646,6 +647,29 @@ export function SettingsPage() {
                 Gói & thanh toán
               </Button>
               <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+            </div>
+
+            <div className="rounded-lg border border-app-line bg-app-bg p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-app-ink">Bộ nhớ Trợ lý AI</p>
+                  <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                    Xóa sạch các thông tin trợ lý tự động ghi nhớ về bạn (sở thích học tập, thói quen làm việc).
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
+                  onClick={() => {
+                    clearMemory(user?.uid ?? null);
+                    toast.success("Đã xóa sạch bộ nhớ của Trợ lý AI.");
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Xóa bộ nhớ Trợ lý
+                </Button>
+              </div>
             </div>
 
             <div className="rounded-card border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-5">

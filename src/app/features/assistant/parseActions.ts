@@ -1,26 +1,3 @@
-export interface AssistantAction {
-  id: string;
-  type:
-    | "create_task"
-    | "mark_task_done"
-    | "navigate_to"
-    | "create_goal"
-    | "create_life_insight_note"
-    | "create_smart_goal_from_insight"
-    | "suggest_feasibility_inputs"
-    | "create_twelve_week_plan_draft"
-    | "add_weekly_review"
-    | "reschedule_task"
-    | "update_task_status";
-  payload: Record<string, unknown>;
-  label: string;
-}
-
-export interface ParsedReply {
-  textContent: string;
-  actions: AssistantAction[];
-}
-
 const VALID_ACTION_TYPES = [
   "create_task",
   "mark_task_done",
@@ -33,7 +10,23 @@ const VALID_ACTION_TYPES = [
   "add_weekly_review",
   "reschedule_task",
   "update_task_status",
-];
+] as const;
+
+export type AssistantActionType = (typeof VALID_ACTION_TYPES)[number];
+
+export interface AssistantAction {
+  id: string;
+  type: AssistantActionType;
+  payload: Record<string, unknown>;
+  label: string;
+  autoExecute?: boolean;
+}
+
+export interface ParsedReply {
+  textContent: string;
+  actions: AssistantAction[];
+}
+
 const VALID_ROUTES = [
   "/",
   "/settings",
@@ -60,6 +53,39 @@ const VALID_ROUTES = [
   "/twelve-week",
 ];
 
+type PersonalConstraint = "time" | "motivation" | "consistency" | "complexity" | "";
+type WorkloadDecision = "keep same" | "reduce slightly" | "increase slightly" | "";
+type LeadIndicatorType = "core" | "optional";
+type LeadIndicatorCadence = "spread" | "frontload" | "backload";
+
+interface SanitizedLeadIndicator {
+  id: string;
+  name: string;
+  target: string;
+  unit: string;
+  type: LeadIndicatorType;
+  cadence: LeadIndicatorCadence;
+}
+
+const PERSONAL_CONSTRAINTS: PersonalConstraint[] = ["time", "motivation", "consistency", "complexity", ""];
+const WORKLOAD_DECISIONS: WorkloadDecision[] = ["keep same", "reduce slightly", "increase slightly", ""];
+
+function isAssistantActionType(value: string): value is AssistantActionType {
+  return VALID_ACTION_TYPES.includes(value as AssistantActionType);
+}
+
+function isPersonalConstraint(value: string): value is PersonalConstraint {
+  return PERSONAL_CONSTRAINTS.includes(value as PersonalConstraint);
+}
+
+function isWorkloadDecision(value: string): value is WorkloadDecision {
+  return WORKLOAD_DECISIONS.includes(value as WorkloadDecision);
+}
+
+function getRecordValue(record: Record<string, unknown>, key: string): unknown {
+  return record[key];
+}
+
 function sanitizeCreateTaskPayload(
   payload: Record<string, unknown>,
 ): { title: string; scheduledDate: string; isCore: boolean } | null {
@@ -82,9 +108,10 @@ function sanitizeCreateTaskPayload(
 }
 
 function sanitizeMarkTaskDonePayload(payload: Record<string, unknown>): { taskId: string; done: boolean } | null {
-  if (typeof payload.taskId !== "string") return null;
-  const taskId = payload.taskId.slice(0, 100);
-  const done = payload.done === true;
+  if (typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
+  if (typeof payload.done !== "boolean") return null;
+  const taskId = payload.taskId.slice(0, 100).trim();
+  const done = payload.done;
 
   if (!done) return null;
 
@@ -243,24 +270,25 @@ function sanitizeCreateTwelveWeekPlanDraftPayload(payload: Record<string, unknow
   const dailyTimeBudget =
     typeof payload.dailyTimeBudget === "string" ? payload.dailyTimeBudget.slice(0, 50).trim() : "";
 
-  let personalConstraint: "time" | "motivation" | "consistency" | "complexity" | "" = "";
-  const constraints = ["time", "motivation", "consistency", "complexity", ""];
-  if (typeof payload.personalConstraint === "string" && constraints.includes(payload.personalConstraint)) {
-    personalConstraint = payload.personalConstraint as any;
+  let personalConstraint: PersonalConstraint = "";
+  if (typeof payload.personalConstraint === "string" && isPersonalConstraint(payload.personalConstraint)) {
+    personalConstraint = payload.personalConstraint;
   }
 
-  const leadIndicators: any[] = [];
+  const leadIndicators: SanitizedLeadIndicator[] = [];
   if (Array.isArray(payload.leadIndicators)) {
     for (const item of payload.leadIndicators) {
       if (item && typeof item === "object" && !Array.isArray(item)) {
-        const id = typeof item.id === "string" ? item.id.slice(0, 100) : crypto.randomUUID();
-        const name = typeof item.name === "string" ? item.name.slice(0, 200).trim() : "";
-        const target = typeof item.target === "string" ? item.target.slice(0, 50).trim() : "";
-        const unit = typeof item.unit === "string" ? item.unit.slice(0, 50).trim() : "";
-        const type = item.type === "core" || item.type === "optional" ? item.type : "core";
+        const rawItem = item as Record<string, unknown>;
+        const id = typeof rawItem.id === "string" ? rawItem.id.slice(0, 100) : crypto.randomUUID();
+        const name = typeof rawItem.name === "string" ? rawItem.name.slice(0, 200).trim() : "";
+        const target = typeof rawItem.target === "string" ? rawItem.target.slice(0, 50).trim() : "";
+        const unit = typeof rawItem.unit === "string" ? rawItem.unit.slice(0, 50).trim() : "";
+        const type: LeadIndicatorType =
+          rawItem.type === "core" || rawItem.type === "optional" ? rawItem.type : "core";
         const cadence =
-          item.cadence === "spread" || item.cadence === "frontload" || item.cadence === "backload"
-            ? item.cadence
+          rawItem.cadence === "spread" || rawItem.cadence === "frontload" || rawItem.cadence === "backload"
+            ? rawItem.cadence
             : "spread";
 
         if (name) {
@@ -308,10 +336,9 @@ function sanitizeAddWeeklyReviewPayload(payload: Record<string, unknown>): {
   const nextWeekPriority =
     typeof payload.nextWeekPriority === "string" ? payload.nextWeekPriority.slice(0, 1000).trim() : "";
 
-  let workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "" = "";
-  const decisions = ["keep same", "reduce slightly", "increase slightly", ""];
-  if (typeof payload.workloadDecision === "string" && decisions.includes(payload.workloadDecision)) {
-    workloadDecision = payload.workloadDecision as any;
+  let workloadDecision: WorkloadDecision = "";
+  if (typeof payload.workloadDecision === "string" && isWorkloadDecision(payload.workloadDecision)) {
+    workloadDecision = payload.workloadDecision;
   }
 
   const biggestOutputThisWeek =
@@ -353,59 +380,63 @@ function sanitizeUpdateTaskStatusPayload(
   payload: Record<string, unknown>,
 ): { taskId: string; completed: boolean } | null {
   if (typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
-  const taskId = payload.taskId.slice(0, 100);
-  const completed = payload.completed === true;
+  if (typeof payload.completed !== "boolean") return null;
+  const taskId = payload.taskId.slice(0, 100).trim();
+  const completed = payload.completed;
   return { taskId, completed };
 }
 
 function parseActionBlock(content: string): AssistantAction | null {
   try {
-    const json = JSON.parse(content);
+    const json = JSON.parse(content) as unknown;
+    if (!json || typeof json !== "object" || Array.isArray(json)) return null;
+    const record = json as Record<string, unknown>;
 
-    if (typeof json.type !== "string") return null;
-    if (!VALID_ACTION_TYPES.includes(json.type)) return null;
+    if (typeof record.type !== "string") return null;
+    if (!isAssistantActionType(record.type)) return null;
 
-    if (typeof json.label !== "string" || json.label.length === 0) {
+    if (typeof record.label !== "string" || record.label.length === 0) {
       return null;
     }
 
-    if (!json.payload || typeof json.payload !== "object") return null;
+    const payload = getRecordValue(record, "payload");
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
 
     let sanitizedPayload: Record<string, unknown> | null;
 
-    switch (json.type) {
+    switch (record.type) {
       case "create_task":
-        sanitizedPayload = sanitizeCreateTaskPayload(json.payload);
+        sanitizedPayload = sanitizeCreateTaskPayload(payload as Record<string, unknown>);
         break;
       case "mark_task_done":
-        sanitizedPayload = sanitizeMarkTaskDonePayload(json.payload);
+        sanitizedPayload = sanitizeMarkTaskDonePayload(payload as Record<string, unknown>);
         break;
       case "navigate_to":
-        sanitizedPayload = sanitizeNavigateToPayload(json.payload);
+        sanitizedPayload = sanitizeNavigateToPayload(payload as Record<string, unknown>);
         break;
       case "create_goal":
-        sanitizedPayload = sanitizeCreateGoalPayload(json.payload);
+        sanitizedPayload = sanitizeCreateGoalPayload(payload as Record<string, unknown>);
         break;
       case "create_life_insight_note":
-        sanitizedPayload = sanitizeCreateLifeInsightNotePayload(json.payload);
+        sanitizedPayload = sanitizeCreateLifeInsightNotePayload(payload as Record<string, unknown>);
         break;
       case "create_smart_goal_from_insight":
-        sanitizedPayload = sanitizeCreateSmartGoalFromInsightPayload(json.payload);
+        sanitizedPayload = sanitizeCreateSmartGoalFromInsightPayload(payload as Record<string, unknown>);
         break;
       case "suggest_feasibility_inputs":
-        sanitizedPayload = sanitizeSuggestFeasibilityInputsPayload(json.payload);
+        sanitizedPayload = sanitizeSuggestFeasibilityInputsPayload(payload as Record<string, unknown>);
         break;
       case "create_twelve_week_plan_draft":
-        sanitizedPayload = sanitizeCreateTwelveWeekPlanDraftPayload(json.payload);
+        sanitizedPayload = sanitizeCreateTwelveWeekPlanDraftPayload(payload as Record<string, unknown>);
         break;
       case "add_weekly_review":
-        sanitizedPayload = sanitizeAddWeeklyReviewPayload(json.payload);
+        sanitizedPayload = sanitizeAddWeeklyReviewPayload(payload as Record<string, unknown>);
         break;
       case "reschedule_task":
-        sanitizedPayload = sanitizeRescheduleTaskPayload(json.payload);
+        sanitizedPayload = sanitizeRescheduleTaskPayload(payload as Record<string, unknown>);
         break;
       case "update_task_status":
-        sanitizedPayload = sanitizeUpdateTaskStatusPayload(json.payload);
+        sanitizedPayload = sanitizeUpdateTaskStatusPayload(payload as Record<string, unknown>);
         break;
       default:
         return null;
@@ -415,9 +446,10 @@ function parseActionBlock(content: string): AssistantAction | null {
 
     return {
       id: crypto.randomUUID(),
-      type: json.type as any,
+      type: record.type,
       payload: sanitizedPayload,
-      label: json.label.slice(0, 80),
+      label: record.label.slice(0, 80),
+      autoExecute: record.autoExecute === true,
     };
   } catch {
     return null;

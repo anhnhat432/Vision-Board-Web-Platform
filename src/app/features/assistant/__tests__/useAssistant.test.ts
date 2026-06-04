@@ -43,9 +43,22 @@ vi.mock("../assistantApi", () => ({
   sendAssistantMessageStream: vi.fn(),
 }));
 
+vi.mock("../executeAction", () => ({
+  executeAction: vi.fn(),
+}));
+
 import { sendAssistantMessageStream } from "../assistantApi";
+import { executeAction } from "../executeAction";
+import { buildAssistantContext } from "../buildAssistantContext";
+import {
+  createTaskSelectionClarification,
+  getPendingAssistantClarification,
+  setPendingAssistantClarification,
+} from "../assistantConversationState";
 
 const mockedSendAssistantMessageStream = vi.mocked(sendAssistantMessageStream);
+const mockedExecuteAction = vi.mocked(executeAction);
+const mockedBuildAssistantContext = vi.mocked(buildAssistantContext);
 
 function setAuthContext(userId: string | null = null) {
   authContextMock.useAuthContext.mockReturnValue({
@@ -160,6 +173,11 @@ describe("useAssistant streaming", () => {
     // Pre-set onboarded flag to skip welcome message injection in tests
     localStorage.setItem(`assistant.onboarded:${ANON_USER}`, "1");
     setAuthContext(ANON_USER);
+    mockedExecuteAction.mockResolvedValue({
+      success: true,
+      verified: true,
+      message: "Đã đánh dấu xong: Đọc sách",
+    });
   });
 
   afterEach(() => {
@@ -270,5 +288,236 @@ describe("useAssistant streaming", () => {
       currentStep: "specific",
       hint: "Hãy làm rõ mục tiêu",
     });
+  });
+
+  it("auto-executes one safe auto action and appends the verified result", async () => {
+    mockedSendAssistantMessageStream.mockImplementation(async (_request, onDelta) => {
+      onDelta(`Mình sẽ đánh dấu task này.
+
+\`\`\`action
+{
+  "type": "mark_task_done",
+  "payload": { "taskId": "task_123", "done": true },
+  "label": "Hoàn thành: Đọc sách",
+  "autoExecute": true
+}
+\`\`\``);
+    });
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("confirm action");
+    });
+
+    expect(mockedExecuteAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "mark_task_done",
+        autoExecute: true,
+      }),
+      expect.any(String),
+    );
+
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.content).toContain("Mình sẽ đánh dấu task này.");
+    expect(assistantMessage?.content).toContain("Đã đánh dấu xong: Đọc sách");
+    expect(assistantMessage?.actions).toEqual([]);
+  });
+
+  it("does not auto-execute unsafe action types even if autoExecute is present", async () => {
+    mockedSendAssistantMessageStream.mockImplementation(async (_request, onDelta) => {
+      onDelta(`Mình đề xuất tạo mục tiêu.
+
+\`\`\`action
+{
+  "type": "create_goal",
+  "payload": { "title": "Học IELTS", "category": "career" },
+  "label": "Tạo mục tiêu: Học IELTS",
+  "autoExecute": true
+}
+\`\`\``);
+    });
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("tạo mục tiêu học IELTS");
+    });
+
+    expect(mockedExecuteAction).not.toHaveBeenCalled();
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.actions).toHaveLength(1);
+  });
+
+  it("stores a pending clarification instead of ticking vaguely when multiple tasks match", async () => {
+    mockedBuildAssistantContext.mockImplementationOnce(() => ({
+      currentWeek: 5,
+      weeksTotal: 12,
+      goals: [],
+      todayTasks: [
+        { id: "task_read", title: "Đọc sách 20 phút", done: false },
+        { id: "task_run", title: "Chạy bộ 2km", done: false },
+      ],
+      lastReflectionDate: null,
+      feasibility: null,
+      latestWeeklyReview: null,
+      stuckSignals: {
+        latestObstacle: null,
+        missedCommitments: [],
+        overdueOpenCount: 0,
+        overdueTasks: [],
+      },
+      trend: { completionLast4Weeks: [], direction: "unknown" },
+      streak: { daysWithCompletedTask: 0 },
+      upcomingDeadlines: [],
+      pageContext: { route: "/today", currentStep: null, nextSuggestedStep: null, formDraft: {} },
+    }));
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("tick task hôm nay");
+    });
+
+    expect(mockedSendAssistantMessageStream).not.toHaveBeenCalled();
+    expect(mockedExecuteAction).not.toHaveBeenCalled();
+    expect(getPendingAssistantClarification(ANON_USER)).toMatchObject({
+      kind: "task_selection",
+      intent: "mark_task_done",
+    });
+
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.content).toContain("Bạn muốn tick task nào?");
+    expect(assistantMessage?.content).toContain("1. Đọc sách 20 phút");
+    expect(assistantMessage?.content).toContain("2. Chạy bộ 2km");
+  });
+
+  it("resolves follow-up ordinal replies against pending clarification", async () => {
+    const pending = createTaskSelectionClarification({
+      intent: "mark_task_done",
+      candidates: [
+        { id: "task_read", label: "Đọc sách 20 phút" },
+        { id: "task_run", label: "Chạy bộ 2km" },
+      ],
+    });
+    setPendingAssistantClarification(ANON_USER, pending);
+    mockedExecuteAction.mockResolvedValueOnce({
+      success: true,
+      verified: true,
+      message: "Đã đánh dấu xong: Chạy bộ 2km",
+    });
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("cái thứ 2");
+    });
+
+    expect(mockedSendAssistantMessageStream).not.toHaveBeenCalled();
+    expect(mockedExecuteAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "mark_task_done",
+        payload: { taskId: "task_run", done: true },
+      }),
+      expect.any(String),
+    );
+    expect(getPendingAssistantClarification(ANON_USER)).toBeNull();
+
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.content).toContain("Đã đánh dấu xong: Chạy bộ 2km");
+  });
+
+  it("cancels pending clarification without mutating data", async () => {
+    const pending = createTaskSelectionClarification({
+      intent: "mark_task_done",
+      candidates: [{ id: "task_read", label: "Đọc sách 20 phút" }],
+    });
+    setPendingAssistantClarification(ANON_USER, pending);
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("hủy");
+    });
+
+    expect(mockedSendAssistantMessageStream).not.toHaveBeenCalled();
+    expect(mockedExecuteAction).not.toHaveBeenCalled();
+    expect(getPendingAssistantClarification(ANON_USER)).toBeNull();
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.content).toContain("Đã hủy");
+  });
+
+  it("does not reuse expired pending clarification", async () => {
+    const pending = createTaskSelectionClarification({
+      intent: "mark_task_done",
+      candidates: [{ id: "task_read", label: "Đọc sách 20 phút" }],
+      now: new Date(Date.now() - 60_000),
+      ttlMs: 1,
+    });
+    setPendingAssistantClarification(ANON_USER, pending);
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("cái thứ 1");
+    });
+
+    expect(mockedSendAssistantMessageStream).not.toHaveBeenCalled();
+    expect(mockedExecuteAction).not.toHaveBeenCalled();
+    expect(getPendingAssistantClarification(ANON_USER)).toBeNull();
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.content).toContain("đã hết hạn");
+  });
+
+  it("single-candidate confirmation executes safely", async () => {
+    const pending = createTaskSelectionClarification({
+      intent: "mark_task_done",
+      candidates: [{ id: "task_read", label: "Đọc sách 20 phút" }],
+    });
+    setPendingAssistantClarification(ANON_USER, pending);
+    mockedExecuteAction.mockResolvedValueOnce({
+      success: true,
+      verified: true,
+      message: "Đã đánh dấu xong: Đọc sách 20 phút",
+    });
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("ok tick đi");
+    });
+
+    expect(mockedExecuteAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "mark_task_done",
+        payload: { taskId: "task_read", done: true },
+      }),
+      expect.any(String),
+    );
+    expect(getPendingAssistantClarification(ANON_USER)).toBeNull();
+  });
+
+  it("action failure after clarification does not produce success copy", async () => {
+    const pending = createTaskSelectionClarification({
+      intent: "mark_task_done",
+      candidates: [{ id: "task_read", label: "Đọc sách 20 phút" }],
+    });
+    setPendingAssistantClarification(ANON_USER, pending);
+    mockedExecuteAction.mockResolvedValueOnce({
+      success: false,
+      verified: false,
+      message: "Không tìm thấy task.",
+    });
+
+    const { result } = renderHook(() => useAssistant());
+
+    await act(async () => {
+      result.current.send("1");
+    });
+
+    const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
+    expect(assistantMessage?.content).toContain("Mình chưa thực hiện được");
+    expect(assistantMessage?.content).toContain("Không tìm thấy task.");
+    expect(assistantMessage?.content).not.toContain("Đã đánh dấu xong");
   });
 });
