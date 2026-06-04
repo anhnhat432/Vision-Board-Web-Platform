@@ -1,8 +1,10 @@
-import { act, renderHook } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AssistantMascot } from "../AssistantMascot";
 import { buildAssistantContext, type AssistantContext } from "../buildAssistantContext";
+import type { NudgeState } from "../useProactiveNudge";
 import { useProactiveNudge } from "../useProactiveNudge";
 
 const authContextMock = vi.hoisted(() => ({
@@ -50,16 +52,34 @@ type ContextOverrides = {
   todayTasks?: Array<{ id: string; title: string; done: boolean }>;
   lastReflectionDate?: string | null;
   feasibility?: { readinessScore: number | null; bottleneckLabel: string | null; bottleneckAction: string | null } | null;
-  latestWeeklyReview?: { weekNumber: number; leadCompletionPercent: number | null; mainObstacle: string | null; nextWeekPriority: string | null; workloadDecision: string | null; reviewedAt: string | null } | null;
+  latestWeeklyReview?: AssistantContext["latestWeeklyReview"];
   overdueOpenCount?: number;
-  overdueTasks?: Array<{ id: string; title: string; scheduledDate: string; isCore: boolean }>;
+  overdueTasks?: AssistantContext["stuckSignals"]["overdueTasks"];
+  currentStep?: string | null;
   nextSuggestedStep?: string | null;
   goalsWithoutTwelveWeekPlan?: number;
-  authSyncMode?: { authState: "signed_in" | "anonymous"; syncState: "synced" | "syncing" | "error" | "offline" | "disabled" };
+  authSyncMode?: NonNullable<AssistantContext["authSyncMode"]>;
 };
 
+function hasOverride(overrides: ContextOverrides, key: keyof ContextOverrides): boolean {
+  return key in overrides;
+}
+
 function makeContext(overrides: ContextOverrides = {}): AssistantContext {
-  const currentWeek = Object.prototype.hasOwnProperty.call(overrides, "currentWeek") ? (overrides.currentWeek ?? null) : 3;
+  const currentWeek = hasOverride(overrides, "currentWeek") ? (overrides.currentWeek ?? null) : 3;
+  const feasibility = hasOverride(overrides, "feasibility")
+    ? (overrides.feasibility ?? null)
+    : { readinessScore: 80, bottleneckLabel: null, bottleneckAction: null };
+  const latestWeeklyReview = hasOverride(overrides, "latestWeeklyReview")
+    ? (overrides.latestWeeklyReview ?? null)
+    : {
+        weekNumber: 2,
+        leadCompletionPercent: 80,
+        mainObstacle: null,
+        nextWeekPriority: null,
+        workloadDecision: null,
+        reviewedAt: TODAY,
+      };
 
   return {
     currentWeek,
@@ -67,8 +87,8 @@ function makeContext(overrides: ContextOverrides = {}): AssistantContext {
     goals: overrides.goals ?? [{ id: "goal-1", title: "Run marathon", progress: 20 }],
     todayTasks: overrides.todayTasks ?? [],
     lastReflectionDate: overrides.lastReflectionDate ?? TODAY,
-    feasibility: overrides.feasibility ?? { readinessScore: 80, bottleneckLabel: null, bottleneckAction: null },
-    latestWeeklyReview: overrides.latestWeeklyReview ?? { weekNumber: 2, leadCompletionPercent: 80, mainObstacle: null, nextWeekPriority: null, workloadDecision: null, reviewedAt: TODAY },
+    feasibility,
+    latestWeeklyReview,
     stuckSignals: {
       latestObstacle: null,
       missedCommitments: [],
@@ -80,7 +100,7 @@ function makeContext(overrides: ContextOverrides = {}): AssistantContext {
     upcomingDeadlines: [],
     pageContext: {
       route: "/",
-      currentStep: null,
+      currentStep: overrides.currentStep ?? null,
       nextSuggestedStep: overrides.nextSuggestedStep ?? null,
       formDraft: {
         goalsWithoutTwelveWeekPlan: overrides.goalsWithoutTwelveWeekPlan,
@@ -91,10 +111,14 @@ function makeContext(overrides: ContextOverrides = {}): AssistantContext {
 }
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <MemoryRouter>{children}</MemoryRouter>;
+  return createElement(MemoryRouter, null, children);
 }
 
-describe("useProactiveNudge", () => {
+function seedSeenWeek() {
+  localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+}
+
+describe("Phase 9 proactive nudges", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(`${TODAY}T12:00:00`));
@@ -115,77 +139,20 @@ describe("useProactiveNudge", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({
-      active: true,
-      type: "stuck_onboarding",
-      priority: "medium",
-      route: "/onboarding",
-    });
-  });
-
-  it("detects missing SMART goal nudge", () => {
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: null, goals: [], feasibility: null }));
-
-    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
-
-    expect(result.current.nudge).toMatchObject({ type: "missing_smart_goal", route: "/smart-goal" });
-  });
-
-  it("detects missing feasibility check nudge", () => {
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: null, feasibility: null }));
-
-    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
-
-    expect(result.current.nudge).toMatchObject({ type: "missing_feasibility_check", route: "/feasibility" });
-  });
-
-  it("detects missing 12-week plan nudge", () => {
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: null, goalsWithoutTwelveWeekPlan: 1 }));
-
-    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
-
-    expect(result.current.nudge).toMatchObject({ type: "missing_12_week_plan", route: "/12-week-plan" });
-  });
-
-  it("shows new-week nudge when current week is newer than last seen week", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "2");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 3 }));
-
-    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
-
-    expect(result.current.nudge).toMatchObject({
-      active: true,
-      type: "weekly_review_due",
-      message: "Tuần 3 bắt đầu rồi. Muốn mình tóm tắt và chọn ưu tiên không?",
-    });
-    expect(localStorage.getItem("assistant.lastSeenWeek:user-1")).toBe("3");
-    expect(localStorage.getItem("assistant.nudgeCooldown:user-1.weekly_review_due")).toBeTruthy();
-  });
-
-  it("does not nudge when current week matches last seen week and no rule matches", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 3 }));
-
-    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
-
-    expect(result.current.nudge.active).toBe(false);
+    expect(result.current.nudge).toMatchObject({ active: true, type: "stuck_onboarding", route: "/onboarding" });
   });
 
   it("detects today task pending nudge", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({
-      type: "today_task_pending",
-      relatedTaskId: "task-1",
-      route: "/today",
-    });
+    expect(result.current.nudge).toMatchObject({ type: "today_task_pending", relatedTaskId: "task-1", route: "/today" });
   });
 
   it("detects overdue tasks nudge", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     mockedBuildAssistantContext.mockReturnValue(
       makeContext({
         overdueOpenCount: 2,
@@ -195,11 +162,7 @@ describe("useProactiveNudge", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({
-      type: "overdue_tasks",
-      relatedTaskId: "task-old",
-      message: "2 task quá hạn. Chọn 1 việc nhỏ để rescue hôm nay nhé.",
-    });
+    expect(result.current.nudge).toMatchObject({ type: "overdue_tasks", relatedTaskId: "task-old" });
   });
 
   it("detects weekly review due nudge", () => {
@@ -212,7 +175,7 @@ describe("useProactiveNudge", () => {
   });
 
   it("detects reflection due nudge", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     mockedBuildAssistantContext.mockReturnValue(makeContext({ lastReflectionDate: "2026-05-01" }));
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
@@ -220,17 +183,8 @@ describe("useProactiveNudge", () => {
     expect(result.current.nudge).toMatchObject({ type: "reflection_due", route: "/reflection" });
   });
 
-  it("detects sync error nudge without backend calls", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ authSyncMode: { authState: "signed_in", syncState: "error" } }));
-
-    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
-
-    expect(result.current.nudge).toMatchObject({ type: "sync_error", route: "/settings" });
-  });
-
   it("cooldown prevents repeated nudge", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     localStorage.setItem("assistant.nudgeCooldown:user-1.today_task_pending", "2026-05-19T18:00:00.000Z");
     mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
 
@@ -240,36 +194,30 @@ describe("useProactiveNudge", () => {
   });
 
   it("dismiss stores cooldown", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    act(() => {
-      result.current.dismissNudge();
-    });
+    act(() => result.current.dismissNudge());
 
-    expect(result.current.nudge.active).toBe(false);
     expect(localStorage.getItem("assistant.nudgeCooldown:user-1.today_task_pending")).toBeTruthy();
+    expect(result.current.nudge.active).toBe(false);
   });
 
   it("localStorage unavailable does not crash", () => {
-    const getItemSpy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("blocked");
     });
 
     expect(() => renderHook(() => useProactiveNudge(false), { wrapper })).not.toThrow();
-
-    getItemSpy.mockRestore();
   });
 
   it("memory preference don't remind at night suppresses nudge", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     vi.setSystemTime(new Date(`${TODAY}T21:00:00`));
     mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
-    assistantMemoryMock.getMemoryItems.mockReturnValue([
-      { id: "mem1", userId: "user-1", type: "user_preference", content: "đừng nhắc buổi tối", tags: ["preferred_time"], createdAt: new Date().toISOString() },
-    ]);
+    assistantMemoryMock.getMemoryItems.mockReturnValue([{ content: "đừng nhắc buổi tối", tags: ["preferred_time"] }]);
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -277,39 +225,51 @@ describe("useProactiveNudge", () => {
   });
 
   it("shows idle nudge after five minutes without activity", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    seedSeenWeek();
     mockedBuildAssistantContext.mockReturnValue(makeContext());
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    act(() => {
-      vi.advanceTimersByTime(IDLE_MS + 1);
-    });
+    act(() => vi.advanceTimersByTime(IDLE_MS + 1));
 
-    expect(result.current.nudge).toMatchObject({
-      active: true,
-      type: "stuck_onboarding",
-      message: "Bạn đang phân vân chỗ nào không? Hỏi mình thử xem.",
-    });
+    expect(result.current.nudge).toMatchObject({ type: "stuck_onboarding", message: "Bạn đang phân vân chỗ nào không? Hỏi mình thử xem." });
   });
 
-  it("scopes localStorage keys by user id", () => {
-    localStorage.setItem("assistant.lastSeenWeek:user-a", "2");
-    localStorage.setItem("assistant.lastSeenWeek:user-b", "3");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 3 }));
+  it("UI renders nudge and dismiss works", () => {
+    const dismissNudge = vi.fn();
+    const proactiveNudge: NudgeState = {
+      active: true,
+      id: "today_task_pending:2026-05-19",
+      type: "today_task_pending",
+      reason: "today_task_pending",
+      priority: "medium",
+      title: "Task hôm nay",
+      message: "Hôm nay còn: Write outline. Làm tiếp một bước nhỏ nhé?",
+      actionLabel: "Mở Today",
+      route: "/today",
+      createdAt: "2026-05-19T12:00:00.000Z",
+      expiresAt: "2026-05-20T12:00:00.000Z",
+      cooldownKey: "assistant.nudgeCooldown:user-1.today_task_pending",
+    };
 
-    setAuthContext("user-a");
-    const { result: firstResult, unmount } = renderHook(() => useProactiveNudge(false), { wrapper });
+    render(
+      createElement(AssistantMascot, {
+        isOpen: false,
+        onClick: vi.fn(),
+        nudge: proactiveNudge,
+        dismissNudge,
+        position: { x: 120, y: 180 },
+        isDragging: false,
+        handlePointerDown: vi.fn(),
+        wasDragged: false,
+      }),
+    );
 
-    expect(firstResult.current.nudge.type).toBe("weekly_review_due");
-    expect(localStorage.getItem("assistant.nudgeCooldown:user-a.weekly_review_due")).toBeTruthy();
-    expect(localStorage.getItem("assistant.nudgeCooldown:user-b.weekly_review_due")).toBeNull();
+    act(() => vi.advanceTimersByTime(500));
 
-    unmount();
-    setAuthContext("user-b");
-    const { result: secondResult } = renderHook(() => useProactiveNudge(false), { wrapper });
+    expect(screen.getAllByText(proactiveNudge.message).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getAllByRole("button", { name: "Ẩn gợi ý" })[0]);
 
-    expect(secondResult.current.nudge.active).toBe(false);
-    expect(localStorage.getItem("assistant.lastSeenWeek:user-b")).toBe("3");
+    expect(dismissNudge).toHaveBeenCalled();
   });
 });

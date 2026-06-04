@@ -1,16 +1,17 @@
-import { Sparkles, X } from "lucide-react";
+import { X } from "lucide-react";
 import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
-import type { Position } from "./useDraggableMascot";
-import type { NudgeState } from "./useProactiveNudge";
 import { OwlIcon } from "./OwlIcon";
+import type { Position } from "./useDraggableMascot";
 import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
+import type { NudgeState } from "./useProactiveNudge";
 
 interface AssistantMascotProps {
   onClick: () => void;
   isOpen: boolean;
   nudge: NudgeState;
   dismissNudge: () => void;
+  onNudgeAction?: () => void;
   position: Position;
   isDragging: boolean;
   handlePointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
@@ -22,6 +23,7 @@ export function AssistantMascot({
   isOpen,
   nudge,
   dismissNudge,
+  onNudgeAction,
   position,
   isDragging,
   handlePointerDown,
@@ -108,6 +110,10 @@ export function AssistantMascot({
       e.preventDefault();
       return;
     }
+    if (nudge.active && onNudgeAction) {
+      onNudgeAction();
+      return;
+    }
     dismissNudge();
     onClick();
   };
@@ -165,6 +171,19 @@ export function AssistantMascot({
             </button>
           ) : null}
           <div>{nudge.active ? nudge.message : "Kéo để di chuyển · Click để hỏi"}</div>
+          {nudge.active && nudge.actionLabel ? (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onNudgeAction?.();
+                hideTooltip();
+              }}
+              className="mt-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-background"
+            >
+              {nudge.actionLabel}
+            </button>
+          ) : null}
         </div>
       </TooltipContent>
     </Tooltip>

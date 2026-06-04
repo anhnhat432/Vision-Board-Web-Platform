@@ -11,7 +11,7 @@ export function AIAssistant() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { position, isDragging, handlePointerDown, wasDragged } = useDraggableMascot();
-  const { nudge, dismissNudge } = useProactiveNudge(isOpen);
+  const { nudge, dismissNudge, actOnNudge } = useProactiveNudge(isOpen);
   const { peek, resetPeekCount, dismissPeek, pauseAutoHide, resumeAutoHide } = useBubblePeek({
     pause: isOpen || isDragging || nudge.active,
   });
@@ -33,6 +33,7 @@ export function AIAssistant() {
         isOpen={isOpen}
         nudge={nudge}
         dismissNudge={dismissNudge}
+        onNudgeAction={actOnNudge}
         position={position}
         isDragging={isDragging}
         handlePointerDown={handlePointerDown}

@@ -3,7 +3,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AssistantMascot } from "../AssistantMascot";
 import type { NudgeState } from "../useProactiveNudge";
 
-const inactiveNudge: NudgeState = { active: false, reason: null, message: "" };
+const inactiveNudge: NudgeState = {
+  active: false,
+  id: "",
+  type: null,
+  reason: null,
+  priority: "low",
+  title: "",
+  message: "",
+  actionLabel: "",
+  createdAt: "",
+  expiresAt: "",
+  cooldownKey: "",
+};
 const mascotPosition = { x: 120, y: 180 };
 const mascotProps = {
   position: mascotPosition,
@@ -50,8 +62,16 @@ describe("AssistantMascot", () => {
     const dismissNudge = vi.fn();
     const proactiveNudge: NudgeState = {
       active: true,
-      reason: "new-week",
+      id: "weekly_review_due:2026-05-19",
+      type: "weekly_review_due",
+      reason: "weekly_review_due",
+      priority: "medium",
+      title: "Tuần mới bắt đầu",
       message: "Tuần 3 bắt đầu rồi. Muốn mình tóm tắt và chọn ưu tiên không?",
+      actionLabel: "Xem tuần",
+      createdAt: "2026-05-19T12:00:00.000Z",
+      expiresAt: "2026-05-20T12:00:00.000Z",
+      cooldownKey: "assistant.nudgeCooldown:user-1.weekly_review_due",
     };
 
     render(
