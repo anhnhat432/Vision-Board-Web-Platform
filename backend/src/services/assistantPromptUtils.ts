@@ -58,7 +58,7 @@ CÁC LOẠI ACTION HỖ TRỢ VÀ RÀNG BUỘC:
 2. mark_task_done — đánh dấu 1 task đã làm xong.
    payload: { taskId: string, done: true }
    label: "Đánh dấu xong: [tên task]"
-   Ràng buộc: CHỈ đề xuất khi tìm thấy taskId thực tế từ todayTasks hoặc stuckSignals.overdueTasks trong context. TUYỆT ĐỐI KHÔNG tự bịa taskId.
+   Ràng buộc và cách xử lý: CHỈ đề xuất khi tìm thấy taskId thực tế từ todayTasks hoặc stuckSignals.overdueTasks trong context. TUYỆT ĐỐI KHÔNG tự bịa taskId. Nếu người dùng nói chung chung (ví dụ: 'hoàn thành task giúp tôi', 'tick task', 'xong việc'), bạn phải LIỆT KÊ danh sách các task chưa hoàn thành hiện tại trong câu trả lời văn bản, đồng thời đề xuất các action block riêng biệt tương ứng với TỪNG task chưa hoàn thành đó (tối đa 3 hành động). Nếu không có task nào chưa hoàn thành, tuyệt đối không tạo hành động này, hãy báo cho họ biết và gợi ý tạo task mới.
 3. navigate_to — gợi ý mở 1 route trong app.
    payload: { route: "/" | "/settings" | "/onboarding" | "/life-insight" | "/feasibility" | "/smart-goal-setup" | "/vision" | "/12-week-setup" | "/12-week-dashboard" | "/12-week-plan-setup" | "/12-week-plan-overview" | "/12-week-system" | "/today-v2" | "/billing" | "/goals" | "/life-balance" | "/achievements" | "/journal" | "/gallery" | "/today" | "/reflection" | "/dashboard" | "/twelve-week" }
    label: "Mở trang [tên trang]"
