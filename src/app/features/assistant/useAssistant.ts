@@ -14,6 +14,7 @@ import {
 } from "./assistantConversationState";
 import { captureAssistantFeedback } from "./assistantFeedback";
 import { autoCaptureUserMemory, clearMemory, updateAssistantMemoryFromFeedback } from "./assistantMemory";
+import { recordAssistantEvent } from "./assistantObservability";
 import {
   type AssistantWorkflow,
   type AssistantWorkflowType,
@@ -146,7 +147,35 @@ async function executeSafeAutoActions(
   }
 
   const [action] = autoActions;
+
+  recordAssistantEvent({
+    type: "assistant_action_executed",
+    userId,
+    actionType: action.type,
+    metadata: { label: action.label, payload: action.payload, autoExecute: true },
+  });
+
   const result = await executeAction(action, userId);
+
+  if (result.success) {
+    recordAssistantEvent({
+      type: "assistant_action_verified",
+      userId,
+      actionType: action.type,
+      success: true,
+      metadata: { label: action.label, message: result.message, alreadyDone: result.alreadyDone },
+    });
+  } else {
+    recordAssistantEvent({
+      type: "assistant_action_failed",
+      userId,
+      actionType: action.type,
+      success: false,
+      errorCode: "ACTION_EXECUTION_FAILED",
+      metadata: { label: action.label, message: result.message },
+    });
+  }
+
   return {
     actions: actions.filter((item) => item.id !== action.id).map((item) => ({ ...item, autoExecute: false })),
     summary: buildAutoExecutionSummary(action, result),
@@ -358,6 +387,14 @@ async function resolvePendingWorkflowTurn(
 
   if (isCancelReply(text)) {
     updatePendingWorkflow(null);
+    recordAssistantEvent({
+      type: "assistant_workflow_failed",
+      userId,
+      workflowType: workflow.type,
+      success: false,
+      errorCode: "WORKFLOW_CANCELLED",
+      metadata: { reason: "User cancelled pending workflow" },
+    });
     return {
       content: "Đã hủy bỏ kế hoạch/hành động đang chuẩn bị.",
       actions: [],
@@ -365,6 +402,13 @@ async function resolvePendingWorkflowTurn(
   }
 
   if (isConfirmReply(text)) {
+    recordAssistantEvent({
+      type: "assistant_workflow_confirmed",
+      userId,
+      workflowType: workflow.type,
+      metadata: { actionsCount: workflow.proposedActions.length },
+    });
+
     const executingWf: AssistantWorkflow = {
       ...workflow,
       status: "executing",
@@ -379,6 +423,13 @@ async function resolvePendingWorkflowTurn(
 
     for (const action of workflow.proposedActions) {
       try {
+        recordAssistantEvent({
+          type: "assistant_action_executed",
+          userId,
+          actionType: action.type,
+          metadata: { label: action.label, payload: action.payload, workflowType: workflow.type },
+        });
+
         const res = await executeAction(action, userId);
         const status = res.success ? (res.alreadyDone ? "alreadyDone" : "success") : "failed";
 
@@ -388,7 +439,28 @@ async function resolvePendingWorkflowTurn(
           message: res.message,
         });
 
-        if (!res.success) {
+        if (res.success) {
+          recordAssistantEvent({
+            type: "assistant_action_verified",
+            userId,
+            actionType: action.type,
+            success: true,
+            metadata: {
+              label: action.label,
+              message: res.message,
+              alreadyDone: res.alreadyDone,
+              workflowType: workflow.type,
+            },
+          });
+        } else {
+          recordAssistantEvent({
+            type: "assistant_action_failed",
+            userId,
+            actionType: action.type,
+            success: false,
+            errorCode: "WORKFLOW_ACTION_FAILED",
+            metadata: { label: action.label, message: res.message, workflowType: workflow.type },
+          });
           hasFailed = true;
           failedActionLabel = action.label;
           failureMsg = res.message;
@@ -398,6 +470,16 @@ async function resolvePendingWorkflowTurn(
         hasFailed = true;
         failedActionLabel = action.label;
         failureMsg = err instanceof Error ? err.message : String(err);
+
+        recordAssistantEvent({
+          type: "assistant_action_failed",
+          userId,
+          actionType: action.type,
+          success: false,
+          errorCode: "WORKFLOW_ACTION_EXCEPTION",
+          metadata: { label: action.label, message: failureMsg, workflowType: workflow.type },
+        });
+
         results.push({
           actionId: action.id,
           status: "failed",
@@ -415,6 +497,16 @@ async function resolvePendingWorkflowTurn(
         updatedAt: new Date().toISOString(),
       };
       updatePendingWorkflow(failedWf);
+
+      recordAssistantEvent({
+        type: "assistant_workflow_failed",
+        userId,
+        workflowType: workflow.type,
+        success: false,
+        errorCode: "WORKFLOW_EXECUTION_FAILED",
+        metadata: { failedActionLabel, failureMsg },
+      });
+
       return {
         content: `Thực hiện thất bại ở bước "${failedActionLabel}": ${failureMsg}`,
         actions: [],
@@ -428,6 +520,14 @@ async function resolvePendingWorkflowTurn(
       };
       updatePendingWorkflow(completedWf);
       updatePendingWorkflow(null); // Clear pending workflow on success
+
+      recordAssistantEvent({
+        type: "assistant_workflow_completed",
+        userId,
+        workflowType: workflow.type,
+        success: true,
+        metadata: { actionsCount: workflow.proposedActions.length },
+      });
 
       const successLabels = workflow.proposedActions
         .map((a) => {
@@ -465,6 +565,16 @@ async function resolvePendingClarificationTurn(userId: string | null, text: stri
   if (resolution.status === "unresolved") {
     return resolution.question;
   }
+
+  recordAssistantEvent({
+    type: "assistant_clarification_resolved",
+    userId,
+    metadata: {
+      intent: pending.intent,
+      selectedId: resolution.candidate.id,
+      selectedLabel: resolution.candidate.label,
+    },
+  });
 
   const summary = await executeTaskClarificationAction(resolution.pending.intent, resolution.candidate, userId);
   clearPendingAssistantClarification(userId);
@@ -518,6 +628,13 @@ async function resolveDirectTaskCommandTurn(
     question,
   });
   setPendingAssistantClarification(userId, pending);
+
+  recordAssistantEvent({
+    type: "assistant_clarification_created",
+    userId,
+    metadata: { intent, candidatesCount: candidates.length },
+  });
+
   return `${pending.question}\n\nBạn có thể trả lời bằng số thứ tự, ví dụ "cái thứ 2", hoặc gõ tên task.`;
 }
 
@@ -706,10 +823,21 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
       const trimmed = text.trim();
       if (!trimmed || isTyping) return;
 
+      const turnStartedAt = Date.now();
+
       // Tự động capture memory từ chat input
       autoCaptureUserMemory(trimmed, userId);
 
-      setMessages((prev) => [...prev, createMessage("user", trimmed)]);
+      const userMessage = createMessage("user", trimmed);
+      recordAssistantEvent({
+        type: "assistant_message_sent",
+        userId,
+        route,
+        messageId: userMessage.id,
+        metadata: { length: trimmed.length },
+      });
+
+      setMessages((prev) => [...prev, userMessage]);
       setLastUserText(trimmed);
       setIsTyping(true);
       setLastError(null);
@@ -747,6 +875,15 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
         const pendingWfTurn = await resolvePendingWorkflowTurn(userId, trimmed, context, updatePendingWorkflow);
         if (pendingWfTurn) {
+          recordAssistantEvent({
+            type: "assistant_workflow_completed",
+            userId,
+            route,
+            messageId,
+            success: true,
+            latencyMs: Date.now() - turnStartedAt,
+            metadata: { localResolution: true },
+          });
           setMessages((prev) =>
             prev.map((message) =>
               message.id === messageId
@@ -754,6 +891,15 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
                 : message,
             ),
           );
+          recordAssistantEvent({
+            type: "assistant_message_received",
+            userId,
+            route,
+            messageId,
+            success: true,
+            latencyMs: Date.now() - turnStartedAt,
+            metadata: { length: pendingWfTurn.content.length, source: "pending_workflow" },
+          });
           return;
         }
 
@@ -766,6 +912,15 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
                 : message,
             ),
           );
+          recordAssistantEvent({
+            type: "assistant_message_received",
+            userId,
+            route,
+            messageId,
+            success: true,
+            latencyMs: Date.now() - turnStartedAt,
+            metadata: { length: pendingTurn.length, source: "pending_clarification" },
+          });
           return;
         }
 
@@ -778,6 +933,15 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
                 : message,
             ),
           );
+          recordAssistantEvent({
+            type: "assistant_message_received",
+            userId,
+            route,
+            messageId,
+            success: true,
+            latencyMs: Date.now() - turnStartedAt,
+            metadata: { length: directTaskTurn.length, source: "direct_task_command" },
+          });
           return;
         }
 
@@ -797,7 +961,28 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
           abortControllerRef.current.signal,
         );
 
+        recordAssistantEvent({
+          type: "assistant_message_received",
+          userId,
+          route,
+          messageId,
+          success: true,
+          latencyMs: Date.now() - turnStartedAt,
+          metadata: { length: finalContent.length },
+        });
+
         const parsed = parseAssistantReply(finalContent);
+
+        if (parsed.actions && parsed.actions.length > 0) {
+          for (const action of parsed.actions) {
+            recordAssistantEvent({
+              type: "assistant_action_proposed",
+              userId,
+              actionType: action.type,
+              metadata: { label: action.label, payload: action.payload },
+            });
+          }
+        }
 
         const isGoalWorkflow = parsed.actions.some((a) => a.type === "create_goal");
         const isPlanWorkflow = parsed.actions.some((a) => a.type === "create_twelve_week_plan_draft");
@@ -852,6 +1037,13 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
           updatePendingWorkflow(newWorkflow);
 
+          recordAssistantEvent({
+            type: "assistant_workflow_created",
+            userId,
+            workflowType,
+            metadata: { actionsCount: actionsWithNoAuto.length, missingFields },
+          });
+
           setMessages((prev) =>
             prev.map((message) =>
               message.id === messageId
@@ -873,6 +1065,8 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
           );
         }
       } catch (error) {
+        const latencyMs = Date.now() - turnStartedAt;
+        const errCode = getErrorCode(error);
         if (
           error &&
           typeof error === "object" &&
@@ -880,14 +1074,34 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
           (error as { errorCode?: string }).errorCode === "ABORT_ERROR"
         ) {
           // User aborted, don't show error
+          recordAssistantEvent({
+            type: "assistant_message_received",
+            userId,
+            route,
+            messageId,
+            success: false,
+            latencyMs,
+            errorCode: "ABORT_ERROR",
+            metadata: { reason: "User aborted generation" },
+          });
           setMessages((prev) =>
             prev.map((message) => (message.id === messageId ? { ...message, status: "complete" } : message)),
           );
         } else {
           const message = getErrorMessage(error);
+          recordAssistantEvent({
+            type: "assistant_message_received",
+            userId,
+            route,
+            messageId,
+            success: false,
+            latencyMs,
+            errorCode: errCode ?? "UNKNOWN_STREAM_ERROR",
+            metadata: { errorMessage: message },
+          });
           setLastError({
             message,
-            errorCode: getErrorCode(error),
+            errorCode: errCode,
           });
           setMessages((prev) => prev.filter((m) => m.id !== messageId));
         }
@@ -948,6 +1162,21 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             ...buildAssistantContext(undefined, route, pageContextHintValue, undefined, userId),
             route,
           };
+
+          recordAssistantEvent({
+            type: "assistant_feedback_submitted",
+            userId,
+            route,
+            messageId,
+            metadata: {
+              rating,
+              reason: options?.reason,
+              correction: options?.correction,
+              expectedActionType: options?.expectedActionType,
+              expectedTaskTitle: options?.expectedTaskTitle,
+              actionExecution: options?.actionExecution,
+            },
+          });
 
           captureAssistantFeedback({
             userId,

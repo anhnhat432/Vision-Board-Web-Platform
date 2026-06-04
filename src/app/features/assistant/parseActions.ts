@@ -456,22 +456,32 @@ function parseActionBlock(content: string): AssistantAction | null {
 }
 
 export function parseAssistantReply(raw: string): ParsedReply {
-  const actionBlockRegex = /```action\n([\s\S]*?)\n```/g;
+  const actionBlockRegex = /```(action|json)\n([\s\S]*?)\n```/g;
 
   const actions: AssistantAction[] = [];
+  const blocksToRemove: string[] = [];
   let match: RegExpExecArray | null;
 
   while (true) {
     match = actionBlockRegex.exec(raw);
     if (match === null) break;
-    const content = match[1].trim();
+    const blockType = match[1];
+    const content = match[2].trim();
     const action = parseActionBlock(content);
     if (action) {
       actions.push(action);
+      blocksToRemove.push(match[0]);
+    } else if (blockType === "action") {
+      // For legacy/compatibility, always hide block if it is explicitly tagged as ```action
+      blocksToRemove.push(match[0]);
     }
   }
 
-  const textContent = raw.replace(/```action[\s\S]*?```/g, "").trim();
+  let textContent = raw;
+  for (const block of blocksToRemove) {
+    textContent = textContent.replace(block, "");
+  }
+  textContent = textContent.trim();
 
   return { textContent, actions };
 }

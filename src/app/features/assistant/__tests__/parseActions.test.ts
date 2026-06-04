@@ -242,4 +242,35 @@ describe("parseAssistantReply", () => {
 \`\`\``;
     expect(parseAssistantReply(raw3).actions).toHaveLength(0);
   });
+
+  it("parses action blocks inside json blocks if they match valid action schema, but leaves normal code explanation json blocks alone", () => {
+    const raw = `Chào bạn, dưới đây là đề xuất hành động:
+
+\`\`\`json
+{
+  "type": "create_task",
+  "payload": { "title": "Đọc sách 10 phút", "scheduledDate": "today", "isCore": false },
+  "label": "Thêm task: Đọc sách 10 phút"
+}
+\`\`\`
+
+Còn đây là cách cấu hình config code bình thường:
+\`\`\`json
+{
+  "theme": "dark",
+  "fontSize": 14
+}
+\`\`\``;
+
+    const result = parseAssistantReply(raw);
+
+    expect(result.actions).toHaveLength(1);
+    expect(result.actions[0].type).toBe("create_task");
+    expect(result.actions[0].label).toBe("Thêm task: Đọc sách 10 phút");
+    
+    // Check that only the proposed action json block was removed, and the normal config block is kept
+    expect(result.textContent).toContain("Còn đây là cách cấu hình config code bình thường:");
+    expect(result.textContent).toContain('"theme": "dark"');
+    expect(result.textContent).not.toContain('"type": "create_task"');
+  });
 });

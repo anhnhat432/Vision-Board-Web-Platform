@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildAssistantContext, type AssistantContext } from "../buildAssistantContext";
+import { type AssistantContext, buildAssistantContext } from "../buildAssistantContext";
 import { useProactiveNudge } from "../useProactiveNudge";
 
 const authContextMock = vi.hoisted(() => ({
@@ -49,17 +49,31 @@ type ContextOverrides = {
   goals?: Array<{ id: string; title: string; progress: number }>;
   todayTasks?: Array<{ id: string; title: string; done: boolean }>;
   lastReflectionDate?: string | null;
-  feasibility?: { readinessScore: number | null; bottleneckLabel: string | null; bottleneckAction: string | null } | null;
-  latestWeeklyReview?: { weekNumber: number; leadCompletionPercent: number | null; mainObstacle: string | null; nextWeekPriority: string | null; workloadDecision: string | null; reviewedAt: string | null } | null;
+  feasibility?: {
+    readinessScore: number | null;
+    bottleneckLabel: string | null;
+    bottleneckAction: string | null;
+  } | null;
+  latestWeeklyReview?: {
+    weekNumber: number;
+    leadCompletionPercent: number | null;
+    mainObstacle: string | null;
+    nextWeekPriority: string | null;
+    workloadDecision: string | null;
+    reviewedAt: string | null;
+  } | null;
   overdueOpenCount?: number;
   overdueTasks?: Array<{ id: string; title: string; scheduledDate: string; isCore: boolean }>;
   nextSuggestedStep?: string | null;
   goalsWithoutTwelveWeekPlan?: number;
-  authSyncMode?: { authState: "signed_in" | "anonymous"; syncState: "synced" | "syncing" | "error" | "offline" | "disabled" };
+  authSyncMode?: {
+    authState: "signed_in" | "anonymous";
+    syncState: "synced" | "syncing" | "error" | "offline" | "disabled";
+  };
 };
 
 function makeContext(overrides: ContextOverrides = {}): AssistantContext {
-  const currentWeek = Object.prototype.hasOwnProperty.call(overrides, "currentWeek") ? (overrides.currentWeek ?? null) : 3;
+  const currentWeek = "currentWeek" in overrides ? (overrides.currentWeek ?? null) : 3;
 
   return {
     currentWeek,
@@ -68,7 +82,14 @@ function makeContext(overrides: ContextOverrides = {}): AssistantContext {
     todayTasks: overrides.todayTasks ?? [],
     lastReflectionDate: overrides.lastReflectionDate ?? TODAY,
     feasibility: overrides.feasibility ?? { readinessScore: 80, bottleneckLabel: null, bottleneckAction: null },
-    latestWeeklyReview: overrides.latestWeeklyReview ?? { weekNumber: 2, leadCompletionPercent: 80, mainObstacle: null, nextWeekPriority: null, workloadDecision: null, reviewedAt: TODAY },
+    latestWeeklyReview: overrides.latestWeeklyReview ?? {
+      weekNumber: 2,
+      leadCompletionPercent: 80,
+      mainObstacle: null,
+      nextWeekPriority: null,
+      workloadDecision: null,
+      reviewedAt: TODAY,
+    },
     stuckSignals: {
       latestObstacle: null,
       missedCommitments: [],
@@ -173,7 +194,9 @@ describe("useProactiveNudge", () => {
 
   it("detects today task pending nudge", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -204,7 +227,19 @@ describe("useProactiveNudge", () => {
 
   it("detects weekly review due nudge", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "4");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 4, latestWeeklyReview: { weekNumber: 2, leadCompletionPercent: 70, mainObstacle: null, nextWeekPriority: null, workloadDecision: null, reviewedAt: TODAY } }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({
+        currentWeek: 4,
+        latestWeeklyReview: {
+          weekNumber: 2,
+          leadCompletionPercent: 70,
+          mainObstacle: null,
+          nextWeekPriority: null,
+          workloadDecision: null,
+          reviewedAt: TODAY,
+        },
+      }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -222,7 +257,9 @@ describe("useProactiveNudge", () => {
 
   it("detects sync error nudge without backend calls", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ authSyncMode: { authState: "signed_in", syncState: "error" } }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ authSyncMode: { authState: "signed_in", syncState: "error" } }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -232,7 +269,9 @@ describe("useProactiveNudge", () => {
   it("cooldown prevents repeated nudge", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
     localStorage.setItem("assistant.nudgeCooldown:user-1.today_task_pending", "2026-05-19T18:00:00.000Z");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -241,7 +280,9 @@ describe("useProactiveNudge", () => {
 
   it("dismiss stores cooldown", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -266,9 +307,18 @@ describe("useProactiveNudge", () => {
   it("memory preference don't remind at night suppresses nudge", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
     vi.setSystemTime(new Date(`${TODAY}T21:00:00`));
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
     assistantMemoryMock.getMemoryItems.mockReturnValue([
-      { id: "mem1", userId: "user-1", type: "user_preference", content: "đừng nhắc buổi tối", tags: ["preferred_time"], createdAt: new Date().toISOString() },
+      {
+        id: "mem1",
+        userId: "user-1",
+        type: "user_preference",
+        content: "đừng nhắc buổi tối",
+        tags: ["preferred_time"],
+        createdAt: new Date().toISOString(),
+      },
     ]);
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });

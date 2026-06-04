@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   CheckCircle2,
   Loader2,
   Mic,
@@ -23,6 +24,7 @@ import {
 } from "react";
 import { isRealMode } from "@/app/utils/app-mode";
 import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +37,7 @@ import {
 } from "../../components/ui/alert-dialog";
 import { AssistantActionCard } from "./AssistantActionCard";
 import { AssistantMessageContent } from "./AssistantMessageContent";
+import { AssistantObservabilityPanel } from "./AssistantObservabilityPanel";
 import { executeAction } from "./executeAction";
 import { OwlIcon } from "./OwlIcon";
 import type { AssistantAction } from "./parseActions";
@@ -64,6 +67,10 @@ function normalizeFeedbackReason(value: string): FeedbackReason {
 }
 
 export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
+  const { user } = useAuthContext();
+  const userId = user?.uid ?? null;
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
   const {
     messages,
     setMessages,
@@ -453,7 +460,21 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             </div>
           </div>
           <div className="flex-1" />
-          {messages.length > 0 ? (
+          {(import.meta.env.VITE_SHOW_ASSISTANT_DEBUG === "true" || (!realMode && import.meta.env.DEV)) && (
+            <button
+              type="button"
+              onClick={() => setShowDebugPanel(!showDebugPanel)}
+              title="Quan sát chất lượng AI"
+              className={`rounded-lg p-1.5 transition-all hover:scale-105 active:scale-95 ${
+                showDebugPanel
+                  ? "bg-indigo-500/20 text-indigo-500"
+                  : "text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+              }`}
+            >
+              <BarChart3 size={16} />
+            </button>
+          )}
+          {messages.length > 0 && !showDebugPanel ? (
             <button
               type="button"
               onClick={handleClearHistory}
@@ -473,457 +494,469 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          {messages.length === 0 ? (
-            <div className="flex flex-col gap-3">
-              <div className="rounded-xl bg-app-bg-subtle px-3.5 py-2.5 text-sm text-app-ink-soft border border-app-line/40">
-                Bạn có thể hỏi mình về việc hôm nay, tiến độ tuần này, mục tiêu chính, hoặc reflection.
-              </div>
-              <div className="flex flex-col gap-2">
-                {suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    disabled={isTyping}
-                    className="rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-3.5 py-2 text-left text-sm text-app-ink-soft transition-all duration-200 hover:bg-app-accent/15 hover:text-app-accent hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {messages.map((message) => {
-                if (message.role === "assistant" && message.status === "streaming" && !message.content.trim()) {
-                  return null;
-                }
-                return (
-                  <div
-                    key={message.id}
-                    className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
-                  >
-                    <div
-                      className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
-                        message.role === "user"
-                          ? "rounded-tr-none bg-gradient-to-tr from-emerald-500 via-emerald-600 to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.18)]"
-                          : "rounded-tl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 text-app-ink"
-                      }`}
-                    >
-                      {message.role === "user" ? (
-                        <span className="whitespace-pre-line break-words">
-                          {message.content}
-                          {message.status === "streaming" ? (
-                            <span className="ml-0.5 inline-block h-4 w-1 translate-y-0.5 animate-pulse rounded-full bg-current" />
-                          ) : null}
-                        </span>
-                      ) : (
-                        <AssistantMessageContent content={message.content} status={message.status} />
-                      )}
-                    </div>
-                    {message.role === "assistant" && message.status !== "streaming" && !message.isWelcome && (
-                      <>
-                        {message.actions && message.actions.length > 0 && (
-                          <div className="mt-2 w-full space-y-2">
-                            {message.actions.length > 1 && (
-                              <div className="flex justify-between items-center bg-app-bg-subtle/40 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-app-line/20">
-                                <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
-                                  Chuỗi hành động ({message.actions.length})
-                                </span>
-                                <button
-                                  type="button"
-                                  className="h-6 text-[10px] font-bold px-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white dark:hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95"
-                                  onClick={() => handleExecuteAllActions(message.actions || [])}
-                                >
-                                  Thực thi tất cả
-                                </button>
-                              </div>
-                            )}
-                            {message.actions.map((action) => (
-                              <AssistantActionCard
-                                key={action.id}
-                                action={action}
-                                onExecute={handleExecuteAction}
-                                onReject={handleRejectAction}
-                                status={actionStatus[action.id]?.status ?? "pending"}
-                                errorMessage={actionStatus[action.id]?.errorMessage}
-                                verified={actionStatus[action.id]?.verified}
-                                alreadyDone={actionStatus[action.id]?.alreadyDone}
-                              />
-                            ))}
-                          </div>
-                        )}
-                        <div className="mt-1 flex gap-1 pl-1">
-                          <button
-                            type="button"
-                            onClick={() => submitFeedback(message.id, "up")}
-                            aria-label="Phản hồi tốt"
-                            className={`rounded p-1 text-xs transition ${
-                              messageFeedback[message.id] === "up"
-                                ? "bg-green-100 text-green-700"
-                                : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
-                            }`}
-                            disabled={messageFeedback[message.id] === "up"}
-                          >
-                            <ThumbsUp size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveFeedbackMessageId(activeFeedbackMessageId === message.id ? null : message.id);
-                              setFeedbackReason("other");
-                              setFeedbackCorrection("");
-                            }}
-                            aria-label="Phản hồi tệ"
-                            className={`rounded p-1 text-xs transition ${
-                              messageFeedback[message.id] === "down"
-                                ? "bg-red-100 text-red-700"
-                                : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
-                            }`}
-                            disabled={messageFeedback[message.id] === "down"}
-                          >
-                            <ThumbsDown size={14} />
-                          </button>
-                        </div>
-
-                        {activeFeedbackMessageId === message.id && (
-                          <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs">
-                            <div className="font-semibold text-app-ink mb-1">Gửi phản hồi chi tiết:</div>
-                            <label className="block text-gray-600 mb-1">
-                              Lý do:
-                              <select
-                                value={feedbackReason}
-                                onChange={(e) => setFeedbackReason(normalizeFeedbackReason(e.target.value))}
-                                className="ml-1 rounded border border-gray-300 bg-white p-1 text-xs"
-                              >
-                                <option value="other">Lý do khác</option>
-                                <option value="too_long">Trả lời quá dài / rườm rà</option>
-                                <option value="wrong_action">Đề xuất sai hành động</option>
-                                <option value="wrong_context">Hiểu sai ngữ cảnh hiện tại</option>
-                                <option value="too_generic">Lời khuyên chung chung</option>
-                                <option value="unsafe">Nội dung không an toàn</option>
-                              </select>
-                            </label>
-                            <label className="block text-gray-600 mb-2">
-                              Ý kiến sửa đổi (tối đa 300 ký tự):
-                              <textarea
-                                value={feedbackCorrection}
-                                onChange={(e) => setFeedbackCorrection(e.target.value.slice(0, 300))}
-                                placeholder="Nên trả lời như thế nào..."
-                                rows={2}
-                                className="mt-1 w-full rounded border border-gray-300 bg-white p-1 text-xs resize-none"
-                              />
-                            </label>
-                            <div className="flex gap-2 justify-end">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setActiveFeedbackMessageId(null);
-                                  // Vẫn submit thumbs down nếu người dùng bấm Hủy sau khi mở form
-                                  setFeedbackReason("other");
-                                  setFeedbackCorrection("");
-                                  submitFeedback(message.id, "down");
-                                }}
-                                className="rounded px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-                              >
-                                Hủy
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  submitFeedback(message.id, "down", {
-                                    reason: feedbackReason,
-                                    correction: feedbackCorrection,
-                                  });
-                                  setActiveFeedbackMessageId(null);
-                                  setFeedbackReason("other");
-                                  setFeedbackCorrection("");
-                                }}
-                                className="rounded px-2 py-1 bg-red-600 text-white hover:bg-red-700 transition"
-                              >
-                                Gửi
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
+        {showDebugPanel ? (
+          <div className="flex-1 overflow-hidden">
+            <AssistantObservabilityPanel userId={userId} onClose={() => setShowDebugPanel(false)} />
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto p-4">
+              {messages.length === 0 ? (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-xl bg-app-bg-subtle px-3.5 py-2.5 text-sm text-app-ink-soft border border-app-line/40">
+                    Bạn có thể hỏi mình về việc hôm nay, tiến độ tuần này, mục tiêu chính, hoặc reflection.
                   </div>
-                );
-              })}
-              {pendingWorkflow &&
-                (pendingWorkflow.status === "ready_for_confirmation" ||
-                  pendingWorkflow.status === "executing" ||
-                  pendingWorkflow.status === "needs_clarification" ||
-                  pendingWorkflow.status === "failed" ||
-                  pendingWorkflow.status === "completed") && (
-                  <div className="flex justify-start">
-                    <div className="w-full max-w-[90%] rounded-2xl rounded-bl-none bg-app-bg-subtle/80 dark:bg-white/5 backdrop-blur-md border border-app-line/55 p-4 space-y-3 shadow-md">
-                      <div className="flex items-center justify-between border-b border-app-line/30 pb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            Kế hoạch:{" "}
-                            {pendingWorkflow.type === "create_goal_workflow"
-                              ? "Tạo Mục Tiêu"
-                              : pendingWorkflow.type === "create_task_workflow"
-                                ? "Thêm Task"
-                                : pendingWorkflow.type === "create_12_week_plan_workflow"
-                                  ? "Kế hoạch 12 tuần"
-                                  : pendingWorkflow.type === "weekly_review_workflow"
-                                    ? "Review Tuần"
-                                    : pendingWorkflow.type === "reflection_workflow"
-                                      ? "Suy Ngẫm/Reflection"
-                                      : "Workflow"}
-                          </span>
-                        </div>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                            pendingWorkflow.status === "ready_for_confirmation"
-                              ? "bg-amber-100 text-amber-800"
-                              : pendingWorkflow.status === "executing"
-                                ? "bg-blue-100 text-blue-800 animate-pulse"
-                                : pendingWorkflow.status === "completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : pendingWorkflow.status === "failed"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-gray-100 text-gray-800"
+                  <div className="flex flex-col gap-2">
+                    {suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        disabled={isTyping}
+                        className="rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-3.5 py-2 text-left text-sm text-app-ink-soft transition-all duration-200 hover:bg-app-accent/15 hover:text-app-accent hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {messages.map((message) => {
+                    if (message.role === "assistant" && message.status === "streaming" && !message.content.trim()) {
+                      return null;
+                    }
+                    return (
+                      <div
+                        key={message.id}
+                        className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
+                      >
+                        <div
+                          className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
+                            message.role === "user"
+                              ? "rounded-tr-none bg-gradient-to-tr from-emerald-500 via-emerald-600 to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.18)]"
+                              : "rounded-tl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 text-app-ink"
                           }`}
                         >
-                          {pendingWorkflow.status === "ready_for_confirmation"
-                            ? "Chờ xác nhận"
-                            : pendingWorkflow.status === "executing"
-                              ? "Đang thực hiện"
-                              : pendingWorkflow.status === "completed"
-                                ? "Đã hoàn thành"
-                                : pendingWorkflow.status === "failed"
-                                  ? "Thất bại"
-                                  : pendingWorkflow.status === "needs_clarification"
-                                    ? "Thiếu thông tin"
-                                    : pendingWorkflow.status}
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-app-ink-soft italic">{pendingWorkflow.summary}</p>
-
-                      {pendingWorkflow.missingFields && pendingWorkflow.missingFields.length > 0 && (
-                        <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-2.5 space-y-1">
-                          <div className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                            Thông tin còn thiếu:
-                          </div>
-                          <ul className="list-disc list-inside text-xs text-app-ink-soft pl-1 space-y-0.5">
-                            {pendingWorkflow.missingFields.map((field) => (
-                              <li key={field}>
-                                {field === "title"
-                                  ? "Tiêu đề mục tiêu"
-                                  : field === "category"
-                                    ? "Lĩnh vực (category)"
-                                    : field === "deadline"
-                                      ? "Hạn chót (deadline)"
-                                      : field === "goal"
-                                        ? "Mục tiêu liên kết"
-                                        : field}
-                              </li>
-                            ))}
-                          </ul>
+                          {message.role === "user" ? (
+                            <span className="whitespace-pre-line break-words">
+                              {message.content}
+                              {message.status === "streaming" ? (
+                                <span className="ml-0.5 inline-block h-4 w-1 translate-y-0.5 animate-pulse rounded-full bg-current" />
+                              ) : null}
+                            </span>
+                          ) : (
+                            <AssistantMessageContent content={message.content} status={message.status} />
+                          )}
                         </div>
-                      )}
-
-                      {pendingWorkflow.proposedActions && pendingWorkflow.proposedActions.length > 0 && (
-                        <div className="space-y-2">
-                          <div className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
-                            Danh sách hành động dự kiến:
-                          </div>
-                          <div className="space-y-1.5">
-                            {pendingWorkflow.proposedActions.map((action) => {
-                              const execRes = pendingWorkflow.executionResults?.find((r) => r.actionId === action.id);
-                              return (
-                                <div
-                                  key={action.id}
-                                  className="flex items-center justify-between bg-app-surface/60 dark:bg-white/5 border border-app-line/20 p-2 rounded-xl text-xs"
-                                >
-                                  <span className="text-app-ink font-medium">{action.label}</span>
-                                  {execRes ? (
-                                    <span
-                                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                        execRes.status === "success"
-                                          ? "bg-green-100 text-green-800"
-                                          : execRes.status === "alreadyDone"
-                                            ? "bg-blue-100 text-blue-800"
-                                            : "bg-red-100 text-red-800"
-                                      }`}
-                                    >
-                                      {execRes.status === "success"
-                                        ? "Đã xong"
-                                        : execRes.status === "alreadyDone"
-                                          ? "Đã làm trước đó"
-                                          : "Thất bại"}
+                        {message.role === "assistant" && message.status !== "streaming" && !message.isWelcome && (
+                          <>
+                            {message.actions && message.actions.length > 0 && (
+                              <div className="mt-2 w-full space-y-2">
+                                {message.actions.length > 1 && (
+                                  <div className="flex justify-between items-center bg-app-bg-subtle/40 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-app-line/20">
+                                    <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+                                      Chuỗi hành động ({message.actions.length})
                                     </span>
-                                  ) : (
-                                    <span className="text-[10px] text-app-ink-muted">Đang chờ</span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
+                                    <button
+                                      type="button"
+                                      className="h-6 text-[10px] font-bold px-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white dark:hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95"
+                                      onClick={() => handleExecuteAllActions(message.actions || [])}
+                                    >
+                                      Thực thi tất cả
+                                    </button>
+                                  </div>
+                                )}
+                                {message.actions.map((action) => (
+                                  <AssistantActionCard
+                                    key={action.id}
+                                    action={action}
+                                    onExecute={handleExecuteAction}
+                                    onReject={handleRejectAction}
+                                    status={actionStatus[action.id]?.status ?? "pending"}
+                                    errorMessage={actionStatus[action.id]?.errorMessage}
+                                    verified={actionStatus[action.id]?.verified}
+                                    alreadyDone={actionStatus[action.id]?.alreadyDone}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            <div className="mt-1 flex gap-1 pl-1">
+                              <button
+                                type="button"
+                                onClick={() => submitFeedback(message.id, "up")}
+                                aria-label="Phản hồi tốt"
+                                className={`rounded p-1 text-xs transition ${
+                                  messageFeedback[message.id] === "up"
+                                    ? "bg-green-100 text-green-700"
+                                    : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                                }`}
+                                disabled={messageFeedback[message.id] === "up"}
+                              >
+                                <ThumbsUp size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveFeedbackMessageId(
+                                    activeFeedbackMessageId === message.id ? null : message.id,
+                                  );
+                                  setFeedbackReason("other");
+                                  setFeedbackCorrection("");
+                                }}
+                                aria-label="Phản hồi tệ"
+                                className={`rounded p-1 text-xs transition ${
+                                  messageFeedback[message.id] === "down"
+                                    ? "bg-red-100 text-red-700"
+                                    : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                                }`}
+                                disabled={messageFeedback[message.id] === "down"}
+                              >
+                                <ThumbsDown size={14} />
+                              </button>
+                            </div>
 
-                      {pendingWorkflow.status === "ready_for_confirmation" && (
-                        <div className="flex gap-2 justify-end border-t border-app-line/30 pt-2">
-                          <button
-                            type="button"
-                            className="h-7 text-xs font-semibold px-3 rounded-lg border border-app-line bg-app-surface hover:bg-app-bg text-app-ink-soft transition-all cursor-pointer active:scale-95"
-                            onClick={() => send("Hủy")}
-                          >
-                            Hủy bỏ
-                          </button>
-                          <button
-                            type="button"
-                            className="h-7 text-xs font-semibold px-3 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-2xs hover:shadow-[0_0_8px_rgba(16,185,129,0.2)] transition-all cursor-pointer active:scale-95"
-                            onClick={() => send("Đồng ý")}
-                          >
-                            Xác nhận thực hiện
-                          </button>
+                            {activeFeedbackMessageId === message.id && (
+                              <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs">
+                                <div className="font-semibold text-app-ink mb-1">Gửi phản hồi chi tiết:</div>
+                                <label className="block text-gray-600 mb-1">
+                                  Lý do:
+                                  <select
+                                    value={feedbackReason}
+                                    onChange={(e) => setFeedbackReason(normalizeFeedbackReason(e.target.value))}
+                                    className="ml-1 rounded border border-gray-300 bg-white p-1 text-xs"
+                                  >
+                                    <option value="other">Lý do khác</option>
+                                    <option value="too_long">Trả lời quá dài / rườm rà</option>
+                                    <option value="wrong_action">Đề xuất sai hành động</option>
+                                    <option value="wrong_context">Hiểu sai ngữ cảnh hiện tại</option>
+                                    <option value="too_generic">Lời khuyên chung chung</option>
+                                    <option value="unsafe">Nội dung không an toàn</option>
+                                  </select>
+                                </label>
+                                <label className="block text-gray-600 mb-2">
+                                  Ý kiến sửa đổi (tối đa 300 ký tự):
+                                  <textarea
+                                    value={feedbackCorrection}
+                                    onChange={(e) => setFeedbackCorrection(e.target.value.slice(0, 300))}
+                                    placeholder="Nên trả lời như thế nào..."
+                                    rows={2}
+                                    className="mt-1 w-full rounded border border-gray-300 bg-white p-1 text-xs resize-none"
+                                  />
+                                </label>
+                                <div className="flex gap-2 justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveFeedbackMessageId(null);
+                                      // Vẫn submit thumbs down nếu người dùng bấm Hủy sau khi mở form
+                                      setFeedbackReason("other");
+                                      setFeedbackCorrection("");
+                                      submitFeedback(message.id, "down");
+                                    }}
+                                    className="rounded px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                                  >
+                                    Hủy
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      submitFeedback(message.id, "down", {
+                                        reason: feedbackReason,
+                                        correction: feedbackCorrection,
+                                      });
+                                      setActiveFeedbackMessageId(null);
+                                      setFeedbackReason("other");
+                                      setFeedbackCorrection("");
+                                    }}
+                                    className="rounded px-2 py-1 bg-red-600 text-white hover:bg-red-700 transition"
+                                  >
+                                    Gửi
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {pendingWorkflow &&
+                    (pendingWorkflow.status === "ready_for_confirmation" ||
+                      pendingWorkflow.status === "executing" ||
+                      pendingWorkflow.status === "needs_clarification" ||
+                      pendingWorkflow.status === "failed" ||
+                      pendingWorkflow.status === "completed") && (
+                      <div className="flex justify-start">
+                        <div className="w-full max-w-[90%] rounded-2xl rounded-bl-none bg-app-bg-subtle/80 dark:bg-white/5 backdrop-blur-md border border-app-line/55 p-4 space-y-3 shadow-md">
+                          <div className="flex items-center justify-between border-b border-app-line/30 pb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Kế hoạch:{" "}
+                                {pendingWorkflow.type === "create_goal_workflow"
+                                  ? "Tạo Mục Tiêu"
+                                  : pendingWorkflow.type === "create_task_workflow"
+                                    ? "Thêm Task"
+                                    : pendingWorkflow.type === "create_12_week_plan_workflow"
+                                      ? "Kế hoạch 12 tuần"
+                                      : pendingWorkflow.type === "weekly_review_workflow"
+                                        ? "Review Tuần"
+                                        : pendingWorkflow.type === "reflection_workflow"
+                                          ? "Suy Ngẫm/Reflection"
+                                          : "Workflow"}
+                              </span>
+                            </div>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                                pendingWorkflow.status === "ready_for_confirmation"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : pendingWorkflow.status === "executing"
+                                    ? "bg-blue-100 text-blue-800 animate-pulse"
+                                    : pendingWorkflow.status === "completed"
+                                      ? "bg-green-100 text-green-800"
+                                      : pendingWorkflow.status === "failed"
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {pendingWorkflow.status === "ready_for_confirmation"
+                                ? "Chờ xác nhận"
+                                : pendingWorkflow.status === "executing"
+                                  ? "Đang thực hiện"
+                                  : pendingWorkflow.status === "completed"
+                                    ? "Đã hoàn thành"
+                                    : pendingWorkflow.status === "failed"
+                                      ? "Thất bại"
+                                      : pendingWorkflow.status === "needs_clarification"
+                                        ? "Thiếu thông tin"
+                                        : pendingWorkflow.status}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-app-ink-soft italic">{pendingWorkflow.summary}</p>
+
+                          {pendingWorkflow.missingFields && pendingWorkflow.missingFields.length > 0 && (
+                            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-2.5 space-y-1">
+                              <div className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                                Thông tin còn thiếu:
+                              </div>
+                              <ul className="list-disc list-inside text-xs text-app-ink-soft pl-1 space-y-0.5">
+                                {pendingWorkflow.missingFields.map((field) => (
+                                  <li key={field}>
+                                    {field === "title"
+                                      ? "Tiêu đề mục tiêu"
+                                      : field === "category"
+                                        ? "Lĩnh vực (category)"
+                                        : field === "deadline"
+                                          ? "Hạn chót (deadline)"
+                                          : field === "goal"
+                                            ? "Mục tiêu liên kết"
+                                            : field}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {pendingWorkflow.proposedActions && pendingWorkflow.proposedActions.length > 0 && (
+                            <div className="space-y-2">
+                              <div className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+                                Danh sách hành động dự kiến:
+                              </div>
+                              <div className="space-y-1.5">
+                                {pendingWorkflow.proposedActions.map((action) => {
+                                  const execRes = pendingWorkflow.executionResults?.find(
+                                    (r) => r.actionId === action.id,
+                                  );
+                                  return (
+                                    <div
+                                      key={action.id}
+                                      className="flex items-center justify-between bg-app-surface/60 dark:bg-white/5 border border-app-line/20 p-2 rounded-xl text-xs"
+                                    >
+                                      <span className="text-app-ink font-medium">{action.label}</span>
+                                      {execRes ? (
+                                        <span
+                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                            execRes.status === "success"
+                                              ? "bg-green-100 text-green-800"
+                                              : execRes.status === "alreadyDone"
+                                                ? "bg-blue-100 text-blue-800"
+                                                : "bg-red-100 text-red-800"
+                                          }`}
+                                        >
+                                          {execRes.status === "success"
+                                            ? "Đã xong"
+                                            : execRes.status === "alreadyDone"
+                                              ? "Đã làm trước đó"
+                                              : "Thất bại"}
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] text-app-ink-muted">Đang chờ</span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {pendingWorkflow.status === "ready_for_confirmation" && (
+                            <div className="flex gap-2 justify-end border-t border-app-line/30 pt-2">
+                              <button
+                                type="button"
+                                className="h-7 text-xs font-semibold px-3 rounded-lg border border-app-line bg-app-surface hover:bg-app-bg text-app-ink-soft transition-all cursor-pointer active:scale-95"
+                                onClick={() => send("Hủy")}
+                              >
+                                Hủy bỏ
+                              </button>
+                              <button
+                                type="button"
+                                className="h-7 text-xs font-semibold px-3 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-2xs hover:shadow-[0_0_8px_rgba(16,185,129,0.2)] transition-all cursor-pointer active:scale-95"
+                                onClick={() => send("Đồng ý")}
+                              >
+                                Xác nhận thực hiện
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                    )}
+                  {isTyping ? (
+                    <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
+                      <div className="max-w-[80%] rounded-2xl rounded-bl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
+                            style={{ animationDelay: "-0.32s" }}
+                          />
+                          <span
+                            className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
+                            style={{ animationDelay: "-0.16s" }}
+                          />
+                          <span className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500" />
+                        </div>
+                      </div>
                     </div>
+                  ) : null}
+                  {error && !isTyping ? (
+                    <div className="flex justify-start">
+                      <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-red-50 px-3 py-2 text-sm text-red-700">
+                        <p>{error.message}</p>
+                        <button
+                          type="button"
+                          onClick={retry}
+                          className="mt-1 text-xs font-medium underline hover:text-red-800"
+                        >
+                          Thử lại
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+
+            {renderSyncStatus()}
+
+            <div className="border-t border-app-line/45 dark:border-white/10 p-3 bg-gradient-to-t from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
+              <div className="relative">
+                {isShowingCommands && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-xl border border-app-line/80 bg-app-surface/95 backdrop-blur-xl shadow-app-xl z-10"
+                  >
+                    {filteredCommands.map((cmd, idx) => (
+                      <button
+                        key={cmd.command}
+                        type="button"
+                        onClick={() => handleSelectCommand(cmd)}
+                        onMouseEnter={() => setSelectedCommandIndex(idx)}
+                        className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors ${
+                          idx === selectedCommandIndex
+                            ? "bg-app-accent/10 text-app-accent font-medium"
+                            : "hover:bg-app-bg-subtle"
+                        }`}
+                      >
+                        <span className="font-mono text-app-accent text-xs bg-app-accent-soft px-1.5 py-0.5 rounded">
+                          {cmd.command}
+                        </span>
+                        <span className="text-app-ink-soft flex-1">{cmd.description}</span>
+                      </button>
+                    ))}
                   </div>
                 )}
-              {isTyping ? (
-                <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
-                  <div className="max-w-[80%] rounded-2xl rounded-bl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
-                        style={{ animationDelay: "-0.32s" }}
-                      />
-                      <span
-                        className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
-                        style={{ animationDelay: "-0.16s" }}
-                      />
-                      <span className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500" />
-                    </div>
+                {isSpeechListening && (
+                  <div className="px-1 py-1 text-xs text-app-accent italic animate-pulse font-medium">
+                    {interimTranscript ? `Đang nghe: ${interimTranscript}...` : "Đang lắng nghe..."}
                   </div>
-                </div>
-              ) : null}
-              {error && !isTyping ? (
-                <div className="flex justify-start">
-                  <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-red-50 px-3 py-2 text-sm text-red-700">
-                    <p>{error.message}</p>
+                )}
+                {speechError && <div className="px-1 py-1 text-xs text-red-500 font-medium">{speechError}</div>}
+                <div className="flex items-end gap-2 p-1.5 bg-app-bg-subtle/45 dark:bg-black/20 border border-app-line/50 dark:border-white/10 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.08)] transition-all duration-300">
+                  <textarea
+                    ref={textareaRef}
+                    value={inputText}
+                    onChange={handleChange}
+                    onKeyDown={handleTextareaKeyDown}
+                    placeholder={isTyping ? "Đợi trợ lý xong rồi gõ nhé..." : "Nhập tin nhắn..."}
+                    rows={1}
+                    disabled={isTyping}
+                    className="flex-1 resize-none bg-transparent border-0 px-2 py-1 text-sm focus:outline-none focus:ring-0 text-app-ink placeholder:text-app-ink-muted disabled:cursor-not-allowed"
+                    style={{ maxHeight: "72px", minHeight: "36px" }}
+                  />
+                  {!isTyping && (
                     <button
                       type="button"
-                      onClick={retry}
-                      className="mt-1 text-xs font-medium underline hover:text-red-800"
+                      disabled={!isSpeechSupported}
+                      onClick={isSpeechListening ? stopSpeechListening : startSpeechListening}
+                      className={`rounded-lg p-2 transition-all hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40 ${
+                        isSpeechListening
+                          ? "bg-red-100 text-red-700 animate-pulse hover:bg-red-200"
+                          : "bg-app-bg-subtle text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                      }`}
+                      title={
+                        !isSpeechSupported
+                          ? "Trình duyệt này không hỗ trợ nhập giọng nói"
+                          : isSpeechListening
+                            ? "Dừng nghe giọng nói"
+                            : "Nhập bằng giọng nói (tiếng Việt)"
+                      }
+                      aria-label={
+                        !isSpeechSupported
+                          ? "Trình duyệt không hỗ trợ"
+                          : isSpeechListening
+                            ? "Dừng nghe"
+                            : "Nhập bằng giọng nói"
+                      }
                     >
-                      Thử lại
+                      {isSpeechListening ? <MicOff size={18} /> : <Mic size={18} />}
                     </button>
-                  </div>
+                  )}
+                  {isTyping ? (
+                    <button
+                      type="button"
+                      onClick={stopGeneration}
+                      className="rounded-lg bg-red-50 dark:bg-red-950/30 p-2 text-red-700 dark:text-red-400 shadow-sm transition-all hover:scale-110 active:scale-90 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      aria-label="Dừng"
+                    >
+                      <Square size={18} />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={!inputText.trim()}
+                      className="rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 p-2 text-white shadow-sm transition-all hover:scale-110 active:scale-90 hover:shadow-[0_0_12px_rgba(16,185,129,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Gửi"
+                    >
+                      <Send size={18} />
+                    </button>
+                  )}
                 </div>
-              ) : null}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </div>
-
-        {renderSyncStatus()}
-
-        <div className="border-t border-app-line/45 dark:border-white/10 p-3 bg-gradient-to-t from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
-          <div className="relative">
-            {isShowingCommands && (
-              <div
-                ref={dropdownRef}
-                className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-xl border border-app-line/80 bg-app-surface/95 backdrop-blur-xl shadow-app-xl z-10"
-              >
-                {filteredCommands.map((cmd, idx) => (
-                  <button
-                    key={cmd.command}
-                    type="button"
-                    onClick={() => handleSelectCommand(cmd)}
-                    onMouseEnter={() => setSelectedCommandIndex(idx)}
-                    className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors ${
-                      idx === selectedCommandIndex
-                        ? "bg-app-accent/10 text-app-accent font-medium"
-                        : "hover:bg-app-bg-subtle"
-                    }`}
-                  >
-                    <span className="font-mono text-app-accent text-xs bg-app-accent-soft px-1.5 py-0.5 rounded">
-                      {cmd.command}
-                    </span>
-                    <span className="text-app-ink-soft flex-1">{cmd.description}</span>
-                  </button>
-                ))}
               </div>
-            )}
-            {isSpeechListening && (
-              <div className="px-1 py-1 text-xs text-app-accent italic animate-pulse font-medium">
-                {interimTranscript ? `Đang nghe: ${interimTranscript}...` : "Đang lắng nghe..."}
-              </div>
-            )}
-            {speechError && <div className="px-1 py-1 text-xs text-red-500 font-medium">{speechError}</div>}
-            <div className="flex items-end gap-2 p-1.5 bg-app-bg-subtle/45 dark:bg-black/20 border border-app-line/50 dark:border-white/10 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.08)] transition-all duration-300">
-              <textarea
-                ref={textareaRef}
-                value={inputText}
-                onChange={handleChange}
-                onKeyDown={handleTextareaKeyDown}
-                placeholder={isTyping ? "Đợi trợ lý xong rồi gõ nhé..." : "Nhập tin nhắn..."}
-                rows={1}
-                disabled={isTyping}
-                className="flex-1 resize-none bg-transparent border-0 px-2 py-1 text-sm focus:outline-none focus:ring-0 text-app-ink placeholder:text-app-ink-muted disabled:cursor-not-allowed"
-                style={{ maxHeight: "72px", minHeight: "36px" }}
-              />
-              {!isTyping && (
-                <button
-                  type="button"
-                  disabled={!isSpeechSupported}
-                  onClick={isSpeechListening ? stopSpeechListening : startSpeechListening}
-                  className={`rounded-lg p-2 transition-all hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40 ${
-                    isSpeechListening
-                      ? "bg-red-100 text-red-700 animate-pulse hover:bg-red-200"
-                      : "bg-app-bg-subtle text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
-                  }`}
-                  title={
-                    !isSpeechSupported
-                      ? "Trình duyệt này không hỗ trợ nhập giọng nói"
-                      : isSpeechListening
-                        ? "Dừng nghe giọng nói"
-                        : "Nhập bằng giọng nói (tiếng Việt)"
-                  }
-                  aria-label={
-                    !isSpeechSupported
-                      ? "Trình duyệt không hỗ trợ"
-                      : isSpeechListening
-                        ? "Dừng nghe"
-                        : "Nhập bằng giọng nói"
-                  }
-                >
-                  {isSpeechListening ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
-              )}
-              {isTyping ? (
-                <button
-                  type="button"
-                  onClick={stopGeneration}
-                  className="rounded-lg bg-red-50 dark:bg-red-950/30 p-2 text-red-700 dark:text-red-400 shadow-sm transition-all hover:scale-110 active:scale-90 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                  aria-label="Dừng"
-                >
-                  <Square size={18} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={!inputText.trim()}
-                  className="rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 p-2 text-white shadow-sm transition-all hover:scale-110 active:scale-90 hover:shadow-[0_0_12px_rgba(16,185,129,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Gửi"
-                >
-                  <Send size={18} />
-                </button>
-              )}
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </motion.div>
 
       <AlertDialog open={isClearHistoryOpen} onOpenChange={setIsClearHistoryOpen}>

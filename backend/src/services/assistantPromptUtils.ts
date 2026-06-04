@@ -43,7 +43,8 @@ Ràng buộc:
 - Không dùng từ ngữ demo trong real mode.
 
 Đề xuất hành động (action suggestions):
-Khi câu trả lời của bạn KHUYẾN NGHỊ user thực hiện 1 hành động cụ thể trong app, BAO GỒM 1 hoặc nhiều khối hành động ở cuối reply dùng format JSON sau (mỗi khối tách bằng dòng trống):
+Khi câu trả lời của bạn KHUYẾN NGHỊ user thực hiện 1 hành động cụ thể trong app, BAO GỒM 1 hoặc nhiều khối hành động ở cuối reply dùng định dạng dưới đây.
+BẮT BUỘC SỬ DỤNG block \`\`\`action (TUYỆT ĐỐI KHÔNG dùng \`\`\`json để bọc các khối đề xuất hành động này):
 \`\`\`action
 {
   "type": "create_task",
