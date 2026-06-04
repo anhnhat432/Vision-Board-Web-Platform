@@ -31,12 +31,14 @@ export function removeAccents(value: string): string {
 
 export function tokenize(text: string): string[] {
   return removeAccents(text.toLowerCase())
-    .split(/[\s,.:;!?"'()\-\[\]/]+/)
+    .split(/[\s,.:;!?"'()\-[\]/]+/)
     .filter((token) => token.length > 1);
 }
 
 function boundedText(value: unknown, maxLength: number): string {
-  return redactSensitive(String(value ?? "")).trim().slice(0, maxLength);
+  return redactSensitive(String(value ?? ""))
+    .trim()
+    .slice(0, maxLength);
 }
 
 function calculateGoalProgress(goal: Goal): number {

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as storage from "@/app/utils/storage";
 import type { Goal, Reflection, UserData } from "@/app/utils/storage-types";
-import * as assistantMemoryModule from "../assistantMemory";
 import type { AssistantMemory } from "../assistantMemory";
+import * as assistantMemoryModule from "../assistantMemory";
 import { retrieveAssistantKnowledge } from "../assistantRetrieval";
 
 vi.mock("@/app/utils/storage", () => ({
@@ -227,8 +227,7 @@ describe("Assistant Retrieval Suite", () => {
         reflections: [
           createMockReflection({
             title: "Thiet lap api-key",
-            content:
-              "API key cua toi la api_key: AIzaSyD-1234567890-abcdefgh va mat khau la mySecretPassword123",
+            content: "API key cua toi la api_key: AIzaSyD-1234567890-abcdefgh va mat khau la mySecretPassword123",
             date: "2026-06-04T00:00:00.000Z",
           }),
         ],

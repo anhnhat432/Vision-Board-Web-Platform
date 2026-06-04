@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  type AssistantClarificationCandidate,
   buildClarificationQuestion,
   clearPendingAssistantClarification,
   createTaskSelectionClarification,
@@ -8,7 +9,6 @@ import {
   readStoredPendingAssistantClarification,
   resolveClarificationReply,
   setPendingAssistantClarification,
-  type AssistantClarificationCandidate,
 } from "../assistantConversationState";
 
 const NOW = new Date("2026-06-04T10:00:00.000Z");

@@ -4,7 +4,6 @@ import {
   Mic,
   MicOff,
   Send,
-  Sparkles,
   Square,
   ThumbsDown,
   ThumbsUp,
@@ -37,13 +36,13 @@ import {
 import { AssistantActionCard } from "./AssistantActionCard";
 import { AssistantMessageContent } from "./AssistantMessageContent";
 import { executeAction } from "./executeAction";
+import { OwlIcon } from "./OwlIcon";
 import type { AssistantAction } from "./parseActions";
 import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
 import type { FeedbackReason } from "./types";
 import { useAssistant } from "./useAssistant";
-import { useSpeechToText } from "./useSpeechToText";
-import { OwlIcon } from "./OwlIcon";
 import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
+import { useSpeechToText } from "./useSpeechToText";
 
 interface AssistantPanelProps {
   open: boolean;
@@ -77,6 +76,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     clearHistory,
     submitFeedback,
     messageFeedback,
+    pendingWorkflow,
   } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
   const { blinking } = useOwlIdleAnimation({ pause: !open });
@@ -112,7 +112,15 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [actionStatus, setActionStatus] = useState<
-    Record<string, { status: "pending" | "executing" | "done" | "error" | "rejected"; errorMessage?: string; verified?: boolean; alreadyDone?: boolean }>
+    Record<
+      string,
+      {
+        status: "pending" | "executing" | "done" | "error" | "rejected";
+        errorMessage?: string;
+        verified?: boolean;
+        alreadyDone?: boolean;
+      }
+    >
   >({});
   const syncState = useOptionalAutoCloudSyncContext();
   const realMode = isRealMode();
@@ -203,6 +211,43 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
   const handleRejectAction = useCallback((action: AssistantAction) => {
     setActionStatus((prev) => ({ ...prev, [action.id]: { status: "rejected" } }));
+  }, []);
+
+  const handleExecuteAllActions = useCallback(async (actionsToRun: AssistantAction[]) => {
+    for (const action of actionsToRun) {
+      let shouldSkip = false;
+      setActionStatus((prev) => {
+        const status = prev[action.id]?.status;
+        if (status === "done" || status === "rejected") {
+          shouldSkip = true;
+        }
+        return prev;
+      });
+
+      if (shouldSkip) continue;
+
+      setActionStatus((prev) => ({ ...prev, [action.id]: { status: "executing" } }));
+      try {
+        const result = await executeAction(action);
+        if (result.success) {
+          setActionStatus((prev) => ({
+            ...prev,
+            [action.id]: {
+              status: "done",
+              verified: result.verified,
+              alreadyDone: result.alreadyDone,
+            },
+          }));
+        } else {
+          setActionStatus((prev) => ({ ...prev, [action.id]: { status: "error", errorMessage: result.message } }));
+          break;
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        setActionStatus((prev) => ({ ...prev, [action.id]: { status: "error", errorMessage } }));
+        break;
+      }
+    }
   }, []);
 
   const resizeTextarea = useCallback(() => {
@@ -394,13 +439,17 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             <OwlIcon size={18} blinking={blinking} className="text-white" />
           </span>
           <div className="flex flex-col">
-            <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">Trợ lý Cú AI</span>
+            <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
+              Trợ lý Cú AI
+            </span>
             <div className="flex items-center gap-1">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-[ping_1.8s_ease-in-out_infinite] absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]"></span>
               </span>
-              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Trực tuyến</span>
+              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                Trực tuyến
+              </span>
             </div>
           </div>
           <div className="flex-1" />
@@ -455,140 +504,292 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     key={message.id}
                     className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
                   >
-                  <div
-                    className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
-                      message.role === "user"
-                        ? "rounded-tr-none bg-gradient-to-tr from-emerald-500 via-emerald-600 to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.18)]"
-                        : "rounded-tl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 text-app-ink"
-                    }`}
-                  >
-                    {message.role === "user" ? (
-                      <span className="whitespace-pre-line break-words">
-                        {message.content}
-                        {message.status === "streaming" ? (
-                          <span className="ml-0.5 inline-block h-4 w-1 translate-y-0.5 animate-pulse rounded-full bg-current" />
-                        ) : null}
-                      </span>
-                    ) : (
-                      <AssistantMessageContent content={message.content} status={message.status} />
+                    <div
+                      className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
+                        message.role === "user"
+                          ? "rounded-tr-none bg-gradient-to-tr from-emerald-500 via-emerald-600 to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.18)]"
+                          : "rounded-tl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 text-app-ink"
+                      }`}
+                    >
+                      {message.role === "user" ? (
+                        <span className="whitespace-pre-line break-words">
+                          {message.content}
+                          {message.status === "streaming" ? (
+                            <span className="ml-0.5 inline-block h-4 w-1 translate-y-0.5 animate-pulse rounded-full bg-current" />
+                          ) : null}
+                        </span>
+                      ) : (
+                        <AssistantMessageContent content={message.content} status={message.status} />
+                      )}
+                    </div>
+                    {message.role === "assistant" && message.status !== "streaming" && !message.isWelcome && (
+                      <>
+                        {message.actions && message.actions.length > 0 && (
+                          <div className="mt-2 w-full space-y-2">
+                            {message.actions.length > 1 && (
+                              <div className="flex justify-between items-center bg-app-bg-subtle/40 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-app-line/20">
+                                <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+                                  Chuỗi hành động ({message.actions.length})
+                                </span>
+                                <button
+                                  type="button"
+                                  className="h-6 text-[10px] font-bold px-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white dark:hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95"
+                                  onClick={() => handleExecuteAllActions(message.actions || [])}
+                                >
+                                  Thực thi tất cả
+                                </button>
+                              </div>
+                            )}
+                            {message.actions.map((action) => (
+                              <AssistantActionCard
+                                key={action.id}
+                                action={action}
+                                onExecute={handleExecuteAction}
+                                onReject={handleRejectAction}
+                                status={actionStatus[action.id]?.status ?? "pending"}
+                                errorMessage={actionStatus[action.id]?.errorMessage}
+                                verified={actionStatus[action.id]?.verified}
+                                alreadyDone={actionStatus[action.id]?.alreadyDone}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <div className="mt-1 flex gap-1 pl-1">
+                          <button
+                            type="button"
+                            onClick={() => submitFeedback(message.id, "up")}
+                            aria-label="Phản hồi tốt"
+                            className={`rounded p-1 text-xs transition ${
+                              messageFeedback[message.id] === "up"
+                                ? "bg-green-100 text-green-700"
+                                : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                            }`}
+                            disabled={messageFeedback[message.id] === "up"}
+                          >
+                            <ThumbsUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveFeedbackMessageId(activeFeedbackMessageId === message.id ? null : message.id);
+                              setFeedbackReason("other");
+                              setFeedbackCorrection("");
+                            }}
+                            aria-label="Phản hồi tệ"
+                            className={`rounded p-1 text-xs transition ${
+                              messageFeedback[message.id] === "down"
+                                ? "bg-red-100 text-red-700"
+                                : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                            }`}
+                            disabled={messageFeedback[message.id] === "down"}
+                          >
+                            <ThumbsDown size={14} />
+                          </button>
+                        </div>
+
+                        {activeFeedbackMessageId === message.id && (
+                          <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs">
+                            <div className="font-semibold text-app-ink mb-1">Gửi phản hồi chi tiết:</div>
+                            <label className="block text-gray-600 mb-1">
+                              Lý do:
+                              <select
+                                value={feedbackReason}
+                                onChange={(e) => setFeedbackReason(normalizeFeedbackReason(e.target.value))}
+                                className="ml-1 rounded border border-gray-300 bg-white p-1 text-xs"
+                              >
+                                <option value="other">Lý do khác</option>
+                                <option value="too_long">Trả lời quá dài / rườm rà</option>
+                                <option value="wrong_action">Đề xuất sai hành động</option>
+                                <option value="wrong_context">Hiểu sai ngữ cảnh hiện tại</option>
+                                <option value="too_generic">Lời khuyên chung chung</option>
+                                <option value="unsafe">Nội dung không an toàn</option>
+                              </select>
+                            </label>
+                            <label className="block text-gray-600 mb-2">
+                              Ý kiến sửa đổi (tối đa 300 ký tự):
+                              <textarea
+                                value={feedbackCorrection}
+                                onChange={(e) => setFeedbackCorrection(e.target.value.slice(0, 300))}
+                                placeholder="Nên trả lời như thế nào..."
+                                rows={2}
+                                className="mt-1 w-full rounded border border-gray-300 bg-white p-1 text-xs resize-none"
+                              />
+                            </label>
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveFeedbackMessageId(null);
+                                  // Vẫn submit thumbs down nếu người dùng bấm Hủy sau khi mở form
+                                  setFeedbackReason("other");
+                                  setFeedbackCorrection("");
+                                  submitFeedback(message.id, "down");
+                                }}
+                                className="rounded px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                              >
+                                Hủy
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  submitFeedback(message.id, "down", {
+                                    reason: feedbackReason,
+                                    correction: feedbackCorrection,
+                                  });
+                                  setActiveFeedbackMessageId(null);
+                                  setFeedbackReason("other");
+                                  setFeedbackCorrection("");
+                                }}
+                                className="rounded px-2 py-1 bg-red-600 text-white hover:bg-red-700 transition"
+                              >
+                                Gửi
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
-                  {message.role === "assistant" && message.status !== "streaming" && !message.isWelcome && (
-                    <>
-                      {message.actions && message.actions.length > 0 && (
-                        <div className="mt-2 w-full">
-                          {message.actions.map((action) => (
-                            <AssistantActionCard
-                              key={action.id}
-                              action={action}
-                              onExecute={handleExecuteAction}
-                              onReject={handleRejectAction}
-                              status={actionStatus[action.id]?.status ?? "pending"}
-                              errorMessage={actionStatus[action.id]?.errorMessage}
-                              verified={actionStatus[action.id]?.verified}
-                              alreadyDone={actionStatus[action.id]?.alreadyDone}
-                            />
-                          ))}
+                );
+              })}
+              {pendingWorkflow &&
+                (pendingWorkflow.status === "ready_for_confirmation" ||
+                  pendingWorkflow.status === "executing" ||
+                  pendingWorkflow.status === "needs_clarification" ||
+                  pendingWorkflow.status === "failed" ||
+                  pendingWorkflow.status === "completed") && (
+                  <div className="flex justify-start">
+                    <div className="w-full max-w-[90%] rounded-2xl rounded-bl-none bg-app-bg-subtle/80 dark:bg-white/5 backdrop-blur-md border border-app-line/55 p-4 space-y-3 shadow-md">
+                      <div className="flex items-center justify-between border-b border-app-line/30 pb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Kế hoạch:{" "}
+                            {pendingWorkflow.type === "create_goal_workflow"
+                              ? "Tạo Mục Tiêu"
+                              : pendingWorkflow.type === "create_task_workflow"
+                                ? "Thêm Task"
+                                : pendingWorkflow.type === "create_12_week_plan_workflow"
+                                  ? "Kế hoạch 12 tuần"
+                                  : pendingWorkflow.type === "weekly_review_workflow"
+                                    ? "Review Tuần"
+                                    : pendingWorkflow.type === "reflection_workflow"
+                                      ? "Suy Ngẫm/Reflection"
+                                      : "Workflow"}
+                          </span>
                         </div>
-                      )}
-                      <div className="mt-1 flex gap-1 pl-1">
-                        <button
-                          type="button"
-                          onClick={() => submitFeedback(message.id, "up")}
-                          aria-label="Phản hồi tốt"
-                          className={`rounded p-1 text-xs transition ${
-                            messageFeedback[message.id] === "up"
-                              ? "bg-green-100 text-green-700"
-                              : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                            pendingWorkflow.status === "ready_for_confirmation"
+                              ? "bg-amber-100 text-amber-800"
+                              : pendingWorkflow.status === "executing"
+                                ? "bg-blue-100 text-blue-800 animate-pulse"
+                                : pendingWorkflow.status === "completed"
+                                  ? "bg-green-100 text-green-800"
+                                  : pendingWorkflow.status === "failed"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-gray-100 text-gray-800"
                           }`}
-                          disabled={messageFeedback[message.id] === "up"}
                         >
-                          <ThumbsUp size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveFeedbackMessageId(activeFeedbackMessageId === message.id ? null : message.id);
-                            setFeedbackReason("other");
-                            setFeedbackCorrection("");
-                          }}
-                          aria-label="Phản hồi tệ"
-                          className={`rounded p-1 text-xs transition ${
-                            messageFeedback[message.id] === "down"
-                              ? "bg-red-100 text-red-700"
-                              : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
-                          }`}
-                          disabled={messageFeedback[message.id] === "down"}
-                        >
-                          <ThumbsDown size={14} />
-                        </button>
+                          {pendingWorkflow.status === "ready_for_confirmation"
+                            ? "Chờ xác nhận"
+                            : pendingWorkflow.status === "executing"
+                              ? "Đang thực hiện"
+                              : pendingWorkflow.status === "completed"
+                                ? "Đã hoàn thành"
+                                : pendingWorkflow.status === "failed"
+                                  ? "Thất bại"
+                                  : pendingWorkflow.status === "needs_clarification"
+                                    ? "Thiếu thông tin"
+                                    : pendingWorkflow.status}
+                        </span>
                       </div>
 
-                      {activeFeedbackMessageId === message.id && (
-                        <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs">
-                          <div className="font-semibold text-app-ink mb-1">Gửi phản hồi chi tiết:</div>
-                          <label className="block text-gray-600 mb-1">
-                            Lý do:
-                            <select
-                              value={feedbackReason}
-                              onChange={(e) => setFeedbackReason(normalizeFeedbackReason(e.target.value))}
-                              className="ml-1 rounded border border-gray-300 bg-white p-1 text-xs"
-                            >
-                              <option value="other">Lý do khác</option>
-                              <option value="too_long">Trả lời quá dài / rườm rà</option>
-                              <option value="wrong_action">Đề xuất sai hành động</option>
-                              <option value="wrong_context">Hiểu sai ngữ cảnh hiện tại</option>
-                              <option value="too_generic">Lời khuyên chung chung</option>
-                              <option value="unsafe">Nội dung không an toàn</option>
-                            </select>
-                          </label>
-                          <label className="block text-gray-600 mb-2">
-                            Ý kiến sửa đổi (tối đa 300 ký tự):
-                            <textarea
-                              value={feedbackCorrection}
-                              onChange={(e) => setFeedbackCorrection(e.target.value.slice(0, 300))}
-                              placeholder="Nên trả lời như thế nào..."
-                              rows={2}
-                              className="mt-1 w-full rounded border border-gray-300 bg-white p-1 text-xs resize-none"
-                            />
-                          </label>
-                          <div className="flex gap-2 justify-end">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveFeedbackMessageId(null);
-                                // Vẫn submit thumbs down nếu người dùng bấm Hủy sau khi mở form
-                                setFeedbackReason("other");
-                                setFeedbackCorrection("");
-                                submitFeedback(message.id, "down");
-                              }}
-                              className="rounded px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-                            >
-                              Hủy
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                submitFeedback(message.id, "down", {
-                                  reason: feedbackReason,
-                                  correction: feedbackCorrection,
-                                });
-                                setActiveFeedbackMessageId(null);
-                                setFeedbackReason("other");
-                                setFeedbackCorrection("");
-                              }}
-                              className="rounded px-2 py-1 bg-red-600 text-white hover:bg-red-700 transition"
-                            >
-                              Gửi
-                            </button>
+                      <p className="text-xs text-app-ink-soft italic">{pendingWorkflow.summary}</p>
+
+                      {pendingWorkflow.missingFields && pendingWorkflow.missingFields.length > 0 && (
+                        <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-2.5 space-y-1">
+                          <div className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                            Thông tin còn thiếu:
+                          </div>
+                          <ul className="list-disc list-inside text-xs text-app-ink-soft pl-1 space-y-0.5">
+                            {pendingWorkflow.missingFields.map((field) => (
+                              <li key={field}>
+                                {field === "title"
+                                  ? "Tiêu đề mục tiêu"
+                                  : field === "category"
+                                    ? "Lĩnh vực (category)"
+                                    : field === "deadline"
+                                      ? "Hạn chót (deadline)"
+                                      : field === "goal"
+                                        ? "Mục tiêu liên kết"
+                                        : field}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {pendingWorkflow.proposedActions && pendingWorkflow.proposedActions.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+                            Danh sách hành động dự kiến:
+                          </div>
+                          <div className="space-y-1.5">
+                            {pendingWorkflow.proposedActions.map((action) => {
+                              const execRes = pendingWorkflow.executionResults?.find((r) => r.actionId === action.id);
+                              return (
+                                <div
+                                  key={action.id}
+                                  className="flex items-center justify-between bg-app-surface/60 dark:bg-white/5 border border-app-line/20 p-2 rounded-xl text-xs"
+                                >
+                                  <span className="text-app-ink font-medium">{action.label}</span>
+                                  {execRes ? (
+                                    <span
+                                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                        execRes.status === "success"
+                                          ? "bg-green-100 text-green-800"
+                                          : execRes.status === "alreadyDone"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : "bg-red-100 text-red-800"
+                                      }`}
+                                    >
+                                      {execRes.status === "success"
+                                        ? "Đã xong"
+                                        : execRes.status === "alreadyDone"
+                                          ? "Đã làm trước đó"
+                                          : "Thất bại"}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] text-app-ink-muted">Đang chờ</span>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
-                    </>
-                  )}
-                </div>
-              );
-            })}
+
+                      {pendingWorkflow.status === "ready_for_confirmation" && (
+                        <div className="flex gap-2 justify-end border-t border-app-line/30 pt-2">
+                          <button
+                            type="button"
+                            className="h-7 text-xs font-semibold px-3 rounded-lg border border-app-line bg-app-surface hover:bg-app-bg text-app-ink-soft transition-all cursor-pointer active:scale-95"
+                            onClick={() => send("Hủy")}
+                          >
+                            Hủy bỏ
+                          </button>
+                          <button
+                            type="button"
+                            className="h-7 text-xs font-semibold px-3 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-2xs hover:shadow-[0_0_8px_rgba(16,185,129,0.2)] transition-all cursor-pointer active:scale-95"
+                            onClick={() => send("Đồng ý")}
+                          >
+                            Xác nhận thực hiện
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               {isTyping ? (
                 <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
                   <div className="max-w-[80%] rounded-2xl rounded-bl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 px-4 py-3">
@@ -601,9 +802,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                         className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
                         style={{ animationDelay: "-0.16s" }}
                       />
-                      <span
-                        className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
-                      />
+                      <span className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500" />
                     </div>
                   </div>
                 </div>
@@ -643,10 +842,14 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     onClick={() => handleSelectCommand(cmd)}
                     onMouseEnter={() => setSelectedCommandIndex(idx)}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors ${
-                      idx === selectedCommandIndex ? "bg-app-accent/10 text-app-accent font-medium" : "hover:bg-app-bg-subtle"
+                      idx === selectedCommandIndex
+                        ? "bg-app-accent/10 text-app-accent font-medium"
+                        : "hover:bg-app-bg-subtle"
                     }`}
                   >
-                    <span className="font-mono text-app-accent text-xs bg-app-accent-soft px-1.5 py-0.5 rounded">{cmd.command}</span>
+                    <span className="font-mono text-app-accent text-xs bg-app-accent-soft px-1.5 py-0.5 rounded">
+                      {cmd.command}
+                    </span>
                     <span className="text-app-ink-soft flex-1">{cmd.description}</span>
                   </button>
                 ))}

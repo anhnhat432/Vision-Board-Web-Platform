@@ -177,4 +177,56 @@ describe("sanitizeAssistantContext with pageContextHint", () => {
     expect(result.pendingClarification?.candidates).toHaveLength(2);
     expect(result.pendingClarification?.candidates[1].label).toContain("[REDACTED]");
   });
+
+  it("should sanitize pending workflow and redact secret-looking values", () => {
+    const ctx: AssistantContext & { route: string } = {
+      currentWeek: 4,
+      weeksTotal: 12,
+      goals: [],
+      todayTasks: [],
+      lastReflectionDate: null,
+      feasibility: null,
+      latestWeeklyReview: null,
+      stuckSignals: {
+        latestObstacle: null,
+        missedCommitments: [],
+        overdueOpenCount: 0,
+        overdueTasks: [],
+      },
+      trend: {
+        completionLast4Weeks: [],
+        direction: "unknown",
+      },
+      streak: {
+        daysWithCompletedTask: 0,
+      },
+      upcomingDeadlines: [],
+      pageContext: {
+        route: "/today",
+        currentStep: null,
+        nextSuggestedStep: null,
+        formDraft: {},
+      },
+      route: "/today",
+      pendingWorkflow: {
+        id: "wf_123",
+        type: "create_task_workflow",
+        status: "ready_for_confirmation",
+        summary: "Tạo task với token: abcdefghijklmnopqrstuvwxyz",
+        missingFields: [],
+        proposedActions: [
+          {
+            type: "create_task",
+            label: "Tạo task password: mySecretPassword123",
+          },
+        ],
+      },
+    };
+
+    const result = sanitizeAssistantContext(ctx);
+
+    expect(result.pendingWorkflow?.summary).toContain("[REDACTED]");
+    expect(result.pendingWorkflow?.proposedActions[0].label).toContain("[REDACTED]");
+    expect(result.pendingWorkflow?.summary).not.toContain("abcdefghijklmnopqrstuvwxyz");
+  });
 });

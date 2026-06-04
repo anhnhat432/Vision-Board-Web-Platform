@@ -3,8 +3,8 @@ import { APP_STORAGE_KEYS, addGoal, addReflection, getUserData, saveUserData } f
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
 import { buildDerivedScoreboard, getActiveTwelveWeekGoal, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
-import type { AssistantAction } from "./parseActions";
 import { updateAssistantMemoryFromActionResult } from "./assistantMemory";
+import type { AssistantAction } from "./parseActions";
 
 export interface ActionExecutionResult {
   success: boolean;
@@ -146,7 +146,7 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
 
       const activeGoal = getAssistantActiveTwelveWeekGoal(data.goals);
 
-      if (!activeGoal || !activeGoal.twelveWeekSystem) {
+      if (!activeGoal?.twelveWeekSystem) {
         return { success: false, message: "Chưa có 12-week plan. Hãy tạo plan trước." };
       }
 
@@ -219,7 +219,12 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       }
 
       if (target.task.completed) {
-        return { success: true, alreadyDone: true, verified: true, message: `Task "${target.task.title}" đã được hoàn thành từ trước.` };
+        return {
+          success: true,
+          alreadyDone: true,
+          verified: true,
+          message: `Task "${target.task.title}" đã được hoàn thành từ trước.`,
+        };
       }
 
       const didToggle = toggleTwelveWeekTaskInData(data, target.goal.id, target.task.id, true);
@@ -466,6 +471,14 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
 
       saveUserData(data);
 
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("assistant-prefill-weekly-review", {
+            detail: payloadUpdates,
+          }),
+        );
+      }
+
       // Verify state
       const verifyData = getUserData();
       const verifyGoal = verifyData?.goals?.find((g) => g.id === goalId);
@@ -577,7 +590,10 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
   }
 }
 
-export async function executeAction(action: AssistantAction, userId: string | null = null): Promise<ActionExecutionResult> {
+export async function executeAction(
+  action: AssistantAction,
+  userId: string | null = null,
+): Promise<ActionExecutionResult> {
   try {
     const result = await runAction(action);
     writeAuditLog(action.type, action.label, result);

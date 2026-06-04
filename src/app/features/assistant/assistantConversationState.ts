@@ -66,8 +66,14 @@ function normalizeText(text: string): string {
 function redactSensitive(text: string): string {
   return text
     .replace(/[\w-]{24,}/g, "[REDACTED]")
-    .replace(/(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)\s*[:=]\s*[^\s,]+/gi, "$1: [REDACTED]")
-    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)[\w-]*\b/gi, "[REDACTED]");
+    .replace(
+      /(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)\s*[:=]\s*[^\s,]+/gi,
+      "$1: [REDACTED]",
+    )
+    .replace(
+      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)[\w-]*\b/gi,
+      "[REDACTED]",
+    );
 }
 
 function sanitizeText(value: unknown, maxLength: number): string {
@@ -269,10 +275,7 @@ export function isPendingAssistantClarificationExpired(
   return Date.parse(pending.expiresAt) <= referenceDate.getTime();
 }
 
-export function setPendingAssistantClarification(
-  userId: string | null,
-  pending: PendingAssistantClarification,
-): void {
+export function setPendingAssistantClarification(userId: string | null, pending: PendingAssistantClarification): void {
   if (typeof localStorage === "undefined") return;
   const normalized = normalizePending(pending);
   if (!normalized) return;

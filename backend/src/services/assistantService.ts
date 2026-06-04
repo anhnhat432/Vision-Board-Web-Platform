@@ -117,6 +117,24 @@ export interface AssistantContext {
     createdAt: string;
     expiresAt: string;
   };
+  activeTopic?: string | null;
+  smartGoalQuality?: {
+    overallScore: number;
+    level: "weak" | "okay" | "strong";
+    warnings: string[];
+    suggestions: string[];
+    canProceedToFeasibility: boolean;
+  } | null;
+  pendingWorkflow?: PendingAssistantWorkflowSummary | null;
+}
+
+export interface PendingAssistantWorkflowSummary {
+  id: string;
+  type: string;
+  status: string;
+  summary: string;
+  missingFields: string[];
+  proposedActions: Array<{ type: string; label: string }>;
 }
 
 export interface AssistantRequest {
@@ -301,6 +319,73 @@ export function sanitizeContext(context: unknown): AssistantContext {
     assistantMemory: sanitizeAssistantMemory(raw.assistantMemory),
     retrievedKnowledge: sanitizeRetrievedKnowledge(raw.retrievedKnowledge),
     pendingClarification: sanitizePendingClarification(raw.pendingClarification),
+    activeTopic: raw.activeTopic ? sanitizeText(raw.activeTopic, 100) : null,
+    smartGoalQuality: sanitizeSmartGoalQuality(raw.smartGoalQuality),
+    pendingWorkflow: sanitizePendingWorkflow(raw.pendingWorkflow),
+  };
+}
+
+function sanitizeSmartGoalQuality(value: unknown): AssistantContext["smartGoalQuality"] {
+  const raw = record(value);
+  if (Object.keys(raw).length === 0) return null;
+
+  return {
+    overallScore: clampNumber(raw.overallScore, 0, 100, 0),
+    level: raw.level === "weak" || raw.level === "okay" || raw.level === "strong" ? raw.level : "weak",
+    warnings: (Array.isArray(raw.warnings) ? raw.warnings : []).slice(0, 10).map((item) => sanitizeText(item, 200)),
+    suggestions: (Array.isArray(raw.suggestions) ? raw.suggestions : []).slice(0, 10).map((item) => sanitizeText(item, 200)),
+    canProceedToFeasibility: raw.canProceedToFeasibility === true,
+  };
+}
+
+function sanitizePendingWorkflow(value: unknown): AssistantContext["pendingWorkflow"] {
+  const raw = record(value);
+  if (Object.keys(raw).length === 0) return null;
+
+  const validTypes = new Set([
+    "create_goal_workflow",
+    "create_task_workflow",
+    "create_12_week_plan_workflow",
+    "weekly_review_workflow",
+    "reflection_workflow",
+  ]);
+  const type = String(raw.type || "");
+  if (!validTypes.has(type)) return null;
+
+  const validStatus = new Set([
+    "draft",
+    "needs_clarification",
+    "ready_for_confirmation",
+    "executing",
+    "completed",
+    "failed",
+    "cancelled",
+  ]);
+  const status = String(raw.status || "");
+  if (!validStatus.has(status)) return null;
+
+  const proposedActions = Array.isArray(raw.proposedActions)
+    ? raw.proposedActions
+        .slice(0, 15)
+        .map((act) => {
+          const rAct = record(act);
+          return {
+            type: sanitizeText(rAct.type, 50),
+            label: redactSensitive(sanitizeText(rAct.label, 160)),
+          };
+        })
+        .filter((act) => act.type && act.label)
+    : [];
+
+  return {
+    id: sanitizeText(raw.id, 100),
+    type,
+    status,
+    summary: redactSensitive(sanitizeText(raw.summary, 1000)),
+    missingFields: (Array.isArray(raw.missingFields) ? raw.missingFields : [])
+      .slice(0, 10)
+      .map((f) => sanitizeText(f, 80)),
+    proposedActions,
   };
 }
 

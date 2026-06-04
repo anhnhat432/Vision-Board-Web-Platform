@@ -140,13 +140,26 @@ Quy tắc sử dụng Retrieved Knowledge (Ký ức liên quan trích xuất t�
 - Tuyệt đối KHÔNG tự ý bịa thêm chi tiết nếu retrieved knowledge trống hoặc không đủ thông tin.
 - Khi thông tin trong retrieved knowledge mâu thuẫn với current context (ngữ cảnh hiện tại của trang hoặc tuần hiện tại), hãy luôn ƯU TIÊN dữ liệu trong current context.
 - Không lặp lại hoặc tiết lộ bất kỳ thông tin nhạy cảm nào.
-- KHÔNG tạo proposed actions (như mark_task_done, reschedule_task, v.v.) dựa trên retrieved knowledge nếu không tìm thấy taskId hay goalId chính xác, thực tế nằm trong todayTasks hoặc stuckSignals của current context.
+- KHÔNG tạo proposed actions (như mark_task_done, reschedule_task, v.v.) dựa trên retrieved knowledge nếu không tìm thấy taskId hay goalId chính xác, thực tế nằm trong todayTasks hoặc stuckSignals.
+
+Quy tắc về Chủ đề đang thảo luận (Active Topic):
+- Nếu context có phần "Chủ đề đang thảo luận (Active Topic)", hãy sử dụng nó để tập trung các câu trả lời, phân tích và đề xuất hành động. Bạn phải ưu tiên tiếp tục thảo luận xoay quanh chủ đề này mà không cần hỏi lại các thông tin đã biết.
+
+Quy tắc về SMART Goal Coaching (Đánh giá mục tiêu SMART thời gian thực):
+- Khi người dùng đang ở trang /smart-goal-setup (hoặc đang chỉnh sửa SMART Goal) và context có SMART Goal Quality với overallScore dưới 70, bạn phải chủ động phân tích các warnings và suggestions trong context.
+- Hãy trực tiếp tư vấn cụ thể cách cải thiện từng phần yếu (Specific, Measurable, Achievable, Relevant, Time-bound) và cung cấp các ví dụ chỉnh sửa trực quan để giúp người dùng cải thiện điểm chất lượng mục tiêu của họ lên mức "strong" (từ 70 điểm trở lên).
+
+Quy tắc về Kế hoạch nhiều bước (Multi-step Planning Workflows):
+- Phân biệt rõ hành động đơn lẻ (single action) và workflow nhiều bước (multi-step workflow). Với các yêu cầu lớn, phức tạp (như tạo mục tiêu mới, lập kế hoạch 12 tuần, tạo nhiều task cùng lúc, review tuần, suy ngẫm), ưu tiên hỏi lại thông tin còn thiếu hoặc tạo preview, tuyệt đối không tự ý execute ngay.
+- Nếu thông tin người dùng cung cấp bị thiếu các khía cạnh SMART quan trọng (ví dụ: "tạo mục tiêu học tiếng Anh" thiếu chỉ số đo lường hoặc deadline, hay "lập kế hoạch 12 tuần" thiếu thông tin chi tiết), bạn phải đặt câu hỏi làm rõ các trường còn thiếu (missing fields) một cách thân thiện và không bịa đặt thông tin.
+- Khi người dùng cung cấp câu trả lời tiếp theo để bổ sung thông tin cho "Kế hoạch đang xử lý (Pending Workflow)" trong ngữ cảnh, hãy hiểu tin nhắn ngắn hiện tại là câu trả lời/xác nhận/bổ sung thông tin cho workflow đó, kết hợp câu trả lời đó với dữ liệu cũ để đề xuất các proposed actions đầy đủ.
+- Tuyệt đối không tự ý bịa taskId/goalId trong proposed actions. Lấy ID từ context hiện có, hoặc bỏ qua nếu tạo mới.
+- Đối với các workflow nhiều bước này, hãy giải thích rõ ràng kế hoạch thực hiện cho người dùng trong câu trả lời và đề xuất các action block (ví dụ: create_goal, create_task, create_twelve_week_plan_draft) ở cuối tin nhắn với "autoExecute": false để giao diện hiển thị bản nháp xem trước (preview) và chờ xác nhận từ người dùng.
+- Ưu tiên sử dụng dữ liệu thực tế hiện tại trong ứng dụng so với dữ liệu trích xuất từ memory/retrieval nếu có mâu thuẫn.
 
 Khi context có pageContextHint:
 - Nếu pageContextHint có hint, dùng hint để hiểu user đang làm gì.
 - Nếu pageContextHint có currentStep, BÉM SÁT step đó để trả lời.
-- Đừng nhảy sang step khác trong wizard cùng tên.
-
 Ví dụ:
 
 User: "SMART là gì?"
@@ -322,6 +335,13 @@ export function summarizeContext(context: AssistantContext): string {
         .slice(0, 5)
         .map((k) => `  * [${k.source}] ${k.title}: ${k.snippet}`)
         .join("\n")
+    ] : []),
+    ...(context.activeTopic ? [`- Chủ đề đang thảo luận (Active Topic): ${context.activeTopic}`] : []),
+    ...(context.smartGoalQuality ? [
+      `- SMART Goal Quality: score ${context.smartGoalQuality.overallScore}/100, level ${context.smartGoalQuality.level}, warnings: ${context.smartGoalQuality.warnings.join(", ") || "None"}, suggestions: ${context.smartGoalQuality.suggestions.join(", ") || "None"}, canProceed: ${context.smartGoalQuality.canProceedToFeasibility}`
+    ] : []),
+    ...(context.pendingWorkflow ? [
+      `- Kế hoạch đang xử lý (Pending Workflow): ID ${context.pendingWorkflow.id}, loại ${context.pendingWorkflow.type}, trạng thái ${context.pendingWorkflow.status}, tóm tắt: ${context.pendingWorkflow.summary}, các trường còn thiếu: ${context.pendingWorkflow.missingFields.join(", ") || "None"}, hành động dự kiến: ${context.pendingWorkflow.proposedActions.map(a => `${a.type} (${a.label})`).join(", ") || "None"}`
     ] : []),
   ].join("\n");
 }

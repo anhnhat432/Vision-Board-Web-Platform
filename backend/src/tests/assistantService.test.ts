@@ -100,6 +100,74 @@ describe("assistantService sanitizeContext", () => {
     assert.equal(context.pendingClarification?.candidates.length, 2);
     assert.match(context.pendingClarification?.candidates[1].label ?? "", /\[REDACTED\]/);
   });
+
+  it("sanitizes pendingWorkflow safely and redacts sensitive data", async () => {
+    ensureBackendEnvForServiceImports();
+    const { sanitizeContext } = await import("../services/assistantService");
+
+    const context = sanitizeContext({
+      currentWeek: 2,
+      weeksTotal: 12,
+      goals: [],
+      todayTasks: [],
+      lastReflectionDate: null,
+      route: "/today",
+      pendingWorkflow: {
+        id: "wf_123",
+        type: "create_goal_workflow",
+        status: "ready_for_confirmation",
+        summary: "Tạo mục tiêu với key: api_key_12345678901234567890",
+        missingFields: [],
+        proposedActions: [
+          {
+            type: "create_goal",
+            label: "Tạo mục tiêu với password: mypassword123",
+          },
+        ],
+      },
+    });
+
+    assert.ok(context.pendingWorkflow);
+    assert.equal(context.pendingWorkflow.id, "wf_123");
+    assert.equal(context.pendingWorkflow.type, "create_goal_workflow");
+    assert.equal(context.pendingWorkflow.status, "ready_for_confirmation");
+    assert.ok(context.pendingWorkflow.summary.includes("[REDACTED]"));
+    assert.ok(!context.pendingWorkflow.summary.includes("api_key_12345678901234567890"));
+    assert.ok(context.pendingWorkflow.proposedActions[0].label.includes("[REDACTED]"));
+    assert.ok(!context.pendingWorkflow.proposedActions[0].label.includes("mypassword123"));
+  });
+
+  it("drops malformed pendingWorkflow before provider calls", async () => {
+    ensureBackendEnvForServiceImports();
+    const { sanitizeContext } = await import("../services/assistantService");
+
+    const badType = sanitizeContext({
+      route: "/today",
+      pendingWorkflow: {
+        id: "wf_bad",
+        type: "unknown_workflow",
+        status: "ready_for_confirmation",
+        summary: "bad",
+        missingFields: [],
+        proposedActions: [],
+      },
+    });
+
+    const badStatus = sanitizeContext({
+      route: "/today",
+      pendingWorkflow: {
+        id: "wf_bad",
+        type: "create_task_workflow",
+        status: "done",
+        summary: "bad",
+        missingFields: [],
+        proposedActions: [],
+      },
+    });
+
+    assert.equal(badType.pendingWorkflow, null);
+    assert.equal(badStatus.pendingWorkflow, null);
+  });
 });
 
 describe("assistantService sanitizeHistory", () => {

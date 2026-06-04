@@ -3,23 +3,29 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 import { useAssistantPageContextValue } from "./AssistantPageContextProvider";
 import { sendAssistantMessageStream } from "./assistantApi";
 import {
+  type AssistantClarificationCandidate,
   buildClarificationQuestion,
   clearPendingAssistantClarification,
   createTaskSelectionClarification,
+  type PendingAssistantClarificationIntent,
   readStoredPendingAssistantClarification,
   resolveClarificationReply,
   setPendingAssistantClarification,
-  type AssistantClarificationCandidate,
-  type PendingAssistantClarificationIntent,
 } from "./assistantConversationState";
 import { captureAssistantFeedback } from "./assistantFeedback";
-import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
+import { autoCaptureUserMemory, clearMemory, updateAssistantMemoryFromFeedback } from "./assistantMemory";
 import {
-  updateAssistantMemoryFromFeedback,
-  autoCaptureUserMemory,
-  clearMemory,
-} from "./assistantMemory";
-import { executeAction, type ActionExecutionResult } from "./executeAction";
+  type AssistantWorkflow,
+  type AssistantWorkflowType,
+  clearPendingWorkflow,
+  createWorkflow,
+  getPendingWorkflow,
+  isCancelReply,
+  isConfirmReply,
+  setPendingWorkflow,
+} from "./assistantWorkflow";
+import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
+import { type ActionExecutionResult, executeAction } from "./executeAction";
 import { type AssistantAction, parseAssistantReply } from "./parseActions";
 import type { ChatHistoryMessage, FeedbackEntry, FeedbackRating, FeedbackReason, Message } from "./types";
 
@@ -164,6 +170,18 @@ function normalizeCommandText(text: string): string {
     .trim();
 }
 
+function detectActiveTopic(text: string, goals: Array<{ title: string }>): string | null {
+  if (!text || !goals || goals.length === 0) return null;
+  const normalizedText = text.toLowerCase();
+  for (const goal of goals) {
+    const title = goal.title?.trim();
+    if (title && title.length > 3 && normalizedText.includes(title.toLowerCase())) {
+      return title;
+    }
+  }
+  return null;
+}
+
 function getTaskCommandIntent(text: string): PendingAssistantClarificationIntent | null {
   const normalized = normalizeCommandText(text);
   const mentionsTask = /\b(task|viec|nhiem vu|cong viec)\b/.test(normalized);
@@ -188,7 +206,12 @@ function shouldUseTodayOnly(text: string): boolean {
   return /\b(hom nay|today)\b/.test(normalizeCommandText(text));
 }
 
-function toTaskCandidate(task: { id: string; title: string; done?: boolean; scheduledDate?: string }): AssistantTaskCandidate {
+function toTaskCandidate(task: {
+  id: string;
+  title: string;
+  done?: boolean;
+  scheduledDate?: string;
+}): AssistantTaskCandidate {
   return {
     id: task.id,
     label: task.title,
@@ -284,6 +307,146 @@ async function executeTaskClarificationAction(
   return buildAutoExecutionSummary(action, result);
 }
 
+function detectWorkflowTypeFromText(text: string): AssistantWorkflowType | null {
+  const normalized = text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u0111/g, "d")
+    .replace(/\u0110/g, "D")
+    .toLowerCase()
+    .trim();
+
+  if (/\b(tao muc tieu|tao goal|them muc tieu|them goal|muc tieu moi|goal moi)\b/.test(normalized)) {
+    return "create_goal_workflow";
+  }
+  if (/\b(lap ke hoach 12 tuan|chia 12 tuan|ke hoach 12 tuan|12 week plan)\b/.test(normalized)) {
+    return "create_12_week_plan_workflow";
+  }
+  if (/\b(them task|tao task|them viec|tao viec|giao viec|them nhiem vu|tao nhiem vu)\b/.test(normalized)) {
+    return "create_task_workflow";
+  }
+  if (/\b(weekly review|review tuan|danh gia tuan|nhin lai tuan)\b/.test(normalized)) {
+    return "weekly_review_workflow";
+  }
+  if (/\b(reflection|suy ngam|nhat ky|insight)\b/.test(normalized)) {
+    return "reflection_workflow";
+  }
+  return null;
+}
+
+export function isWorkflowExpired(workflow: AssistantWorkflow, referenceDate = new Date()): boolean {
+  if (!workflow.expiresAt) return true;
+  return Date.parse(workflow.expiresAt) <= referenceDate.getTime();
+}
+
+async function resolvePendingWorkflowTurn(
+  userId: string | null,
+  text: string,
+  _context: AssistantContext,
+  updatePendingWorkflow: (wf: AssistantWorkflow | null) => void,
+): Promise<{ content: string; actions: AssistantAction[] } | null> {
+  const workflow = getPendingWorkflow(userId);
+  if (!workflow) return null;
+
+  if (isWorkflowExpired(workflow)) {
+    updatePendingWorkflow(null);
+    return {
+      content: "Kế hoạch đang xử lý trước đó đã hết hạn (quá 30 phút). Bạn vui lòng yêu cầu lại nhé.",
+      actions: [],
+    };
+  }
+
+  if (isCancelReply(text)) {
+    updatePendingWorkflow(null);
+    return {
+      content: "Đã hủy bỏ kế hoạch/hành động đang chuẩn bị.",
+      actions: [],
+    };
+  }
+
+  if (isConfirmReply(text)) {
+    const executingWf: AssistantWorkflow = {
+      ...workflow,
+      status: "executing",
+      updatedAt: new Date().toISOString(),
+    };
+    updatePendingWorkflow(executingWf);
+
+    const results: typeof workflow.executionResults = [];
+    let hasFailed = false;
+    let failedActionLabel = "";
+    let failureMsg = "";
+
+    for (const action of workflow.proposedActions) {
+      try {
+        const res = await executeAction(action, userId);
+        const status = res.success ? (res.alreadyDone ? "alreadyDone" : "success") : "failed";
+
+        results.push({
+          actionId: action.id,
+          status,
+          message: res.message,
+        });
+
+        if (!res.success) {
+          hasFailed = true;
+          failedActionLabel = action.label;
+          failureMsg = res.message;
+          break;
+        }
+      } catch (err) {
+        hasFailed = true;
+        failedActionLabel = action.label;
+        failureMsg = err instanceof Error ? err.message : String(err);
+        results.push({
+          actionId: action.id,
+          status: "failed",
+          message: failureMsg,
+        });
+        break;
+      }
+    }
+
+    if (hasFailed) {
+      const failedWf: AssistantWorkflow = {
+        ...executingWf,
+        status: "failed",
+        executionResults: results,
+        updatedAt: new Date().toISOString(),
+      };
+      updatePendingWorkflow(failedWf);
+      return {
+        content: `Thực hiện thất bại ở bước "${failedActionLabel}": ${failureMsg}`,
+        actions: [],
+      };
+    } else {
+      const completedWf: AssistantWorkflow = {
+        ...executingWf,
+        status: "completed",
+        executionResults: results,
+        updatedAt: new Date().toISOString(),
+      };
+      updatePendingWorkflow(completedWf);
+      updatePendingWorkflow(null); // Clear pending workflow on success
+
+      const successLabels = workflow.proposedActions
+        .map((a) => {
+          const res = results.find((r) => r.actionId === a.id);
+          const prefix = res?.status === "alreadyDone" ? "[Đã làm trước đó] " : "";
+          return `- ${prefix}${a.label}`;
+        })
+        .join("\n");
+
+      return {
+        content: `Đã thực hiện thành công các hành động sau:\n${successLabels}`,
+        actions: [],
+      };
+    }
+  }
+
+  return null;
+}
+
 async function resolvePendingClarificationTurn(userId: string | null, text: string): Promise<string | null> {
   const pending = readStoredPendingAssistantClarification(userId);
   if (!pending) return null;
@@ -347,9 +510,7 @@ async function resolveDirectTaskCommandTurn(
   }
 
   const questionPrefix =
-    hasBulkTaskCommand(text) && intent === "mark_task_done"
-      ? "Mình chưa tick hàng loạt để tránh đánh dấu nhầm.\n"
-      : "";
+    hasBulkTaskCommand(text) && intent === "mark_task_done" ? "Mình chưa tick hàng loạt để tránh đánh dấu nhầm.\n" : "";
   const question = `${questionPrefix}${buildClarificationQuestion(intent, candidates)}`;
   const pending = createTaskSelectionClarification({
     intent,
@@ -462,10 +623,28 @@ export function useAssistant(options?: UseAssistantOptions) {
     }
   });
 
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  const [pendingWorkflow, setPendingWorkflowState] = useState<AssistantWorkflow | null>(() =>
+    getPendingWorkflow(userId, new Date(), true),
+  );
+
+  const updatePendingWorkflow = useCallback(
+    (wf: AssistantWorkflow | null) => {
+      if (wf) {
+        setPendingWorkflow(userId, wf);
+      } else {
+        clearPendingWorkflow(userId);
+      }
+      setPendingWorkflowState(wf);
+    },
+    [userId],
+  );
+
   useEffect(() => {
     setMessages(loadPersistedMessages(userId));
     setLastError(null);
     setLastUserText(null);
+    setPendingWorkflowState(getPendingWorkflow(userId, new Date(), true));
     setMessageFeedback(() => {
       try {
         const raw = typeof localStorage !== "undefined" ? localStorage.getItem(getFeedbackMapStorageKey(userId)) : null;
@@ -550,8 +729,15 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
       abortControllerRef.current = new AbortController();
 
       try {
+        const contextObj = buildAssistantContext(undefined, route, pageContextHintValue, trimmed, userId, activeTopic);
+        const newTopic = detectActiveTopic(trimmed, contextObj.goals || []);
+        if (newTopic) {
+          setActiveTopic(newTopic);
+          contextObj.activeTopic = newTopic;
+        }
+
         const context: AssistantContext & { route: string } = {
-          ...buildAssistantContext(undefined, route, pageContextHintValue, trimmed, userId),
+          ...contextObj,
           route,
         };
         turnSnapshotsRef.current[messageId] = {
@@ -559,11 +745,25 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
           context,
         };
 
+        const pendingWfTurn = await resolvePendingWorkflowTurn(userId, trimmed, context, updatePendingWorkflow);
+        if (pendingWfTurn) {
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === messageId
+                ? { ...message, content: pendingWfTurn.content, actions: pendingWfTurn.actions, status: "complete" }
+                : message,
+            ),
+          );
+          return;
+        }
+
         const pendingTurn = await resolvePendingClarificationTurn(userId, trimmed);
         if (pendingTurn) {
           setMessages((prev) =>
             prev.map((message) =>
-              message.id === messageId ? { ...message, content: pendingTurn, actions: [], status: "complete" } : message,
+              message.id === messageId
+                ? { ...message, content: pendingTurn, actions: [], status: "complete" }
+                : message,
             ),
           );
           return;
@@ -598,17 +798,80 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
         );
 
         const parsed = parseAssistantReply(finalContent);
-        const autoExecution = await executeSafeAutoActions(parsed.actions, userId);
-        const finalText = autoExecution.summary
-          ? `${parsed.textContent}\n\n${autoExecution.summary}`.trim()
-          : parsed.textContent;
-        setMessages((prev) =>
-          prev.map((message) =>
-            message.id === messageId
-              ? { ...message, content: finalText, actions: autoExecution.actions, status: "complete" }
-              : message,
-          ),
-        );
+
+        const isGoalWorkflow = parsed.actions.some((a) => a.type === "create_goal");
+        const isPlanWorkflow = parsed.actions.some((a) => a.type === "create_twelve_week_plan_draft");
+        const isMultiTaskWorkflow = parsed.actions.filter((a) => a.type === "create_task").length >= 2;
+        const isWeeklyReviewWorkflow = parsed.actions.some((a) => a.type === "add_weekly_review");
+
+        let workflowType = detectWorkflowTypeFromText(trimmed);
+
+        const existingWf = getPendingWorkflow(userId);
+        if (!workflowType && existingWf) {
+          workflowType = existingWf.type;
+        }
+
+        if (!workflowType) {
+          if (isGoalWorkflow) workflowType = "create_goal_workflow";
+          else if (isPlanWorkflow) workflowType = "create_12_week_plan_workflow";
+          else if (isMultiTaskWorkflow) workflowType = "create_task_workflow";
+          else if (isWeeklyReviewWorkflow) workflowType = "weekly_review_workflow";
+        }
+
+        if (workflowType) {
+          const actionsWithNoAuto = parsed.actions.map((act) => ({
+            ...act,
+            autoExecute: false,
+          }));
+
+          const missingFields: string[] = [];
+          if (workflowType === "create_goal_workflow") {
+            const goalAction = parsed.actions.find((a) => a.type === "create_goal");
+            if (goalAction) {
+              const payload = goalAction.payload as { title?: string; category?: string; deadline?: string };
+              if (!payload.title) missingFields.push("title");
+              if (!payload.category || payload.category === "other") missingFields.push("category");
+            } else {
+              missingFields.push("title");
+              missingFields.push("category");
+            }
+          } else if (workflowType === "create_task_workflow") {
+            if (parsed.actions.length === 0) {
+              missingFields.push("goal");
+            }
+          }
+
+          const newWorkflow = createWorkflow({
+            type: workflowType,
+            userId,
+            summary: parsed.textContent.slice(0, 500),
+            sourceUserText: trimmed,
+            missingFields,
+            proposedActions: actionsWithNoAuto,
+          });
+
+          updatePendingWorkflow(newWorkflow);
+
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === messageId
+                ? { ...message, content: parsed.textContent, actions: actionsWithNoAuto, status: "complete" }
+                : message,
+            ),
+          );
+        } else {
+          const autoExecution = await executeSafeAutoActions(parsed.actions, userId);
+          const finalText = autoExecution.summary
+            ? `${parsed.textContent}\n\n${autoExecution.summary}`.trim()
+            : parsed.textContent;
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === messageId
+                ? { ...message, content: finalText, actions: autoExecution.actions, status: "complete" }
+                : message,
+            ),
+          );
+        }
       } catch (error) {
         if (
           error &&
@@ -633,7 +896,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
         abortControllerRef.current = null;
       }
     },
-    [isTyping, messages, route, pageContextHintValue, userId],
+    [isTyping, messages, route, pageContextHintValue, userId, activeTopic, updatePendingWorkflow],
   );
 
   const retry = useCallback(() => {
@@ -668,7 +931,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
           success: boolean;
           message: string;
         };
-      }
+      },
     ) => {
       try {
         setMessages((prev) => {
@@ -765,5 +1028,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
     clearHistory,
     submitFeedback,
     messageFeedback,
+    pendingWorkflow: pendingWorkflow && !isWorkflowExpired(pendingWorkflow) ? pendingWorkflow : null,
+    updatePendingWorkflow,
   };
 }

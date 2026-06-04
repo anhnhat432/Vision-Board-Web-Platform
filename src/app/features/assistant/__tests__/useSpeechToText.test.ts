@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useSpeechToText } from "../useSpeechToText";
 
 describe("useSpeechToText Hook", () => {
-  const originalSpeechRecognition = (window as any).SpeechRecognition;
-  const originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
+  const _originalSpeechRecognition = (window as any).SpeechRecognition;
+  const _originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
 
   beforeEach(() => {
     vi.restoreAllMocks();

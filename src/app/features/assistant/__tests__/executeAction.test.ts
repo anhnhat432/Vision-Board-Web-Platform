@@ -83,14 +83,23 @@ vi.mock("@/app/utils/storage", () => {
 });
 
 vi.mock("@/app/utils/storage-goal-ops", () => ({
-  toggleTwelveWeekTaskInData: vi.fn((data: { goals?: Array<{ id: string; twelveWeekSystem?: { taskInstances?: Array<{ id: string; completed: boolean }> } }> }, goalId: string, taskId: string, completed: boolean) => {
-    const goal = data.goals?.find((g) => g.id === goalId);
-    if (!goal?.twelveWeekSystem?.taskInstances) return false;
-    const task = goal.twelveWeekSystem.taskInstances.find((t) => t.id === taskId);
-    if (!task) return false;
-    task.completed = completed;
-    return true;
-  }),
+  toggleTwelveWeekTaskInData: vi.fn(
+    (
+      data: {
+        goals?: Array<{ id: string; twelveWeekSystem?: { taskInstances?: Array<{ id: string; completed: boolean }> } }>;
+      },
+      goalId: string,
+      taskId: string,
+      completed: boolean,
+    ) => {
+      const goal = data.goals?.find((g) => g.id === goalId);
+      if (!goal?.twelveWeekSystem?.taskInstances) return false;
+      const task = goal.twelveWeekSystem.taskInstances.find((t) => t.id === taskId);
+      if (!task) return false;
+      task.completed = completed;
+      return true;
+    },
+  ),
 }));
 
 vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
@@ -132,7 +141,7 @@ import { APP_STORAGE_KEYS, addGoal, addReflection, saveUserData } from "@/app/ut
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
 
 // biome-ignore lint/suspicious/noExplicitAny: test helper reset function
-const { __resetMockData } = await import("@/app/utils/storage") as any;
+const { __resetMockData } = (await import("@/app/utils/storage")) as any;
 
 describe("executeAction - Phase 5 Action Suite", () => {
   beforeEach(() => {

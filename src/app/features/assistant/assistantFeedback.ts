@@ -119,7 +119,9 @@ function normalizeRecord(value: unknown): AssistantGoldenExample | null {
 }
 
 function boundedText(value: unknown, maxLength: number): string {
-  return redactSensitiveText(String(value ?? "")).trim().slice(0, maxLength);
+  return redactSensitiveText(String(value ?? ""))
+    .trim()
+    .slice(0, maxLength);
 }
 
 function redactSensitiveText(text: string): string {
@@ -128,7 +130,10 @@ function redactSensitiveText(text: string): string {
       /\b(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|token|secret|password|private[_\s-]?key)\b\s*[:=]\s*["']?[^"'\s,;]+/gi,
       "$1=[redacted]",
     )
-    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|token|secret|password|private[_\s-]?key)[\w-]*\b/gi, "[redacted]");
+    .replace(
+      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|token|secret|password|private[_\s-]?key)[\w-]*\b/gi,
+      "[redacted]",
+    );
 }
 
 function sanitizeStoredContext(value: unknown): SanitizedAssistantContext | null {

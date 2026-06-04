@@ -238,7 +238,15 @@ function renderActionPreview(action: AssistantAction) {
   }
 }
 
-export function AssistantActionCard({ action, onExecute, onReject, status, errorMessage, verified, alreadyDone }: AssistantActionCardProps) {
+export function AssistantActionCard({
+  action,
+  onExecute,
+  onReject,
+  status,
+  errorMessage,
+  verified,
+  alreadyDone,
+}: AssistantActionCardProps) {
   const handleClick = async () => {
     if (status === "executing" || status === "done") return;
     await onExecute(action);
@@ -247,30 +255,16 @@ export function AssistantActionCard({ action, onExecute, onReject, status, error
   const getDoneBadge = () => {
     if (alreadyDone) {
       return (
-        <span className="rounded px-3 py-1.5 text-xs font-medium bg-amber-100 text-amber-700">
-          Đã làm từ trước
-        </span>
+        <span className="rounded px-3 py-1.5 text-xs font-medium bg-amber-100 text-amber-700">Đã làm từ trước</span>
       );
     }
     if (verified) {
-      return (
-        <span className="rounded px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700">
-          ✓ Đã xác nhận
-        </span>
-      );
+      return <span className="rounded px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700">✓ Đã xác nhận</span>;
     }
     if (verified === false) {
-      return (
-        <span className="rounded px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700">
-          Chưa xác nhận
-        </span>
-      );
+      return <span className="rounded px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700">Chưa xác nhận</span>;
     }
-    return (
-      <span className="rounded px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700">
-        Đã làm
-      </span>
-    );
+    return <span className="rounded px-3 py-1.5 text-xs font-medium bg-green-100 text-green-700">Đã làm</span>;
   };
 
   return (
@@ -282,7 +276,9 @@ export function AssistantActionCard({ action, onExecute, onReject, status, error
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-app-ink truncate">{action.label}</p>
           {renderActionPreview(action)}
-          {status === "error" && errorMessage && <p className="mt-1 text-xs text-red-600 font-medium">{errorMessage}</p>}
+          {status === "error" && errorMessage && (
+            <p className="mt-1 text-xs text-red-600 font-medium">{errorMessage}</p>
+          )}
         </div>
         {status === "pending" ? (
           <div className="flex gap-1.5 ml-2 shrink-0">

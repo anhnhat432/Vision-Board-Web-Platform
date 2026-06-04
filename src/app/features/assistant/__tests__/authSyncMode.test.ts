@@ -30,8 +30,8 @@ vi.mock("@/app/utils/storage", () => ({
 }));
 
 import { isDemoMode } from "@/app/utils/app-mode";
-import { APP_STORAGE_KEYS } from "@/app/utils/storage-constants";
 import { getUserData } from "@/app/utils/storage";
+import { APP_STORAGE_KEYS } from "@/app/utils/storage-constants";
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
 import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 

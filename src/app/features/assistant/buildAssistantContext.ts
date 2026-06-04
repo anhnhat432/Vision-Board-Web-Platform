@@ -25,17 +25,20 @@ import type {
 } from "@/app/utils/storage-types";
 import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 import { getFirebaseAuth } from "@/lib/auth/firebase";
+import { evaluateSmartGoalQuality } from "@/lib/smart-goal/quality";
+import type { SmartGoal } from "@/lib/smart-goal/types";
 import {
   getPendingAssistantClarification,
   type PendingAssistantClarificationSummary,
 } from "./assistantConversationState";
 import {
+  type AssistantMemorySummary,
+  autoCaptureFromAppData,
   getAssistantMemory,
   summarizeAssistantMemoryForContext,
-  autoCaptureFromAppData,
-  type AssistantMemorySummary,
 } from "./assistantMemory";
-import { retrieveAssistantKnowledge, type AssistantRetrievedMemory } from "./assistantRetrieval";
+import { type AssistantRetrievedMemory, retrieveAssistantKnowledge } from "./assistantRetrieval";
+import { getPendingWorkflow } from "./assistantWorkflow";
 
 export interface AuthSyncMode {
   authState: "signed_in" | "anonymous";
@@ -98,6 +101,24 @@ export interface AssistantContext {
   assistantMemory?: AssistantMemorySummary;
   retrievedKnowledge?: AssistantRetrievedMemory[];
   pendingClarification?: PendingAssistantClarificationSummary;
+  activeTopic?: string | null;
+  smartGoalQuality?: {
+    overallScore: number;
+    level: "weak" | "okay" | "strong";
+    warnings: string[];
+    suggestions: string[];
+    canProceedToFeasibility: boolean;
+  } | null;
+  pendingWorkflow?: PendingAssistantWorkflowSummary | null;
+}
+
+export interface PendingAssistantWorkflowSummary {
+  id: string;
+  type: string;
+  status: string;
+  summary: string;
+  missingFields: string[];
+  proposedActions: Array<{ type: string; label: string }>;
 }
 
 export interface AssistantPageContext {
@@ -204,6 +225,81 @@ export function buildAuthSyncMode(): AuthSyncMode {
   }
 }
 
+function mapDraftToSmartGoal(draft: any): SmartGoal {
+  const raw = draft || {};
+  const specific = raw.specific || {};
+  const measurable = raw.measurable || {};
+  const achievable = raw.achievable || {};
+  const relevant = raw.relevant || {};
+  const time_bound = raw.time_bound || raw.timeBound || {};
+
+  const goal_statement = typeof specific === "string" ? specific : specific.goal_statement || raw.goal_statement || "";
+  const metric_name = typeof measurable === "string" ? measurable : measurable.metric_name || raw.metric_name || "";
+  const target_value =
+    typeof measurable === "string" ? 0 : Number(measurable.target_value) || Number(raw.target_value) || 0;
+  const metric_unit = typeof measurable === "string" ? "" : measurable.metric_unit || raw.metric_unit || "";
+  const baseline_value =
+    typeof measurable === "string"
+      ? undefined
+      : measurable.baseline_value !== undefined
+        ? Number(measurable.baseline_value)
+        : undefined;
+
+  const weekly_time_commitment_hours =
+    typeof achievable === "string"
+      ? Number(achievable) || 0
+      : Number(achievable.weekly_time_commitment_hours) || Number(raw.weekly_time_commitment_hours) || 0;
+  const required_skills =
+    typeof achievable === "string" ? [] : Array.isArray(achievable.required_skills) ? achievable.required_skills : [];
+  const support_resources =
+    typeof achievable === "string"
+      ? []
+      : Array.isArray(achievable.support_resources)
+        ? achievable.support_resources
+        : [];
+
+  const motivation_reason =
+    typeof relevant === "string" ? relevant : relevant.motivation_reason || raw.motivation_reason || "";
+  const life_dimension_alignment =
+    typeof relevant === "string" ? "" : relevant.life_dimension_alignment || raw.life_dimension_alignment || "";
+
+  const target_date = typeof time_bound === "string" ? time_bound : time_bound.target_date || raw.target_date || "";
+  const target_weeks =
+    typeof time_bound === "string"
+      ? Number(time_bound) || undefined
+      : time_bound.target_weeks !== undefined
+        ? Number(time_bound.target_weeks)
+        : undefined;
+
+  return {
+    id: raw.id || "",
+    domain: raw.domain || "career",
+    specific: { goal_statement },
+    measurable: { metric_name, metric_unit, baseline_value, target_value },
+    achievable: { weekly_time_commitment_hours, required_skills, support_resources },
+    relevant: { motivation_reason, life_dimension_alignment },
+    time_bound: { target_date, target_weeks },
+    created_at: raw.created_at || "",
+  };
+}
+
+function buildWorkflowSummary(userId: string | null): PendingAssistantWorkflowSummary | null {
+  const workflow = getPendingWorkflow(userId);
+  if (!workflow) return null;
+
+  return {
+    id: workflow.id,
+    type: workflow.type,
+    status: workflow.status,
+    summary: workflow.summary,
+    missingFields: workflow.missingFields,
+    proposedActions: workflow.proposedActions.map((action) => ({
+      type: action.type,
+      label: action.label,
+    })),
+  };
+}
+
 /**
  * Build context from localStorage.
  *
@@ -220,6 +316,7 @@ export function buildAssistantContext(
   pageContextHint?: AssistantPageContextHint,
   query?: string,
   userId: string | null = null,
+  activeTopic?: string | null,
 ): AssistantContext {
   // Tự động quét và capture dữ liệu mới vào memory
   autoCaptureFromAppData(userId);
@@ -228,6 +325,10 @@ export function buildAssistantContext(
   const pendingClarification = getPendingAssistantClarification(userId, referenceDate) ?? undefined;
   try {
     const data = getUserData();
+    const pendingSmartGoalDraft = readJsonStorage(APP_STORAGE_KEYS.pendingSmartGoal);
+    const smartGoalQuality = pendingSmartGoalDraft
+      ? evaluateSmartGoalQuality(mapDraftToSmartGoal(pendingSmartGoalDraft))
+      : null;
 
     if (!data?.goals || data.goals.length === 0) {
       return emptyContext(route, pageContextHint, authSyncMode, undefined, userId, referenceDate);
@@ -242,11 +343,13 @@ export function buildAssistantContext(
     const lastReflectionDate = data.reflections && data.reflections.length > 0 ? data.reflections[0].date : null;
     const memory = getAssistantMemory(userId);
     const assistantMemorySummary = summarizeAssistantMemoryForContext(memory);
-    const retrievedKnowledge = query ? retrieveAssistantKnowledge(query, { referenceDate, userId, activeGoalId: activeGoal?.id }) : undefined;
+    const retrievedKnowledge = query
+      ? retrieveAssistantKnowledge(query, { referenceDate, userId, activeGoalId: activeGoal?.id })
+      : undefined;
 
     if (!activeGoal?.twelveWeekSystem) {
       return {
-        ...emptyContext(route, pageContextHint, authSyncMode, query, userId, referenceDate),
+        ...emptyContext(route, pageContextHint, authSyncMode, query, userId, referenceDate, activeTopic),
         goals,
         lastReflectionDate,
         feasibility: buildFeasibilityContext(data.goals[0]),
@@ -256,6 +359,9 @@ export function buildAssistantContext(
         assistantMemory: assistantMemorySummary,
         retrievedKnowledge,
         pendingClarification,
+        activeTopic,
+        smartGoalQuality,
+        pendingWorkflow: buildWorkflowSummary(userId),
       };
     }
 
@@ -286,10 +392,13 @@ export function buildAssistantContext(
       assistantMemory: assistantMemorySummary,
       retrievedKnowledge,
       pendingClarification,
+      activeTopic,
+      smartGoalQuality,
+      pendingWorkflow: buildWorkflowSummary(userId),
     };
   } catch {
     // Storage read error -> safe defaults.
-    return emptyContext(route, pageContextHint, authSyncMode, undefined, userId, referenceDate);
+    return emptyContext(route, pageContextHint, authSyncMode, undefined, userId, referenceDate, activeTopic);
   }
 }
 
@@ -300,11 +409,17 @@ function emptyContext(
   query?: string,
   userId: string | null = null,
   referenceDate = new Date(),
+  activeTopic?: string | null,
 ): AssistantContext {
   const memory = getAssistantMemory(userId);
   const assistantMemorySummary = summarizeAssistantMemoryForContext(memory);
   const retrievedKnowledge = query ? retrieveAssistantKnowledge(query, { referenceDate, userId }) : undefined;
   const pendingClarification = getPendingAssistantClarification(userId, referenceDate) ?? undefined;
+
+  const pendingSmartGoalDraft = readJsonStorage(APP_STORAGE_KEYS.pendingSmartGoal);
+  const smartGoalQuality = pendingSmartGoalDraft
+    ? evaluateSmartGoalQuality(mapDraftToSmartGoal(pendingSmartGoalDraft))
+    : null;
 
   return {
     currentWeek: null,
@@ -334,6 +449,9 @@ function emptyContext(
     assistantMemory: assistantMemorySummary,
     retrievedKnowledge,
     pendingClarification,
+    activeTopic,
+    smartGoalQuality,
+    pendingWorkflow: buildWorkflowSummary(userId),
   };
 }
 

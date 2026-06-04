@@ -303,10 +303,7 @@ function scoreTaskMatch(userText: string, task: AssistantTaskCandidate): number 
   return Math.round(queryCoverage * 70 + titleCoverage * 30);
 }
 
-function resolveTaskReference(
-  userText: string,
-  candidates: AssistantTaskCandidate[],
-): AssistantTaskCandidate | null {
+function resolveTaskReference(userText: string, candidates: AssistantTaskCandidate[]): AssistantTaskCandidate | null {
   if (candidates.length === 0) return null;
 
   const ordinalIndex = detectOrdinalIndex(userText, candidates.length);
@@ -372,7 +369,10 @@ export const mockProvider: AssistantProvider = {
     if (intent !== "today" && ctx.retrievedKnowledge && ctx.retrievedKnowledge.length > 0) {
       if (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle")) {
         const obstacles = ctx.retrievedKnowledge.filter(
-          (k) => k.source === "weekly_review" || k.snippet.toLowerCase().includes("trở ngại") || k.snippet.toLowerCase().includes("obstacle")
+          (k) =>
+            k.source === "weekly_review" ||
+            k.snippet.toLowerCase().includes("trở ngại") ||
+            k.snippet.toLowerCase().includes("obstacle"),
         );
         if (obstacles.length > 0) {
           await waitDelay();
@@ -381,7 +381,7 @@ export const mockProvider: AssistantProvider = {
       }
       if (lower.includes("toeic")) {
         const toeicGoals = ctx.retrievedKnowledge.filter(
-          (k) => k.title.toLowerCase().includes("toeic") || k.snippet.toLowerCase().includes("toeic")
+          (k) => k.title.toLowerCase().includes("toeic") || k.snippet.toLowerCase().includes("toeic"),
         );
         if (toeicGoals.length > 0) {
           await waitDelay();
@@ -393,31 +393,41 @@ export const mockProvider: AssistantProvider = {
     // Nếu hỏi về trở ngại cũ hoặc toeic mà retrievedKnowledge trống/không tìm thấy
     if (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle") || lower.includes("toeic")) {
       const hasObs = ctx.retrievedKnowledge?.some(
-        (k) => k.source === "weekly_review" || k.snippet.toLowerCase().includes("trở ngại") || k.snippet.toLowerCase().includes("obstacle")
+        (k) =>
+          k.source === "weekly_review" ||
+          k.snippet.toLowerCase().includes("trở ngại") ||
+          k.snippet.toLowerCase().includes("obstacle"),
       );
       const hasToeic = ctx.retrievedKnowledge?.some(
-        (k) => k.title.toLowerCase().includes("toeic") || k.snippet.toLowerCase().includes("toeic")
+        (k) => k.title.toLowerCase().includes("toeic") || k.snippet.toLowerCase().includes("toeic"),
       );
 
       if (intent !== "today" && lower.includes("toeic") && !hasToeic) {
         await waitDelay();
         return "Mình chưa thấy mục tiêu hay thông tin nào liên quan đến TOEIC trong dữ liệu của bạn.";
       }
-      if (intent !== "today" && (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle")) && !hasObs) {
+      if (
+        intent !== "today" &&
+        (lower.includes("kẹt") || lower.includes("trở ngại") || lower.includes("obstacle")) &&
+        !hasObs
+      ) {
         await waitDelay();
         return "Mình không thấy thông tin trở ngại cũ nào trong dữ liệu của bạn.";
       }
     }
 
     // 1. Kiểm tra cảnh báo từ chối hiểu sai ngữ cảnh của memory (case 8)
-    const hasWrongContextPattern = ctx.assistantMemory?.rejectedPatterns?.some((p) => p.toLowerCase().includes("ngữ cảnh"));
+    const hasWrongContextPattern = ctx.assistantMemory?.rejectedPatterns?.some((p) =>
+      p.toLowerCase().includes("ngữ cảnh"),
+    );
     if (hasWrongContextPattern && (lower.includes("mục tiêu") || lower.includes("goal"))) {
       await waitDelay();
       return "Bạn muốn thiết lập mục tiêu thuộc lĩnh vực nào cụ thể? Vui lòng làm rõ giúp mình.";
     }
 
     // 2. Ý định dời lịch task (reschedule task) - case 6 & case 10
-    const isRescheduleIntent = /dời|hoãn|chuyển lịch|reschedule/.test(lower) && /task|việc|nhiệm vụ|công việc/.test(lower);
+    const isRescheduleIntent =
+      /dời|hoãn|chuyển lịch|reschedule/.test(lower) && /task|việc|nhiệm vụ|công việc/.test(lower);
     if (isRescheduleIntent) {
       const openTasks = getTaskCandidates(ctx).filter((task) => !task.done);
       const matchTask = resolveTaskReference(userText, openTasks);
@@ -469,7 +479,11 @@ export const mockProvider: AssistantProvider = {
     }
 
     // 4. Ý định tạo task (create task) - case 9
-    const isCreateTaskIntent = (lower.includes("tạo") || lower.includes("thêm")) && (lower.includes("task") || lower.includes("việc") || lower.includes("nhiệm vụ")) && !lower.includes("mục tiêu") && !lower.includes("goal");
+    const isCreateTaskIntent =
+      (lower.includes("tạo") || lower.includes("thêm")) &&
+      (lower.includes("task") || lower.includes("việc") || lower.includes("nhiệm vụ")) &&
+      !lower.includes("mục tiêu") &&
+      !lower.includes("goal");
     if (isCreateTaskIntent) {
       let taskTitle = "Công việc mới";
       const match = userText.match(/(?:task|việc|nhiệm vụ)\s+(.+)/i);
@@ -493,8 +507,7 @@ export const mockProvider: AssistantProvider = {
 
     // Check if user wants to mark task as done
     const isTickIntent =
-      /tick|hoàn thành|xong|đóng|đánh dấu|mark|done|complete/.test(lower) &&
-      /task|việc|nhiệm vụ|công việc/.test(lower);
+      /tick|hoàn thành|xong|đóng|đánh dấu|mark|done|complete/.test(lower) && /task|việc|nhiệm vụ|công việc/.test(lower);
 
     if (isTickIntent) {
       // 1. Kiểm tra xem người dùng có 12-week plan không
@@ -549,9 +562,7 @@ export const mockProvider: AssistantProvider = {
       // 4. Nếu có nhiều hơn 1 task chưa hoàn thành, liệt kê và đề xuất nút bấm cho từng task (tối đa 3)
       const lines = uniqueOpen.map((task) => `- ${task.title}`);
       const proposed = uniqueOpen.slice(0, 3);
-      const actionBlocks = proposed
-        .map((task) => buildMarkDoneActionBlock(task, false))
-        .join("\n\n");
+      const actionBlocks = proposed.map((task) => buildMarkDoneActionBlock(task, false)).join("\n\n");
 
       let response = `Tôi thấy bạn có nhiều công việc chưa hoàn thành:\n${lines.join(
         "\n",
@@ -663,10 +674,11 @@ export const mockProvider: AssistantProvider = {
             return lp.includes("quá dài") || lp.includes("rườm rà");
           }))
       ) {
-        response = response.split("\n\n").slice(0, 2).join("\n\n") + "\n\n_(Phản hồi ngắn gọn theo sở thích của bạn)_";
+        response = `${response.split("\n\n").slice(0, 2).join("\n\n")}\n\n_(Phản hồi ngắn gọn theo sở thích của bạn)_`;
       }
       if (memory.recurringObstacles?.some((o) => o.toLowerCase().includes("thiếu thời gian"))) {
-        response += "\n\n**Mẹo nhỏ**: Nhận thấy bạn hay gặp trở ngại thiếu thời gian, hãy thử chia nhỏ task hôm nay ra thành các việc chỉ 10-15 phút nhé.";
+        response +=
+          "\n\n**Mẹo nhỏ**: Nhận thấy bạn hay gặp trở ngại thiếu thời gian, hãy thử chia nhỏ task hôm nay ra thành các việc chỉ 10-15 phút nhé.";
       }
     }
 

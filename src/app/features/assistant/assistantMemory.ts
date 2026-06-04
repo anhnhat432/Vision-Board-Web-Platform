@@ -1,5 +1,5 @@
-import type { FeedbackReason, MemoryItem, MemoryItemType } from "./types";
 import { getUserData } from "@/app/utils/storage";
+import type { FeedbackReason, MemoryItem } from "./types";
 
 export interface AssistantMemory {
   version: number;
@@ -64,7 +64,10 @@ export function redactSensitive(text: string): string {
       /\b(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key|credentials)\b\s*[:=]\s*["']?[^"'\s,;]+/gi,
       "$1: [REDACTED]",
     )
-    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi, "[REDACTED]")
+    .replace(
+      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi,
+      "[REDACTED]",
+    )
     .replace(
       /\b(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key|credentials)\b/gi,
       "[REDACTED]",
@@ -122,7 +125,11 @@ export function normalizeAssistantMemory(raw: unknown): AssistantMemory {
     memory.preferredCoachingStyle = rawObj.preferredCoachingStyle;
   }
 
-  if (rawObj.taskBehaviorSignals && typeof rawObj.taskBehaviorSignals === "object" && !Array.isArray(rawObj.taskBehaviorSignals)) {
+  if (
+    rawObj.taskBehaviorSignals &&
+    typeof rawObj.taskBehaviorSignals === "object" &&
+    !Array.isArray(rawObj.taskBehaviorSignals)
+  ) {
     const rawSignals = rawObj.taskBehaviorSignals as Record<string, unknown>;
     memory.taskBehaviorSignals.oftenMissedTaskTitles = normalizeTextArray(rawSignals.oftenMissedTaskTitles);
     if (typeof rawSignals.preferredTaskTime === "string") {
@@ -317,11 +324,11 @@ export function clearMemory(userId: string | null = null): void {
 export function mapMemoryItemsToLegacy(items: MemoryItem[]): AssistantMemory {
   const userPreferences: string[] = [];
   const recurringObstacles: string[] = [];
-  let preferredCoachingStyle: AssistantMemory["preferredCoachingStyle"] = undefined;
+  let preferredCoachingStyle: AssistantMemory["preferredCoachingStyle"];
   const recentCorrections: AssistantMemory["recentCorrections"] = [];
   const oftenMissedTaskTitles: string[] = [];
-  let preferredTaskTime: string | undefined = undefined;
-  let commonRescheduleReason: string | undefined = undefined;
+  let preferredTaskTime: string | undefined;
+  let commonRescheduleReason: string | undefined;
   const successfulPatterns: string[] = [];
   const rejectedPatterns: string[] = [];
 
@@ -388,10 +395,7 @@ export function saveAssistantMemory(memory: AssistantMemory, userId: string | nu
 
   // Giữ lại các items không thuộc legacy types để tránh bị mất
   const nonLegacyItems = items.filter(
-    (item) =>
-      item.type !== "user_preference" &&
-      item.type !== "assistant_correction" &&
-      item.type !== "task_history"
+    (item) => item.type !== "user_preference" && item.type !== "assistant_correction" && item.type !== "task_history",
   );
 
   const now = new Date().toISOString();
@@ -553,7 +557,7 @@ export function updateAssistantMemoryFromFeedback(
       }
     }
 
-    if (options?.correction && options.correction.trim()) {
+    if (options?.correction?.trim()) {
       reason = truncate(options.correction, 300);
     }
 
@@ -585,7 +589,7 @@ export function updateAssistantMemoryFromFeedback(
     }
 
     memory.successfulPatterns = addToUniqueArray(memory.successfulPatterns, pattern, MAX_ARRAY_SIZE);
-    
+
     // Lưu vào action outcome
     addMemoryItem(
       {
@@ -613,7 +617,11 @@ export function updateAssistantMemoryFromActionResult(
 
   if (success) {
     if (actionType === "mark_task_done" || actionType === "update_task_status") {
-      memory.successfulPatterns = addToUniqueArray(memory.successfulPatterns, "hoàn thành công việc nhanh", MAX_ARRAY_SIZE);
+      memory.successfulPatterns = addToUniqueArray(
+        memory.successfulPatterns,
+        "hoàn thành công việc nhanh",
+        MAX_ARRAY_SIZE,
+      );
     } else if (actionType === "reschedule_task") {
       memory.taskBehaviorSignals.commonRescheduleReason = "dời lịch khi bận";
       memory.userPreferences = addToUniqueArray(memory.userPreferences, "thường xuyên dời lịch task", MAX_ARRAY_SIZE);
@@ -632,7 +640,11 @@ export function updateAssistantMemoryFromActionResult(
   } else {
     const lowerMessage = message.toLowerCase();
     if (lowerMessage.includes("không tìm thấy") || lowerMessage.includes("chưa có") || lowerMessage.includes("thiếu")) {
-      memory.rejectedPatterns = addToUniqueArray(memory.rejectedPatterns, "chưa rõ mục tiêu hoặc task trong context", MAX_ARRAY_SIZE);
+      memory.rejectedPatterns = addToUniqueArray(
+        memory.rejectedPatterns,
+        "chưa rõ mục tiêu hoặc task trong context",
+        MAX_ARRAY_SIZE,
+      );
     }
 
     addMemoryItem(

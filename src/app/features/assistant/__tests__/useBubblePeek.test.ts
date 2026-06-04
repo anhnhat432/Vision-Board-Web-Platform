@@ -2,6 +2,12 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_PEEKS_PER_SESSION, PEEK_DURATION, PEEK_INTERVAL_MIN, PEEK_PHRASES, useBubblePeek } from "../useBubblePeek";
 
+vi.mock("react-router", () => ({
+  useLocation: () => ({
+    pathname: "/",
+  }),
+}));
+
 function advance(ms: number) {
   act(() => {
     vi.advanceTimersByTime(ms);

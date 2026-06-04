@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
+import { getMemoryItems } from "./assistantMemory";
 import { buildAssistantContext } from "./buildAssistantContext";
 
-export type NudgeReason = "new-week" | "overdue" | "idle";
+export type NudgeReason = "new-week" | "overdue" | "idle" | "personalized";
 
 export interface NudgeState {
   active: boolean;
@@ -126,10 +127,13 @@ export function useProactiveNudge(panelOpen: boolean): {
         activateNudge("idle", "Bạn đang phân vân chỗ nào không? Hỏi mình thử xem.");
       }, IDLE_MS);
     };
-
     const context = buildAssistantContext(undefined, route);
     const shownToday = readStorage(NUDGE_SHOWN_KEY(userId)) === "1";
     if (shownToday) return undefined;
+
+    const memoryItems = getMemoryItems(userId) || [];
+    const obstacles = (memoryItems || []).filter((item) => item?.tags?.includes("obstacle"));
+    const preferredTimes = (memoryItems || []).filter((item) => item?.tags?.includes("preferred_time"));
 
     const currentWeek = context.currentWeek;
     if (currentWeek !== null) {
@@ -144,12 +148,67 @@ export function useProactiveNudge(panelOpen: boolean): {
       }
     }
 
-    const overdueOpenCount = context.stuckSignals?.overdueOpenCount ?? 0;
-    if (overdueOpenCount > 0) {
-      activateNudge("overdue", `${overdueOpenCount} task đang quá hạn. Cùng xử lý từng cái nhé?`);
+    // Personalized preferred time nudge
+    const now = new Date();
+    const hours = now.getHours();
+    const day = now.getDay();
+    const isWeekend = day === 0 || day === 6;
+    let activePreferredTimeMsg = "";
+
+    const hasWeekendPref = preferredTimes.some(
+      (it) => it.content.toLowerCase().includes("cuối tuần") || it.tags?.includes("cuối tuần"),
+    );
+    const hasNightPref = preferredTimes.some(
+      (it) =>
+        it.content.toLowerCase().includes("đêm") ||
+        it.content.toLowerCase().includes("tối muộn") ||
+        it.tags?.includes("ban đêm"),
+    );
+    const hasMorningPref = preferredTimes.some(
+      (it) =>
+        it.content.toLowerCase().includes("sáng sớm") ||
+        it.content.toLowerCase().includes("buổi sáng") ||
+        it.tags?.includes("sáng sớm"),
+    );
+
+    if (isWeekend && hasWeekendPref) {
+      activePreferredTimeMsg = "Đang trong thời gian rảnh cuối tuần của bạn. Dành 10 phút xử lý task nhé?";
+    } else if ((hours >= 22 || hours < 5) && hasNightPref) {
+      activePreferredTimeMsg = "Đang là khung giờ tập trung ban đêm ưa thích của bạn. Bạn muốn bắt đầu việc gì?";
+    } else if (hours >= 5 && hours < 9 && hasMorningPref) {
+      activePreferredTimeMsg = "Khung giờ sáng sớm yên tĩnh này là lúc bạn tập trung tốt nhất. Cùng chạy task nhé?";
+    }
+
+    if (activePreferredTimeMsg) {
+      activateNudge("personalized", activePreferredTimeMsg);
       return undefined;
     }
 
+    const overdueOpenCount = context.stuckSignals?.overdueOpenCount ?? 0;
+    if (overdueOpenCount > 0) {
+      const busyPref = obstacles.some(
+        (it) =>
+          it.content.toLowerCase().includes("bận") ||
+          it.content.toLowerCase().includes("thì giờ") ||
+          it.content.toLowerCase().includes("thời gian"),
+      );
+      const lazyPref = obstacles.some(
+        (it) =>
+          it.content.toLowerCase().includes("lười") ||
+          it.content.toLowerCase().includes("ngại") ||
+          it.content.toLowerCase().includes("nản"),
+      );
+
+      let overdueMsg = `${overdueOpenCount} task đang quá hạn. Cùng xử lý từng cái nhé?`;
+      if (busyPref) {
+        overdueMsg = `Biết bạn dạo này khá bận rộn, nhưng có ${overdueOpenCount} việc đã quá hạn. Dành 5 phút giải quyết 1 việc nhỏ nhé?`;
+      } else if (lazyPref) {
+        overdueMsg = `Hơi lười một chút cũng không sao, hãy thử xử lý 1 việc quá hạn siêu nhanh trong 3 phút xem thế nào nhé?`;
+      }
+
+      activateNudge("overdue", overdueMsg);
+      return undefined;
+    }
     const handleActivity: EventListener = () => {
       if (panelOpen || hasTriggeredThisLoadRef.current) return;
       scheduleIdleTimer();

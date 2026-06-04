@@ -48,13 +48,13 @@ vi.mock("../executeAction", () => ({
 }));
 
 import { sendAssistantMessageStream } from "../assistantApi";
-import { executeAction } from "../executeAction";
-import { buildAssistantContext } from "../buildAssistantContext";
 import {
   createTaskSelectionClarification,
   getPendingAssistantClarification,
   setPendingAssistantClarification,
 } from "../assistantConversationState";
+import { buildAssistantContext } from "../buildAssistantContext";
+import { executeAction } from "../executeAction";
 
 const mockedSendAssistantMessageStream = vi.mocked(sendAssistantMessageStream);
 const mockedExecuteAction = vi.mocked(executeAction);

@@ -284,8 +284,7 @@ function sanitizeCreateTwelveWeekPlanDraftPayload(payload: Record<string, unknow
         const name = typeof rawItem.name === "string" ? rawItem.name.slice(0, 200).trim() : "";
         const target = typeof rawItem.target === "string" ? rawItem.target.slice(0, 50).trim() : "";
         const unit = typeof rawItem.unit === "string" ? rawItem.unit.slice(0, 50).trim() : "";
-        const type: LeadIndicatorType =
-          rawItem.type === "core" || rawItem.type === "optional" ? rawItem.type : "core";
+        const type: LeadIndicatorType = rawItem.type === "core" || rawItem.type === "optional" ? rawItem.type : "core";
         const cadence =
           rawItem.cadence === "spread" || rawItem.cadence === "frontload" || rawItem.cadence === "backload"
             ? rawItem.cadence

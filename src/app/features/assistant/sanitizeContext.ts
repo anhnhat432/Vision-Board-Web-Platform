@@ -22,6 +22,9 @@ const MAX_DAYS_UNTIL = 365;
 const MAX_MISSING_FIELDS = 8;
 
 type RetrievedKnowledgeSource = NonNullable<AssistantContext["retrievedKnowledge"]>[number]["source"];
+type PendingWorkflowSummary = NonNullable<AssistantContext["pendingWorkflow"]>;
+type PendingWorkflowType = PendingWorkflowSummary["type"];
+type PendingWorkflowStatus = PendingWorkflowSummary["status"];
 
 export function sanitizeAssistantContext(ctx: AssistantContext & { route: string }): SanitizedAssistantContext {
   return {
@@ -51,6 +54,9 @@ export function sanitizeAssistantContext(ctx: AssistantContext & { route: string
     assistantMemory: sanitizeAssistantMemory(ctx.assistantMemory),
     retrievedKnowledge: sanitizeRetrievedKnowledge(ctx.retrievedKnowledge),
     pendingClarification: sanitizePendingClarification(ctx.pendingClarification),
+    activeTopic: ctx.activeTopic ? text(ctx.activeTopic, 100) : null,
+    smartGoalQuality: sanitizeSmartGoalQuality(ctx.smartGoalQuality),
+    pendingWorkflow: sanitizePendingWorkflow(ctx.pendingWorkflow),
   };
 }
 
@@ -211,9 +217,7 @@ export function sanitizePageContextHint(
   };
 }
 
-function sanitizeAssistantMemory(
-  memory: AssistantContext["assistantMemory"],
-): AssistantContext["assistantMemory"] {
+function sanitizeAssistantMemory(memory: AssistantContext["assistantMemory"]): AssistantContext["assistantMemory"] {
   if (!memory) return undefined;
   return {
     preferredCoachingStyle: ["direct", "gentle", "structured", "brief"].includes(String(memory.preferredCoachingStyle))
@@ -230,9 +234,12 @@ function sanitizeAssistantMemory(
 function redactSensitive(textVal: string): string {
   return textVal
     .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]")
-    .replace(/[\w\-]{20,}/g, "[REDACTED]")
+    .replace(/[\w-]{20,}/g, "[REDACTED]")
     .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)\s*:\s*[^\s,]+/gi, "$1: [REDACTED]")
-    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi, "[REDACTED]")
+    .replace(
+      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi,
+      "[REDACTED]",
+    )
     .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)/gi, "[REDACTED]");
 }
 
@@ -297,4 +304,64 @@ function sanitizePendingClarification(
     createdAt: text(pending.createdAt, 40),
     expiresAt: text(pending.expiresAt, 40),
   };
+}
+
+function sanitizeSmartGoalQuality(quality: AssistantContext["smartGoalQuality"]): AssistantContext["smartGoalQuality"] {
+  if (!quality) return null;
+  return {
+    overallScore: clamp(quality.overallScore, 0, 100, 0),
+    level: ["weak", "okay", "strong"].includes(String(quality.level)) ? quality.level : "weak",
+    warnings: (quality.warnings || []).slice(0, 10).map((item) => text(item, 200)),
+    suggestions: (quality.suggestions || []).slice(0, 10).map((item) => text(item, 200)),
+    canProceedToFeasibility: !!quality.canProceedToFeasibility,
+  };
+}
+
+function sanitizePendingWorkflow(workflow: AssistantContext["pendingWorkflow"]): AssistantContext["pendingWorkflow"] {
+  if (!workflow) return null;
+
+  const type = String(workflow.type);
+  if (!isPendingWorkflowType(type)) return null;
+
+  const status = String(workflow.status);
+  if (!isPendingWorkflowStatus(status)) return null;
+
+  const proposedActions = (workflow.proposedActions || [])
+    .slice(0, 15)
+    .map((act) => ({
+      type: text(act.type, 50),
+      label: redactSensitive(text(act.label, 160)),
+    }))
+    .filter((act) => act.type && act.label);
+
+  return {
+    id: text(workflow.id, 100),
+    type,
+    status,
+    summary: redactSensitive(text(workflow.summary, 1000)),
+    missingFields: (workflow.missingFields || []).slice(0, 10).map((f) => text(f, 80)),
+    proposedActions,
+  };
+}
+
+function isPendingWorkflowType(value: string): value is PendingWorkflowType {
+  return (
+    value === "create_goal_workflow" ||
+    value === "create_task_workflow" ||
+    value === "create_12_week_plan_workflow" ||
+    value === "weekly_review_workflow" ||
+    value === "reflection_workflow"
+  );
+}
+
+function isPendingWorkflowStatus(value: string): value is PendingWorkflowStatus {
+  return (
+    value === "draft" ||
+    value === "needs_clarification" ||
+    value === "ready_for_confirmation" ||
+    value === "executing" ||
+    value === "completed" ||
+    value === "failed" ||
+    value === "cancelled"
+  );
 }

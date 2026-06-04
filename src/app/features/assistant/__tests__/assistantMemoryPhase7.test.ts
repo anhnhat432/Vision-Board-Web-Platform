@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as storage from "@/app/utils/storage";
+import type { UserData } from "@/app/utils/storage-types";
 import {
-  getMemoryItems,
   addMemoryItem,
-  deleteMemoryItem,
-  clearMemory,
   autoCaptureUserMemory,
+  clearMemory,
+  deleteMemoryItem,
+  getMemoryItems,
   redactSensitive,
 } from "../assistantMemory";
 import { retrieveAssistantKnowledge } from "../assistantRetrieval";
 import { buildAssistantContext } from "../buildAssistantContext";
 import { sanitizeAssistantContext } from "../sanitizeContext";
-import * as storage from "@/app/utils/storage";
-import type { UserData } from "@/app/utils/storage-types";
 
 vi.mock("@/app/utils/storage", () => {
   let mockUserData: UserData | null = null;
@@ -76,7 +76,7 @@ describe("Assistant Memory Phase 7 - Memory Items & Retrieval", () => {
   it("limits content length and truncates text appropriately", () => {
     const veryLongText = Array(100).fill("hello").join(" ");
     const addedItem = addMemoryItem({ type: "user_preference", content: veryLongText }, "user_limit");
-    
+
     expect(addedItem.content.length).toBe(300); // truncated to 300
   });
 
@@ -106,23 +106,25 @@ describe("Assistant Memory Phase 7 - Memory Items & Retrieval", () => {
       successfulPatterns: [],
       rejectedPatterns: [],
       recentCorrections: [
-        { at: new Date().toISOString(), userSaid: "Dài quá", assistantShouldDo: "Trả lời ngắn thôi" }
+        { at: new Date().toISOString(), userSaid: "Dài quá", assistantShouldDo: "Trả lời ngắn thôi" },
       ],
       taskBehaviorSignals: {
         oftenMissedTaskTitles: ["Chạy bộ"],
-      }
+      },
     };
     localStorage.setItem("assistant.memory", JSON.stringify(legacyMemory));
 
     const items = getMemoryItems("user_migrated");
     expect(items.length).toBeGreaterThan(0);
-    
+
     // Kiểm tra xem Đọc sách đã được migrate thành item
-    expect(items.some(it => it.type === "user_preference" && it.content === "Đọc sách")).toBe(true);
+    expect(items.some((it) => it.type === "user_preference" && it.content === "Đọc sách")).toBe(true);
     // Kiểm tra xem Lười biếng đã được migrate
-    expect(items.some(it => it.type === "user_preference" && it.content === "Lười biếng" && it.tags?.includes("obstacle"))).toBe(true);
+    expect(
+      items.some((it) => it.type === "user_preference" && it.content === "Lười biếng" && it.tags?.includes("obstacle")),
+    ).toBe(true);
     // Kiểm tra xem Trả lời ngắn thôi đã được migrate
-    expect(items.some(it => it.type === "assistant_correction" && it.content === "Trả lời ngắn thôi")).toBe(true);
+    expect(items.some((it) => it.type === "assistant_correction" && it.content === "Trả lời ngắn thôi")).toBe(true);
   });
 
   it("captures preferences from user chat text automatically", () => {
@@ -134,36 +136,50 @@ describe("Assistant Memory Phase 7 - Memory Items & Retrieval", () => {
     autoCaptureUserMemory("Mục tiêu chính của tôi là thi đỗ IELTS 7.5", "user_capture");
     const items2 = getMemoryItems("user_capture");
     expect(items2).toHaveLength(2);
-    expect(items2.some(it => it.type === "goal_context" && it.content.includes("IELTS"))).toBe(true);
+    expect(items2.some((it) => it.type === "goal_context" && it.content.includes("IELTS"))).toBe(true);
 
     // Test capture Obstacles
     autoCaptureUserMemory("Tuần này bận quá không có thời gian", "user_capture");
     const items3 = getMemoryItems("user_capture");
-    expect(items3.some(it => it.type === "user_preference" && it.tags?.includes("obstacle") && it.content.includes("bận quá"))).toBe(true);
+    expect(
+      items3.some(
+        (it) => it.type === "user_preference" && it.tags?.includes("obstacle") && it.content.includes("bận quá"),
+      ),
+    ).toBe(true);
 
     // Test capture Preferred Work Time
     autoCaptureUserMemory("Tôi thường học buổi sáng sớm", "user_capture");
     const items4 = getMemoryItems("user_capture");
-    expect(items4.some(it => it.type === "user_preference" && it.tags?.includes("preferred_time") && it.content.includes("sáng sớm"))).toBe(true);
+    expect(
+      items4.some(
+        (it) => it.type === "user_preference" && it.tags?.includes("preferred_time") && it.content.includes("sáng sớm"),
+      ),
+    ).toBe(true);
   });
 
   it("retrieves knowledge using keywords, active goal, decay, and tag matching", () => {
     const now = new Date();
-    addMemoryItem({
-      type: "user_preference",
-      content: "Tôi thích học IELTS",
-      tags: ["ielts", "study"],
-      createdAt: now.toISOString(),
-    }, "user_ret");
+    addMemoryItem(
+      {
+        type: "user_preference",
+        content: "Tôi thích học IELTS",
+        tags: ["ielts", "study"],
+        createdAt: now.toISOString(),
+      },
+      "user_ret",
+    );
 
     const oldDate = new Date();
     oldDate.setDate(oldDate.getDate() - 30); // 30 days ago
-    addMemoryItem({
-      type: "goal_context",
-      content: "Mục tiêu IELTS cũ của tôi",
-      tags: ["ielts"],
-      createdAt: oldDate.toISOString(),
-    }, "user_ret");
+    addMemoryItem(
+      {
+        type: "goal_context",
+        content: "Mục tiêu IELTS cũ của tôi",
+        tags: ["ielts"],
+        createdAt: oldDate.toISOString(),
+      },
+      "user_ret",
+    );
 
     const results = retrieveAssistantKnowledge("IELTS", {
       userId: "user_ret",
@@ -184,7 +200,7 @@ describe("Assistant Memory Phase 7 - Memory Items & Retrieval", () => {
           title: "Goal 1",
           category: "career",
           tasks: [],
-        }
+        },
       ],
       reflections: [],
     } as unknown as UserData;
@@ -193,7 +209,7 @@ describe("Assistant Memory Phase 7 - Memory Items & Retrieval", () => {
     addMemoryItem({ type: "user_preference", content: "Thích code React" }, "user_ctx");
 
     const ctx = buildAssistantContext(new Date(), "/dashboard", undefined, "React", "user_ctx");
-    
+
     expect(ctx.assistantMemory).toBeDefined();
     expect(ctx.assistantMemory?.userPreferences).toContain("Thích code React");
     expect(ctx.retrievedKnowledge).toBeDefined();

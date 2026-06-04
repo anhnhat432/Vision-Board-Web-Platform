@@ -9,6 +9,14 @@ const authContextMock = vi.hoisted(() => ({
   useOptionalAuthContext: vi.fn(),
 }));
 
+const assistantMemoryMock = vi.hoisted(() => ({
+  getMemoryItems: vi.fn().mockReturnValue([]),
+}));
+
+vi.mock("../assistantMemory", () => ({
+  getMemoryItems: assistantMemoryMock.getMemoryItems,
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
@@ -192,5 +200,55 @@ describe("useProactiveNudge", () => {
 
     expect(secondResult.current.nudge.active).toBe(false);
     expect(localStorage.getItem("assistant.lastSeenWeek:user-b")).toBe("3");
+  });
+
+  it("shows personalized weekend nudge when user has weekend preference and today is weekend", () => {
+    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    // Thiết lập hệ thống chạy vào ngày thứ 7 (2026-05-23)
+    vi.setSystemTime(new Date(`2026-05-23T12:00:00`));
+    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 3 }));
+    assistantMemoryMock.getMemoryItems.mockReturnValue([
+      {
+        id: "mem1",
+        userId: "user-1",
+        type: "user_preference",
+        content: "rảnh cuối tuần",
+        tags: ["preferred_time"],
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+
+    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
+
+    expect(result.current.nudge).toMatchObject({
+      active: true,
+      reason: "personalized",
+      message: "Đang trong thời gian rảnh cuối tuần của bạn. Dành 10 phút xử lý task nhé?",
+    });
+  });
+
+  it("shows busy-personalized overdue nudge when user has busy obstacle", () => {
+    localStorage.setItem("assistant.lastSeenWeek:user-1", "3");
+    // Quay về ngày thường
+    vi.setSystemTime(new Date(`${TODAY}T12:00:00`));
+    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 3, overdueOpenCount: 2 }));
+    assistantMemoryMock.getMemoryItems.mockReturnValue([
+      {
+        id: "mem2",
+        userId: "user-1",
+        type: "user_preference",
+        content: "dạo này bận rộn",
+        tags: ["obstacle"],
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+
+    const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
+
+    expect(result.current.nudge).toMatchObject({
+      active: true,
+      reason: "overdue",
+      message: "Biết bạn dạo này khá bận rộn, nhưng có 2 việc đã quá hạn. Dành 5 phút giải quyết 1 việc nhỏ nhé?",
+    });
   });
 });
