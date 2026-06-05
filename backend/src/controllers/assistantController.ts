@@ -7,6 +7,7 @@ import {
 } from "../services/assistantService";
 import {
   processAIAssistantRequest,
+  processAIAssistantRequestStream,
   type AIAssistantRequest,
 } from "../services/aiAssistantService";
 import { transcribeAudio } from "../services/groqAssistantProvider";
@@ -21,6 +22,43 @@ function getProviderStatus(errorCode: string): number {
   if (errorCode === "ASSISTANT_PROVIDER_NOT_CONFIGURED") return 503;
   if (errorCode === "ASSISTANT_PROVIDER_TIMEOUT") return 504;
   return 502;
+}
+
+function getAiProviderStatus(errorCode: string): number {
+  if (errorCode === "AI_PROVIDER_NOT_CONFIGURED" || errorCode === "ASSISTANT_PROVIDER_NOT_CONFIGURED") return 503;
+  if (errorCode === "ASSISTANT_PROVIDER_TIMEOUT") return 504;
+  return 400;
+}
+
+function validateAIAssistantBody(body: any):
+  | { request: AIAssistantRequest }
+  | { error: { message: string; errorCode: string } } {
+  const { message, context, mode, history } = body;
+
+  if (typeof message !== "string" || !message.trim()) {
+    return { error: { message: "Tin nhắn không hợp lệ.", errorCode: "AI_INVALID_MESSAGE" } };
+  }
+
+  if (!context || typeof context !== "object") {
+    return { error: { message: "Dữ liệu ngữ cảnh không hợp lệ.", errorCode: "AI_INVALID_CONTEXT" } };
+  }
+
+  if (mode !== "demo" && mode !== "real") {
+    return { error: { message: "Chế độ ứng dụng không hợp lệ.", errorCode: "AI_INVALID_MODE" } };
+  }
+
+  return {
+    request: {
+      message,
+      context,
+      mode,
+      history,
+    },
+  };
+}
+
+function writeSseEvent(res: Response, event: Record<string, unknown>): void {
+  res.write(`data: ${JSON.stringify(event)}\n\n`);
 }
 
 export async function chatController(req: Request, res: Response) {
@@ -140,7 +178,7 @@ export async function aiAssistantController(req: Request, res: Response) {
     const result = await processAIAssistantRequest(requestData);
 
     if ("errorCode" in result) {
-      const status = result.errorCode === "AI_PROVIDER_NOT_CONFIGURED" || result.errorCode === "ASSISTANT_PROVIDER_NOT_CONFIGURED" ? 503 : 400;
+      const status = getAiProviderStatus(result.errorCode);
       return res.status(status).json(
         withErrorCode(result.message, result.errorCode),
       );
@@ -152,6 +190,62 @@ export async function aiAssistantController(req: Request, res: Response) {
     return res.status(500).json(
       withErrorCode("Đã xảy ra lỗi hệ thống khi xử lý yêu cầu.", "AI_INTERNAL_ERROR"),
     );
+  }
+}
+
+export async function aiAssistantStreamController(req: Request, res: Response) {
+  const validation = validateAIAssistantBody(req.body);
+
+  if ("error" in validation) {
+    return res.status(400).json(
+      withErrorCode(validation.error.message, validation.error.errorCode),
+    );
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  const abortController = new AbortController();
+  let closed = false;
+  req.on("close", () => {
+    closed = true;
+    abortController.abort();
+  });
+
+  const onDelta = (text: string) => {
+    if (!closed && !res.writableEnded) {
+      writeSseEvent(res, { type: "delta", text });
+    }
+  };
+
+  try {
+    const error = await processAIAssistantRequestStream(validation.request, onDelta, abortController.signal);
+
+    if (!closed && !res.writableEnded) {
+      if (error) {
+        writeSseEvent(res, {
+          type: "error",
+          message: error.message,
+          errorCode: error.errorCode,
+        });
+      }
+
+      writeSseEvent(res, { type: "done" });
+      res.end();
+    }
+  } catch (error) {
+    console.error("[ai-assistant] Stream error:", error instanceof Error ? error.name : "UnknownError");
+    if (!closed && !res.writableEnded) {
+      writeSseEvent(res, {
+        type: "error",
+        message: "Đã xảy ra lỗi hệ thống khi xử lý yêu cầu.",
+        errorCode: "AI_INTERNAL_ERROR",
+      });
+      res.end();
+    }
   }
 }
 

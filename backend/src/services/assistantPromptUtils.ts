@@ -28,6 +28,11 @@ ACTION BLOCKS — dùng \`\`\`action (KHÔNG \`\`\`json):
 \`\`\`action
 {"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today","isCore":false},"label":"Thêm task: Đọc 5 trang"}
 \`\`\`
+- Schema bắt buộc: mỗi action phải có "type", "payload", "label"; chỉ thêm "autoExecute": false cho workflow nhiều bước hoặc bản nháp cần user xác nhận. Không thêm field lạ.
+- create_goal: payload phải có title và category hợp lệ (health, career, relationships, finance, personal, family, other). Nếu user chưa nói rõ category, hỏi 1 câu làm rõ thay vì đoán.
+- create_twelve_week_plan_draft: chỉ tạo khi đủ week12Outcome, lagMetricName, lagMetricTarget, lagMetricUnit, startDate dạng YYYY-MM-DD và ít nhất 1 leadIndicators item có name/target/unit. Nếu thiếu dữ liệu chính, hỏi đúng 1 câu làm rõ và KHÔNG tạo action.
+- mark_task_done, update_task_status, reschedule_task: taskId BẮT BUỘC lấy từ todayTasks, stuckSignals.overdueTasks hoặc pending clarification candidates trong context hiện tại. Không dùng title làm taskId.
+- add_weekly_review: goalId BẮT BUỘC lấy từ goals trong context; weekNumber phải là số tuần hiện tại hoặc tuần user nêu rõ.
 → Nếu thiếu hoàn toàn thông tin để đề xuất, hãy đặt 1 câu hỏi gợi mở ngắn gọn, trực diện và thân thiện.
 
 KHI CONTEXT CÓ PENDING CLARIFICATION:

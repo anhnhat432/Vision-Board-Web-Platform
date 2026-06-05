@@ -98,7 +98,7 @@ describe("AssistantMascot", () => {
     expect(screen.queryAllByText(proactiveNudge.message)).toHaveLength(0);
   });
 
-  it("renders the decorative sparkle icon inside the mascot button", () => {
+  it("renders the owl icon inside the mascot button", () => {
     render(
       <AssistantMascot
         isOpen={false}
@@ -113,10 +113,11 @@ describe("AssistantMascot", () => {
     const owlIcon = button.querySelector("svg");
 
     expect(owlIcon).toBeInTheDocument();
-    expect(owlIcon).toHaveClass("lucide-sparkles");
+    expect(owlIcon?.querySelector(".owl-body")).toBeInTheDocument();
+    expect(owlIcon?.querySelector(".owl-eye-disc")).toBeInTheDocument();
   });
 
-  it("applies twinkle animation to the sparkle icon when not open/dragging", () => {
+  it("renders both owl eye groups when not open or dragging", () => {
     render(
       <AssistantMascot
         isOpen={false}
@@ -128,9 +129,9 @@ describe("AssistantMascot", () => {
     );
 
     const button = screen.getByRole("button", { name: "Mở trợ lý AI" });
-    const innerShell = button.querySelector(".animate-sparkle-twinkle");
+    const eyeGroups = button.querySelectorAll(".owl-eyes");
 
-    expect(innerShell).toBeInTheDocument();
+    expect(eyeGroups).toHaveLength(2);
   });
 
   it("returns null when isOpen = true, preventing animation", () => {

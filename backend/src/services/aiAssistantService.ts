@@ -1,6 +1,6 @@
 import { env } from "../config/env";
 import { sendToGemini } from "./geminiAssistantProvider";
-import { sendToGroq } from "./groqAssistantProvider";
+import { sendToGroq, sendToGroqStream } from "./groqAssistantProvider";
 import type { AssistantContext } from "./assistantService";
 
 export interface AssistantAction {
@@ -268,6 +268,38 @@ function shouldUseProviderFallback(errorCode: string): boolean {
   return PROVIDER_FALLBACK_ERROR_CODES.has(errorCode);
 }
 
+export function formatAIAssistantResponseForStream(response: AIAssistantResponse): string {
+  let content = response.assistantText;
+  for (const action of response.proposedActions) {
+    content += `\n\n\`\`\`action\n${JSON.stringify(action, null, 2)}\n\`\`\``;
+  }
+  return content;
+}
+
+function normalizeStreamingProviderError(error: unknown): AIAssistantError {
+  if (error && typeof error === "object" && "errorCode" in error && "message" in error) {
+    const providerError = error as { message?: unknown; errorCode?: unknown };
+    if (typeof providerError.message === "string" && typeof providerError.errorCode === "string") {
+      return {
+        message: providerError.message,
+        errorCode: providerError.errorCode,
+      };
+    }
+  }
+
+  if (error instanceof Error && error.name === "AbortError") {
+    return {
+      message: "Phản hồi từ trợ lý quá lâu. Thử lại nhé.",
+      errorCode: "ASSISTANT_PROVIDER_TIMEOUT",
+    };
+  }
+
+  return {
+    message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
+    errorCode: "ASSISTANT_PROVIDER_ERROR",
+  };
+}
+
 function buildProviderFallbackResponse(
   userText: string,
   ctx: AssistantContext,
@@ -277,7 +309,7 @@ function buildProviderFallbackResponse(
   if (errorCode === "ASSISTANT_PROVIDER_AUTH_ERROR") {
     return {
       ...fallback,
-      assistantText: `AI nÃ¢ng cao táº¡m thá»i chÆ°a xÃ¡c thá»±c Ä‘Æ°á»£c, nÃªn mÃ¬nh dÃ¹ng cháº¿ Ä‘á»™ nhanh Ä‘á»ƒ há»— trá»£ trÆ°á»›c.\n\n${fallback.assistantText}`.trim(),
+      assistantText: `AI nâng cao tạm thời chưa xác thực được, nên mình dùng chế độ nhanh để hỗ trợ trước.\n\n${fallback.assistantText}`.trim(),
     };
   }
   const notice =
@@ -846,4 +878,69 @@ export async function processAIAssistantRequest(
 
   // Phân tích và validate schema proposed actions từ kết quả LLM
   return parseAndValidateAIResponse(result.message);
+}
+
+export async function processAIAssistantRequestStream(
+  request: AIAssistantRequest,
+  onDelta: (text: string) => void,
+  signal?: AbortSignal,
+): Promise<void | AIAssistantError> {
+  const provider = env.AI_PROVIDER;
+  const apiKey = env.AI_API_KEY;
+
+  if (shouldUseLocalAssistantShortcut(request.message)) {
+    onDelta(formatAIAssistantResponseForStream(getDeterministicFallback(request.message, request.context)));
+    return;
+  }
+
+  if (!apiKey) {
+    if (request.mode === "demo") {
+      onDelta(formatAIAssistantResponseForStream(getDeterministicFallback(request.message, request.context)));
+      return;
+    }
+
+    return {
+      message: "Dịch vụ AI chưa được cấu hình. Vui lòng cấu hình API Key để sử dụng trợ lý ở real-mode.",
+      errorCode: "AI_PROVIDER_NOT_CONFIGURED",
+    };
+  }
+
+  const history = request.history || [];
+
+  if (provider !== "groq") {
+    const result = await processAIAssistantRequest(request);
+    if ("errorCode" in result) return result;
+    onDelta(formatAIAssistantResponseForStream(result));
+    return;
+  }
+
+  try {
+    let hasDelta = false;
+    await sendToGroqStream(
+      request.message.trim(),
+      request.context,
+      history,
+      (delta) => {
+        hasDelta = true;
+        onDelta(delta);
+      },
+      signal,
+    );
+
+    if (!hasDelta) {
+      return {
+        message: "Trợ lý chưa có gợi ý phù hợp cho câu hỏi này. Thử hỏi cụ thể hơn nhé.",
+        errorCode: "ASSISTANT_PROVIDER_ERROR",
+      };
+    }
+  } catch (error) {
+    const err = normalizeStreamingProviderError(error);
+    if (shouldUseProviderFallback(err.errorCode)) {
+      console.warn("[ai-assistant] Groq stream unavailable, using deterministic fallback:", err.errorCode);
+      onDelta(formatAIAssistantResponseForStream(buildProviderFallbackResponse(request.message, request.context, err.errorCode)));
+      return;
+    }
+
+    return err;
+  }
 }

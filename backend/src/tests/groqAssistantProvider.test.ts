@@ -92,6 +92,17 @@ describe("groqAssistantProvider prompt", () => {
     assert.match(prompt, /ví dụ điền/i);
   });
 
+  it("documents strict action schema rules for Groq", async () => {
+    ensureBackendEnvForProviderImports();
+    const { buildSystemPrompt } = await import("../services/assistantPromptUtils");
+    const prompt = buildSystemPrompt();
+
+    assert.match(prompt, /create_twelve_week_plan_draft/);
+    assert.match(prompt, /startDate dạng YYYY-MM-DD/);
+    assert.match(prompt, /Không dùng title làm taskId/);
+    assert.match(prompt, /autoExecute": false/);
+  });
+
   it("summarizes enriched context for Groq", async () => {
     ensureBackendEnvForProviderImports();
     const { summarizeContext } = await import("../services/assistantPromptUtils");

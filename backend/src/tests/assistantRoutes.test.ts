@@ -235,6 +235,23 @@ describe("assistantRoutes", () => {
     }
   });
 
+  it("requires auth for structured AI stream endpoint", async () => {
+    const response = await requestJson(await createTestApp(), "/api/ai/assistant/stream", undefined, {
+      message: "ban la ai",
+      mode: "real",
+      context: {
+        currentWeek: 1,
+        weeksTotal: 12,
+        goals: [],
+        todayTasks: [],
+        lastReflectionDate: null,
+        route: "/12-week-system",
+      },
+    });
+
+    assert.equal(response.status, 401);
+  });
+
   it("returns SSE stream with correct content-type", async () => {
     const app = await createTestApp();
     const server = app.listen(0);
@@ -257,6 +274,47 @@ describe("assistantRoutes", () => {
       assert.equal(response.status, 200);
       const contentType = response.headers.get("Content-Type");
       assert.ok(contentType?.includes("text/event-stream"));
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+  });
+
+  it("returns structured AI SSE stream for local shortcut responses", async () => {
+    const app = await createTestApp();
+    const server = app.listen(0);
+    await new Promise<void>((resolve) => server.once("listening", resolve));
+    const address = server.address() as import("node:net").AddressInfo;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${address.port}/api/ai/assistant/stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer verified-token",
+        },
+        body: JSON.stringify({
+          message: "ban la ai",
+          mode: "real",
+          context: {
+            currentWeek: 1,
+            weeksTotal: 12,
+            goals: [],
+            todayTasks: [],
+            lastReflectionDate: null,
+            route: "/12-week-system",
+          },
+        }),
+      });
+
+      const body = await response.text();
+
+      assert.equal(response.status, 200);
+      assert.ok(response.headers.get("Content-Type")?.includes("text/event-stream"));
+      assert.match(body, /"type":"delta"/);
+      assert.match(body, /Vision Board/);
+      assert.match(body, /"type":"done"/);
     } finally {
       await new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));

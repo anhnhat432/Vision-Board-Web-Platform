@@ -16,6 +16,7 @@ import {
   parseAndValidateAIResponse,
   getDeterministicFallback,
   processAIAssistantRequest,
+  processAIAssistantRequestStream,
   selectGeminiModelForAssistantRequest,
   shouldUseLocalAssistantShortcut,
 } from "../services/aiAssistantService";
@@ -271,6 +272,32 @@ describe("aiAssistantService processAIAssistantRequest", () => {
       assert.ok(!("errorCode" in response));
       assert.equal(response.proposedActions.length, 0);
       assert.ok(response.assistantText.length > 0);
+    } finally {
+      (env as any).AI_API_KEY = originalKey;
+    }
+  });
+
+  it("streams short identity requests locally in real mode without an API key", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalKey = env.AI_API_KEY;
+    (env as any).AI_API_KEY = "";
+    const deltas: string[] = [];
+
+    try {
+      const error = await processAIAssistantRequestStream(
+        {
+          message: "ban la ai",
+          context: sampleContext,
+          mode: "real",
+        },
+        (delta) => deltas.push(delta),
+      );
+
+      assert.equal(error, undefined);
+      assert.equal(deltas.length, 1);
+      assert.match(deltas.join(""), /Vision Board/);
+      assert.match(deltas.join(""), /SMART goal/);
     } finally {
       (env as any).AI_API_KEY = originalKey;
     }

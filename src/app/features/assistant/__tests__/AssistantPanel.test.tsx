@@ -503,7 +503,8 @@ describe("AssistantPanel", () => {
     await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "tạo mục tiêu học tiếng anh{enter}");
 
     // Đợi proposal xuất hiện
-    expect(await screen.findByText("Tạo mục tiêu: Học tiếng Anh")).toBeInTheDocument();
+    const goalProposalLabels = await screen.findAllByText("Tạo mục tiêu: Học tiếng Anh");
+    expect(goalProposalLabels.length).toBeGreaterThan(0);
 
     // Sẽ thấy nút "Từ chối" và "Đồng ý"
     const rejectBtn = screen.getByRole("button", { name: "Từ chối" });
@@ -548,7 +549,8 @@ describe("AssistantPanel", () => {
     await userEvent.type(screen.getByPlaceholderText("Nhập tin nhắn..."), "lập kế hoạch 12 tuần{enter}");
 
     // Đợi proposal xuất hiện
-    expect(await screen.findByText("Tạo bản nháp kế hoạch 12 tuần")).toBeInTheDocument();
+    const planProposalLabels = await screen.findAllByText("Tạo bản nháp kế hoạch 12 tuần");
+    expect(planProposalLabels.length).toBeGreaterThan(0);
 
     // Kiểm tra hiển thị preview
     expect(screen.getByText("Giảm 3kg mỡ thừa")).toBeInTheDocument();
