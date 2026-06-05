@@ -175,8 +175,4 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
       )}
     </div>
   );
-}dark:bg-emerald-400 ml-0.5" />
-      )}
-    </div>
-  );
 }
