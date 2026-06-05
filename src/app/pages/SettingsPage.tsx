@@ -660,7 +660,7 @@ export function SettingsPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
+                  className="border-[color:var(--color-warning-border)] text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)] hover:text-[color:var(--color-warning-fg)]"
                   onClick={() => {
                     clearMemory(user?.uid ?? null);
                     toast.success("Đã xóa sạch bộ nhớ của Trợ lý AI.");

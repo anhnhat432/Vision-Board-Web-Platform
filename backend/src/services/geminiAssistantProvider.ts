@@ -115,7 +115,7 @@ function buildRequestBody(
 
   return {
     system_instruction: {
-      parts: [{ text: buildSystemPrompt() }],
+      parts: [{ text: buildSystemPrompt(context) }],
     },
     contents: [
       ...mappedHistory,

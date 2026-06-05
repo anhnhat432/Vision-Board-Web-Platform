@@ -18,6 +18,7 @@ import {
   processAIAssistantRequest,
   processAIAssistantRequestStream,
   selectGeminiModelForAssistantRequest,
+  shouldRepairAIResponse,
   shouldUseLocalAssistantShortcut,
 } from "../services/aiAssistantService";
 import type { AssistantContext } from "../services/assistantService";
@@ -205,6 +206,21 @@ Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiế
     assert.equal((result.proposedActions[0].payload as any).taskId, "Học thuộc 10 phút");
     assert.equal(result.assistantText, "Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiếp tục cố gắng!");
   });
+
+  it("detects invalid action blocks that need a repair pass", () => {
+    ensureBackendEnvForServiceImports();
+    const rawText = `Mình sẽ thêm task này.
+
+\`\`\`action
+{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today",},"label":"Thêm task"}
+\`\`\``;
+
+    const result = parseAndValidateAIResponse(rawText);
+
+    assert.equal(result.proposedActions.length, 0);
+    assert.equal(shouldRepairAIResponse(rawText), true);
+    assert.equal(shouldRepairAIResponse("Không có action nào cả."), false);
+  });
 });
 
 describe("aiAssistantService getDeterministicFallback", () => {
@@ -309,6 +325,64 @@ describe("aiAssistantService processAIAssistantRequest", () => {
     assert.equal(shouldUseLocalAssistantShortcut("ban la ai"), true);
     assert.equal(shouldUseLocalAssistantShortcut("hay gioi thieu di"), true);
     assert.equal(shouldUseLocalAssistantShortcut("tạo mục tiêu chạy bộ trong 12 tuần"), false);
+  });
+
+  it("buffers Groq stream for action-like requests so repair can run", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalFetch = globalThis.fetch;
+    const previous = {
+      AI_PROVIDER: env.AI_PROVIDER,
+      AI_API_KEY: env.AI_API_KEY,
+      GROQ_API_KEY: env.GROQ_API_KEY,
+      GROQ_MODEL: env.GROQ_MODEL,
+      AI_MODEL: env.AI_MODEL,
+    };
+    const requestBodies: any[] = [];
+    const deltas: string[] = [];
+
+    try {
+      (env as any).AI_PROVIDER = "groq";
+      (env as any).AI_API_KEY = "test-groq-key";
+      (env as any).GROQ_API_KEY = "test-groq-key";
+      (env as any).GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+      (env as any).AI_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+
+      globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? "{}"));
+        requestBodies.push(body);
+
+        return new Response(JSON.stringify({
+          choices: [{
+            message: {
+              content: `Đề xuất task hợp lệ.\n\n\`\`\`action\n{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today","isCore":false},"label":"Thêm task: Đọc 5 trang"}\n\`\`\``,
+            },
+          }],
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }) as typeof fetch;
+
+      const error = await processAIAssistantRequestStream(
+        {
+          message: "thêm task đọc 5 trang hôm nay",
+          context: sampleContext,
+          mode: "real",
+        },
+        (delta) => deltas.push(delta),
+      );
+
+      assert.equal(error, undefined);
+      assert.equal(requestBodies.length, 1);
+      assert.equal(requestBodies[0].stream, undefined);
+      assert.match(deltas.join(""), /```action/);
+      assert.match(deltas.join(""), /create_task/);
+    } finally {
+      globalThis.fetch = originalFetch;
+      (env as any).AI_PROVIDER = previous.AI_PROVIDER;
+      (env as any).AI_API_KEY = previous.AI_API_KEY;
+      (env as any).GROQ_API_KEY = previous.GROQ_API_KEY;
+      (env as any).GROQ_MODEL = previous.GROQ_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
+    }
   });
 
   it("routes complex planning requests to the smart Gemini model", async () => {
@@ -440,6 +514,74 @@ describe("aiAssistantService processAIAssistantRequest", () => {
       (env as any).AI_MODEL = previous.AI_MODEL;
       (env as any).GEMINI_SMART_MODEL = previous.GEMINI_SMART_MODEL;
       (env as any).AI_SMART_MODEL = previous.AI_SMART_MODEL;
+    }
+  });
+
+  it("repairs invalid Groq action output with one low-temperature retry", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalFetch = globalThis.fetch;
+    const previous = {
+      AI_PROVIDER: env.AI_PROVIDER,
+      AI_API_KEY: env.AI_API_KEY,
+      GROQ_API_KEY: env.GROQ_API_KEY,
+      GROQ_MODEL: env.GROQ_MODEL,
+      AI_MODEL: env.AI_MODEL,
+    };
+    const requestBodies: any[] = [];
+
+    try {
+      (env as any).AI_PROVIDER = "groq";
+      (env as any).AI_API_KEY = "test-groq-key";
+      (env as any).GROQ_API_KEY = "test-groq-key";
+      (env as any).GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+      (env as any).AI_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+
+      globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? "{}"));
+        requestBodies.push(body);
+
+        if (requestBodies.length === 1) {
+          return new Response(JSON.stringify({
+            choices: [{
+              message: {
+                content: `Mình sẽ thêm task này.\n\n\`\`\`action\n{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today",},"label":"Thêm task"}\n\`\`\``,
+              },
+            }],
+          }), { status: 200, headers: { "Content-Type": "application/json" } });
+        }
+
+        return new Response(JSON.stringify({
+          choices: [{
+            message: {
+              content: `Mình đã sửa đề xuất thành action hợp lệ.\n\n\`\`\`action\n{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today","isCore":false},"label":"Thêm task: Đọc 5 trang"}\n\`\`\``,
+            },
+          }],
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }) as typeof fetch;
+
+      const response = await processAIAssistantRequest({
+        message: "thêm task đọc 5 trang hôm nay",
+        context: sampleContext,
+        mode: "real",
+      });
+
+      assert.ok(!("errorCode" in response));
+      assert.equal(response.proposedActions.length, 1);
+      assert.equal(response.proposedActions[0].type, "create_task");
+      assert.equal((response.proposedActions[0].payload as any).title, "Đọc 5 trang");
+      assert.equal(requestBodies.length, 2);
+      assert.equal(requestBodies[1].temperature, 0.1);
+      assert.equal(requestBodies[1].max_tokens, 900);
+      const repairMessage = requestBodies[1].messages[requestBodies[1].messages.length - 1];
+      assert.match(repairMessage.content, /REPAIR_ACTION_OUTPUT/);
+    } finally {
+      globalThis.fetch = originalFetch;
+      (env as any).AI_PROVIDER = previous.AI_PROVIDER;
+      (env as any).AI_API_KEY = previous.AI_API_KEY;
+      (env as any).GROQ_API_KEY = previous.GROQ_API_KEY;
+      (env as any).GROQ_MODEL = previous.GROQ_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
     }
   });
 

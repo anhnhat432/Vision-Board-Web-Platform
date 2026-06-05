@@ -16,6 +16,13 @@ These rules apply to AI coding agents working in this repository. Keep them shor
 - The worktree may be dirty. Never revert, overwrite, or clean up user changes unless the user explicitly asks.
 - Do not hardcode secrets, provider keys, tokens, private keys, credentials, service account JSON, or real emails/passwords.
 
+## Kilo Tool Calls
+
+- Use only the exact tool names provided by the active Kilo session.
+- Never call or emit a tool named `invalid`.
+- Common valid Kilo tools are `read`, `glob`, `grep`, `edit`, `write`, `bash`, `webfetch`, `question`, `skill`, `suggest`, and `plan_exit`.
+- If no valid tool applies, respond in plain text, ask a concise question, or finish the plan.
+
 ## Implementation Rules
 
 - Prefer existing helpers, components, hooks, utilities, and domain modules over new abstractions.

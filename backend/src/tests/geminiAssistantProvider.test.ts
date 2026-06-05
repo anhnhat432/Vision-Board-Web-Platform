@@ -101,6 +101,9 @@ describe("geminiAssistantProvider prompt", () => {
     assert.match(summary, /Lich lam viec day/);
     assert.match(summary, /Bi ket vi qua met/);
     assert.match(summary, /Lam bai tap cu/);
+    assert.match(summary, /\[taskId:late_1\]/);
+    assert.match(summary, /\[goalId:goal_1\]/);
+    assert.match(summary, /Route guidance/);
     assert.match(summary, /twelve_week_setup/);
     assert.match(summary, /Dien lead indicator con thieu/);
     assert.match(summary, /Chi co 30 phut moi ngay/);

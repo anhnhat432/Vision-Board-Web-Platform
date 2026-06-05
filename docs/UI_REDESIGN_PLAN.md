@@ -119,7 +119,7 @@ Dưới đây là phần kiểm toán chi tiết của 12 màn hình người d�
     *   *3 Câu hỏi cốt lõi*: Trang chưa giải thích rõ vì sao việc tự đánh giá này giúp bảo vệ mục tiêu không bị bỏ dở giữa chừng (Tránh nản lòng ở tuần thứ 3-4).
 *   **Recommended redesign direction**:
     *   *Visual*: Tái thiết kế chiếc cán cân đo lường bằng nét vẽ phác thảo mềm mại. Khi người dùng chọn câu trả lời, cán cân sẽ nghiêng động theo thời gian thực một cách trực quan.
-    *   *Color system*: Loại bỏ sắc đỏ cảnh báo thất bại. Thay thế bằng màu terracotta ấm áp hoặc cam đất dịu nhẹ.
+    *   *Color system*: Tránh sắc đỏ gắt mang nghĩa "thất bại". Dùng status token cảnh báo/thông tin trung tính theo hệ thống (`app-status-*`) để diễn đạt mức readiness thấp như lời khuyên điều chỉnh, không phải điểm trượt. KHÔNG dùng `app-warm-*`/terracotta cho cảnh báo, vì theo `DESIGN.md` terracotta chỉ dành cho Reflection/Review.
     *   *Copy*: Chuyển đổi các thông điệp cảnh báo quá tải thành lời khuyên xây dựng, ví dụ: *"Mục tiêu của bạn rất đáng mong đợi, hãy điều chỉnh thời lượng xuống một chút để bạn có một hành trình bền bỉ và thoải mái hơn."*
 *   **Risk level**: Trung bình (Medium) - Tính toán Readiness Score chuyển đổi sang tham số đề xuất cho trang setup kế hoạch.
 *   **Suggested batch**: Batch 2.
@@ -168,16 +168,18 @@ Dưới đây là phần kiểm toán chi tiết của 12 màn hình người d�
 *   **Recommended redesign direction**:
     *   *Layout*: Tái định vị theo hướng "Notion-style clarity + Studygram corner". Sử dụng nền giấy kem nhạt ấm áp, bo tròn các góc thẻ lớn hơn, bổ sung các hình trang trí vẽ tay nhẹ nhàng.
     *   *Visual*: Biến đổi bảng điểm Scoreboard khô khan thành sơ đồ 12 bước chân hành trình vẽ tay. Mỗi tuần hoàn thành xuất sắc sẽ được đóng dấu bằng một con tem sticker phần thưởng lấp lánh (reward stamp animation).
-    *   *Gọn hóa panel*: Gom các thông báo trạng thái đồng bộ, log hệ thống xuống thanh khay điều khiển nhỏ ở chân trang để tránh chiếm không gian cảm xúc.
+    *   *Gọn hóa panel*: Sắp xếp lại các thông báo trạng thái đồng bộ và log hệ thống cho gọn gàng, nhưng KHÔNG ẩn sync/offline/conflict state. Theo `DESIGN.md` và `VISUAL_EXECUTION_SPEC.md`, trạng thái đồng bộ phải luôn nhìn thấy và rõ ràng cho người dùng đã đăng nhập ở real mode. Có thể gom log kỹ thuật chi tiết vào khu vực phụ, nhưng tín hiệu "đã lưu local / đã đồng bộ / chưa đồng bộ / có lỗi" phải hiển thị đủ rõ ở nơi người dùng dễ thấy.
 *   **Risk level**: Cao (High) - Hub điều hành trung tâm chứa rất nhiều logic đồng bộ hóa dữ liệu từ xa, kiểm tra quyền và thay đổi trạng thái của chu kỳ hoạt động.
 *   **Suggested batch**: Batch 3.
 
 ---
 
-### 7. `/today-v2` (Góc Hôm Nay tối giản)
+### 7. Today / Góc Hôm Nay (`/today` -> `/12-week-system?tab=today`)
+
+> Lưu ý route: code hiện không có route `/today-v2`. Route `/today` trong `src/app/routes.tsx` redirect sang `/12-week-system?tab=today`, nên surface "Hôm nay" thực chất là tab Today bên trong `/12-week-system`. Redesign phải bám đúng surface này, không tạo route mới.
 
 *   **Screen role in the product journey**:
-    *   *Vị trí*: Không gian hành động hằng ngày của người dùng.
+    *   *Vị trí*: Không gian hành động hằng ngày của người dùng (tab Today trong `/12-week-system`).
     *   *Trước đó*: `/12-week-system` hoặc trang chủ sau khi đăng nhập.
     *   *Sau đó*: `/journal` (Viết phản tư cuối ngày).
 *   **Main user job**:
@@ -191,8 +193,8 @@ Dưới đây là phần kiểm toán chi tiết của 12 màn hình người d�
     *   *Tương tác*: Việc viết phản tư bắt buộc người dùng chuyển sang màn hình khác (`/journal`) làm đứt mạch cảm xúc.
 *   **Recommended redesign direction**:
     *   *Layout*: Thiết kế lại theo phong cách "Focus Mode" tối giản tuyệt đối. Đưa danh sách việc hôm nay ra vị trí trung tâm nổi bật dưới dạng các thẻ card phẳng thanh lịch.
-    *   *Visual/Tương tác*: Thêm hiệu ứng hoa giấy rơi nhẹ nhàng (micro-confetti) kết hợp âm thanh click giòn dã dễ chịu khi người dùng tích hoàn thành việc cuối cùng trong ngày.
-    *   *In-context Journaling*: Tích hợp trực tiếp một ô ghi chép phản tư nhanh (Quick journaling widget) ngay trên trang Hôm nay, cho phép ghi lại cảm xúc cuối ngày mà không cần chuyển trang.
+    *   *Visual/Tương tác*: Có thể thêm phản hồi hoàn thành nhẹ nhàng (subtle reveal/progress) khi người dùng tích xong việc, nhưng phải tuân thủ rule motion trong `DESIGN.md`. Hiệu ứng nặng như micro-confetti và âm thanh KHÔNG đưa vào như polish mặc định; chỉ cân nhắc khi có task riêng, đã token hóa, và tôn trọng `prefers-reduced-motion` (không phát animation/âm thanh ở chế độ reduced-motion).
+    *   *In-context Journaling*: Có thể hiển thị một ô gợi ý phản tư nhanh, nhưng không thay thế hoặc thay đổi flow/dữ liệu của `/journal`. Mặc định vẫn điều hướng sang `/journal`; chỉ tích hợp quick journaling tại chỗ khi có task riêng xác nhận an toàn về storage và analytics.
 *   **Risk level**: Trung bình (Medium) - Cập nhật trạng thái hoàn thành công việc hằng ngày trong localStorage và remote database.
 *   **Suggested batch**: Batch 3.
 
@@ -308,7 +310,7 @@ Dưới đây là phần kiểm toán chi tiết của 12 màn hình người d�
     *   *Visual Anchor*: Thiếu các icon minh họa sinh động cho các cụm chức năng (theme, âm thanh, data).
 *   **Recommended redesign direction**:
     *   *Layout*: Phân chia trang cài đặt thành 3 cụm thẻ rõ ràng: Cấu hình trải nghiệm (Theme, Âm thanh), Quản lý dữ liệu (Backup, Restore, Sync) và Vùng bảo mật (Xóa tài khoản/Xóa data local).
-    *   *Visual*: Sử dụng các icon bo góc mịn màng màu Sage Green cho các mục thông thường. Thiết kế vùng Danger Zone với màu terracotta/soft orange cảnh báo văn minh.
+    *   *Visual*: Sử dụng các icon bo góc mịn màng màu Sage Green cho các mục thông thường. Thiết kế vùng Danger Zone bằng status/danger token theo hệ thống (`app-status-error` hoặc pattern danger sẵn có) với mức nhấn vừa phải, văn minh. KHÔNG dùng `app-warm-*`/terracotta/soft orange cho Danger Zone, vì terracotta chỉ dành cho Reflection/Review.
     *   *Copy*: Viết lại các cảnh báo hủy/xóa dữ liệu thân thiện hơn nhưng vẫn đảm bảo tính cảnh báo rõ ràng.
 *   **Risk level**: Cao (High) - Chứa các hành động phá hủy dữ liệu (xóa tài khoản, wipe local data) và xuất/nhập tệp tin JSON cấu trúc phức tạp.
 *   **Suggested batch**: Later (Batch phụ sau khi hoàn tất các chức năng chính).
@@ -377,7 +379,7 @@ Khi hoàn tất redesign cho mỗi màn hình, ta phải tự kiểm tra qua cá
 3.  **Bước 3**: Redesign `/smart-goal-setup` (Viết mục tiêu) -> Kiểm tra sự thay đổi của Goal Crystal.
 4.  **Bước 4**: Redesign `/feasibility` (Kiểm tra thực tế) -> Nhận Readiness Score.
 5.  **Bước 5**: Redesign `/12-week-setup` (Dựng roadmap) -> Áp dụng template và lưu chu kỳ mới.
-6.  **Bước 6**: Redesign `/today-v2` (Làm việc hằng ngày) -> Đánh dấu hoàn thành và ghi phản tư tại chỗ.
+6.  **Bước 6**: Redesign Today (tab Today của `/12-week-system`, route `/today` redirect tới đây) -> Đánh dấu hoàn thành và gợi ý ghi phản tư.
 7.  **Bước 7**: Redesign `/12-week-system` (Xem tổng quan toàn chu kỳ và review tuần).
 8.  **Bước 8**: Redesign `/vision-board` (Biên tập bảng ghim Polaroid/Washi tape).
 9.  **Bước 9**: Redesign `/billing/plan` -> `/order` -> `/order-status` (Luồng nâng cấp và đặt Kit vật lý).

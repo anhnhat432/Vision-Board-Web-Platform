@@ -41,8 +41,15 @@ export interface AssistantProviderError {
   errorCode: string;
 }
 
+export interface GroqRequestOptions {
+  maxTokens?: number;
+  temperature?: number;
+  repairMode?: boolean;
+}
+
 const GROQ_TIMEOUT_MS = 30_000;
-const MAX_COMPLETION_TOKENS = 800;
+const DEFAULT_COMPLETION_TOKENS = 800;
+const COMPLEX_COMPLETION_TOKENS = 1_400;
 
 // Rough token estimator: Vietnamese text averages ~3.5 chars/token
 function estimateTokens(text: string): number {
@@ -100,13 +107,43 @@ function getGroqErrorMessage(status: number, parsed?: GroqErrorBody): { message:
   };
 }
 
+export function getGroqGenerationOptions(
+  userMessage: string,
+  context: AssistantContext,
+  options: GroqRequestOptions = {},
+): Required<Pick<GroqRequestOptions, "maxTokens" | "temperature">> {
+  if (options.repairMode) {
+    return {
+      maxTokens: options.maxTokens ?? DEFAULT_COMPLETION_TOKENS,
+      temperature: options.temperature ?? 0.1,
+    };
+  }
+
+  const normalizedText = userMessage
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const route = `${context.route} ${context.pageContext?.route ?? ""} ${context.pageContextHint?.pageType ?? ""}`.toLowerCase();
+  const isComplex =
+    normalizedText.length > 220 ||
+    /12[- ]?week|12 tuan|ke hoach|smart goal|muc tieu smart|feasibility|kha thi|phan tich|chien luoc|reflection|review|tong ket|life insight/.test(normalizedText) ||
+    /life-insight|feasibility|smart-goal|12-week|reflection/.test(route);
+
+  return {
+    maxTokens: options.maxTokens ?? (isComplex ? COMPLEX_COMPLETION_TOKENS : DEFAULT_COMPLETION_TOKENS),
+    temperature: options.temperature ?? (isComplex ? 0.35 : 0.5),
+  };
+}
+
 function buildRequestBody(
   userMessage: string,
   context: AssistantContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
   modelName: string,
+  options: GroqRequestOptions = {},
 ): GroqRequest {
-  const systemPrompt = buildSystemPrompt();
+  const generationOptions = getGroqGenerationOptions(userMessage, context, options);
+  const systemPrompt = buildSystemPrompt(context);
   let contextSummary = summarizeContext(context);
 
   // Estimate total tokens and trim context if needed
@@ -115,7 +152,7 @@ function buildRequestBody(
   const historyTokens = history.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
   let contextTokens = estimateTokens(contextSummary);
   const totalInputTokens = systemTokens + contextTokens + historyTokens + userTokens;
-  const totalWithCompletion = totalInputTokens + MAX_COMPLETION_TOKENS;
+  const totalWithCompletion = totalInputTokens + generationOptions.maxTokens;
 
   // If total exceeds a safe budget (5000 tokens for input), trim context
   const MAX_INPUT_BUDGET = 5000;
@@ -146,8 +183,8 @@ function buildRequestBody(
   return {
     model: modelName,
     messages,
-    temperature: 0.5,
-    max_tokens: MAX_COMPLETION_TOKENS,
+    temperature: generationOptions.temperature,
+    max_tokens: generationOptions.maxTokens,
   };
 }
 
@@ -165,6 +202,7 @@ export async function sendToGroqStream(
   history: Array<{ role: "user" | "assistant"; content: string }>,
   onDelta: (text: string) => void,
   signal?: AbortSignal,
+  options: GroqRequestOptions = {},
 ): Promise<void> {
   const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
   const activeModel = env.AI_PROVIDER === "groq" ? (env.AI_MODEL || env.GROQ_MODEL) : env.GROQ_MODEL;
@@ -192,7 +230,7 @@ export async function sendToGroqStream(
         "Authorization": `Bearer ${activeApiKey}`,
       },
       body: JSON.stringify({
-        ...buildRequestBody(userMessage, context, history, activeModel),
+        ...buildRequestBody(userMessage, context, history, activeModel, options),
         stream: true,
       }),
       signal: abortController.signal,
@@ -269,6 +307,7 @@ export async function sendToGroq(
   userMessage: string,
   context: AssistantContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
+  options: GroqRequestOptions = {},
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
   const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
   const activeModel = env.AI_PROVIDER === "groq" ? (env.AI_MODEL || env.GROQ_MODEL) : env.GROQ_MODEL;
@@ -290,7 +329,7 @@ export async function sendToGroq(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${activeApiKey}`,
       },
-      body: JSON.stringify(buildRequestBody(userMessage, context, history, activeModel)),
+      body: JSON.stringify(buildRequestBody(userMessage, context, history, activeModel, options)),
       signal: abortController.signal,
     });
 

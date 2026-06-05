@@ -143,7 +143,9 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
         </div>
 
         <div className="flex items-center gap-1.5 bg-app-bg-subtle px-3 py-1.5 rounded-pill border border-app-line shrink-0 whitespace-nowrap">
-          {answeredCount > 0 && isHeavyRight && <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />}
+          {answeredCount > 0 && isHeavyRight && (
+            <Sparkles className="h-3 w-3 text-app-accent motion-safe:animate-pulse" />
+          )}
           <span className="text-xs font-semibold text-app-ink-muted">Mức khả thi</span>
           <span
             className="text-sm font-extrabold tabular-nums text-app-accent"

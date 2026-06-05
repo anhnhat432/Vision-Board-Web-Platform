@@ -38,6 +38,11 @@ export interface AIAssistantError {
   errorCode: string;
 }
 
+interface AIAssistantParseDiagnostics extends AIAssistantResponse {
+  actionBlockCount: number;
+  invalidActionBlockCount: number;
+}
+
 const VALID_ACTION_TYPES = [
   "create_task",
   "mark_task_done",
@@ -323,6 +328,23 @@ function buildProviderFallbackResponse(
   };
 }
 
+function buildActionRepairPrompt(originalMessage: string, invalidProviderText: string): string {
+  return `REPAIR_ACTION_OUTPUT\nHãy sửa lại câu trả lời trước thành output hợp lệ cho Vision Board Assistant.
+
+Yêu cầu:
+- Giữ nguyên ý nghĩa trợ giúp chính bằng tiếng Việt, ngắn gọn.
+- Nếu có action, mỗi action phải nằm trong block \`\`\`action riêng.
+- JSON action phải parse được bằng JSON.parse: dấu ngoặc kép, không comment, không trailing comma, không markdown trong JSON.
+- Không tạo action mới nếu dữ liệu trong câu trả lời trước không đủ schema; khi thiếu dữ liệu, chỉ hỏi 1 câu làm rõ.
+- Chỉ dùng các action type hợp lệ: ${VALID_ACTION_TYPES.join(", ")}.
+
+Tin nhắn user ban đầu:
+${originalMessage.slice(0, 1000)}
+
+Câu trả lời cần sửa:
+${invalidProviderText.slice(0, 2500)}`;
+}
+
 async function sendToGeminiWithModelRouting(
   request: AIAssistantRequest,
   history: Array<{ role: "user" | "assistant"; content: string }>,
@@ -606,11 +628,14 @@ function sanitizeUpdateTaskStatusPayload(payload: any) {
   return { taskId, completed };
 }
 
-export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse {
+function parseAndValidateAIResponseWithDiagnostics(rawText: string): AIAssistantParseDiagnostics {
   const proposedActions: AssistantAction[] = [];
   const blocksToRemove: string[] = [];
+  let actionBlockCount = 0;
+  let invalidActionBlockCount = 0;
 
   const processJson = (jsonStr: string) => {
+    actionBlockCount += 1;
     try {
       const json = JSON.parse(jsonStr.trim());
       if (typeof json.type === "string" && VALID_ACTION_TYPES.includes(json.type) && typeof json.label === "string") {
@@ -664,6 +689,7 @@ export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse
     } catch {
       // Ignore
     }
+    invalidActionBlockCount += 1;
     return false;
   };
 
@@ -705,7 +731,26 @@ export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse
   }
 
   assistantText = assistantText.trim();
+  return { assistantText, proposedActions, actionBlockCount, invalidActionBlockCount };
+}
+
+export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse {
+  const { assistantText, proposedActions } = parseAndValidateAIResponseWithDiagnostics(rawText);
   return { assistantText, proposedActions };
+}
+
+export function shouldRepairAIResponse(rawText: string): boolean {
+  const diagnostics = parseAndValidateAIResponseWithDiagnostics(rawText);
+  return diagnostics.actionBlockCount > 0 && diagnostics.proposedActions.length === 0 && diagnostics.invalidActionBlockCount > 0;
+}
+
+function shouldUseBufferedGroqResponse(request: AIAssistantRequest): boolean {
+  if (request.context.pendingClarification || request.context.pendingWorkflow) return true;
+
+  const normalizedText = normalizeModelRoutingText(request.message);
+  return /\b(tao|them|mark|tick|danh dau|hoan thanh|xong|cap nhat|doi lich|doi ngay|reschedule|lap ke hoach|ke hoach 12|review|tong ket|smart goal|muc tieu|goal|task)\b/.test(
+    normalizedText,
+  );
 }
 
 export function getDeterministicFallback(
@@ -857,10 +902,26 @@ export async function processAIAssistantRequest(
 
   // Gửi request thực tế tới AI provider
   const history = request.history || [];
-  const result =
+  let result =
     provider === "gemini"
       ? await sendToGeminiWithModelRouting(request, history)
       : await sendToGroq(request.message.trim(), request.context, history);
+
+  if (!("errorCode" in result) && provider === "groq" && shouldRepairAIResponse(result.message)) {
+    console.warn("[ai-assistant] Groq returned invalid action block, retrying repair pass");
+    const repairResult = await sendToGroq(
+      buildActionRepairPrompt(request.message.trim(), result.message),
+      request.context,
+      history,
+      { maxTokens: 900, temperature: 0.1, repairMode: true },
+    );
+    if (!("errorCode" in repairResult)) {
+      const repaired = parseAndValidateAIResponseWithDiagnostics(repairResult.message);
+      if (!shouldRepairAIResponse(repairResult.message) && repaired.proposedActions.length > 0) {
+        result = repairResult;
+      }
+    }
+  }
 
   if ("errorCode" in result) {
     // Trả lỗi từ provider
@@ -907,7 +968,7 @@ export async function processAIAssistantRequestStream(
 
   const history = request.history || [];
 
-  if (provider !== "groq") {
+  if (provider !== "groq" || shouldUseBufferedGroqResponse(request)) {
     const result = await processAIAssistantRequest(request);
     if ("errorCode" in result) return result;
     onDelta(formatAIAssistantResponseForStream(result));

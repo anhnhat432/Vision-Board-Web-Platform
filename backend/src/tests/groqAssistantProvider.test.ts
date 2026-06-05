@@ -95,12 +95,14 @@ describe("groqAssistantProvider prompt", () => {
   it("documents strict action schema rules for Groq", async () => {
     ensureBackendEnvForProviderImports();
     const { buildSystemPrompt } = await import("../services/assistantPromptUtils");
-    const prompt = buildSystemPrompt();
+    const prompt = buildSystemPrompt(context);
 
     assert.match(prompt, /create_twelve_week_plan_draft/);
     assert.match(prompt, /startDate dạng YYYY-MM-DD/);
     assert.match(prompt, /Không dùng title làm taskId/);
     assert.match(prompt, /autoExecute": false/);
+    assert.match(prompt, /JSON phải hợp lệ tuyệt đối/);
+    assert.match(prompt, /12-week setup\/plan/);
   });
 
   it("summarizes enriched context for Groq", async () => {
@@ -112,8 +114,37 @@ describe("groqAssistantProvider prompt", () => {
     assert.match(summary, /Lich lam viec day/);
     assert.match(summary, /Bi ket vi qua met/);
     assert.match(summary, /Lam bai tap cu/);
+    assert.match(summary, /\[taskId:late_1\]/);
+    assert.match(summary, /\[goalId:goal_1\]/);
+    assert.match(summary, /Route guidance/);
     assert.match(summary, /twelve_week_setup/);
     assert.match(summary, /Dien lead indicator con thieu/);
     assert.match(summary, /Chi co 30 phut moi ngay/);
+  });
+
+  it("uses larger, steadier generation settings for complex planning requests", async () => {
+    ensureBackendEnvForProviderImports();
+    const { getGroqGenerationOptions } = await import("../services/groqAssistantProvider");
+
+    const options = getGroqGenerationOptions("lap ke hoach 12 tuan cho muc tieu hoc React", context);
+
+    assert.equal(options.maxTokens, 1400);
+    assert.equal(options.temperature, 0.35);
+  });
+
+  it("keeps simple Groq requests concise and faster", async () => {
+    ensureBackendEnvForProviderImports();
+    const { getGroqGenerationOptions } = await import("../services/groqAssistantProvider");
+
+    const simpleContext: AssistantContext = {
+      ...context,
+      route: "/goals",
+      pageContext: { ...context.pageContext, route: "/goals" },
+      pageContextHint: { pageType: "goals" },
+    };
+    const options = getGroqGenerationOptions("hom nay lam gi", simpleContext);
+
+    assert.equal(options.maxTokens, 800);
+    assert.equal(options.temperature, 0.5);
   });
 });

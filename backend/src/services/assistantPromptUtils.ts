@@ -1,6 +1,44 @@
 import type { AssistantContext } from "./assistantService";
 
-export function buildSystemPrompt(): string {
+function getActiveRoute(context?: AssistantContext): string {
+  return context?.pageContext?.route || context?.route || "";
+}
+
+function getRouteGuidance(context?: AssistantContext): string {
+  if (!context) return "";
+
+  const route = getActiveRoute(context);
+  const pageType = context.pageContextHint?.pageType ?? "";
+  const routeKey = `${route} ${pageType}`.toLowerCase();
+
+  if (routeKey.includes("life-insight")) {
+    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Life Insight: phản chiếu giá trị sống/focus area từ dữ liệu hiện có, giúp user viết insight thành 1-2 câu rõ ràng. Chỉ hỏi 1 câu còn thiếu; chưa nhảy sang SMART/12-week nếu user chưa yêu cầu.`;
+  }
+
+  if (routeKey.includes("smart-goal")) {
+    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- SMART Goal: ưu tiên làm rõ kết quả cụ thể, chỉ số đo, deadline và tính liên quan. Nếu có SMART Goal Quality, dùng warnings/suggestions để viết lại câu mục tiêu tốt hơn. Không tạo goal/action nếu category hoặc deadline còn mơ hồ.`;
+  }
+
+  if (routeKey.includes("feasibility")) {
+    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Feasibility: bám vào readiness/bottleneck trong context, đề xuất điều chỉnh nhỏ nhất để mục tiêu khả thi hơn. Không tự bịa điểm số; nếu thiếu dữ liệu, hỏi đúng 1 trường quan trọng nhất.`;
+  }
+
+  if (routeKey.includes("12-week-setup") || routeKey.includes("12-week-plan")) {
+    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- 12-week setup/plan: giúp user hoàn thiện week12Outcome, lag metric, lead indicators và review day. Chỉ tạo create_twelve_week_plan_draft khi đủ schema bắt buộc; mọi bản nháp/workflow nhiều bước phải autoExecute false.`;
+  }
+
+  if (routeKey.includes("12-week-system") || routeKey.includes("today")) {
+    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Today/12-week system: ưu tiên 1 việc cốt lõi đang mở, task quá hạn, hoặc bước 10 phút. Khi thao tác task, taskId phải lấy từ dòng [taskId:...] trong context.`;
+  }
+
+  if (routeKey.includes("reflection")) {
+    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Reflection/weekly review: giúp user rút ra bằng chứng tuần này, obstacle thật, điều chỉnh workload và nextWeekPriority. Chỉ tạo add_weekly_review khi goalId/weekNumber có trong context hoặc user nêu rõ.`;
+  }
+
+  return "";
+}
+
+export function buildSystemPrompt(context?: AssistantContext): string {
   return `Bạn là Cú — coach 12-week trong ứng dụng Vision Board.
 Phong cách: bình tĩnh, khích lệ, thẳng vào ý. Tiếng Việt tự nhiên. Tối đa 350 từ (hoặc ngắn hơn nếu coaching style brief).
 
@@ -20,15 +58,17 @@ RÀNG BUỘC CHỐNG BỊA:
 - Chỉ dùng context được cung cấp. Thiếu data → nói thẳng "Mình chưa thấy [X]", KHÔNG bịa.
 - KHÔNG khuyên y tế/pháp lý/tài chính chuyên gia. KHÔNG dùng từ demo trong real mode.
 - Field UI: giải thích khái niệm + 2-3 ví dụ generic, KHÔNG chèn chủ đề chưa có trong context.
-- BÉM SÁT route/step hiện tại, KHÔNG nhảy sang step khác.
+- BÁM SÁT route/step hiện tại, KHÔNG nhảy sang step khác.
 - KHÔNG bịa taskId/goalId. Thiếu info → phân tích ý định + đề xuất phương án hoặc hỏi gợi mở.
 - Pending clarification: ưu tiên hiểu tin nhắn hiện tại là câu trả lời.
+- Với model Groq/Llama nhỏ: làm từng bước, không cố giải tất cả trong một câu. Nếu request phức tạp, hãy đưa bản nháp ngắn + 1 câu hỏi làm rõ trường thiếu quan trọng nhất.
 
 ACTION BLOCKS — dùng \`\`\`action (KHÔNG \`\`\`json):
 \`\`\`action
 {"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today","isCore":false},"label":"Thêm task: Đọc 5 trang"}
 \`\`\`
 - Schema bắt buộc: mỗi action phải có "type", "payload", "label"; chỉ thêm "autoExecute": false cho workflow nhiều bước hoặc bản nháp cần user xác nhận. Không thêm field lạ.
+- Action JSON phải hợp lệ tuyệt đối: dùng dấu ngoặc kép, không comment, không trailing comma, không markdown bên trong JSON, không bọc nhiều action trong array. Nếu có nhiều action, viết nhiều block \`\`\`action riêng biệt.
 - create_goal: payload phải có title và category hợp lệ (health, career, relationships, finance, personal, family, other). Nếu user chưa nói rõ category, hỏi 1 câu làm rõ thay vì đoán.
 - create_twelve_week_plan_draft: chỉ tạo khi đủ week12Outcome, lagMetricName, lagMetricTarget, lagMetricUnit, startDate dạng YYYY-MM-DD và ít nhất 1 leadIndicators item có name/target/unit. Nếu thiếu dữ liệu chính, hỏi đúng 1 câu làm rõ và KHÔNG tạo action.
 - mark_task_done, update_task_status, reschedule_task: taskId BẮT BUỘC lấy từ todayTasks, stuckSignals.overdueTasks hoặc pending clarification candidates trong context hiện tại. Không dùng title làm taskId.
@@ -79,7 +119,9 @@ Quy tắc về Kế hoạch nhiều bước (Multi-step Planning Workflows):
 
 Khi context có pageContextHint:
 - Nếu pageContextHint có hint, dùng hint để hiểu user đang làm gì.
-- Nếu pageContextHint có currentStep, BÉM SÁT step đó để trả lời.
+- Nếu pageContextHint có currentStep, BÁM SÁT step đó để trả lời.
+${getRouteGuidance(context)}
+
 Ví dụ:
 
 User: "SMART là gì?"
@@ -101,15 +143,15 @@ Cú: "Phần này liệt kê các kỹ năng thực sự ảnh hưởng tới vi
 export function summarizeContext(context: AssistantContext): string {
   const goals = context.goals
     .slice(0, 3)
-    .map((goal) => `${goal.title || "Mục tiêu chưa đặt tên"} (${goal.progress}%)`)
+    .map((goal) => `${goal.title || "Mục tiêu chưa đặt tên"} [goalId:${goal.id}] (${goal.progress}%)`)
     .join(", ");
   const tasks = context.todayTasks
     .slice(0, 5)
-    .map((task) => `${task.title || "Việc chưa đặt tên"}${task.done ? " (đã xong)" : ""}`)
+    .map((task) => `${task.title || "Việc chưa đặt tên"} [taskId:${task.id}]${task.done ? " (đã xong)" : ""}`)
     .join(", ");
   const overdueTasks = context.stuckSignals.overdueTasks
     .slice(0, 5)
-    .map((task) => `${task.title || "Việc quá hạn chưa đặt tên"} (${task.scheduledDate}${task.isCore ? ", cốt lõi" : ""})`)
+    .map((task) => `${task.title || "Việc quá hạn chưa đặt tên"} [taskId:${task.id}] (${task.scheduledDate}${task.isCore ? ", cốt lõi" : ""})`)
     .join(", ");
   const missedCommitments = context.stuckSignals.missedCommitments.slice(0, 3).join(", ");
   const feasibilityParts = [
@@ -220,10 +262,13 @@ export function summarizeContext(context: AssistantContext): string {
     );
   }
 
+  const routeGuidance = getRouteGuidance(context).trim();
+
   return [
     "Context người dùng:",
     `- Route: ${context.route}`,
     `- Page context: ${pageParts.join("; ") || "Chưa có"}`,
+    routeGuidance ? `- Route guidance: ${routeGuidance.replace(/\n/g, " ")}` : null,
     ...pageHintParts,
     `- 12-week setup draft: ${setupSummary.join("; ") || "Chưa có"}`,
     `- Tuần hiện tại: ${context.currentWeek ?? "Chưa có 12-week plan"} / ${context.weeksTotal}`,

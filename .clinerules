@@ -1,10 +1,12 @@
 # Cline Project Rules
 
 Follow `.roo/rules/00-project-agent-rules.md` and `AGENTS.md` for this repository.
+Also follow `.kilocode/rules/tool-call-safety.md` when running in Kilo Code.
 
 Quick defaults:
 
 - Keep changes small, typed, and focused on the user request.
+- Use only available Kilo tool names; never call a tool named `invalid`.
 - Do not refactor unrelated code or introduce dependencies unless explicitly needed.
 - Never revert user changes in a dirty worktree.
 - Do not hardcode secrets, API keys, tokens, credentials, or service account JSON.

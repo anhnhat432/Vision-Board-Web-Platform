@@ -1,46 +1,59 @@
-# Dear Our Future — DESIGN.md
+# Dear Our Future - DESIGN.md
 
 This file is the single source of truth for product design, UX writing, visual style, and AI-assisted UI redesign in Dear Our Future.
 
 Before any AI coding agent edits UI, UX, layout, page structure, visual hierarchy, copy, onboarding, dashboards, forms, cards, empty states, or product experience, it must read and follow this file first.
 
-This file defines **how the product should feel and behave visually**. It does not override production safety rules, code-backed feature status, auth/billing/sync contracts, localStorage compatibility, or environment-mode rules.
+This file defines how the product should feel, prioritize, and make design tradeoffs. It does not override production safety rules, code-backed feature status, auth/billing/sync contracts, localStorage compatibility, environment-mode rules, route registration, analytics events, entitlement behavior, or TypeScript behavior.
 
-For practical layout blueprints, component recipes, typography scale, screen-level execution rules, and one-screen prompt patterns, also read `docs/VISUAL_EXECUTION_SPEC.md`.
+For practical layout blueprints, component recipes, typography scale, screen-level execution rules, and one-screen prompt patterns, also read `docs/VISUAL_EXECUTION_SPEC.md`. This file is the design authority; `docs/VISUAL_EXECUTION_SPEC.md` is the implementation blueprint.
 
 ---
 
 ## 0. How to use this document
 
-### For AI coding agents
-
-Before editing any screen, the AI must:
-
-1. Read this file.
-2. Read `docs/VISUAL_EXECUTION_SPEC.md` for practical visual execution guidance.
-3. Check the code-backed product state in `guidelines/CURRENT_PROJECT_STATUS.md`.
-4. Check `guidelines/PRODUCTION_ROADMAP.md` when it exists. If it is missing, use `guidelines/CURRENT_PROJECT_STATUS.md` as the scope anchor and report the missing roadmap instead of inventing one.
-5. Identify the screen's role in the product journey.
-6. Identify the user's main job on that screen.
-7. Identify the expected output/result after the screen.
-8. Identify the primary CTA.
-9. Redesign using the rules in this document.
-10. Preserve existing business logic, routes, storage behavior, analytics events, API contracts, and TypeScript safety unless explicitly asked otherwise.
-11. Report what changed, what was not changed, and any verification commands run.
-
-This document is a design authority, not a scope-expansion license. Do not add new product modules, routes, paid flows, admin surfaces, or provider assumptions just because they are mentioned here.
-
-### For human team members
-
-Use this document to judge whether a screen feels consistent with Dear Our Future.
-
-A screen is good only if it makes the user feel:
+### Required reading order for UI work
 
 ```text
-Clearer, calmer, more inspired, and closer to action.
+AGENTS.md
+-> docs/DESIGN.md
+-> docs/VISUAL_EXECUTION_SPEC.md
+-> guidelines/CURRENT_PROJECT_STATUS.md
 ```
 
-If a screen feels dry, confusing, text-heavy, dashboard-heavy, or visually generic, it must be redesigned.
+If these documents disagree, preserve production safety and code-backed scope first.
+
+`guidelines/PRODUCTION_ROADMAP.md` was not present in this workspace when this file was revised. If it exists later, read it. If it is still missing, use `guidelines/CURRENT_PROJECT_STATUS.md` as the scope anchor and report the missing roadmap instead of inventing roadmap content.
+
+### Agent workflow summary
+
+Before editing:
+
+1. Identify the screen's role in the journey.
+2. Identify the user's main job and expected output.
+3. Identify the main CTA and supporting actions.
+4. Check state/data risks: localStorage, auth, billing, sync, app mode, entitlement, analytics, routes, API contracts.
+5. Reuse existing tokens, components, and layout patterns before creating new ones.
+6. Choose the smallest verification set that matches the risk.
+
+During editing:
+
+1. Keep one main action visible.
+2. Give the screen one meaningful visual anchor.
+3. Reduce text through structure, examples, and progressive disclosure.
+4. Cover loading, empty, error, success, offline, and sync states where relevant.
+5. Preserve mobile comfort, accessibility, focus, and reduced-motion behavior.
+6. Do not change business logic, storage shape, route behavior, analytics, billing, sync, auth, entitlement, or app-mode handling unless explicitly asked.
+
+After editing:
+
+1. Report files changed.
+2. Explain what changed and why.
+3. List commands run and results.
+4. List commands not run and why.
+5. State unchanged contracts and remaining risks.
+
+This document is a design authority, not a scope-expansion license. Do not add new product modules, routes, paid flows, provider assumptions, admin surfaces, analytics, sync features, billing behavior, or account lifecycle features just because they are mentioned here.
 
 ---
 
@@ -48,9 +61,9 @@ If a screen feels dry, confusing, text-heavy, dashboard-heavy, or visually gener
 
 Dear Our Future is not a normal productivity dashboard.
 
-Dear Our Future is a **dreamy guided self-discovery studio** that helps Gen Z users move from vague dreams to clear vision boards, SMART goals, 12-week action plans, weekly progress tracking, and reflection.
+Dear Our Future is a warm guided planning studio that helps users move from vague dreams to self-understanding, SMART goals, a feasible 12-week execution plan, weekly action, and reflection.
 
-The product journey is:
+The core journey is:
 
 ```text
 Onboarding
@@ -69,21 +82,6 @@ The core transformation is:
 From vague inspiration to visible, structured action.
 ```
 
-The product should not only help users plan.
-It should help users **feel that their future is becoming clearer and more achievable.**
-
-Current production UX priority:
-
-```text
-Help a real signed-in or local-first user move from first start to a usable 12-week execution rhythm without confusion, data loss, or demo-only language.
-```
-
-Vision board, order kit, payment, achievements, and admin surfaces may support the product, but they must not pull attention away from the core flow unless a task explicitly targets them.
-
----
-
-## 2. Design North Star
-
 The official UX/UI direction is:
 
 ```text
@@ -92,170 +90,151 @@ Dreamy Guided Productivity
 
 Meaning:
 
-- **Dreamy**: emotional, soft, visual, personal, hopeful, vision-board-like.
-- **Guided**: users always know where they are, why the step matters, and what to do next.
-- **Productivity**: the final output must be practical, structured, measurable, and action-oriented.
+- Dreamy: emotional, soft, visual, personal, hopeful, vision-board-like.
+- Guided: users know where they are, why the step matters, and what to do next.
+- Productivity: the output is practical, structured, measurable, and action-oriented.
 
-The product should combine:
+The product experience has three layers:
+
+| Layer | User need | Design response |
+| --- | --- | --- |
+| Emotional clarity | "I feel scattered." | Warm language, personal insight, calm visual focus. |
+| Guided decision | "What should I choose now?" | One decision at a time, examples, clear progress, outcome-based CTA. |
+| Practical execution | "What do I do this week?" | Roadmap, priorities, check-ins, sync/offline clarity, recovery states. |
+
+North Star sentence:
 
 ```text
-Pinterest / Studygram aesthetic
-+ Notion-like clarity
-+ Personal growth workshop guidance
+Dear Our Future helps young people turn unclear dreams into a visible future and a clear 12-week action plan.
 ```
 
-### North Star sentence
-
-```text
-Dear Our Future helps young people turn unclear dreams into a beautiful vision board and a clear 12-week action plan.
-```
-
-### Emotional promise
+Emotional promise:
 
 ```text
 You are not lost. You only need a clearer next step.
 ```
 
-### Functional promise
+Functional promise:
 
 ```text
-Understand yourself, choose one focus, create a SMART goal, and follow a 12-week plan.
+Understand yourself, choose one focus, create a SMART goal, test feasibility, and follow a 12-week plan.
 ```
 
-### Distinctive visual concept
-
-The product's memorable design idea is:
+Distinctive visual concept:
 
 ```text
 A warm guided planning studio where the user's future becomes visible one decision at a time.
 ```
 
-This is the product's visual point of view. It may be bold, memorable, editorial, tactile, and emotionally expressive. It only fails when the visual idea hides the user's next action, weakens trust, or turns a working product screen into pure decoration.
+Visual distinctiveness must come from the user's state, progress, next action, or saved result - not from decorative effects alone.
 
 Use this concept through product-state visuals:
 
-- Life Balance: a visible balance shape, not only slider values.
-- Life Insight: a personal focus card with one recommended next step.
-- SMART Goal: a live goal preview that gets clearer as the user answers.
-- Feasibility: a supportive meter with adjustment guidance, not a failure grade.
-- 12-Week Plan: a roadmap that makes the next 12 weeks feel doable.
-- Today / Weekly Execution: a current-week focus map with 1-3 priority actions.
-- Reflection: a calm prompt surface that turns learning into one adjustment.
-- Vision Board: tactile moodboard elements that stay linked to the user's goal and plan.
+| Moment | Product-state visual |
+| --- | --- |
+| Life Balance | A visible balance shape, not only slider values. |
+| Life Insight | A personal focus card with one recommended next step. |
+| SMART Goal | A live goal preview that becomes clearer as the user answers. |
+| Feasibility | A supportive readiness meter with adjustment guidance, not a failure grade. |
+| 12-Week Plan | A roadmap that makes the next 12 weeks feel doable. |
+| Today / Weekly Execution | A current-week focus map with 1-3 priority actions. |
+| Reflection | A calm prompt surface that turns learning into one adjustment. |
+| Vision Board | Tactile moodboard elements linked back to the user's goal and plan. |
 
-Design distinctiveness should come from the user's goal, progress, and next action. Within that frame, choose the stronger concept over the safer generic layout.
+Creative moves are encouraged when they clarify a real user moment:
 
-Creative moves that are encouraged:
-
-- Editorial asymmetry when it helps one decision feel important.
+- Editorial asymmetry when it makes one decision feel important.
 - Tactile collage details such as paper, tape, pins, photo frames, stickers, and workbook-like surfaces.
-- Richer hero media on public/marketing pages when it shows the actual product promise.
-- Screen-specific visual anchors, as long as they still belong to the same product world.
 - Custom progress, roadmap, balance, and preview visuals instead of generic dashboard charts.
-- Moment-based accent color, illustration, and motion when they reinforce the user's current step.
+- Moment-based accent, illustration, and motion when tied to progress or a result reveal.
 - A small number of memorable details per screen, executed with precision.
 
-Avoid by default, unless there is a product-specific reason and the implementation is tokenized, accessible, and tested:
+Avoid by default:
 
 - Default purple-blue gradient patterns that could belong to any AI SaaS.
-- Decorative blobs, glow fields, or floating abstract shapes that do not explain state, progress, or outcome.
+- Decorative blobs, glow fields, or abstract shapes that do not explain state, progress, or outcome.
 - Generic SaaS icon grids.
-- Stock wellness photos that do not reveal the user's state or outcome.
+- Stock wellness photos that do not reveal the user's state or output.
 - Oversized marketing hero layouts inside core product screens.
-- Visual effects that compete with forms, sync state, billing state, or the primary CTA.
-
-Execution, billing, settings, legal, and admin surfaces should still feel polished and considered, but their main job is clarity and trust. They can have personality; they should not become ambiguous.
+- Visual effects that compete with forms, sync state, billing state, errors, or the primary CTA.
 
 ---
 
-## 3. What the product must feel like
+## 2. Code-backed product frame
 
-Dear Our Future must feel:
+The design must stay aligned with `guidelines/CURRENT_PROJECT_STATUS.md`.
 
-```text
-Bright
-Calm
-Dreamy
-Visual
-Personal
-Guided
-Warm
-Hopeful
-Gen Z-friendly
-Action-oriented
-Trustworthy
-Easy to start
-```
+Current code-backed frame:
 
-It must not feel:
+- The app is local-first. Most user-facing data is persisted in browser storage first.
+- Backend sync exists, but it is selective. The strongest current sync domain is the 12-week planning/execution loop.
+- Local save must remain usable when backend, Firebase, auth, or network sync is unavailable.
+- `/12-week-setup` is the current setup route and renders `TwelveWeekSetupLab`. Do not assume legacy setup routes are active.
+- Billing is production-sensitive and required for launch, but paid subscription/provider readiness must not be overstated. Use the current billing provider mode, entitlement rules, support/legal requirements, and code-backed status.
+- Demo mode exists for preview/marketing deployments. Demo-only copy, mock checkout routes, and browser-bound trial language must not leak into real-mode surfaces.
+- Real-mode surfaces must be account-bound, trust-first, and guarded by existing auth/billing/sync/app-mode helpers.
 
-```text
-Dry
-Corporate
-Dashboard-heavy
-Admin-like
-Text-heavy
-Confusing
-Cold
-Overly dark
-Overly complex
-Generic SaaS
-Generic AI-generated
-Like a long survey
-Like a spreadsheet
-```
+Design work must not change:
 
-When in doubt, choose:
+- Routes or routing assumptions.
+- Business/domain logic.
+- Storage keys, storage shape, migrations, or normalization behavior.
+- Analytics event shape or dispatch behavior.
+- Backend API contracts or sync semantics.
+- Auth, billing, entitlement, paywall, or checkout behavior.
+- `isRealMode()` / `isDemoMode()` gating.
+- TypeScript behavior, validation rules, or tests unless explicitly requested.
+
+Priority rule:
 
 ```text
-More guided, more visual, less text, clearer CTA.
+Core journey first. Supporting surfaces second. Decorative polish never outranks production safety.
 ```
 
-### Surface modes
+Supporting surfaces such as Vision Board, Goals, Billing/Order, Settings, Legal, Achievements, and Admin can be polished, but they must not pull attention away from the next core planning/execution action unless a task explicitly targets them.
 
-Not every screen should carry the same emotional weight. Use the right surface mode:
+---
 
-| Surface | Primary job | Visual tone | Avoid |
-| --- | --- | --- | --- |
-| Core journey | Move the user through the next step | Warm, guided, visual, focused | Dashboard mosaics, long forms, too many equal CTAs |
-| Execution workspace | Help the user act today/this week | Calm, structured, efficient | Decorative clutter, motivational noise, hidden task state |
-| Reflection | Help the user learn without guilt | Softer, more emotional, serif-friendly | Judgmental scoring, failure language |
-| Marketing/public pages | Explain the promise and invite start | More visual storytelling | Overpromising production readiness |
-| Billing/settings/legal | Build trust and reduce risk | Clear, restrained, account-bound | Dreamy ambiguity, mock/demo copy in real mode |
-| Admin | Let operators inspect and act safely | Functional, dense, consistent | User-facing decorative style leaking into admin |
+## 3. Current UI audit priorities
 
-Product screens should feel designed, but they are still working surfaces. Use visual warmth to clarify the next action, not to decorate every container.
+This is not a file-by-file bug list. It summarizes recurring UI risks visible in the current codebase and the design response expected when a screen is touched.
+
+| Audit finding | Design response |
+| --- | --- |
+| Primitive Tailwind palettes such as `slate-*`, hard-coded hex values, and primitive CSS vars appear across surfaces. | Migrate touched UI toward semantic tokens from `src/styles/tokens.css` and `tailwind.config.js`. Do not create new one-off colors. |
+| Several surfaces mix dark/admin/SaaS styling with warm product UI. | Normalize page canvas, cards, borders, typography, and CTA hierarchy to the Dear Our Future product world. |
+| Many screens rely on equal card grids or dashboard-like widgets. | Replace equal mosaics with one dominant working surface, one visual anchor, and supporting details below. |
+| CTA labels sometimes use generic words such as `Continue`, `Next`, `Submit`, `OK`, or `Done`. | Prefer outcome-based labels unless context already makes the result obvious. |
+| Loading, empty, error, success, offline, and sync states are uneven. | Every meaningful screen should make state visible, calm, and actionable, especially when local-first or sync safety matters. |
+| Some destructive/error UX still uses `window.confirm` or `alert`. | When the touched scope includes destructive or recoverable error UX, use the in-app dialog/state pattern and preserve focus management. |
+| Mobile layouts can become dense, wide, or hard to tap. | Design mobile-first: one column, no horizontal scroll, readable text, no clipped badges/buttons, and roughly 44px touch targets for primary controls. |
+| Typography can collapse into generic sans/system usage for emotional moments. | Use serif for emotional transitions, insights, reflection, and vision-board moments; use sans for body, forms, buttons, navigation, and execution UI. |
+| Visual effects can become decorative without clarifying the user's state. | Tie every distinctive visual to progress, a decision, a result preview, or next action. |
+
+Migration order for UI polish:
+
+```text
+1. Replace primitive styles with semantic tokens.
+2. Normalize page shells and surface hierarchy.
+3. Clarify CTA hierarchy and outcome-based labels.
+4. Add or improve state coverage.
+5. Add restrained motion only when it clarifies progress.
+```
 
 ---
 
 ## 4. Core UX principles
 
-### Principle 1 — First meaningful result within 3 minutes
+### 4.1 First meaningful result within 3 minutes
 
-A new user must receive a meaningful result quickly.
-
-A meaningful result can be:
+A new user must receive a useful result quickly:
 
 - A visible life-balance insight.
 - A chosen focus area.
 - A SMART goal draft.
+- A feasibility adjustment suggestion.
 - A 12-week plan draft.
-- A first vision board preview.
 - A clear next action for this week.
-
-Do not force users to complete too many setup steps before seeing value.
-
-Bad:
-
-```text
-Complete 6 long forms before seeing any result.
-```
-
-Good:
-
-```text
-Answer a few guided prompts -> get a useful insight -> customize later.
-```
 
 Rule:
 
@@ -263,77 +242,52 @@ Rule:
 Quick win first. Deep customization later.
 ```
 
----
+Do not force users through long forms before showing value.
 
-### Principle 2 — Visual first, text second
+### 4.2 Visual first, text second
 
-Dear Our Future is a vision-board product. Important screens must have a meaningful visual.
+Important screens need a meaningful visual anchor:
 
-Good visual elements:
-
-- Life balance wheel.
-- Radar map.
-- Vision board preview.
-- Moodboard.
-- Goal card.
+- Life balance shape.
+- Focus/insight card.
+- SMART goal preview.
+- Feasibility meter.
 - 12-week roadmap.
-- Weekly progress map.
-- Physical kit mockup.
-- Timeline.
-- Soft illustration.
-- Checklist card.
-- Study desk / planning corner visual.
+- Today/weekly focus map.
+- Reflection prompt card.
+- Vision board preview.
 
-Avoid screens that are only:
+A visual anchor is not decoration. It must explain current state, future result, progress, or next action.
 
-- Text.
-- Forms.
-- Tables.
-- Sliders.
-- Plain cards.
-- Dense charts.
+### 4.3 One screen, one main action
 
-Rule:
+Each screen must have one clear primary CTA. Secondary actions must be quieter.
 
-```text
-If the screen has no visual anchor, it probably does not feel like Dear Our Future.
-```
-
----
-
-### Principle 3 — One screen, one main action
-
-Each screen must have one clear primary CTA.
-
-Secondary actions must be quieter.
-
-Good CTA labels describe the outcome:
+Good labels:
 
 ```text
 Reveal my Life Insight
-Choose my focus
+Choose this focus
 Create my SMART goal
 Build my 12-week plan
 Start this week
-Create my vision board
-Order my vision kit
+Save reflection
 ```
 
-Avoid generic CTA labels when the outcome can be clearer:
+Vietnamese examples:
 
 ```text
-Continue
-Next
-Submit
-Done
-Save
+Xem insight của tôi
+Chọn trọng tâm này
+Tạo mục tiêu SMART
+Tạo kế hoạch 12 tuần
+Bắt đầu tuần này
+Lưu reflection
 ```
 
-Generic labels are allowed only when the surrounding context already makes the result obvious.
+Generic labels are allowed only when the surrounding context already makes the outcome obvious.
 
----
-
-### Principle 4 — Reduce cognitive load
+### 4.4 Reduce cognitive load
 
 Each screen must answer:
 
@@ -343,21 +297,9 @@ Each screen must answer:
 3. What should I do next?
 ```
 
-If users need to guess, the UX is wrong.
+Use short headings, examples, previews, progressive disclosure, and clear CTA hierarchy. Do not use long paragraphs to compensate for unclear structure.
 
-Reduce cognitive load by:
-
-- Using short headings.
-- Showing one main task at a time.
-- Providing examples.
-- Using visual previews.
-- Hiding advanced options.
-- Making CTA hierarchy obvious.
-- Avoiding repeated explanations.
-
----
-
-### Principle 5 — Progressive disclosure
+### 4.5 Progressive disclosure
 
 Simple first. Advanced later.
 
@@ -368,56 +310,27 @@ Use:
 - Advanced settings.
 - More details.
 - AI suggestion.
-- Tooltip.
+- Tooltip for small concepts.
 - Expand/collapse section.
 - Step-by-step wizard.
 
-Do not show every option, explanation, configuration, or edge case at once.
+Do not show every option, explanation, configuration, warning, or edge case at once.
 
-Bad:
-
-```text
-Show all SMART fields, advanced scoring, examples, warnings, and explanations on one screen.
-```
-
-Good:
-
-```text
-Ask one guided question, show an example, then reveal the next step.
-```
-
----
-
-### Principle 6 — Mobile-first for Gen Z
-
-Design for mobile first because many users will access the product on phones.
+### 4.6 Mobile-first for Gen Z
 
 Mobile UI must have:
 
-- Large tappable buttons.
-- Clear card hierarchy.
-- Short forms.
-- Sticky bottom CTA when helpful.
-- No wide tables.
-- No tiny text.
-- No overloaded horizontal layouts.
-- Comfortable spacing.
-- Clear progress indicator.
+- Single-column flow by default.
+- Large tappable controls, generally around 44px or taller for primary actions.
+- Short forms and clear card hierarchy.
+- No horizontal scroll.
+- No tiny text for important information.
+- No hidden CTA below long content when a sticky CTA would help.
+- Stable responsive layout with no clipped buttons, tabs, badges, or Vietnamese text.
 
-Avoid:
+### 4.7 Action over analysis
 
-- Dense grids on mobile.
-- Tables requiring horizontal scroll.
-- CTA hidden below long content.
-- Small icon-only actions without labels.
-
----
-
-### Principle 7 — Action over analysis
-
-The product should not trap users in analysis.
-
-Each insight should lead to an action.
+Every insight needs a next step.
 
 Bad:
 
@@ -431,29 +344,9 @@ Good:
 Your current focus is Health. Start with one small weekly action.
 ```
 
-Rule:
-
-```text
-Every insight needs a next step.
-```
-
----
-
-### Principle 8 — Calm motivation, not pressure
+### 4.8 Calm motivation, not pressure
 
 The product should encourage users without making them feel judged.
-
-Prefer:
-
-```text
-You're building clarity step by step.
-```
-
-Avoid:
-
-```text
-You failed to complete your plan.
-```
 
 Prefer:
 
@@ -467,46 +360,67 @@ Avoid:
 You are behind.
 ```
 
-Tone must be supportive, not guilt-driven.
+Scoring should guide adjustment, not shame the user.
+
+### 4.9 State transparency is trust
+
+Because the product is local-first with selective backend sync, UI must not hide uncertainty.
+
+When relevant, state surfaces should say:
+
+- What is happening.
+- What is safe locally.
+- What is synced or not synced.
+- What the user can do next.
+
+Do not hide auth, sync, billing, entitlement, or production uncertainty behind pretty empty states.
 
 ---
 
-## 5. Visual design system direction
+## 5. Surface modes
 
-### 5.0 Creative runway and quality gates
+Not every screen should carry the same emotional weight.
 
-Dear Our Future should not become visually timid. Use the two lists below together: hard gates protect the product, while creative levers make the design worth remembering.
+| Surface | Primary job | Visual tone | Avoid |
+| --- | --- | --- | --- |
+| Core journey | Move the user through the next step | Warm, guided, visual, focused | Dashboard mosaics, long forms, equal CTAs |
+| Execution workspace | Help the user act today/this week | Calm, structured, efficient | Decorative clutter, motivational noise, hidden task/sync state |
+| Reflection | Help the user learn without guilt | Softer, more emotional, serif-friendly | Judgmental scoring, failure language |
+| Vision support | Make the future visible | Tactile, visual, goal-linked | Generic moodboard scope creep |
+| Marketing/public | Explain the promise and invite start | Visual storytelling | Overpromising production readiness |
+| Billing/settings/legal | Build trust and reduce risk | Clear, restrained, account-bound | Dreamy ambiguity, mock/demo copy in real mode |
+| Admin | Let operators inspect and act safely | Functional, dense, consistent | User-facing decorative style leaking into admin |
+
+Use visual warmth to clarify the next action, not to decorate every container.
+
+---
+
+## 6. Visual system direction
+
+### 6.1 Hard gates and creative levers
 
 Hard gates:
 
-1. **Production safety**: preserve auth, billing, sync, app-mode, localStorage, route, entitlement, and API contracts.
-2. **Accessibility**: readable contrast, visible focus, keyboard flow, labels, screen reader semantics, and reduced-motion support are required.
-3. **Touch and interaction**: primary controls must be easy to tap, generally at least 44px tall, with clear hover/press/disabled/loading feedback.
-4. **Performance and layout stability**: reserve space for images, visual anchors, skeletons, progress widgets, and repeated tiles; avoid CLS and unbudgeted heavy effects.
-5. **Responsive structure**: mobile-first single-column flow, no horizontal scroll, no hidden CTA, no desktop-only comprehension.
+1. Production safety: preserve auth, billing, sync, app-mode, localStorage, route, entitlement, analytics, and API contracts.
+2. Accessibility: readable contrast, visible focus, keyboard flow, labels, semantics, and reduced-motion support are required.
+3. Touch and interaction: primary controls must be easy to tap with clear hover/press/disabled/loading feedback.
+4. Performance and layout stability: reserve space for visuals, skeletons, progress widgets, and repeated tiles.
+5. Responsive structure: mobile-first, no horizontal scroll, no hidden CTA, no desktop-only comprehension.
 
 Creative levers:
 
-1. **Concept strength**: every major screen should have one memorable idea, not just a clean arrangement of cards.
-2. **Visual anchor quality**: prefer custom product-state visuals over generic icons, generic charts, or decorative panels.
-3. **Composition**: use asymmetry, overlap, contrast, rhythm, and negative space when they clarify focus.
-4. **Typography and writing**: pair emotional serif moments with clear sans-serif utility; keep copy short, human, and outcome-based.
-5. **Color and texture**: extend the token system intentionally when a new accent, texture, or surface role supports a real product moment.
-6. **Forms and feedback**: make input feel guided through examples, previews, inline recovery, and saved-local reassurance.
-7. **Motion**: use functional, meaningful motion for step changes, result reveals, progress, and small celebration moments; keep it interruptible and reduced-motion aware.
-8. **Charts and data visuals**: make data feel like guidance, not reporting; every metric needs a next step.
+1. Concept strength: every major screen should have one memorable idea tied to the user's state.
+2. Visual anchor quality: prefer product-state visuals over generic icons/charts.
+3. Composition: use asymmetry, overlap, rhythm, and negative space when they clarify focus.
+4. Typography and writing: pair emotional serif moments with clear sans utility.
+5. Color and texture: extend tokens only when a new role supports a real product moment.
+6. Motion: use functional motion for step changes, result reveals, progress, and small confirmations.
 
-Rules:
+A visually striking screen succeeds only when the user can understand the next action within 5 seconds.
 
-- Hard gates should not be used as an excuse for bland UI. Inside the gates, push for the more distinctive design.
-- A visually striking screen is successful only if the user can still understand the next action within 5 seconds.
-- If a design idea requires new tokens, images, motion primitives, or dependencies, justify it by the user moment it improves, not by novelty alone.
+### 6.2 Design token contract
 
-### 5.1 Design token contract
-
-The codebase already has a semantic token system in `src/styles/tokens.css` and a Tailwind bridge in `tailwind.config.js`. New UI work must use these semantic/component tokens instead of hard-coded primitive colors.
-
-Use these defaults:
+The codebase has a semantic token system in `src/styles/tokens.css` and a Tailwind bridge in `tailwind.config.js`. New UI work must use semantic/component tokens instead of hard-coded primitive colors.
 
 | Role | Tailwind/CSS token | Use for |
 | --- | --- | --- |
@@ -523,67 +437,47 @@ Use these defaults:
 | Accent soft | `bg-app-accent-soft` | Selected pill, progress track, gentle action context |
 | Accent subtle | `bg-app-accent-subtle` | Hover row, light selected area |
 | Reflection warm | `bg-app-warm-soft`, `text-app-warm`, `border-app-warm-border` | Reflection/Review context only |
-| Status | `text-app-status-*`, `bg-[color:var(--color-danger-bg)]` when already defined | Success, warning, error, info states |
+| Status | `text-app-status-*`, existing status/danger component tokens | Success, warning, error, info states |
 | Radius | `rounded-card`, `rounded-input`, `rounded-control`, `rounded-pill` | Consistent component shape |
 | Shadow | `shadow-app-sm`, `shadow-app-md`, `shadow-app-lg` | Subtle elevation |
 | Fonts | `font-sans`, `font-serif` | Body/utility and emotional headings |
 
 Rules:
 
-- Do not use primitive palette values like `--green-700`, `--terra-600`, raw hex, or random Tailwind colors directly in components as one-off styling.
-- New accents, gradients, textures, glow colors, or shadow recipes are allowed when they serve a clear product moment, are added as semantic tokens or well-scoped component styles, and are verified for contrast/responsiveness.
-- Use `app-warm-*` only for Reflection/Review. For billing, danger, pending, and error states, use status tokens or existing component tokens so terracotta does not become a generic warning color.
-- If a token is missing, add or request a semantic token instead of hardcoding a one-off color.
-- Keep light mode as the default brand impression; dark mode must be supported but should not drive the visual identity.
+- Use semantic tokens first.
+- Do not use raw hex values, primitive CSS vars such as `--green-700` / `--terra-600`, or random Tailwind colors directly in components as one-off styling.
+- Do not use `slate-*`, `emerald-*`, `amber-*`, `purple-*`, or similar primitive palettes for new brand surfaces unless mapping through a semantic token or existing component role.
+- Use `app-warm-*` only for Reflection/Review. Do not use terracotta as generic danger, billing, warning, pending, or error color.
+- Status, billing, danger, and destructive states must use status or component tokens with clear semantics.
+- If a token is missing, add or request a scoped semantic token instead of hardcoding a one-off color.
+- Keep light/warm mode as the default brand impression. Dark mode must be supported but should not drive the product identity.
+- New gradients, textures, glow colors, and shadow recipes are allowed only when tokenized, scoped, accessible, and tied to a user state or outcome.
 
-### 5.2 Color direction
+### 6.3 Color direction
 
-Default mode should be light, warm, and calm.
-
-Use existing semantic tokens from `src/styles/tokens.css`.
-
-Do not introduce random primitive colors directly in components. If a stronger creative color is needed, add or reuse a semantic role so the choice can travel consistently across the app.
-
-Preferred color feeling:
+Default mode should feel:
 
 ```text
-Cream / off-white background
-Forest green primary action
-Sage green secondary surfaces
-Soft pastel accents
-Dark neutral text
-Soft gray-brown muted text
+Light, warm, calm, hopeful, personal, clean.
 ```
 
-Recommended color roles:
+Preferred color roles:
 
 ```text
 Background: cream, off-white, warm white
 Primary action: forest green
 Secondary surface: sage green
-Emotional accent: terracotta
-Soft accents: lavender, blush pink, sky blue, soft yellow
+Emotional accent: restrained warm tones in reflection contexts
+Soft accents: lavender, blush pink, sky blue, soft yellow when tokenized
 Text: dark neutral
 Muted text: soft gray-brown
 ```
 
-The interface should feel:
+The interface must not feel corporate, financial, gaming-heavy, cold, overly dark, or visually noisy.
 
-```text
-Calm, soft, warm, hopeful, personal, clean.
-```
-
-It must not feel:
-
-```text
-Corporate, financial, gaming-heavy, cold, overly dark, or visually noisy.
-```
-
-### 5.3 Dark mode
+### 6.4 Dark mode
 
 Dark mode can exist, but it must not define the primary brand impression.
-
-Default design direction is light mode.
 
 If editing dark mode:
 
@@ -591,8 +485,9 @@ If editing dark mode:
 - Preserve contrast.
 - Keep emotional softness.
 - Avoid neon/gaming aesthetics.
+- Keep sync, billing, auth, and error states readable and explicit.
 
-### 5.4 Typography
+### 6.5 Typography
 
 Use this rule:
 
@@ -601,7 +496,7 @@ Serif headings = emotional, reflective, premium.
 Sans-serif body = clear, readable, modern.
 ```
 
-Use serif headings for:
+Use serif for:
 
 - Hero moments.
 - Personal insights.
@@ -616,74 +511,65 @@ Use sans-serif for:
 - Labels.
 - Forms.
 - Navigation.
-- Utility UI.
+- Dense execution UI.
+- Billing, settings, legal, and admin surfaces.
 
 Default hierarchy:
 
-| Element | Default direction |
+| Element | Direction |
 | --- | --- |
-| Page title | `font-serif`, confident but not oversized |
+| Page title | `font-serif` when emotional; confident but not oversized |
 | Product section title | `font-sans font-semibold`, compact and scannable |
 | Form label | `font-sans font-medium`, close to the input |
 | Helper text | `text-app-ink-soft`, one short sentence |
 | Metadata/caption | `text-app-ink-muted`, small but readable |
-| Data/numbers | Use tabular numbers when comparison matters |
+| Data/numbers | Use tabular numbers when comparison, progress, or score matters |
 
-Do not scale font size with viewport width. Use responsive breakpoints and stable line-height instead. Avoid negative letter spacing.
+Avoid the visual outcome of "Inter everywhere" or system-default SaaS typography. `Inter` may remain a fallback in code, but emotional moments should not look like generic product UI when `font-serif` and existing tokens are available.
 
-Good heading examples:
+Vietnamese readability rules:
 
-```text
-Map your current life balance
-Choose what matters most
-Turn a vague goal into a clear plan
-Build the future you can see
-Your next 12 weeks start here
-```
+- Use stable line-height.
+- Do not scale font size with viewport width.
+- Avoid negative letter spacing for normal Vietnamese copy.
+- Prevent clipped text in buttons, tabs, badges, pills, toasts, and cards.
+- Avoid tiny all-caps labels when Vietnamese diacritics become cramped.
+- Use tabular numbers for scores, progress, money, counts, and week numbers.
 
-Avoid headings that sound technical:
-
-```text
-Assessment summary
-Goal configuration
-Execution module
-Data input step
-```
-
-### 5.5 Cards
+### 6.6 Cards and surfaces
 
 Cards should generally use:
 
 - `rounded-card`.
 - `border border-app-line`.
 - `bg-app-surface` or a semantic soft surface.
-- `shadow-app-sm` only when elevation clarifies the hierarchy.
-- Clear heading.
+- `shadow-app-sm` only when elevation clarifies hierarchy.
 - One main idea.
-- Icon, illustration, preview, or meaningful visual marker.
+- Clear heading.
+- Meaningful visual marker, preview, or state.
 - Comfortable padding.
 
 Avoid:
 
-- Cards inside cards.
+- Cards inside cards unless the inner object is independently selectable/editable.
 - Too many identical cards.
 - Dense text cards.
 - Card grids without visual hierarchy.
 - Heavy shadows.
 - Random bright colors.
-- Admin-dashboard styling.
+- Admin-dashboard styling on user-facing product screens.
 
-Use a card when the boundary changes meaning: a selectable option, a saved result, an editable object, a modal, or a repeated item. If a card is only grouping normal page content, prefer a plain section with spacing.
+Use a card when the boundary changes meaning: a selectable option, saved result, editable object, modal, or repeated item. If a card only groups normal page content, prefer a plain section with spacing.
 
-### 5.6 Buttons
+### 6.7 Buttons
 
 Primary button:
 
 - One per screen or section.
 - Strongest visual weight.
-- Uses primary brand action color.
-- Label describes outcome.
-- Default styling should map to `bg-app-accent text-white hover:bg-app-accent-hover`.
+- Uses the primary brand action color.
+- Label describes the result.
+- Maps to `bg-app-accent text-white hover:bg-app-accent-hover` unless an existing component abstracts it.
 
 Secondary button:
 
@@ -696,101 +582,53 @@ Danger button:
 - Only for destructive actions.
 - Must have confirmation.
 - Must use the app confirmation dialog pattern, not `window.confirm`.
+- Must not rely on warm/reflection tokens.
 
 Interaction rules:
 
 - Buttons must have visible focus states.
-- Mobile touch targets should be at least 44px tall.
+- Mobile touch targets should generally be at least 44px tall.
 - Primary and secondary actions must not have the same visual weight.
-- Icon-only buttons need accessible names and tooltips when the icon is not universally obvious.
+- Icon-only buttons need accessible names and tooltips when the icon is not obvious.
+- Loading/disabled states must preserve intent and not cause layout shift.
 
-Button label examples:
+### 6.8 Motion
 
-Good:
-
-```text
-Xem insight của tôi
-Chọn trọng tâm này
-Tạo mục tiêu SMART
-Tạo kế hoạch 12 tuần
-Bắt đầu tuần này
-```
-
-Weak:
-
-```text
-Tiếp tục
-Xong
-OK
-Submit
-```
-
-### 5.7 Icons and illustration
-
-Use icons only when they add meaning.
-
-Prefer warm, human, physical, vision-board-related visuals:
-
-- Stickers.
-- Paper texture.
-- Tape.
-- Pin.
-- Photo frame.
-- Moodboard preview.
-- Calendar.
-- Checklist.
-- Goal card.
-- Soft stars/sparkles.
-- Study desk / study corner feeling.
-
-Avoid relying only on generic SaaS icons.
-
-### 5.8 Motion
-
-Motion should be purposeful. It is usually calm and restrained in work surfaces, but it can be more expressive for onboarding, result reveals, vision-board moments, and small celebrations when that expression helps the user feel progress.
+Motion should be purposeful. It can be expressive for onboarding, result reveals, vision-board moments, and small celebrations, but it must not delay production-critical actions.
 
 Use motion for:
 
 - Step transitions.
 - Progress reveal.
 - Small confirmation feedback.
-- Hover polish.
+- Hover/tap polish.
 - Visual preview updates.
-- Milestone or completion moments that acknowledge progress without guilt.
+- Milestone moments that acknowledge progress without guilt.
 
 Default timing:
 
 | Motion type | Duration | Notes |
 | --- | --- | --- |
-| Hover/tap feedback | 120-160ms | Prefer CSS transitions unless Framer Motion is already needed |
+| Hover/tap feedback | 120-160ms | Prefer CSS transitions unless richer motion already exists |
 | Small reveal | 160-220ms | Opacity + 4-8px translate |
 | Page/step enter | 180-250ms | Fade + 8-16px translate, no dramatic movement |
-| Progress fill | 200-350ms | Only when it clarifies completion |
-| Staggered list | 30-50ms between items | Use only for short lists |
+| Progress fill | 200-350ms | Only when it clarifies completion and space is reserved |
+| Short list stagger | 30-50ms between items | Use only for short lists |
 
-Implementation rules:
+Rules:
 
-- Respect `prefers-reduced-motion` with `useReducedMotion` or an equivalent CSS strategy.
+- Respect `prefers-reduced-motion` with `useReducedMotion` or equivalent CSS strategy.
 - In reduced-motion mode, render the final state without transform/stagger.
-- Animate `opacity`, `transform`, and intentional progress values. Avoid animating layout-affecting properties like `height`, `top`, `left`, or large shadows unless the component reserves space.
-- Do not animate long task lists, inputs while typing, sync state loops, billing confirmation state, or auth forms in a way that delays interaction.
-- Do not use bounce/spring effects by default on production-critical flows. If using a spring or richer motion, keep it tied to a specific state change and safe for reduced-motion users.
-- Do not add motion that changes the reading order, focus order, or click target.
-
-Avoid:
-
-- Fast, flashy animation.
-- Excessive bouncing.
-- Gaming-like effects.
-- Motion that distracts from the main task or slows completion.
-- Continuous decorative loops, except clear loading indicators.
-- Animation that causes layout shift.
+- Animate opacity, transform, and intentional progress values.
+- Avoid animating layout-affecting properties unless space is reserved.
+- Do not animate long task lists, inputs while typing, sync loops, billing confirmation, or auth forms in a way that delays interaction.
+- Do not add audio, confetti, drag-heavy interaction, or canvas rewrites as default polish without a specific task and risk review.
 
 ---
 
-## 6. UX writing rules
+## 7. UX writing rules
 
-### 6.1 Voice and tone
+### 7.1 Voice and tone
 
 Writing must be:
 
@@ -812,12 +650,6 @@ Do not write like:
 - A psychological diagnosis.
 - A strict productivity coach.
 
-Bad:
-
-```text
-Dear Our Future helps users transform long-term vision into SMART goals and specific 12-week action plans through a multidimensional assessment system.
-```
-
 Good:
 
 ```text
@@ -825,51 +657,36 @@ Have many goals but not sure where to start?
 We help you choose one focus and turn it into a 12-week plan.
 ```
 
-Vietnamese good example:
+Good Vietnamese:
 
 ```text
 Bạn có nhiều mục tiêu nhưng chưa biết bắt đầu từ đâu?
 Chúng mình giúp bạn chọn một trọng tâm và biến nó thành kế hoạch 12 tuần.
 ```
 
-### 6.2 Text length limits
-
-Default limits:
+### 7.2 Text length defaults
 
 ```text
-Title: 6–12 words
-Subtitle: 1–2 short lines
+Title: 6-12 words
+Subtitle: 1-2 short lines
 Card description: 1 short line
-Button: 2–5 words
+Button: 2-5 words
 Tooltip: 1 short sentence
 Empty state: 1 short title + 1 helpful sentence + 1 CTA
+Error state: what happened + what is safe + next action
+Success state: what changed + next action
 ```
 
-If a concept needs more explanation, use:
+If a concept needs more explanation, use an example, tooltip, disclosure, or help link. Do not use long paragraphs to fix unclear UX.
 
-- Example.
-- Tooltip.
-- Expandable content.
-- “Learn more”.
-- “See example”.
-- “AI suggestion”.
+### 7.3 Examples over abstraction
 
-Do not use long paragraphs to fix unclear UX.
-
-### 6.3 Use examples instead of abstract explanation
-
-For forms and setup screens, always include concrete examples.
+For forms and setup screens, include concrete examples close to the input.
 
 Good:
 
 ```text
 Example: Reach IELTS 6.5 in 12 weeks by studying 5 sessions per week.
-```
-
-Bad:
-
-```text
-Enter your goal here.
 ```
 
 Good Vietnamese:
@@ -878,7 +695,13 @@ Good Vietnamese:
 Ví dụ: Đạt IELTS 6.5 trong 12 tuần bằng cách học 5 buổi mỗi tuần.
 ```
 
-### 6.4 Button copy
+Avoid:
+
+```text
+Enter your goal here.
+```
+
+### 7.4 CTA copy
 
 Buttons should explain the next result.
 
@@ -892,56 +715,33 @@ Tạo kế hoạch 12 tuần
 Lưu và bắt đầu tuần này
 ```
 
-Avoid:
+Avoid when context is unclear:
 
 ```text
 Tiếp tục
 Gửi
 Xong
 OK
+Submit
 ```
 
-### 6.5 Empty states
+### 7.5 State copy
 
-Empty states must help the user act.
-
-A good empty state includes:
+Empty states must include:
 
 1. What is missing.
 2. Why it matters.
 3. What to do next.
 
-Example:
-
-```text
-No focus area yet
-Choose one area to turn your life balance result into a 12-week plan.
-[Choose my focus]
-```
-
-Avoid:
-
-```text
-No data found.
-```
-
-### 6.6 Error states
-
-Error messages must be calm and recoverable.
+Error states must be calm and recoverable.
 
 Good:
 
 ```text
-We couldn't save this yet. Your changes are still on this device. Try again in a moment.
+We could not save to the server yet.
+Your changes are still saved on this device.
+Try syncing again.
 ```
-
-Bad:
-
-```text
-Error: request failed.
-```
-
-### 6.7 Success states
 
 Success states should reinforce progress.
 
@@ -951,509 +751,177 @@ Good:
 Your focus is saved. Next, let's turn it into a SMART goal.
 ```
 
-Bad:
+Avoid:
 
 ```text
+No data found.
+Error occurred.
 Saved successfully.
 ```
 
----
+### 7.6 Production/demo copy
 
-## 7. Screen-specific rules
+Real-mode copy must be account-bound and production-safe.
 
-Prioritize screens in this order unless the task explicitly says otherwise:
+Do not show real users:
 
-```text
-Onboarding
--> Life Balance
--> Life Insight
--> SMART Goal
--> Feasibility Check
--> 12-Week Plan
--> Weekly Execution / Today
--> Reflection / Review
-```
+- Mock/demo payment language.
+- "No real money" payment copy.
+- Browser-bound trial language.
+- Claims that paid subscription, provider settlement, analytics, backend ownership, or cross-device restore are fully production-ready unless the current code-backed status proves it.
 
-Side surfaces such as Vision Board, Order Kit, Achievements, and Admin must support the core journey. Do not make them more prominent than the next planning/execution step for a new or returning user.
-
-### 7.1 Homepage / Dashboard entry
-
-The homepage or entry dashboard must quickly answer:
-
-```text
-What problem does Dear Our Future solve?
-What result will I get?
-Where should I start?
-```
-
-Recommended structure:
-
-```text
-Problem -> Promise -> Visual Preview -> CTA
-```
-
-Homepage should show:
-
-- Vision board preview.
-- 3-step journey.
-- Transformation from vague dream to clear 12-week plan.
-- Strong primary CTA.
-- Short social proof or user benefit if available.
-
-Avoid:
-
-- Too many charts.
-- Too many feature cards.
-- Long explanation of methodology.
-- Dashboard widgets before the user understands the product.
-
-Good homepage message:
-
-```text
-Stop dreaming vaguely.
-Build your 12-week action plan.
-```
-
-Vietnamese version:
-
-```text
-Đừng chỉ mơ nữa.
-Hãy biến mục tiêu của bạn thành kế hoạch 12 tuần.
-```
+For billing, entitlement, auth, sync, and account lifecycle screens, clarity and trust outrank emotional flourish.
 
 ---
 
-### 7.2 Onboarding
+## 8. Flow upgrade plan
 
-Onboarding must feel like a guided quest, not a survey.
+Use this section to decide what to improve first and how to do it safely. It is not permission to rewrite interactions, data flow, canvas behavior, checkout providers, sync behavior, or routes.
 
-Each step should have:
+### 8.1 Entry / Dashboard (`/`)
 
-```text
-1 main question
-1 meaningful visual
-1 clear action
-1 visible result after completion
-```
+- User job: understand the product promise or resume the most important current action.
+- Primary output: a chosen starting point for new users, or the next execution action for returning users.
+- Visual anchor: transformation preview for fresh users; current-week focus map or next-action preview for active users.
+- CTA direction: `Start Life Balance`, `Continue my plan`, `Open today's actions`, or another state-based outcome label.
+- Common risks: generic SaaS landing/dashboard mix, too many widgets, demo-only copy in real mode, side surfaces outranking the core flow.
+- Safe redesign moves: simplify first viewport, use state-based hierarchy, show one main CTA, keep local-first and sync status copy intact, avoid adding new routes or onboarding steps.
 
-The user should always understand why this step matters.
+### 8.2 Onboarding / Life Balance (`/onboarding`, `/life-balance`)
 
-Onboarding should reduce fear of starting.
+- User job: start calmly and score current life areas without feeling judged.
+- Primary output: a visible balance result and enough context to reveal Life Insight.
+- Visual anchor: life balance wheel, radar shape, circular score map, or another accessible visual shape.
+- CTA direction: `Reveal my Life Insight`, `Xem insight của tôi`.
+- Common risks: long survey feeling, dense slider list on mobile, low scores feeling like failure, gesture-heavy redesign that weakens accessibility or stored draft behavior.
+- Safe redesign moves: show one area or one focused cluster at a time on mobile, keep sliders/inputs accessible, explain "current feeling" not objective judgment, show progress through areas, keep draft/local data behavior unchanged.
 
-Use:
+### 8.3 Life Insight (`/life-insight`)
 
-- Step indicator.
-- Short instruction.
-- Examples.
-- Friendly visual.
-- One main action.
+- User job: understand the result, choose one focus, and know why it matters.
+- Primary output: selected focus area, intent/context, and a clear move into SMART Goal setup.
+- Visual anchor: personal report card, selected focus spotlight, or balance-result summary tied to one recommendation.
+- CTA direction: `Choose this focus`, `Create my SMART goal`, `Tiếp -> viết mục tiêu` when context is already clear.
+- Common risks: analytics-dashboard layout, too many charts, long psychological explanations, ending without a next action.
+- Safe redesign moves: turn analysis into one focus recommendation, keep copy short and supportive, make intent choices scannable, preserve selected focus/intent data handoff.
 
-Avoid:
+### 8.4 SMART Goal Setup (`/smart-goal-setup`)
 
-- Long intro text.
-- Too many options at once.
-- Asking users for details before showing value.
-- Dry survey language.
+- User job: turn a vague wish into a concrete SMART goal without feeling the goal must be perfect.
+- Primary output: valid SMART goal draft ready for feasibility check.
+- Visual anchor: live SMART goal preview, clarity checklist, or goal card that updates as answers become specific.
+- CTA direction: `Create my SMART goal`, `Check feasibility`, `Tiếp -> khảo sát tính khả thi` when context is clear.
+- Common risks: dense all-fields form, academic SMART explanations, AI suggestions that overwrite user intent, visual polish that touches validation/local draft behavior.
+- Safe redesign moves: keep one prompt per step, place examples next to inputs, make suggestions clearly optional/editable, preserve validation, draft persistence, analytics, and route handoff.
 
----
+### 8.5 Feasibility Check (`/feasibility`)
 
-### 7.3 Life Balance
+- User job: check whether the goal is realistic for 12 weeks and adjust without discouragement.
+- Primary output: readiness score/context and a safe recommendation for building the plan or adjusting the goal.
+- Visual anchor: supportive meter, balance visual, blocker map, or adjustment preview.
+- CTA direction: `Build my 12-week plan`, `Adjust my goal`, `Tiếp tục thiết lập 12 tuần`.
+- Common risks: failure-grade visuals, red-heavy normal guidance, changing scoring/domain logic during UI polish, using warm/reflection tokens as generic warning colors.
+- Safe redesign moves: keep domain scoring unchanged, use status tokens for warnings/errors, frame low readiness as adjustment guidance, make the next path explicit.
 
-Life Balance must not be only sliders.
+### 8.6 12-Week Setup (`/12-week-setup`)
 
-It should include a visual representation such as:
+- User job: convert the goal into a realistic 12-week system with lead actions, milestones, schedule, and review rhythm.
+- Primary output: local goal and local `twelveWeekSystem` created first, with backend sync attempted only under existing conditions.
+- Visual anchor: 12-week roadmap, week/milestone preview, setup summary, or week-one action preview.
+- CTA direction: `Build my 12-week plan`, `Confirm and start the 12-week cycle`, `Xác nhận & bắt đầu chu kỳ 12 tuần`.
+- Common risks: overcrowded setup, spreadsheet-like preview, rewriting setup logic, drag/drop tactic systems, changing task generation, weakening sync/link behavior.
+- Safe redesign moves: reduce density, use progressive disclosure, keep week-one preview close to setup decisions, preserve local-first save before remote sync, do not change plan creation or backend sync semantics unless explicitly tasked.
 
-- Life balance wheel.
-- Radar map.
-- Circular score map.
-- Visual balance shape.
+### 8.7 Weekly Execution / Today (`/12-week-system` and Today entry surfaces)
 
-The user should see scores become a visual shape.
+- User job: know what matters today/this week, complete 1-3 priority actions, and understand sync/offline safety.
+- Primary output: task progress, daily check-in, and clear weekly rhythm.
+- Visual anchor: current-week focus band, today's priority queue, progress/check-in surface, or week map.
+- CTA direction: `Start this week`, `Mark today's focus`, `Save check-in`, `Review this week` depending on state.
+- Common risks: showing the whole backlog first, dashboard metrics louder than next action, hiding sync/conflict/offline state, moving review/journal behavior into a new flow without data review.
+- Safe redesign moves: make today's action dominant, keep only 1-3 priority actions above the fold, keep sync/offline/conflict state visible for signed-in real-mode users, preserve task/check-in/review data behavior.
 
-Required UX:
+### 8.8 Reflection / Review (`/12-week-system` review surfaces, `/journal` where applicable)
 
-- Explain that scores are based on current feeling, not a perfect objective measurement.
-- Keep scoring fast.
-- Show progress through the 8 areas.
-- Show average, strongest area, and focus/weakest area.
-- CTA should reveal the result.
+- User job: learn from the week without guilt and choose one adjustment for the next week.
+- Primary output: saved reflection/review and one practical adjustment.
+- Visual anchor: warm reflection card, week summary, one prompt at a time, or adjustment preview.
+- CTA direction: `Save reflection`, `Plan next week`, `Lưu review tuần này`.
+- Common risks: judgmental copy, too many prompts at once, warm tokens leaking into non-reflection contexts, vague success state.
+- Safe redesign moves: use `app-warm-*` only here, ask one question at a time, summarize what was saved, keep next-week adjustment concrete, preserve review storage/sync behavior.
 
-Good CTA:
+### 8.9 Supporting surfaces
 
-```text
-Xem insight của tôi
-Reveal my Life Insight
-```
+#### Vision Board and Gallery (`/vision-board`, `/gallery`)
 
-Avoid:
+- User job: visualize the chosen future and keep it connected to the goal/plan.
+- Primary output: saved visual board or selected inspiration that supports execution.
+- Visual anchor: tactile moodboard, goal-linked card, template preview, gallery image/story.
+- CTA direction: `Create my vision board`, `Save to gallery`, `Use this in my plan`.
+- Common risks: becoming a generic canvas product, mobile drag/canvas friction, base64/export regressions, visual beauty disconnected from the plan.
+- Safe redesign moves: improve tactile styling and guidance without rewriting canvas/export/storage by default; keep goal/plan linkage visible; guide users back to weekly action.
 
-```text
-Submit scores
-Next
-Continue
-```
+#### Goals surfaces
 
----
+- User job: inspect or continue meaningful goals without losing the core 12-week rhythm.
+- Primary output: a clear next goal action, status, or review point.
+- Visual anchor: goal card, progress snapshot, linked 12-week plan preview.
+- CTA direction: `Continue this plan`, `Review goal`, `Create 12-week plan`.
+- Common risks: generic goal tracker, too many metrics, unrelated achievements outranking execution.
+- Safe redesign moves: connect each goal to next action, use tabular progress, keep historical/secondary detail behind disclosure.
 
-### 7.4 Life Insight
+#### Billing / Order / Support (`/billing/*`, `/order`, `/order-status`)
 
-Life Insight should feel like a beautiful personal report, not an analytics dashboard.
+- User job: understand plan value, account/payment state, support options, and safe next steps.
+- Primary output: trusted upgrade/manage/order action, or clear recovery path.
+- Visual anchor: restrained value summary, account-bound entitlement state, product/kit preview only when code-backed and not overpromising.
+- CTA direction: `Upgrade Plus`, `Manage plan`, `Contact support`, `Review order`, `Return to plan`.
+- Common risks: mock/demo copy in real mode, fake urgency, provider-specific assumptions, overclaiming payment readiness, hiding pending/error state, making checkout too dreamy.
+- Safe redesign moves: keep copy account-bound, show support/legal links where required, preserve entitlement wait rules, surface pending/error states clearly, do not hardcode Stripe/VNPay/MoMo/Casso assumptions unless the task targets that provider and code supports it.
 
-It should include:
+#### Settings / Legal / Admin
 
-```text
-Current focus
-Why it matters
-Suggested next step
-```
-
-The insight should be short, personal, and action-oriented.
-
-Good structure:
-
-```text
-Your current focus is Health.
-Why this matters: your energy supports every other plan.
-Next step: turn this into one SMART goal for the next 12 weeks.
-```
-
-Avoid:
-
-- Too many charts.
-- Long psychological explanations.
-- Making the user feel judged.
-- Ending without a next action.
-
----
-
-### 7.5 SMART Goal Setup
-
-SMART Goal Setup should feel like an AI-assisted goal builder, not a long form.
-
-Break it into small guided prompts:
-
-```text
-What do you want to achieve?
-Why does it matter?
-How will you measure it?
-When do you want to finish?
-```
-
-Every input should have an example.
-
-AI suggestions should be:
-
-- Visible.
-- Easy to accept.
-- Easy to edit.
-- Not overly verbose.
-- Clearly marked as suggestions.
-
-Avoid:
-
-- Showing all SMART fields as a dense form.
-- Technical wording.
-- Asking for too much detail upfront.
-- Making users feel their goal must be perfect.
+- User job: manage account, data, preferences, support, and operations safely.
+- Primary output: successful configuration, export/import, support action, or confirmed destructive action.
+- Visual anchor: restrained grouped settings, safety summary, clear status panels, functional tables for admin when truly needed.
+- CTA direction: action-specific labels such as `Export data`, `Check backup`, `Delete local data`, `Save settings`.
+- Common risks: unclear destructive actions, `window.confirm`, vague account lifecycle copy, admin dark theme leaking into product UI, hidden legal/support requirements.
+- Safe redesign moves: group by risk, use in-app confirmation dialogs, keep dangerous actions visually and semantically distinct, preserve existing data/account logic, keep admin functional and token-compliant.
 
 ---
 
-### 7.6 Feasibility Check
-
-Feasibility should help users adjust the goal, not discourage them.
-
-It should answer:
-
-```text
-Is this goal realistic for the next 12 weeks?
-What might block me?
-What should I adjust?
-```
-
-Tone should be supportive.
-
-Good:
-
-```text
-This goal is possible, but the weekly workload may be high. Try reducing the target or increasing your study sessions gradually.
-```
-
-Bad:
-
-```text
-Your goal is not feasible.
-```
-
-Use visual indicators carefully. Avoid making scoring feel like a failure grade.
-
----
-
-### 7.7 Vision Board
-
-Vision Board should be the most visual and emotional side surface of the product.
-
-It should support the user's chosen focus, SMART goal, and 12-week plan. It must not become a separate generic moodboard product unless the task explicitly targets that scope.
-
-It should include, when relevant:
-
-- Templates.
-- Themes.
-- Stickers.
-- Image gallery.
-- Moodboard preview.
-- Visual selection.
-- Personalization.
-- Goal cards linked to SMART goals.
-
-It must feel like:
-
-```text
-I am building the future I can see.
-```
-
-It must not feel like a normal information form.
-
-It should be reachable when it helps users visualize the plan, but the primary product journey should still guide them back to weekly action.
-
-Avoid:
-
-- Too many text fields.
-- Overly technical editor UI.
-- No preview.
-- No templates.
-- Generic blank canvas without guidance.
-
----
-
-### 7.8 12-Week Plan
-
-The 12-week plan can be more structured, but it must stay visually clear.
-
-Use:
-
-- Week cards.
-- This week focus.
-- Next action.
-- Progress bar.
-- Check-in.
-- Simple milestones.
-- Clear weekly rhythm.
-
-Avoid:
-
-- Dense tables.
-- Spreadsheet-like layouts.
-- Overloaded task lists.
-- Too many metrics at once.
-
-Each week should answer:
-
-```text
-What should I do this week?
-What is the most important action?
-How much progress have I made?
-```
-
-The user should always know what to do today or this week.
-
----
-
-### 7.9 Today / Weekly Execution
-
-The Today screen should be the most action-focused part.
-
-It should answer:
-
-```text
-What should I do today?
-What matters most this week?
-What is already done?
-What should I check in?
-```
-
-Good structure:
-
-- Today's focus.
-- 1–3 priority actions.
-- Small progress indicator.
-- Quick check-in.
-- Encouraging microcopy.
-
-Avoid:
-
-- Showing the entire 12-week plan at once.
-- Overwhelming user with backlog.
-- Too many charts.
-
----
-
-### 7.10 Reflection / Review
-
-Reflection should feel calm and supportive.
-
-It should help users learn, not feel guilty.
-
-Good prompts:
-
-```text
-What worked this week?
-What got in the way?
-What is one small adjustment for next week?
-```
-
-Avoid:
-
-```text
-Why did you fail?
-Why didn't you complete your tasks?
-```
-
-Reflection should lead to adjustment.
-
----
-
-### 7.11 Order Kit / Payment
-
-The order flow should make the physical kit feel tangible and desirable, while staying production-safe and trustworthy.
-
-It should include:
-
-- Product image or mockup.
-- What is inside the kit.
-- Delivery / receiving process.
-- Clear price.
-- Direct payment QR where relevant.
-- Strong CTA.
-- Trust signals.
-- Support email or contact route.
-- Links to legal pages before paid transaction.
-
-Production rules:
-
-- Real mode must never show mock/demo payment copy.
-- Trial or entitlement copy must be account-bound, not browser-bound.
-- Do not imply payment is complete until entitlement sync or provider confirmation says so.
-- Do not add provider-specific assumptions unless the task targets that provider.
-- If billing readiness is not proven, say so clearly instead of making the checkout more persuasive than the operation can support.
-
-Avoid:
-
-- Dry checkout-only feeling.
-- Hidden price.
-- Unclear next step.
-- Too much payment jargon.
-- Fake urgency.
-- Demo-only language in real mode.
-
----
-
-### 7.12 Admin surfaces
-
-Admin pages may be more functional, but they should still be clean and consistent.
-
-Admin surfaces can be more table-heavy, but must remain:
-
-- Clear.
-- Accessible.
-- Consistent with tokens.
-- Not visually mixed with user-facing emotional screens.
-
-Do not let admin style leak into user-facing product screens.
-
----
-
-## 8. Component-level rules
-
-### 8.1 Forms
-
-Forms should be guided and example-driven.
+## 9. Phased implementation plan
+
+Use this sequencing for future UI redesign work. It is safer than route-by-route decorative batches because it follows user value and production risk.
+
+| Phase | Scope | Goal | Verification expectation |
+| --- | --- | --- | --- |
+| Phase 0 - Foundations | Shared tokens, page shell, common states, CTA patterns, dialog patterns | Reduce primitive styles and create safe reusable UI language before screen polish | Inspect token/component diff; run typecheck/lint/build if code changed; manually verify light/dark/mobile patterns |
+| Phase 1 - First-start clarity | `/`, `/onboarding`, `/life-balance`, `/life-insight` | Help new users understand the promise, assess balance, and choose focus | Verify fresh-state flow, mobile scan, local draft behavior, no demo copy leak |
+| Phase 2 - Goal creation | `/smart-goal-setup`, `/feasibility` | Convert focus into a clear goal and feasible next step | Verify validation, draft persistence, examples, feasibility logic unchanged, route handoff unchanged |
+| Phase 3 - Planning/execution | `/12-week-setup`, `/12-week-system`, goals surfaces, weekly review | Make setup and weekly rhythm calm, clear, and local-first safe | Verify local save before sync, plan links, task/check-in/review updates, sync/offline/conflict visibility |
+| Phase 4 - Reflection/vision support | `/journal`, `/vision-board`, `/gallery` | Support emotional clarity without distracting from execution | Verify warm token scope, media/canvas/export behavior if touched, saved state, return path to action |
+| Phase 5 - Trust/monetization/support | `/billing/*`, `/order`, `/order-status`, `/settings`, legal/support, admin | Make production-sensitive surfaces clear, account-bound, and safe | Verify real/demo gating, billing mode copy, entitlement wait rules, legal/support links, destructive dialogs, auth/account safety |
 
 Rules:
 
-- Use clear labels.
-- Use examples or placeholders.
-- Group related fields.
-- Avoid too many fields at once.
-- Use inline validation.
-- Explain errors in human language.
-- Preserve user input when errors happen.
+- Do not start Phase 5 persuasion polish until production readiness and support/legal expectations are clear for the touched surface.
+- Do not use Phase 4 visual polish to expand Vision Board into an unrelated product.
+- Do not rewrite high-risk interactions such as direct chart dragging, canvas behavior, task generation, checkout provider handling, or sync behavior unless the task explicitly targets that implementation and includes verification.
+- Shared foundations may be improved earlier when they reduce duplication and do not change product behavior.
 
-### 8.2 Sliders
+---
 
-Sliders must have context.
+## 10. Component-level rules
 
-A slider should include:
+`docs/VISUAL_EXECUTION_SPEC.md` contains the detailed component recipes. These are the authority-level rules to preserve.
 
-- What the score means.
-- Min/max labels.
-- Optional midpoint meaning.
-- Live visual feedback where possible.
-
-Avoid sliders that feel like arbitrary scoring.
-
-### 8.3 Progress indicators
-
-Use progress indicators to reduce uncertainty.
-
-Good progress indicators:
-
-- Step 1 of 6.
-- 3 of 8 areas reviewed.
-- Week 4 of 12.
-- 60% complete.
-
-Progress should encourage, not pressure.
-
-### 8.4 Tables
-
-Avoid tables on user-facing mobile screens.
-
-Use tables only when:
-
-- The data is truly tabular.
-- The user needs comparison.
-- The screen is admin or management-focused.
-
-For user-facing planning, prefer cards, timelines, or weekly sections.
-
-### 8.5 Modals
-
-Use modals sparingly.
-
-Good uses:
-
-- Confirm destructive action.
-- Show focused detail.
-- Short guided explanation.
-- Quick edit.
-
-Avoid using modals for long workflows.
-
-### 8.6 Tooltips
-
-Tooltips should explain small concepts, not carry essential instructions.
-
-If users need the tooltip to complete the screen, the main UI is not clear enough.
-
-### 8.7 Navigation
-
-Navigation must support the core journey.
-
-The user should know:
-
-- Where they are.
-- What came before.
-- What comes next.
-- How to return safely.
-
-Avoid exposing too many side routes before users finish the core journey.
-
-### 8.8 Page shell
+### 10.1 Page shell
 
 Default product page structure:
 
 ```text
-Page context / progress
+Context / progress / state
 -> Clear title
 -> One-sentence guidance
 -> Main working surface
@@ -1466,95 +934,109 @@ Rules:
 - Keep one dominant working surface per screen.
 - Keep page chrome quieter than the main task.
 - Do not start core product screens with marketing-style hero sections unless the page is a public landing page.
-- Use constrained width and stable responsive grids so content does not stretch into loose desktop layouts.
+- Use constrained width and stable responsive grids.
 - On mobile, use one column and keep the primary CTA easy to reach.
 
-### 8.9 Guided step screens
+### 10.2 Forms
 
-For onboarding, Life Balance, SMART Goal, Feasibility, and 12-week setup, each step should have:
-
-```text
-Step indicator
--> One main question
--> Helpful example or preview
--> Input/choice
--> Primary CTA
-```
+Forms should be guided and example-driven.
 
 Rules:
 
-- Show only the current decision unless seeing the previous answer helps.
-- Put advanced details behind disclosure.
-- Keep examples close to the input they explain.
-- Save locally before remote sync where the implementation already supports it.
+- Use clear labels.
+- Put examples close to inputs.
+- Group related fields.
+- Avoid too many fields at once.
+- Use inline validation.
+- Preserve user input when errors happen.
+- Explain errors in human language.
 
-### 8.10 Visual anchors
+### 10.3 Choice controls
 
-A visual anchor is not decoration. It must explain the user's current state, future result, or next action.
+Choice cards, sliders, radios, and segmented controls must have context.
 
-Good visual anchors:
+Rules:
 
-- Life balance shape.
-- Selected focus card.
-- SMART goal preview.
-- Feasibility meter with adjustment guidance.
-- 12-week roadmap.
-- This-week progress map.
-- Reflection prompt card.
+- Explain what the choice changes.
+- Show selected state without relying on color alone.
+- Keep controls large enough for touch.
+- Preserve native semantics where possible.
+- Avoid arbitrary scoring without meaning.
 
-Avoid:
+### 10.4 Tables
 
-- Decorative gradients.
-- Generic icon clusters.
-- Images that do not reveal product state.
-- Visuals that compete with forms or CTAs.
+Avoid tables on user-facing mobile screens.
 
-### 8.11 State surfaces
+Use tables only when:
 
-Every meaningful screen or component should consider:
+- The data is truly tabular.
+- The user needs comparison.
+- The screen is admin or management-focused.
 
-- Loading: preserve layout space, avoid blank screens.
-- Empty: explain what is missing and give one action.
-- Error: say what happened, what is still safe locally, and how to retry.
-- Success: name what changed and what the next step is.
-- Offline/sync: keep local progress usable and show the safety state for signed-in real-mode users.
+For user-facing planning, prefer cards, timelines, week sections, or progressive summaries.
 
-Do not hide production failures behind pretty empty states. If sync, auth, billing, or entitlement is uncertain, surface it calmly and specifically.
+### 10.5 Modals and dialogs
+
+Use dialogs sparingly.
+
+Good uses:
+
+- Confirm destructive action.
+- Show focused detail.
+- Short guided explanation.
+- Quick edit.
+
+Rules:
+
+- Do not use modals for long workflows.
+- Preserve focus when opening/closing.
+- Use in-app confirmation dialogs for destructive actions instead of `window.confirm`.
+- Do not use `alert` for recoverable product errors; show an in-app state/toast/panel with next action.
+
+### 10.6 Navigation
+
+Navigation must support the core journey.
+
+The user should know:
+
+- Where they are.
+- What came before.
+- What comes next.
+- How to return safely.
+
+Avoid exposing too many side routes before users finish the core journey.
 
 ---
 
-## 9. Responsive design rules
+## 11. Responsive and accessibility rules
 
-### Mobile
+### 11.1 Responsive structure
+
+Mobile:
 
 - Single-column layout by default.
-- Primary CTA should be visible or easy to reach.
+- Primary CTA visible or easy to reach.
 - Avoid dense grids.
 - Avoid horizontal scrolling.
 - Use larger tap targets.
 - Keep headings short.
 - Use progressive disclosure.
-- Prevent text from overflowing buttons, cards, tabs, and badges.
-- Prefer sticky bottom CTA only when it does not cover form fields or important content.
+- Prevent text overflow in buttons, cards, tabs, badges, and pills.
+- Use sticky bottom CTA only when it does not cover form fields or important content.
 
-### Tablet
+Tablet:
 
 - Use two-column layout only when it improves clarity.
 - Keep important visual preview near the main action.
 
-### Desktop
+Desktop:
 
-- Use wider layouts for visual storytelling.
-- Good patterns:
-  - Left content + right preview.
-  - Main task + sticky insight panel.
-  - Card grid + visual summary.
+- Use wider layouts for visual storytelling and efficient work only when it clarifies the task.
+- Good patterns: main task + preview, current action + sticky insight panel, roadmap + setup decision.
 - Do not fill space with unnecessary widgets.
-- Use stable dimensions for repeated tiles, progress widgets, and toolbars so hover/loading/content changes do not shift layout.
+- Reserve stable dimensions for repeated tiles, progress widgets, images, and toolbars.
 
----
-
-## 10. Accessibility rules
+### 11.2 Accessibility
 
 All UI must remain accessible.
 
@@ -1570,192 +1052,67 @@ Rules:
 - Keep button text descriptive.
 - Avoid tiny text for important information.
 - Preserve focus when opening/closing dialogs, disclosures, and route-level overlays.
-- Keep keyboard submission behavior for forms where users expect Enter-to-submit.
+- Keep expected form keyboard behavior such as Enter-to-submit where appropriate.
 - Keep screen reader semantics when replacing native controls with custom UI.
+- Add captions/transcripts for meaningful media when media carries required information.
 
 Accessibility is part of product quality, not an optional layer.
 
 ---
 
-## 11. AI redesign workflow
+## 12. AI redesign workflow
 
-Before editing any screen, always do this:
-
-### Step 0 — Confirm scope and authority
+### Before editing
 
 Answer internally:
 
 ```text
-Is this screen in the current production priority?
-Does this change touch auth, billing, sync, localStorage, or routing?
+What screen or route is in scope?
+Where is it in the core journey?
+What is the user trying to finish?
+What is the expected output?
+What data/state contracts could be touched?
 Which existing tokens/components should be reused?
-Which verification commands are appropriate for the risk?
+Which verification commands match the risk?
 ```
 
 If a requested visual change conflicts with production safety, preserve production safety and report the tradeoff.
 
-### Step 1 — Identify the screen purpose
+### During editing
 
-Answer internally:
-
-```text
-Where is this screen in the journey?
-What is the user's main job here?
-What result should the user get after this screen?
-What is the main CTA?
-```
-
-### Step 2 — Identify user friction
-
-Check:
+Ensure:
 
 ```text
-Is there too much text?
-Are there too many choices?
-Is the main CTA obvious?
-Is there a meaningful visual?
-Is any advanced detail shown too early?
-Does the user need an example?
-Does the mobile layout remain easy?
-Is the screen too dashboard-like?
-Is the screen too generic?
+[ ] One main action is visually dominant.
+[ ] The screen has one meaningful visual anchor.
+[ ] Copy is shorter, concrete, and outcome-based.
+[ ] Advanced detail is progressively disclosed.
+[ ] Loading/empty/error/success/offline/sync states are considered.
+[ ] Mobile layout is comfortable with no horizontal scroll.
+[ ] Accessibility, focus, and reduced motion are preserved.
+[ ] Semantic tokens are used or intentionally extended.
+[ ] Existing logic, routes, storage, analytics, auth, billing, sync, entitlement, and app-mode behavior are preserved.
 ```
 
-### Step 3 — Redesign using the North Star
+### After editing
 
-The result must be:
+Report:
 
 ```text
-Dreamy
-Guided
-Visual
-Clear
-Action-oriented
-Mobile-friendly
+Files changed.
+What changed and why.
+Commands run and results.
+Commands not run and why.
+Contracts preserved.
+Remaining risks or TODOs.
 ```
 
-Inside production and accessibility guardrails, choose the more distinctive screen concept over the safer generic arrangement. The screen should have one memorable design idea that helps the user understand the task or result.
-
-### Step 4 — Preserve engineering safety
-
-Unless explicitly asked, preserve:
-
-- Existing routes.
-- Existing business logic.
-- Existing localStorage/sessionStorage behavior.
-- Existing analytics events.
-- Existing API contracts.
-- Existing TypeScript safety.
-- Existing tests where applicable.
-- Existing app mode handling.
-- Existing auth and billing safety rules.
-- Existing local-first behavior when sync is unavailable.
-- Existing production/demo route gating.
-
-### Step 5 — Final checklist
-
-Before finishing, verify:
-
-```text
-[ ] There is one clear primary CTA.
-[ ] The user knows where they are in the journey.
-[ ] The screen has a meaningful visual element.
-[ ] Text is shorter and easier to scan.
-[ ] Forms include examples or just-in-time guidance.
-[ ] Mobile layout is comfortable.
-[ ] Existing tokens and design system are respected or intentionally extended.
-[ ] Creative visual details are tokenized, scoped, accessible, and tied to the user's task.
-[ ] Motion respects reduced-motion preferences.
-[ ] The screen feels like Dear Our Future, not a generic SaaS app.
-[ ] The screen creates a clear next step.
-[ ] No business logic, routes, storage, or analytics were broken.
-[ ] Auth, billing, sync, and app-mode behavior were not weakened.
-```
-
----
-
-## 12. Anti-patterns to avoid
-
-Do not:
-
-1. Add long explanations to fix confusion.
-2. Make the app look like an admin dashboard.
-3. Use dark mode as the default visual direction.
-4. Put too many charts on the first impression.
-5. Force users through too many setup steps before they get value.
-6. Hide the main CTA among many equal buttons.
-7. Use random colors outside the design system instead of adding intentional semantic roles.
-8. Give each screen an unrelated visual style instead of a screen-specific expression of the same product world.
-9. Use generic AI-generated layouts.
-10. Leave users unsure about the next step.
-11. Build dense table-first mobile UI.
-12. Make Vision Board screens feel like normal forms.
-13. Use guilt-driven productivity copy.
-14. Make scoring feel like judgment.
-15. Show advanced settings too early.
-16. Replace emotional clarity with technical complexity.
-17. Add new dependencies for visual polish without a strong user-facing reason, bundle/performance check, and fallback plan.
-18. Break local-first behavior for UI changes.
-19. Ignore empty, loading, error, and success states.
-20. Optimize desktop while making mobile worse.
-21. Use `app-warm-*` outside Reflection/Review unless there is a documented semantic reason.
-22. Add demo-only copy, mock payment language, or browser-bound trial language to real-mode surfaces.
-23. Make billing, auth, sync, legal, or account lifecycle screens emotionally vague.
-24. Animate every card or list item just because motion is available.
-25. Hide production uncertainty behind optimistic marketing copy.
-
----
-
-## 13. Implementation guidance
-
-When implementing UI changes:
-
-- Prefer existing components before adding new ones.
-- Use Tailwind classes that map to existing semantic tokens.
-- Keep accessibility: labels, aria attributes, focus states, contrast, keyboard flow.
-- Avoid large rewrites unless necessary.
-- Keep components readable and maintainable.
-- Do not break the product flow.
-- Do not mix unrelated refactors with UI redesign.
-- Keep changes focused on the requested screen unless a shared component must change.
-- Avoid changing localStorage shapes, route registration, auth/billing/sync behavior, app-mode handling, or analytics while doing visual work.
-- If a UI problem requires product or data-model changes, stop and report the risk instead of smuggling it into a redesign.
-- Use small reusable patterns only when they remove meaningful duplication across core journey screens.
-- For motion, prefer existing CSS transitions for simple hover states and use Framer Motion only where it improves route/step/list transitions.
-- Run typecheck/lint/build after meaningful changes when available.
-
-Recommended commands after UI changes:
-
-```bash
-npm run typecheck
-npm run lint
-npm run build
-```
-
-If the change affects broad frontend behavior, also consider:
-
-```bash
-npm run test:run
-npm run check
-```
-
-For route/UI changes that affect production-facing behavior, also consider:
-
-```bash
-npm run smoke:prod
-```
-
-If a command does not exist or cannot run due to environment constraints, report it clearly instead of pretending it passed.
-
----
-
-## 14. Prompt template for AI agents
-
-Use this prompt when asking an AI agent to redesign a screen:
+### Prompt template for AI agents
 
 ```text
 Read docs/DESIGN.md first and follow it as the design authority.
-Also check guidelines/CURRENT_PROJECT_STATUS.md for current production scope.
+Also read docs/VISUAL_EXECUTION_SPEC.md for practical execution guidance.
+Check guidelines/CURRENT_PROJECT_STATUS.md for current code-backed scope.
 
 Now redesign this screen: [route or screen name]
 
@@ -1779,12 +1136,12 @@ Constraints:
 - Improve UX/UI, layout, copy, visual hierarchy, responsive design, and user guidance.
 
 Expected result:
-- The screen follows the Dear Our Future design north star.
+- The screen follows Dreamy Guided Productivity.
 - The screen has one clear primary CTA.
-- The screen has a meaningful visual element.
+- The screen has a meaningful visual anchor tied to user state/result/action.
 - The screen is less text-heavy and easier to use.
 - The screen works well on mobile.
-- The screen remains production-safe in real mode.
+- The screen remains production-safe in real mode and demo-safe in demo mode.
 
 Before editing, answer internally:
 - Where is this screen in the core journey?
@@ -1803,34 +1160,40 @@ After editing, report:
 
 ---
 
-## 15. Definition of done for UI/UX redesign
+## 13. Definition of done for UI/UX redesign
 
 A UI/UX redesign is done only when:
 
 ```text
 [ ] The user can understand the screen within 5 seconds.
-[ ] The primary CTA is obvious.
-[ ] The screen has a visual anchor.
-[ ] The copy is short and human.
+[ ] The user knows where they are in the journey.
+[ ] The primary CTA is obvious and outcome-based when context requires it.
+[ ] The screen has a meaningful visual anchor.
+[ ] The copy is short, human, and non-judgmental.
 [ ] The screen guides the user to the next step.
-[ ] Mobile layout is comfortable.
-[ ] Loading, empty, error, and success states are considered where relevant.
+[ ] Mobile layout is comfortable and has no horizontal scroll.
+[ ] Loading, empty, error, success, offline, and sync states are considered where relevant.
 [ ] Accessibility is not degraded.
 [ ] Existing logic and data flow are preserved.
-[ ] Existing auth, billing, sync, entitlement, route, and app-mode behavior are preserved.
+[ ] Existing auth, billing, sync, entitlement, route, analytics, and app-mode behavior are preserved.
 [ ] Local-first behavior still works when backend/Firebase/sync is unavailable.
-[ ] Semantic tokens are used or intentionally extended; no one-off primitive colors or unrelated visual systems were added.
+[ ] Semantic tokens are used or intentionally extended.
+[ ] No one-off primitive colors or unrelated visual systems were added.
 [ ] Motion, if added, is purposeful and respects reduced motion.
 [ ] The result feels like Dreamy Guided Productivity.
 ```
 
-If any item fails, the redesign is not finished.
+Blocking zero rule for the core journey:
+
+```text
+Any 0 in production safety, accessibility, token compliance, state coverage, or primary CTA blocks the redesign even if the total score is high.
+```
 
 ---
 
-## 16. UI review rubric
+## 14. UI review rubric
 
-Use this rubric when reviewing a screen or asking an AI agent to verify UI quality. Score each category from 0 to 3.
+Score each category from 0 to 3.
 
 | Category | 0 | 1 | 2 | 3 |
 | --- | --- | --- | --- | --- |
@@ -1842,8 +1205,8 @@ Use this rubric when reviewing a screen or asking an AI agent to verify UI quali
 | Token compliance | Hard-coded/random styles | Mixed token and one-off styles | Mostly token-based | Fully semantic and consistent |
 | Surface hierarchy | Everything competes | Too many cards/borders | Main task is mostly dominant | Main task is calm, clear, and focused |
 | State coverage | Missing key states | States exist but vague | States are useful | Loading/empty/error/success/offline are calm and actionable |
-| Accessibility | Focus/labels/contrast broken | Several risks | Minor issues only | Keyboard, focus, labels, contrast, and reduced motion are sound |
-| Production safety | Breaks or weakens product contracts | Risky/unverified changes | Safe with minor uncertainty | Preserves auth/billing/sync/localStorage/app-mode behavior |
+| Accessibility | Focus/labels/contrast broken | Several risks | Minor issues only | Keyboard, focus, labels, contrast, semantics, and reduced motion are sound |
+| Production safety | Breaks or weakens product contracts | Risky or unverified changes | Safe with minor uncertainty | Preserves auth/billing/sync/localStorage/routes/analytics/app-mode behavior |
 
 Interpretation:
 
@@ -1855,3 +1218,80 @@ Interpretation:
 ```
 
 For the core journey, any category scored `0` blocks the redesign even if the total score is high.
+
+---
+
+## 15. Anti-patterns to avoid
+
+Do not:
+
+1. Add long explanations to fix confusion.
+2. Make the app look like an admin dashboard.
+3. Use dark mode as the default visual direction.
+4. Put too many charts on the first impression.
+5. Force users through too many setup steps before they get value.
+6. Hide the main CTA among many equal buttons.
+7. Use random colors outside the semantic token system.
+8. Give each screen an unrelated visual style instead of a screen-specific expression of the same product world.
+9. Use generic AI-generated layouts.
+10. Leave users unsure about the next step.
+11. Build dense table-first mobile UI for user-facing planning.
+12. Make Vision Board screens feel like normal forms or an unrelated canvas product.
+13. Use guilt-driven productivity copy.
+14. Make scoring feel like judgment.
+15. Show advanced settings too early.
+16. Replace emotional clarity with technical complexity.
+17. Add dependencies for visual polish without a strong user-facing reason, bundle/performance check, and fallback plan.
+18. Break local-first behavior for UI changes.
+19. Ignore empty, loading, error, success, offline, and sync states.
+20. Optimize desktop while making mobile worse.
+21. Use `app-warm-*` outside Reflection/Review unless there is a documented semantic reason and token review.
+22. Add demo-only copy, mock payment language, or browser-bound trial language to real-mode surfaces.
+23. Make billing, auth, sync, legal, account lifecycle, or destructive-action screens emotionally vague.
+24. Animate every card or list item just because motion is available.
+25. Hide production uncertainty behind optimistic marketing copy.
+26. Turn route guidance into a reason to rewrite interaction models, canvas behavior, checkout providers, or sync semantics by default.
+
+---
+
+## 16. Implementation guidance
+
+When implementing UI changes:
+
+- Prefer existing components before adding new ones.
+- Use Tailwind classes that map to existing semantic tokens.
+- Keep accessibility: labels, aria attributes, focus states, contrast, keyboard flow.
+- Avoid large rewrites unless necessary and explicitly scoped.
+- Keep components readable and maintainable.
+- Do not break the product flow.
+- Do not mix unrelated refactors with UI redesign.
+- Keep changes focused on the requested screen unless a shared component must change.
+- Avoid changing localStorage shapes, route registration, auth/billing/sync behavior, app-mode handling, entitlement logic, or analytics while doing visual work.
+- If a UI problem requires product or data-model changes, stop and report the risk instead of smuggling it into a redesign.
+- Use small reusable patterns only when they remove meaningful duplication across core journey screens.
+- For motion, prefer existing CSS transitions for simple hover states and use richer motion only where it improves route/step/list transitions without weakening reduced-motion behavior.
+
+Recommended commands after meaningful frontend code changes:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
+
+If the change affects broad frontend behavior, also consider:
+
+```bash
+npm run test:run
+npm run check
+```
+
+For route/UI changes that affect production-facing behavior, also consider:
+
+```bash
+npm run smoke:prod
+```
+
+If a command does not exist or cannot run due to environment constraints, report it clearly instead of pretending it passed.
+
+For documentation-only changes, full frontend checks are usually not required. Still read the changed document and verify it does not contradict `guidelines/CURRENT_PROJECT_STATUS.md` or overstate production readiness.
