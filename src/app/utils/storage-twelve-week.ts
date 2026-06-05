@@ -1072,11 +1072,15 @@ export function normalizeGoal(goal: Goal): Goal {
 
   const normalizedStartDate = inferSystemStartDate(systemWithDefaults);
   const normalizedEndDate = getCycleEndDate(normalizedStartDate, totalWeeks);
-  const taskInstances = buildTaskInstances({
+  const generatedTaskInstances = buildTaskInstances({
     ...systemWithDefaults,
     startDate: formatDateInputValue(normalizedStartDate),
     endDate: formatDateInputValue(normalizedEndDate),
   });
+  const legacyAdhocTasks = systemWithDefaults.taskInstances.filter(
+    (task) => task && task.id && !task.id.startsWith("tw_task_"),
+  );
+  const taskInstances = [...generatedTaskInstances, ...legacyAdhocTasks];
   const systemForDerivedState = {
     ...systemWithDefaults,
     startDate: formatDateInputValue(normalizedStartDate),

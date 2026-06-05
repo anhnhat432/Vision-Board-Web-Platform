@@ -398,8 +398,8 @@ export async function transcribeAudio(
   }
 
   const formData = new FormData();
-  const blob = new Blob([new Uint8Array(audioBuffer)], { type: mimeType });
-  formData.append("file", blob, fileName);
+  const file = new File([new Uint8Array(audioBuffer)], fileName, { type: mimeType });
+  formData.append("file", file);
   formData.append("model", env.GROQ_AUDIO_MODEL || "whisper-large-v3-turbo");
   formData.append("language", "vi");
   formData.append("response_format", "json");

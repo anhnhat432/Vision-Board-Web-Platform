@@ -601,3 +601,21 @@ describe("weekly review storage migration", () => {
     });
   });
 });
+
+describe("normalizeGoal ad-hoc tasks preservation", () => {
+  it("preserves ad-hoc tasks that do not start with tw_task_", () => {
+    const goal = createGoal("preservation-test", "2026-05-01T00:00:00.000Z", {
+      taskInstances: [
+        makeTask({ id: "tw_task_1_tactic_1_0", weekNumber: 1, scheduledDate: "2026-03-03", tacticId: "tactic_1" }),
+        makeTask({ id: "task_adhoc_123", weekNumber: 1, scheduledDate: "2026-03-05", title: "Adhoc Task" }),
+      ],
+    });
+
+    const normalized = normalizeGoal(goal);
+    const system = normalized.twelveWeekSystem;
+
+    const taskIds = system?.taskInstances.map((t) => t.id) ?? [];
+    expect(taskIds).toContain("task_adhoc_123");
+  });
+});
+
