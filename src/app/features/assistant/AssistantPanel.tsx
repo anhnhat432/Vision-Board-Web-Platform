@@ -532,10 +532,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                         className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
                       >
                         <div
-                          className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
+                          className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-[14.5px] leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
                             message.role === "user"
-                              ? "rounded-tr-none bg-gradient-to-tr from-emerald-500 via-emerald-600 to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.18)]"
-                              : "rounded-tl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 text-app-ink"
+                              ? "rounded-tr-none bg-gradient-to-tr from-emerald-600 via-emerald-700 to-teal-600 text-white font-medium shadow-[0_4px_16px_rgba(16,185,129,0.15)]"
+                              : "rounded-tl-none bg-app-bg-subtle/60 dark:bg-white/5 backdrop-blur-md border border-app-line/35 border-l-2 border-l-emerald-600/70 dark:border-l-emerald-400/70 dark:border-white/5 text-app-ink"
                           }`}
                         >
                           {message.role === "user" ? (
