@@ -42,9 +42,9 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
       
       // Regex tìm **bold**, *italic* hoặc ==highlight==
       const regex = /(\*\*|==|\*)(.*?)\1/g;
-      let match;
+      let match = regex.exec(inputText);
       
-      while ((match = regex.exec(inputText)) !== null) {
+      while (match !== null) {
         const matchIndex = match.index;
         const [fullMatch, delimiter, innerText] = match;
         
@@ -75,6 +75,7 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         }
         
         currentIdx = matchIndex + fullMatch.length;
+        match = regex.exec(inputText);
       }
       
       if (currentIdx < inputText.length) {
@@ -89,7 +90,7 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         elements.push(
           <ul key={`list-${key}`} className="list-none pl-1.5 my-2.5 space-y-2">
             {listItems.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 text-[15px] leading-relaxed">
+              <li key={`item-${key}-${item.slice(0, 20)}`} className="flex items-start gap-2.5 text-[15px] leading-relaxed">
                 <span className="text-emerald-600 dark:text-emerald-400 mt-2 shrink-0 size-1.5 rounded-full bg-emerald-500/80 shadow-xs" />
                 <span className="flex-1">{parseInlineStyles(item)}</span>
               </li>
