@@ -146,17 +146,37 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
     };
   }, [isSupported, onFinalResult]);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     if (!isSupported || !recognitionRef.current || isListening) return;
 
     setError(null);
     setFinalTranscript("");
     setInterimTranscript("");
+
+    // Pre-check: xin quyền mic trực tiếp để chắc chắn browser thực sự cho phép
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Ngắt stream ngay vì chỉ cần kiểm tra quyền
+      for (const track of stream.getTracks()) {
+        track.stop();
+      }
+    } catch (micErr: any) {
+      console.error("[SpeechToText] Mic permission pre-check failed:", micErr.name, micErr.message);
+      if (micErr.name === "NotAllowedError" || micErr.name === "PermissionDeniedError") {
+        setError("Micro bị từ chối truy cập. Vui lòng tải lại trang (F5) rồi cho phép micro khi trình duyệt hỏi.");
+      } else if (micErr.name === "NotFoundError") {
+        setError("Không tìm thấy micro. Vui lòng kiểm tra thiết bị micro.");
+      } else {
+        setError(`Không thể truy cập micro: ${micErr.message || micErr.name}`);
+      }
+      return;
+    }
+
     try {
       recognitionRef.current.start();
     } catch (err) {
       console.error("[SpeechToText] Start error:", err);
-      setError("Không thể khởi động micro.");
+      setError("Không thể khởi động nhận diện giọng nói. Thử tải lại trang.");
     }
   }, [isSupported, isListening]);
 
