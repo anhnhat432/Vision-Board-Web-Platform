@@ -42,6 +42,12 @@ export interface AssistantProviderError {
 }
 
 const GROQ_TIMEOUT_MS = 30_000;
+const MAX_COMPLETION_TOKENS = 800;
+
+// Rough token estimator: Vietnamese text averages ~3.5 chars/token
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 3.5);
+}
 
 interface GroqErrorBody {
   error?: { message?: string; type?: string; code?: string };
@@ -100,13 +106,37 @@ function buildRequestBody(
   history: Array<{ role: "user" | "assistant"; content: string }>,
   modelName: string,
 ): GroqRequest {
+  const systemPrompt = buildSystemPrompt();
+  let contextSummary = summarizeContext(context);
+
+  // Estimate total tokens and trim context if needed
+  const systemTokens = estimateTokens(systemPrompt);
+  const userTokens = estimateTokens(userMessage);
+  const historyTokens = history.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
+  let contextTokens = estimateTokens(contextSummary);
+  const totalInputTokens = systemTokens + contextTokens + historyTokens + userTokens;
+  const totalWithCompletion = totalInputTokens + MAX_COMPLETION_TOKENS;
+
+  // If total exceeds a safe budget (5000 tokens for input), trim context
+  const MAX_INPUT_BUDGET = 5000;
+  if (totalInputTokens > MAX_INPUT_BUDGET) {
+    // Trim context to fit within budget
+    const availableForContext = Math.max(200, MAX_INPUT_BUDGET - systemTokens - userTokens - historyTokens);
+    const maxContextChars = availableForContext * 3.5;
+    if (contextSummary.length > maxContextChars) {
+      contextSummary = contextSummary.slice(0, Math.floor(maxContextChars)) + "\n[...context trimmed...]";
+      console.warn(`[Groq] Context trimmed from ${contextTokens} to ~${availableForContext} estimated tokens (total was ~${totalWithCompletion})`);
+    }
+  }
+
   const messages: GroqMessage[] = [
-    { role: "system", content: buildSystemPrompt() },
-    { role: "system", content: summarizeContext(context) },
+    { role: "system", content: systemPrompt },
+    { role: "system", content: contextSummary },
   ];
 
-  // Add conversation history
-  for (const msg of history) {
+  // Add conversation history (limit to last 4 messages to save tokens)
+  const trimmedHistory = history.slice(-4);
+  for (const msg of trimmedHistory) {
     messages.push({ role: msg.role, content: msg.content });
   }
 
@@ -117,7 +147,7 @@ function buildRequestBody(
     model: modelName,
     messages,
     temperature: 0.5,
-    max_tokens: 1000,
+    max_tokens: MAX_COMPLETION_TOKENS,
   };
 }
 
