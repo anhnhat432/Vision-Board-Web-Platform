@@ -330,3 +330,44 @@ export async function sendToGroq(
     };
   }
 }
+
+export async function transcribeAudio(
+  audioBuffer: Buffer,
+  mimeType: string,
+  fileName: string = "audio.webm"
+): Promise<string> {
+  const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
+
+  if (!activeApiKey) {
+    throw new Error("Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.");
+  }
+
+  const formData = new FormData();
+  const blob = new Blob([new Uint8Array(audioBuffer)], { type: mimeType });
+  formData.append("file", blob, fileName);
+  formData.append("model", "whisper-large-v3");
+  formData.append("language", "vi");
+  formData.append("response_format", "json");
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${activeApiKey}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[Groq Transcribe] API error:", response.status, errorText);
+      throw new Error(`API transcription failed: ${response.status}`);
+    }
+
+    const data = await response.json() as { text: string };
+    return data.text || "";
+  } catch (error: any) {
+    console.error("[Groq Transcribe] Error:", error);
+    throw error;
+  }
+}

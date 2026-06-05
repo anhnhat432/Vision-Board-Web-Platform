@@ -206,8 +206,9 @@ async function request<TResponse, TBody = unknown>(
   }
 
   const headers = new Headers(options?.headers ?? {});
+  const isFormData = body instanceof FormData;
 
-  if (body !== undefined && !headers.has("Content-Type")) {
+  if (body !== undefined && !isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -217,7 +218,7 @@ async function request<TResponse, TBody = unknown>(
       ...options,
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : (isFormData ? (body as any) : JSON.stringify(body)),
     });
   } catch (networkError) {
     const apiError =

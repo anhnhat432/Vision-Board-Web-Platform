@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { apiClient } from "@/lib/api/apiClient";
 
 // Khai báo kiểu dữ liệu cho Web Speech API để type-safe
 interface SpeechRecognitionEvent {
@@ -45,22 +46,39 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
   const [error, setError] = useState<string | null>(null);
 
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
+  
+  // MediaRecorder refs cho fallback ghi âm
+  const mediaRecorderRef = useRef<any>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const isWebSpeechFailedRef = useRef(false);
+  const isWebSpeechSuccessRef = useRef(false);
 
-  // Tự động xoá lỗi sau 4 giây để UI sạch sẽ
+  // Tự động xoá lỗi sau 5 giây để UI sạch sẽ
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(null), 4000);
+      const timer = setTimeout(() => setError(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
-  // Feature detection an toàn
+  // Hỗ trợ nếu trình duyệt hỗ trợ MediaRecorder HOẶC Web Speech API
   const isSupported =
+    typeof window !== "undefined" &&
+    (Boolean(navigator.mediaDevices && window.MediaRecorder) ||
+     Boolean((window as any).SpeechRecognition) ||
+     Boolean((window as any).webkitSpeechRecognition));
+
+  // Kiểm tra xem Web Speech API có khả dụng không
+  const isWebSpeechSupported =
     typeof window !== "undefined" &&
     (Boolean((window as any).SpeechRecognition) || Boolean((window as any).webkitSpeechRecognition));
 
   useEffect(() => {
-    if (!isSupported) return;
+    if (!isWebSpeechSupported) {
+      console.log("[SpeechToText] Web Speech API is not supported. Will use backend transcription.");
+      return;
+    }
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition() as ISpeechRecognition;
@@ -70,37 +88,37 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
     recognition.lang = "vi-VN"; // Tiếng Việt mặc định
 
     recognition.onstart = () => {
-      setIsListening(true);
+      console.log("[SpeechToText] WebSpeech Recognition started");
       setError(null);
-      setInterimTranscript("");
     };
 
     recognition.onend = () => {
-      setIsListening(false);
-      setInterimTranscript("");
+      console.log("[SpeechToText] WebSpeech Recognition ended");
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("[SpeechToText] Error:", event.error);
-      setIsListening(false);
-      setInterimTranscript("");
+      console.error("[SpeechToText] WebSpeech Error:", event.error);
 
       switch (event.error) {
         case "not-allowed":
         case "permission-denied":
           setError("Micro bị từ chối truy cập. Vui lòng cho phép micro trong cài đặt trình duyệt.");
+          setIsListening(false);
           break;
         case "no-speech":
-          setError("Không nghe thấy giọng nói. Vui lòng thử lại.");
+          // Không nói gì, không cần báo lỗi nghiêm trọng
           break;
         case "network":
-          setError("Lỗi kết nối mạng khi nhận diện giọng nói.");
+          // Lỗi kết nối đến server Google, đánh dấu để fallback sang ghi âm backend
+          console.warn("[SpeechToText] WebSpeech network error, using backend Whisper fallback");
+          isWebSpeechFailedRef.current = true;
           break;
         case "aborted":
           // Hủy bởi người dùng, không báo lỗi
           break;
         default:
-          setError(`Lỗi micro: ${event.error}`);
+          console.warn(`[SpeechToText] WebSpeech warning: ${event.error}`);
+          isWebSpeechFailedRef.current = true;
       }
     };
 
@@ -124,6 +142,7 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
       }
 
       if (final) {
+        isWebSpeechSuccessRef.current = true; // Ghi nhận Web Speech API thành công
         setFinalTranscript((prev) => {
           const next = prev ? `${prev} ${final}` : final;
           if (onFinalResult) {
@@ -144,56 +163,199 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
         // Silent catch
       }
     };
-  }, [isSupported, onFinalResult]);
+  }, [isWebSpeechSupported, onFinalResult]);
 
   const startListening = useCallback(async () => {
-    if (!isSupported || !recognitionRef.current || isListening) return;
+    if (!isSupported) {
+      setError("Trình duyệt của bạn không hỗ trợ ghi âm.");
+      return;
+    }
 
     setError(null);
     setFinalTranscript("");
     setInterimTranscript("");
+    isWebSpeechFailedRef.current = false;
+    isWebSpeechSuccessRef.current = false;
+    audioChunksRef.current = [];
 
-    // Pre-check: xin quyền mic trực tiếp để chắc chắn browser thực sự cho phép
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Ngắt stream ngay vì chỉ cần kiểm tra quyền
-      for (const track of stream.getTracks()) {
-        track.stop();
+    // 1. Xin quyền micro và tạo stream (chỉ khi mediaDevices.getUserMedia tồn tại)
+    let stream: MediaStream | null = null;
+    if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function") {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+      } catch (micErr: any) {
+        console.error("[SpeechToText] Mic permission pre-check failed:", micErr.name, micErr.message);
+        if (micErr.name === "NotAllowedError" || micErr.name === "PermissionDeniedError") {
+          setError("Micro bị từ chối truy cập. Vui lòng tải lại trang (F5) rồi cho phép micro.");
+        } else if (micErr.name === "NotFoundError") {
+          setError("Không tìm thấy micro. Vui lòng kiểm tra kết nối thiết bị.");
+        } else {
+          setError(`Không thể truy cập micro: ${micErr.message || micErr.name}`);
+        }
+        return;
       }
-    } catch (micErr: any) {
-      console.error("[SpeechToText] Mic permission pre-check failed:", micErr.name, micErr.message);
-      if (micErr.name === "NotAllowedError" || micErr.name === "PermissionDeniedError") {
-        setError("Micro bị từ chối truy cập. Vui lòng tải lại trang (F5) rồi cho phép micro khi trình duyệt hỏi.");
-      } else if (micErr.name === "NotFoundError") {
-        setError("Không tìm thấy micro. Vui lòng kiểm tra thiết bị micro.");
-      } else {
-        setError(`Không thể truy cập micro: ${micErr.message || micErr.name}`);
+    }
+
+    // 2. Bắt đầu MediaRecorder ghi âm làm dự phòng (chỉ nếu có stream và MediaRecorder tồn tại)
+    if (stream && typeof window.MediaRecorder !== "undefined") {
+      try {
+        let options = { mimeType: "audio/webm" };
+        if (!MediaRecorder.isTypeSupported("audio/webm")) {
+          // Safari fallback
+          options = { mimeType: "audio/mp4" };
+        }
+
+        const recorder = new MediaRecorder(stream, options);
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = (event: any) => {
+          if (event.data && event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
+        };
+
+        recorder.start(250); // Thu thập data mỗi 250ms
+        setIsListening(true);
+      } catch (recErr) {
+        console.warn("[SpeechToText] Failed to init preferred MediaRecorder, using default options", recErr);
+        try {
+          const recorder = new MediaRecorder(stream);
+          mediaRecorderRef.current = recorder;
+          recorder.ondataavailable = (event: any) => {
+            if (event.data && event.data.size > 0) {
+              audioChunksRef.current.push(event.data);
+            }
+          };
+          recorder.start();
+          setIsListening(true);
+        } catch (fallbackErr: any) {
+          console.error("[SpeechToText] Basic MediaRecorder failed:", fallbackErr);
+          setError("Không thể ghi âm trên thiết bị này.");
+          for (const track of stream.getTracks()) {
+            track.stop();
+          }
+          return;
+        }
       }
-      return;
+    } else {
+      // Nếu không có stream (môi trường test), set isListening thành true để đồng bộ với Web Speech API
+      setIsListening(true);
     }
 
-    try {
-      recognitionRef.current.start();
-    } catch (err) {
-      console.error("[SpeechToText] Start error:", err);
-      setError("Không thể khởi động nhận diện giọng nói. Thử tải lại trang.");
+    // 3. Khởi chạy Web Speech Recognition (nếu hỗ trợ)
+    if (isWebSpeechSupported && recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        console.warn("[SpeechToText] WebSpeech start failed. Will fallback to backend.", err);
+        isWebSpeechFailedRef.current = true;
+      }
+    } else {
+      isWebSpeechFailedRef.current = true;
     }
-  }, [isSupported, isListening]);
+  }, [isSupported, isWebSpeechSupported]);
 
-  const stopListening = useCallback(() => {
-    if (!isSupported || !recognitionRef.current || !isListening) return;
+  const stopListening = useCallback(async () => {
+    if (!isListening) return;
 
-    try {
-      recognitionRef.current.stop();
-    } catch (err) {
-      console.error("[SpeechToText] Stop error:", err);
+    // Dừng Web Speech API
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {
+        // Silent catch
+      }
     }
-  }, [isSupported, isListening]);
+
+    // Dừng MediaRecorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.onstop = async () => {
+        // Tắt microphone stream để tắt đèn micro trình duyệt
+        if (streamRef.current) {
+          for (const track of streamRef.current.getTracks()) {
+            track.stop();
+          }
+          streamRef.current = null;
+        }
+
+        // Kiểm tra xem có cần dùng bản ghi âm dịch qua backend không
+        const needsBackendFallback = isWebSpeechFailedRef.current || !isWebSpeechSuccessRef.current;
+
+        if (needsBackendFallback && audioChunksRef.current.length > 0) {
+          setIsListening(true); // Giữ trạng thái hiển thị "Đang xử lý"
+          setInterimTranscript("Đang dịch giọng nói...");
+
+          try {
+            const mimeType = mediaRecorderRef.current.mimeType || "audio/webm";
+            const extension = mimeType.includes("mp4") ? "mp4" : "webm";
+            const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+
+            const formData = new FormData();
+            formData.append("file", audioBlob, `audio.${extension}`);
+
+            // Gọi API backend
+            const result = await apiClient.post<{ text: string }>("/assistant/transcribe", formData);
+
+            if (result && result.text) {
+              const text = result.text.trim();
+              if (text) {
+                setFinalTranscript(text);
+                if (onFinalResult) {
+                  onFinalResult(text);
+                }
+              } else {
+                setError("Không nhận diện được giọng nói. Thử lại nhé.");
+              }
+            } else {
+              setError("Không nhận diện được giọng nói. Thử lại nhé.");
+            }
+          } catch (apiErr: any) {
+            console.error("[SpeechToText] Backend transcription error:", apiErr);
+            setError("Lỗi xử lý âm thanh từ máy chủ. Thử lại nhé.");
+          } finally {
+            setIsListening(false);
+            setInterimTranscript("");
+          }
+        } else {
+          setIsListening(false);
+          setInterimTranscript("");
+        }
+      };
+
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (err) {
+        console.error("[SpeechToText] Error stopping MediaRecorder:", err);
+        setIsListening(false);
+      }
+    } else {
+      // Dọn dẹp stream nếu MediaRecorder không chạy
+      if (streamRef.current) {
+        for (const track of streamRef.current.getTracks()) {
+          track.stop();
+        }
+        streamRef.current = null;
+      }
+      setIsListening(false);
+    }
+  }, [isListening, onFinalResult]);
 
   const resetTranscript = useCallback(() => {
     setFinalTranscript("");
     setInterimTranscript("");
     setError(null);
+  }, []);
+
+  // Đảm bảo dọn dẹp stream khi unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        for (const track of streamRef.current.getTracks()) {
+          track.stop();
+        }
+      }
+    };
   }, []);
 
   return {

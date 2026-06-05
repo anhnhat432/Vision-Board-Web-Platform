@@ -9,6 +9,7 @@ import {
   processAIAssistantRequest,
   type AIAssistantRequest,
 } from "../services/aiAssistantService";
+import { transcribeAudio } from "../services/groqAssistantProvider";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 
 function withErrorCode(message: string, errorCode: string) {
@@ -150,6 +151,32 @@ export async function aiAssistantController(req: Request, res: Response) {
     console.error("[ai-assistant] Unexpected error:", error instanceof Error ? error.name : "UnknownError");
     return res.status(500).json(
       withErrorCode("Đã xảy ra lỗi hệ thống khi xử lý yêu cầu.", "AI_INTERNAL_ERROR"),
+    );
+  }
+}
+
+export async function transcribeController(req: Request, res: Response) {
+  if (!req.file) {
+    return res.status(400).json(
+      withErrorCode("Không tìm thấy file âm thanh để nhận diện.", "ASSISTANT_NO_FILE")
+    );
+  }
+
+  try {
+    const text = await transcribeAudio(
+      req.file.buffer,
+      req.file.mimetype,
+      req.file.originalname || "audio.webm"
+    );
+
+    return res.json(successResponse({ text }));
+  } catch (error: any) {
+    console.error("[assistant] Transcribe error:", error instanceof Error ? error.message : error);
+    return res.status(500).json(
+      withErrorCode(
+        error.message || "Đã xảy ra lỗi khi chuyển đổi giọng nói thành văn bản.",
+        "ASSISTANT_TRANSCRIBE_ERROR"
+      )
     );
   }
 }
