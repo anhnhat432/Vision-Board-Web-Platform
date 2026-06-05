@@ -65,16 +65,18 @@ const billingProvider = getOptionalEnv("BILLING_PROVIDER")?.toLowerCase();
 const rawPrivateKey = getRequiredEnv("FIREBASE_PRIVATE_KEY");
 const assistantProvider = getOptionalEnv("ASSISTANT_PROVIDER")?.toLowerCase();
 const geminiApiKey = getOptionalEnv("GEMINI_API_KEY");
-const geminiModel = getOptionalEnv("GEMINI_MODEL") ?? "gemini-2.5-flash";
+const geminiModel = getOptionalEnv("GEMINI_MODEL") ?? "gemini-2.5-flash-lite";
+const geminiSmartModel = getOptionalEnv("GEMINI_SMART_MODEL") ?? "gemini-3.1-flash-lite";
 const groqApiKey = getOptionalEnv("GROQ_API_KEY");
 const groqModel = getOptionalEnv("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
 
-const resolvedAssistantProvider: "groq" | "gemini" = assistantProvider === "gemini" ? "gemini" : "groq";
+const resolvedAssistantProvider: "groq" | "gemini" = assistantProvider === "groq" ? "groq" : "gemini";
 
-const aiProvider = getOptionalEnv("AI_PROVIDER")?.toLowerCase() || assistantProvider;
-const resolvedAiProvider: "groq" | "gemini" = aiProvider === "gemini" ? "gemini" : "groq";
+const aiProvider = getOptionalEnv("AI_PROVIDER")?.toLowerCase() || assistantProvider || "gemini";
+const resolvedAiProvider: "groq" | "gemini" = aiProvider === "groq" ? "groq" : "gemini";
 const aiApiKey = getOptionalEnv("AI_API_KEY") || (resolvedAiProvider === "gemini" ? geminiApiKey : groqApiKey);
 const aiModel = getOptionalEnv("AI_MODEL") || (resolvedAiProvider === "gemini" ? geminiModel : groqModel);
+const aiSmartModel = getOptionalEnv("AI_SMART_MODEL") || (resolvedAiProvider === "gemini" ? geminiSmartModel : aiModel);
 
 export const env = {
   NODE_ENV: nodeEnv,
@@ -90,11 +92,13 @@ export const env = {
   ASSISTANT_PROVIDER: resolvedAssistantProvider,
   GEMINI_API_KEY: geminiApiKey,
   GEMINI_MODEL: geminiModel,
+  GEMINI_SMART_MODEL: geminiSmartModel,
   GROQ_API_KEY: groqApiKey,
   GROQ_MODEL: groqModel,
   AI_PROVIDER: resolvedAiProvider,
   AI_API_KEY: aiApiKey,
   AI_MODEL: aiModel,
+  AI_SMART_MODEL: aiSmartModel,
   R2_ACCOUNT_ID: getOptionalEnv("R2_ACCOUNT_ID"),
   R2_ACCESS_KEY_ID: getOptionalEnv("R2_ACCESS_KEY_ID"),
   R2_SECRET_ACCESS_KEY: getOptionalEnv("R2_SECRET_ACCESS_KEY"),

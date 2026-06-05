@@ -34,6 +34,10 @@ export interface AssistantProviderError {
   errorCode: string;
 }
 
+export interface GeminiRequestOptions {
+  model?: string;
+}
+
 const GEMINI_TIMEOUT_MS = 30_000;
 
 interface GeminiErrorBody {
@@ -51,6 +55,19 @@ async function extractGeminiErrorDetails(response: Response): Promise<{ status: 
   return { status, body: body.slice(0, 500), parsed };
 }
 
+function isGeminiAuthError(status: number, parsed?: GeminiErrorBody): boolean {
+  if (status === 401 || status === 403) return true;
+  const providerStatus = parsed?.error?.status?.toLowerCase() ?? "";
+  const providerMsg = parsed?.error?.message?.toLowerCase() ?? "";
+  return (
+    providerStatus === "unauthenticated" ||
+    providerStatus === "permission_denied" ||
+    providerMsg.includes("api key not valid") ||
+    providerMsg.includes("api_key_invalid") ||
+    providerMsg.includes("invalid api key")
+  );
+}
+
 function getGeminiErrorMessage(status: number, parsed?: GeminiErrorBody): AssistantProviderError {
   const providerMsg = parsed?.error?.message?.slice(0, 200);
   if (status === 429) {
@@ -59,7 +76,7 @@ function getGeminiErrorMessage(status: number, parsed?: GeminiErrorBody): Assist
       errorCode: "ASSISTANT_PROVIDER_RATE_LIMIT",
     };
   }
-  if (status === 401 || status === 403) {
+  if (isGeminiAuthError(status, parsed)) {
     return {
       message: "Xác thực với dịch vụ AI không thành công. Vui lòng kiểm tra API Key.",
       errorCode: "ASSISTANT_PROVIDER_AUTH_ERROR",
@@ -125,9 +142,11 @@ export async function sendToGemini(
   userMessage: string,
   context: AssistantContext,
   history: Array<{ role: "user" | "assistant"; content: string }>,
+  options: GeminiRequestOptions = {},
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
   const activeApiKey = env.AI_PROVIDER === "gemini" ? (env.AI_API_KEY || env.GEMINI_API_KEY) : env.GEMINI_API_KEY;
-  const activeModel = env.AI_PROVIDER === "gemini" ? (env.AI_MODEL || env.GEMINI_MODEL) : env.GEMINI_MODEL;
+  const configuredModel = env.AI_PROVIDER === "gemini" ? (env.AI_MODEL || env.GEMINI_MODEL) : env.GEMINI_MODEL;
+  const activeModel = options.model?.trim() || configuredModel;
 
   if (!activeApiKey) {
     return {
@@ -154,7 +173,7 @@ export async function sendToGemini(
 
     if (!response.ok) {
       const details = await extractGeminiErrorDetails(response);
-      console.error("[Gemini] API error:", { status: details.status, body: details.body });
+      console.error("[Gemini] API error:", { model: activeModel, status: details.status, body: details.body });
       return getGeminiErrorMessage(details.status, details.parsed);
     }
 

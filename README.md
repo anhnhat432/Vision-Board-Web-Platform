@@ -511,9 +511,15 @@ The app includes an AI Assistant ("Cú" - Owl mascot) designed to help users nav
 
 To enable the AI Assistant in production (`VITE_APP_MODE=real`), you must configure the following variables in the backend environment:
 
-- `AI_PROVIDER`: The AI provider to use (`gemini` or `groq`).
+- `AI_PROVIDER`: The AI provider to use (`gemini` or `groq`). `gemini` is recommended for the default production assistant path.
 - `AI_API_KEY`: API key for the chosen provider.
-- `AI_MODEL`: Model name (e.g. `gemini-1.5-flash` or `llama3-8b-8192`).
+- `AI_MODEL`: Model name (recommended default `gemini-2.5-flash-lite`; Groq fallback example `llama-3.1-8b-instant`).
+- `AI_SMART_MODEL`: Optional smart-model override for complex assistant turns (recommended `gemini-3.1-flash-lite`). When the smart Gemini model is rate-limited or unavailable, the assistant retries the fast model once.
+
+If you use Gemini specifically, set:
+- `GEMINI_API_KEY`: Gemini API key.
+- `GEMINI_MODEL`: Fast/default Gemini model name (recommended `gemini-2.5-flash-lite`).
+- `GEMINI_SMART_MODEL`: Smart Gemini model for planning, SMART goal, feasibility, reflection, and multi-step workflow prompts (recommended `gemini-3.1-flash-lite`).
 
 If you use Groq specifically, you can also set:
 - `GROQ_API_KEY`: Groq API Key.

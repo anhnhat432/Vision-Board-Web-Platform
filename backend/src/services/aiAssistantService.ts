@@ -78,10 +78,140 @@ const VALID_ROUTES = [
 ];
 
 const PROVIDER_FALLBACK_ERROR_CODES = new Set([
+  "ASSISTANT_PROVIDER_AUTH_ERROR",
   "ASSISTANT_PROVIDER_RATE_LIMIT",
   "ASSISTANT_PROVIDER_TIMEOUT",
   "ASSISTANT_PROVIDER_SERVER_ERROR",
 ]);
+const SMART_MODEL_RETRY_ERROR_CODES = new Set([
+  "ASSISTANT_PROVIDER_RATE_LIMIT",
+  "ASSISTANT_PROVIDER_TIMEOUT",
+  "ASSISTANT_PROVIDER_SERVER_ERROR",
+  "ASSISTANT_PROVIDER_ERROR",
+]);
+const SMART_ASSISTANT_ROUTES = new Set([
+  "/life-insight",
+  "/feasibility",
+  "/smart-goal-setup",
+  "/12-week-setup",
+  "/12-week-plan-setup",
+  "/12-week-plan-overview",
+  "/12-week-system",
+  "/reflection",
+]);
+
+export interface GeminiModelSelection {
+  tier: "fast" | "smart";
+  primaryModel: string;
+  fallbackModel?: string;
+  reason: string;
+}
+
+function normalizeModelRoutingText(userText: string): string {
+  return userText
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u0111/g, "d")
+    .replace(/\u0110/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getGeminiFastModel(): string {
+  return env.GEMINI_MODEL || env.AI_MODEL || "gemini-2.5-flash-lite";
+}
+
+function getGeminiSmartModel(): string {
+  return env.AI_SMART_MODEL || env.GEMINI_SMART_MODEL || "gemini-3.1-flash-lite";
+}
+
+function isSimpleFastRequest(normalizedText: string): boolean {
+  if (!normalizedText) return true;
+  if (/^(hi|hello|hey|hola|alo|chao|xin chao)(\s|$)/.test(normalizedText) && normalizedText.length <= 64) {
+    return true;
+  }
+  if (/\b(tick|mark|done|complete|completed|danh dau)\b/.test(normalizedText) && /\b(task|viec|nhiem vu)\b/.test(normalizedText)) {
+    return true;
+  }
+  if (normalizedText.length <= 140 && normalizedText.includes("hom nay")) {
+    return /\b(task|viec|nen lam gi|lam gi|uu tien nao)\b/.test(normalizedText);
+  }
+  return false;
+}
+
+function isSmartRequestByText(normalizedText: string): boolean {
+  if (normalizedText.length > 220) return true;
+  return [
+    "12-week",
+    "12 week",
+    "12 tuan",
+    "ke hoach",
+    "lap ke hoach",
+    "smart goal",
+    "muc tieu smart",
+    "feasibility",
+    "kha thi",
+    "phan tich",
+    "chien luoc",
+    "roadmap",
+    "workflow",
+    "quy trinh",
+    "nhieu buoc",
+    "multi step",
+    "uu tien",
+    "sap xep",
+    "toi uu",
+    "reflection",
+    "review",
+    "tong ket",
+    "danh gia",
+    "life insight",
+  ].some((keyword) => normalizedText.includes(keyword));
+}
+
+function isSmartRequestByContext(context: AssistantContext): boolean {
+  const route = typeof context.route === "string" ? context.route : "";
+  if (SMART_ASSISTANT_ROUTES.has(route)) return true;
+
+  const pageRoute = typeof context.pageContext?.route === "string" ? context.pageContext.route : "";
+  if (SMART_ASSISTANT_ROUTES.has(pageRoute)) return true;
+
+  const pageType = typeof context.pageContextHint?.pageType === "string" ? context.pageContextHint.pageType : "";
+  return /setup|feasibility|smart|reflection|insight|12/.test(normalizeModelRoutingText(pageType));
+}
+
+export function selectGeminiModelForAssistantRequest(
+  request: Pick<AIAssistantRequest, "message" | "context">,
+): GeminiModelSelection {
+  const fastModel = getGeminiFastModel();
+  const smartModel = getGeminiSmartModel();
+  const normalizedText = normalizeModelRoutingText(request.message);
+
+  if (!smartModel || smartModel === fastModel || isSimpleFastRequest(normalizedText)) {
+    return {
+      tier: "fast",
+      primaryModel: fastModel,
+      reason: "fast_request",
+    };
+  }
+
+  if (isSmartRequestByText(normalizedText) || isSmartRequestByContext(request.context)) {
+    return {
+      tier: "smart",
+      primaryModel: smartModel,
+      fallbackModel: fastModel,
+      reason: "complex_request",
+    };
+  }
+
+  return {
+    tier: "fast",
+    primaryModel: fastModel,
+    reason: "default_fast",
+  };
+}
 
 function normalizeShortUserText(userText: string): string {
   return userText
@@ -133,6 +263,12 @@ function buildProviderFallbackResponse(
   errorCode: string,
 ): AIAssistantResponse {
   const fallback = getDeterministicFallback(userText, ctx);
+  if (errorCode === "ASSISTANT_PROVIDER_AUTH_ERROR") {
+    return {
+      ...fallback,
+      assistantText: `AI nÃ¢ng cao táº¡m thá»i chÆ°a xÃ¡c thá»±c Ä‘Æ°á»£c, nÃªn mÃ¬nh dÃ¹ng cháº¿ Ä‘á»™ nhanh Ä‘á»ƒ há»— trá»£ trÆ°á»›c.\n\n${fallback.assistantText}`.trim(),
+    };
+  }
   const notice =
     errorCode === "ASSISTANT_PROVIDER_RATE_LIMIT"
       ? "AI nâng cao đang quá tải tạm thời, nên mình dùng chế độ nhanh để hỗ trợ trước."
@@ -142,6 +278,41 @@ function buildProviderFallbackResponse(
     ...fallback,
     assistantText: `${notice}\n\n${fallback.assistantText}`.trim(),
   };
+}
+
+async function sendToGeminiWithModelRouting(
+  request: AIAssistantRequest,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+): Promise<{ message: string } | AIAssistantError> {
+  const selection = selectGeminiModelForAssistantRequest(request);
+  const primaryResult = await sendToGemini(
+    request.message.trim(),
+    request.context,
+    history,
+    { model: selection.primaryModel },
+  );
+
+  if (
+    "errorCode" in primaryResult &&
+    selection.tier === "smart" &&
+    selection.fallbackModel &&
+    selection.fallbackModel !== selection.primaryModel &&
+    SMART_MODEL_RETRY_ERROR_CODES.has(primaryResult.errorCode)
+  ) {
+    console.warn("[ai-assistant] Smart Gemini model unavailable, retrying fast model:", {
+      errorCode: primaryResult.errorCode,
+      primaryModel: selection.primaryModel,
+      fallbackModel: selection.fallbackModel,
+    });
+    return sendToGemini(
+      request.message.trim(),
+      request.context,
+      history,
+      { model: selection.fallbackModel },
+    );
+  }
+
+  return primaryResult;
 }
 
 function sanitizeCreateTaskPayload(payload: any) {
@@ -599,9 +770,10 @@ export async function processAIAssistantRequest(
 
   // Gửi request thực tế tới AI provider
   const history = request.history || [];
-  const result = provider === "gemini"
-    ? await sendToGemini(request.message.trim(), request.context, history)
-    : await sendToGroq(request.message.trim(), request.context, history);
+  const result =
+    provider === "gemini"
+      ? await sendToGeminiWithModelRouting(request, history)
+      : await sendToGroq(request.message.trim(), request.context, history);
 
   if ("errorCode" in result) {
     // Trả lỗi từ provider

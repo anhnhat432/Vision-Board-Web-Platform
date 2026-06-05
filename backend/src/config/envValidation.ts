@@ -366,13 +366,14 @@ function validateSupportEmail(env: NodeJS.ProcessEnv, isProduction: boolean): En
 function validateAIConfig(env: NodeJS.ProcessEnv, isProduction: boolean): EnvValidationIssue[] {
   if (!isProduction) return [];
   const issues: EnvValidationIssue[] = [];
-  const provider = env.AI_PROVIDER || env.ASSISTANT_PROVIDER || "groq";
-  const apiKey = env.AI_API_KEY || (provider === "gemini" ? env.GEMINI_API_KEY : env.GROQ_API_KEY);
+  const provider = (env.AI_PROVIDER || env.ASSISTANT_PROVIDER || "gemini").trim().toLowerCase();
+  const providerKey = provider === "groq" ? "GROQ_API_KEY" : "GEMINI_API_KEY";
+  const apiKey = env.AI_API_KEY || env[providerKey];
 
   if (!apiKey) {
     issues.push({
       level: "warning",
-      key: provider === "gemini" ? "GEMINI_API_KEY" : "GROQ_API_KEY",
+      key: providerKey,
       category: "core",
       message: `AI provider "${provider}" is active but its API key is not configured. Assistant requests in real mode will fail.`,
     });

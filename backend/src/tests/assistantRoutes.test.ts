@@ -146,11 +146,13 @@ describe("assistantRoutes", () => {
     const { env } = await import("../config/env");
     const previousProvider = env.ASSISTANT_PROVIDER;
     const previousKey = env.GEMINI_API_KEY;
+    const previousAiKey = env.AI_API_KEY;
     const previousGroqKey = env.GROQ_API_KEY;
     
     // Test with gemini provider not configured
     env.ASSISTANT_PROVIDER = "gemini";
     env.GEMINI_API_KEY = undefined;
+    env.AI_API_KEY = undefined;
 
     try {
       const response = await requestJson(await createTestApp(), "/api/assistant/chat", "verified-token");
@@ -160,6 +162,7 @@ describe("assistantRoutes", () => {
     } finally {
       env.ASSISTANT_PROVIDER = previousProvider;
       env.GEMINI_API_KEY = previousKey;
+      env.AI_API_KEY = previousAiKey;
       env.GROQ_API_KEY = previousGroqKey;
     }
   });

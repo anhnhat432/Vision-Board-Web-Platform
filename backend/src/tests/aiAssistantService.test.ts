@@ -16,6 +16,7 @@ import {
   parseAndValidateAIResponse,
   getDeterministicFallback,
   processAIAssistantRequest,
+  selectGeminiModelForAssistantRequest,
   shouldUseLocalAssistantShortcut,
 } from "../services/aiAssistantService";
 import type { AssistantContext } from "../services/assistantService";
@@ -249,6 +250,190 @@ describe("aiAssistantService processAIAssistantRequest", () => {
     assert.equal(shouldUseLocalAssistantShortcut("hola"), true);
     assert.equal(shouldUseLocalAssistantShortcut("hello bot"), true);
     assert.equal(shouldUseLocalAssistantShortcut("tạo mục tiêu chạy bộ trong 12 tuần"), false);
+  });
+
+  it("routes complex planning requests to the smart Gemini model", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const previous = {
+      GEMINI_MODEL: env.GEMINI_MODEL,
+      AI_MODEL: env.AI_MODEL,
+      GEMINI_SMART_MODEL: env.GEMINI_SMART_MODEL,
+      AI_SMART_MODEL: env.AI_SMART_MODEL,
+    };
+
+    try {
+      (env as any).GEMINI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).AI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).GEMINI_SMART_MODEL = "gemini-3.1-flash-lite";
+      (env as any).AI_SMART_MODEL = "gemini-3.1-flash-lite";
+
+      const selection = selectGeminiModelForAssistantRequest({
+        message: "lap ke hoach 12 tuan cho muc tieu chay bo",
+        context: sampleContext,
+      });
+
+      assert.equal(selection.tier, "smart");
+      assert.equal(selection.primaryModel, "gemini-3.1-flash-lite");
+      assert.equal(selection.fallbackModel, "gemini-2.5-flash-lite");
+    } finally {
+      (env as any).GEMINI_MODEL = previous.GEMINI_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
+      (env as any).GEMINI_SMART_MODEL = previous.GEMINI_SMART_MODEL;
+      (env as any).AI_SMART_MODEL = previous.AI_SMART_MODEL;
+    }
+  });
+
+  it("keeps simple task commands on the fast Gemini model", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const previous = {
+      GEMINI_MODEL: env.GEMINI_MODEL,
+      AI_MODEL: env.AI_MODEL,
+      GEMINI_SMART_MODEL: env.GEMINI_SMART_MODEL,
+      AI_SMART_MODEL: env.AI_SMART_MODEL,
+    };
+
+    try {
+      (env as any).GEMINI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).AI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).GEMINI_SMART_MODEL = "gemini-3.1-flash-lite";
+      (env as any).AI_SMART_MODEL = "gemini-3.1-flash-lite";
+
+      const selection = selectGeminiModelForAssistantRequest({
+        message: "tick task hom nay",
+        context: { ...sampleContext, route: "/12-week-system" },
+      });
+
+      assert.equal(selection.tier, "fast");
+      assert.equal(selection.primaryModel, "gemini-2.5-flash-lite");
+      assert.equal(selection.fallbackModel, undefined);
+    } finally {
+      (env as any).GEMINI_MODEL = previous.GEMINI_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
+      (env as any).GEMINI_SMART_MODEL = previous.GEMINI_SMART_MODEL;
+      (env as any).AI_SMART_MODEL = previous.AI_SMART_MODEL;
+    }
+  });
+
+  it("retries the fast Gemini model when the smart model is rate-limited", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalFetch = globalThis.fetch;
+    const previous = {
+      AI_PROVIDER: env.AI_PROVIDER,
+      AI_API_KEY: env.AI_API_KEY,
+      GEMINI_API_KEY: env.GEMINI_API_KEY,
+      GEMINI_MODEL: env.GEMINI_MODEL,
+      AI_MODEL: env.AI_MODEL,
+      GEMINI_SMART_MODEL: env.GEMINI_SMART_MODEL,
+      AI_SMART_MODEL: env.AI_SMART_MODEL,
+    };
+    const requestedUrls: string[] = [];
+
+    try {
+      (env as any).AI_PROVIDER = "gemini";
+      (env as any).AI_API_KEY = "test-gemini-key";
+      (env as any).GEMINI_API_KEY = "test-gemini-key";
+      (env as any).GEMINI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).AI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).GEMINI_SMART_MODEL = "gemini-3.1-flash-lite";
+      (env as any).AI_SMART_MODEL = "gemini-3.1-flash-lite";
+
+      globalThis.fetch = (async (input: string | URL | Request) => {
+        requestedUrls.push(String(input));
+        if (requestedUrls.length === 1) {
+          return new Response(JSON.stringify({
+            error: {
+              code: 429,
+              message: "quota exceeded",
+              status: "RESOURCE_EXHAUSTED",
+            },
+          }), { status: 429, headers: { "Content-Type": "application/json" } });
+        }
+
+        return new Response(JSON.stringify({
+          candidates: [{
+            finishReason: "STOP",
+            content: {
+              parts: [{ text: "Mình sẽ giúp bạn lập kế hoạch theo từng bước." }],
+            },
+          }],
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }) as typeof fetch;
+
+      const response = await processAIAssistantRequest({
+        message: "lap ke hoach 12 tuan cho muc tieu chay bo",
+        context: sampleContext,
+        mode: "real",
+      });
+
+      assert.ok(!("errorCode" in response));
+      assert.equal(requestedUrls.length, 2);
+      assert.ok(requestedUrls[0].includes("gemini-3.1-flash-lite"));
+      assert.ok(requestedUrls[1].includes("gemini-2.5-flash-lite"));
+    } finally {
+      globalThis.fetch = originalFetch;
+      (env as any).AI_PROVIDER = previous.AI_PROVIDER;
+      (env as any).AI_API_KEY = previous.AI_API_KEY;
+      (env as any).GEMINI_API_KEY = previous.GEMINI_API_KEY;
+      (env as any).GEMINI_MODEL = previous.GEMINI_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
+      (env as any).GEMINI_SMART_MODEL = previous.GEMINI_SMART_MODEL;
+      (env as any).AI_SMART_MODEL = previous.AI_SMART_MODEL;
+    }
+  });
+
+  it("uses deterministic fallback when Gemini reports an invalid API key", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalFetch = globalThis.fetch;
+    const previous = {
+      AI_PROVIDER: env.AI_PROVIDER,
+      AI_API_KEY: env.AI_API_KEY,
+      GEMINI_API_KEY: env.GEMINI_API_KEY,
+      GEMINI_MODEL: env.GEMINI_MODEL,
+      AI_MODEL: env.AI_MODEL,
+      GEMINI_SMART_MODEL: env.GEMINI_SMART_MODEL,
+      AI_SMART_MODEL: env.AI_SMART_MODEL,
+    };
+
+    try {
+      (env as any).AI_PROVIDER = "gemini";
+      (env as any).AI_API_KEY = "invalid-test-key";
+      (env as any).GEMINI_API_KEY = "invalid-test-key";
+      (env as any).GEMINI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).AI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).GEMINI_SMART_MODEL = "gemini-3.1-flash-lite";
+      (env as any).AI_SMART_MODEL = "gemini-3.1-flash-lite";
+
+      globalThis.fetch = (async () => new Response(JSON.stringify({
+        error: {
+          code: 400,
+          message: "API key not valid. Please pass a valid API key.",
+          status: "INVALID_ARGUMENT",
+        },
+      }), { status: 400, headers: { "Content-Type": "application/json" } })) as typeof fetch;
+
+      const response = await processAIAssistantRequest({
+        message: "phan tich muc tieu va lap ke hoach 12 tuan",
+        context: sampleContext,
+        mode: "real",
+      });
+
+      assert.ok(!("errorCode" in response));
+      assert.ok(!response.assistantText.includes("API key not valid"));
+      assert.ok(response.assistantText.length > 0);
+    } finally {
+      globalThis.fetch = originalFetch;
+      (env as any).AI_PROVIDER = previous.AI_PROVIDER;
+      (env as any).AI_API_KEY = previous.AI_API_KEY;
+      (env as any).GEMINI_API_KEY = previous.GEMINI_API_KEY;
+      (env as any).GEMINI_MODEL = previous.GEMINI_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
+      (env as any).GEMINI_SMART_MODEL = previous.GEMINI_SMART_MODEL;
+      (env as any).AI_SMART_MODEL = previous.AI_SMART_MODEL;
+    }
   });
 
   it("uses deterministic fallback in demo mode when API Key is missing", async () => {

@@ -662,9 +662,10 @@ export async function processAssistantRequest(
 ): Promise<AssistantResponse | AssistantError> {
   const sanitizedContext = sanitizeContext(request.context);
   const sanitizedHistory = sanitizeHistory(request.history);
-  const result = env.ASSISTANT_PROVIDER === "gemini"
-    ? await sendToGemini(request.message.trim(), sanitizedContext, sanitizedHistory)
-    : await sendToGroq(request.message.trim(), sanitizedContext, sanitizedHistory);
+  const result =
+    env.ASSISTANT_PROVIDER === "gemini"
+      ? await sendToGemini(request.message.trim(), sanitizedContext, sanitizedHistory)
+      : await sendToGroq(request.message.trim(), sanitizedContext, sanitizedHistory);
 
   if ("errorCode" in result) {
     return result;

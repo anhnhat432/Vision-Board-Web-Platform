@@ -100,6 +100,9 @@ function getErrorMessage(error: unknown): string {
   if (code === "ASSISTANT_PROVIDER_AUTH_ERROR") {
     return "Dịch vụ AI chưa xác thực được. Vui lòng liên hệ quản trị viên.";
   }
+  if (code === "ASSISTANT_PROVIDER_ERROR") {
+    return "Dá»‹ch vá»¥ AI Ä‘ang gáº·p váº¥n Ä‘á». Vui lÃ²ng thá»­ láº¡i sau.";
+  }
   if (code === "ASSISTANT_PROVIDER_SERVER_ERROR") {
     return "Dịch vụ AI đang gặp sự cố tạm thời. Vui lòng thử lại sau ít phút.";
   }
@@ -112,6 +115,9 @@ function getErrorMessage(error: unknown): string {
 
   if (error && typeof error === "object" && "message" in error) {
     const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && /api key not valid|invalid api key/i.test(message)) {
+      return "Dá»‹ch vá»¥ AI chÆ°a xÃ¡c thá»±c Ä‘Æ°á»£c. Vui lÃ²ng liÃªn há»‡ quáº£n trá»‹ viÃªn.";
+    }
     if (typeof message === "string" && message.trim()) return message;
   }
 
