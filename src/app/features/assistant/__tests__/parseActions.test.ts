@@ -273,4 +273,22 @@ Còn đây là cách cấu hình config code bình thường:
     expect(result.textContent).toContain('"theme": "dark"');
     expect(result.textContent).not.toContain('"type": "create_task"');
   });
+
+  it("parses raw action JSON without fenced code blocks", () => {
+    const raw = `action
+{
+  "type": "mark_task_done",
+  "payload": { "taskId": "Học thuộc 10 phút", "done": true },
+  "label": "Học thuộc 10 phút đã hoàn thành"
+}
+Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiếp tục cố gắng!`;
+
+    const result = parseAssistantReply(raw);
+
+    expect(result.actions).toHaveLength(1);
+    expect(result.actions[0].type).toBe("mark_task_done");
+    expect(result.actions[0].payload.taskId).toBe("Học thuộc 10 phút");
+    expect(result.textContent).toBe("Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiếp tục cố gắng!");
+  });
 });
+

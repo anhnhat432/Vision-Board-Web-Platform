@@ -455,10 +455,11 @@ function parseActionBlock(content: string): AssistantAction | null {
 }
 
 export function parseAssistantReply(raw: string): ParsedReply {
-  const actionBlockRegex = /```(action|json)\n([\s\S]*?)\n```/g;
-
   const actions: AssistantAction[] = [];
   const blocksToRemove: string[] = [];
+
+  // 1. Quét tìm các code block có ba nháy ngược
+  const actionBlockRegex = /```(action|json)\n([\s\S]*?)\n```/g;
   let match: RegExpExecArray | null;
 
   while (true) {
@@ -480,7 +481,28 @@ export function parseAssistantReply(raw: string): ParsedReply {
   for (const block of blocksToRemove) {
     textContent = textContent.replace(block, "");
   }
-  textContent = textContent.trim();
 
+  // 2. Quét tìm các JSON block thô không có ba nháy ngược nhưng đứng sau từ khóa "action" hoặc "json"
+  const rawActionRegex = /(?:^|\n)(?:action|json)\r?\n(\{[\s\S]*?\})(?=\n|$)/gi;
+  let rawMatch: RegExpExecArray | null;
+  const rawBlocksToRemove: string[] = [];
+
+  rawActionRegex.lastIndex = 0;
+  while (true) {
+    rawMatch = rawActionRegex.exec(textContent);
+    if (rawMatch === null) break;
+    const content = rawMatch[1].trim();
+    const action = parseActionBlock(content);
+    if (action) {
+      actions.push(action);
+      rawBlocksToRemove.push(rawMatch[0]);
+    }
+  }
+
+  for (const block of rawBlocksToRemove) {
+    textContent = textContent.replace(block, "");
+  }
+
+  textContent = textContent.trim();
   return { textContent, actions };
 }

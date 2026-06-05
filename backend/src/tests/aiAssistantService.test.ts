@@ -183,6 +183,27 @@ Bạn cứ bấm đồng ý nhé.`;
     const result = parseAndValidateAIResponse(rawText);
     assert.equal(result.proposedActions.length, 0);
   });
+
+  it("parses raw action JSON without fenced code blocks", () => {
+    ensureBackendEnvForServiceImports();
+    const rawText = `action
+{
+  "type": "mark_task_done",
+  "payload": {
+    "taskId": "Học thuộc 10 phút",
+    "done": true
+  },
+  "label": "Học thuộc 10 phút đã hoàn thành"
+}
+Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiếp tục cố gắng!`;
+
+    const result = parseAndValidateAIResponse(rawText);
+
+    assert.equal(result.proposedActions.length, 1);
+    assert.equal(result.proposedActions[0].type, "mark_task_done");
+    assert.equal((result.proposedActions[0].payload as any).taskId, "Học thuộc 10 phút");
+    assert.equal(result.assistantText, "Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiếp tục cố gắng!");
+  });
 });
 
 describe("aiAssistantService getDeterministicFallback", () => {

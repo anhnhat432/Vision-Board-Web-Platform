@@ -575,15 +575,12 @@ function sanitizeUpdateTaskStatusPayload(payload: any) {
 }
 
 export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse {
-  const actionBlockRegex = /```action\n([\s\S]*?)\n```/g;
   const proposedActions: AssistantAction[] = [];
-  let match: RegExpExecArray | null;
+  const blocksToRemove: string[] = [];
 
-  while (true) {
-    match = actionBlockRegex.exec(rawText);
-    if (match === null) break;
+  const processJson = (jsonStr: string) => {
     try {
-      const json = JSON.parse(match[1].trim());
+      const json = JSON.parse(jsonStr.trim());
       if (typeof json.type === "string" && VALID_ACTION_TYPES.includes(json.type) && typeof json.label === "string") {
         let sanitizedPayload: any = null;
         switch (json.type) {
@@ -629,15 +626,53 @@ export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse
             payload: sanitizedPayload,
             label: json.label.slice(0, 80),
           });
+          return true;
         }
       }
     } catch {
-      // Ignore invalid JSON action blocks
+      // Ignore
+    }
+    return false;
+  };
+
+  // 1. Quét code blocks ```action
+  const actionBlockRegex = /```action\n([\s\S]*?)\n```/g;
+  let match: RegExpExecArray | null;
+
+  while (true) {
+    match = actionBlockRegex.exec(rawText);
+    if (match === null) break;
+    const isAdded = processJson(match[1]);
+    if (isAdded) {
+      blocksToRemove.push(match[0]);
     }
   }
 
-  const assistantText = rawText.replace(/```action[\s\S]*?```/g, "").trim();
+  let assistantText = rawText;
+  for (const block of blocksToRemove) {
+    assistantText = assistantText.replace(block, "");
+  }
 
+  // 2. Quét raw action blocks (không có ba nháy ngược)
+  const rawActionRegex = /(?:^|\n)(?:action|json)\r?\n(\{[\s\S]*?\})(?=\n|$)/gi;
+  let rawMatch: RegExpExecArray | null;
+  const rawBlocksToRemove: string[] = [];
+
+  rawActionRegex.lastIndex = 0;
+  while (true) {
+    rawMatch = rawActionRegex.exec(assistantText);
+    if (rawMatch === null) break;
+    const isAdded = processJson(rawMatch[1]);
+    if (isAdded) {
+      rawBlocksToRemove.push(rawMatch[0]);
+    }
+  }
+
+  for (const block of rawBlocksToRemove) {
+    assistantText = assistantText.replace(block, "");
+  }
+
+  assistantText = assistantText.trim();
   return { assistantText, proposedActions };
 }
 
