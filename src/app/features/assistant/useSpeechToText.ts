@@ -312,7 +312,8 @@ export function useSpeechToText(options?: UseSpeechToTextOptions) {
             }
           } catch (apiErr: any) {
             console.error("[SpeechToText] Backend transcription error:", apiErr);
-            setError("Lỗi xử lý âm thanh từ máy chủ. Thử lại nhé.");
+            const detailMsg = apiErr.message || apiErr;
+            setError(`Lỗi xử lý âm thanh từ máy chủ (${detailMsg}). Thử lại nhé.`);
           } finally {
             setIsListening(false);
             setInterimTranscript("");
