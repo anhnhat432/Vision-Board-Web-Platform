@@ -69,6 +69,7 @@ const geminiModel = getOptionalEnv("GEMINI_MODEL") ?? "gemini-2.5-flash-lite";
 const geminiSmartModel = getOptionalEnv("GEMINI_SMART_MODEL") ?? "gemini-3.1-flash-lite";
 const groqApiKey = getOptionalEnv("GROQ_API_KEY");
 const groqModel = getOptionalEnv("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
+const groqAudioModel = getOptionalEnv("GROQ_AUDIO_MODEL") ?? "whisper-large-v3-turbo";
 
 const resolvedAssistantProvider: "groq" | "gemini" = assistantProvider === "groq" ? "groq" : "gemini";
 
@@ -95,6 +96,7 @@ export const env = {
   GEMINI_SMART_MODEL: geminiSmartModel,
   GROQ_API_KEY: groqApiKey,
   GROQ_MODEL: groqModel,
+  GROQ_AUDIO_MODEL: groqAudioModel,
   AI_PROVIDER: resolvedAiProvider,
   AI_API_KEY: aiApiKey,
   AI_MODEL: aiModel,

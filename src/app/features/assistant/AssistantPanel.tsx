@@ -535,7 +535,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                           className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-[14.5px] leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
                             message.role === "user"
                               ? "rounded-tr-none bg-gradient-to-tr from-emerald-600 via-emerald-700 to-teal-600 text-white font-medium shadow-[0_4px_16px_rgba(16,185,129,0.15)]"
-                              : "rounded-tl-none bg-app-bg-subtle/60 dark:bg-white/5 backdrop-blur-md border border-app-line/35 border-l-2 border-l-emerald-600/70 dark:border-l-emerald-400/70 dark:border-white/5 text-app-ink"
+                              : "rounded-tl-none bg-gradient-to-br from-emerald-50/70 via-emerald-50/55 to-teal-50/40 dark:from-emerald-950/25 dark:via-emerald-950/15 dark:to-teal-950/15 backdrop-blur-xl border border-emerald-500/10 border-l-3 border-l-emerald-600/80 dark:border-emerald-500/5 dark:border-l-emerald-400/80 text-app-ink shadow-[0_4px_20px_rgba(16,185,129,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.15)] px-4.5 py-3"
                           }`}
                         >
                           {message.role === "user" ? (

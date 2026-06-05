@@ -400,7 +400,7 @@ export async function transcribeAudio(
   const formData = new FormData();
   const blob = new Blob([new Uint8Array(audioBuffer)], { type: mimeType });
   formData.append("file", blob, fileName);
-  formData.append("model", "whisper-large-v3");
+  formData.append("model", env.GROQ_AUDIO_MODEL || "whisper-large-v3-turbo");
   formData.append("language", "vi");
   formData.append("response_format", "json");
 

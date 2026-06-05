@@ -5,10 +5,31 @@ interface AssistantMessageContentProps {
   status?: "streaming" | "complete";
 }
 
+// Hàm phát hiện văn bản có chứa cú pháp markdown thực sự hay không
+const hasMarkdown = (text: string): boolean => {
+  if (!text) return false;
+  // bold (**), italic (*), highlight (==)
+  if (/\*\*|==|\*/.test(text)) return true;
+  // list items (- , * , • ) ở đầu dòng
+  if (/^\s*(-\s*|\*\s*|•\s*)/m.test(text)) return true;
+  // headings (##, ###) ở đầu dòng
+  if (/^\s*#{2,3}\s+/m.test(text)) return true;
+  return false;
+};
+
 export function AssistantMessageContent({ content, status }: AssistantMessageContentProps) {
   // Hàm parse markdown đơn giản sang React Elements để hiển thị tuyệt đẹp
   const renderFormattedContent = (text: string) => {
     if (!text) return null;
+
+    // Nếu không chứa markdown thực sự, render dưới dạng text thô trong một tag duy nhất
+    if (!hasMarkdown(text)) {
+      return (
+        <p className="my-1.5 text-[15px] leading-relaxed whitespace-pre-line font-serif text-app-ink/95 tracking-normal">
+          {text}
+        </p>
+      );
+    }
 
     const lines = text.split("\n");
     let inList = false;
@@ -41,13 +62,13 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
           );
         } else if (delimiter === "*") {
           parts.push(
-            <em key={matchIndex} className="italic text-app-ink-soft">
+            <em key={matchIndex} className="italic text-app-ink-soft/90">
               {innerText}
             </em>
           );
         } else if (delimiter === "==") {
           parts.push(
-            <mark key={matchIndex} className="bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 px-1 rounded font-medium">
+            <mark key={matchIndex} className="bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-850 dark:text-emerald-300 px-1.5 py-0.5 rounded-md font-medium border border-emerald-500/10">
               {innerText}
             </mark>
           );
@@ -66,10 +87,10 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
     const flushList = (key: number) => {
       if (listItems.length > 0) {
         elements.push(
-          <ul key={`list-${key}`} className="list-none pl-1 my-2 space-y-1.5">
+          <ul key={`list-${key}`} className="list-none pl-1.5 my-2.5 space-y-2">
             {listItems.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-[14px]">
-                <span className="text-emerald-600 dark:text-emerald-400 mt-1.5 shrink-0 size-1.5 rounded-full bg-emerald-500/80" />
+              <li key={idx} className="flex items-start gap-2.5 text-[15px] leading-relaxed">
+                <span className="text-emerald-600 dark:text-emerald-400 mt-2 shrink-0 size-1.5 rounded-full bg-emerald-500/80 shadow-xs" />
                 <span className="flex-1">{parseInlineStyles(item)}</span>
               </li>
             ))}
@@ -89,7 +110,7 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         flushList(i);
         const headerText = trimmedLine.replace(/^###\s*/, "");
         elements.push(
-          <h4 key={i} className="text-[15px] font-bold text-emerald-800 dark:text-emerald-400 mt-3.5 mb-1.5 font-serif tracking-wide">
+          <h4 key={i} className="text-[15.5px] font-bold text-emerald-850 dark:text-emerald-400 mt-4 mb-2 font-serif tracking-wide leading-snug">
             {parseInlineStyles(headerText)}
           </h4>
         );
@@ -101,7 +122,7 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         flushList(i);
         const headerText = trimmedLine.replace(/^##\s*/, "");
         elements.push(
-          <h3 key={i} className="text-base font-bold text-emerald-900 dark:text-emerald-300 mt-4 mb-2 font-serif tracking-wide border-b border-emerald-500/10 pb-0.5">
+          <h3 key={i} className="text-[17px] font-bold text-emerald-900 dark:text-emerald-300 mt-5 mb-2.5 font-serif tracking-wide leading-snug border-b border-emerald-500/10 pb-1">
             {parseInlineStyles(headerText)}
           </h3>
         );
@@ -124,7 +145,7 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
 
       if (trimmedLine === "") {
         flushList(i);
-        elements.push(<div key={i} className="h-2" />);
+        elements.push(<div key={i} className="h-2.5" />);
         continue;
       }
 
@@ -133,7 +154,7 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         listItems[listItems.length - 1] += "\n" + trimmedLine;
       } else {
         elements.push(
-          <p key={i} className="my-1 text-[14.5px] leading-relaxed">
+          <p key={i} className="my-1.5 text-[15px] leading-relaxed text-app-ink/95 tracking-normal">
             {parseInlineStyles(line)}
           </p>
         );
@@ -147,10 +168,14 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
   };
 
   return (
-    <div className="font-serif text-app-ink/95 selection:bg-emerald-200/50 leading-relaxed space-y-1.5 break-words">
+    <div className="font-serif text-app-ink/95 antialiased selection:bg-emerald-200/50 leading-relaxed space-y-1.5 break-words">
       {renderFormattedContent(content)}
       {status === "streaming" && (
         <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse rounded-full bg-emerald-600 dark:bg-emerald-400 ml-0.5" />
+      )}
+    </div>
+  );
+}dark:bg-emerald-400 ml-0.5" />
       )}
     </div>
   );
