@@ -88,7 +88,7 @@ describe("geminiAssistantProvider prompt", () => {
 
     assert.match(prompt, /tin nhắn hiện tại/i);
     assert.match(prompt, /dữ liệu hợp lệ/i);
-    assert.match(prompt, /đừng trả lời.*chưa thấy/i);
+    assert.match(prompt, /nói thẳng.*chưa thấy/i);
     assert.match(prompt, /ví dụ điền/i);
   });
 
