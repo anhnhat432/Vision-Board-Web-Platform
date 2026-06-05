@@ -1,10 +1,9 @@
 import { Activity, AlertTriangle, Lightbulb, Minus, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
 import { motion } from "motion/react";
-import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
-
+import { useState } from "react";
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { cn } from "@/app/components/ui/utils";
 import { soundService } from "@/app/services/soundService";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
@@ -140,7 +139,7 @@ export function LeadIndicatorsStepLab({
   const showNameError = (indicator: LeadIndicatorDraft) => showValidationErrors && !indicator.name.trim();
 
   // Lấy danh sách gợi ý dựa trên loại mục tiêu hiện tại (goalType)
-  const currentSuggestions = TACTIC_SUGGESTIONS[draft.goalType] ?? TACTIC_SUGGESTIONS["Other"];
+  const currentSuggestions = TACTIC_SUGGESTIONS[draft.goalType] ?? TACTIC_SUGGESTIONS.Other;
 
   const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -186,9 +185,7 @@ export function LeadIndicatorsStepLab({
           💡
         </span>
         <div className="space-y-1">
-          <p className="font-bold text-app-accent">
-            Cách chọn hành động tốt nhất (Lead Indicators):
-          </p>
+          <p className="font-bold text-app-accent">Cách chọn hành động tốt nhất (Lead Indicators):</p>
           <p className="leading-relaxed opacity-95">
             Chọn việc nhỏ nằm trong tầm kiểm soát hoàn toàn của bạn và lặp lại đều đặn mỗi tuần.
           </p>
@@ -355,7 +352,9 @@ export function LeadIndicatorsStepLab({
                       }}
                       className={cn(
                         "inline-flex rounded bg-app-bg-subtle border border-app-line px-1.5 py-0.5 text-[9px] font-bold transition-colors active:scale-90 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",
-                        indicator.unit === u ? "bg-app-accent text-white border-app-accent" : "text-app-ink-soft hover:bg-app-accent-soft/40",
+                        indicator.unit === u
+                          ? "bg-app-accent text-white border-app-accent"
+                          : "text-app-ink-soft hover:bg-app-accent-soft/40",
                       )}
                     >
                       {u}
@@ -426,9 +425,7 @@ export function LeadIndicatorsStepLab({
             <span className="font-extrabold text-[9px] uppercase tracking-wider text-app-status-warning block mb-0.5">
               Lời khuyên về tải trọng hành động:
             </span>
-            <p className="text-xs font-semibold text-app-ink-soft leading-relaxed">
-              {weekOneTaskWarning}
-            </p>
+            <p className="text-xs font-semibold text-app-ink-soft leading-relaxed">{weekOneTaskWarning}</p>
           </div>
         </div>
       )}

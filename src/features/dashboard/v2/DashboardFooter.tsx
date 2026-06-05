@@ -9,7 +9,9 @@ export function DashboardFooter({ lastSavedLabel }: DashboardFooterProps) {
         <span>Đã lưu cục bộ · {lastSavedLabel}</span>
         <div className="flex items-center gap-1">
           <span>Trang chính · 12-Week Year</span>
-          <span aria-hidden="true" className="mx-1">·</span>
+          <span aria-hidden="true" className="mx-1">
+            ·
+          </span>
           <a
             href="https://deerflow.tech"
             target="_blank"

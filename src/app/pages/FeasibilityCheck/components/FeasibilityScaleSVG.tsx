@@ -1,4 +1,3 @@
-
 export interface FeasibilityScaleSVGProps {
   tiltAngle: number;
   isHeavyLeft: boolean;
@@ -33,18 +32,8 @@ export function FeasibilityScaleSVG({
     <svg viewBox="0 0 300 170" className="w-full h-full overflow-visible" aria-hidden="true">
       {/* 1. Trụ đỡ trung tâm (cột chống) */}
       {/* Chân đế dẹt */}
-      <rect
-        x="110"
-        y="145"
-        width="80"
-        height="8"
-        rx="4"
-        className="fill-app-line/20 dark:fill-app-line/30"
-      />
-      <path
-        d="M 120 145 L 180 145 L 170 135 L 130 135 Z"
-        className="fill-app-line/10 dark:fill-app-line/20"
-      />
+      <rect x="110" y="145" width="80" height="8" rx="4" className="fill-app-line/20 dark:fill-app-line/30" />
+      <path d="M 120 145 L 180 145 L 170 135 L 130 135 Z" className="fill-app-line/10 dark:fill-app-line/20" />
       {/* Thân trụ */}
       <rect
         x="147"
@@ -144,7 +133,7 @@ export function FeasibilityScaleSVG({
             className="fill-app-status-error/5 stroke-app-status-error/20"
             strokeWidth="1"
           />
-          
+
           {/* Các vật phẩm động dựa trên câu trả lời */}
           <g style={{ transform: "translate(50px, 94px)" }}>
             <text className="text-[17px] select-none">🎯</text>
@@ -215,7 +204,7 @@ export function FeasibilityScaleSVG({
             className="fill-app-status-success/5 stroke-app-status-success/20"
             strokeWidth="1"
           />
-          
+
           {/* Vật phẩm động dựa trên thời gian, năng lượng, nguồn lực */}
           {showTimeIcon ? (
             <g style={{ transform: "translate(229px, 94px)" }}>

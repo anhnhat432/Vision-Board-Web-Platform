@@ -351,64 +351,61 @@ function ReflectionJournalContent() {
         }
       />
 
-        {/* Toolbar */}
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative min-w-[200px] flex-1">
-            <Search
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
-              aria-hidden="true"
-            />
-            <Input
-              type="search"
-              aria-label="Tìm kiếm nhật ký"
-              placeholder="Tìm kiếm nhật ký..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(["all", "weekly-review", "freeform"] as const).map((type) => (
+      {/* Toolbar */}
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
+          <Input
+            type="search"
+            aria-label="Tìm kiếm nhật ký"
+            placeholder="Tìm kiếm nhật ký..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(["all", "weekly-review", "freeform"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setFilterType(type)}
+              className={cn(
+                "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
+                filterType === type
+                  ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
+                  : "text-app-ink-soft hover:bg-app-bg",
+              )}
+            >
+              {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
+            </button>
+          ))}
+          <span className="hidden sm:inline w-px h-5 bg-app-line" />
+          {(["", "happy", "neutral", "sad"] as const).map((mood) => {
+            const labels: Record<string, string> = {
+              "": "Mọi tâm trạng",
+              happy: "Vui vẻ",
+              neutral: "Bình thường",
+              sad: "Suy tư",
+            };
+            return (
               <button
-                key={type}
+                key={mood}
                 type="button"
-                onClick={() => setFilterType(type)}
+                onClick={() => setFilterMood(mood)}
                 className={cn(
                   "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
-                  filterType === type
+                  filterMood === mood
                     ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
                     : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
-                {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
+                {labels[mood]}
               </button>
-            ))}
-            <span className="hidden sm:inline w-px h-5 bg-app-line" />
-            {(["", "happy", "neutral", "sad"] as const).map((mood) => {
-              const labels: Record<string, string> = {
-                "": "Mọi tâm trạng",
-                happy: "Vui vẻ",
-                neutral: "Bình thường",
-                sad: "Suy tư",
-              };
-              return (
-                <button
-                  key={mood}
-                  type="button"
-                  onClick={() => setFilterMood(mood)}
-                  className={cn(
-                    "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
-                    filterMood === mood
-                      ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
-                      : "text-app-ink-soft hover:bg-app-bg",
-                  )}
-                >
-                  {labels[mood]}
-                </button>
-              );
-            })}
-          </div>
+            );
+          })}
         </div>
+      </div>
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
         <DialogContent className="max-w-3xl">

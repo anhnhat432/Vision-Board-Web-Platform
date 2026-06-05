@@ -1,4 +1,5 @@
 import { getUserData } from "@/app/utils/storage";
+import { recordAssistantEvent } from "./assistantObservability";
 import type { FeedbackReason, MemoryItem } from "./types";
 
 export interface AssistantMemory {
@@ -36,6 +37,11 @@ const MEMORY_ITEMS_PREFIX = "assistant.memory_items:";
 const MAX_ARRAY_SIZE = 15;
 const MAX_SUMMARY_SIZE = 3;
 const MAX_TEXT_LENGTH = 150;
+
+function getCurrentRouteForMemory(): string {
+  if (typeof window === "undefined") return "/";
+  return window.location?.pathname || "/";
+}
 
 function truncate(text: string, maxLength = MAX_TEXT_LENGTH): string {
   return text.trim().slice(0, maxLength);
@@ -298,6 +304,17 @@ export function addMemoryItem(
 
   items.unshift(newItem);
   saveMemoryItems(items, targetUserId);
+  recordAssistantEvent({
+    type: "assistant_memory_captured",
+    userId: targetUserId,
+    route: getCurrentRouteForMemory(),
+    metadata: {
+      memoryType: newItem.type,
+      source: newItem.source,
+      confidence: newItem.confidence ?? null,
+      tags: newItem.tags?.join(",") ?? null,
+    },
+  });
   return newItem;
 }
 

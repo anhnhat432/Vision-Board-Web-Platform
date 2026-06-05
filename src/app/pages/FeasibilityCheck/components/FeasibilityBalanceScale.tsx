@@ -181,9 +181,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
 
       {/* ═══ Description ═══ */}
       <div className="w-full text-center">
-        <p className="text-xs text-app-ink-muted font-semibold uppercase tracking-wider">
-          {statusInfo.sub}
-        </p>
+        <p className="text-xs text-app-ink-muted font-semibold uppercase tracking-wider">{statusInfo.sub}</p>
       </div>
     </div>
   );

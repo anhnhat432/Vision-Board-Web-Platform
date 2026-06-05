@@ -5,7 +5,6 @@ import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
 import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
 import { capitalizeVietnameseName } from "@/app/utils/text";
 import { DreamToPlanPreview } from "./DreamToPlanPreview";
-import { DreamyPinboardMockup } from "./DreamyPinboardMockup";
 
 interface NewUserSetupViewProps {
   userData: UserData;

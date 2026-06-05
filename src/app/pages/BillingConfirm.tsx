@@ -29,9 +29,7 @@ interface CheckoutSessionResponse {
   provider: string;
 }
 
-type CheckoutRedirectTarget =
-  | { kind: "internal"; path: string }
-  | { kind: "external"; url: string };
+type CheckoutRedirectTarget = { kind: "internal"; path: string } | { kind: "external"; url: string };
 
 const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 

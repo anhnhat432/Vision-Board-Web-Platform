@@ -3,7 +3,7 @@ import { createElement, type ReactNode } from "react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AssistantMascot } from "../AssistantMascot";
-import { buildAssistantContext, type AssistantContext } from "../buildAssistantContext";
+import { type AssistantContext, buildAssistantContext } from "../buildAssistantContext";
 import type { NudgeState } from "../useProactiveNudge";
 import { useProactiveNudge } from "../useProactiveNudge";
 
@@ -51,7 +51,11 @@ type ContextOverrides = {
   goals?: Array<{ id: string; title: string; progress: number }>;
   todayTasks?: Array<{ id: string; title: string; done: boolean }>;
   lastReflectionDate?: string | null;
-  feasibility?: { readinessScore: number | null; bottleneckLabel: string | null; bottleneckAction: string | null } | null;
+  feasibility?: {
+    readinessScore: number | null;
+    bottleneckLabel: string | null;
+    bottleneckAction: string | null;
+  } | null;
   latestWeeklyReview?: AssistantContext["latestWeeklyReview"];
   overdueOpenCount?: number;
   overdueTasks?: AssistantContext["stuckSignals"]["overdueTasks"];
@@ -144,11 +148,17 @@ describe("Phase 9 proactive nudges", () => {
 
   it("detects today task pending nudge", () => {
     seedSeenWeek();
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "today_task_pending", relatedTaskId: "task-1", route: "/today" });
+    expect(result.current.nudge).toMatchObject({
+      type: "today_task_pending",
+      relatedTaskId: "task-1",
+      route: "/today",
+    });
   });
 
   it("detects overdue tasks nudge", () => {
@@ -167,7 +177,19 @@ describe("Phase 9 proactive nudges", () => {
 
   it("detects weekly review due nudge", () => {
     localStorage.setItem("assistant.lastSeenWeek:user-1", "4");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ currentWeek: 4, latestWeeklyReview: { weekNumber: 2, leadCompletionPercent: 70, mainObstacle: null, nextWeekPriority: null, workloadDecision: null, reviewedAt: TODAY } }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({
+        currentWeek: 4,
+        latestWeeklyReview: {
+          weekNumber: 2,
+          leadCompletionPercent: 70,
+          mainObstacle: null,
+          nextWeekPriority: null,
+          workloadDecision: null,
+          reviewedAt: TODAY,
+        },
+      }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -186,7 +208,9 @@ describe("Phase 9 proactive nudges", () => {
   it("cooldown prevents repeated nudge", () => {
     seedSeenWeek();
     localStorage.setItem("assistant.nudgeCooldown:user-1.today_task_pending", "2026-05-19T18:00:00.000Z");
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -195,7 +219,9 @@ describe("Phase 9 proactive nudges", () => {
 
   it("dismiss stores cooldown", () => {
     seedSeenWeek();
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
@@ -216,7 +242,9 @@ describe("Phase 9 proactive nudges", () => {
   it("memory preference don't remind at night suppresses nudge", () => {
     seedSeenWeek();
     vi.setSystemTime(new Date(`${TODAY}T21:00:00`));
-    mockedBuildAssistantContext.mockReturnValue(makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }));
+    mockedBuildAssistantContext.mockReturnValue(
+      makeContext({ todayTasks: [{ id: "task-1", title: "Write outline", done: false }] }),
+    );
     assistantMemoryMock.getMemoryItems.mockReturnValue([{ content: "đừng nhắc buổi tối", tags: ["preferred_time"] }]);
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
@@ -232,7 +260,10 @@ describe("Phase 9 proactive nudges", () => {
 
     act(() => vi.advanceTimersByTime(IDLE_MS + 1));
 
-    expect(result.current.nudge).toMatchObject({ type: "stuck_onboarding", message: "Bạn đang phân vân chỗ nào không? Hỏi mình thử xem." });
+    expect(result.current.nudge).toMatchObject({
+      type: "stuck_onboarding",
+      message: "Bạn đang phân vân chỗ nào không? Hỏi mình thử xem.",
+    });
   });
 
   it("UI renders nudge and dismiss works", () => {

@@ -17,8 +17,8 @@ import {
   Target,
   Wrench,
 } from "lucide-react";
-import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import { motion } from "motion/react";
+import type { PendingSMARTGoal } from "@/lib/smart-goal";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../../components/ui/collapsible";
 import { cn } from "../../../components/ui/utils";
@@ -58,8 +58,6 @@ interface ResultStepProps {
   answers?: Record<number, string>;
 }
 
-
-
 function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
 }
@@ -88,7 +86,6 @@ const CAPACITY_LABEL: Record<WeeklyCapacity, string> = {
   high: "Khá rộng",
 };
 
-
 function getBottleneckIcon(axis: string): LucideIcon {
   switch (axis) {
     case "time":
@@ -110,15 +107,21 @@ function getBottleneckIcon(axis: string): LucideIcon {
   }
 }
 
-
-
-export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal, answers = {} }: ResultStepProps) {
+export function ResultStep({
+  result,
+  focusArea,
+  pendingGoal,
+  onContinue,
+  onAdjustGoal,
+  answers = {},
+}: ResultStepProps) {
   const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1024;
   const isDesktop = windowWidth >= 768;
-  const rawActionText = result.bottleneck.axis === "wheel"
-    ? "cân nhắc củng cố nền tảng lĩnh vực này song song với mục tiêu"
-    : getPrePlanAction(result.bottleneck);
-  const capitalizedAction = rawActionText.charAt(0).toUpperCase() + rawActionText.slice(1) + ".";
+  const rawActionText =
+    result.bottleneck.axis === "wheel"
+      ? "cân nhắc củng cố nền tảng lĩnh vực này song song với mục tiêu"
+      : getPrePlanAction(result.bottleneck);
+  const capitalizedAction = `${rawActionText.charAt(0).toUpperCase() + rawActionText.slice(1)}.`;
   const scorePercent = clampPercent(Math.round((result.adjustedScore / 20) * 100));
   const readinessPercent = clampPercent(Math.round((result.readinessScore / 20) * 100));
   const bottleneckPercent =
@@ -202,9 +205,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       {/* ── KHU VỰC 1: Mục tiêu có thực tế không? ── */}
       <div className="relative z-10 space-y-6">
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">
-            Kết quả đánh giá khả thi
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">Kết quả đánh giá khả thi</p>
           <span className="w-fit rounded-pill bg-app-accent-soft px-3.5 py-1.5 text-xs font-bold text-app-accent border border-app-line shadow-app-sm">
             {getLifeAreaLabel(focusArea)}
           </span>
@@ -217,9 +218,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             resultHeaderCopy.cardBg,
           )}
         >
-          <div
-            className="p-3 rounded-control bg-app-surface shadow-app-sm shrink-0"
-          >
+          <div className="p-3 rounded-control bg-app-surface shadow-app-sm shrink-0">
             <ActionIcon className={cn("h-6 w-6", resultHeaderCopy.textClass)} aria-hidden="true" />
           </div>
           <div className="space-y-1.5">
@@ -229,9 +228,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             >
               {resultHeaderCopy.answer}
             </h1>
-            <p className="text-sm leading-relaxed text-app-ink-soft font-normal">
-              {resultHeaderCopy.desc}
-            </p>
+            <p className="text-sm leading-relaxed text-app-ink-soft font-normal">{resultHeaderCopy.desc}</p>
           </div>
         </div>
 
@@ -290,9 +287,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <span>Vững vàng (2.8-4)</span>
                 </div>
               </div>
-              <p className="text-sm leading-relaxed text-app-ink-soft font-normal">
-                {result.recommendation}
-              </p>
+              <p className="text-sm leading-relaxed text-app-ink-soft font-normal">{result.recommendation}</p>
             </div>
           </div>
         </div>
@@ -352,12 +347,8 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <Key className="h-4 w-4" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-semibold text-app-accent">
-                    1. Chuẩn bị bệ đỡ
-                  </h4>
-                  <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">
-                    {capitalizedAction}
-                  </p>
+                  <h4 className="text-sm font-semibold text-app-accent">1. Chuẩn bị bệ đỡ</h4>
+                  <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">{capitalizedAction}</p>
                 </div>
               </div>
 
@@ -367,9 +358,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <Sparkles className="h-4 w-4" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-semibold text-app-accent">
-                    2. Tuần khởi động (Tuần 1)
-                  </h4>
+                  <h4 className="text-sm font-semibold text-app-accent">2. Tuần khởi động (Tuần 1)</h4>
                   <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">
                     {result.firstWeekGuidance}
                   </p>
@@ -383,9 +372,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                     <Compass className="h-4 w-4" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-sm font-semibold text-app-accent">
-                      3. Tinh chỉnh quy mô mục tiêu
-                    </h4>
+                    <h4 className="text-sm font-semibold text-app-accent">3. Tinh chỉnh quy mô mục tiêu</h4>
                     <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">
                       {result.scopeRecommendation}
                     </p>
@@ -429,8 +416,6 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-5 space-y-6 data-[state=closed]:hidden">
-
-
             {/* Grid hiển thị 3 ScoreCards chính */}
             <div className="grid gap-4 md:grid-cols-3">
               {scoreCards.map((card) => (
@@ -438,12 +423,8 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   key={card.label}
                   className="rounded-card bg-app-surface/40 p-5 transition-all duration-300 hover:bg-app-surface/60 hover:shadow-app-md border-none"
                 >
-                  <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted">
-                    {card.label}
-                  </p>
-                  <p className="mt-2 text-xl font-extrabold leading-normal text-app-ink tracking-tight">
-                    {card.value}
-                  </p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted">{card.label}</p>
+                  <p className="mt-2 text-xl font-extrabold leading-normal text-app-ink tracking-tight">{card.value}</p>
                   <div
                     className="mt-4 h-2 overflow-hidden rounded-pill bg-app-line/20 shadow-inner"
                     role="progressbar"
@@ -469,10 +450,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </h4>
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {result.axisScores.map((axis) => (
-                  <div
-                    key={axis.axis}
-                    className="rounded-card bg-app-surface/50 p-4 border-none"
-                  >
+                  <div key={axis.axis} className="rounded-card bg-app-surface/50 p-4 border-none">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-bold text-app-ink">{axis.label}</p>
                       <span className="text-xs font-bold text-app-ink-muted bg-app-bg-subtle px-2 py-0.5 rounded-control">
@@ -492,9 +470,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                         style={{ width: `${axis.percent}%` }}
                       />
                     </div>
-                    <p className="mt-3 text-xs leading-relaxed text-app-ink-soft font-normal">
-                      {axis.diagnostic}
-                    </p>
+                    <p className="mt-3 text-xs leading-relaxed text-app-ink-soft font-normal">{axis.diagnostic}</p>
                   </div>
                 ))}
               </div>
@@ -502,18 +478,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
 
             {/* PHẦN 2: Mục tiêu đã viết (Hiển thị phẳng) */}
             <div className="space-y-3 pt-2 border-t border-app-line">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">
-                Mục tiêu SMART của bạn
-              </h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Mục tiêu SMART của bạn</h4>
               <div className="rounded-card bg-app-surface/40 p-5 space-y-4 border-none">
                 <p className="text-sm font-bold leading-relaxed text-app-ink p-4 rounded-card bg-app-bg-subtle shadow-app-sm border-none">
                   {pendingGoal.specific}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3 text-sm leading-relaxed text-app-ink-soft">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted mb-1">
-                      Thời hạn
-                    </p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted mb-1">Thời hạn</p>
                     <p className="font-semibold text-app-ink">{pendingGoal.timeBound}</p>
                   </div>
                   <div>
@@ -531,8 +503,6 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 </div>
               </div>
             </div>
-
-
           </CollapsibleContent>
         </Collapsible>
 

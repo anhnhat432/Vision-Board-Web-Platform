@@ -1,4 +1,4 @@
-import { AlertTriangle, Bell, ChevronDown, Flag, RotateCcw, Settings2, ShieldCheck, Target, Zap } from "lucide-react";
+import { AlertTriangle, ChevronDown, Flag, RotateCcw, Settings2, Target } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { isDemoMode } from "../../utils/app-mode";

@@ -1,9 +1,8 @@
 import { Calendar, CalendarDays, ChevronDown, Clock, Flag, Play, Settings, Sliders } from "lucide-react";
-import { useState } from "react";
 import { motion } from "motion/react";
-import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
-
+import { useState } from "react";
 import { Input } from "@/app/components/ui/input";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { cn } from "@/app/components/ui/utils";
 import { soundService } from "@/app/services/soundService";
 import { formatDateInputValue } from "@/app/utils/storage";
@@ -278,12 +277,10 @@ export function ScheduleStepLab({
           </legend>
 
           <div className="rounded-xl border border-app-accent/15 bg-app-accent-soft/10 px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1.5 mb-2 select-none">
-            <div className="font-semibold text-app-accent">
-              📊 Lựa chọn thời điểm phản tư tốt nhất:
-            </div>
+            <div className="font-semibold text-app-accent">📊 Lựa chọn thời điểm phản tư tốt nhất:</div>
             <p>
-              Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: 9:00–10:00 sáng Chủ nhật (thư thái
-              nhâm nhi cà phê) hoặc 16:00–17:00 chiều thứ Bảy để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.
+              Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: 9:00–10:00 sáng Chủ nhật (thư thái nhâm
+              nhi cà phê) hoặc 16:00–17:00 chiều thứ Bảy để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.
             </p>
           </div>
 
@@ -342,8 +339,8 @@ export function ScheduleStepLab({
                   <span>Thời lượng dành cho mục tiêu mỗi ngày</span>
                 </legend>
                 <div className="rounded-xl border border-app-status-warning/20 bg-app-status-warning/5 px-3 py-2 text-[10px] text-app-ink-soft leading-normal mb-1">
-                  * Ví dụ: Dành 30–60 phút tập trung cao độ mỗi ngày (ví dụ khung giờ cố định 20:00–21:00 tối)
-                  để xây dựng thói quen kỷ luật tự nhiên mà không gây căng thẳng.
+                  * Ví dụ: Dành 30–60 phút tập trung cao độ mỗi ngày (ví dụ khung giờ cố định 20:00–21:00 tối) để xây
+                  dựng thói quen kỷ luật tự nhiên mà không gây căng thẳng.
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {[
@@ -425,10 +422,7 @@ export function ScheduleStepLab({
       >
         <div className="flex items-center gap-2 mb-2 border-b border-app-line/60 pb-2">
           <span className="flex h-2.5 w-2.5 rounded-full bg-app-accent animate-pulse" />
-          <h3
-            id="week-preview-title"
-            className="text-xs font-extrabold uppercase tracking-wider text-app-accent"
-          >
+          <h3 id="week-preview-title" className="text-xs font-extrabold uppercase tracking-wider text-app-accent">
             👀 Xem trước & Tự sắp xếp Lịch hành động (Interactive LWW Schedule)
           </h3>
         </div>
@@ -465,7 +459,7 @@ export function ScheduleStepLab({
                         ? "border-app-status-warning/40 bg-app-status-warning/5 text-app-ink-soft"
                         : isPreferredDay
                           ? "border-app-accent bg-app-accent-soft/10 text-app-ink-soft"
-                          : "border-app-line bg-app-surface text-app-ink-soft"
+                          : "border-app-line bg-app-surface text-app-ink-soft",
                   )}
                 >
                   <span className="text-xs">{day.label}</span>
@@ -490,9 +484,7 @@ export function ScheduleStepLab({
                   </span>
                 )}
               </h4>
-              <span className="text-[10px] text-app-ink-muted">
-                {getTacticsForDay(selectedMobileDay).length} việc
-              </span>
+              <span className="text-[10px] text-app-ink-muted">{getTacticsForDay(selectedMobileDay).length} việc</span>
             </div>
 
             {/* Nút Ghim ưu tiên */}
@@ -503,10 +495,12 @@ export function ScheduleStepLab({
                 "w-full rounded-xl py-2 px-3 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none font-sans",
                 draft.preferredDays.includes(selectedMobileDay)
                   ? "bg-app-accent text-white border-app-accent shadow-sm shadow-app-accent/20"
-                  : "bg-app-surface text-app-ink-soft border-app-line hover:border-app-accent/30"
+                  : "bg-app-surface text-app-ink-soft border-app-line hover:border-app-accent/30",
               )}
             >
-              <span>{draft.preferredDays.includes(selectedMobileDay) ? "📌 Đã ghim ưu tiên" : "📌 Ghim làm ngày ưu tiên"}</span>
+              <span>
+                {draft.preferredDays.includes(selectedMobileDay) ? "📌 Đã ghim ưu tiên" : "📌 Ghim làm ngày ưu tiên"}
+              </span>
             </button>
 
             {/* Danh sách công việc của ngày */}
@@ -525,8 +519,8 @@ export function ScheduleStepLab({
                 ))
               ) : (
                 <p className="text-xs text-app-ink-muted italic text-center py-2">
-                  {draft.reviewDay === WEEK_DAYS[selectedMobileDay].key 
-                    ? "Hạn chốt nhìn lại tuần - Dành thời gian tự ngẫm và đánh giá." 
+                  {draft.reviewDay === WEEK_DAYS[selectedMobileDay].key
+                    ? "Hạn chốt nhìn lại tuần - Dành thời gian tự ngẫm và đánh giá."
                     : "Ngày nghỉ ngơi. Ghim thêm việc để lên lịch."}
                 </p>
               )}

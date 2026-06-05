@@ -8,7 +8,7 @@
  * narrow to avoid coupling to business logic.
  */
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -247,9 +247,7 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("heading", { level: 1, name: /Có, mục tiêu rất thực tế/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /Có, mục tiêu rất thực tế/i })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /Bắt đầu lập Kế hoạch 12 tuần ngay/i }).length).toBeGreaterThan(0);
     const detailsTrigger = screen.getByRole("button", { name: /Xem phân tích chi tiết/i });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");

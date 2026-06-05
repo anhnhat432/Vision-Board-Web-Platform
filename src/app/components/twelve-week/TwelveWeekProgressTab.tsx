@@ -208,13 +208,15 @@ function getAverageLeadScore(system: TwelveWeekSystem): number {
 
 // Decorative elements for Dreamy Planner aesthetic
 const WashiTape = ({ className = "" }: { className?: string }) => (
-  <div 
-    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  <div
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`}
   />
 );
 
 const PaperPin = ({ className = "" }: { className?: string }) => (
-  <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
+  <div
+    className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}
+  >
     <div className="w-3.5 h-3.5 bg-app-warm rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
       <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
     </div>
@@ -302,7 +304,9 @@ export function TwelveWeekProgressTab({
           action={
             nextActionHandler ? (
               <div className="rounded-2xl border border-app-line/40 bg-app-bg-subtle/70 backdrop-blur-xs p-4 shadow-3xs">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Tiếp theo nên làm</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+                  Tiếp theo nên làm
+                </p>
                 <p className="mt-1.5 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
                 <Button
                   size="lg"
@@ -511,7 +515,9 @@ export function TwelveWeekProgressTab({
                         <p className="pt-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-app-accent">
                           {item.label}
                         </p>
-                        <p className="mt-1.5 font-serif text-sm leading-relaxed text-app-ink font-medium">{item.value}</p>
+                        <p className="mt-1.5 font-serif text-sm leading-relaxed text-app-ink font-medium">
+                          {item.value}
+                        </p>
                       </div>
                     );
                   })}
@@ -527,7 +533,9 @@ export function TwelveWeekProgressTab({
           {executionHeatmap.length > 0 && (
             <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">Bản đồ thực thi</CardTitle>
+                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">
+                  Bản đồ thực thi
+                </CardTitle>
                 <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
                   Mỗi ô là một ngày. Màu dịu, càng đậm nghĩa là mức hoàn thành càng chắc.
                 </CardDescription>
@@ -611,7 +619,9 @@ export function TwelveWeekProgressTab({
           {weeklyTrend.length > 0 && (
             <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">Xu hướng thực thi theo tuần</CardTitle>
+                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">
+                  Xu hướng thực thi theo tuần
+                </CardTitle>
                 <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
                   So sánh mức hoàn thành việc cốt lõi, việc tùy chọn và điểm qua các tuần.
                 </CardDescription>
@@ -670,7 +680,9 @@ export function TwelveWeekProgressTab({
           {tacticBreakdown.length > 0 && (
             <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">Phân tích theo việc lặp lại</CardTitle>
+                <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">
+                  Phân tích theo việc lặp lại
+                </CardTitle>
                 <CardDescription className="text-sm leading-relaxed text-app-ink-soft">
                   Chi tiết hoàn thành và xu hướng từng việc lặp lại đến tuần {currentWeek}.
                 </CardDescription>

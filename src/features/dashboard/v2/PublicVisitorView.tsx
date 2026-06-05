@@ -93,7 +93,7 @@ const FEATURE_ROWS = [
     tag: "Mobile-ready",
     title: "Đủ nhẹ cho buổi sáng vội",
     description: "Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng.",
-    href: "/today-v2",
+    href: "/12-week-system?tab=today",
     icon: Smartphone,
   },
 ] as const;

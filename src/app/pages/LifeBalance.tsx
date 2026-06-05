@@ -1,13 +1,12 @@
 import { AlertTriangle, ArrowRight, ChevronLeft, ChevronRight, Compass, Save, Sparkles, Target } from "lucide-react";
+import { motion } from "motion/react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker } from "react-router";
-import { motion } from "motion/react";
-import { MotionFadeIn, MotionStaggerList, MotionStaggerItem } from "../components/motion";
 import { toast } from "sonner";
-
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { getLifeAreaIcon } from "../components/illustrations";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
+import { MotionFadeIn, MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { PageShell } from "../components/PageShell";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import {
@@ -505,14 +504,20 @@ export function LifeBalance() {
         </header>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <MotionFadeIn delay={0.05} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
+          <MotionFadeIn
+            delay={0.05}
+            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30"
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={averageScore} precision={1} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
           </MotionFadeIn>
-          <MotionFadeIn delay={0.1} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30">
+          <MotionFadeIn
+            delay={0.1}
+            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30"
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Lĩnh vực mạnh nhất</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={strongestArea.score} />
@@ -520,7 +525,10 @@ export function LifeBalance() {
             </p>
             <p className="mt-1.5 text-xs font-medium text-app-ink-soft">{getLifeAreaLabel(strongestArea.name)}</p>
           </MotionFadeIn>
-          <MotionFadeIn delay={0.15} className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50">
+          <MotionFadeIn
+            delay={0.15}
+            className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50"
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">Lĩnh vực cần ưu tiên</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
@@ -692,7 +700,10 @@ export function LifeBalance() {
                     if (!cluster) return null;
 
                     return (
-                      <MotionFadeIn key={activeClusterIndex} className="surface-raised rounded-2xl border border-emerald-600/20 bg-app-surface p-5 md:p-6 shadow-md w-full max-w-full overflow-hidden">
+                      <MotionFadeIn
+                        key={activeClusterIndex}
+                        className="surface-raised rounded-2xl border border-emerald-600/20 bg-app-surface p-5 md:p-6 shadow-md w-full max-w-full overflow-hidden"
+                      >
                         {/* Progress Header */}
                         <header className="pb-4 border-b border-app-line/60 space-y-2">
                           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-700">

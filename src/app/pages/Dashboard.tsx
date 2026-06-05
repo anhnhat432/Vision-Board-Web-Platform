@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, Award, CheckCircle2, Compass } from "lucide-react";
+import { AlertCircle, ArrowRight, Award, CheckCircle2, Compass, Loader2, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
@@ -580,8 +580,8 @@ function DashboardContent({
   return (
     <div
       className={
-        showMobileStickyCTA 
-          ? "min-h-screen bg-app-bg pb-24 text-app-ink relative overflow-hidden" 
+        showMobileStickyCTA
+          ? "min-h-screen bg-app-bg pb-24 text-app-ink relative overflow-hidden"
           : "min-h-screen bg-app-bg text-app-ink relative overflow-hidden"
       }
     >
@@ -691,7 +691,7 @@ function DashboardContent({
           <button
             type="button"
             className="w-full rounded-xl bg-gradient-to-r from-app-accent to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
-            onClick={() => navigate("/today-v2")}
+            onClick={() => navigate("/12-week-system?tab=today")}
           >
             Mở Today · {dashboardData.dashboardOpenTaskCount} việc hôm nay
           </button>
@@ -761,7 +761,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
     title = `Còn ${activeSystemTodayOpenTasks.length} việc cần hoàn thành hôm nay`;
     description = "Kiên trì thực hiện các hành động nhỏ để giữ vững Streak và hoàn thành mục tiêu 12 tuần.";
     ctaLabel = "Mở Today";
-    ctaPath = "/today-v2";
+    ctaPath = "/12-week-system?tab=today";
     Icon = CheckCircle2;
   } else if (reviewDueToday && !hasReviewedCurrentWeek) {
     title = `Đến ngày Phản tư Tuần ${activeSystemWeek}`;
@@ -899,12 +899,18 @@ function DashboardActiveLayout({
           </div>
 
           {/* Active Goals Card - Quieter border */}
-          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "300ms" }}>
+          <div
+            className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
+            style={{ animationDelay: "300ms" }}
+          >
             <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
           </div>
 
           {/* Week Rhythm Card - Quieter border */}
-          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "400ms" }}>
+          <div
+            className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
+            style={{ animationDelay: "400ms" }}
+          >
             <WeekRhythmCard
               system={data.activeSystem}
               currentWeek={data.dashboardKpiCurrentWeek}
@@ -920,7 +926,10 @@ function DashboardActiveLayout({
           </div>
 
           {/* Twelve Week Trend Card - Quieter / conditional display within card */}
-          <div className="opacity-85 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "500ms" }}>
+          <div
+            className="opacity-85 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
+            style={{ animationDelay: "500ms" }}
+          >
             <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
           </div>
         </div>
@@ -939,20 +948,32 @@ function DashboardActiveLayout({
             </div>
           ) : null}
 
-          <div className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "250ms" }}>
+          <div
+            className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
+            style={{ animationDelay: "250ms" }}
+          >
             <BalanceCard rows={balanceRows} />
           </div>
 
-          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "350ms" }}>
+          <div
+            className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
+            style={{ animationDelay: "350ms" }}
+          >
             <DailyStoicCard />
           </div>
 
-          <div className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up" style={{ animationDelay: "450ms" }}>
+          <div
+            className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
+            style={{ animationDelay: "450ms" }}
+          >
             <QuoteBlock />
           </div>
 
           {/* 🎨 Cozy planning corner generated image asset for Active Users */}
-          <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none opacity-90 hover:opacity-100 transition-all duration-200 appear-fade-up" style={{ animationDelay: "550ms" }}>
+          <div
+            className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none opacity-90 hover:opacity-100 transition-all duration-200 appear-fade-up"
+            style={{ animationDelay: "550ms" }}
+          >
             <img
               src="/study_desk_hero.png"
               alt="Góc học tập & lập kế hoạch ấm áp"
@@ -1045,18 +1066,40 @@ function DashboardPlanStateNotice({
   hasPlan: boolean;
   planError: ReturnType<typeof usePlan12Week>["error"];
 }) {
+  const [dismissed, setDismissed] = useState(false);
+
+  // Reset dismissed khi có lỗi mới
+  const errorMessage = planError?.message ?? null;
+  const prevErrorRef = useRef(errorMessage);
+  if (errorMessage !== prevErrorRef.current) {
+    prevErrorRef.current = errorMessage;
+    if (errorMessage) setDismissed(false);
+  }
+
   if (planLoading && !hasPlan) {
     return (
-      <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-muted">
-        Đang tải dữ liệu Trang chính 12 tuần...
+      <div className="flex items-center gap-2 rounded-xl border border-app-line/50 bg-app-surface/60 backdrop-blur-sm p-3 text-xs text-app-ink-muted">
+        <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0 opacity-60" />
+        <span>Đang tải kế hoạch 12 tuần từ máy chủ…</span>
       </div>
     );
   }
 
-  if (planError) {
+  if (planError && !dismissed) {
     return (
-      <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft">
-        {planError.message}
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-200/60 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 backdrop-blur-sm p-3 text-xs text-amber-800 dark:text-amber-300">
+        <div className="flex items-center gap-2 min-w-0">
+          <WifiOff className="h-3.5 w-3.5 shrink-0 opacity-70" />
+          <span className="truncate">Không tải được kế hoạch từ máy chủ — dữ liệu hiển thị từ bộ nhớ cục bộ.</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="shrink-0 rounded-md p-1 transition-colors hover:bg-amber-200/40 dark:hover:bg-amber-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40"
+          aria-label="Đóng thông báo"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
       </div>
     );
   }

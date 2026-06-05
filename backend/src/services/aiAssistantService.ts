@@ -77,6 +77,73 @@ const VALID_ROUTES = [
   "/twelve-week",
 ];
 
+const PROVIDER_FALLBACK_ERROR_CODES = new Set([
+  "ASSISTANT_PROVIDER_RATE_LIMIT",
+  "ASSISTANT_PROVIDER_TIMEOUT",
+  "ASSISTANT_PROVIDER_SERVER_ERROR",
+]);
+
+function normalizeShortUserText(userText: string): string {
+  return userText
+    .trim()
+    .toLowerCase()
+    .normalize("NFC")
+    .replace(/[!?.。！？,，;:]+$/g, "")
+    .replace(/\s+/g, " ");
+}
+
+export function shouldUseLocalAssistantShortcut(userText: string): boolean {
+  const normalized = normalizeShortUserText(userText);
+  if (!normalized || normalized.length > 48) return false;
+
+  const greetings = new Set([
+    "hi",
+    "hello",
+    "hey",
+    "hola",
+    "alo",
+    "chao",
+    "xin chao",
+    "chào",
+    "xin chào",
+    "cu oi",
+    "cú ơi",
+    "ai oi",
+    "ai ơi",
+    "bot oi",
+    "bot ơi",
+    "tro ly oi",
+    "trợ lý ơi",
+  ]);
+
+  if (greetings.has(normalized)) return true;
+
+  return /^(hi|hello|hey|hola|alo|chao|xin chao|chào|xin chào)(\s+(ban|bạn|cu|cú|bot|ai|oi|ơi))?$/.test(
+    normalized,
+  );
+}
+
+function shouldUseProviderFallback(errorCode: string): boolean {
+  return PROVIDER_FALLBACK_ERROR_CODES.has(errorCode);
+}
+
+function buildProviderFallbackResponse(
+  userText: string,
+  ctx: AssistantContext,
+  errorCode: string,
+): AIAssistantResponse {
+  const fallback = getDeterministicFallback(userText, ctx);
+  const notice =
+    errorCode === "ASSISTANT_PROVIDER_RATE_LIMIT"
+      ? "AI nâng cao đang quá tải tạm thời, nên mình dùng chế độ nhanh để hỗ trợ trước."
+      : "AI nâng cao đang gặp sự cố tạm thời, nên mình dùng chế độ nhanh để hỗ trợ trước.";
+
+  return {
+    ...fallback,
+    assistantText: `${notice}\n\n${fallback.assistantText}`.trim(),
+  };
+}
+
 function sanitizeCreateTaskPayload(payload: any) {
   if (!payload || typeof payload.title !== "string") return null;
   const title = payload.title.slice(0, 200).trim();
@@ -513,6 +580,10 @@ export async function processAIAssistantRequest(
   const provider = env.AI_PROVIDER;
   const apiKey = env.AI_API_KEY;
 
+  if (shouldUseLocalAssistantShortcut(request.message)) {
+    return getDeterministicFallback(request.message, request.context);
+  }
+
   // Nếu AI API key bị thiếu
   if (!apiKey) {
     if (request.mode === "demo") {
@@ -535,6 +606,11 @@ export async function processAIAssistantRequest(
   if ("errorCode" in result) {
     // Trả lỗi từ provider
     const err = result as { message: string; errorCode: string };
+    if (shouldUseProviderFallback(err.errorCode)) {
+      console.warn("[ai-assistant] Provider unavailable, using deterministic fallback:", err.errorCode);
+      return buildProviderFallbackResponse(request.message, request.context, err.errorCode);
+    }
+
     return {
       message: err.message,
       errorCode: err.errorCode,

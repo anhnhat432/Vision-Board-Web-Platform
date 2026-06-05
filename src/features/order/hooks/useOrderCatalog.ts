@@ -22,7 +22,7 @@ export function useOrderCatalog(): UseOrderCatalogResult {
   const { items: instant, source } = getInstantCatalog();
 
   const [catalog, setCatalog] = useState<CatalogItem[]>(instant);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, _setLoading] = useState(false);
   const [isFromFallback, setFromFallback] = useState(source === "default");
   const fetchedRef = useRef(false);
 

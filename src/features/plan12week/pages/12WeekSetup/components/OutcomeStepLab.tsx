@@ -1,11 +1,10 @@
 import { Award, ClipboardCheck, Flag, Lightbulb, Target } from "lucide-react";
-import { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { MotionFadeIn } from "@/app/components/motion";
-import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
-
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { cn } from "@/app/components/ui/utils";
 import { soundService } from "@/app/services/soundService";
 import type { PricingPlanCode } from "@/app/utils/storage";
@@ -217,7 +216,8 @@ export function OutcomeStepLab({
               className={cn(
                 textareaClass,
                 "min-h-[60px] text-sm leading-relaxed border-app-accent/30 focus-visible:ring-app-accent rounded-xl",
-                milestoneError && "border-app-status-error focus-visible:border-app-status-error focus-visible:ring-app-status-error/20",
+                milestoneError &&
+                  "border-app-status-error focus-visible:border-app-status-error focus-visible:ring-app-status-error/20",
               )}
               onChange={(event) => onChange("week12Outcome", event.target.value)}
               placeholder="Nhập đích đến của bạn (Ví dụ: Chạy bộ liên tục 10km không nghỉ, học xong 12 chương tiếng Anh…)"

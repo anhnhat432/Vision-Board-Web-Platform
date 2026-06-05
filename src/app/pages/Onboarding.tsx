@@ -16,9 +16,9 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { AnimatePresence, motion } from "motion/react";
 
 import { toast } from "sonner";
 
@@ -383,24 +383,10 @@ function LifeAtlasPanel({
               );
             })}
             <circle cx="140" cy="140" r="24" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
-            <text
-              x="140"
-              y="134"
-              fill="var(--app-ink-muted)"
-              fontSize="11"
-              fontWeight="700"
-              textAnchor="middle"
-            >
+            <text x="140" y="134" fill="var(--app-ink-muted)" fontSize="11" fontWeight="700" textAnchor="middle">
               LIFE
             </text>
-            <text
-              x="140"
-              y="151"
-              fill="var(--app-accent)"
-              fontSize="18"
-              fontWeight="700"
-              textAnchor="middle"
-            >
+            <text x="140" y="151" fill="var(--app-accent)" fontSize="18" fontWeight="700" textAnchor="middle">
               {averageScore.toFixed(1)}
             </text>
             <g className="motion-safe:transition-transform motion-reduce:transition-none">
@@ -450,9 +436,7 @@ function LifeAtlasPanel({
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Đã rà</span>
-              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">
-                {reviewedAreaCount}/8
-              </p>
+              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">{reviewedAreaCount}/8</p>
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Cần chăm sóc</span>
@@ -804,8 +788,8 @@ export function Onboarding() {
                           className="overflow-hidden"
                         >
                           <p className="pt-3 text-sm leading-6 text-app-ink-soft">
-                            Điểm số chỉ là cảm nhận hiện tại, không phải phán xét. Sau khi rà xong, màn tiếp theo sẽ
-                            gợi ý một trọng tâm để bạn viết mục tiêu 12 tuần.
+                            Điểm số chỉ là cảm nhận hiện tại, không phải phán xét. Sau khi rà xong, màn tiếp theo sẽ gợi
+                            ý một trọng tâm để bạn viết mục tiêu 12 tuần.
                           </p>
                         </motion.div>
                       )}
@@ -967,8 +951,13 @@ export function Onboarding() {
                     </div>
 
                     <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Điểm hiện tại</span>
-                      <p className="mt-1 font-serif text-3xl font-semibold leading-none tabular-nums" style={{ color: colorConfig.accent }}>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+                        Điểm hiện tại
+                      </span>
+                      <p
+                        className="mt-1 font-serif text-3xl font-semibold leading-none tabular-nums"
+                        style={{ color: colorConfig.accent }}
+                      >
                         {area.score}
                         <span className="text-sm font-normal text-app-ink-muted">/10</span>
                       </p>
@@ -1033,7 +1022,11 @@ export function Onboarding() {
                                   ? "border-app-accent bg-app-accent text-white shadow-app-sm motion-safe:scale-105"
                                   : "border-app-line bg-app-bg text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink",
                               )}
-                              style={isCurrentScore ? { backgroundColor: colorConfig.accent, borderColor: colorConfig.accent } : undefined}
+                              style={
+                                isCurrentScore
+                                  ? { backgroundColor: colorConfig.accent, borderColor: colorConfig.accent }
+                                  : undefined
+                              }
                               aria-label={`Chấm ${scoreVal} điểm`}
                               aria-pressed={isCurrentScore}
                             >
@@ -1047,7 +1040,12 @@ export function Onboarding() {
                     <div className="hidden space-y-2 border-t border-app-line pt-4 md:block">
                       <div className="flex items-center justify-between gap-3 text-sm font-semibold">
                         <span className="text-app-ink-muted">Hoặc kéo thanh trượt</span>
-                        <span className={cn("inline-flex items-center rounded-pill px-3 py-1 text-xs font-semibold", getScaleGuidanceColor(area.score))}>
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-pill px-3 py-1 text-xs font-semibold",
+                            getScaleGuidanceColor(area.score),
+                          )}
+                        >
                           {area.score}đ · {getScaleGuidance(area.score)}
                         </span>
                       </div>

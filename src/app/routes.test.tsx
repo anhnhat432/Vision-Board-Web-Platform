@@ -199,7 +199,7 @@ describe("app routes", () => {
     await route.dispose();
   });
 
-  it("resolves /today-v2 through the app route table", async () => {
+  it("redirects /today to /12-week-system?tab=today", async () => {
     authContextMock.useAuthContext.mockReturnValue({
       user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
@@ -215,9 +215,11 @@ describe("app routes", () => {
     const userData = initializeUserData();
     saveUserData({ ...userData, onboardingCompleted: true });
 
-    const route = renderRoute("/today-v2");
+    const route = renderRoute("/today");
+    await route.waitForIdle();
 
-    expect(await screen.findByRole("button", { name: "Về Trang chính" })).toBeInTheDocument();
+    expect(route.router.state.location.pathname).toBe("/12-week-system");
+    expect(route.router.state.location.search).toBe("?tab=today");
     await route.dispose();
   });
 

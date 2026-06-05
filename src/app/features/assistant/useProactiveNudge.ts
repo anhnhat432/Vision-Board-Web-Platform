@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getMemoryItems } from "./assistantMemory";
+import { recordAssistantEvent } from "./assistantObservability";
 import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
 
 export type NudgeType =
@@ -129,7 +130,10 @@ function storeCooldown(key: string, now: Date, hours: number): boolean {
 }
 
 function memoryText(memoryItems: Array<{ content?: string; tags?: string[] }>): string {
-  return memoryItems.map((item) => `${item.content ?? ""} ${(item.tags ?? []).join(" ")}`).join(" ").toLowerCase();
+  return memoryItems
+    .map((item) => `${item.content ?? ""} ${(item.tags ?? []).join(" ")}`)
+    .join(" ")
+    .toLowerCase();
 }
 
 function shouldSuppressForMemory(memoryItems: Array<{ content?: string; tags?: string[] }>, now: Date): boolean {
@@ -144,7 +148,8 @@ function shouldSuppressForMemory(memoryItems: Array<{ content?: string; tags?: s
 
   if (noNight && hour >= 20) return true;
 
-  const prefersMorning = text.includes("thích nhắc sáng") || text.includes("nhắc buổi sáng") || text.includes("morning reminders");
+  const prefersMorning =
+    text.includes("thích nhắc sáng") || text.includes("nhắc buổi sáng") || text.includes("morning reminders");
   return prefersMorning && (hour < 5 || hour >= 12);
 }
 
@@ -187,12 +192,18 @@ function selectNudgeCandidate(context: AssistantContext): ProactiveNudgeCandidat
   const goalsWithoutPlan = context.pageContext?.formDraft?.goalsWithoutTwelveWeekPlan ?? 0;
   const firstGoal = context.goals[0];
 
-  if (context.authSyncMode?.authState === "signed_in" && ["error", "offline"].includes(context.authSyncMode.syncState)) {
+  if (
+    context.authSyncMode?.authState === "signed_in" &&
+    ["error", "offline"].includes(context.authSyncMode.syncState)
+  ) {
     return {
       type: "sync_error",
       priority: "medium",
       title: "Sync cần chú ý",
-      message: context.authSyncMode.syncState === "offline" ? "Bạn đang offline. Tiến độ vẫn lưu cục bộ." : "Sync đang lỗi. Kiểm tra trước khi đổi thiết bị nhé.",
+      message:
+        context.authSyncMode.syncState === "offline"
+          ? "Bạn đang offline. Tiến độ vẫn lưu cục bộ."
+          : "Sync đang lỗi. Kiểm tra trước khi đổi thiết bị nhé.",
       actionLabel: "Mở Settings",
       route: "/settings",
       cooldownHours: 12,
@@ -346,6 +357,13 @@ export function useProactiveNudge(panelOpen: boolean): {
       const candidate = activeCandidateRef.current;
       if (candidate) {
         storeCooldown(cooldownKey ?? COOLDOWN_KEY(userId, candidate.type), now, candidate.cooldownHours);
+        recordAssistantEvent({
+          type: "assistant_nudge_dismissed",
+          userId,
+          route,
+          nudgeType: candidate.type,
+          metadata: { cooldownHours: candidate.cooldownHours },
+        });
       } else if (cooldownKey) {
         storeCooldown(cooldownKey, now, 24);
       }
@@ -355,7 +373,7 @@ export function useProactiveNudge(panelOpen: boolean): {
       clearIdleTimer();
       setNudge(INACTIVE_NUDGE);
     },
-    [clearIdleTimer, userId],
+    [clearIdleTimer, route, userId],
   );
 
   const actOnNudge = useCallback(() => {
@@ -402,6 +420,13 @@ export function useProactiveNudge(panelOpen: boolean): {
       activeCandidateRef.current = candidate;
       clearIdleTimer();
       setNudge(buildNudgeState(candidate, userId, now));
+      recordAssistantEvent({
+        type: "assistant_nudge_shown",
+        userId,
+        route,
+        nudgeType: candidate.type,
+        metadata: { priority: candidate.priority, cooldownHours: candidate.cooldownHours },
+      });
     };
 
     const scheduleIdleTimer = () => {

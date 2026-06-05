@@ -143,13 +143,15 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
 
 // Decorative elements for Dreamy Planner aesthetic
 const WashiTape = ({ className = "" }: { className?: string }) => (
-  <div 
-    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  <div
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`}
   />
 );
 
 const PaperPin = ({ className = "" }: { className?: string }) => (
-  <div className={`absolute -top-2 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
+  <div
+    className={`absolute -top-2 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}
+  >
     <div className="w-3.5 h-3.5 bg-app-warm rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
       <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
     </div>
@@ -212,7 +214,7 @@ export function TwelveWeekTodayTab({
 }: TwelveWeekTodayTabProps) {
   const secondaryPreviewTasks = secondaryTodayTasks.slice(0, 2);
   const remainingSecondaryTasks = Math.max(secondaryTodayTasks.length - secondaryPreviewTasks.length, 0);
-  const rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
+  const _rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
   const primaryTask = firstPriorityTask && !firstPriorityTask.completed ? firstPriorityTask : null;
   const hasPrimaryTask = Boolean(firstPriorityTask);
@@ -502,7 +504,7 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-        className="order-1 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-subtle/25 border border-app-line/50 rounded-3xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md"
+          className="order-1 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-subtle/25 border border-app-line/50 rounded-3xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md"
         >
           <WashiTape className="opacity-80" />
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
@@ -635,7 +637,7 @@ export function TwelveWeekTodayTab({
           <PaperPin />
           <WashiTape className="opacity-70 rotate-[2deg] -top-3.5" />
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
-          
+
           {isPrimaryTaskCompleted ? (
             <>
               <button
@@ -678,7 +680,8 @@ export function TwelveWeekTodayTab({
                     `Việc này đang trễ – hôm nay hãy làm phiên bản tối giản. Duy trì nhịp quan trọng hơn làm hết.`
                   ) : (
                     <>
-                      Thuộc nhóm việc lặp lại “{firstPriorityTask.leadIndicatorName}”. Xong việc này là bạn đã giữ đúng tiến độ.
+                      Thuộc nhóm việc lặp lại “{firstPriorityTask.leadIndicatorName}”. Xong việc này là bạn đã giữ đúng
+                      tiến độ.
                       <span className="sr-only">Chỉ cần xong việc này là hôm nay đã đủ</span>
                     </>
                   )}
@@ -691,9 +694,13 @@ export function TwelveWeekTodayTab({
               </div>
 
               {primaryTaskCommitmentQuote && (
-                <p className={`text-xs italic leading-relaxed pl-3.5 py-2 my-1 relative z-10 border-l-2 ${
-                  primaryTaskOverdue ? "border-app-warm/40 bg-app-warm-soft/15 text-app-warm-strong" : "border-app-accent/40 bg-app-accent-soft/20 text-app-ink-soft"
-                } rounded-r-xl font-serif`}>
+                <p
+                  className={`text-xs italic leading-relaxed pl-3.5 py-2 my-1 relative z-10 border-l-2 ${
+                    primaryTaskOverdue
+                      ? "border-app-warm/40 bg-app-warm-soft/15 text-app-warm-strong"
+                      : "border-app-accent/40 bg-app-accent-soft/20 text-app-ink-soft"
+                  } rounded-r-xl font-serif`}
+                >
                   {primaryTaskCommitmentQuote}
                 </p>
               )}

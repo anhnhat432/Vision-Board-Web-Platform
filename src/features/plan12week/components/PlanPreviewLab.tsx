@@ -84,9 +84,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             <div className="flex h-9 w-9 items-center justify-center rounded-control bg-app-accent-soft text-app-accent border border-app-accent/15">
               <Award className="h-4.5 w-4.5" aria-hidden="true" />
             </div>
-            <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-              Mốc chốt Tuần 12
-            </p>
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Mốc chốt Tuần 12</p>
             <p className="mt-1 line-clamp-3 text-xs font-bold leading-relaxed text-app-ink">
               {draft.week12Outcome || "Chưa có nội dung"}
             </p>
@@ -113,9 +111,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
               Ngày khởi hành chu kỳ
             </p>
-            <p className="mt-1.5 text-xs font-bold text-app-ink">
-              {formatDateLabel(draft.startDate)}
-            </p>
+            <p className="mt-1.5 text-xs font-bold text-app-ink">{formatDateLabel(draft.startDate)}</p>
           </div>
 
           {/* Động lực cốt lõi */}
@@ -143,9 +139,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
               Ngày review nhìn lại tuần
             </p>
-            <p className="mt-1.5 text-xs font-bold text-app-ink">
-              {formatReviewDayLabel(draft.reviewDay)}
-            </p>
+            <p className="mt-1.5 text-xs font-bold text-app-ink">{formatReviewDayLabel(draft.reviewDay)}</p>
           </div>
         </div>
       </section>
@@ -166,9 +160,12 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         <div className="relative pt-2">
           {/* Đường nối dọc trên Mobile, ẩn trên Desktop */}
           <div className="absolute left-4.5 top-8 bottom-8 w-[2px] bg-app-line/60 sm:hidden" aria-hidden="true" />
-          
+
           {/* Đường nối ngang trên Desktop, ẩn trên Mobile */}
-          <div className="absolute left-6 right-6 top-[28px] h-[3px] bg-app-line/60 rounded-full hidden sm:block" aria-hidden="true" />
+          <div
+            className="absolute left-6 right-6 top-[28px] h-[3px] bg-app-line/60 rounded-full hidden sm:block"
+            aria-hidden="true"
+          />
 
           <div className="grid gap-6 sm:grid-cols-4 relative z-10">
             {/* Mốc 1: Tuần 1 */}
@@ -192,7 +189,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <div className="min-w-0">
                 <h5 className="text-xs font-bold text-app-ink">Tuần 4: Tạo đà</h5>
                 <p className="mt-1 text-[11px] text-app-ink-soft leading-normal italic">
-                  “{draft.week4Milestone || "Chạy đà thuận lợi, bắt đầu có thói quen" }”
+                  “{draft.week4Milestone || "Chạy đà thuận lợi, bắt đầu có thói quen"}”
                 </p>
               </div>
             </div>
@@ -205,7 +202,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <div className="min-w-0">
                 <h5 className="text-xs font-bold text-app-ink">Tuần 8: Tăng tốc</h5>
                 <p className="mt-1 text-[11px] text-app-ink-soft leading-normal italic">
-                  “{draft.week8Milestone || "Bứt phá giới hạn, hoàn thành phần lớn khối lượng" }”
+                  “{draft.week8Milestone || "Bứt phá giới hạn, hoàn thành phần lớn khối lượng"}”
                 </p>
               </div>
             </div>
@@ -218,7 +215,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <div className="min-w-0">
                 <h5 className="text-xs font-bold text-app-accent">Tuần 12: Đích đến</h5>
                 <p className="mt-1 text-[11px] font-bold text-app-ink leading-normal italic">
-                  “{draft.week12Outcome || "Cán mốc mục tiêu và gặt hái quả ngọt" }”
+                  “{draft.week12Outcome || "Cán mốc mục tiêu và gặt hái quả ngọt"}”
                 </p>
               </div>
             </div>
@@ -268,10 +265,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
                   <span>{leadMetric.name}</span>
                 </p>
                 <p className="mt-1.5 text-xs text-app-ink-muted font-medium">
-                  Mục tiêu tuần:{" "}
-                  <span className="text-app-accent font-bold">
-                    {leadMetric.weeklyTarget} lần / tuần
-                  </span>
+                  Mục tiêu tuần: <span className="text-app-accent font-bold">{leadMetric.weeklyTarget} lần / tuần</span>
                 </p>
               </div>
             ))
@@ -295,8 +289,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <p className="flex items-start gap-1.5">
                 <Target className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-app-ink font-bold">Trọng tâm tuần 1:</strong>{" "}
-                  {week1.focus}
+                  <strong className="text-app-ink font-bold">Trọng tâm tuần 1:</strong> {week1.focus}
                 </span>
               </p>
             ) : null}
@@ -304,8 +297,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <p className="flex items-start gap-1.5 whitespace-pre-line">
                 <Flag className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-app-ink font-bold">Kết quả dự kiến:</strong>{" "}
-                  {week1.expectedOutput}
+                  <strong className="text-app-ink font-bold">Kết quả dự kiến:</strong> {week1.expectedOutput}
                 </span>
               </p>
             ) : null}

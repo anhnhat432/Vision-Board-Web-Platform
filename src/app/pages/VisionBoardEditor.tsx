@@ -913,8 +913,7 @@ export function VisionBoardEditor() {
               </div>
               {!boardName.trim() ? (
                 <p className="text-xs text-app-ink-soft">
-                  Đặt tên bảng (ví dụ "Vision 2026") rồi bấm{" "}
-                  <span className="font-medium text-app-ink">Lưu bảng</span>.
+                  Đặt tên bảng (ví dụ "Vision 2026") rồi bấm <span className="font-medium text-app-ink">Lưu bảng</span>.
                 </p>
               ) : null}
 
@@ -1094,7 +1093,9 @@ export function VisionBoardEditor() {
                   onClick={() => setShowAdvancedImageOptions(!showAdvancedImageOptions)}
                   className="text-xs font-semibold text-app-accent hover:underline flex items-center gap-1 mt-2 self-start"
                 >
-                  {showAdvancedImageOptions ? "Ẩn tùy chọn nâng cao" : "Hiển thị tùy chọn nâng cao (Life area, Khung ảnh)..."}
+                  {showAdvancedImageOptions
+                    ? "Ẩn tùy chọn nâng cao"
+                    : "Hiển thị tùy chọn nâng cao (Life area, Khung ảnh)..."}
                 </button>
 
                 {showAdvancedImageOptions && (

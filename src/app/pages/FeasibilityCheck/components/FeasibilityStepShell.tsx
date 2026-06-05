@@ -54,9 +54,7 @@ export function FeasibilityStepShell({
   };
 
   // Lấy dữ liệu của đáp án đang chọn để hiển thị box phân tích tĩnh bên dưới
-  const selectedOptionData = currentQuestion.options.find(
-    (opt) => opt.value === selectedAnswer
-  );
+  const selectedOptionData = currentQuestion.options.find((opt) => opt.value === selectedAnswer);
 
   return (
     <section

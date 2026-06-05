@@ -22,6 +22,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { clearMemory } from "@/app/features/assistant/assistantMemory";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { deleteCloudWorkspace, exportAccountData } from "@/services/syncService";
@@ -56,7 +57,6 @@ import {
   updateAppPreferences,
 } from "../utils/storage";
 import { inputClass } from "./SMARTGoalSetup/components/formStyles";
-import { clearMemory } from "@/app/features/assistant/assistantMemory";
 
 const themeOptions = [
   { value: "system", label: "Theo thiết bị", description: "Dùng cài đặt hệ thống." },

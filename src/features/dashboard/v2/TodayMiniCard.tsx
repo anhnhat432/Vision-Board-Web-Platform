@@ -95,7 +95,7 @@ export function TodayMiniCard({ title = "Hành động hôm nay", tasks, complet
 
         <div className="mt-4 pt-4 border-t border-neutral-200/50 dark:border-neutral-800/55 flex justify-end">
           <Link
-            to="/today-v2"
+            to="/12-week-system?tab=today"
             className="group inline-flex items-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-2 text-[10px] font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 hover:border-app-accent/30 hover:text-app-accent shadow-sm transition-all duration-200 focus-visible:outline-none"
           >
             <span>Mở trang thực thi Today</span>

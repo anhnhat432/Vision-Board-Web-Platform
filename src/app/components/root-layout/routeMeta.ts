@@ -13,7 +13,6 @@ export const GUIDED_PATHS = new Set([
   "/12-week-setup",
   "/12-week-plan-setup",
   "/12-week-plan-overview",
-  "/today-v2",
 ]);
 
 export const ROUTE_META: RouteMeta[] = [
@@ -58,12 +57,6 @@ export const ROUTE_META: RouteMeta[] = [
     label: "Thiết lập 12 tuần",
     title: "Thiết lập 12 tuần – Dear Our Future",
     tagline: "Chốt kết quả, việc lặp lại, lịch nhìn lại và tuần đầu tiên.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/today-v2"),
-    label: "Today preview",
-    title: "Today preview – Dear Our Future",
-    tagline: "Một bản thử nghiệm bình tĩnh cho nhịp việc hôm nay.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/goals"),
@@ -241,7 +234,6 @@ export function getRouteTone(pathname: string): string {
     return "balance";
   }
   if (pathname.startsWith("/smart-goal-setup") || pathname.startsWith("/feasibility")) return "system";
-  if (pathname.startsWith("/today-v2")) return "system";
   if (pathname.startsWith("/goals")) return "system";
   if (pathname.startsWith("/12-week")) return "system";
   if (pathname.startsWith("/vision") || pathname.startsWith("/gallery")) return "vision";

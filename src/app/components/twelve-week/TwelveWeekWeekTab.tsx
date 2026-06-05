@@ -1,8 +1,4 @@
-import {
-  ChevronDown,
-  Lightbulb,
-  Loader2,
-} from "lucide-react";
+import { ChevronDown, Lightbulb, Loader2 } from "lucide-react";
 import { useState } from "react";
 import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
 import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
@@ -187,13 +183,15 @@ function getCommitmentButtonClass(status: WeeklyCommitmentStatus, currentStatus:
 
 // Decorative elements for Dreamy Planner aesthetic
 const WashiTape = ({ className = "" }: { className?: string }) => (
-  <div 
-    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`} 
+  <div
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1.5deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20 ${className}`}
   />
 );
 
 const PaperPin = ({ className = "" }: { className?: string }) => (
-  <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}>
+  <div
+    className={`absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none select-none z-20 ${className}`}
+  >
     <div className="w-3.5 h-3.5 bg-app-warm rounded-full shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
       <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
     </div>
@@ -810,7 +808,9 @@ export function TwelveWeekWeekTab({
                   }`}
                 />
               ))}
-              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">Tiến độ review ({reviewReadyCount}/4)</span>
+              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">
+                Tiến độ review ({reviewReadyCount}/4)
+              </span>
             </div>
           </div>
 

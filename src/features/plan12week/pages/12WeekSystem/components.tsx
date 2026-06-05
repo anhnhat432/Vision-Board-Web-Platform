@@ -220,14 +220,17 @@ export function TwelveWeekDashboardHeader({
 }: TwelveWeekDashboardHeaderProps) {
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
   const PhaseIcon = phaseInfo.icon;
-  const domainLabel = activeGoal.focusArea || activeGoal.category;
+  const _domainLabel = activeGoal.focusArea || activeGoal.category;
 
   return (
     <header className="relative border border-app-line/40 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/15 rounded-2xl p-5 md:p-6 shadow-xs overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div className="min-w-0 flex-1 space-y-2">
-          <div data-testid="twelve-week-header-description" className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">
+          <div
+            data-testid="twelve-week-header-description"
+            className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted"
+          >
             <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">HỆ THỐNG 12 TUẦN</span>
             <span>·</span>
             <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">
@@ -236,7 +239,9 @@ export function TwelveWeekDashboardHeader({
             <span>·</span>
             <span className="inline-flex items-center gap-1 bg-app-accent-soft/60 px-2.5 py-0.5 rounded-full text-app-accent border border-app-accent/10">
               <PhaseIcon className="h-3 w-3 shrink-0" />
-              <span>Nhịp <span>{phaseInfo.label}</span></span>
+              <span>
+                Nhịp <span>{phaseInfo.label}</span>
+              </span>
             </span>
           </div>
 
@@ -264,7 +269,10 @@ export function TwelveWeekDashboardHeader({
         </div>
 
         {/* Action Button: Slimmer premium buttons */}
-        <div data-testid="twelve-week-header-actions" className="flex flex-col sm:flex-row items-center gap-2.5 pt-1 sm:pt-0 shrink-0">
+        <div
+          data-testid="twelve-week-header-actions"
+          className="flex flex-col sm:flex-row items-center gap-2.5 pt-1 sm:pt-0 shrink-0"
+        >
           <button
             type="button"
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent/95 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"

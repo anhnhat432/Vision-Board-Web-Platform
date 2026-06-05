@@ -16,6 +16,7 @@ import {
   parseAndValidateAIResponse,
   getDeterministicFallback,
   processAIAssistantRequest,
+  shouldUseLocalAssistantShortcut,
 } from "../services/aiAssistantService";
 import type { AssistantContext } from "../services/assistantService";
 import { sanitizeContext } from "../services/assistantService";
@@ -223,6 +224,33 @@ describe("aiAssistantService getDeterministicFallback", () => {
 });
 
 describe("aiAssistantService processAIAssistantRequest", () => {
+  it("handles short greetings locally in real mode without an API key", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const originalKey = env.AI_API_KEY;
+    (env as any).AI_API_KEY = "";
+
+    try {
+      const response = await processAIAssistantRequest({
+        message: "hola",
+        context: sampleContext,
+        mode: "real",
+      });
+
+      assert.ok(!("errorCode" in response));
+      assert.equal(response.proposedActions.length, 0);
+      assert.ok(response.assistantText.length > 0);
+    } finally {
+      (env as any).AI_API_KEY = originalKey;
+    }
+  });
+
+  it("only short-circuits small greeting messages", () => {
+    assert.equal(shouldUseLocalAssistantShortcut("hola"), true);
+    assert.equal(shouldUseLocalAssistantShortcut("hello bot"), true);
+    assert.equal(shouldUseLocalAssistantShortcut("tạo mục tiêu chạy bộ trong 12 tuần"), false);
+  });
+
   it("uses deterministic fallback in demo mode when API Key is missing", async () => {
     ensureBackendEnvForServiceImports();
     const { env } = await import("../config/env");

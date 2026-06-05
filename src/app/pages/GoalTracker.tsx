@@ -26,8 +26,8 @@ import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { PageHero } from "../components/layout/PageHero";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1636,7 +1636,11 @@ function GoalCard({
         </div>
 
         {/* BACK SIDE */}
-        <div className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10" aria-hidden={!isFlipped} inert={!isFlipped ? true : undefined}>
+        <div
+          className="backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10"
+          aria-hidden={!isFlipped}
+          inert={!isFlipped ? true : undefined}
+        >
           <SpotlightCard
             className={cn(
               "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
@@ -2114,9 +2118,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               const isDirty = tempText.trim() !== (letterText || "").trim();
               if (
                 isDirty &&
-                !window.confirm(
-                  "Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?"
-                )
+                !window.confirm("Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?")
               ) {
                 return;
               }
@@ -2243,9 +2245,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             const isDirty = tempText.trim() !== (letterText || "").trim();
             if (
               isDirty &&
-              !window.confirm(
-                "Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?"
-              )
+              !window.confirm("Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?")
             ) {
               return;
             }

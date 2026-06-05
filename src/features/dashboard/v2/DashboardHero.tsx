@@ -52,7 +52,7 @@ export function DashboardHero({
       {/* Decorative ambient light - Gradient Mesh effect */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 blur-[80px] dark:from-emerald-500/20" />
       <div className="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-gradient-to-tr from-amber-500/5 to-pink-500/5 blur-[80px]" />
-      
+
       {/* Grid Pattern overlay for texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
 

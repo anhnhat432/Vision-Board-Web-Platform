@@ -59,6 +59,10 @@ function RedirectToBillingPlan() {
   return <Navigate to="/billing/plan" replace />;
 }
 
+function RedirectToToday() {
+  return <Navigate to="/12-week-system?tab=today" replace />;
+}
+
 export const appRoutes = [
   {
     path: "/login",
@@ -130,9 +134,10 @@ export const appRoutes = [
         Component: TwelveWeekSystemRoute,
       },
       {
-        path: "today-v2",
-        ...lazyRoute(() => import("./pages/TodayV2/TodayV2Page"), "TodayV2Page"),
+        path: "today",
+        Component: RedirectToToday,
       },
+
       {
         path: "billing",
         Component: RedirectToBillingPlan,

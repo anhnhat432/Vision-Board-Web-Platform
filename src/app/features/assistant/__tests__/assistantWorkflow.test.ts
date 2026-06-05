@@ -155,7 +155,14 @@ describe("Assistant Workflow Engine", () => {
         userId: TEST_USER,
         summary: "Tạo goal password: mySecretPassword123",
         missingFields: ["deadline"],
-        proposedActions: [{ id: "act_1", type: "create_goal", label: "Tạo api_key: abcdefghijklmnopqrstuvwxyz", payload: { title: "Goal token: abcdefghijklmnopqrstuvwxyz" } }],
+        proposedActions: [
+          {
+            id: "act_1",
+            type: "create_goal",
+            label: "Tạo api_key: abcdefghijklmnopqrstuvwxyz",
+            payload: { title: "Goal token: abcdefghijklmnopqrstuvwxyz" },
+          },
+        ],
         executionResults: [{ actionId: "act_1", status: "alreadyDone", message: "ok" }],
         sourceUserText: "tạo goal secret: abcdefghijklmnopqrstuvwxyz",
         metadata: { note: "access_token: abcdefghijklmnopqrstuvwxyz", nested: { unsafe: "drop" } },
@@ -196,7 +203,12 @@ describe("Assistant Workflow Engine", () => {
       const originalLocalStorage = globalThis.localStorage;
       Object.defineProperty(globalThis, "localStorage", { value: undefined, configurable: true });
       expect(() => getPendingWorkflow(TEST_USER)).not.toThrow();
-      expect(() => setPendingWorkflow(TEST_USER, createWorkflow({ type: "create_goal_workflow", userId: TEST_USER, summary: "x", sourceUserText: "x" }))).not.toThrow();
+      expect(() =>
+        setPendingWorkflow(
+          TEST_USER,
+          createWorkflow({ type: "create_goal_workflow", userId: TEST_USER, summary: "x", sourceUserText: "x" }),
+        ),
+      ).not.toThrow();
       expect(() => clearPendingWorkflow(TEST_USER)).not.toThrow();
       Object.defineProperty(globalThis, "localStorage", { value: originalLocalStorage, configurable: true });
     });
@@ -252,8 +264,16 @@ describe("Assistant Workflow Engine", () => {
       });
 
       expect(mockedExecuteAction).toHaveBeenCalledTimes(2);
-      expect(mockedExecuteAction).toHaveBeenNthCalledWith(1, { ...wf.proposedActions[0], autoExecute: false }, TEST_USER);
-      expect(mockedExecuteAction).toHaveBeenNthCalledWith(2, { ...wf.proposedActions[1], autoExecute: false }, TEST_USER);
+      expect(mockedExecuteAction).toHaveBeenNthCalledWith(
+        1,
+        { ...wf.proposedActions[0], autoExecute: false },
+        TEST_USER,
+      );
+      expect(mockedExecuteAction).toHaveBeenNthCalledWith(
+        2,
+        { ...wf.proposedActions[1], autoExecute: false },
+        TEST_USER,
+      );
       expect(getPendingWorkflow(TEST_USER)).toBeNull();
 
       const assistantMsg = result.current.messages.find((m) => m.role === "assistant");
@@ -268,7 +288,14 @@ describe("Assistant Workflow Engine", () => {
         userId: TEST_USER,
         summary: "Tick task",
         sourceUserText: "tick task",
-        proposedActions: [{ id: "act_1", type: "mark_task_done", label: "Tick task đọc sách", payload: { taskId: "task_1", done: true } }],
+        proposedActions: [
+          {
+            id: "act_1",
+            type: "mark_task_done",
+            label: "Tick task đọc sách",
+            payload: { taskId: "task_1", done: true },
+          },
+        ],
       });
       setPendingWorkflow(TEST_USER, wf);
 

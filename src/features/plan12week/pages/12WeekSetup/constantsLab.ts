@@ -6,4 +6,3 @@ export const STEPS = [
 ] as const;
 
 export { GOAL_TYPES, LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS } from "./constants";
-

@@ -84,7 +84,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
   const showStreakPop = cyclePhase === 2;
 
   // Derive static properties for polaroid layouts based on preview content
-  const polaroids = [
+  const _polaroids = [
     {
       emoji: data.visionIcons[0]?.emoji ?? "💡",
       label:

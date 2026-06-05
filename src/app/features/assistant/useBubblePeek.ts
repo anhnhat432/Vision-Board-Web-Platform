@@ -64,7 +64,7 @@ function getPersonalizedPeekPhrases(userId: string | null, route: string): strin
       "Bạn chọn ngày review tuần chưa? Chủ Nhật là lựa chọn phổ biến đó.",
       "Cần mình lên khung milestone cho tuần 4 và tuần 8 không?",
     );
-  } else if (route === "/today" || route === "/today-v2" || route === "/12-week-system") {
+  } else if (route === "/today" || route === "/12-week-system") {
     const overdueCount = context.stuckSignals?.overdueOpenCount ?? 0;
     if (overdueCount > 0) {
       phrases.push(

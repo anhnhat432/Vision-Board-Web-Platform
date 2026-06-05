@@ -105,7 +105,10 @@ export function BalanceCard({ rows }: BalanceCardProps) {
                 </span>
               </div>
 
-              <div className="h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800 shadow-inner" aria-hidden="true">
+              <div
+                className="h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800 shadow-inner"
+                aria-hidden="true"
+              >
                 <div
                   className={`h-full rounded-full bg-gradient-to-r ${style.gradient} transition-all duration-550 ease-out`}
                   style={{ width: `${score * 10}%` }}

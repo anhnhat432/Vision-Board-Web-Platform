@@ -122,7 +122,7 @@ export function RootLayout() {
     "/feasibility",
     "/12-week-setup",
     "/12-week-system",
-    "/today-v2",
+
     "/journal",
   ]);
   const showAssistant = ASSISTANT_ROUTES.has(location.pathname);

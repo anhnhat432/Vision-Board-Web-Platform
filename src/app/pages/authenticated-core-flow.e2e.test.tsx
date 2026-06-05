@@ -375,8 +375,7 @@ describe("authenticated new user core flow", () => {
 
     expect(
       await screen.findByText(
-        (_content, element) =>
-          element?.tagName === "H1" && /Nhìn lại để bước tiếp/i.test(element.textContent ?? ""),
+        (_content, element) => element?.tagName === "H1" && /Nhìn lại để bước tiếp/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     expect(getUserData().onboardingCompleted).toBe(true);

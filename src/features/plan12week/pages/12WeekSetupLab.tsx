@@ -1,4 +1,3 @@
-import { Award, Calendar, Flag, Map as MapIcon, Target } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -8,7 +7,6 @@ import { PageShell } from "@/app/components/PageShell";
 import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { FormSkeleton } from "@/app/components/ui/skeleton";
-import { cn } from "@/app/components/ui/utils";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import { isDemoMode, isRealMode } from "@/app/utils/app-mode";
 import { getScoredLifeArea, hasRealLifeBalance } from "@/app/utils/core-flow-guard";
@@ -942,8 +940,7 @@ export function TwelveWeekSetupLab() {
       toast.error(rawCurrentStepValidationError);
       if (
         currentStep !== 1 &&
-        (rawCurrentStepValidationError === invalidTargetError ||
-          rawCurrentStepValidationError === invalidUnitError)
+        (rawCurrentStepValidationError === invalidTargetError || rawCurrentStepValidationError === invalidUnitError)
       ) {
         setCurrentStep(1);
       } else if (
@@ -1178,7 +1175,8 @@ export function TwelveWeekSetupLab() {
 
         if (isSyncError) {
           toast.warning("Lưu ngoại tuyến thành công!", {
-            description: "Kế hoạch đã sẵn sàng trên thiết bị này nhưng chưa thể đồng bộ lên đám mây (Lỗi kết nối). Bạn có thể thử đồng bộ lại sau trong Cài đặt.",
+            description:
+              "Kế hoạch đã sẵn sàng trên thiết bị này nhưng chưa thể đồng bộ lên đám mây (Lỗi kết nối). Bạn có thể thử đồng bộ lại sau trong Cài đặt.",
             duration: 6000,
           });
         } else {

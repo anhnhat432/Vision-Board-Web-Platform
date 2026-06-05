@@ -606,6 +606,40 @@ export function TwelveWeekSystem() {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    const handlePrefill = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const payload = customEvent.detail;
+      if (payload) {
+        setWeeklyForm((prev) => {
+          const nextForm = { ...prev };
+          if (payload.biggestOutputThisWeek !== undefined)
+            nextForm.biggestOutputThisWeek = payload.biggestOutputThisWeek;
+          if (payload.mainObstacle !== undefined) nextForm.mainObstacle = payload.mainObstacle;
+          if (payload.nextWeekPriority !== undefined) nextForm.nextWeekPriority = payload.nextWeekPriority;
+          if (payload.insights !== undefined) nextForm.insights = payload.insights;
+          if (payload.reflection !== undefined && !nextForm.insights) nextForm.insights = payload.reflection;
+          if (payload.workloadDecision !== undefined) nextForm.workloadDecision = payload.workloadDecision;
+
+          if (Array.isArray(payload.nextWeekCommitments)) {
+            nextForm.nextWeekCommitments = payload.nextWeekCommitments;
+          } else if (payload.nextWeekPriority) {
+            nextForm.nextWeekCommitments = [payload.nextWeekPriority];
+          }
+          return nextForm;
+        });
+
+        toastSuccess("AI đã điền nháp review tuần", {
+          description: "Hãy rà soát lại các câu trả lời trong tab Tuần trước khi Lưu nhé.",
+        });
+      }
+    };
+    window.addEventListener("assistant-prefill-weekly-review", handlePrefill);
+    return () => {
+      window.removeEventListener("assistant-prefill-weekly-review", handlePrefill);
+    };
+  }, [setWeeklyForm]);
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`/12-week-system?tab=${value}`, { replace: true });
@@ -1203,7 +1237,9 @@ export function TwelveWeekSystem() {
               </span>
             </div>
 
-            <h2 className="font-serif text-2xl font-semibold leading-tight text-app-ink">Thiết lập kế hoạch thành công!</h2>
+            <h2 className="font-serif text-2xl font-semibold leading-tight text-app-ink">
+              Thiết lập kế hoạch thành công!
+            </h2>
             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-app-accent">
               12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
             </p>

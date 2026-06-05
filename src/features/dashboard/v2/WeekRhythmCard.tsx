@@ -51,23 +51,19 @@ function clampPercent(value: number): number {
 const KPI_CARD_STYLES = {
   Tuần: {
     bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   "Tỷ lệ lead": {
     bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   Nhịp: {
     bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   Chuỗi: {
     bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg:
-      "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
 };
 
@@ -132,7 +128,10 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
           className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-app-accent/40 shadow-inner"
           aria-hidden="true"
         >
-          <div className="w-full rounded-full bg-gradient-to-t from-app-accent to-[#5ba590] animate-pulse" style={{ height: `${fillHeight}%` }} />
+          <div
+            className="w-full rounded-full bg-gradient-to-t from-app-accent to-[#5ba590] animate-pulse"
+            style={{ height: `${fillHeight}%` }}
+          />
         </div>
       );
     }
@@ -161,7 +160,9 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
         {day.label}
       </span>
       {barContent}
-      <span className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-neutral-500"}`}>
+      <span
+        className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-neutral-500"}`}
+      >
         {day.completed}/{day.total}
       </span>
     </div>

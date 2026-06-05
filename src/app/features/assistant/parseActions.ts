@@ -40,7 +40,6 @@ const VALID_ROUTES = [
   "/12-week-plan-setup",
   "/12-week-plan-overview",
   "/12-week-system",
-  "/today-v2",
   "/billing",
   "/goals",
   "/life-balance",

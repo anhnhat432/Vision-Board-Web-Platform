@@ -13,8 +13,8 @@ import {
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { PageShell } from "../components/PageShell";
 import { MotionFadeIn } from "../components/motion";
+import { PageShell } from "../components/PageShell";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -531,12 +531,8 @@ export function FeasibilityCheck() {
             <div className="mt-6 rounded-card border border-app-line bg-app-bg-subtle p-5 shadow-app-sm">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted mb-2">
-                    Mục tiêu của bạn
-                  </p>
-                  <p className="line-clamp-2 text-sm font-bold leading-relaxed text-app-ink">
-                    {pendingGoal.specific}
-                  </p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted mb-2">Mục tiêu của bạn</p>
+                  <p className="line-clamp-2 text-sm font-bold leading-relaxed text-app-ink">{pendingGoal.specific}</p>
                 </div>
                 <Link
                   to="/smart-goal-setup"

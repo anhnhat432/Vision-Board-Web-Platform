@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { ChevronDown, ChevronUp, Heart, RefreshCcw } from "lucide-react";
+import { useState } from "react";
 
 import type { RescueModeStatus, RescueSuggestion, RescueSuggestionId } from "@/features/plan12week/logic";
 import { getRescueActionSuggestion, getRescueModeMessage } from "@/features/plan12week/logic";
@@ -112,7 +112,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
               {suggestions.map((suggestion: RescueSuggestion, index) => {
                 const callback = getCallbackForSuggestion(suggestion.id, props);
                 const isSecondOrLater = index > 0;
-                
+
                 return (
                   <li
                     key={suggestion.id}

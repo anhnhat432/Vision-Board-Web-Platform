@@ -1,13 +1,4 @@
-import {
-  AlertTriangle,
-  ChevronDown,
-  CloudDownload,
-  CloudUpload,
-  FileDown,
-  RefreshCw,
-  Trash2,
-  WifiOff,
-} from "lucide-react";
+import { AlertTriangle, ChevronDown, CloudDownload, CloudUpload, FileDown, RefreshCw, WifiOff } from "lucide-react";
 import { type SyntheticEvent, useCallback, useState } from "react";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
