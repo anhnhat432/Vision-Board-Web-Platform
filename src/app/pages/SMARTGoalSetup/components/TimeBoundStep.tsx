@@ -130,7 +130,7 @@ export function TimeBoundStep({
             {/* Vòng hiển thị số tuần */}
             <div
               className={cn(
-                "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-lg border border-dashed transition-all duration-300 shadow-[2px_4px_12px_rgba(44,38,33,0.04)] relative rotate-[-1.5deg] bg-white dark:bg-[#1E1C18]",
+                "flex h-20 w-24 shrink-0 flex-col items-center justify-center rounded-lg border border-dashed transition-all duration-300 shadow-[2px_4px_12px_rgba(44,38,33,0.04)] relative rotate-[-1.5deg] bg-app-surface",
                 parsedTargetWeeks === 12
                   ? "border-app-accent/30 text-app-accent"
                   : parsedTargetWeeks <= 6
@@ -139,8 +139,8 @@ export function TimeBoundStep({
               )}
             >
               {/* Kẹp giấy giả lập */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-350 dark:bg-slate-700 rounded-full border border-slate-400 dark:border-slate-650 opacity-80 z-10 flex items-center justify-center">
-                <div className="w-1.5 h-2.5 border border-slate-500 rounded-full" />
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-app-line-strong rounded-full border border-app-line-strong opacity-80 z-10 flex items-center justify-center">
+                <div className="w-1.5 h-2.5 border border-app-ink-muted rounded-full" />
               </div>
               <span className="text-3xl font-serif italic font-extrabold tracking-tight mt-1">{parsedTargetWeeks}</span>
               <span className="text-[9px] font-extrabold uppercase tracking-widest">tuần</span>

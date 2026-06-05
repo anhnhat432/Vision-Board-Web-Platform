@@ -1,7 +1,6 @@
-﻿import {
+import {
   CheckCircle2,
   ClipboardList,
-  Clock,
   Copy,
   Loader2,
   Mail,
@@ -12,6 +11,7 @@
   RefreshCw,
   Target,
   Truck,
+  XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -366,7 +366,7 @@ export function OrderStatusPage() {
     if (paymentError && !paymentOrder) {
       return (
         <div className="mx-auto max-w-md px-4 py-12">
-          <div className="rounded-card border border-app-line bg-[color:var(--color-danger-bg)] p-8 text-center">
+          <div className="rounded-card border border-app-status-error/20 bg-app-status-error/8 p-8 text-center">
             <h1 className="font-serif text-xl font-medium text-app-ink">Không tải được đơn thanh toán</h1>
             <p className="mt-2 text-sm leading-6 text-app-ink-soft">{paymentError}</p>
             <Button
@@ -403,9 +403,9 @@ export function OrderStatusPage() {
     if (paymentTimedOut || paymentOrder.status === "failed") {
       return (
         <div className="mx-auto max-w-2xl px-4 py-12">
-          <div className="rounded-card border border-app-line bg-app-warm-soft p-8 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-app-warm text-white">
-              <Clock className="h-8 w-8" />
+          <div className="rounded-card border border-app-status-error/20 bg-app-status-error/8 p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+              <XCircle className="h-8 w-8 text-app-status-error" />
             </div>
             <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Đơn hàng đã huỷ</h1>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-app-ink-soft">
@@ -538,7 +538,7 @@ export function OrderStatusPage() {
             </div>
 
             {paymentError && (
-              <div className="rounded-lg border border-app-line bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">
+              <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/8 p-3 text-sm text-app-status-error">
                 {paymentError}
               </div>
             )}
@@ -729,7 +729,7 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Target className="h-3.5 w-3.5 text-app-accent" />
                     Mục tiêu đang gắn
@@ -744,7 +744,7 @@ export function OrderStatusPage() {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
                     Chi tiết đơn
@@ -753,11 +753,11 @@ export function OrderStatusPage() {
                     <ul className="mt-[var(--space-inline)] space-y-2 text-sm">
                       {order.lines.map((line) => (
                         <li key={`${line.itemId}-${line.qty}`} className="flex items-start justify-between gap-2">
-                          <span className="text-slate-900">
+                          <span className="text-app-ink">
                             {line.label}
                             {line.qty > 1 ? ` × ${line.qty}` : ""}
                           </span>
-                          <span className="shrink-0 tabular-nums text-slate-700">{formatVnd(line.lineTotalVnd)}</span>
+                          <span className="shrink-0 tabular-nums text-app-ink-soft">{formatVnd(line.lineTotalVnd)}</span>
                         </li>
                       ))}
                       {INCLUDED_DOCS.map((doc) => (
@@ -768,17 +768,17 @@ export function OrderStatusPage() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
+                    <p className="mt-[var(--space-inline)] text-sm leading-7 text-app-ink-soft">
                       Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết.
                     </p>
                   )}
                   {typeof order.totalVnd === "number" && order.totalVnd > 0 && (
-                    <div className="mt-3 flex items-center justify-between border-t border-[color:var(--border)] pt-3 text-sm font-semibold">
+                    <div className="mt-3 flex items-center justify-between border-t border-app-line pt-3 text-sm font-semibold">
                       <span>Tổng đơn</span>
                       <span className="tabular-nums">{formatVnd(order.totalVnd)}</span>
                     </div>
                   )}
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-app-ink-muted">
                     {hasKeywords
                       ? `${order.keywords.length} từ khóa đã được lưu cùng đơn này.`
                       : "Chưa có từ khóa cụ thể cho kit."}
@@ -787,56 +787,56 @@ export function OrderStatusPage() {
               </div>
 
               {(!order.lines || order.lines.length === 0) && (
-                <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <div className="rounded border border-app-status-warning/40 bg-app-status-warning/10 px-3 py-2 text-xs text-app-ink">
                   Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết và giá.
                 </div>
               )}
 
-              <div className="space-y-1 border-t border-slate-100 pt-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="space-y-1 border-t border-app-line pt-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                   Người nhận & giao hàng
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-app-ink-soft">
                   Thông tin liên hệ và địa chỉ được tách riêng để hạn chế phải dò lại trong card.
                 </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-slate-200 bg-app-surface p-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <div className="rounded-xl border border-app-line bg-app-surface p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     <Mail className="h-3.5 w-3.5" />
                     Người nhận
                   </div>
-                  <p className="mt-[var(--space-inline)] text-sm font-semibold text-slate-900">{order.fullName}</p>
-                  <p className="mt-1 text-sm text-slate-600">{order.email}</p>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                  <p className="mt-[var(--space-inline)] text-sm font-semibold text-app-ink">{order.fullName}</p>
+                  <p className="mt-1 text-sm text-app-ink-soft">{order.email}</p>
+                  <div className="mt-1 flex items-center gap-2 text-sm text-app-ink-soft">
                     <Phone className="h-3.5 w-3.5" />
                     {order.phone || "Chưa bổ sung số điện thoại"}
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-app-surface p-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <div className="rounded-xl border border-app-line bg-app-surface p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     <MapPin className="h-3.5 w-3.5" />
                     Địa chỉ giao
                   </div>
-                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{order.shippingAddress}</p>
+                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-app-ink-soft">{order.shippingAddress}</p>
                 </div>
               </div>
 
               {(hasKeywords || hasNote) && (
-                <div className="stack-stack border-t border-slate-100 pt-5">
+                <div className="stack-stack border-t border-app-line pt-5">
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       Từ khóa & ghi chú
                     </p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-app-ink-soft">
                       Những thông tin tinh chỉnh cho kit được gom riêng để đỡ lẫn với thông tin giao hàng.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                       <Package className="h-3.5 w-3.5" />
                       Ghi chú cho kit
                     </div>
@@ -847,7 +847,7 @@ export function OrderStatusPage() {
                           <Badge
                             key={keyword}
                             variant="outline"
-                            className="border-slate-200 bg-app-surface text-slate-700"
+                            className="border-app-line bg-app-surface text-app-ink-soft"
                           >
                             {keyword}
                           </Badge>
@@ -856,7 +856,7 @@ export function OrderStatusPage() {
                     )}
 
                     {hasNote && (
-                      <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{order.note}</p>
+                      <p className="mt-[var(--space-inline)] text-sm leading-7 text-app-ink-soft">{order.note}</p>
                     )}
                   </div>
                 </div>
@@ -883,12 +883,12 @@ export function OrderStatusPage() {
                   <div
                     key={step.status}
                     className={`flex items-start gap-4 rounded-xl border px-4 py-4 ${
-                      isActive ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-app-surface"
+                      isActive ? "border-app-status-success/40 bg-app-status-success/10" : "border-app-line bg-app-surface"
                     }`}
                   >
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] ${
-                        isActive ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-400"
+                        isActive ? "bg-app-status-success text-white" : "bg-app-bg-subtle text-app-ink-muted"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -896,21 +896,21 @@ export function OrderStatusPage() {
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className={`text-sm font-semibold ${isActive ? "text-emerald-900" : "text-slate-700"}`}>
+                        <p className={`text-sm font-semibold ${isActive ? "text-app-ink" : "text-app-ink-soft"}`}>
                           {getOrderStatusLabel(step.status)}
                         </p>
                         {isCurrent && (
-                          <Badge variant="outline" className="border-emerald-200 bg-app-surface text-emerald-800">
+                          <Badge variant="outline" className="border-app-status-success/40 bg-app-surface text-app-status-success">
                             Trạng thái hiện tại
                           </Badge>
                         )}
                         {!isCurrent && isCompleted && (
-                          <Badge variant="outline" className="border-emerald-200 bg-app-surface text-emerald-800">
+                          <Badge variant="outline" className="border-app-status-success/40 bg-app-surface text-app-status-success">
                             Đã hoàn thành
                           </Badge>
                         )}
                       </div>
-                      <p className={`mt-1 text-sm leading-7 ${isActive ? "text-emerald-800/80" : "text-slate-500"}`}>
+                      <p className={`mt-1 text-sm leading-7 ${isActive ? "text-app-ink-soft" : "text-app-ink-muted"}`}>
                         {step.description}
                       </p>
                     </div>
@@ -919,34 +919,34 @@ export function OrderStatusPage() {
               })}
 
               {isCancelled && (
-                <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-4">
-                  <p className="text-sm font-semibold text-rose-800">Đơn này đã bị huỷ.</p>
-                  <p className="mt-1 text-sm leading-7 text-rose-700/80">
+                <div className="rounded-xl border border-app-status-error/30 bg-app-status-error/10 p-4">
+                  <p className="text-sm font-semibold text-app-status-error">Đơn này đã bị huỷ.</p>
+                  <p className="mt-1 text-sm leading-7 text-app-ink-soft">
                     Bạn có thể tạo đơn mới nếu vẫn muốn đặt kit.
                   </p>
                 </div>
               )}
 
               {demoMode && !isBackendBacked && !isCancelled && (
-                <div className="stack-stack border-t border-slate-100 pt-5">
+                <div className="stack-stack border-t border-app-line pt-5">
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       Điều khiển trạng thái
                     </p>
-                    <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa kết nối máy chủ.</p>
+                    <p className="text-sm text-app-ink-soft">Phần này chỉ xuất hiện khi đơn chưa kết nối máy chủ.</p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                  <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                           Cập nhật trạng thái
                         </p>
-                        <p className="mt-2 text-sm leading-7 text-slate-600">
+                        <p className="mt-2 text-sm leading-7 text-app-ink-soft">
                           Dùng để cập nhật đơn lưu trên thiết bị khi chưa có dữ liệu từ máy chủ.
                         </p>
                       </div>
-                      <Badge variant="outline" className="border-slate-200 bg-app-surface text-slate-700">
+                      <Badge variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
                         Trên thiết bị
                       </Badge>
                     </div>
@@ -954,9 +954,9 @@ export function OrderStatusPage() {
                     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                       {nextStatus ? (
                         <>
-                          <p className="text-sm text-slate-600">
+                          <p className="text-sm text-app-ink-soft">
                             Bước tiếp theo:{" "}
-                            <span className="font-medium text-slate-900">{getOrderStatusLabel(nextStatus)}</span>
+                            <span className="font-medium text-app-ink">{getOrderStatusLabel(nextStatus)}</span>
                           </p>
                           <Button type="button" size="sm" variant="outline" onClick={handleAdvanceStatus}>
                             Chuyển sang bước tiếp theo
@@ -964,7 +964,7 @@ export function OrderStatusPage() {
                         </>
                       ) : (
                         <>
-                          <p className="text-sm text-slate-600">Đơn đã ở bước cuối cùng trên thiết bị này.</p>
+                          <p className="text-sm text-app-ink-soft">Đơn đã ở bước cuối cùng trên thiết bị này.</p>
                           <Button type="button" size="sm" variant="outline" disabled>
                             Đã hoàn tất
                           </Button>
@@ -992,19 +992,19 @@ export function OrderStatusPage() {
                   type="button"
                   className={`w-full rounded-xl border px-4 py-4 text-left transition-colors ${
                     item.id === order.id
-                      ? "border-sky-200 bg-sky-50"
-                      : "border-slate-200 bg-app-surface hover:bg-slate-50"
+                      ? "border-app-status-info/40 bg-app-status-info/10"
+                      : "border-app-line bg-app-surface hover:bg-app-bg-subtle"
                   }`}
                   onClick={() => navigate(`/order-status/${item.id}`)}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">{item.goalTitle}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="truncate text-sm font-semibold text-app-ink">{item.goalTitle}</p>
+                      <p className="mt-1 text-xs text-app-ink-muted">
                         {getOrderStatusLabel(item.status)}
                         {typeof item.totalVnd === "number" && item.totalVnd > 0 ? ` · ${formatVnd(item.totalVnd)}` : ""}
                       </p>
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-1 text-xs text-app-ink-muted">
                         {formatCalendarDate(item.createdAt, "vi-VN", {
                           day: "2-digit",
                           month: "short",
@@ -1014,7 +1014,7 @@ export function OrderStatusPage() {
                     </div>
 
                     {item.id === order.id && (
-                      <Badge variant="outline" className="border-sky-200 bg-app-surface text-sky-700">
+                      <Badge variant="outline" className="border-app-status-info/40 bg-app-surface text-app-status-info">
                         Đang xem
                       </Badge>
                     )}
@@ -1060,13 +1060,13 @@ function PaymentInfoRow({
 
   return (
     <div
-      className={`rounded-lg border p-4 ${highlight ? "border-app-line bg-app-warm-soft" : "border-app-line bg-app-bg"}`}
+      className={`rounded-lg border p-4 ${highlight ? "border-app-warm-border/30 bg-app-warm-soft" : "border-app-line bg-app-bg"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{label}</p>
           <p
-            className={`mt-2 select-all break-all font-semibold ${highlight ? "text-lg text-app-warm" : "text-base text-app-ink"}`}
+            className={`mt-2 select-all break-all font-semibold ${highlight ? "text-lg text-app-warm-strong" : "text-base text-app-ink"}`}
           >
             {value}
           </p>

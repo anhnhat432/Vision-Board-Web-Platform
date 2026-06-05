@@ -49,7 +49,7 @@ describe("WizardStepPip", () => {
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       <div
-        class="rounded-[var(--r-tile)] border border-slate-200/80 bg-slate-50/72 p-2"
+        class="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle p-2"
       >
         <ol
           aria-label="Tiến độ các bước"
@@ -59,7 +59,7 @@ describe("WizardStepPip", () => {
             class="min-w-fit flex-1"
           >
             <button
-              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors text-slate-600 hover:bg-app-bg"
+              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors text-app-ink-soft hover:bg-app-accent-subtle"
               type="button"
             >
               <span
@@ -100,7 +100,7 @@ describe("WizardStepPip", () => {
             class="min-w-fit flex-1"
           >
             <button
-              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors bg-slate-50 text-slate-900 ring-2 ring-primary/40 cursor-default"
+              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors bg-app-accent-subtle text-app-ink ring-2 ring-primary/40 cursor-default"
               disabled=""
               type="button"
             >
@@ -126,13 +126,13 @@ describe("WizardStepPip", () => {
             class="min-w-fit flex-1"
           >
             <button
-              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors text-slate-400 cursor-default"
+              class="flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors text-app-ink-muted cursor-default"
               disabled=""
               type="button"
             >
               <span
                 aria-hidden="true"
-                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-slate-300 bg-app-surface text-slate-400"
+                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-app-line-strong bg-app-surface text-app-ink-muted"
               >
                 3
               </span>

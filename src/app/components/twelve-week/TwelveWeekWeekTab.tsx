@@ -830,7 +830,7 @@ export function TwelveWeekWeekTab({
             )}
             <Button
               size="sm"
-              className="bg-app-warm hover:bg-app-warm/95 text-white text-xs font-semibold px-4.5 py-2.5 rounded-xl shadow-2xs h-9.5 transition-all"
+              className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4.5 py-2.5 rounded-xl shadow-2xs h-9.5 transition-all"
               onClick={handleSaveReviewClick}
               disabled={isSavingReview || !canSubmitWeeklyReview}
               aria-busy={isSavingReview}
@@ -1026,7 +1026,7 @@ export function TwelveWeekWeekTab({
               <div className="flex items-center gap-2 pt-1">
                 <Button
                   type="button"
-                  className="bg-app-warm hover:bg-app-warm/90 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs h-9"
+                  className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs h-9"
                   onClick={onAcceptNextWeekRecommendation}
                 >
                   Áp dụng gợi ý tuần sau
@@ -1095,7 +1095,7 @@ export function TwelveWeekWeekTab({
         >
           <Button
             size="lg"
-            className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm rounded-xl"
+            className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm-hover rounded-xl"
             onClick={handleSaveReviewClick}
             disabled={isSavingReview || !canSubmitWeeklyReview}
             aria-busy={isSavingReview}

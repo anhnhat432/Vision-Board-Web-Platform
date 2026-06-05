@@ -158,7 +158,7 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
     expect(screen.queryByTestId("today-primary-hero")).toBeNull();
   });
 
-  it("does not render the hero when the primary task is already completed", () => {
+  it("renders a completion celebration in the hero when the primary task is already completed", () => {
     const completed = makeTask({ completed: true });
     render(
       <TwelveWeekTodayTab
@@ -168,7 +168,8 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
         })}
       />,
     );
-    expect(screen.queryByTestId("today-primary-hero")).toBeNull();
+    const hero = screen.getByTestId("today-primary-hero");
+    expect(hero).toHaveTextContent(/Tuyệt vời! Bạn đã hoàn thành việc quan trọng nhất hôm nay/i);
   });
 });
 

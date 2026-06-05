@@ -690,7 +690,7 @@ function DashboardContent({
         <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/85 p-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:hidden">
           <button
             type="button"
-            className="w-full rounded-xl bg-gradient-to-r from-app-accent to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
+            className="w-full rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
             onClick={() => navigate("/12-week-system?tab=today")}
           >
             Mở Today · {dashboardData.dashboardOpenTaskCount} việc hôm nay

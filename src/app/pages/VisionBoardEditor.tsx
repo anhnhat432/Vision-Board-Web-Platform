@@ -704,7 +704,7 @@ export function VisionBoardEditor() {
               Ở lại
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
               onClick={() => {
                 if (blocker.state === "blocked") blocker.proceed();
               }}

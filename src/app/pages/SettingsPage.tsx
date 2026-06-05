@@ -278,7 +278,7 @@ export function SettingsPage() {
         title="Tuỳ chỉnh tài khoản"
         description="Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn."
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
             <img
               src="/settings_safe_data.png"
               alt="Cài đặt an toàn dữ liệu"

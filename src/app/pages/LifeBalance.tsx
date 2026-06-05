@@ -43,7 +43,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-blue-50 dark:bg-blue-950/20",
         text: "text-blue-600 dark:text-blue-400",
         border: "border-blue-100 dark:border-blue-900/30",
-        accent: "#2563eb",
+        accent: "var(--color-career-accent)",
         glow: "shadow-blue-500/10 dark:shadow-blue-500/20",
       };
     case "Finance":
@@ -51,7 +51,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-amber-50 dark:bg-amber-950/20",
         text: "text-amber-600 dark:text-amber-400",
         border: "border-amber-100 dark:border-amber-900/30",
-        accent: "#d97706",
+        accent: "var(--color-finance-accent)",
         glow: "shadow-amber-500/10 dark:shadow-amber-500/20",
       };
     case "Health":
@@ -59,7 +59,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-emerald-50 dark:bg-emerald-950/20",
         text: "text-emerald-600 dark:text-emerald-400",
         border: "border-emerald-100 dark:border-emerald-900/30",
-        accent: "#059669",
+        accent: "var(--color-health-accent)",
         glow: "shadow-emerald-500/10 dark:shadow-emerald-500/20",
       };
     case "Education":
@@ -67,7 +67,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-indigo-50 dark:bg-indigo-950/20",
         text: "text-indigo-600 dark:text-indigo-400",
         border: "border-indigo-100 dark:border-indigo-900/30",
-        accent: "#4f46e5",
+        accent: "var(--color-education-accent)",
         glow: "shadow-indigo-500/10 dark:shadow-indigo-500/20",
       };
     case "Relationships":
@@ -75,7 +75,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-rose-50 dark:bg-rose-950/20",
         text: "text-rose-600 dark:text-rose-400",
         border: "border-rose-100 dark:border-rose-900/30",
-        accent: "#e11d48",
+        accent: "var(--color-relationships-accent)",
         glow: "shadow-rose-500/10 dark:shadow-rose-500/20",
       };
     case "Family":
@@ -83,7 +83,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-teal-50 dark:bg-teal-950/20",
         text: "text-teal-600 dark:text-teal-400",
         border: "border-teal-100 dark:border-teal-900/30",
-        accent: "#0d9488",
+        accent: "var(--color-family-accent)",
         glow: "shadow-teal-500/10 dark:shadow-teal-500/20",
       };
     case "Personal Growth":
@@ -91,7 +91,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-orange-50 dark:bg-orange-950/20",
         text: "text-orange-600 dark:text-orange-400",
         border: "border-orange-100 dark:border-orange-900/30",
-        accent: "#ea580c",
+        accent: "var(--color-personal-growth-accent)",
         glow: "shadow-orange-500/10 dark:shadow-orange-500/20",
       };
     case "Leisure":
@@ -99,7 +99,7 @@ const getAreaColorConfig = (name: string) => {
         bgLight: "bg-sky-50 dark:bg-sky-950/20",
         text: "text-sky-600 dark:text-sky-400",
         border: "border-sky-100 dark:border-sky-900/30",
-        accent: "#0284c7",
+        accent: "var(--color-leisure-accent)",
         glow: "shadow-sky-500/10 dark:shadow-sky-500/20",
       };
     default:
@@ -560,7 +560,7 @@ export function LifeBalance() {
                       </p>
                     </div>
                     {isCheckInMode && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-app-accent bg-app-accent-subtle border border-app-accent/15 px-2 py-0.5 rounded-full">
                         <Sparkles className="h-3 w-3 animate-pulse" />
                         Đang Check-in...
                       </span>
@@ -583,24 +583,24 @@ export function LifeBalance() {
                       <h2 className="text-xs font-bold uppercase tracking-wider text-amber-700">
                         Trọng tâm Hành động đề xuất
                       </h2>
-                      <p className="text-[10px] text-neutral-400 font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
+                      <p className="text-[10px] text-app-ink-muted font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
                     </div>
                   </header>
 
                   <div className="mt-4 space-y-3">
-                    <p className="text-xs font-bold text-neutral-700 leading-normal">
+                    <p className="text-xs font-bold text-app-ink-soft leading-normal">
                       Khía cạnh cần ưu tiên cải thiện:{" "}
                       <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">
                         {getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)
                       </span>
                     </p>
 
-                    <p className="text-xs text-neutral-500 leading-relaxed font-medium">
+                    <p className="text-xs text-app-ink-muted leading-relaxed font-medium">
                       {getFocusInsight(weakestArea.name, weakestArea.score).reason}
                     </p>
 
-                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 rounded-xl p-3 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex gap-2 items-start shadow-3xs">
-                      <Sparkles className="h-4 w-4 shrink-0 text-emerald-600 animate-pulse mt-0.5" />
+                    <div className="bg-app-surface border border-app-line rounded-xl p-3 text-[11px] text-app-accent font-semibold flex gap-2 items-start shadow-3xs">
+                      <Sparkles className="h-4 w-4 shrink-0 text-app-accent animate-pulse mt-0.5" />
                       <p className="leading-relaxed">
                         <strong>Hành động đề xuất:</strong> {getFocusInsight(weakestArea.name, weakestArea.score).tip}
                       </p>
@@ -614,13 +614,13 @@ export function LifeBalance() {
                   // BẢNG ĐIỀU KHIỂN DASHBOARD CHÍNH (Tĩnh, click để check-in)
                   <div className="space-y-6 animate-fade-in w-full max-w-full overflow-hidden">
                     {/* Banner Bắt đầu Check-in */}
-                    <div className="surface-raised rounded-2xl border border-emerald-500/10 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/[0.05] dark:from-emerald-950/10 dark:via-neutral-900 dark:to-neutral-950 p-6 shadow-3xs flex flex-col justify-between space-y-4">
+                    <div className="surface-raised rounded-2xl border border-app-accent/10 bg-gradient-to-br from-app-accent-subtle via-app-surface to-app-bg-subtle dark:from-app-accent-subtle dark:via-app-surface dark:to-app-bg p-6 shadow-3xs flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-app-accent">
                           Check-in Cân bằng
                         </span>
                         <h3 className="font-serif text-lg font-bold text-app-ink leading-tight flex items-center gap-1.5">
-                          <Compass className="h-5 w-5 text-emerald-600 animate-spin-slow" />
+                          <Compass className="h-5 w-5 text-app-accent animate-spin-slow" />
                           Cập nhật Bánh xe cuộc sống hằng tuần
                         </h3>
                         <p className="text-xs text-neutral-500 leading-relaxed font-semibold">
@@ -637,7 +637,7 @@ export function LifeBalance() {
                           setIsCheckInMode(true);
                           setActiveClusterIndex(0);
                         }}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer w-full sm:w-auto font-sans"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-app-accent hover:bg-app-accent-hover px-6 py-2.5 text-xs font-bold text-app-ink-on-accent shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer w-full sm:w-auto font-sans"
                       >
                         Bắt đầu Check-in nhanh
                         <ChevronRight className="h-4 w-4" />
@@ -686,7 +686,7 @@ export function LifeBalance() {
                       <div className="mt-4 pt-4 border-t border-app-line/45 flex justify-end">
                         <Link
                           to="/onboarding"
-                          className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                          className="text-xs font-bold text-app-accent hover:text-app-accent-hover hover:underline"
                         >
                           Làm lại khảo sát toàn diện →
                         </Link>
@@ -702,7 +702,7 @@ export function LifeBalance() {
                     return (
                       <MotionFadeIn
                         key={activeClusterIndex}
-                        className="surface-raised rounded-2xl border border-emerald-600/20 bg-app-surface p-5 md:p-6 shadow-md w-full max-w-full overflow-hidden"
+                        className="surface-raised rounded-2xl border border-app-accent/20 bg-app-surface p-5 md:p-6 shadow-md w-full max-w-full overflow-hidden"
                       >
                         {/* Progress Header */}
                         <header className="pb-4 border-b border-app-line/60 space-y-2">
@@ -854,7 +854,7 @@ export function LifeBalance() {
                               whileHover={{ scale: 1.015 }}
                               whileTap={{ scale: 0.985 }}
                               type="button"
-                              className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 px-6 py-2.5 text-xs font-bold text-white transition-all active:scale-[0.97] shadow-md cursor-pointer font-sans"
+                              className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-app-accent hover:bg-app-accent-hover px-6 py-2.5 text-xs font-bold text-white transition-all active:scale-[0.97] shadow-md cursor-pointer font-sans"
                               onClick={() => {
                                 if (activeClusterIndex < 2) {
                                   setActiveClusterIndex(activeClusterIndex + 1);

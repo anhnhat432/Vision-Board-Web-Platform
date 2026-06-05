@@ -57,9 +57,9 @@ export function WizardStepPip({
               }}
               className={cn(
                 "flex h-full w-full items-center gap-2 rounded-[var(--r-control)] px-3 py-2 text-left text-xs font-semibold tracking-normal transition-colors",
-                isActive && "bg-slate-50 text-slate-900 ring-2 ring-primary/40",
-                isDone && !isActive && "text-slate-600 hover:bg-app-bg",
-                !isDone && !isActive && "text-slate-400",
+                isActive && "bg-app-accent-subtle text-app-ink ring-2 ring-primary/40",
+                isDone && !isActive && "text-app-ink-soft hover:bg-app-accent-subtle",
+                !isDone && !isActive && "text-app-ink-muted",
                 !canJump && "cursor-default",
               )}
             >
@@ -68,7 +68,7 @@ export function WizardStepPip({
                   "flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold",
                   isActive && "border-primary bg-primary text-white",
                   isDone && !isActive && "border-primary/30 bg-primary/10 text-primary",
-                  !isDone && !isActive && "border-slate-300 bg-app-surface text-slate-400",
+                  !isDone && !isActive && "border-app-line-strong bg-app-surface text-app-ink-muted",
                 )}
                 aria-hidden="true"
               >
@@ -84,14 +84,14 @@ export function WizardStepPip({
   );
 
   return (
-    <div className={cn("rounded-[var(--r-tile)] border border-slate-200/80 bg-slate-50/72 p-2", className)}>
+    <div className={cn("rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle p-2", className)}>
       {mobileMode === "compact" && (
         <div className="space-y-2 sm:hidden">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               Bước {currentIndex + 1}/{steps.length}
             </span>
-            <span className="truncate text-xs font-semibold text-slate-900">{currentStepLabel}</span>
+            <span className="truncate text-xs font-semibold text-app-ink">{currentStepLabel}</span>
           </div>
           <div
             role="progressbar"
@@ -99,7 +99,7 @@ export function WizardStepPip({
             aria-valuemin={1}
             aria-valuemax={steps.length}
             aria-valuenow={currentIndex + 1}
-            className="h-2 overflow-hidden rounded-[var(--r-pill)] bg-app-surface ring-1 ring-slate-200"
+            className="h-2 overflow-hidden rounded-[var(--r-pill)] bg-app-surface ring-1 ring-app-line"
           >
             <div className="h-full rounded-[var(--r-pill)] bg-primary" style={{ width: `${progressPercent}%` }} />
           </div>

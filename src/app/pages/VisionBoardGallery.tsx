@@ -188,7 +188,10 @@ export function VisionBoardGallery() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteBoard} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={confirmDeleteBoard}
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
+            >
               Xóa
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -217,7 +220,7 @@ export function VisionBoardGallery() {
           </Button>
         }
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
             <img
               src="/gallery_templates.png"
               alt="Các mẫu bảng tầm nhìn phong phú"
@@ -243,21 +246,21 @@ export function VisionBoardGallery() {
               value: years.length,
               note: "mốc thời gian có bảng",
               icon: Calendar,
-              color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
+              color: "from-app-status-info/18 to-app-status-info/8 text-app-status-info",
             },
             {
               title: "Tổng phần tử",
               value: totalItems,
               note: "ảnh, câu nói và biểu tượng",
               icon: Sparkles,
-              color: "from-amber-500/18 to-orange-500/10 text-amber-700",
+              color: "from-app-warm/18 to-app-warm/8 text-app-warm",
             },
             {
               title: "Trung bình mỗi bảng",
               value: userData.visionBoards.length ? Math.round(totalItems / userData.visionBoards.length) : 0,
               note: "mức độ phong phú của bảng",
               icon: ImageIcon,
-              color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
+              color: "from-app-status-success/18 to-app-status-success/8 text-app-status-success",
             },
           ].map((item) => {
             const Icon = item.icon;
@@ -280,7 +283,7 @@ export function VisionBoardGallery() {
                     </div>
                   </CardHeader>
                   <CardContent className="relative pt-0">
-                    <p className="text-sm text-slate-500">{item.note}</p>
+                    <p className="text-sm text-app-ink-muted">{item.note}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -358,7 +361,7 @@ export function VisionBoardGallery() {
                               </div>
                               <Badge
                                 variant="outline"
-                                className="rounded-[var(--r-pill)] border-white/70 bg-white/72 px-3 py-1.5 text-slate-600"
+                                className="rounded-[var(--r-pill)] border-app-line bg-app-bg-subtle px-3 py-1.5 text-app-ink-soft"
                               >
                                 {board.year}
                               </Badge>
@@ -367,15 +370,15 @@ export function VisionBoardGallery() {
 
                           <CardContent className="stack-stack pt-0">
                             <div
-                              className="relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
+                              className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg-subtle"
                               style={{ aspectRatio: "16/10" }}
                             >
                               <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
-                              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_24%,_rgba(15,23,42,0.05)_100%)]" />
+                              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_transparent_24%,_color-mix(in_srgb,var(--app-ink)_5%,transparent)_100%)]" />
 
                               {board.items.length === 0 ? (
                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                                  <Sparkles className="h-12 w-12 text-slate-300" />
+                                  <Sparkles className="h-12 w-12 text-app-ink-muted/50" />
                                 </div>
                               ) : (
                                 <div className="preview-hover-media relative h-full w-full interactive-layer interactive-layer--strong">
@@ -390,7 +393,7 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-xl border border-white/80 bg-white/88 p-1.5 shadow-[var(--shadow-1)]">
+                                        <div className="rounded-xl border border-app-line bg-app-surface p-1.5 shadow-[var(--shadow-1)]">
                                           <ImageWithFallback
                                             src={item.content}
                                             alt="Phần tử bảng"
@@ -399,7 +402,7 @@ export function VisionBoardGallery() {
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-[var(--r-tile)] border border-white/80 bg-white/90 px-3 py-2 text-xs italic leading-4 text-slate-700 shadow-sm">
+                                        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface px-3 py-2 text-xs italic leading-4 text-app-ink-soft shadow-sm">
                                           {item.content}
                                         </div>
                                       )}
@@ -409,7 +412,7 @@ export function VisionBoardGallery() {
                                 </div>
                               )}
 
-                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[var(--r-tile)] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-lg">
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[var(--r-tile)] border border-white/18 bg-[color-mix(in_srgb,var(--app-ink)_72%,transparent)] px-4 py-3 text-white shadow-lg">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
                                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
@@ -427,21 +430,21 @@ export function VisionBoardGallery() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-3">
-                              <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Ảnh</p>
-                                <p className="mt-2 text-xl font-bold text-slate-900">{imageCount}</p>
+                              <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-app-ink-muted">Ảnh</p>
+                                <p className="mt-2 text-xl font-bold text-app-ink">{imageCount}</p>
                               </div>
-                              <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Câu nói</p>
-                                <p className="mt-2 text-xl font-bold text-slate-900">{quoteCount}</p>
+                              <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-app-ink-muted">Câu nói</p>
+                                <p className="mt-2 text-xl font-bold text-app-ink">{quoteCount}</p>
                               </div>
-                              <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Icon</p>
-                                <p className="mt-2 text-xl font-bold text-slate-900">{iconCount}</p>
+                              <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-app-ink-muted">Icon</p>
+                                <p className="mt-2 text-xl font-bold text-app-ink">{iconCount}</p>
                               </div>
                             </div>
 
-                            <div className="flex gap-2 border-t border-slate-100 pt-4">
+                            <div className="flex gap-2 border-t border-app-line pt-4">
                               <Button
                                 variant="outline"
                                 className="flex-1"
@@ -460,7 +463,7 @@ export function VisionBoardGallery() {
                               </Button>
                               <Button
                                 variant="outline"
-                                className="border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                                className="border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20"
                                 onClick={() => handleDeleteBoard(board.id)}
                               >
                                 <Trash2 className="h-4 w-4" />

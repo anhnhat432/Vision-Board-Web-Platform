@@ -151,15 +151,15 @@ export function TwelveWeekDashboardNotice({
     tone === "success"
       ? "border-app-line/80 bg-app-surface/90 shadow-2xs"
       : tone === "error"
-        ? "border-red-200/60 bg-red-50/40 dark:border-red-950/20 dark:bg-red-950/5"
+        ? "border-app-status-error/30 bg-app-status-error/10"
         : "border-app-warm-border/20 bg-app-warm-soft/10";
   const iconClass =
-    tone === "success" ? "text-app-accent" : tone === "error" ? "text-red-500 dark:text-red-400" : "text-app-warm";
+    tone === "success" ? "text-app-accent" : tone === "error" ? "text-app-status-error" : "text-app-warm";
   const titleClass =
     tone === "warning"
       ? "font-serif text-app-warm-strong font-semibold"
       : tone === "error"
-        ? "font-serif text-red-800 dark:text-red-400 font-semibold"
+        ? "font-serif text-app-status-error font-semibold"
         : "text-app-ink font-semibold";
   const role = tone === "success" ? "status" : "alert";
 
@@ -275,7 +275,7 @@ export function TwelveWeekDashboardHeader({
         >
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent/95 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent-hover hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
             onClick={onOpenFocusTab}
           >
             <span>{reviewDueToday ? "Review tuần này →" : "Xem việc hôm nay →"}</span>

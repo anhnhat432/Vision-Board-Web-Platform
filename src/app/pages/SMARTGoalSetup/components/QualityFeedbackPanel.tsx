@@ -101,7 +101,7 @@ export function QualityFeedbackPanel({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Độ rõ nét mục tiêu"
-        className="relative h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden"
+        className="relative h-2 w-full rounded-full bg-app-bg-subtle overflow-hidden"
       >
         <div
           className={cn("h-full rounded-full transition-all duration-500 ease-out", clarity.barClass)}

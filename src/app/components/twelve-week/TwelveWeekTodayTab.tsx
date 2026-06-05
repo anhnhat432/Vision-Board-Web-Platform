@@ -525,7 +525,7 @@ export function TwelveWeekTodayTab({
             {nextActionState.onAction && nextActionState.actionLabel ? (
               <Button
                 variant="default"
-                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent/95 text-white font-semibold text-xs shadow-2xs transition-colors rounded-xl px-5 py-2.5 h-10"
+                className="w-full sm:w-auto bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-xs shadow-2xs transition-colors rounded-xl px-5 py-2.5 h-11"
                 onClick={nextActionState.onAction}
               >
                 {nextActionState.actionLabel}
@@ -677,7 +677,7 @@ export function TwelveWeekTodayTab({
                 </h1>
                 <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft mt-1.5 max-w-3xl font-sans">
                   {primaryTaskOverdue ? (
-                    `Việc này đang trễ – hôm nay hãy làm phiên bản tối giản. Duy trì nhịp quan trọng hơn làm hết.`
+                    `Việc này đang trễ – hôm nay hãy làm phiên bản gọn nhất. Duy trì nhịp quan trọng hơn làm hết.`
                   ) : (
                     <>
                       Thuộc nhóm việc lặp lại “{firstPriorityTask.leadIndicatorName}”. Xong việc này là bạn đã giữ đúng

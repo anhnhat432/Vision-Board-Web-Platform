@@ -35,6 +35,10 @@ export function WaterReflectionPool() {
   const lastSoundTime = useRef<number>(0);
 
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 

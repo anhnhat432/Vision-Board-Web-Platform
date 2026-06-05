@@ -155,7 +155,7 @@ export function LoginPage() {
     if (userProfileError) {
       return (
         <LoginStatusCard
-          icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
+          icon={<AlertCircle className="h-5 w-5 text-app-status-warning" />}
           title="Không tải được hồ sơ"
           description={userProfileError}
           action={
@@ -239,7 +239,7 @@ export function LoginPage() {
           <h2 className="mt-4 font-serif text-xl font-medium text-app-ink">Chưa cấu hình xác thực</h2>
           <p className="mt-1 text-sm text-app-ink-muted">Xác thực chưa được thiết lập trong môi trường này.</p>
           <Button
-            className="mt-5 w-full bg-app-accent text-white hover:bg-app-accent"
+            className="mt-5 w-full bg-app-accent text-white hover:bg-app-accent-hover"
             onClick={() => navigate("/", { replace: true })}
           >
             Quay về trang chủ
@@ -515,12 +515,12 @@ export function LoginPage() {
                             <div
                               key={item.label}
                               className={`flex items-center gap-2 text-xs ${
-                                item.passed ? "text-green-700" : "text-app-ink-soft"
+                                item.passed ? "text-app-status-success" : "text-app-ink-soft"
                               }`}
                             >
                               <span
                                 className={`h-2 w-2 rounded-full ${
-                                  item.passed ? "bg-green-600" : "border border-app-line bg-transparent"
+                                  item.passed ? "bg-app-status-success" : "border border-app-line bg-transparent"
                                 }`}
                               />
                               <span>{item.label}</span>
@@ -547,7 +547,7 @@ export function LoginPage() {
                     {/* Submit button */}
                     <Button
                       type="submit"
-                      className="w-full bg-app-accent text-white py-2.5 text-sm font-medium hover:bg-app-accent transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
+                      className="w-full bg-app-accent text-white py-2.5 text-sm font-medium hover:bg-app-accent-hover transition-colors duration-150 disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none disabled:cursor-not-allowed"
                       disabled={submitting || authLoading || !email || !password || !canSubmitSignup}
                     >
                       {submitting ? (
@@ -643,7 +643,7 @@ export function LoginPage() {
                         <div className="flex gap-2">
                           <Button
                             type="submit"
-                            className="bg-app-accent text-white hover:bg-app-accent"
+                            className="bg-app-accent text-white hover:bg-app-accent-hover"
                             disabled={resetSubmitting || !resetEmail.trim()}
                           >
                             {resetSubmitting ? (

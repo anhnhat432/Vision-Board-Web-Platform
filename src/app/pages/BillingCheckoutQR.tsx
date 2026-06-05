@@ -1,4 +1,4 @@
-﻿import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -300,9 +300,9 @@ export function BillingCheckoutQR() {
   if (error && !order) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-card border border-app-line bg-[color:var(--color-danger-bg)] p-8 text-center">
+        <div className="rounded-card border border-app-status-error/20 bg-app-status-error/8 p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <XCircle className="h-8 w-8 text-[color:var(--color-danger-fg)]" />
+            <XCircle className="h-8 w-8 text-app-status-error" />
           </div>
           <h2 className="font-serif text-lg font-medium text-app-ink">Có lỗi xảy ra</h2>
           <p className="mt-2 text-sm text-app-ink-soft">{error}</p>
@@ -482,8 +482,8 @@ export function BillingCheckoutQR() {
                 </p>
               ) : null}
 
-              <div className="rounded-lg border border-app-line bg-app-warm-soft px-4 py-3">
-                <p className="text-xs font-medium leading-5 text-app-ink">
+              <div className="rounded-lg border border-app-warm-border/30 bg-app-warm-soft px-4 py-3">
+                <p className="text-xs font-medium leading-5 text-app-warm-strong">
                   Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Nếu nội dung khác mã đơn, giao
                   dịch có thể cần kiểm tra thủ công.
                 </p>
@@ -545,7 +545,7 @@ function InfoRow({
       <div className="flex min-w-0 items-center gap-1.5">
         <span
           className={`min-w-0 break-all text-sm font-semibold ${
-            highlight ? "rounded-full bg-app-warm-soft px-2 py-0.5 text-app-warm" : "text-app-ink"
+            highlight ? "rounded-full bg-app-warm-soft px-2 py-0.5 text-app-warm-strong" : "text-app-ink"
           }`}
         >
           {value}

@@ -870,13 +870,13 @@ export function SmartGoalStepShell({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -65, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed top-0 left-0 right-0 z-45 bg-white/90 dark:bg-slate-900/90 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3 lg:hidden"
+            className="fixed top-0 left-0 right-0 z-45 bg-app-surface/90 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3 lg:hidden"
           >
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-0.5 select-none flex items-center gap-1">
                 <span>🎯</span> Live Preview
               </p>
-              <p className="text-xs truncate font-serif italic text-slate-700 dark:text-slate-300 leading-normal">
+              <p className="text-xs truncate font-serif italic text-app-ink-soft leading-normal">
                 Quyết tâm {isSpecFilled ? specText : "..."} 🎯. Đo lường:{" "}
                 {isMeasFilled ? `${measTarget} ${measUnit}` : "..."} 📊.
               </p>
@@ -1228,7 +1228,7 @@ export function SmartGoalStepShell({
           <div className="rounded-2xl border border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C] p-5 shadow-[2px_4px_16px_rgba(44,38,33,0.02)] space-y-4">
             <div className="flex items-center gap-3.5">
               {/* Compass SVG */}
-              <div className="relative w-16 h-16 shrink-0 rounded-full border border-[#E8E3D9] bg-white dark:bg-[#1C1A15] flex items-center justify-center shadow-inner select-none pointer-events-none">
+              <div className="relative w-16 h-16 shrink-0 rounded-full border border-[#E8E3D9] bg-app-surface flex items-center justify-center shadow-inner select-none pointer-events-none">
                 {/* Các vạch la bàn */}
                 <div className="absolute inset-1 rounded-full border border-dashed border-[#E8E3D9]/60 opacity-60" />
                 {/* Hướng Bắc Nam */}
@@ -1302,7 +1302,7 @@ export function SmartGoalStepShell({
               </div>
 
               {/* Ống nghiệm thủy tinh */}
-              <div className="relative h-6 w-full rounded-full border-2 border-slate-300 dark:border-[#4A4239] bg-slate-100/30 dark:bg-[#1E1C18]/40 p-[2px] overflow-hidden shadow-inner flex items-center">
+              <div className="relative h-6 w-full rounded-full border-2 border-app-line-strong bg-app-bg-subtle p-[2px] overflow-hidden shadow-inner flex items-center">
                 {/* Vạch chia độ của ống nghiệm */}
                 <div
                   className="absolute inset-0 z-10 pointer-events-none opacity-20 dark:opacity-30"

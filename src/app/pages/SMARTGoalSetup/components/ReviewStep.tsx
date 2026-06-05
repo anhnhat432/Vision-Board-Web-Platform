@@ -51,8 +51,8 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl border border-teal-500/10 bg-teal-500/[0.015] p-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed space-y-1.5 select-none animate-[fade-in_0.3s_ease-out]">
-        <div className="flex items-center gap-1.5 font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+      <div className="mt-4 rounded-xl border border-app-accent/10 bg-app-accent-subtle p-4 text-xs text-app-ink-soft leading-relaxed space-y-1.5 select-none animate-[fade-in_0.3s_ease-out]">
+        <div className="flex items-center gap-1.5 font-extrabold uppercase tracking-wider text-app-accent">
           <span>📌 Bước tiếp theo:</span>
         </div>
         <p>

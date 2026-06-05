@@ -15,15 +15,19 @@ export function RefundPolicyPage() {
   const refundMaxUsedPercent = getSafePositiveNumber(REFUND_MAX_USED_PERCENT, 25);
 
   return (
-    <article className="mx-auto max-w-3xl space-y-8 px-4 py-4 sm:px-6">
-      <header className="space-y-3">
-        <div className="flex items-center gap-2 text-app-accent">
-          <RefreshCw className="h-5 w-5" />
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]">Dear Our Future</span>
+    <article className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
+      <header className="surface-raised overflow-hidden rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
+            <RefreshCw className="h-6 w-6" />
+          </div>
+          <div className="min-w-0 space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-app-accent">Dear Our Future</span>
+            <h1 className="font-serif text-3xl font-medium tracking-tight text-app-ink">Chính sách hoàn tiền</h1>
+            <p className="text-sm text-app-ink-muted">Cập nhật lần cuối: {LAST_UPDATED}</p>
+          </div>
         </div>
-        <h1 className="font-serif text-3xl font-medium tracking-tight text-app-ink">Chính sách hoàn tiền</h1>
-        <p className="text-sm text-app-ink-muted">Cập nhật lần cuối: {LAST_UPDATED}</p>
-        <p className="text-sm leading-7 text-app-ink-soft">
+        <p className="mt-5 text-sm leading-7 text-app-ink-soft">
           Dear Our Future cho phép hoàn tiền thủ công cho gói Plus trong một số trường hợp hợp lý. Quy trình này không
           tự động trừ tiền qua cổng thanh toán: bạn gửi yêu cầu, đội ngũ hỗ trợ kiểm tra, admin duyệt và chuyển khoản
           lại vào tài khoản ngân hàng bạn cung cấp.
@@ -31,24 +35,24 @@ export function RefundPolicyPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-[var(--r-card)] border border-emerald-100 bg-emerald-50/70 p-4">
-          <BadgeCheck className="h-5 w-5 text-emerald-700" />
-          <p className="mt-3 text-sm font-semibold text-emerald-950">Có hoàn tiền</p>
-          <p className="mt-1 text-xs leading-5 text-emerald-800">Xét duyệt thủ công, không tự động.</p>
+        <div className="rounded-[var(--r-card)] border border-app-status-success/30 bg-app-status-success/10 p-4">
+          <BadgeCheck className="h-5 w-5 text-app-status-success" />
+          <p className="mt-3 text-sm font-semibold text-app-ink">Có hoàn tiền</p>
+          <p className="mt-1 text-xs leading-5 text-app-ink-soft">Xét duyệt thủ công, không tự động.</p>
         </div>
-        <div className="rounded-[var(--r-card)] border border-sky-100 bg-sky-50/70 p-4">
-          <Clock className="h-5 w-5 text-sky-700" />
-          <p className="mt-3 text-sm font-semibold text-sky-950">3-7 ngày làm việc</p>
-          <p className="mt-1 text-xs leading-5 text-sky-800">Thời gian xử lý sau khi nhận đủ thông tin.</p>
+        <div className="rounded-[var(--r-card)] border border-app-status-info/30 bg-app-status-info/10 p-4">
+          <Clock className="h-5 w-5 text-app-status-info" />
+          <p className="mt-3 text-sm font-semibold text-app-ink">3-7 ngày làm việc</p>
+          <p className="mt-1 text-xs leading-5 text-app-ink-soft">Thời gian xử lý sau khi nhận đủ thông tin.</p>
         </div>
-        <div className="rounded-[var(--r-card)] border border-app-warm-border bg-app-warm/30 p-4">
-          <ReceiptText className="h-5 w-5 text-app-warm-strong" />
-          <p className="mt-3 text-sm font-semibold text-app-warm-strong">Cần mã đơn hàng</p>
-          <p className="mt-1 text-xs leading-5 text-app-warm-strong/80">Mã đơn giúp đối chiếu thanh toán chính xác.</p>
+        <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle p-4">
+          <ReceiptText className="h-5 w-5 text-app-accent" />
+          <p className="mt-3 text-sm font-semibold text-app-ink">Cần mã đơn hàng</p>
+          <p className="mt-1 text-xs leading-5 text-app-ink-soft">Mã đơn giúp đối chiếu thanh toán chính xác.</p>
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">1. Điều kiện hoàn tiền</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Chúng tôi cho phép hoàn tiền trong <strong>{refundWindowDays} ngày</strong> kể từ ngày thanh toán nếu bạn chưa
@@ -65,7 +69,7 @@ export function RefundPolicyPage() {
         </ul>
       </section>
 
-      <section className="space-y-3">
+      <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">2. Cách gửi yêu cầu</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Cách nhanh nhất là mở trang{" "}
@@ -92,23 +96,23 @@ export function RefundPolicyPage() {
         </p>
       </section>
 
-      <section className="space-y-3 rounded-[var(--r-card)] border border-amber-100 bg-amber-50/70 p-5">
-        <h2 className="flex items-center gap-2 font-serif text-xl font-medium text-amber-950">
-          <Mail className="h-5 w-5" />
+      <section className="space-y-3 rounded-[var(--r-card)] border border-app-status-warning/30 bg-app-status-warning/10 p-5">
+        <h2 className="flex items-center gap-2 font-serif text-xl font-medium text-app-ink">
+          <Mail className="h-5 w-5 text-app-status-warning" />
           Quy trình xử lý thủ công
         </h2>
-        <ol className="list-decimal space-y-1.5 pl-5 text-sm leading-7 text-amber-900">
+        <ol className="list-decimal space-y-1.5 pl-5 text-sm leading-7 text-app-ink-soft">
           <li>Bạn gửi yêu cầu hoàn tiền trong ứng dụng hoặc qua email hỗ trợ.</li>
           <li>Admin kiểm tra đơn hàng, trạng thái thanh toán, thời hạn và mức sử dụng chu kỳ.</li>
           <li>Nếu được duyệt, admin chuyển khoản hoàn tiền thủ công vào tài khoản bạn cung cấp.</li>
           <li>Hệ thống gửi email cập nhật khi yêu cầu đã được xử lý hoặc bị từ chối.</li>
         </ol>
-        <p className="text-xs leading-5 text-amber-800">
+        <p className="text-xs leading-5 text-app-ink-muted">
           Thời gian xử lý thông thường: 3-7 ngày làm việc sau khi chúng tôi nhận đủ thông tin đối chiếu.
         </p>
       </section>
 
-      <section className="space-y-3">
+      <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">3. Hủy gói và chu kỳ chưa dùng</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Hiện tại Plus không tự động gia hạn, nên không có thao tác hủy auto-renewal qua cổng thanh toán. Nếu bạn không

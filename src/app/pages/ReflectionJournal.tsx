@@ -332,7 +332,7 @@ function ReflectionJournalContent() {
           hasReflections && (
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-md shadow-app-warm/15"
+              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-md shadow-app-warm/15"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết nhật ký mới
@@ -340,7 +340,7 @@ function ReflectionJournalContent() {
           )
         }
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
             <img
               src="/reflection_journal.png"
               alt="Nhật ký phản tư chánh niệm"
@@ -418,7 +418,7 @@ function ReflectionJournalContent() {
 
           <div className="mt-4 grid gap-5">
             {pendingReflectionDraft ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
+              <div className="rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p>Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.</p>
                   <div className="flex flex-wrap gap-2">
@@ -525,7 +525,7 @@ function ReflectionJournalContent() {
               <Button
                 onClick={handleAddReflection}
                 disabled={!newReflection.title || !newReflection.content}
-                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.98] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shadow-md shadow-app-warm/15"
+                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shadow-md shadow-app-warm/15"
               >
                 Lưu nhật ký
               </Button>
@@ -579,7 +579,7 @@ function ReflectionJournalContent() {
         <EmptyState
           variant="card"
           illustration={
-            <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto mb-4">
+            <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto mb-4">
               <img
                 src="/reflection_journal.png"
                 alt="Nhật ký phản tư chánh niệm"
@@ -592,7 +592,7 @@ function ReflectionJournalContent() {
           actions={
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm hover:brightness-105 active:scale-[0.98] transition-all duration-150 shadow-md shadow-app-warm/15"
+              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 shadow-md shadow-app-warm/15"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết entry đầu tiên
@@ -687,7 +687,7 @@ function ReflectionJournalContent() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleDeleteReflection(reflection.id)}
-                          className="text-red-600 focus:text-red-600"
+                          className="text-app-status-error focus:text-app-status-error"
                         >
                           Xóa
                         </DropdownMenuItem>

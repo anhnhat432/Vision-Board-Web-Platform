@@ -277,7 +277,7 @@ export function LeadIndicatorsStepLab({
                 </div>
 
                 {showNameError(indicator) && (
-                  <p role="alert" className="text-[10px] font-bold text-red-500">
+                  <p role="alert" className="text-[10px] font-bold text-app-status-error">
                     Vui lòng chọn hoặc nhập mô tả hành động.
                   </p>
                 )}

@@ -240,12 +240,12 @@ export function ScheduleStepLab({
                 onChange={(event) => onChange("startDate", event.target.value)}
               />
               {startDateValidation.error && (
-                <p role="alert" className="text-[10px] font-bold text-red-500 mt-1">
+                <p role="alert" className="text-[10px] font-bold text-app-status-error mt-1">
                   {startDateValidation.error}
                 </p>
               )}
               {startDateValidation.warning && (
-                <p role="status" className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
+                <p role="status" className="text-[10px] text-app-status-warning font-semibold mt-1">
                   {startDateValidation.warning}
                 </p>
               )}
@@ -597,7 +597,7 @@ export function ScheduleStepLab({
                     </div>
                   ) : (
                     !isReflectionDay && (
-                      <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 italic block mt-1 text-center sm:text-left">
+                      <span className="text-[8px] font-bold text-app-ink-muted italic block mt-1 text-center sm:text-left">
                         Nghỉ ngơi
                       </span>
                     )

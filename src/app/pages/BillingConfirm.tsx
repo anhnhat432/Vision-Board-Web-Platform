@@ -262,7 +262,9 @@ export function BillingConfirm() {
                 : "Nếu email tài khoản chưa xác minh hoặc bạn chưa đăng nhập, bạn có thể sửa email nhận biên nhận."}
             </p>
             {emailInvalid && (
-              <p className="mt-2 text-xs font-medium text-red-600">Email nhận biên nhận chưa đúng định dạng.</p>
+              <p className="mt-2 text-xs font-medium text-[color:var(--color-danger-fg)]">
+                Email nhận biên nhận chưa đúng định dạng.
+              </p>
             )}
           </div>
 
@@ -316,9 +318,9 @@ export function BillingConfirm() {
           ) : null}
 
           {emailVerificationRequired ? (
-            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="mt-4 rounded-xl border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-sm text-[color:var(--color-warning-fg)]">
               <p className="font-semibold">Vui lòng xác thực email trước khi thanh toán.</p>
-              <p className="mt-1 leading-6">
+              <p className="mt-1 leading-6 text-app-ink-soft">
                 Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực:{" "}
                 {userEmail || "chưa có email"}.
               </p>
@@ -326,7 +328,7 @@ export function BillingConfirm() {
                 type="button"
                 onClick={handleSendVerification}
                 disabled={sendingVerification}
-                className="mt-3 rounded-[var(--r-control)] border border-amber-300 bg-app-surface px-3 py-2 text-xs font-semibold text-amber-900 disabled:opacity-60"
+                className="mt-3 rounded-[var(--r-control)] border border-[color:var(--color-warning-border)] bg-app-surface px-3 py-2 text-xs font-semibold text-[color:var(--color-warning-fg)] disabled:opacity-60"
               >
                 {sendingVerification ? "Đang gửi..." : "Gửi email xác thực"}
               </button>
@@ -334,7 +336,9 @@ export function BillingConfirm() {
           ) : null}
 
           {error && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            <div className="mt-4 rounded-xl border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">
+              {error}
+            </div>
           )}
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">

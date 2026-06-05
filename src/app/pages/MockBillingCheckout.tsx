@@ -79,9 +79,9 @@ export function MockBillingCheckout() {
 
   return (
     <div className="stack-section pb-12">
-      <div className="rounded-[var(--r-control)] border-2 border-amber-400 bg-amber-50 px-4 py-3">
-        <p className="font-semibold text-amber-900">Thanh toán dùng thử</p>
-        <p className="text-sm text-amber-800">Màn này chỉ dùng cho bản demo/preview, không xử lý khoản thu thật.</p>
+      <div className="rounded-[var(--r-control)] border-2 border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-4 py-3">
+        <p className="font-semibold text-[color:var(--color-warning-fg)]">Thanh toán dùng thử</p>
+        <p className="text-sm text-app-ink-soft">Màn này chỉ dùng cho bản demo/preview, không xử lý khoản thu thật.</p>
       </div>
 
       <Card className="overflow-hidden">

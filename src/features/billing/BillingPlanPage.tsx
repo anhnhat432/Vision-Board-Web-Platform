@@ -516,7 +516,7 @@ export function BillingPlan() {
               </p>
             </div>
             {refundFormError ? (
-              <div className="rounded-lg border border-app-line bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">
+              <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/8 p-3 text-sm text-app-status-error">
                 {refundFormError}
               </div>
             ) : null}
@@ -632,11 +632,11 @@ export function BillingPlan() {
         </div>
       )}
       {checkoutReturnStatus === "failed" && (
-        <div className="rounded-xl border border-app-line bg-[color:var(--color-danger-bg)] p-4">
+        <div className="rounded-xl border border-app-status-error/20 bg-app-status-error/8 p-4">
           <div className="flex items-center gap-3">
-            <Shield className="h-5 w-5 text-[color:var(--color-danger-fg)]" />
+            <Shield className="h-5 w-5 text-app-status-error" />
             <div>
-              <p className="font-medium text-[color:var(--color-danger-fg)]">Không thể kiểm tra thanh toán</p>
+              <p className="font-medium text-app-status-error">Không thể kiểm tra thanh toán</p>
               <p className="text-sm text-app-ink-soft">Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.</p>
             </div>
             <Button variant="outline" size="sm" onClick={retryCheckoutEntitlement} className="ml-auto">
@@ -648,14 +648,14 @@ export function BillingPlan() {
 
       {shouldShowExpiryNotice && (
         <div
-          className={`rounded-xl p-4 ${isExpired ? "border-app-line bg-[color:var(--color-danger-bg)]" : "border-app-line bg-app-warm-soft"}`}
+          className={`rounded-xl p-4 ${isExpired ? "border-app-status-error/20 bg-app-status-error/8" : "border-app-line bg-app-warm-soft"}`}
         >
           <div className="flex items-start gap-3">
             <AlertTriangle
-              className={`mt-0.5 h-5 w-5 ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-warm"}`}
+              className={`mt-0.5 h-5 w-5 ${isExpired ? "text-app-status-error" : "text-app-warm"}`}
             />
             <div className="flex-1">
-              <p className={`font-medium ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-ink"}`}>
+              <p className={`font-medium ${isExpired ? "text-app-status-error" : "text-app-ink"}`}>
                 {isInRenewalPriority
                   ? `Đang trong giai đoạn ưu tiên gia hạn — còn ${graceState.daysRemaining} ngày`
                   : isExpired
@@ -663,7 +663,7 @@ export function BillingPlan() {
                     : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
               </p>
               <p
-                className={`mt-1 text-sm leading-6 ${isExpired ? "text-[color:var(--color-danger-fg)]" : "text-app-ink-soft"}`}
+                className={`mt-1 text-sm leading-6 ${isExpired ? "text-app-status-error" : "text-app-ink-soft"}`}
               >
                 {isInRenewalPriority
                   ? "Quyền Plus vẫn được giữ trong thời gian này. Gia hạn ngay để không bị tạm dừng."
@@ -750,7 +750,7 @@ export function BillingPlan() {
             ) : isExpired ? (
               <Badge
                 variant="outline"
-                className="border-app-line bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]"
+                className="border-app-status-error/20 bg-app-status-error/8 text-app-status-error"
               >
                 Đã hết hạn
               </Badge>
@@ -858,7 +858,7 @@ export function BillingPlan() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ReceiptText className="h-5 w-5 text-sky-600" />
+                <ReceiptText className="h-5 w-5 text-app-status-info" />
                 Lịch sử thanh toán
               </CardTitle>
               <CardDescription>
@@ -875,7 +875,7 @@ export function BillingPlan() {
 
               {!isLoadingPaymentHistory && paymentHistoryError && (
                 <div className="flex flex-col gap-3 rounded-xl border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-[color:var(--color-danger-fg)]">{paymentHistoryError}</p>
+                  <p className="text-sm text-app-status-error">{paymentHistoryError}</p>
                   <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
                     Thử lại
                   </Button>
