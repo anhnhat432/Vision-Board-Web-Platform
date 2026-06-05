@@ -222,6 +222,15 @@ describe("aiAssistantService getDeterministicFallback", () => {
     assert.equal((result.proposedActions[0].payload as any).title, "học tiếng anh");
     assert.equal((result.proposedActions[0].payload as any).category, "career");
   });
+
+  it("answers assistant identity and introduction locally", () => {
+    ensureBackendEnvForServiceImports();
+    const result = getDeterministicFallback("ban la ai", sampleContext);
+
+    assert.equal(result.proposedActions.length, 0);
+    assert.match(result.assistantText, /Vision Board/);
+    assert.match(result.assistantText, /SMART goal/);
+  });
 });
 
 describe("aiAssistantService processAIAssistantRequest", () => {
@@ -249,6 +258,8 @@ describe("aiAssistantService processAIAssistantRequest", () => {
   it("only short-circuits small greeting messages", () => {
     assert.equal(shouldUseLocalAssistantShortcut("hola"), true);
     assert.equal(shouldUseLocalAssistantShortcut("hello bot"), true);
+    assert.equal(shouldUseLocalAssistantShortcut("ban la ai"), true);
+    assert.equal(shouldUseLocalAssistantShortcut("hay gioi thieu di"), true);
     assert.equal(shouldUseLocalAssistantShortcut("tạo mục tiêu chạy bộ trong 12 tuần"), false);
   });
 

@@ -222,9 +222,20 @@ function normalizeShortUserText(userText: string): string {
     .replace(/\s+/g, " ");
 }
 
+function isAssistantIdentityRequest(normalizedText: string): boolean {
+  return (
+    /^(ban la ai|ban ten gi|tro ly nay la gi|cu la ai|ai la ai)$/.test(normalizedText) ||
+    /^(hay\s+)?(tu\s+)?gioi thieu( ve ban| ban than| di)?$/.test(normalizedText) ||
+    /^(ban|tro ly|ai|cu) co the lam gi$/.test(normalizedText)
+  );
+}
+
 export function shouldUseLocalAssistantShortcut(userText: string): boolean {
   const normalized = normalizeShortUserText(userText);
   if (!normalized || normalized.length > 48) return false;
+  const normalizedRoutingText = normalizeModelRoutingText(userText);
+
+  if (isAssistantIdentityRequest(normalizedRoutingText)) return true;
 
   const greetings = new Set([
     "hi",
@@ -635,6 +646,15 @@ export function getDeterministicFallback(
   ctx: AssistantContext,
 ): AIAssistantResponse {
   const lower = userText.toLowerCase().trim();
+  const normalizedRoutingText = normalizeModelRoutingText(userText);
+
+  if (isAssistantIdentityRequest(normalizedRoutingText)) {
+    return {
+      assistantText:
+        "Mình là Trợ lý Cú AI của Vision Board. Mình giúp bạn đi theo luồng chính của sản phẩm: nhìn lại định hướng sống, tạo SMART goal, kiểm tra tính khả thi, lập kế hoạch 12 tuần, chọn việc hôm nay và review tiến độ.\n\nMình có thể gợi ý bước tiếp theo, tóm tắt mục tiêu, đề xuất task, đánh dấu task đã xong khi bạn xác nhận, và nhắc bạn quay lại đúng việc quan trọng nhất.",
+      proposedActions: [],
+    };
+  }
 
   // 1. Ý định đánh dấu hoàn thành công việc (tick task)
   const isTickIntent =
