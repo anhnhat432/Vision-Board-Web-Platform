@@ -336,10 +336,65 @@ export async function transcribeAudio(
   mimeType: string,
   fileName: string = "audio.webm"
 ): Promise<string> {
+  const isGemini = env.AI_PROVIDER === "gemini";
+
+  if (isGemini) {
+    const activeApiKey = env.AI_API_KEY || env.GEMINI_API_KEY;
+    if (!activeApiKey) {
+      throw new Error("Trợ lý Gemini hiện chưa được cấu hình. Vui lòng thử lại sau.");
+    }
+
+    const base64Data = audioBuffer.toString("base64");
+    // Sử dụng gemini-2.5-flash làm model chính cho voice transcription vì nó hỗ trợ audio tốt
+    const model = env.GEMINI_MODEL || "gemini-2.5-flash";
+    const resolvedModel = model.includes("lite") ? "gemini-2.5-flash-lite" : "gemini-2.5-flash";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${resolvedModel}:generateContent?key=${activeApiKey}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: base64Data,
+                  }
+                },
+                {
+                  text: "Hãy nghe đoạn âm thanh tiếng Việt này và chuyển đổi thành văn bản chính xác nhất. Chỉ trả về kết quả văn bản thô được nhận diện, không thêm bất kỳ giải thích hay bình luận nào khác. Nếu không có tiếng nói hoặc chỉ có im lặng, chỉ trả về chuỗi rỗng."
+                }
+              ]
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json() as any;
+        console.error("[Gemini Transcribe] API error:", response.status, errorData);
+        throw new Error(errorData.error?.message || `API transcription failed: ${response.status}`);
+      }
+
+      const data = await response.json() as any;
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
+      return text;
+    } catch (error: any) {
+      console.error("[Gemini Transcribe] Error:", error);
+      throw error;
+    }
+  }
+
+  // Mặc định: Gọi Groq Whisper
   const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
 
   if (!activeApiKey) {
-    throw new Error("Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.");
+    throw new Error("Trợ lý Groq hiện chưa được cấu hình. Vui lòng thử lại sau.");
   }
 
   const formData = new FormData();
