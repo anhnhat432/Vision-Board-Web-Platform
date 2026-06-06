@@ -229,6 +229,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const lastDrainStartedAtRef = useRef<number | null>(null);
   const mutationDebounceTimerRef = useRef<number | null>(null);
   const visibilityDebounceTimerRef = useRef<number | null>(null);
+  const trailingFlushTimerRef = useRef<number | null>(null);
 
   const syncReadiness = getTwelveWeekSyncReadiness({
     realMode,
@@ -249,6 +250,35 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const clearFirstLoginRestoreSummary = useCallback(() => {
     setFirstLoginRestoreSummary(null);
   }, []);
+
+  const clearTrailingFlushTimer = useCallback(() => {
+    if (trailingFlushTimerRef.current !== null) {
+      window.clearTimeout(trailingFlushTimerRef.current);
+      trailingFlushTimerRef.current = null;
+    }
+  }, []);
+
+  const triggerDrainOnlyRef = useRef<(() => Promise<MutationQueueSyncResult | null>) | null>(null);
+
+  const scheduleTrailingFlush = useCallback(() => {
+    // R5.3: không lên lịch khi chưa có user.
+    if (!ownerUid) return;
+
+    // R2.4 / R4.4: tránh timer trùng lặp — đã có timer pending thì không tạo thêm.
+    if (trailingFlushTimerRef.current !== null) return;
+
+    // R1.2 / R1.3: delay = phần còn lại của Sync_Floor, clamp >= 0.
+    const elapsed =
+      lastDrainStartedAtRef.current === null ? minSyncIntervalMs : Date.now() - lastDrainStartedAtRef.current;
+    const delay = Math.max(0, minSyncIntervalMs - elapsed);
+
+    trailingFlushTimerRef.current = window.setTimeout(() => {
+      // R4.3: xóa ref khi timer nổ để cho phép lên lịch lại sau này.
+      trailingFlushTimerRef.current = null;
+      // R1.4 / R5.x: đi qua đúng đường dẫn drain hiện có (đã chứa mọi guard).
+      void triggerDrainOnlyRef.current?.();
+    }, delay);
+  }, [minSyncIntervalMs, ownerUid]);
 
   useEffect(() => {
     refreshPendingCount();
@@ -273,6 +303,10 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       setPendingCount(currentPendingCount);
       if (currentPendingCount <= 0) return null;
       if (!drainOptions.bypassRateLimit && !hasElapsedSince(lastDrainStartedAtRef.current, minSyncIntervalMs)) {
+        // R1.1: còn mutation chờ nhưng bị floor chặn → hẹn lại đúng lúc floor hết hiệu lực.
+        if (currentPendingCount > 0) {
+          scheduleTrailingFlush();
+        }
         return null;
       }
 
@@ -323,6 +357,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       ownerUid,
       realMode,
       refreshPendingCount,
+      scheduleTrailingFlush,
     ],
   );
 
@@ -396,6 +431,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   triggerSyncNowRef.current = triggerSyncNow;
 
   const triggerDrainOnly = useCallback(() => drainPendingMutations(), [drainPendingMutations]);
+  triggerDrainOnlyRef.current = triggerDrainOnly;
 
   const effectiveLastResult = manualSyncLastResult ?? lastResult;
   const conflictPending = isBlockingResult(effectiveLastResult);
@@ -517,8 +553,10 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     return () => {
       window.removeEventListener(USER_DATA_UPDATED_EVENT_NAME, handleUserDataUpdated);
       clearMutationDebounceTimer();
+      // R4.1 (unmount), R4.2 (đổi ownerUid): hủy trailing flush timer còn chờ.
+      clearTrailingFlushTimer();
     };
-  }, [drainSyncReady, mutationDebounceMs, ownerUid, triggerDrainOnly]);
+  }, [clearTrailingFlushTimer, drainSyncReady, mutationDebounceMs, ownerUid, triggerDrainOnly]);
 
   return useMemo(
     () => ({
