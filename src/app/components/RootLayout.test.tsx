@@ -590,57 +590,6 @@ describe("RootLayout onboarding redirect", () => {
     });
   });
 
-  it("surfaces the auto cloud conflict dialog so signed-in users can pick a version", async () => {
-    seedAuthenticatedCompletedWorkspace();
-    autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
-      loading: false,
-      lastResult: {
-        status: "conflict",
-        message: "Needs review.",
-        mergeReport: {
-          safeToApply: false,
-          localOnlyChanges: [],
-          cloudOnlyChanges: [],
-          conflicts: [],
-          missingClientIds: [],
-          unsupportedFields: [],
-          autoResolvable: false,
-          summary: {
-            localEntityCount: 0,
-            cloudEntityCount: 0,
-            localOnlyCount: 0,
-            cloudOnlyCount: 0,
-            conflictCount: 0,
-            missingClientIdCount: 0,
-            unsupportedFieldCount: 0,
-          },
-        },
-      },
-      lastSyncedAt: "2026-05-10T10:00:00.000Z",
-      pendingCount: 1,
-      online: true,
-      conflictPending: true,
-      firstLoginRestoreSummary: null,
-      syncing: false,
-      triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
-      triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
-      resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
-      resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
-      clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
-    });
-    setAuthContext({
-      user: { uid: "user_test", email: "test@example.com" },
-      userProfile: { id: "profile_test", email: "test@example.com" },
-    });
-
-    renderAppShell("/goals");
-
-    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
-    expect(await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Giữ trên thiết bị này" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Lấy bản tài khoản" })).toBeInTheDocument();
-  });
-
   it("shows the sync status pill in the mobile account dropdown", async () => {
     seedPlusSubscription();
     autoCloudSyncMock.useAutoCloudSync.mockReturnValue({

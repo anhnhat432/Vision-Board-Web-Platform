@@ -5,9 +5,12 @@ import { useNavigate } from "react-router";
 import { SyncIdleDot, SyncOkDot, SyncSyncingDot } from "@/app/components/illustrations";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 
+// Chỉ dùng cho test/harness (twoDeviceSync.e2e, AutoCloudConflictDialog.test).
+// App production tự đồng bộ + auto-resolve LWW, không còn render dialog chọn bản
+// nên không có đường dẫn nào dispatch event này trong runtime thực.
 export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME = "visionboard:auto-cloud-conflict-dialog-open";
 
-type SyncPillState = "conflict" | "syncing" | "offline" | "pending" | "ok" | "idle";
+type SyncPillState = "syncing" | "offline" | "pending" | "ok" | "idle";
 
 interface SyncStatusPillProps {
   compact?: boolean;
@@ -33,9 +36,7 @@ function getSyncState(input: {
   online: boolean;
   pendingCount: number;
   lastSyncedAt: string | null;
-  conflictPending: boolean;
 }): SyncPillState {
-  if (input.conflictPending) return "conflict";
   if (input.syncing) return "syncing";
   if (!input.online) return "offline";
   if (input.pendingCount > 0) return "pending";
@@ -48,7 +49,6 @@ function getPendingCopy(count: number): string {
 }
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
-  if (state === "conflict") return "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Bấm để chọn phiên bản an toàn.";
   if (state === "syncing")
     return `Đã lưu trên thiết bị này. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
   if (state === "offline")
@@ -72,7 +72,6 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     online: syncState.online,
     pendingCount: syncState.pendingCount,
     lastSyncedAt: syncState.lastSyncedAt,
-    conflictPending: syncState.conflictPending,
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
@@ -111,33 +110,12 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     }
   }
 
-  // Demo workaround (verify probe 2026-05-26): nếu state="conflict" do legacy
-  // data thiếu clientXxxId (missingClientIdCount > 0) chứ không phải user
-  // value-diff conflict thật, ẩn pill khỏi header. User vẫn có thể vào
-  // /settings#account-sync để xem chi tiết. Tracked riêng:
-  // docs/superpowers/prompts/2026-05-26-b2-missing-client-id-backfill.md
-  if (effectiveState === "conflict") {
-    const lastResult = syncState.lastResult;
-    const summary = lastResult?.mergeReport?.summary;
-    const isLegacyMissingClientId =
-      summary != null && (summary.missingClientIdCount ?? 0) > 0 && summary.conflictCount === 0;
-    if (isLegacyMissingClientId) {
-      return null;
-    }
-  }
-
   const tooltip = getTooltip(effectiveState, relativeTime, syncState.pendingCount);
   const baseClass =
     "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium leading-none transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 animate-in fade-in zoom-in-95 duration-200";
   const sizeClass = compact ? "" : "mt-2";
 
   const config = {
-    conflict: {
-      dot: <SyncIdleDot className="h-4 w-4" />,
-      icon: <Upload className="h-3 w-3" />,
-      label: "Cần chọn bản dữ liệu",
-      tone: "border-app-warm-border bg-app-warm-soft text-app-warm",
-    },
     syncing: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
@@ -171,10 +149,6 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
 
   const handleClick = () => {
-    if (effectiveState === "conflict") {
-      window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
-      return;
-    }
     if (effectiveState === "pending" && syncState.online) {
       void syncState.triggerSyncNow();
       return;

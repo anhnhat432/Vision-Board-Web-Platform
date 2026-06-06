@@ -76,7 +76,6 @@ import { MindfulPlayer } from "../ui/mindful-player";
 import { Toaster } from "../ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { AppSidebar } from "./AppSidebar";
-import { AutoCloudConflictDialog } from "./AutoCloudConflictDialog";
 import { CommandPalette, type CommandPaletteGoal } from "./CommandPalette";
 import { EmailVerificationBanner } from "./EmailVerificationBanner";
 import { FirstLoginRestoreToast } from "./FirstLoginRestoreToast";
@@ -1498,7 +1497,6 @@ export function RootLayout() {
         </div>
       </AssistantPageContextProvider>
       {!demoMode && user ? <FirstLoginRestoreToast /> : null}
-      {!demoMode && user ? <AutoCloudConflictDialog /> : null}
     </AutoCloudSyncProvider>
   );
 }

@@ -45,6 +45,10 @@ function downloadBackupJson(): void {
   URL.revokeObjectURL(url);
 }
 
+// CHỈ DÙNG CHO TEST/HARNESS. App production tự đồng bộ và auto-resolve xung đột
+// bằng Last-Write-Wins nên component này KHÔNG được render trong RootLayout thực.
+// Giữ lại để twoDeviceHarness.ts và AutoCloudConflictDialog.test.tsx kiểm thử
+// đường dẫn giải quyết xung đột thủ công của engine. Không nối lại vào app shell.
 export function AutoCloudConflictDialog() {
   const autoSyncState = useAutoCloudSyncContext();
   const navigate = useNavigate();

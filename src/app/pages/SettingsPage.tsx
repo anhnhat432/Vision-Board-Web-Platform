@@ -259,15 +259,13 @@ export function SettingsPage() {
     navigate("/");
   };
 
-  const syncIcon = autoSyncState.conflictPending
-    ? AlertTriangle
-    : autoSyncState.syncing
-      ? Loader2
-      : !autoSyncState.online
-        ? WifiOff
-        : autoSyncState.pendingCount > 0
-          ? Upload
-          : CheckCircle2;
+  const syncIcon = autoSyncState.syncing
+    ? Loader2
+    : !autoSyncState.online
+      ? WifiOff
+      : autoSyncState.pendingCount > 0
+        ? Upload
+        : CheckCircle2;
   const SyncIcon = syncIcon;
 
   return (
@@ -598,13 +596,11 @@ export function SettingsPage() {
                   className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`}
                 />
                 <p>
-                  {autoSyncState.conflictPending
-                    ? "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Ứng dụng sẽ hỏi bạn trước khi ghi đè."
-                    : !autoSyncState.online
-                      ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
-                      : autoSyncState.syncing
-                        ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
-                        : "Sao lưu sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
+                  {!autoSyncState.online
+                    ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+                    : autoSyncState.syncing
+                      ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+                      : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
                 </p>
               </div>
             </div>

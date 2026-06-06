@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
-import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, SyncStatusPill } from "./SyncStatusPill";
+import { SyncStatusPill } from "./SyncStatusPill";
 
 function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloudSyncState {
   return {
@@ -46,7 +46,6 @@ describe("SyncStatusPill", () => {
   });
 
   it.each([
-    ["conflict", createSyncState({ conflictPending: true }), "Cần chọn bản dữ liệu"],
     ["syncing", createSyncState({ syncing: true, loading: true }), "Đang sao lưu"],
     ["offline", createSyncState({ online: false }), "Đã lưu trên thiết bị này. Chưa sao lưu"],
     ["pending", createSyncState({ pendingCount: 3 }), "Đã lưu trên thiết bị này. Chưa sao lưu"],
@@ -88,23 +87,5 @@ describe("SyncStatusPill", () => {
     fireEvent.click(screen.getByRole("button", { name: "Đã lưu trên thiết bị này. Chưa sao lưu" }));
 
     expect(triggerSyncNow).toHaveBeenCalledTimes(1);
-  });
-
-  it("opens conflict resolution when cloud and device versions diverge", () => {
-    const listener = vi.fn();
-    window.addEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, listener);
-
-    renderPill(
-      createSyncState({
-        conflictPending: true,
-        lastSyncedAt: "2026-05-10T09:59:30.000Z",
-      }),
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Cần chọn bản dữ liệu" }));
-
-    expect(screen.getByText("Cần chọn bản dữ liệu")).toBeInTheDocument();
-    expect(listener).toHaveBeenCalledTimes(1);
-    window.removeEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, listener);
   });
 });
