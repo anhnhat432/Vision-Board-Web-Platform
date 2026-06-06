@@ -1,7 +1,61 @@
 import type { AssistantContext } from "./assistantService";
 
+export interface RoutePlaybook {
+  id: string;
+  matchKeywords: string[];
+  guidance: string;
+}
+
+const PLAYBOOK_HEADER = "\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:";
+
+export const ROUTE_PLAYBOOKS: RoutePlaybook[] = [
+  {
+    id: "life-insight",
+    matchKeywords: ["life-insight"],
+    guidance:
+      "- Life Insight: phản chiếu giá trị sống/focus area từ dữ liệu hiện có, giúp user viết insight thành 1-2 câu rõ ràng. Chỉ hỏi 1 câu còn thiếu; chưa nhảy sang SMART/12-week nếu user chưa yêu cầu.",
+  },
+  {
+    id: "smart-goal",
+    matchKeywords: ["smart-goal"],
+    guidance:
+      "- SMART Goal: ưu tiên làm rõ kết quả cụ thể, chỉ số đo, deadline và tính liên quan. Nếu có SMART Goal Quality, dùng warnings/suggestions để viết lại câu mục tiêu tốt hơn. Không tạo goal/action nếu category hoặc deadline còn mơ hồ.",
+  },
+  {
+    id: "feasibility",
+    matchKeywords: ["feasibility"],
+    guidance:
+      "- Feasibility: bám vào readiness/bottleneck trong context, đề xuất điều chỉnh nhỏ nhất để mục tiêu khả thi hơn. Không tự bịa điểm số; nếu thiếu dữ liệu, hỏi đúng 1 trường quan trọng nhất.",
+  },
+  {
+    id: "12-week-setup",
+    matchKeywords: ["12-week-setup", "12-week-plan"],
+    guidance:
+      "- 12-week setup/plan: giúp user hoàn thiện week12Outcome, lag metric, lead indicators và review day. Chỉ tạo create_twelve_week_plan_draft khi đủ schema bắt buộc; mọi bản nháp/workflow nhiều bước phải autoExecute false.",
+  },
+  {
+    id: "today",
+    matchKeywords: ["12-week-system", "today"],
+    guidance:
+      "- Today/12-week system: ưu tiên 1 việc cốt lõi đang mở, task quá hạn, hoặc bước 10 phút. Khi thao tác task, taskId phải lấy từ dòng [taskId:...] trong context.",
+  },
+  {
+    id: "reflection",
+    matchKeywords: ["reflection"],
+    guidance:
+      "- Reflection/weekly review: giúp user rút ra bằng chứng tuần này, obstacle thật, điều chỉnh workload và nextWeekPriority. Chỉ tạo add_weekly_review khi goalId/weekNumber có trong context hoặc user nêu rõ.",
+  },
+];
+
 function getActiveRoute(context?: AssistantContext): string {
   return context?.pageContext?.route || context?.route || "";
+}
+
+export function resolveRoutePlaybook(routeKey: string): RoutePlaybook | undefined {
+  const normalized = routeKey.toLowerCase();
+  return ROUTE_PLAYBOOKS.find((playbook) =>
+    playbook.matchKeywords.some((keyword) => normalized.includes(keyword)),
+  );
 }
 
 function getRouteGuidance(context?: AssistantContext): string {
@@ -11,31 +65,10 @@ function getRouteGuidance(context?: AssistantContext): string {
   const pageType = context.pageContextHint?.pageType ?? "";
   const routeKey = `${route} ${pageType}`.toLowerCase();
 
-  if (routeKey.includes("life-insight")) {
-    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Life Insight: phản chiếu giá trị sống/focus area từ dữ liệu hiện có, giúp user viết insight thành 1-2 câu rõ ràng. Chỉ hỏi 1 câu còn thiếu; chưa nhảy sang SMART/12-week nếu user chưa yêu cầu.`;
-  }
+  const playbook = resolveRoutePlaybook(routeKey);
+  if (!playbook) return "";
 
-  if (routeKey.includes("smart-goal")) {
-    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- SMART Goal: ưu tiên làm rõ kết quả cụ thể, chỉ số đo, deadline và tính liên quan. Nếu có SMART Goal Quality, dùng warnings/suggestions để viết lại câu mục tiêu tốt hơn. Không tạo goal/action nếu category hoặc deadline còn mơ hồ.`;
-  }
-
-  if (routeKey.includes("feasibility")) {
-    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Feasibility: bám vào readiness/bottleneck trong context, đề xuất điều chỉnh nhỏ nhất để mục tiêu khả thi hơn. Không tự bịa điểm số; nếu thiếu dữ liệu, hỏi đúng 1 trường quan trọng nhất.`;
-  }
-
-  if (routeKey.includes("12-week-setup") || routeKey.includes("12-week-plan")) {
-    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- 12-week setup/plan: giúp user hoàn thiện week12Outcome, lag metric, lead indicators và review day. Chỉ tạo create_twelve_week_plan_draft khi đủ schema bắt buộc; mọi bản nháp/workflow nhiều bước phải autoExecute false.`;
-  }
-
-  if (routeKey.includes("12-week-system") || routeKey.includes("today")) {
-    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Today/12-week system: ưu tiên 1 việc cốt lõi đang mở, task quá hạn, hoặc bước 10 phút. Khi thao tác task, taskId phải lấy từ dòng [taskId:...] trong context.`;
-  }
-
-  if (routeKey.includes("reflection")) {
-    return `\n\nPLAYBOOK THEO MÀN HÌNH HIỆN TẠI:\n- Reflection/weekly review: giúp user rút ra bằng chứng tuần này, obstacle thật, điều chỉnh workload và nextWeekPriority. Chỉ tạo add_weekly_review khi goalId/weekNumber có trong context hoặc user nêu rõ.`;
-  }
-
-  return "";
+  return `${PLAYBOOK_HEADER}\n${playbook.guidance}`;
 }
 
 export function buildSystemPrompt(context?: AssistantContext): string {
