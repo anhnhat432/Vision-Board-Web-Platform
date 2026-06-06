@@ -1,6 +1,14 @@
+import { redactSensitive as sharedRedactSensitive } from "@shared/assistantRedaction";
 import { getUserData } from "@/app/utils/storage";
 import { recordAssistantEvent } from "./assistantObservability";
 import type { FeedbackReason, MemoryItem } from "./types";
+
+/**
+ * Re-export redaction dùng chung. Trước đây mỗi module assistant có bản sao riêng,
+ * dễ lệch regex. Giữ named export `redactSensitive` ở đây để các nơi đang import từ
+ * `./assistantMemory` không phải đổi import.
+ */
+export const redactSensitive = sharedRedactSensitive;
 
 export interface AssistantMemory {
   version: number;
@@ -59,25 +67,6 @@ function normalizeTextArray(value: unknown, limit = MAX_ARRAY_SIZE): string[] {
 
 function isPreferredCoachingStyle(value: unknown): value is AssistantMemory["preferredCoachingStyle"] {
   return value === "direct" || value === "gentle" || value === "structured" || value === "brief";
-}
-
-// Redact secrets, sensitive keys, emails
-export function redactSensitive(text: string): string {
-  return text
-    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]")
-    .replace(/\b(?=[A-Za-z0-9_-]{20,}\b)(?=[A-Za-z0-9_-]*\d)[A-Za-z0-9_-]+\b/g, "[REDACTED]")
-    .replace(
-      /\b(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key|credentials)\b\s*[:=]\s*["']?[^"'\s,;]+/gi,
-      "$1: [REDACTED]",
-    )
-    .replace(
-      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi,
-      "[REDACTED]",
-    )
-    .replace(
-      /\b(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key|credentials)\b/gi,
-      "[REDACTED]",
-    );
 }
 
 export function normalizeAssistantMemory(raw: unknown): AssistantMemory {

@@ -2,6 +2,7 @@ import { isDemoMode } from "@/app/utils/app-mode";
 import { getApiBaseUrl, post } from "@/lib/api/apiClient";
 import { AuthError, authedFetch } from "@/lib/auth/authedFetch";
 import { mockProvider } from "./assistantEngine";
+import { getSessionId } from "./assistantObservability";
 import type { AssistantContext } from "./buildAssistantContext";
 import { sanitizeAssistantContext } from "./sanitizeContext";
 import type { ChatHistoryMessage } from "./types";
@@ -271,6 +272,8 @@ export async function sendAssistantMessageStream(
     context: sanitizedContext,
     history: sanitizedHistory,
     mode: "real",
+    // G4: gửi sessionId để backend hash 1 chiều cho telemetry (không gửi userId raw).
+    sessionId: getSessionId(),
   };
 
   const streamResponse = await fetchStructuredAssistant(`${getApiBaseUrl()}/ai/assistant/stream`, body, signal);

@@ -1,3 +1,4 @@
+import { redactSensitive } from "../shared/assistantRedaction";
 import { sendToGemini } from "./geminiAssistantProvider";
 import { sendToGroq, sendToGroqStream } from "./groqAssistantProvider";
 import { env } from "../config/env";
@@ -436,15 +437,6 @@ function sanitizeAssistantMemory(value: unknown): AssistantContext["assistantMem
       .slice(0, 3)
       .map((item) => sanitizeText(redactSensitive(String(item)), 100)),
   };
-}
-
-function redactSensitive(textVal: string): string {
-  return textVal
-    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]")
-    .replace(/[\w\-]{20,}/g, "[REDACTED]")
-    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)\s*:\s*[^\s,]+/gi, "$1: [REDACTED]")
-    .replace(/\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi, "[REDACTED]")
-    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)/gi, "[REDACTED]");
 }
 
 type RetrievedKnowledgeSource = NonNullable<AssistantContext["retrievedKnowledge"]>[number]["source"];

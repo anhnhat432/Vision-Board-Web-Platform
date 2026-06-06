@@ -9,6 +9,7 @@
  *   - route: string max 50 chars
  */
 
+import { redactSensitive } from "@shared/assistantRedaction";
 import type { AssistantContext } from "./buildAssistantContext";
 
 export interface SanitizedAssistantContext extends AssistantContext {
@@ -229,18 +230,6 @@ function sanitizeAssistantMemory(memory: AssistantContext["assistantMemory"]): A
     recentCorrections: (memory.recentCorrections || []).slice(0, 3).map((item) => text(item, 100)),
     oftenMissedTasks: (memory.oftenMissedTasks || []).slice(0, 3).map((item) => text(item, 100)),
   };
-}
-
-function redactSensitive(textVal: string): string {
-  return textVal
-    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]")
-    .replace(/[\w-]{20,}/g, "[REDACTED]")
-    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)\s*:\s*[^\s,]+/gi, "$1: [REDACTED]")
-    .replace(
-      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|token|private[_\s-]?key)[\w-]*\b/gi,
-      "[REDACTED]",
-    )
-    .replace(/(api[_-]?key|secret|password|token|private[_-]?key|credentials)/gi, "[REDACTED]");
 }
 
 function isRetrievedKnowledgeSource(value: unknown): value is RetrievedKnowledgeSource {

@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { mockProvider, resetAssistantSession } from "../assistantEngine";
 import type { AssistantContext } from "../buildAssistantContext";
-import { EVAL_CASES } from "../evals/assistantEvalCases";
+import {
+  EVAL_CASES,
+  EVAL_CATEGORIES,
+  SAFETY_CRITICAL_CATEGORIES,
+} from "../evals/assistantEvalCases";
+import { formatEvalSummary, runAssistantEvals } from "../evals/evalRunner";
 import { parseAssistantReply } from "../parseActions";
 
 const BASE_CONTEXT: AssistantContext = {
@@ -160,4 +165,60 @@ describe("AI Assistant Evaluation Suite", () => {
       }
     });
   }
+});
+
+/**
+ * G5: chạy toàn bộ golden set qua runner để có report theo category/route + rubric,
+ * và gate pass rate ở mức production-grade (deterministic, CI bắt buộc).
+ */
+describe("AI Assistant Eval Harness (runner + rubric gating)", () => {
+  beforeEach(() => {
+    resetAssistantSession();
+  });
+
+  it("đạt pass rate tổng >= 90% và safety-critical = 100%", async () => {
+    const summary = await runAssistantEvals(
+      EVAL_CASES,
+      async (input, ctx) => {
+        const context = buildEvalContext(ctx);
+        const reply = await mockProvider.send(input, context);
+        const parsed = parseAssistantReply(reply);
+        return { content: reply, actions: parsed.actions };
+      },
+      { safetyCriticalCategories: SAFETY_CRITICAL_CATEGORIES },
+    );
+
+    // In report để CI log có thể trả lời route/category nào yếu.
+    // eslint-disable-next-line no-console
+    console.info(`\n${formatEvalSummary(summary)}\n`);
+
+    // GĐ2 tiêu chí: pass rate baseline >= 90%.
+    expect(summary.passRate).toBeGreaterThanOrEqual(90);
+    // Safety-critical không được regression.
+    expect(summary.safetyCriticalPassRate).toBe(100);
+  });
+
+  it("golden set đủ lớn và phủ mọi category đã định nghĩa", async () => {
+    // G5 tiêu chí số lượng case theo lộ trình (>= 28 hiện tại, hướng tới 100).
+    expect(EVAL_CASES.length).toBeGreaterThanOrEqual(28);
+
+    const presentCategories = new Set(EVAL_CASES.map((c) => c.category));
+    for (const category of EVAL_CATEGORIES) {
+      expect(presentCategories.has(category)).toBe(true);
+    }
+  });
+
+  it("báo cáo breakdown theo route giúp xác định màn hình chất lượng thấp", async () => {
+    const summary = await runAssistantEvals(EVAL_CASES, async (input, ctx) => {
+      const context = buildEvalContext(ctx);
+      const reply = await mockProvider.send(input, context);
+      const parsed = parseAssistantReply(reply);
+      return { content: reply, actions: parsed.actions };
+    });
+
+    expect(summary.byRoute.length).toBeGreaterThan(0);
+    // Tổng case trong breakdown phải khớp tổng case.
+    const totalInRoutes = summary.byRoute.reduce((acc, g) => acc + g.total, 0);
+    expect(totalInRoutes).toBe(EVAL_CASES.length);
+  });
 });

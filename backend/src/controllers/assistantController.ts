@@ -11,7 +11,19 @@ import {
   type AIAssistantRequest,
 } from "../services/aiAssistantService";
 import { transcribeAudio } from "../services/groqAssistantProvider";
+import {
+  getAssistantTelemetryOverview,
+  recordClientAssistantEvents,
+} from "../services/assistantTelemetry";
+import { evaluateAssistantAlerts } from "../services/assistantAlerts";
 import { errorResponse, successResponse } from "../utils/apiResponse";
+
+// G4: trích session id từ body để hash 1 chiều ở telemetry (không bao giờ lưu raw).
+function extractSessionId(body: unknown): string | undefined {
+  if (!body || typeof body !== "object") return undefined;
+  const sessionId = (body as { sessionId?: unknown }).sessionId;
+  return typeof sessionId === "string" && sessionId.trim() ? sessionId : undefined;
+}
 
 function withErrorCode(message: string, errorCode: string) {
   const payload = errorResponse(message);
@@ -53,6 +65,7 @@ function validateAIAssistantBody(body: any):
       context,
       mode,
       history,
+      sessionId: extractSessionId(body),
     },
   };
 }
@@ -173,6 +186,7 @@ export async function aiAssistantController(req: Request, res: Response) {
       context,
       mode,
       history,
+      sessionId: extractSessionId(req.body),
     };
 
     const result = await processAIAssistantRequest(requestData);
@@ -246,6 +260,64 @@ export async function aiAssistantStreamController(req: Request, res: Response) {
       });
       res.end();
     }
+  }
+}
+
+export async function assistantTelemetryController(req: Request, res: Response) {
+  // G4: nhận event observability redacted từ frontend. Telemetry tự gate qua AI_ENABLE_TELEMETRY.
+  const events = (req.body as { events?: unknown })?.events;
+  if (!Array.isArray(events)) {
+    return res.status(400).json(
+      withErrorCode("Danh sách sự kiện không hợp lệ.", "AI_TELEMETRY_INVALID_EVENTS"),
+    );
+  }
+
+  try {
+    const accepted = recordClientAssistantEvents(events);
+    return res.json(successResponse({ accepted }));
+  } catch (error) {
+    console.error("[ai-assistant] Telemetry ingest error:", error instanceof Error ? error.name : "UnknownError");
+    return res.status(500).json(
+      withErrorCode("Không ghi nhận được telemetry.", "AI_TELEMETRY_INTERNAL_ERROR"),
+    );
+  }
+}
+
+/**
+ * G4/G5: đọc tổng hợp telemetry (provider health, quality proxy, cost, parse/repair, experiment, theo route).
+ * Chỉ trả metadata redacted đã tổng hợp; admin-guarded ở route. Dùng cho dashboard vận hành.
+ */
+export async function assistantTelemetryOverviewController(_req: Request, res: Response) {
+  try {
+    const overview = getAssistantTelemetryOverview();
+    return res.json(successResponse(overview));
+  } catch (error) {
+    console.error(
+      "[ai-assistant] Telemetry overview error:",
+      error instanceof Error ? error.name : "UnknownError",
+    );
+    return res.status(500).json(
+      withErrorCode("Không đọc được telemetry overview.", "AI_TELEMETRY_OVERVIEW_ERROR"),
+    );
+  }
+}
+
+/**
+ * GĐ5 (Alerting/SLO): đọc alert vận hành dựa trên telemetry redacted so với ngưỡng SLO.
+ * Admin-guarded ở route. Dùng cho dashboard/runbook để quyết định can thiệp/rollback.
+ */
+export async function assistantAlertsController(_req: Request, res: Response) {
+  try {
+    const report = evaluateAssistantAlerts();
+    return res.json(successResponse(report));
+  } catch (error) {
+    console.error(
+      "[ai-assistant] Alerts evaluation error:",
+      error instanceof Error ? error.name : "UnknownError",
+    );
+    return res.status(500).json(
+      withErrorCode("Không đánh giá được alert SLO.", "AI_ALERTS_EVAL_ERROR"),
+    );
   }
 }
 

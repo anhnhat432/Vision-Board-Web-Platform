@@ -34,6 +34,7 @@ export function defineVisionBoardVitestConfig(testOverrides = {}) {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "@shared": path.resolve(__dirname, "./backend/src/shared"),
       },
     },
     test: {

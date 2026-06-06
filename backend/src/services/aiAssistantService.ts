@@ -1,22 +1,22 @@
 import { env } from "../config/env";
+import {
+  type AssistantActionType,
+  sanitizeActionPayload,
+  VALID_ACTION_TYPES,
+} from "../shared/assistantActionSchema";
 import { sendToGemini } from "./geminiAssistantProvider";
-import { sendToGroq, sendToGroqStream } from "./groqAssistantProvider";
+import { estimateTokens, sendToGroq, sendToGroqStream } from "./groqAssistantProvider";
+import {
+  type AssistantTurnOutcome,
+  hashSession,
+  recordAssistantTurnTelemetry,
+} from "./assistantTelemetry";
+import { decideRollout } from "./assistantRollout";
 import type { AssistantContext } from "./assistantService";
 
 export interface AssistantAction {
   id: string;
-  type:
-    | "create_task"
-    | "mark_task_done"
-    | "navigate_to"
-    | "create_goal"
-    | "create_life_insight_note"
-    | "create_smart_goal_from_insight"
-    | "suggest_feasibility_inputs"
-    | "create_twelve_week_plan_draft"
-    | "add_weekly_review"
-    | "reschedule_task"
-    | "update_task_status";
+  type: AssistantActionType;
   payload: Record<string, unknown>;
   label: string;
 }
@@ -26,6 +26,8 @@ export interface AIAssistantRequest {
   context: AssistantContext;
   mode: "demo" | "real";
   history?: Array<{ role: "user" | "assistant"; content: string }>;
+  // G4: session id (sẽ được hash 1 chiều ở telemetry, không bao giờ lưu raw).
+  sessionId?: string;
 }
 
 export interface AIAssistantResponse {
@@ -41,46 +43,63 @@ export interface AIAssistantError {
 interface AIAssistantParseDiagnostics extends AIAssistantResponse {
   actionBlockCount: number;
   invalidActionBlockCount: number;
+  // G3: cờ cho biết đã dùng nhánh structured JSON hay fallback regex.
+  structuredAttempted: boolean;
+  structuredSucceeded: boolean;
+  fencedSucceeded: boolean;
 }
 
-const VALID_ACTION_TYPES = [
-  "create_task",
-  "mark_task_done",
-  "navigate_to",
-  "create_goal",
-  "create_life_insight_note",
-  "create_smart_goal_from_insight",
-  "suggest_feasibility_inputs",
-  "create_twelve_week_plan_draft",
-  "add_weekly_review",
-  "reschedule_task",
-  "update_task_status",
-];
-const VALID_ROUTES = [
-  "/",
-  "/settings",
-  "/onboarding",
-  "/life-insight",
-  "/feasibility",
-  "/smart-goal-setup",
-  "/vision",
-  "/12-week-setup",
-  "/12-week-dashboard",
-  "/12-week-plan-setup",
-  "/12-week-plan-overview",
-  "/12-week-system",
-  "/today-v2",
-  "/billing",
-  "/goals",
-  "/life-balance",
-  "/achievements",
-  "/journal",
-  "/gallery",
-  "/today",
-  "/reflection",
-  "/dashboard",
-  "/twelve-week",
-];
+interface ParseOptions {
+  // G3: cho phép parser ưu tiên thử JSON object hợp lệ trước khi rơi về regex action block.
+  structured?: boolean;
+}
+
+/**
+ * G3 metrics: theo dõi hiệu quả structured output vs parser regex cũ.
+ * Đây là counters in-memory, redacted (không lưu nội dung), phục vụ đo invalid rate trước/sau.
+ */
+export interface AssistantParseMetrics {
+  structuredParseAttempts: number;
+  structuredParseSuccess: number;
+  structuredParseFallback: number;
+  fencedParseSuccess: number;
+  totalActionBlocks: number;
+  invalidActionBlocks: number;
+  repairTriggered: number;
+  repairSucceeded: number;
+}
+
+const assistantParseMetrics: AssistantParseMetrics = {
+  structuredParseAttempts: 0,
+  structuredParseSuccess: 0,
+  structuredParseFallback: 0,
+  fencedParseSuccess: 0,
+  totalActionBlocks: 0,
+  invalidActionBlocks: 0,
+  repairTriggered: 0,
+  repairSucceeded: 0,
+};
+
+export function getAssistantParseMetrics(): AssistantParseMetrics {
+  return { ...assistantParseMetrics };
+}
+
+export function resetAssistantParseMetrics(): void {
+  assistantParseMetrics.structuredParseAttempts = 0;
+  assistantParseMetrics.structuredParseSuccess = 0;
+  assistantParseMetrics.structuredParseFallback = 0;
+  assistantParseMetrics.fencedParseSuccess = 0;
+  assistantParseMetrics.totalActionBlocks = 0;
+  assistantParseMetrics.invalidActionBlocks = 0;
+  assistantParseMetrics.repairTriggered = 0;
+  assistantParseMetrics.repairSucceeded = 0;
+}
+
+/** Tỉ lệ invalid action block trên tổng số block đã quét (0..1). */
+export function getInvalidActionBlockRate(metrics: AssistantParseMetrics = assistantParseMetrics): number {
+  if (metrics.totalActionBlocks === 0) return 0;
+  return metrics.invalidActionBlocks / metrics.totalActionBlocks;
+}
 
 const PROVIDER_FALLBACK_ERROR_CODES = new Set([
   "ASSISTANT_PROVIDER_AUTH_ERROR",
@@ -380,255 +399,109 @@ async function sendToGeminiWithModelRouting(
   return primaryResult;
 }
 
-function sanitizeCreateTaskPayload(payload: any) {
-  if (!payload || typeof payload.title !== "string") return null;
-  const title = payload.title.slice(0, 200).trim();
-
-  const scheduledDateRaw = payload.scheduledDate;
-  let scheduledDate: string;
-  if (scheduledDateRaw === "today" || scheduledDateRaw === "tomorrow") {
-    scheduledDate = scheduledDateRaw;
-  } else if (typeof scheduledDateRaw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(scheduledDateRaw)) {
-    scheduledDate = scheduledDateRaw;
-  } else {
+// G3: validate + sanitize 1 action object (chia sẻ giữa nhánh structured JSON và regex block).
+// Trả về AssistantAction hợp lệ hoặc null. Tái dùng sanitizeActionPayload của schema chung G2.
+function buildSanitizedAction(json: unknown): AssistantAction | null {
+  if (!json || typeof json !== "object" || Array.isArray(json)) return null;
+  const candidate = json as Record<string, unknown>;
+  if (
+    typeof candidate.type !== "string" ||
+    !(VALID_ACTION_TYPES as readonly string[]).includes(candidate.type) ||
+    typeof candidate.label !== "string" ||
+    !candidate.payload ||
+    typeof candidate.payload !== "object" ||
+    Array.isArray(candidate.payload)
+  ) {
     return null;
   }
 
-  const isCore = payload.isCore === true;
-  return { title, scheduledDate, isCore };
+  const sanitizedPayload = sanitizeActionPayload(
+    candidate.type as AssistantActionType,
+    candidate.payload as Record<string, unknown>,
+  );
+  if (!sanitizedPayload) return null;
+
+  return {
+    id: typeof candidate.id === "string" && candidate.id ? candidate.id : `act_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    type: candidate.type as AssistantActionType,
+    payload: sanitizedPayload,
+    label: candidate.label.slice(0, 80),
+  };
 }
 
-function sanitizeMarkTaskDonePayload(payload: any) {
-  if (!payload || typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
-  if (typeof payload.done !== "boolean") return null;
-  const taskId = payload.taskId.slice(0, 100).trim();
-  const done = payload.done;
-  if (!done) return null;
-  return { taskId, done };
-}
+// G3: thử parse toàn bộ rawText như 1 JSON object structured ({ assistantText, actions }).
+// Chỉ áp dụng khi caller bật structured. Trả về null nếu không phải JSON structured hợp lệ
+// để parser rơi về nhánh regex action block cũ.
+function tryParseStructuredResponse(rawText: string): {
+  assistantText: string;
+  proposedActions: AssistantAction[];
+  actionBlockCount: number;
+  invalidActionBlockCount: number;
+} | null {
+  const trimmed = rawText.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return null;
 
-function sanitizeNavigateToPayload(payload: any) {
-  if (!payload || typeof payload.route !== "string") return null;
-  const route = payload.route;
-  if (!route.startsWith("/") || !VALID_ROUTES.includes(route)) return null;
-  return { route };
-}
-
-function sanitizeCreateGoalPayload(payload: any) {
-  if (!payload || typeof payload.title !== "string" || !payload.title.trim()) return null;
-  const title = payload.title.slice(0, 200).trim();
-  
-  let category = "other";
-  const validCategories = ["health", "career", "relationships", "finance", "personal", "family", "other"];
-  if (typeof payload.category === "string" && validCategories.includes(payload.category.toLowerCase())) {
-    category = payload.category.toLowerCase();
-  }
-  
-  const description = typeof payload.description === "string" ? payload.description.slice(0, 500).trim() : undefined;
-  
-  let deadline: string | undefined;
-  if (typeof payload.deadline === "string" && /^\d{4}-\d{2}-\d{2}$/.test(payload.deadline)) {
-    deadline = payload.deadline;
-  }
-  return { title, category, description, deadline };
-}
-
-function sanitizeCreateLifeInsightNotePayload(payload: any) {
-  if (!payload || typeof payload.title !== "string" || !payload.title.trim()) return null;
-  if (typeof payload.content !== "string" || !payload.content.trim()) return null;
-  const title = payload.title.slice(0, 200).trim();
-  const content = payload.content.slice(0, 2000).trim();
-  const mood = typeof payload.mood === "string" ? payload.mood.slice(0, 50) : undefined;
-  const entryType =
-    payload.entryType === "freeform" || payload.entryType === "weekly-review" || payload.entryType === "cycleReview"
-      ? payload.entryType
-      : "freeform";
-  return { title, content, mood, entryType };
-}
-
-function sanitizeCreateSmartGoalFromInsightPayload(payload: any) {
-  if (!payload || typeof payload.title !== "string" || !payload.title.trim()) return null;
-  const title = payload.title.slice(0, 200).trim();
-
-  let category = "other";
-  const validCategories = ["health", "career", "relationships", "finance", "personal", "family", "other"];
-  if (typeof payload.category === "string" && validCategories.includes(payload.category.toLowerCase())) {
-    category = payload.category.toLowerCase();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    return null;
   }
 
-  const description = typeof payload.description === "string" ? payload.description.slice(0, 1000).trim() : undefined;
-  const deadline =
-    typeof payload.deadline === "string" && /^\d{4}-\d{2}-\d{2}$/.test(payload.deadline) ? payload.deadline : undefined;
-  const focusArea = typeof payload.focusArea === "string" ? payload.focusArea.slice(0, 100).trim() : undefined;
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+  const obj = parsed as Record<string, unknown>;
 
-  return { title, category, description, deadline, focusArea };
-}
+  // Phải có ít nhất một trong hai field hợp đồng để coi là structured response.
+  const hasAssistantText = typeof obj.assistantText === "string";
+  const hasActions = Array.isArray(obj.actions);
+  if (!hasAssistantText && !hasActions) return null;
 
-function sanitizeSuggestFeasibilityInputsPayload(payload: any) {
-  if (!payload || !payload.answers || typeof payload.answers !== "object" || Array.isArray(payload.answers)) return null;
-  const rawAnswers = payload.answers as Record<string, unknown>;
-  const answers: Record<number, string> = {};
+  const assistantText = hasAssistantText ? (obj.assistantText as string).trim() : "";
+  const proposedActions: AssistantAction[] = [];
+  let actionBlockCount = 0;
+  let invalidActionBlockCount = 0;
 
-  const validQ1 = ["lt1", "1to3", "3to5", "gt5"];
-  const validQ2 = ["energy_drained", "energy_low", "energy_stable", "energy_high"];
-  const validQ3 = ["resources_missing", "resources_basic", "resources_mostly_ready", "resources_ready"];
-  const validQ4 = ["overwhelming", "challenging", "realistic", "very_realistic"];
-  const validQ5 = ["motivation", "time", "resources", "complexity", "none"];
-  const validQ6 = ["rarely", "sometimes", "mostly", "always"];
-  const validQ7 = ["exploring", "interested", "ready", "committed"];
-
-  const valQ1 = String(rawAnswers[1] ?? "");
-  const valQ2 = String(rawAnswers[2] ?? "");
-  const valQ3 = String(rawAnswers[3] ?? "");
-  const valQ4 = String(rawAnswers[4] ?? "");
-  const valQ5 = String(rawAnswers[5] ?? "");
-  const valQ6 = String(rawAnswers[6] ?? "");
-  const valQ7 = String(rawAnswers[7] ?? "");
-
-  if (!validQ1.includes(valQ1)) return null;
-  if (!validQ2.includes(valQ2)) return null;
-  if (!validQ3.includes(valQ3)) return null;
-  if (!validQ4.includes(valQ4)) return null;
-  if (!validQ5.includes(valQ5)) return null;
-  if (!validQ6.includes(valQ6)) return null;
-  if (!validQ7.includes(valQ7)) return null;
-
-  answers[1] = valQ1;
-  answers[2] = valQ2;
-  answers[3] = valQ3;
-  answers[4] = valQ4;
-  answers[5] = valQ5;
-  answers[6] = valQ6;
-  answers[7] = valQ7;
-
-  return { answers };
-}
-
-function sanitizeCreateTwelveWeekPlanDraftPayload(payload: any) {
-  if (!payload) return null;
-  const week12Outcome = typeof payload.week12Outcome === "string" ? payload.week12Outcome.slice(0, 500).trim() : "";
-  const lagMetricName = typeof payload.lagMetricName === "string" ? payload.lagMetricName.slice(0, 100).trim() : "";
-  const lagMetricTarget =
-    typeof payload.lagMetricTarget === "string" ? payload.lagMetricTarget.slice(0, 50).trim() : "";
-  const lagMetricUnit = typeof payload.lagMetricUnit === "string" ? payload.lagMetricUnit.slice(0, 50).trim() : "";
-  const startDate =
-    typeof payload.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(payload.startDate) ? payload.startDate : "";
-  const reviewDay = typeof payload.reviewDay === "string" ? payload.reviewDay.slice(0, 50).trim() : "Sunday";
-
-  let tacticLoadPreference: "balanced" | "lighter" | "push" = "balanced";
-  if (payload.tacticLoadPreference === "lighter" || payload.tacticLoadPreference === "push") {
-    tacticLoadPreference = payload.tacticLoadPreference;
-  }
-
-  const week4Milestone = typeof payload.week4Milestone === "string" ? payload.week4Milestone.slice(0, 500).trim() : "";
-  const week8Milestone = typeof payload.week8Milestone === "string" ? payload.week8Milestone.slice(0, 500).trim() : "";
-  const successEvidence =
-    typeof payload.successEvidence === "string" ? payload.successEvidence.slice(0, 500).trim() : "";
-  const dailyTimeBudget =
-    typeof payload.dailyTimeBudget === "string" ? payload.dailyTimeBudget.slice(0, 50).trim() : "";
-
-  let personalConstraint: "time" | "motivation" | "consistency" | "complexity" | "" = "";
-  const constraints = ["time", "motivation", "consistency", "complexity", ""];
-  if (typeof payload.personalConstraint === "string" && constraints.includes(payload.personalConstraint)) {
-    personalConstraint = payload.personalConstraint as any;
-  }
-
-  const leadIndicators: any[] = [];
-  if (Array.isArray(payload.leadIndicators)) {
-    for (const item of payload.leadIndicators) {
-      if (item && typeof item === "object" && !Array.isArray(item)) {
-        const id = typeof item.id === "string" ? item.id.slice(0, 100) : "tactic_" + Math.random().toString(36).slice(2, 8);
-        const name = typeof item.name === "string" ? item.name.slice(0, 200).trim() : "";
-        const target = typeof item.target === "string" ? item.target.slice(0, 50).trim() : "";
-        const unit = typeof item.unit === "string" ? item.unit.slice(0, 50).trim() : "";
-        const type = item.type === "core" || item.type === "optional" ? item.type : "core";
-        const cadence =
-          item.cadence === "spread" || item.cadence === "frontload" || item.cadence === "backload"
-            ? item.cadence
-            : "spread";
-
-        if (name) {
-          leadIndicators.push({ id, name, target, unit, type, cadence });
-        }
+  if (hasActions) {
+    for (const item of obj.actions as unknown[]) {
+      actionBlockCount += 1;
+      const action = buildSanitizedAction(item);
+      if (action) {
+        proposedActions.push(action);
+      } else {
+        invalidActionBlockCount += 1;
       }
     }
   }
 
-  return {
-    week12Outcome,
-    lagMetricName,
-    lagMetricTarget,
-    lagMetricUnit,
-    startDate,
-    reviewDay,
-    tacticLoadPreference,
-    week4Milestone,
-    week8Milestone,
-    successEvidence,
-    dailyTimeBudget,
-    personalConstraint,
-    leadIndicators,
-  };
+  return { assistantText, proposedActions, actionBlockCount, invalidActionBlockCount };
 }
 
-function sanitizeAddWeeklyReviewPayload(payload: any) {
-  if (!payload || typeof payload.goalId !== "string" || !payload.goalId.trim()) return null;
-  if (typeof payload.weekNumber !== "number") return null;
-
-  const goalId = payload.goalId.slice(0, 100);
-  const weekNumber = payload.weekNumber;
-  const mainObstacle = typeof payload.mainObstacle === "string" ? payload.mainObstacle.slice(0, 1000).trim() : "";
-  const nextWeekPriority =
-    typeof payload.nextWeekPriority === "string" ? payload.nextWeekPriority.slice(0, 1000).trim() : "";
-
-  let workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "" = "";
-  const decisions = ["keep same", "reduce slightly", "increase slightly", ""];
-  if (typeof payload.workloadDecision === "string" && decisions.includes(payload.workloadDecision)) {
-    workloadDecision = payload.workloadDecision as any;
+function parseAndValidateAIResponseWithDiagnostics(
+  rawText: string,
+  options: ParseOptions = {},
+): AIAssistantParseDiagnostics {
+  // 1. G3: ưu tiên JSON object structured khi caller bật structured output.
+  if (options.structured) {
+    assistantParseMetrics.structuredParseAttempts += 1;
+    const structured = tryParseStructuredResponse(rawText);
+    if (structured) {
+      assistantParseMetrics.structuredParseSuccess += 1;
+      assistantParseMetrics.totalActionBlocks += structured.actionBlockCount;
+      assistantParseMetrics.invalidActionBlocks += structured.invalidActionBlockCount;
+      return {
+        assistantText: structured.assistantText,
+        proposedActions: structured.proposedActions,
+        actionBlockCount: structured.actionBlockCount,
+        invalidActionBlockCount: structured.invalidActionBlockCount,
+        structuredAttempted: true,
+        structuredSucceeded: true,
+        fencedSucceeded: false,
+      };
+    }
+    // Không parse được JSON structured -> rơi về regex (đếm fallback).
+    assistantParseMetrics.structuredParseFallback += 1;
   }
 
-  const biggestOutputThisWeek =
-    typeof payload.biggestOutputThisWeek === "string" ? payload.biggestOutputThisWeek.slice(0, 1000).trim() : "";
-  const reflection = typeof payload.reflection === "string" ? payload.reflection.slice(0, 2000).trim() : "";
-  const adjustments = typeof payload.adjustments === "string" ? payload.adjustments.slice(0, 2000).trim() : "";
-
-  const disciplineScore =
-    typeof payload.disciplineScore === "number" ? Math.max(0, Math.min(10, payload.disciplineScore)) : undefined;
-  const progressScore =
-    typeof payload.progressScore === "number" ? Math.max(0, Math.min(10, payload.progressScore)) : undefined;
-
-  return {
-    goalId,
-    weekNumber,
-    mainObstacle,
-    nextWeekPriority,
-    workloadDecision,
-    biggestOutputThisWeek,
-    reflection,
-    adjustments,
-    disciplineScore,
-    progressScore,
-  };
-}
-
-function sanitizeRescheduleTaskPayload(payload: any) {
-  if (!payload || typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
-  if (typeof payload.scheduledDate !== "string" || !payload.scheduledDate.trim()) return null;
-
-  const taskId = payload.taskId.slice(0, 100);
-  const scheduledDate = payload.scheduledDate.slice(0, 50).trim();
-  return { taskId, scheduledDate };
-}
-
-function sanitizeUpdateTaskStatusPayload(payload: any) {
-  if (!payload || typeof payload.taskId !== "string" || !payload.taskId.trim()) return null;
-  if (typeof payload.completed !== "boolean") return null;
-  const taskId = payload.taskId.slice(0, 100).trim();
-  const completed = payload.completed;
-  return { taskId, completed };
-}
-
-function parseAndValidateAIResponseWithDiagnostics(rawText: string): AIAssistantParseDiagnostics {
   const proposedActions: AssistantAction[] = [];
   const blocksToRemove: string[] = [];
   let actionBlockCount = 0;
@@ -636,64 +509,22 @@ function parseAndValidateAIResponseWithDiagnostics(rawText: string): AIAssistant
 
   const processJson = (jsonStr: string) => {
     actionBlockCount += 1;
-    try {
-      const json = JSON.parse(jsonStr.trim());
-      if (typeof json.type === "string" && VALID_ACTION_TYPES.includes(json.type) && typeof json.label === "string") {
-        let sanitizedPayload: any = null;
-        switch (json.type) {
-          case "create_task":
-            sanitizedPayload = sanitizeCreateTaskPayload(json.payload);
-            break;
-          case "mark_task_done":
-            sanitizedPayload = sanitizeMarkTaskDonePayload(json.payload);
-            break;
-          case "navigate_to":
-            sanitizedPayload = sanitizeNavigateToPayload(json.payload);
-            break;
-          case "create_goal":
-            sanitizedPayload = sanitizeCreateGoalPayload(json.payload);
-            break;
-          case "create_life_insight_note":
-            sanitizedPayload = sanitizeCreateLifeInsightNotePayload(json.payload);
-            break;
-          case "create_smart_goal_from_insight":
-            sanitizedPayload = sanitizeCreateSmartGoalFromInsightPayload(json.payload);
-            break;
-          case "suggest_feasibility_inputs":
-            sanitizedPayload = sanitizeSuggestFeasibilityInputsPayload(json.payload);
-            break;
-          case "create_twelve_week_plan_draft":
-            sanitizedPayload = sanitizeCreateTwelveWeekPlanDraftPayload(json.payload);
-            break;
-          case "add_weekly_review":
-            sanitizedPayload = sanitizeAddWeeklyReviewPayload(json.payload);
-            break;
-          case "reschedule_task":
-            sanitizedPayload = sanitizeRescheduleTaskPayload(json.payload);
-            break;
-          case "update_task_status":
-            sanitizedPayload = sanitizeUpdateTaskStatusPayload(json.payload);
-            break;
-        }
-
-        if (sanitizedPayload) {
-          proposedActions.push({
-            id: json.id || `act_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-            type: json.type as any,
-            payload: sanitizedPayload,
-            label: json.label.slice(0, 80),
-          });
-          return true;
-        }
+    const action = buildSanitizedAction((() => {
+      try {
+        return JSON.parse(jsonStr.trim());
+      } catch {
+        return null;
       }
-    } catch {
-      // Ignore
+    })());
+    if (action) {
+      proposedActions.push(action);
+      return true;
     }
     invalidActionBlockCount += 1;
     return false;
   };
 
-  // 1. Quét code blocks ```action
+  // 2. Quét code blocks ```action
   const actionBlockRegex = /```action\n([\s\S]*?)\n```/g;
   let match: RegExpExecArray | null;
 
@@ -711,7 +542,7 @@ function parseAndValidateAIResponseWithDiagnostics(rawText: string): AIAssistant
     assistantText = assistantText.replace(block, "");
   }
 
-  // 2. Quét raw action blocks (không có ba nháy ngược)
+  // 3. Quét raw action blocks (không có ba nháy ngược)
   const rawActionRegex = /(?:^|\n)(?:action|json)\r?\n(\{[\s\S]*?\})(?=\n|$)/gi;
   let rawMatch: RegExpExecArray | null;
   const rawBlocksToRemove: string[] = [];
@@ -731,20 +562,68 @@ function parseAndValidateAIResponseWithDiagnostics(rawText: string): AIAssistant
   }
 
   assistantText = assistantText.trim();
-  return { assistantText, proposedActions, actionBlockCount, invalidActionBlockCount };
+
+  const fencedSucceeded = proposedActions.length > 0;
+  if (options.structured) {
+    // Khi structured bật nhưng đã fallback về regex, vẫn cộng dồn block đã quét để đo invalid rate.
+    assistantParseMetrics.totalActionBlocks += actionBlockCount;
+    assistantParseMetrics.invalidActionBlocks += invalidActionBlockCount;
+    if (fencedSucceeded) {
+      assistantParseMetrics.fencedParseSuccess += 1;
+    }
+  }
+
+  return {
+    assistantText,
+    proposedActions,
+    actionBlockCount,
+    invalidActionBlockCount,
+    structuredAttempted: options.structured === true,
+    structuredSucceeded: false,
+    fencedSucceeded,
+  };
 }
 
-export function parseAndValidateAIResponse(rawText: string): AIAssistantResponse {
-  const { assistantText, proposedActions } = parseAndValidateAIResponseWithDiagnostics(rawText);
+export function parseAndValidateAIResponse(rawText: string, options: ParseOptions = {}): AIAssistantResponse {
+  const { assistantText, proposedActions } = parseAndValidateAIResponseWithDiagnostics(rawText, options);
   return { assistantText, proposedActions };
 }
 
-export function shouldRepairAIResponse(rawText: string): boolean {
-  const diagnostics = parseAndValidateAIResponseWithDiagnostics(rawText);
+export function shouldRepairAIResponse(rawText: string, options: ParseOptions = {}): boolean {
+  // shouldRepairAIResponse chỉ dùng để quyết định có gọi repair pass hay không;
+  // không cộng dồn metrics ở đây để tránh đếm trùng. Dùng nhánh không structured.
+  const diagnostics = parseAndValidateAIResponseWithDiagnostics(rawText, { structured: false });
+  // Với structured response hợp lệ (JSON object), shouldRepair luôn false (xử lý ở nhánh structured).
+  if (options.structured && tryParseStructuredResponse(rawText)) return false;
   return diagnostics.actionBlockCount > 0 && diagnostics.proposedActions.length === 0 && diagnostics.invalidActionBlockCount > 0;
 }
 
+function resolveTelemetryRoute(context: AssistantContext): string | undefined {
+  if (typeof context.route === "string" && context.route) return context.route;
+  if (typeof context.pageContext?.route === "string" && context.pageContext.route) return context.pageContext.route;
+  return undefined;
+}
+
+function resolveActiveModel(provider: "groq" | "gemini", request: AIAssistantRequest): string {
+  if (provider === "groq") {
+    return env.AI_MODEL || env.GROQ_MODEL || "";
+  }
+  return selectGeminiModelForAssistantRequest(request).primaryModel;
+}
+
+function estimateTurnTokens(
+  request: AIAssistantRequest,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+  responseText: string,
+): number {
+  const historyTokens = history.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
+  return estimateTokens(request.message) + historyTokens + estimateTokens(responseText);
+}
+
 function shouldUseBufferedGroqResponse(request: AIAssistantRequest): boolean {
+  // GĐ5 (Runbook kill-switch): tắt streaming -> ép buffered toàn bộ.
+  if (env.AI_ENABLE_STREAMING !== true) return true;
+
   if (request.context.pendingClarification || request.context.pendingWorkflow) return true;
 
   const normalizedText = normalizeModelRoutingText(request.message);
@@ -902,13 +781,61 @@ export async function processAIAssistantRequest(
 
   // Gửi request thực tế tới AI provider
   const history = request.history || [];
+
+  // G4: telemetry tối thiểu redacted cho mỗi turn gọi provider (latency/error/action/token).
+  const turnStartedAt = Date.now();
+  const sessionHash = hashSession(request.sessionId);
+  const activeModel = resolveActiveModel(provider, request);
+  const rollout = decideRollout(request.mode, sessionHash);
+  let repairTriggered = false;
+  let repairSucceeded = false;
+  let structuredSucceeded = false;
+
+  const emitTurn = (
+    outcome: AssistantTurnOutcome,
+    info: { errorCode?: string; actions?: AssistantAction[]; responseText?: string; structured?: boolean },
+  ): void => {
+    const actions = info.actions ?? [];
+    recordAssistantTurnTelemetry({
+      provider,
+      model: activeModel,
+      route: resolveTelemetryRoute(request.context),
+      mode: request.mode,
+      latencyMs: Date.now() - turnStartedAt,
+      outcome,
+      errorCode: info.errorCode,
+      actionType: actions[0]?.type,
+      actionCount: actions.length,
+      structuredAttempted: info.structured === true,
+      structuredSucceeded,
+      repairTriggered,
+      repairSucceeded,
+      tokenEstimate: estimateTurnTokens(request, history, info.responseText ?? ""),
+      sessionHash,
+      source: "non_stream",
+      experiment: rollout.experiment,
+      variant: rollout.variant,
+      inCohort: rollout.inCohort,
+    });
+  };
+
+  // G3: bật JSON mode (structured output) cho nhánh action/workflow của Groq khi cờ env bật.
+  // Caller truyền structuredOutput=true; provider tự kiểm tra env.AI_ENABLE_STRUCTURED_OUTPUT.
+  const useStructured =
+    provider === "groq" &&
+    env.AI_ENABLE_STRUCTURED_OUTPUT === true &&
+    shouldUseBufferedGroqResponse(request);
+
   let result =
     provider === "gemini"
       ? await sendToGeminiWithModelRouting(request, history)
-      : await sendToGroq(request.message.trim(), request.context, history);
+      : await sendToGroq(request.message.trim(), request.context, history, { structuredOutput: useStructured });
 
-  if (!("errorCode" in result) && provider === "groq" && shouldRepairAIResponse(result.message)) {
+  if (!("errorCode" in result) && provider === "groq" && shouldRepairAIResponse(result.message, { structured: useStructured })) {
     console.warn("[ai-assistant] Groq returned invalid action block, retrying repair pass");
+    assistantParseMetrics.repairTriggered += 1;
+    repairTriggered = true;
+    // Repair pass dùng fenced action block (không structured) để tái dùng prompt repair hiện có.
     const repairResult = await sendToGroq(
       buildActionRepairPrompt(request.message.trim(), result.message),
       request.context,
@@ -918,7 +845,16 @@ export async function processAIAssistantRequest(
     if (!("errorCode" in repairResult)) {
       const repaired = parseAndValidateAIResponseWithDiagnostics(repairResult.message);
       if (!shouldRepairAIResponse(repairResult.message) && repaired.proposedActions.length > 0) {
-        result = repairResult;
+        assistantParseMetrics.repairSucceeded += 1;
+        repairSucceeded = true;
+        // Repair output là fenced block thường -> parse không structured ở dưới.
+        const repairedResponse = parseAndValidateAIResponse(repairResult.message);
+        emitTurn("success", {
+          actions: repairedResponse.proposedActions,
+          responseText: repairResult.message,
+          structured: useStructured,
+        });
+        return repairedResponse;
       }
     }
   }
@@ -928,17 +864,33 @@ export async function processAIAssistantRequest(
     const err = result as { message: string; errorCode: string };
     if (shouldUseProviderFallback(err.errorCode)) {
       console.warn("[ai-assistant] Provider unavailable, using deterministic fallback:", err.errorCode);
-      return buildProviderFallbackResponse(request.message, request.context, err.errorCode);
+      const fallback = buildProviderFallbackResponse(request.message, request.context, err.errorCode);
+      emitTurn("fallback", {
+        errorCode: err.errorCode,
+        actions: fallback.proposedActions,
+        responseText: fallback.assistantText,
+        structured: useStructured,
+      });
+      return fallback;
     }
 
+    emitTurn("error", { errorCode: err.errorCode, structured: useStructured });
     return {
       message: err.message,
       errorCode: err.errorCode,
     };
   }
 
-  // Phân tích và validate schema proposed actions từ kết quả LLM
-  return parseAndValidateAIResponse(result.message);
+  // Phân tích và validate schema proposed actions từ kết quả LLM.
+  // Khi structured bật, parser ưu tiên JSON object hợp lệ rồi fallback regex.
+  const diagnostics = parseAndValidateAIResponseWithDiagnostics(result.message, { structured: useStructured });
+  structuredSucceeded = diagnostics.structuredSucceeded;
+  emitTurn("success", {
+    actions: diagnostics.proposedActions,
+    responseText: result.message,
+    structured: useStructured,
+  });
+  return { assistantText: diagnostics.assistantText, proposedActions: diagnostics.proposedActions };
 }
 
 export async function processAIAssistantRequestStream(
@@ -969,11 +921,43 @@ export async function processAIAssistantRequestStream(
   const history = request.history || [];
 
   if (provider !== "groq" || shouldUseBufferedGroqResponse(request)) {
+    // Nhánh buffered đã được đo telemetry bên trong processAIAssistantRequest (source=non_stream).
     const result = await processAIAssistantRequest(request);
     if ("errorCode" in result) return result;
     onDelta(formatAIAssistantResponseForStream(result));
     return;
   }
+
+  // G4: telemetry cho nhánh streaming thuần (chat tự do, Groq stream text).
+  const turnStartedAt = Date.now();
+  const sessionHash = hashSession(request.sessionId);
+  const activeModel = resolveActiveModel(provider, request);
+  const rollout = decideRollout(request.mode, sessionHash);
+  let streamedText = "";
+
+  const emitStreamTurn = (outcome: AssistantTurnOutcome, errorCode?: string): void => {
+    recordAssistantTurnTelemetry({
+      provider,
+      model: activeModel,
+      route: resolveTelemetryRoute(request.context),
+      mode: request.mode,
+      latencyMs: Date.now() - turnStartedAt,
+      outcome,
+      errorCode,
+      actionType: undefined,
+      actionCount: 0,
+      structuredAttempted: false,
+      structuredSucceeded: false,
+      repairTriggered: false,
+      repairSucceeded: false,
+      tokenEstimate: estimateTurnTokens(request, history, streamedText),
+      sessionHash,
+      source: "stream",
+      experiment: rollout.experiment,
+      variant: rollout.variant,
+      inCohort: rollout.inCohort,
+    });
+  };
 
   try {
     let hasDelta = false;
@@ -983,25 +967,33 @@ export async function processAIAssistantRequestStream(
       history,
       (delta) => {
         hasDelta = true;
+        streamedText += delta;
         onDelta(delta);
       },
       signal,
     );
 
     if (!hasDelta) {
+      emitStreamTurn("error", "ASSISTANT_PROVIDER_ERROR");
       return {
         message: "Trợ lý chưa có gợi ý phù hợp cho câu hỏi này. Thử hỏi cụ thể hơn nhé.",
         errorCode: "ASSISTANT_PROVIDER_ERROR",
       };
     }
+
+    emitStreamTurn("success");
   } catch (error) {
     const err = normalizeStreamingProviderError(error);
     if (shouldUseProviderFallback(err.errorCode)) {
       console.warn("[ai-assistant] Groq stream unavailable, using deterministic fallback:", err.errorCode);
-      onDelta(formatAIAssistantResponseForStream(buildProviderFallbackResponse(request.message, request.context, err.errorCode)));
+      const fallback = buildProviderFallbackResponse(request.message, request.context, err.errorCode);
+      streamedText = fallback.assistantText;
+      emitStreamTurn("fallback", err.errorCode);
+      onDelta(formatAIAssistantResponseForStream(fallback));
       return;
     }
 
+    emitStreamTurn("error", err.errorCode);
     return err;
   }
 }

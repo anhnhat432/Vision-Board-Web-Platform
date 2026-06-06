@@ -15,6 +15,7 @@ import {
 import { captureAssistantFeedback } from "./assistantFeedback";
 import { autoCaptureUserMemory, clearMemory, updateAssistantMemoryFromFeedback } from "./assistantMemory";
 import { recordAssistantEvent } from "./assistantObservability";
+import { startAssistantTelemetryForwarding } from "./assistantTelemetryClient";
 import {
   type AssistantWorkflow,
   type AssistantWorkflowType,
@@ -778,6 +779,13 @@ export function useAssistant(options?: UseAssistantOptions) {
     },
     [userId],
   );
+
+  // G4: bật forward telemetry lên backend khi đã đăng nhập (real-mode/online).
+  // Forwarder tự gate demo-mode/offline; gọi idempotent nên an toàn khi re-render.
+  useEffect(() => {
+    if (!userId) return;
+    startAssistantTelemetryForwarding();
+  }, [userId]);
 
   useEffect(() => {
     setMessages(loadPersistedMessages(userId));

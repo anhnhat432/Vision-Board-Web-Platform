@@ -1,3 +1,4 @@
+import { redactSensitive } from "@shared/assistantRedaction";
 import type { AssistantAction } from "./parseActions";
 
 export type AssistantWorkflowType =
@@ -131,19 +132,6 @@ const DEFAULT_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 function getStorageKey(userId: string | null): string {
   return `${STORAGE_PREFIX}:${userId ?? "anon"}`;
-}
-
-function redactSensitive(text: string): string {
-  return text
-    .replace(/[\w-]{24,}/g, "[REDACTED]")
-    .replace(
-      /(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)\s*[:=]\s*[^\s,]+/gi,
-      "$1: [REDACTED]",
-    )
-    .replace(
-      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)[\w-]*\b/gi,
-      "[REDACTED]",
-    );
 }
 
 function sanitizeText(value: unknown, maxLength: number): string {

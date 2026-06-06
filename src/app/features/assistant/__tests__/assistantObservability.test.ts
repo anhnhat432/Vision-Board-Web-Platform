@@ -193,6 +193,8 @@ describe("evalRunner", () => {
     {
       id: "case_test_contain",
       name: "Check contain rule",
+      category: "normal",
+      route: "general",
       input: "test contain",
       context: { todayTasks: [] },
       expected: {
@@ -202,6 +204,8 @@ describe("evalRunner", () => {
     {
       id: "case_test_not_contain",
       name: "Check not contain rule",
+      category: "normal",
+      route: "general",
       input: "test not contain",
       context: { todayTasks: [] },
       expected: {
@@ -211,6 +215,8 @@ describe("evalRunner", () => {
     {
       id: "case_test_actions",
       name: "Check action type rules",
+      category: "normal",
+      route: "today",
       input: "test actions",
       context: { todayTasks: [{ id: "task_1", title: "Task 1", done: false }] },
       expected: {
@@ -222,6 +228,8 @@ describe("evalRunner", () => {
     {
       id: "case_test_max_words",
       name: "Check max words limit",
+      category: "normal",
+      route: "general",
       input: "test max words",
       context: { todayTasks: [] },
       expected: {
@@ -231,6 +239,8 @@ describe("evalRunner", () => {
     {
       id: "case_test_clarification",
       name: "Check must ask clarification",
+      category: "missing_context",
+      route: "general",
       input: "test clarify",
       context: { todayTasks: [] },
       expected: {

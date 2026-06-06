@@ -1,3 +1,5 @@
+import { redactSensitive } from "@shared/assistantRedaction";
+
 export type AssistantEventType =
   | "assistant_message_sent"
   | "assistant_message_received"
@@ -63,6 +65,19 @@ export interface AssistantMetrics {
 const STORAGE_PREFIX = "assistant.observability";
 const MAX_EVENTS_LIMIT = 500;
 
+/**
+ * G4: sink để forward event lên backend telemetry khi signed-in/online (real-mode).
+ * Dùng cơ chế đăng ký sink để tránh import vòng giữa observability và telemetry client.
+ * Local log luôn chạy trước; sink chỉ là best-effort, không được ném lỗi ra ngoài.
+ */
+export type AssistantEventSink = (event: AssistantEvent) => void;
+
+let assistantEventSink: AssistantEventSink | null = null;
+
+export function setAssistantEventSink(sink: AssistantEventSink | null): void {
+  assistantEventSink = sink;
+}
+
 // Session ID logic (keeps a single session ID per browser session)
 let currentSessionId = "";
 export function getSessionId(): string {
@@ -86,19 +101,6 @@ export function getSessionId(): string {
 
 function getStorageKey(userId: string | null): string {
   return `${STORAGE_PREFIX}:${userId ?? "anon"}`;
-}
-
-function redactSensitive(value: string): string {
-  return value
-    .replace(/[\w-]{24,}/g, "[REDACTED]")
-    .replace(
-      /(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)\s*[:=]\s*[^\s,]+/gi,
-      "$1: [REDACTED]",
-    )
-    .replace(
-      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)[\w-]*\b/gi,
-      "[REDACTED]",
-    );
 }
 
 function sanitizeRecord(record: Record<string, unknown>): AssistantEventMetadata {
@@ -183,6 +185,15 @@ export function recordAssistantEvent(input: {
     localStorage.setItem(key, JSON.stringify(capped));
   } catch {
     // Avoid crashing if localStorage is full or disabled
+  }
+
+  // G4: best-effort forward lên backend telemetry (sink tự quyết định gửi hay giữ offline).
+  if (assistantEventSink) {
+    try {
+      assistantEventSink(newEvent);
+    } catch {
+      // Sink không bao giờ được phá vỡ local logging.
+    }
   }
 }
 

@@ -1,3 +1,5 @@
+import { redactSensitive } from "@shared/assistantRedaction";
+
 const STORAGE_PREFIX = "assistant.pending_clarification";
 const DEFAULT_TTL_MS = 15 * 60 * 1000;
 const MAX_CANDIDATES = 7;
@@ -61,19 +63,6 @@ function normalizeText(text: string): string {
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function redactSensitive(text: string): string {
-  return text
-    .replace(/[\w-]{24,}/g, "[REDACTED]")
-    .replace(
-      /(api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)\s*[:=]\s*[^\s,]+/gi,
-      "$1: [REDACTED]",
-    )
-    .replace(
-      /\b[\w-]*(?:api[_\s-]?key|access[_\s-]?token|refresh[_\s-]?token|secret|password|private[_\s-]?key)[\w-]*\b/gi,
-      "[REDACTED]",
-    );
 }
 
 function sanitizeText(value: unknown, maxLength: number): string {

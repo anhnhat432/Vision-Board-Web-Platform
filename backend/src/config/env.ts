@@ -25,6 +25,19 @@ export function getRequiredEnvInProduction(name: string): string | undefined {
   return getRequiredEnv(name);
 }
 
+export function getBooleanEnv(name: string, defaultValue = false): boolean {
+  const value = getOptionalEnv(name)?.toLowerCase();
+  if (value === undefined) return defaultValue;
+  return value === "1" || value === "true" || value === "yes" || value === "on";
+}
+
+export function getNumberEnv(name: string, defaultValue: number): number {
+  const raw = getOptionalEnv(name);
+  if (raw === undefined) return defaultValue;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : defaultValue;
+}
+
 function parsePort(rawPort: string | undefined): number {
   if (!rawPort) return 4000;
 
@@ -68,7 +81,7 @@ const geminiApiKey = getOptionalEnv("GEMINI_API_KEY");
 const geminiModel = getOptionalEnv("GEMINI_MODEL") ?? "gemini-2.5-flash-lite";
 const geminiSmartModel = getOptionalEnv("GEMINI_SMART_MODEL") ?? "gemini-3.1-flash-lite";
 const groqApiKey = getOptionalEnv("GROQ_API_KEY");
-const groqModel = getOptionalEnv("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
+const groqModel = getOptionalEnv("GROQ_MODEL") ?? "meta-llama/llama-4-scout-17b-16e-instruct";
 const groqAudioModel = getOptionalEnv("GROQ_AUDIO_MODEL") ?? "whisper-large-v3-turbo";
 
 const resolvedAssistantProvider: "groq" | "gemini" = assistantProvider === "groq" ? "groq" : "gemini";
@@ -101,6 +114,46 @@ export const env = {
   AI_API_KEY: aiApiKey,
   AI_MODEL: aiModel,
   AI_SMART_MODEL: aiSmartModel,
+  // G3: bật JSON mode (response_format: json_object) cho nhánh action/workflow của Groq.
+  // Default off để không thay đổi hành vi hiện tại; bật rõ ràng ở staging/prod khi muốn giảm invalid action block.
+  AI_ENABLE_STRUCTURED_OUTPUT: getBooleanEnv("AI_ENABLE_STRUCTURED_OUTPUT", false),
+  // G4: bật telemetry tối thiểu redacted cho assistant (turn-level + client events).
+  // Default off để không tạo overhead/lưu trữ khi chưa cần; bật ở staging/prod để đo latency/error theo route.
+  AI_ENABLE_TELEMETRY: getBooleanEnv("AI_ENABLE_TELEMETRY", false),
+  // GĐ5 (Runbook kill-switch): bật streaming cho Groq chat tự do.
+  // Default ON để giữ nguyên hành vi hiện tại. Đặt =0 để ép buffered toàn bộ (tắt nhanh streaming khi incident).
+  AI_ENABLE_STREAMING: getBooleanEnv("AI_ENABLE_STREAMING", true),
+  // GĐ5 (Rollout/A-B): canary rollout cho signed-in real-mode users.
+  // AI_CANARY_PERCENT = 0..100 (mặc định 100 = full rollout). Cohort được tính deterministic theo sessionHash.
+  AI_CANARY_PERCENT: getNumberEnv("AI_CANARY_PERCENT", 100),
+  // Tên experiment hiện tại (để gắn vào telemetry, phân tích A/B). Rỗng = không gắn experiment.
+  AI_EXPERIMENT: getOptionalEnv("AI_EXPERIMENT") ?? "",
+  // Danh sách variant phân bổ A/B, cách nhau bằng dấu phẩy. VD "control,variant_a".
+  // Mặc định chỉ "control" để không bật A/B khi chưa cấu hình.
+  AI_EXPERIMENT_VARIANTS: getOptionalEnv("AI_EXPERIMENT_VARIANTS") ?? "control",
+  // GĐ5 (Alerting/SLO): ngưỡng cảnh báo vận hành. Alert đọc từ telemetry overview redacted.
+  AI_SLO_P95_LATENCY_MS: getNumberEnv("AI_SLO_P95_LATENCY_MS", 12000),
+  AI_SLO_ERROR_RATE_PCT: getNumberEnv("AI_SLO_ERROR_RATE_PCT", 3),
+  AI_SLO_TIMEOUT_RATE_PCT: getNumberEnv("AI_SLO_TIMEOUT_RATE_PCT", 2),
+  AI_SLO_RATE_LIMIT_RATE_PCT: getNumberEnv("AI_SLO_RATE_LIMIT_RATE_PCT", 5),
+  AI_SLO_ACTION_FAIL_RATE_PCT: getNumberEnv("AI_SLO_ACTION_FAIL_RATE_PCT", 5),
+  // Token budget cảnh báo chi phí trung bình mỗi turn (token estimate). Vượt => alert cost.
+  AI_SLO_AVG_TOKEN_BUDGET: getNumberEnv("AI_SLO_AVG_TOKEN_BUDGET", 4000),
+  // Cost budget theo tiền tệ (USD). Đơn giá ước tính USD / 1K token (gộp input+output cho gọn).
+  // Mặc định 0 = chưa biết giá => bỏ qua alert cost-USD (chỉ dùng token budget ở trên).
+  AI_COST_PER_1K_TOKENS_USD: getNumberEnv("AI_COST_PER_1K_TOKENS_USD", 0),
+  // Ngưỡng tổng chi phí ước tính (USD) trong cửa sổ thời gian gần đây. Vượt => alert cost-USD.
+  // Mặc định 0 = tắt alert theo tiền (chỉ bật khi có đơn giá thực tế của provider).
+  AI_SLO_TOTAL_COST_USD: getNumberEnv("AI_SLO_TOTAL_COST_USD", 0),
+  // Cửa sổ thời gian (phút) để cộng chi phí cost-USD. Mặc định 60 phút => ngưỡng là USD/giờ, dễ diễn giải.
+  AI_SLO_COST_WINDOW_MINUTES: getNumberEnv("AI_SLO_COST_WINDOW_MINUTES", 60),
+  // Số lần secret/token bị redaction (trong cửa sổ thời gian) tối đa chấp nhận.
+  // Vượt => alert secret-leak (critical). Chỉ đếm secret/token, KHÔNG đếm email (lành tính).
+  AI_SLO_SECRET_LEAK_MAX: getNumberEnv("AI_SLO_SECRET_LEAK_MAX", 0),
+  // Cửa sổ thời gian (phút) để đếm secret-leak hit. Mặc định 60 phút => alert tự lành khi hit cũ trôi đi.
+  AI_SLO_SECRET_LEAK_WINDOW_MINUTES: getNumberEnv("AI_SLO_SECRET_LEAK_WINDOW_MINUTES", 60),
+  // Số turn tối thiểu trước khi đánh giá SLO để tránh cảnh báo do mẫu quá nhỏ.
+  AI_SLO_MIN_SAMPLE: getNumberEnv("AI_SLO_MIN_SAMPLE", 20),
   R2_ACCOUNT_ID: getOptionalEnv("R2_ACCOUNT_ID"),
   R2_ACCESS_KEY_ID: getOptionalEnv("R2_ACCESS_KEY_ID"),
   R2_SECRET_ACCESS_KEY: getOptionalEnv("R2_SECRET_ACCESS_KEY"),

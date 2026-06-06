@@ -1,4 +1,5 @@
 import { env } from "../config/env";
+import { VALID_ACTION_TYPES } from "../shared/assistantActionSchema";
 import type { AssistantContext } from "./assistantService";
 import { buildSystemPrompt, summarizeContext } from "./assistantPromptUtils";
 
@@ -7,12 +8,17 @@ interface GroqMessage {
   content: string;
 }
 
+interface GroqResponseFormat {
+  type: "json_object";
+}
+
 interface GroqRequest {
   model: string;
   messages: GroqMessage[];
   temperature: number;
   max_tokens: number;
   stream?: boolean;
+  response_format?: GroqResponseFormat;
 }
 
 interface GroqChoice {
@@ -45,14 +51,42 @@ export interface GroqRequestOptions {
   maxTokens?: number;
   temperature?: number;
   repairMode?: boolean;
+  /**
+   * G3: yêu cầu Groq trả về JSON object (response_format: json_object) cho nhánh action/workflow.
+   * Caller chỉ nên bật khi env.AI_ENABLE_STRUCTURED_OUTPUT = true; provider vẫn tự kiểm tra cờ env để an toàn.
+   */
+  structuredOutput?: boolean;
 }
 
 const GROQ_TIMEOUT_MS = 30_000;
 const DEFAULT_COMPLETION_TOKENS = 800;
 const COMPLEX_COMPLETION_TOKENS = 1_400;
 
+// G3: chỉ bật JSON mode khi cả cờ env lẫn option của caller đều yêu cầu.
+export function isStructuredOutputEnabled(options: GroqRequestOptions = {}): boolean {
+  return env.AI_ENABLE_STRUCTURED_OUTPUT === true && options.structuredOutput === true;
+}
+
+// G3: hợp đồng JSON output cho nhánh action/workflow khi bật structured output.
+// Model phải trả về DUY NHẤT 1 JSON object với assistantText (string) + actions (mảng).
+// Giữ nguyên 11 action type + shape payload đã có ở schema chung G2.
+function buildStructuredOutputInstruction(): string {
+  return [
+    "STRUCTURED_OUTPUT_MODE",
+    "Bạn PHẢI trả lời bằng DUY NHẤT một JSON object hợp lệ (JSON.parse được), không kèm markdown, không kèm văn bản ngoài JSON.",
+    "Shape bắt buộc:",
+    '{ "assistantText": string, "actions": Array<{ "type": string, "payload": object, "label": string }> }',
+    "- assistantText: lời tư vấn ngắn gọn bằng tiếng Việt cho người dùng.",
+    "- actions: mảng các action đề xuất; nếu không có action phù hợp thì để mảng rỗng [].",
+    "- Không bịa taskId/goalId không có trong context. Khi thiếu dữ liệu, để actions rỗng và hỏi 1 câu làm rõ trong assistantText.",
+    `- Chỉ dùng các action type hợp lệ: ${VALID_ACTION_TYPES.join(", ")}.`,
+    "- payload phải đúng schema từng action type; không thêm field thừa, không trailing comma, không comment.",
+  ].join("\n");
+}
+
 // Rough token estimator: Vietnamese text averages ~3.5 chars/token
-function estimateTokens(text: string): number {
+// G4: export để telemetry tái dùng cùng công thức (token estimate metric).
+export function estimateTokens(text: string): number {
   return Math.ceil(text.length / 3.5);
 }
 
@@ -171,6 +205,12 @@ function buildRequestBody(
     { role: "system", content: contextSummary },
   ];
 
+  // G3: khi bật structured output, thêm system instruction mô tả JSON contract.
+  const structuredOutput = isStructuredOutputEnabled(options);
+  if (structuredOutput) {
+    messages.push({ role: "system", content: buildStructuredOutputInstruction() });
+  }
+
   // Add conversation history (limit to last 4 messages to save tokens)
   const trimmedHistory = history.slice(-4);
   for (const msg of trimmedHistory) {
@@ -180,12 +220,18 @@ function buildRequestBody(
   // Add current user message
   messages.push({ role: "user", content: userMessage });
 
-  return {
+  const requestBody: GroqRequest = {
     model: modelName,
     messages,
     temperature: generationOptions.temperature,
     max_tokens: generationOptions.maxTokens,
   };
+
+  if (structuredOutput) {
+    requestBody.response_format = { type: "json_object" };
+  }
+
+  return requestBody;
 }
 
 function extractGroqText(data: GroqChunkResponse): string {

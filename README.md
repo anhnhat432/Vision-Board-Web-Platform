@@ -523,7 +523,7 @@ If you use Gemini specifically, set:
 
 If you use Groq specifically, you can also set:
 - `GROQ_API_KEY`: Groq API Key.
-- `GROQ_MODEL`: Groq Model.
+- `GROQ_MODEL`: Groq Model. The current production assistant uses `meta-llama/llama-4-scout-17b-16e-instruct` (on_demand); set this explicitly so the deployment does not rely on the code default.
 
 Live AI smoke check for a deployed backend:
 
