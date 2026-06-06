@@ -14,6 +14,10 @@ paths = [
   '''AGENTS\.md''',
   '''CLAUDE\.md''',
   '''PROMPTS.*\.md''',
+  # Fixture/secret giả lập trong test & eval của AI assistant (không phải secret thật)
+  '''backend/src/tests/assistant.*\.test\.ts''',
+  '''src/app/features/assistant/evals/.*''',
+  '''src/app/features/assistant/__tests__/.*''',
 ]
 regexes = [
   # Demo/mock placeholder keys used in docs
