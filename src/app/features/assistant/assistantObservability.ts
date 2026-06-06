@@ -16,7 +16,9 @@ export type AssistantEventType =
   | "assistant_memory_captured"
   | "assistant_nudge_shown"
   | "assistant_nudge_dismissed"
-  | "assistant_feedback_submitted";
+  | "assistant_feedback_submitted"
+  // G6: context budget report. KHÔNG đếm vào totalMessagesSent; chỉ phục vụ observability token/trim.
+  | "assistant_context_budget";
 
 export interface AssistantEvent {
   id: string;

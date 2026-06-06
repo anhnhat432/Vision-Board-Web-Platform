@@ -11,6 +11,9 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_MEASUREMENT_ID?: string;
   readonly VITE_APP_MODE?: string;
   readonly VITE_SHOW_BILLING_DEBUG?: string;
+  readonly VITE_AI_ENABLE_MEMORY?: string;
+  readonly VITE_AI_ENABLE_RETRIEVAL?: string;
+  readonly VITE_AI_ENABLE_PROACTIVE_NUDGE?: string;
   readonly VITE_ANALYTICS_MODE?: string;
   readonly VITE_GA_MEASUREMENT_ID?: string;
   readonly VITE_OUTBOX_SYNC_ENDPOINT?: string;

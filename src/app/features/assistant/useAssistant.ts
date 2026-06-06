@@ -12,6 +12,8 @@ import {
   resolveClarificationReply,
   setPendingAssistantClarification,
 } from "./assistantConversationState";
+import { buildContextBudgetReport } from "./assistantContextBudget";
+import { isAssistantMemoryEnabled } from "./assistantFeatureFlags";
 import { captureAssistantFeedback } from "./assistantFeedback";
 import { autoCaptureUserMemory, clearMemory, updateAssistantMemoryFromFeedback } from "./assistantMemory";
 import { recordAssistantEvent } from "./assistantObservability";
@@ -855,8 +857,10 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
 
       const turnStartedAt = Date.now();
 
-      // Tự động capture memory từ chat input
-      autoCaptureUserMemory(trimmed, userId);
+      // Tự động capture memory từ chat input (gate bằng flag để tắt nhanh).
+      if (isAssistantMemoryEnabled()) {
+        autoCaptureUserMemory(trimmed, userId);
+      }
 
       const userMessage = createMessage("user", trimmed);
       recordAssistantEvent({
@@ -902,6 +906,32 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
           userMessage: trimmed,
           context,
         };
+
+        // G6: emit context budget report (số item đưa vào prompt và phần bị trim).
+        // Dùng event type riêng (không đếm vào totalMessagesSent); chỉ phục vụ observability.
+        const budget = buildContextBudgetReport(context);
+        recordAssistantEvent({
+          type: "assistant_context_budget",
+          userId,
+          route,
+          messageId,
+          metadata: {
+            kind: "context_budget",
+            goalsTotal: budget.goals.total,
+            goalsTrimmed: budget.goals.trimmed,
+            todayTasksTotal: budget.todayTasks.total,
+            todayTasksTrimmed: budget.todayTasks.trimmed,
+            overdueTotal: budget.overdueTasks.total,
+            overdueTrimmed: budget.overdueTasks.trimmed,
+            missedTotal: budget.missedCommitments.total,
+            missedTrimmed: budget.missedCommitments.trimmed,
+            retrievedTotal: budget.retrievedKnowledge.total,
+            retrievedTrimmed: budget.retrievedKnowledge.trimmed,
+            weeklyReviewIncluded: budget.weeklyReviewIncluded,
+            memoryIncluded: budget.memoryIncluded,
+            totalTrimmed: budget.totalTrimmed,
+          },
+        });
 
         const pendingWfTurn = await resolvePendingWorkflowTurn(userId, trimmed, context, updatePendingWorkflow);
         if (pendingWfTurn) {

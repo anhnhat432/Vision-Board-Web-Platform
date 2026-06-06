@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getMemoryItems } from "./assistantMemory";
+import { isAssistantProactiveNudgeEnabled } from "./assistantFeatureFlags";
 import { recordAssistantEvent } from "./assistantObservability";
 import { type AssistantContext, buildAssistantContext } from "./buildAssistantContext";
 
@@ -406,6 +407,8 @@ export function useProactiveNudge(panelOpen: boolean): {
 
   useEffect(() => {
     if (typeof window === "undefined" || panelOpen || hasTriggeredThisLoadRef.current) return undefined;
+    // Kill-switch: tắt proactive nudge qua flag mà không phá assistant chat.
+    if (!isAssistantProactiveNudgeEnabled()) return undefined;
     if (!canUseLocalStorage()) return undefined;
 
     let mounted = true;

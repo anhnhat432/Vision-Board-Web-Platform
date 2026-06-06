@@ -12,6 +12,11 @@ import {
   recordAssistantTurnTelemetry,
 } from "./assistantTelemetry";
 import { decideRollout } from "./assistantRollout";
+import {
+  canRequest as circuitCanRequest,
+  recordFailure as circuitRecordFailure,
+  recordSuccess as circuitRecordSuccess,
+} from "./assistantCircuitBreaker";
 import type { AssistantContext } from "./assistantService";
 
 export interface AssistantAction {
@@ -826,10 +831,32 @@ export async function processAIAssistantRequest(
     env.AI_ENABLE_STRUCTURED_OUTPUT === true &&
     shouldUseBufferedGroqResponse(request);
 
+  // G7: circuit breaker — khi Groq lỗi transient liên tiếp, chặn ngay và fallback để tránh spam provider nghẽn.
+  if (provider === "groq" && !circuitCanRequest()) {
+    console.warn("[ai-assistant] Groq circuit open, using deterministic fallback");
+    const fallback = buildProviderFallbackResponse(request.message, request.context, "ASSISTANT_PROVIDER_RATE_LIMIT");
+    emitTurn("fallback", {
+      errorCode: "ASSISTANT_CIRCUIT_OPEN",
+      actions: fallback.proposedActions,
+      responseText: fallback.assistantText,
+      structured: false,
+    });
+    return fallback;
+  }
+
   let result =
     provider === "gemini"
       ? await sendToGeminiWithModelRouting(request, history)
       : await sendToGroq(request.message.trim(), request.context, history, { structuredOutput: useStructured });
+
+  // G7: cập nhật trạng thái circuit breaker theo kết quả provider Groq (chỉ tính lỗi transient).
+  if (provider === "groq") {
+    if ("errorCode" in result) {
+      circuitRecordFailure((result as AIAssistantError).errorCode);
+    } else {
+      circuitRecordSuccess();
+    }
+  }
 
   if (!("errorCode" in result) && provider === "groq" && shouldRepairAIResponse(result.message, { structured: useStructured })) {
     console.warn("[ai-assistant] Groq returned invalid action block, retrying repair pass");
@@ -961,6 +988,17 @@ export async function processAIAssistantRequestStream(
 
   try {
     let hasDelta = false;
+
+    // G7: nếu circuit đang mở, không gọi Groq stream — fallback deterministic ngay.
+    if (!circuitCanRequest()) {
+      console.warn("[ai-assistant] Groq circuit open (stream), using deterministic fallback");
+      const fallback = buildProviderFallbackResponse(request.message, request.context, "ASSISTANT_PROVIDER_RATE_LIMIT");
+      streamedText = fallback.assistantText;
+      emitStreamTurn("fallback", "ASSISTANT_CIRCUIT_OPEN");
+      onDelta(formatAIAssistantResponseForStream(fallback));
+      return;
+    }
+
     await sendToGroqStream(
       request.message.trim(),
       request.context,
@@ -974,6 +1012,7 @@ export async function processAIAssistantRequestStream(
     );
 
     if (!hasDelta) {
+      circuitRecordFailure("ASSISTANT_PROVIDER_ERROR");
       emitStreamTurn("error", "ASSISTANT_PROVIDER_ERROR");
       return {
         message: "Trợ lý chưa có gợi ý phù hợp cho câu hỏi này. Thử hỏi cụ thể hơn nhé.",
@@ -981,9 +1020,12 @@ export async function processAIAssistantRequestStream(
       };
     }
 
+    circuitRecordSuccess();
     emitStreamTurn("success");
   } catch (error) {
     const err = normalizeStreamingProviderError(error);
+    // G7: cập nhật circuit breaker (chỉ lỗi transient mới đẩy breaker về open).
+    circuitRecordFailure(err.errorCode);
     if (shouldUseProviderFallback(err.errorCode)) {
       console.warn("[ai-assistant] Groq stream unavailable, using deterministic fallback:", err.errorCode);
       const fallback = buildProviderFallbackResponse(request.message, request.context, err.errorCode);

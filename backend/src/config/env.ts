@@ -123,6 +123,19 @@ export const env = {
   // GĐ5 (Runbook kill-switch): bật streaming cho Groq chat tự do.
   // Default ON để giữ nguyên hành vi hiện tại. Đặt =0 để ép buffered toàn bộ (tắt nhanh streaming khi incident).
   AI_ENABLE_STREAMING: getBooleanEnv("AI_ENABLE_STREAMING", true),
+  // G7 (Reliability): timeout Groq (ms). Configurable để ops hạ thấp khi provider nghẽn.
+  // Default 30000 giữ nguyên hành vi cũ; có thể giảm xuống ~15000-20000 để cải thiện UX khi nghẽn.
+  AI_GROQ_TIMEOUT_MS: getNumberEnv("AI_GROQ_TIMEOUT_MS", 30000),
+  // G7 (Reliability): số lần retry nhẹ khi Groq trả 429 (rate limit) trước khi bỏ cuộc/fallback.
+  // Default 1 (tổng 2 lần thử). Đặt 0 để tắt retry.
+  AI_GROQ_MAX_RETRIES_ON_429: getNumberEnv("AI_GROQ_MAX_RETRIES_ON_429", 1),
+  // G7 (Reliability): backoff cơ sở (ms) giữa các lần retry 429. Lần thử thứ n đợi base * n.
+  AI_GROQ_RETRY_BASE_DELAY_MS: getNumberEnv("AI_GROQ_RETRY_BASE_DELAY_MS", 500),
+  // G7 (Circuit breaker): số lần lỗi transient liên tiếp (429/5xx/timeout) trước khi mở circuit.
+  // Khi circuit mở, request Groq bị chặn ngay và rơi về deterministic fallback trong cooldown.
+  AI_GROQ_CIRCUIT_FAILURE_THRESHOLD: getNumberEnv("AI_GROQ_CIRCUIT_FAILURE_THRESHOLD", 4),
+  // G7 (Circuit breaker): thời gian giữ circuit mở (ms) trước khi cho phép thử lại provider.
+  AI_GROQ_CIRCUIT_COOLDOWN_MS: getNumberEnv("AI_GROQ_CIRCUIT_COOLDOWN_MS", 30000),
   // GĐ5 (Rollout/A-B): canary rollout cho signed-in real-mode users.
   // AI_CANARY_PERCENT = 0..100 (mặc định 100 = full rollout). Cohort được tính deterministic theo sessionHash.
   AI_CANARY_PERCENT: getNumberEnv("AI_CANARY_PERCENT", 100),

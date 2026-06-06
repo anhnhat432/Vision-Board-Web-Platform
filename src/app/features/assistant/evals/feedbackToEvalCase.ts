@@ -1,6 +1,6 @@
 import type { AssistantGoldenExample } from "../assistantFeedback";
 import type { FeedbackReason } from "../types";
-import type { AssistantEvalCase } from "./assistantEvalCases";
+import type { AssistantEvalCase, EvalCategory, EvalRoute } from "./assistantEvalCases";
 
 export const DEFAULT_FEEDBACK_EVAL_REASONS: FeedbackReason[] = ["wrong_context", "wrong_action"];
 
@@ -36,6 +36,27 @@ function boundedInput(value: string): string {
 
 type EvalExpected = AssistantEvalCase["expected"];
 type EvalContext = AssistantEvalCase["context"];
+
+/** G5: map route string của feedback về EvalRoute core flow để báo cáo theo màn hình. */
+function mapFeedbackRouteToEvalRoute(route: string | undefined): EvalRoute {
+  const normalized = (route ?? "").toLowerCase();
+  if (normalized.includes("life-insight") || normalized.includes("insight")) return "life_insight";
+  if (normalized.includes("smart")) return "smart_goal";
+  if (normalized.includes("feasibility")) return "feasibility";
+  if (normalized.includes("12-week") || normalized.includes("twelve") || normalized.includes("12 week")) {
+    return "twelve_week";
+  }
+  if (normalized.includes("reflection") || normalized.includes("review")) return "review";
+  if (normalized.includes("today") || normalized.includes("12-week-system")) return "today";
+  return "general";
+}
+
+/** G5: suy ra category từ reason của feedback (wrong_context -> missing_context, wrong_action -> invalid_action). */
+function mapFeedbackReasonToCategory(reason: FeedbackReason | undefined): EvalCategory {
+  if (reason === "wrong_context") return "missing_context";
+  if (reason === "wrong_action") return "invalid_action";
+  return "normal";
+}
 
 function hasAnyContextSignal(context: EvalContext): boolean {
   const goals = Array.isArray(context.goals) ? context.goals : [];
@@ -120,6 +141,8 @@ export function feedbackToEvalCases(
     cases.push({
       id: `${idPrefix}_${example.id}`,
       name: `Regression từ feedback (${example.reason}) tại ${example.route}`,
+      category: mapFeedbackReasonToCategory(example.reason),
+      route: mapFeedbackRouteToEvalRoute(example.route),
       input,
       context,
       expected,

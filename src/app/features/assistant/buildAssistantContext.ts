@@ -31,6 +31,7 @@ import {
   getPendingAssistantClarification,
   type PendingAssistantClarificationSummary,
 } from "./assistantConversationState";
+import { isAssistantMemoryEnabled, isAssistantRetrievalEnabled } from "./assistantFeatureFlags";
 import {
   type AssistantMemorySummary,
   autoCaptureFromAppData,
@@ -318,8 +319,10 @@ export function buildAssistantContext(
   userId: string | null = null,
   activeTopic?: string | null,
 ): AssistantContext {
-  // Tự động quét và capture dữ liệu mới vào memory
-  autoCaptureFromAppData(userId);
+  // Tự động quét và capture dữ liệu mới vào memory (gate bằng flag để có thể tắt nhanh).
+  if (isAssistantMemoryEnabled()) {
+    autoCaptureFromAppData(userId);
+  }
 
   const authSyncMode = buildAuthSyncMode();
   const pendingClarification = getPendingAssistantClarification(userId, referenceDate) ?? undefined;
@@ -341,11 +344,12 @@ export function buildAssistantContext(
       progress: calculateGoalProgress(goal),
     }));
     const lastReflectionDate = data.reflections && data.reflections.length > 0 ? data.reflections[0].date : null;
-    const memory = getAssistantMemory(userId);
-    const assistantMemorySummary = summarizeAssistantMemoryForContext(memory);
-    const retrievedKnowledge = query
-      ? retrieveAssistantKnowledge(query, { referenceDate, userId, activeGoalId: activeGoal?.id })
-      : undefined;
+    const memory = isAssistantMemoryEnabled() ? getAssistantMemory(userId) : null;
+    const assistantMemorySummary = memory ? summarizeAssistantMemoryForContext(memory) : undefined;
+    const retrievedKnowledge =
+      query && isAssistantRetrievalEnabled()
+        ? retrieveAssistantKnowledge(query, { referenceDate, userId, activeGoalId: activeGoal?.id })
+        : undefined;
 
     if (!activeGoal?.twelveWeekSystem) {
       return {
@@ -411,9 +415,10 @@ function emptyContext(
   referenceDate = new Date(),
   activeTopic?: string | null,
 ): AssistantContext {
-  const memory = getAssistantMemory(userId);
-  const assistantMemorySummary = summarizeAssistantMemoryForContext(memory);
-  const retrievedKnowledge = query ? retrieveAssistantKnowledge(query, { referenceDate, userId }) : undefined;
+  const memory = isAssistantMemoryEnabled() ? getAssistantMemory(userId) : null;
+  const assistantMemorySummary = memory ? summarizeAssistantMemoryForContext(memory) : undefined;
+  const retrievedKnowledge =
+    query && isAssistantRetrievalEnabled() ? retrieveAssistantKnowledge(query, { referenceDate, userId }) : undefined;
   const pendingClarification = getPendingAssistantClarification(userId, referenceDate) ?? undefined;
 
   const pendingSmartGoalDraft = readJsonStorage(APP_STORAGE_KEYS.pendingSmartGoal);
