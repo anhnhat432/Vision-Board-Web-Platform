@@ -20,22 +20,22 @@ describe("useSpeechToText Hook", () => {
   });
 
   it("should return isSupported as true when window.SpeechRecognition exists", () => {
-    (window as any).SpeechRecognition = vi.fn().mockImplementation(() => ({
-      start: vi.fn(),
-      stop: vi.fn(),
-      abort: vi.fn(),
-    }));
+    (window as any).SpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+      this.start = vi.fn();
+      this.stop = vi.fn();
+      this.abort = vi.fn();
+    });
 
     const { result } = renderHook(() => useSpeechToText());
     expect(result.current.isSupported).toBe(true);
   });
 
   it("should return isSupported as true when window.webkitSpeechRecognition exists", () => {
-    (window as any).webkitSpeechRecognition = vi.fn().mockImplementation(() => ({
-      start: vi.fn(),
-      stop: vi.fn(),
-      abort: vi.fn(),
-    }));
+    (window as any).webkitSpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+      this.start = vi.fn();
+      this.stop = vi.fn();
+      this.abort = vi.fn();
+    });
 
     const { result } = renderHook(() => useSpeechToText());
     expect(result.current.isSupported).toBe(true);
@@ -66,7 +66,7 @@ describe("useSpeechToText Hook", () => {
     expect(startMock).toHaveBeenCalledTimes(1);
 
     // Chuyển sang trạng thái nghe (giả lập recognition trigger start event)
-    const instance = MockRecognition.mock.instances[0];
+    const instance = MockRecognition.mock.instances[0] as any;
     act(() => {
       if (instance.onstart) instance.onstart();
     });
@@ -105,7 +105,7 @@ describe("useSpeechToText Hook", () => {
       result.current.startListening();
     });
 
-    const instance = MockRecognition.mock.instances[0];
+    const instance = MockRecognition.mock.instances[0] as any;
     act(() => {
       if (instance.onstart) instance.onstart();
     });
@@ -163,7 +163,7 @@ describe("useSpeechToText Hook", () => {
       result.current.startListening();
     });
 
-    const instance = MockRecognition.mock.instances[0];
+    const instance = MockRecognition.mock.instances[0] as any;
     act(() => {
       if (instance.onstart) instance.onstart();
     });
