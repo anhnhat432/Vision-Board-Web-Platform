@@ -541,7 +541,7 @@ const PLAN_DEFAULTS: Record<GoalArchetype, ArchetypePlanDefaults> = {
     weekOneStart: "Tuần 1 nhẹ — kiểm tra form và nhịp tim. Tăng tải từ tuần 2 trở đi.",
   },
   career_growth: {
-    recommendedLeadIndicators: ["Khung làm sâu", "1:1 với người liên quan", "Chuẩn bị demo / buổi góp ý"],
+    recommendedLeadIndicators: ["Khung làm sâu", "1:1 với người liên quan", "Chuẩn bị buổi trình diễn / buổi góp ý"],
     weekOneStart: "Tuần 1 chốt lịch làm sâu cố định và một buổi 1:1 với mentor/quản lý.",
   },
   financial_goal: {

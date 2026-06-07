@@ -108,7 +108,7 @@ function ReviewSection({
         <button
           type="button"
           onClick={() => jumpToSetupStep(stepIndex)}
-          className="rounded-full px-2 py-1 text-xs font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 py-1 text-xs font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Sửa
         </button>

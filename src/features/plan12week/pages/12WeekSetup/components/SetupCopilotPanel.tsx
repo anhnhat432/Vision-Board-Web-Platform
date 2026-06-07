@@ -189,7 +189,7 @@ export function SetupCopilotPanel({
                 <span>Hành động Lặp lại (Lead) - Nên ghi</span>
               </p>
               <ul className="mt-1.5 space-y-1 text-app-ink-soft list-disc list-inside leading-snug">
-                <li>Demo sản phẩm cho 5 người / tuần</li>
+                <li>Trình diễn sản phẩm cho 5 người / tuần</li>
                 <li>Lập trình core tính năng 5 buổi / tuần</li>
                 <li>Tập thể dục bền bỉ 3 buổi / tuần</li>
               </ul>

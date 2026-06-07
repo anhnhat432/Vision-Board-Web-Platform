@@ -10,7 +10,7 @@ const buttonVariants = cva(
     "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:h-11 after:w-full after:min-w-[44px] sm:after:hidden",
     "shrink-0 [&_svg]:shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
     "transition-[transform,box-shadow,background-color,color,border-color,text-decoration-color] duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
-    "active:duration-[100ms]",
+    "active:duration-[150ms]",
     "outline-none focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]",
     "disabled:pointer-events-none disabled:opacity-50",
     "motion-reduce:transition-none motion-reduce:transform-none motion-reduce:active:scale-100",

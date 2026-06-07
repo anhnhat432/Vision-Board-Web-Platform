@@ -711,7 +711,7 @@ export function SmartGoalStepShell({
               initial={{ scale: 0, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0 }}
-              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-app-warm-soft text-app-warm border border-app-warm-border/30 px-3 py-1 text-[10px] font-extrabold shadow-md animate-[pulse_2.2s_infinite] z-25"
+              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-app-status-warning/15 text-app-status-warning border border-app-status-warning/30 px-3 py-1 text-[10px] font-extrabold shadow-md animate-[pulse_2.2s_infinite] z-25"
             >
               <span>🏆 Chuẩn Vàng</span>
             </motion.div>

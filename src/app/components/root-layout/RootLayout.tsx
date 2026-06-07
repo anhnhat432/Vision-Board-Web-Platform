@@ -606,7 +606,7 @@ export function RootLayout() {
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
+        message: "Tài khoản này chưa có dữ liệu 12 tuần để kiểm tra.",
       };
     }
 
@@ -699,7 +699,7 @@ export function RootLayout() {
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để đồng bộ.",
+        message: "Tài khoản này chưa có dữ liệu 12 tuần để đồng bộ.",
       };
     }
 

@@ -314,7 +314,7 @@ function ReflectionJournalContent() {
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteReflection}
-              className="bg-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-fg)]/90"
+              className="bg-app-status-error hover:bg-app-status-error/90 text-white"
             >
               Xóa
             </AlertDialogAction>
@@ -371,7 +371,7 @@ function ReflectionJournalContent() {
               type="button"
               onClick={() => setFilterType(type)}
               className={cn(
-                "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
+                "inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                 filterType === type
                   ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
                   : "text-app-ink-soft hover:bg-app-bg",
@@ -394,7 +394,7 @@ function ReflectionJournalContent() {
                 type="button"
                 onClick={() => setFilterMood(mood)}
                 className={cn(
-                  "rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
+                  "inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                   filterMood === mood
                     ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
                     : "text-app-ink-soft hover:bg-app-bg",
@@ -665,7 +665,7 @@ function ReflectionJournalContent() {
                           variant="ghost"
                           size="icon"
                           aria-label={`Mở tuỳ chọn cho nhật ký ${reflection.title || formatCalendarDate(reflection.date)}`}
-                          className="h-9 w-9 shrink-0 text-app-ink-soft hover:text-app-ink"
+                          className="shrink-0 text-app-ink-soft hover:text-app-ink"
                         >
                           <MoreVertical className="h-4 w-4" aria-hidden="true" />
                         </Button>

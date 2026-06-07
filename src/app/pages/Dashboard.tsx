@@ -1011,7 +1011,7 @@ function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; lim
         <button
           type="button"
           onClick={onUpgrade}
-          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Mở Plus
         </button>
@@ -1048,7 +1048,7 @@ function TrialCountdownBanner({
         <button
           type="button"
           onClick={onOpenPlan}
-          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:ml-auto"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-sm font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:ml-auto"
         >
           Chi tiết
         </button>
@@ -1095,7 +1095,7 @@ function DashboardPlanStateNotice({
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="shrink-0 rounded-md p-1 transition-colors hover:bg-amber-200/40 dark:hover:bg-amber-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md p-1 transition-colors hover:bg-amber-200/40 dark:hover:bg-amber-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40"
           aria-label="Đóng thông báo"
         >
           <X className="h-3.5 w-3.5" />
@@ -1120,7 +1120,7 @@ function DemoDataNotice({ onOpenLifeBalance }: { onOpenLifeBalance: () => void }
         <button
           type="button"
           onClick={onOpenLifeBalance}
-          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Cập nhật ngay
         </button>

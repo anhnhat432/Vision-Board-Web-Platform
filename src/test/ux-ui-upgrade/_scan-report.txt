@@ -1,0 +1,50 @@
+=== NEUTRAL VIOLATIONS (step screens): 42 ===
+{
+  "src/app/pages/GoalTracker.tsx": 16,
+  "src/app/pages/LifeBalance.tsx": 20,
+  "src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx": 5,
+  "src/features/plan12week/pages/12WeekSetup/components/SetupCopilotPanel.tsx": 1
+}
+
+src/app/pages/GoalTracker.tsx:420:129 [primitive-palette] via-neutral-950
+src/app/pages/GoalTracker.tsx:420:150 [primitive-palette] to-neutral-950
+src/app/pages/GoalTracker.tsx:1005:90 [primitive-palette] from-neutral-950
+src/app/pages/GoalTracker.tsx:1005:112 [primitive-palette] via-neutral-950
+src/app/pages/GoalTracker.tsx:1525:51 [primitive-palette] bg-slate-100
+src/app/pages/GoalTracker.tsx:1525:69 [primitive-palette] bg-neutral-800
+src/app/pages/GoalTracker.tsx:1646:151 [primitive-palette] via-neutral-950
+src/app/pages/GoalTracker.tsx:1863:83 [primitive-palette] bg-neutral-900
+src/app/pages/GoalTracker.tsx:1968:27 [primitive-palette] bg-slate-100
+src/app/pages/GoalTracker.tsx:1968:45 [primitive-palette] bg-neutral-800
+src/app/pages/GoalTracker.tsx:2027:93 [primitive-palette] bg-neutral-900
+src/app/pages/GoalTracker.tsx:2027:113 [primitive-palette] bg-neutral-800
+src/app/pages/GoalTracker.tsx:2027:261 [primitive-palette] border-neutral-800
+src/app/pages/GoalTracker.tsx:2029:109 [primitive-palette] border-t-neutral-900
+src/app/pages/GoalTracker.tsx:2029:135 [primitive-palette] border-t-neutral-800
+src/app/pages/GoalTracker.tsx:2243:49 [primitive-palette] bg-neutral-900
+src/app/pages/LifeBalance.tsx:626:47 [primitive-palette] text-neutral-500
+src/app/pages/LifeBalance.tsx:678:68 [primitive-palette] text-neutral-700
+src/app/pages/LifeBalance.tsx:680:82 [primitive-palette] text-neutral-800
+src/app/pages/LifeBalance.tsx:715:50 [primitive-palette] bg-neutral-100
+src/app/pages/LifeBalance.tsx:723:49 [primitive-palette] text-neutral-400
+src/app/pages/LifeBalance.tsx:755:72 [primitive-palette] text-neutral-800
+src/app/pages/LifeBalance.tsx:756:65 [primitive-palette] text-neutral-500
+src/app/pages/LifeBalance.tsx:762:94 [primitive-palette] bg-neutral-900
+src/app/pages/LifeBalance.tsx:762:119 [primitive-palette] border-neutral-200
+src/app/pages/LifeBalance.tsx:764:84 [primitive-palette] text-neutral-800
+src/app/pages/LifeBalance.tsx:769:66 [primitive-palette] text-neutral-400
+src/app/pages/LifeBalance.tsx:780:122 [primitive-palette] border-neutral-200
+src/app/pages/LifeBalance.tsx:780:168 [primitive-palette] text-neutral-700
+src/app/pages/LifeBalance.tsx:780:191 [primitive-palette] bg-neutral-50
+src/app/pages/LifeBalance.tsx:804:122 [primitive-palette] border-neutral-200
+src/app/pages/LifeBalance.tsx:804:168 [primitive-palette] text-neutral-700
+src/app/pages/LifeBalance.tsx:804:191 [primitive-palette] bg-neutral-50
+src/app/pages/LifeBalance.tsx:812:93 [primitive-palette] text-neutral-400
+src/app/pages/LifeBalance.tsx:847:138 [primitive-palette] text-neutral-500
+src/app/pages/LifeBalance.tsx:847:161 [primitive-palette] text-neutral-700
+src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx:327:40 [primitive-palette] bg-slate-950
+src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx:362:20 [primitive-palette] text-slate-200
+src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx:377:71 [primitive-palette] text-slate-300
+src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx:392:68 [primitive-palette] bg-slate-800
+src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx:392:91 [primitive-palette] border-slate-700
+src/features/plan12week/pages/12WeekSetup/components/SetupCopilotPanel.tsx:92:46 [primitive-palette] text-slate-600

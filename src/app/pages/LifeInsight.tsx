@@ -494,7 +494,12 @@ export function LifeInsight() {
                 Huỷ
               </Button>
               <AlertDialogCancel>Giữ bản nháp</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmDraftClear}>Xoá bản nháp và đổi lĩnh vực</AlertDialogAction>
+              <AlertDialogAction
+                onClick={handleConfirmDraftClear}
+                className="bg-app-status-error hover:bg-app-status-error/90 text-white"
+              >
+                Xoá bản nháp và đổi lĩnh vực
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

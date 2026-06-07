@@ -56,7 +56,7 @@ export function ArchetypePicker({
         {isUserOverridden ? (
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 sm:px-2.5 py-1.5 sm:py-1 text-[10px] font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.97] cursor-pointer"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 sm:px-2.5 py-1.5 sm:py-1 text-[10px] font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.97] cursor-pointer"
             onClick={onResetToInferred}
             aria-label={`Quay lại đoán tự động (${getGoalArchetypeLabel(inferredArchetype)})`}
           >
@@ -66,7 +66,7 @@ export function ArchetypePicker({
         ) : null}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
+      <div className="mt-3 flex flex-wrap gap-2">
         {ARCHETYPE_ORDER.map((option) => {
           const Icon = option.icon;
           const active = archetype === option.value;
@@ -76,7 +76,7 @@ export function ArchetypePicker({
               key={option.value}
               type="button"
               className={cn(
-                "group inline-flex items-center gap-1.5 rounded-full border px-3 sm:px-2.5 py-2 sm:py-1 text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
+                "group inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 sm:px-2.5 py-2 sm:py-1 text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
                 active
                   ? "border-app-accent bg-app-accent-soft/30 text-app-accent shadow-sm"
                   : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/10 hover:text-app-accent",

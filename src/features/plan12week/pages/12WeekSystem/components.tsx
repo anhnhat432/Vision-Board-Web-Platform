@@ -86,7 +86,7 @@ export function TwelveWeekDashboardState({
     <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-app-line/60 bg-app-surface p-8 md:p-12 text-center shadow-xs relative overflow-hidden">
       {/* Soft decorative background glow circles */}
       <div className="absolute -top-12 -right-12 w-48 h-48 bg-app-accent-soft/20 rounded-full blur-3xl -z-10" />
-      <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-app-warm-soft/30 rounded-full blur-3xl -z-10" />
+      <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-app-status-warning/10 rounded-full blur-3xl -z-10" />
 
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-app-accent-soft to-app-accent-soft/50 text-app-accent shadow-xs">
         <Icon className="h-5 w-5" aria-hidden="true" />
@@ -110,7 +110,7 @@ export function TwelveWeekDashboardState({
         </div>
 
         <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-warm-soft text-xs font-bold text-app-warm-strong">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-status-warning/15 text-xs font-bold text-app-status-warning">
             2
           </span>
           <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Mục tiêu SMART</h3>
@@ -152,12 +152,12 @@ export function TwelveWeekDashboardNotice({
       ? "border-app-line/80 bg-app-surface/90 shadow-2xs"
       : tone === "error"
         ? "border-app-status-error/30 bg-app-status-error/10"
-        : "border-app-warm-border/20 bg-app-warm-soft/10";
+        : "border-app-status-warning/30 bg-app-status-warning/10";
   const iconClass =
-    tone === "success" ? "text-app-accent" : tone === "error" ? "text-app-status-error" : "text-app-warm";
+    tone === "success" ? "text-app-accent" : tone === "error" ? "text-app-status-error" : "text-app-status-warning";
   const titleClass =
     tone === "warning"
-      ? "font-serif text-app-warm-strong font-semibold"
+      ? "font-serif text-app-status-warning font-semibold"
       : tone === "error"
         ? "font-serif text-app-status-error font-semibold"
         : "text-app-ink font-semibold";
@@ -275,7 +275,7 @@ export function TwelveWeekDashboardHeader({
         >
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent-hover hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent-hover hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
             onClick={onOpenFocusTab}
           >
             <span>{reviewDueToday ? "Review tuần này →" : "Xem việc hôm nay →"}</span>
@@ -284,7 +284,7 @@ export function TwelveWeekDashboardHeader({
 
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-3xs"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-3xs"
             onClick={onOpenGoals}
           >
             Mở mục tiêu
@@ -372,22 +372,22 @@ export function TwelveWeekRescueTriggerBanner({
   return (
     <div
       role="alert"
-      className="relative overflow-hidden rounded-2xl border border-app-warm/20 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 p-5 shadow-2xs transition-colors"
+      className="relative overflow-hidden rounded-2xl border border-app-status-warning/20 bg-gradient-to-br from-app-surface via-app-surface to-app-status-warning/10 p-5 shadow-2xs transition-colors"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex min-w-0 flex-1 items-start gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-bg/50 border border-app-line/30 text-app-warm shadow-3xs">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-bg/50 border border-app-line/30 text-app-status-warning shadow-3xs">
             <AlertTriangle className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
-            <p className="font-serif text-base font-semibold text-app-warm-strong leading-snug">{trigger.headline}</p>
+            <p className="font-serif text-base font-semibold text-app-status-warning leading-snug">{trigger.headline}</p>
             <p className="text-xs leading-relaxed text-app-ink-soft">{trigger.detail}</p>
           </div>
         </div>
         <div className="flex w-full shrink-0 items-center gap-2.5 sm:w-auto pt-2 sm:pt-0">
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-xl bg-app-warm px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-warm/90 hover:opacity-95 hover:shadow-2xs sm:flex-none"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-app-status-warning px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-warning/90 hover:opacity-95 hover:shadow-2xs sm:flex-none"
             onClick={() => {
               const action = isUpgradeTrigger ? "upgrade" : "navigate_system";
               onActionTaken(trigger, action);
@@ -399,7 +399,7 @@ export function TwelveWeekRescueTriggerBanner({
           </button>
           <button
             type="button"
-            className="inline-flex flex-1 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink hover:shadow-3xs sm:flex-none"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink hover:shadow-3xs sm:flex-none"
             onClick={() => onDismiss(trigger.kind)}
           >
             Bỏ qua

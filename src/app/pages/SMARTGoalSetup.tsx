@@ -569,14 +569,14 @@ export function SMARTGoalSetup() {
 
         {!isVisionPromptDismissed ? (
           <section
-            className="rounded-[14px] border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
+            className="rounded-[14px] border border-app-accent-soft bg-app-accent-soft p-5 md:p-6"
             aria-label="Tầm nhìn dài hạn"
           >
-            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-warm">
+            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-accent">
               Tầm nhìn dài hạn
             </span>
             {aspirationalVision ? (
-              <p className="mt-3 font-serif text-lg font-medium leading-7 text-app-warm-strong">
+              <p className="mt-3 font-serif text-lg font-medium leading-7 text-app-ink">
                 Mục tiêu này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
               </p>
             ) : (
@@ -587,13 +587,13 @@ export function SMARTGoalSetup() {
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     to="/vision"
-                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                   >
                     Điền 2 phút →
                   </Link>
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
                     Bỏ qua

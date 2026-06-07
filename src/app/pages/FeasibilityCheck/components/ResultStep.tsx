@@ -199,8 +199,8 @@ export function ResultStep({
       aria-labelledby="feasibility-result-title"
     >
       {/* Premium Background Glow effects */}
-      <div className="absolute -top-24 -left-24 w-48 h-48 bg-app-accent/10 rounded-full blur-3xl pointer-events-none transition-all duration-1000 group-hover:bg-app-accent/20" />
-      <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-app-status-success/10 dark:bg-app-status-success/15 rounded-full blur-3xl pointer-events-none transition-all duration-1000 group-hover:bg-app-status-success/20" />
+      <div className="absolute -top-24 -left-24 w-48 h-48 bg-app-accent/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-app-accent/20" />
+      <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-app-status-success/10 dark:bg-app-status-success/15 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-app-status-success/20" />
 
       {/* ── KHU VỰC 1: Mục tiêu có thực tế không? ── */}
       <div className="relative z-10 space-y-6">
@@ -271,7 +271,7 @@ export function ResultStep({
                   aria-label="Mức khả thi tổng thể"
                 >
                   <div
-                    className="h-full rounded-pill bg-gradient-to-r from-app-status-error via-app-status-warning to-app-status-success transition-all duration-1000 ease-out relative"
+                    className="h-full rounded-pill bg-gradient-to-r from-app-status-error via-app-status-warning to-app-status-success transition-all duration-500 ease-out relative"
                     style={{ width: `${(averageScore / 4) * 100}%` }}
                   >
                     {/* Floating Indicator Bubble */}
@@ -406,7 +406,7 @@ export function ResultStep({
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-between rounded-control border border-app-line bg-app-surface/70 px-5 py-3 text-sm font-bold text-app-ink hover:bg-app-bg-subtle transition-all duration-150 shadow-app-sm focus:outline-none"
+              className="inline-flex w-full items-center justify-between rounded-control border border-app-line bg-app-surface/70 px-5 py-3 text-sm font-bold text-app-ink hover:bg-app-bg-subtle transition-all duration-150 shadow-app-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]"
             >
               <span className="flex items-center gap-2">
                 <Info className="h-4.5 w-4.5 text-app-accent" />
@@ -434,7 +434,7 @@ export function ResultStep({
                     aria-label={card.label}
                   >
                     <div
-                      className="h-full rounded-pill bg-gradient-to-r from-app-accent/60 to-app-accent transition-all duration-1000"
+                      className="h-full rounded-pill bg-gradient-to-r from-app-accent/60 to-app-accent transition-all duration-500"
                       style={{ width: `${card.progress}%` }}
                     />
                   </div>
@@ -466,7 +466,7 @@ export function ResultStep({
                       aria-label={`Chi tiết khía cạnh ${axis.label}`}
                     >
                       <div
-                        className={`h-full rounded-pill transition-all duration-1000 ${getAxisBarClass(axis.percent)}`}
+                        className={`h-full rounded-pill transition-all duration-500 ${getAxisBarClass(axis.percent)}`}
                         style={{ width: `${axis.percent}%` }}
                       />
                     </div>

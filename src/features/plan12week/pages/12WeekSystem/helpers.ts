@@ -140,6 +140,38 @@ export function getBackendSyncIssueMessage(
   );
 }
 
+/**
+ * Sync_State chuẩn hóa cho UI (Requirement 8.3).
+ * 4 nhãn rời nhau, ánh xạ 1-1 sang token màu trong `SYNC_STATE_TOKEN`.
+ */
+export type SyncState = "synced" | "syncing" | "offline" | "error";
+
+/**
+ * Ánh xạ Sync_State → tên Tailwind utility (đã được bridge qua `--app-status-*`).
+ * Bốn giá trị → bốn token KHÁC NHAU; ảnh của ánh xạ có đúng 4 phần tử (Property 6).
+ * Không thay đổi business logic; đây là dẫn xuất trình bày thuần (pure).
+ */
+export const SYNC_STATE_TOKEN: Record<SyncState, string> = {
+  synced: "app-status-success",
+  syncing: "app-status-info",
+  offline: "app-status-warning",
+  error: "app-status-error",
+};
+
+/**
+ * Rút gọn `BackendConnectionStatus` (đang có) về `Sync_State` chuẩn hóa cho UI.
+ * Hàm thuần — không I/O, không thay đổi state.
+ *
+ * Thứ tự ưu tiên:
+ *   offline > syncing > error/partial > synced
+ */
+export function toSyncState(status: BackendConnectionStatus, online: boolean): SyncState {
+  if (!online) return "offline";
+  if (status.syncing) return "syncing";
+  if (status.syncStatus === "error" || status.syncStatus === "partial") return "error";
+  return "synced";
+}
+
 export function getSyncBadgeClass(backendConnectionStatus: BackendConnectionStatus): string {
   return backendConnectionStatus.syncStatus === "success"
     ? "border-emerald-200 bg-emerald-50 text-emerald-800"

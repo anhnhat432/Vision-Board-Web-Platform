@@ -6,13 +6,15 @@
   /* ── Motion tokens ─────────────────────────────────────────
    * Use these for every transition + animation duration/easing.
    * Match Material 3 + iOS curves so motion feels predictable.
+   * Tất cả mặc định nằm trong dải 150–500ms (Requirement 5.4).
+   * Token NAMES được giữ nguyên; chỉ Token_Value được tinh chỉnh.
    * ───────────────────────────────────────────────────────── */
-  --duration-instant: 120ms;
+  --duration-instant: 150ms;
   --duration-fast: 180ms;
   --duration-base: 240ms;
   --duration-medium: 360ms;
-  --duration-slow: 560ms;
-  --duration-slower: 820ms;
+  --duration-slow: 500ms;
+  --duration-slower: 500ms;
   --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
@@ -180,14 +182,14 @@
   --space-inline: 12px;
   --space-tight: 8px;
   --space-loose: 24px;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: var(--app-surface);
+  --sidebar-foreground: var(--app-ink);
+  --sidebar-primary: var(--app-accent);
+  --sidebar-primary-foreground: var(--app-ink-on-accent);
+  --sidebar-accent: var(--app-accent-subtle);
+  --sidebar-accent-foreground: var(--app-accent);
+  --sidebar-border: var(--app-line);
+  --sidebar-ring: var(--app-accent);
   --tone-bg-left: rgba(167, 139, 250, 0.1);
   --tone-bg-right: rgba(232, 121, 249, 0.08);
   --tone-bg-bottom: rgba(244, 114, 182, 0.06);
@@ -259,14 +261,14 @@
   --chart-3: #E8A830;
   --chart-4: var(--app-warm);
   --chart-5: #6B9AC4;
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --sidebar: var(--app-surface);
+  --sidebar-foreground: var(--app-ink);
+  --sidebar-primary: var(--app-accent);
+  --sidebar-primary-foreground: var(--app-ink-on-accent);
+  --sidebar-accent: var(--app-accent-subtle);
+  --sidebar-accent-foreground: var(--app-accent);
+  --sidebar-border: var(--app-line);
+  --sidebar-ring: var(--app-accent);
   --input-background: rgba(15, 23, 42, 0.82);
   --switch-background: rgba(51, 65, 85, 0.95);
   --tone-bg-left: rgba(124, 58, 237, 0.16);
@@ -3280,10 +3282,12 @@
     scroll-behavior: auto !important;
   }
 
-  /* Keep the brand glow pulse — it's a low-vestibular box-shadow only, no motion. */
+  /* R5.1: brand glow pulse là motion trang trí (box-shadow). Khi
+   * người dùng yêu cầu giảm chuyển động, vô hiệu hóa hoàn toàn
+   * thay vì duy trì vòng lặp ~2.6s. Token tên `.brand-glow-pulse`
+   * giữ nguyên — chỉ đổi hành vi runtime dưới reduced-motion. */
   .brand-glow-pulse {
-    animation-duration: 2.6s !important;
-    animation-iteration-count: infinite !important;
+    animation: none !important;
   }
 }
 

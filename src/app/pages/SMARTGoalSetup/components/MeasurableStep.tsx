@@ -155,7 +155,7 @@ export function MeasurableStep({
             onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
             className={inputClass}
           />
-          <div className="mt-2 flex flex-wrap gap-1.5 items-center select-none">
+          <div className="mt-2 flex flex-wrap gap-2 items-center select-none">
             <span className="text-[11px] text-app-ink-muted font-bold">Đơn vị gợi ý:</span>
             {(() => {
               const unitSuggestions = (() => {
@@ -176,7 +176,7 @@ export function MeasurableStep({
                   type="button"
                   onClick={() => handleUnitChange(unit)}
                   className={cn(
-                    "text-[10px] px-3 sm:px-2.5 py-1.5 sm:py-0.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
+                    "inline-flex min-h-11 items-center justify-center text-[10px] px-3 sm:px-2.5 py-1.5 sm:py-0.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                     metricUnitInput === unit
                       ? "bg-app-accent text-white border-app-accent"
                       : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/15",
@@ -322,7 +322,7 @@ export function MeasurableStep({
                   }));
                   setBlurredFields({ metricName: true, targetValue: true });
                 }}
-                className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none whitespace-nowrap snap-start shadow-sm flex-shrink-0 cursor-pointer"
+                className="inline-flex min-h-11 items-center text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none whitespace-nowrap snap-start shadow-sm flex-shrink-0 cursor-pointer"
               >
                 ⚡ <span className="font-medium">{suggestion.label}</span>
               </button>

@@ -695,7 +695,7 @@ function evaluateArchetypeFit(input: PlanQualityInput): { warnings: string[]; su
       const deliverableMilestones = nonEmptyMilestones.filter((value) => value.length >= 8);
       if (deliverableMilestones.length < 2) {
         warnings.push(
-          "Dự án cần mốc deliverable rõ ở ít nhất 2 trong 3 tuần 4/8/12 (ship, release, demo, feature cụ thể).",
+          "Dự án cần mốc deliverable rõ ở ít nhất 2 trong 3 tuần 4/8/12 (ship, release, trình diễn, feature cụ thể).",
         );
       }
       break;
@@ -738,7 +738,7 @@ function evaluateArchetypeFit(input: PlanQualityInput): { warnings: string[]; su
       );
       if (validIndicators.length > 0 && !hasFeedbackLoop) {
         suggestions.push(
-          "Học kỹ năng cần vòng phản hồi (demo, review cùng người khác, đưa kết quả ra ngoài). Học mà không có kết quả dễ ảo tưởng tiến bộ.",
+          "Học kỹ năng cần vòng phản hồi (trình diễn, review cùng người khác, đưa kết quả ra ngoài). Học mà không có kết quả dễ ảo tưởng tiến bộ.",
         );
       }
       break;

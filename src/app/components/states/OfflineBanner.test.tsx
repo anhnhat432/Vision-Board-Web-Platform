@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { OfflineBanner } from "./OfflineBanner";
 
+const SESSION_KEY = "offline-banner-dismissed";
+
 describe("OfflineBanner", () => {
   let originalOnLine: boolean;
 
@@ -47,8 +49,34 @@ describe("OfflineBanner", () => {
 
     render(<OfflineBanner />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("Bạn đang ngoại tuyến");
+    const banner = screen.getByRole("status");
+    expect(banner).toHaveTextContent("Bạn đang ngoại tuyến");
     fireEvent.click(screen.getByRole("button", { name: "Tắt thông báo" }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("uses the status token utility class instead of primitive palette colors", () => {
+    setNetworkStatus(false);
+
+    render(<OfflineBanner />);
+
+    const banner = screen.getByRole("status");
+    expect(banner.className).toContain("bg-app-status-error");
+    expect(banner.className).not.toMatch(/\bbg-red-\d+\b/);
+
+    const dismissButton = screen.getByRole("button", { name: "Tắt thông báo" });
+    expect(dismissButton.className).toContain("hover:bg-app-status-error/90");
+    expect(dismissButton.className).not.toMatch(/\bhover:bg-red-\d+\b/);
+  });
+
+  it("persists dismissal under the unchanged sessionStorage key", () => {
+    setNetworkStatus(false);
+
+    render(<OfflineBanner />);
+
+    expect(window.sessionStorage.getItem(SESSION_KEY)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Tắt thông báo" }));
+    expect(window.sessionStorage.getItem(SESSION_KEY)).toBe("1");
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 

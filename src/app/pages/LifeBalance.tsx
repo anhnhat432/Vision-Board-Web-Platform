@@ -28,6 +28,7 @@ import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { loadWithChunkReload } from "../utils/chunkLoad";
+import { getLifeAreaTheme } from "../utils/life-area-theme";
 import { getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(() =>
@@ -35,83 +36,6 @@ const LifeBalanceHistoryChart = lazy(() =>
     default: (await import("../components/LifeBalanceHistoryChart")).LifeBalanceHistoryChart,
   })),
 );
-
-const getAreaColorConfig = (name: string) => {
-  switch (name) {
-    case "Career":
-      return {
-        bgLight: "bg-blue-50 dark:bg-blue-950/20",
-        text: "text-blue-600 dark:text-blue-400",
-        border: "border-blue-100 dark:border-blue-900/30",
-        accent: "var(--color-career-accent)",
-        glow: "shadow-blue-500/10 dark:shadow-blue-500/20",
-      };
-    case "Finance":
-      return {
-        bgLight: "bg-amber-50 dark:bg-amber-950/20",
-        text: "text-amber-600 dark:text-amber-400",
-        border: "border-amber-100 dark:border-amber-900/30",
-        accent: "var(--color-finance-accent)",
-        glow: "shadow-amber-500/10 dark:shadow-amber-500/20",
-      };
-    case "Health":
-      return {
-        bgLight: "bg-emerald-50 dark:bg-emerald-950/20",
-        text: "text-emerald-600 dark:text-emerald-400",
-        border: "border-emerald-100 dark:border-emerald-900/30",
-        accent: "var(--color-health-accent)",
-        glow: "shadow-emerald-500/10 dark:shadow-emerald-500/20",
-      };
-    case "Education":
-      return {
-        bgLight: "bg-indigo-50 dark:bg-indigo-950/20",
-        text: "text-indigo-600 dark:text-indigo-400",
-        border: "border-indigo-100 dark:border-indigo-900/30",
-        accent: "var(--color-education-accent)",
-        glow: "shadow-indigo-500/10 dark:shadow-indigo-500/20",
-      };
-    case "Relationships":
-      return {
-        bgLight: "bg-rose-50 dark:bg-rose-950/20",
-        text: "text-rose-600 dark:text-rose-400",
-        border: "border-rose-100 dark:border-rose-900/30",
-        accent: "var(--color-relationships-accent)",
-        glow: "shadow-rose-500/10 dark:shadow-rose-500/20",
-      };
-    case "Family":
-      return {
-        bgLight: "bg-teal-50 dark:bg-teal-950/20",
-        text: "text-teal-600 dark:text-teal-400",
-        border: "border-teal-100 dark:border-teal-900/30",
-        accent: "var(--color-family-accent)",
-        glow: "shadow-teal-500/10 dark:shadow-teal-500/20",
-      };
-    case "Personal Growth":
-      return {
-        bgLight: "bg-orange-50 dark:bg-orange-950/20",
-        text: "text-orange-600 dark:text-orange-400",
-        border: "border-orange-100 dark:border-orange-900/30",
-        accent: "var(--color-personal-growth-accent)",
-        glow: "shadow-orange-500/10 dark:shadow-orange-500/20",
-      };
-    case "Leisure":
-      return {
-        bgLight: "bg-sky-50 dark:bg-sky-950/20",
-        text: "text-sky-600 dark:text-sky-400",
-        border: "border-sky-100 dark:border-sky-900/30",
-        accent: "var(--color-leisure-accent)",
-        glow: "shadow-sky-500/10 dark:shadow-sky-500/20",
-      };
-    default:
-      return {
-        bgLight: "bg-app-accent-soft",
-        text: "text-app-accent",
-        border: "border-app-line",
-        accent: "var(--app-accent)",
-        glow: "shadow-app-accent/5",
-      };
-  }
-};
 
 const LIFE_AREA_DETAILS: Record<string, string> = {
   Career: "Việc học, công việc, hướng đi nghề nghiệp và cảm giác tiến triển.",
@@ -442,7 +366,7 @@ export function LifeBalance() {
       <AlertDialog open={blocker.state === "blocked"}>
         <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
           <AlertDialogHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-warm-soft text-app-warm">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-status-warning/15 text-app-status-warning">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <AlertDialogTitle className="font-serif text-app-ink">Bạn có thay đổi chưa lưu</AlertDialogTitle>
@@ -457,7 +381,7 @@ export function LifeBalance() {
                 toast.success("Đã lưu trước khi rời trang.");
                 blocker.proceed?.();
               }}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2 text-sm font-medium text-white hover:bg-app-accent"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2 text-sm font-medium text-white hover:bg-app-accent"
             >
               <Save className="h-4 w-4" />
               Lưu rồi rời trang
@@ -465,13 +389,13 @@ export function LifeBalance() {
             <button
               type="button"
               onClick={() => blocker.proceed?.()}
-              className="rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
             >
               Rời trang
             </button>
             <AlertDialogCancel
               onClick={() => blocker.reset?.()}
-              className="rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
             >
               Ở lại trang này
             </AlertDialogCancel>
@@ -527,14 +451,14 @@ export function LifeBalance() {
           </MotionFadeIn>
           <MotionFadeIn
             delay={0.15}
-            className="surface-raised rounded-xl border border-app-warm/30 bg-app-warm-soft/40 p-5 transition-all duration-300 hover:shadow-md hover:border-app-warm/50"
+            className="surface-raised rounded-xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 transition-all duration-300 hover:shadow-md hover:border-app-status-warning/50"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">Lĩnh vực cần ưu tiên</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-status-warning">Lĩnh vực cần ưu tiên</p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
             </p>
-            <p className="mt-1.5 text-xs font-medium text-app-warm">{getLifeAreaLabel(weakestArea.name)}</p>
+            <p className="mt-1.5 text-xs font-medium text-app-status-warning">{getLifeAreaLabel(weakestArea.name)}</p>
           </MotionFadeIn>
         </div>
 

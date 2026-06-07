@@ -222,7 +222,7 @@ const getGoalHealthStatus = (
   if (isNearDeadline) {
     return {
       label: "Sắp đến hạn ⏳",
-      bgClass: "bg-app-warm-soft text-app-warm border border-app-warm-border",
+      bgClass: "bg-app-status-warning/10 text-app-status-warning border border-app-status-warning/30",
     };
   }
   return {
@@ -1335,7 +1335,7 @@ function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalFilterCh
             type="button"
             onClick={() => setActiveFilter(chip.id)}
             className={cn(
-              "px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all duration-200 flex items-center gap-2 shadow-app-sm shrink-0",
+              "inline-flex min-h-11 items-center justify-center px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all duration-200 gap-2 shadow-app-sm shrink-0",
               isActive
                 ? "bg-app-accent text-white border-app-accent"
                 : "bg-app-bg text-app-ink-soft border-app-line hover:border-app-accent/25 hover:bg-app-surface",
@@ -1860,7 +1860,7 @@ function GoalsSidebar({
       )}
 
       {/* Widget Nhắc nhở tĩnh tâm */}
-      <div className="rounded-[18px] border border-app-line bg-app-warm-soft/40 dark:bg-neutral-900/20 p-4 shadow-app-sm opacity-90">
+      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle dark:bg-neutral-900/20 p-4 shadow-app-sm opacity-90">
         <p className="text-xs italic leading-relaxed text-app-ink-soft font-serif font-medium">
           “Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.”
         </p>
@@ -2049,6 +2049,45 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [isReadOpen, setIsReadOpen] = useState(false);
   const [tempText, setTempText] = useState("");
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
+
+  const handleWriteOpenChange = (open: boolean) => {
+    if (!open) {
+      const isDirty = tempText.trim() !== (letterText || "").trim();
+      if (isDirty) {
+        setDiscardConfirmOpen(true);
+        return;
+      }
+    }
+    setIsWriteOpen(open);
+  };
+
+  const handleConfirmDiscard = () => {
+    setDiscardConfirmOpen(false);
+    setIsWriteOpen(false);
+  };
+
+  const discardLetterAlertDialog = (
+    <AlertDialog open={discardConfirmOpen} onOpenChange={setDiscardConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Bỏ thay đổi trên thư?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Tiếp tục viết</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirmDiscard}
+            className="bg-app-status-error hover:bg-app-status-error/90 text-white"
+          >
+            Bỏ thay đổi
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   useEffect(() => {
     const saved = localStorage.getItem(`future_letter_${goalId}`);
@@ -2111,21 +2150,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           Viết thư tuần 12
         </Button>
 
-        <Dialog
-          open={isWriteOpen}
-          onOpenChange={(open) => {
-            if (!open) {
-              const isDirty = tempText.trim() !== (letterText || "").trim();
-              if (
-                isDirty &&
-                !window.confirm("Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?")
-              ) {
-                return;
-              }
-            }
-            setIsWriteOpen(open);
-          }}
-        >
+        <Dialog open={isWriteOpen} onOpenChange={handleWriteOpenChange}>
           <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
             <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
               <div className="flex items-center gap-2">
@@ -2172,6 +2197,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {discardLetterAlertDialog}
       </>
     );
   }
@@ -2214,7 +2240,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
           </DialogDescription>
 
-          <div className="bg-app-warm-soft/40 dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60 my-2">
+          <div className="bg-app-bg-subtle dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60 my-2">
             <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">“{letterText}”</p>
           </div>
 
@@ -2238,21 +2264,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
       </Dialog>
 
       {/* Dialog Chỉnh sửa khi đã có thư */}
-      <Dialog
-        open={isWriteOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            const isDirty = tempText.trim() !== (letterText || "").trim();
-            if (
-              isDirty &&
-              !window.confirm("Nội dung thư thay đổi chưa được lưu/niêm phong sẽ bị mất. Bạn vẫn muốn đóng chứ?")
-            ) {
-              return;
-            }
-          }
-          setIsWriteOpen(open);
-        }}
-      >
+      <Dialog open={isWriteOpen} onOpenChange={handleWriteOpenChange}>
         <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
           <DialogHeader className="space-y-1.5 text-left border-b border-app-line/45 pb-3">
             <div className="flex items-center gap-2">
@@ -2298,6 +2310,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {discardLetterAlertDialog}
     </>
   );
 }

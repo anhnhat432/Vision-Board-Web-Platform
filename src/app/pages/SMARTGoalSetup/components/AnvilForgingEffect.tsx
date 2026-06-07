@@ -335,7 +335,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         <span
           className={`
             inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide
-            border shadow-lg transition-all duration-700
+            border shadow-lg transition-all duration-500
             ${
               phase === "crystallized"
                 ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 shadow-emerald-500/20"
@@ -344,7 +344,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
           `}
         >
           <Sparkles
-            className={`h-3.5 w-3.5 transition-colors duration-700 ${
+            className={`h-3.5 w-3.5 transition-colors duration-500 ${
               phase === "crystallized" ? "text-emerald-400" : "text-indigo-400"
             }`}
           />
@@ -355,7 +355,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         <h3
           className={`
             font-serif text-2xl sm:text-3xl font-bold tracking-wide
-            transition-all duration-1000
+            transition-all duration-500
             ${
               phase === "crystallized"
                 ? "text-emerald-100 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]"
@@ -369,7 +369,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         {/* Goal statement reveal */}
         <div
           className={`
-            max-w-sm transition-all duration-1000 ease-out
+            max-w-sm transition-all duration-500 ease-out
             ${phase === "crystallized" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
           `}
         >
@@ -381,7 +381,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         {/* Subtitle */}
         <p
           className={`
-            text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-700
+            text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-500
             ${phase === "crystallized" ? "text-emerald-400/80" : "text-indigo-400/60"}
           `}
         >

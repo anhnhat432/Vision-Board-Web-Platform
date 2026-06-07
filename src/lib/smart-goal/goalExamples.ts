@@ -46,8 +46,8 @@ const GOAL_EXAMPLES: Record<GoalArchetype, ArchetypeExample> = {
     archetype: "skill_learning",
     weakGoal: "Học JavaScript giỏi hơn trong vài tháng tới.",
     strongerGoal:
-      "Trong 12 tuần, hoàn thành 3 dự án nhỏ JavaScript đăng lên GitHub, mỗi dự án có README rõ và 1 đoạn demo.",
-    goodMetric: "Số dự án nhỏ hoàn thành (3 dự án có README + demo trong 12 tuần).",
+      "Trong 12 tuần, hoàn thành 3 dự án nhỏ JavaScript đăng lên GitHub, mỗi dự án có README rõ và 1 đoạn minh họa.",
+    goodMetric: "Số dự án nhỏ hoàn thành (3 dự án có README + minh họa trong 12 tuần).",
     badMetric: "Số giờ ngồi học (đo thời gian không nói lên có làm ra sản phẩm).",
     goodLeadIndicator: "Viết và push commit cho 1 tính năng nhỏ, 3 buổi mỗi tuần.",
     badLeadIndicator: "Trở thành lập trình viên giỏi (kết quả cuối, không phải việc tuần).",

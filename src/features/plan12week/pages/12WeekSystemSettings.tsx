@@ -282,6 +282,7 @@ export function TwelveWeekSystemSettings() {
                 handleResetCycle();
                 navigate("/12-week-system");
               }}
+              className="bg-app-status-error hover:bg-app-status-error/90 text-white"
             >
               Reset chu kỳ
             </AlertDialogAction>
@@ -300,7 +301,12 @@ export function TwelveWeekSystemSettings() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearLocalSignals}>Xóa dữ liệu cục bộ</AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleClearLocalSignals}
+              className="bg-app-status-error hover:bg-app-status-error/90 text-white"
+            >
+              Xóa dữ liệu cục bộ
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

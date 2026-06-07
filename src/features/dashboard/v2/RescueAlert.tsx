@@ -13,12 +13,12 @@ interface RescueAlertProps {
 export function RescueAlert({ trigger, ctaLabel, onAction, onDismiss, onVisible }: RescueAlertProps) {
   return (
     <section
-      className="surface-raised rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong md:p-5"
+      className="surface-raised rounded-xl border border-app-status-warning/30 bg-app-status-warning/10 p-4 text-sm text-app-status-warning md:p-5"
       aria-label="Cảnh báo tuần này"
       onAnimationStart={onVisible}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-surface text-app-warm">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-surface text-app-status-warning">
           <AlertTriangle className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
@@ -29,14 +29,14 @@ export function RescueAlert({ trigger, ctaLabel, onAction, onDismiss, onVisible 
           <button
             type="button"
             onClick={onAction}
-            className="inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+            className="inline-flex rounded-lg bg-app-status-warning px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-status-warning/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30"
           >
             {ctaLabel}
           </button>
           <button
             type="button"
             onClick={onDismiss}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-app-warm-strong transition-colors duration-150 hover:bg-app-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-app-status-warning transition-colors duration-150 hover:bg-app-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30"
             aria-label="Đóng thông báo"
           >
             <X className="h-4 w-4" />

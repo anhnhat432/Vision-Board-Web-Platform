@@ -568,14 +568,14 @@ export function FeasibilityCheck() {
                   <button
                     type="button"
                     onClick={handleDiscardBackup}
-                    className="px-3.5 py-1.5 text-xs font-semibold rounded-control border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle transition-all duration-200"
+                    className="inline-flex min-h-11 items-center justify-center px-3.5 py-1.5 text-xs font-semibold rounded-control border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle transition-all duration-200"
                   >
                     Bỏ qua
                   </button>
                   <button
                     type="button"
                     onClick={handleRestoreAnswers}
-                    className="px-4 py-1.5 text-xs font-bold rounded-control bg-app-accent text-white hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm"
+                    className="inline-flex min-h-11 items-center justify-center px-4 py-1.5 text-xs font-bold rounded-control bg-app-accent text-white hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm"
                   >
                     Khôi phục ✏️
                   </button>

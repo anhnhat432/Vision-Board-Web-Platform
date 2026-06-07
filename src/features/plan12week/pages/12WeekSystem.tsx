@@ -993,7 +993,7 @@ export function TwelveWeekSystem() {
         style={{ animationDuration: "8s" }}
       />
       <div
-        className="absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-warm-soft/15 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        className="absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
         style={{ animationDuration: "12s" }}
       />
 
@@ -1225,7 +1225,7 @@ export function TwelveWeekSystem() {
           <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden animate-scale-up">
             {/* Decorative soft gradient blobs inside the card */}
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-app-accent-soft/20 rounded-full blur-xl pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-warm-soft/20 rounded-full blur-xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-status-warning/10 rounded-full blur-xl pointer-events-none" />
 
             {/* Washi Tape effect */}
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-app-accent/15 backdrop-blur-[1px] rotate-[-1deg] border border-dashed border-app-accent/20" />

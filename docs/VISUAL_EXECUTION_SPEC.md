@@ -85,7 +85,19 @@ Side surfaces such as Vision Board, Order Kit, Achievements, and Admin may be be
 
 ## 3. Token Contract
 
-Use semantic tokens from `src/styles/tokens.css` and `tailwind.config.js`.
+Use semantic tokens from `src/styles/tokens.css` and `tailwind.config.js`. The style entry is `src/styles/index.css`, importing `fonts.css -> order-theme.css -> tailwind.css -> tokens.css -> theme.css`. Tokens are layered Primitive -> Semantic -> Component; consume only semantic/component tokens in components, never primitives.
+
+Anchor values (for reference, not for direct hardcoding):
+
+| Concept | Token | Value |
+| --- | --- | --- |
+| Brand accent base | `--app-accent` (`--green-700`) | `#2A5447` |
+| Warm/reflection base | `--app-warm` (`--terra-600`) | `#A8522F` |
+| Page canvas | `--app-bg` (`--neutral-050`) | `#FCFAF7` |
+| Ink | `--app-ink` (`--neutral-950`) | `#1A1A1A` |
+| Card radius | `--app-radius-card` | `14px` |
+| Input radius | `--app-radius-input` | `10px` |
+| Control radius | `--app-radius-control` | `11px` |
 
 Default classes:
 
@@ -114,6 +126,13 @@ Do not use:
 - `app-warm-*` outside Reflection/Review without a documented reason.
 
 Status colors should use existing status tokens or existing component-level danger/success patterns.
+
+Known token-system caveats (verified in code):
+
+- Three shadow systems coexist: `--app-shadow-*` (the official product scale, exposed as `shadow-app-*`), the Material-style `--shadow-1..5` (via `.elevation-*`), and `--shadow-glow-*`. Use only `shadow-app-*` for product cards. Do not add a fourth system or mix the others into core-journey surfaces.
+- `sidebar-*` tokens in `theme.css` still use the stock shadcn palette (neutral grey `oklch` + `--sidebar-primary: #030213` near purple-black in light, a purple/blue hue in dark). They are not mapped to `--app-accent`. When touching the sidebar, map them to brand/semantic tokens.
+- `Be Vietnam Pro` is declared first in the `sans` stack but is not imported in `fonts.css`; sans text falls back to Inter unless the font is locally installed. Treat brand sans as "Inter until Be Vietnam Pro is imported".
+- Live decorative classes still exist in `theme.css` (`washi-tape-*`, `studio-pin`, `surface-glass*`, `glass-surface*`, `ambient-glow`, the `product-visual` family, the `--tone-*` route tones). Keep vibrant tones on marketing/public surfaces; do not pull them into the core journey.
 
 ---
 
@@ -242,6 +261,9 @@ Style:
 - `rounded-card border border-app-line bg-app-surface shadow-app-sm`.
 - Reserve stable dimensions with `min-h`, `aspect-ratio`, or fixed grid tracks.
 - Use `bg-app-bg-subtle` only for quiet nested areas.
+- Concentric radius: nested controls inside a `rounded-card` panel should use `rounded-input`/`rounded-control` so the inner corner sits inside the outer (`outer = inner + padding`), never another 14px.
+- Images in the panel get a 1px inset outline (`outline` with `outline-offset: -1px`), not a border, so the frame reads intentionally and layout does not shift.
+- Keep one depth strategy: `shadow-app-sm` only. Do not introduce `.elevation-*` or glow shadows on the same panel.
 
 Avoid:
 
@@ -404,6 +426,14 @@ Avoid:
 - Blank loading screens.
 - Success messages with no next step.
 
+Modern failure modes to design out (from `ux-audit`, ship-readiness tiers):
+
+- Release-blocker: form data loss on validation error (re-render wipes user input), broken/missing critical-path error state (sync/billing/auth), focus traps in dialogs that never restore focus on close, optimistic UI with no rollback when the request fails.
+- Fix-this-sprint: missing skeleton for a known-shape load, generic loading copy ("Loading…") where a specific message helps, missing empty-state CTA, sub-44px touch target on a primary mobile control.
+- Skeleton must match the final layout shape and reserve the same dimensions, or it causes layout shift (CLS) when content arrives. Reserve space with `min-h`/`aspect-ratio`.
+- For React surfaces, prefer modern APIs for these states: `useActionState` + `useFormStatus` for form submit/pending, `useOptimistic` for optimistic updates with rollback, `useTransition` for non-blocking triggers, `<Suspense fallback={<Skeleton/>}>` for async reads. Do not block auth/billing/sync submission behind motion.
+- Local-first nuance: a sync error is not a data-loss error. Always state that local data is safe and offer "try again", never imply progress was lost.
+
 ---
 
 ## 6. Typography Execution
@@ -434,6 +464,15 @@ Rules:
 - Avoid paragraphs longer than 2-3 lines inside cards.
 - If body copy feels long, reduce scope or use progressive disclosure instead of shrinking text.
 - Buttons and badges must not clip Vietnamese text.
+
+Craft rules (from `typography-audit`):
+
+- Line height is unitless. Body `~1.45-1.5`; large serif route titles `~1.1-1.2`; small captions `~1.4`. A unitless value scales with font size and prevents heading line overlap.
+- Keep prose measure at `45-75` characters. Constrain long copy with `max-w-prose` / `max-w-[65ch]`; do not let body text span a full desktop width.
+- Never letterspace body text. The font is already spaced for reading; negative tracking on Vietnamese copy crowds diacritics. Slight positive tracking is allowed only on tiny uppercase eyebrow labels.
+- Use `font-variant-numeric: tabular-nums` for scores, progress, money, counts, and week numbers so digits align.
+- Use real punctuation in display copy: curly quotes, en/em dashes, and a real ellipsis (`…`). Straight quotes and `...` read as amateur typography.
+- Do not fake bold or italic. Use a weight/style the font actually ships (Source Serif 4 Variable and Inter both ship true weights/italics).
 
 ---
 
@@ -749,11 +788,46 @@ Before a UI task is done, verify:
 [ ] Auth, billing, sync, localStorage, route, and app-mode behavior are preserved.
 ```
 
+Accessibility + interaction checks (from `ui-audit`, CRITICAL first):
+
+```text
+[ ] Semantic HTML first (nav/main/section/button), not div soup.
+[ ] Icon-only controls have an accessible name (aria-label or visible text).
+[ ] Visible focus ring on every interactive element; focus restores after dialog close.
+[ ] Full keyboard flow; Enter-to-submit on forms where expected.
+[ ] Inputs have associated labels; errors are inline and move focus to the first error.
+[ ] Contrast meets AA; meaning never relies on color alone.
+[ ] Touch targets >= 44px on mobile (>= 24px minimum elsewhere).
+[ ] Images have meaningful alt text; offscreen/below-fold images lazy-load.
+[ ] No layout shift: dimensions reserved for images, skeletons, and progress widgets.
+```
+
+Live visual verification viewports (from `web-design-reviewer`):
+
+```text
+Mobile 375px  -> overflow, tap targets, one-column flow, no horizontal scroll
+Tablet 768px  -> breakpoint transition is natural
+Desktop 1280px -> main task + anchor balance, no stretched prose
+Wide 1920px   -> content respects max-width, prose measure stays 45-75 chars
+```
+
 Use the rubric in `docs/DESIGN.md` for scoring. A core journey screen with any `0` category is not ready.
 
 ---
 
 ## 12. Prompt Patterns
+
+Skill chain for a screen task (load via the skill tool, run only what the change needs):
+
+```text
+ui-design (product-ui track) -> visual direction, surface/depth/radius craft
+frontend-design              -> distinctive detail + anti-slop, scoped to Dreamy Guided Productivity
+design-in-code               -> low-fi ASCII wireframe, structure before polish
+typography-audit             -> punctuation, line-height, measure, OpenType, Vietnamese safety
+ux-audit                     -> state coverage, form data loss, focus, optimistic-UI rollback
+ui-audit                     -> accessibility, interaction, motion, microcopy
+web-design-reviewer          -> live desktop + mobile visual verification
+```
 
 ### 12.1 One-screen design audit
 
@@ -782,6 +856,8 @@ Read AGENTS.md, docs/DESIGN.md, docs/VISUAL_EXECUTION_SPEC.md, and guidelines/CU
 
 Implement only this screen: [SCREEN/ROUTE].
 Follow the approved audit plan.
+
+Plan structure low-fi first (design-in-code): sketch the layout as an ASCII wireframe, get structure and hierarchy right, then apply visual polish.
 
 Constraints:
 - Do not edit other screens.
