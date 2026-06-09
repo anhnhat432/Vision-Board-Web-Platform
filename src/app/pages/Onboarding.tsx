@@ -32,39 +32,13 @@ import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
+import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getLifeAreaLabel, getUserData, LIFE_AREAS, type LifeArea, updateWheelOfLife } from "../utils/storage";
 import { ZenBreathingGate } from "./Onboarding/components/ZenBreathingGate";
 
 type OnboardingStep = "welcome" | "assessment";
 
 type AutoSaveDraftStatus = "idle" | "saving" | "saved";
-
-interface AreaColorConfig {
-  accent: string;
-}
-
-const getAreaColorConfig = (name: string): AreaColorConfig => {
-  switch (name) {
-    case "Career":
-      return { accent: "var(--color-career-accent)" };
-    case "Finance":
-      return { accent: "var(--color-finance-accent)" };
-    case "Health":
-      return { accent: "var(--color-health-accent)" };
-    case "Education":
-      return { accent: "var(--color-education-accent)" };
-    case "Relationships":
-      return { accent: "var(--color-relationships-accent)" };
-    case "Family":
-      return { accent: "var(--color-family-accent)" };
-    case "Personal Growth":
-      return { accent: "var(--color-personal-growth-accent)" };
-    case "Leisure":
-      return { accent: "var(--color-leisure-accent)" };
-    default:
-      return { accent: "var(--app-accent)" };
-  }
-};
 
 const LIFE_AREA_DETAILS: Record<string, string> = {
   Career: "Việc học, công việc, hướng đi nghề nghiệp và cảm giác tiến triển.",

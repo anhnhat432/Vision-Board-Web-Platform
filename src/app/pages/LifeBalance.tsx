@@ -28,7 +28,7 @@ import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { loadWithChunkReload } from "../utils/chunkLoad";
-import { getLifeAreaTheme } from "../utils/life-area-theme";
+import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(() =>

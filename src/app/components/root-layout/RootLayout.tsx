@@ -433,8 +433,7 @@ export function RootLayout() {
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountEmail = user?.email || userProfile?.email || "";
   const currentAccountPlanCode = getCurrentPlan(guideUserData);
-  const accountPlanLabel =
-    currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
+  const accountPlanLabel = currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
   const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? []).slice(0, 12).map((goal) => ({
