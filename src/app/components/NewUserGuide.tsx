@@ -113,14 +113,14 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
   const compact = variant === "compact";
   const title = userData.isHydratedFromDemo
     ? compact
-      ? "Khám phá web theo thứ tự này"
-      : "Nếu đang xem dữ liệu mẫu, cứ đi theo checklist này là hiểu web nhanh nhất."
+      ? "Khám phá web theo 4 bước"
+      : "Đang xem dữ liệu mẫu? Đi theo checklist này là hiểu web nhanh nhất."
     : compact
-      ? "Đi tiếp theo đúng thứ tự này"
-      : `Nếu mới vào web, cứ đi theo ${progress.totalSteps} bước này là đủ gọn.`;
+      ? "6 bước để bắt đầu"
+      : `Đi theo ${progress.totalSteps} bước này để không bị lạc.`;
   const description = userData.isHydratedFromDemo
-    ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ luồng thật của sản phẩm."
-    : "Website này dễ dùng hơn nhiều nếu bạn đi đúng luồng: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
+    ? "Web đã có dữ liệu mẫu sẵn. Checklist này giúp bạn hiểu luồng thật."
+    : "Chỉ cần đi đúng thứ tự: đánh giá → chọn trọng tâm → viết mục tiêu → hành động.";
   const surfaceClass = compact
     ? "max-w-full overflow-hidden border border-app-line bg-app-surface shadow-sm"
     : "max-w-full overflow-hidden border border-app-line bg-app-surface text-app-ink shadow-sm";
@@ -226,21 +226,19 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
           </div>
           <DialogTitle className="text-xl tracking-normal text-app-ink sm:text-2xl">
             {userData.isHydratedFromDemo
-              ? "Khám phá sản phẩm theo checklist."
-              : `Đi web này theo ${progress.totalSteps} bước là dễ nhất.`}
+              ? "Khám phá web theo checklist"
+              : `${progress.totalSteps} bước để bắt đầu`}
           </DialogTitle>
-          <DialogDescription className="text-sm leading-7 text-app-ink-soft">
+          <DialogDescription className="text-sm leading-6 text-app-ink-soft">
             {userData.isHydratedFromDemo
-              ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Checklist này giúp bạn hiểu luồng thật của sản phẩm mà không bị lạc giữa quá nhiều màn."
-              : "Nếu bạn mới dùng lần đầu, cứ coi đây là đường đi ngắn nhất để hiểu web và không bị lạc giữa quá nhiều màn."}
+              ? "Web đã có dữ liệu mẫu sẵn. Đi theo thứ tự này để hiểu luồng thật."
+              : "Đi đúng thứ tự để không bị lạc: đánh giá → chọn trọng tâm → viết mục tiêu → hành động."}
           </DialogDescription>
         </DialogHeader>
 
         {userData.isHydratedFromDemo && (
-          <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
-            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, luồng chuẩn vẫn là: đo
-            bánh xe cuộc đời, chốt góc nhìn cuộc sống, viết mục tiêu SMART, kiểm tra tính thực tế rồi mới vào chu kỳ 12
-            tuần.
+          <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-3 text-xs leading-5 text-amber-900">
+            Luồng chuẩn khi dùng thật: Bánh xe cuộc sống → Chọn lĩnh vực → Mục tiêu SMART → Kiểm tra khả thi → Chu kỳ 12 tuần.
           </div>
         )}
 

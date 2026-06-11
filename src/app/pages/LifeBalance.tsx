@@ -810,9 +810,31 @@ export function LifeBalance() {
                                   </div>
 
                                   <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase tracking-wider px-1">
-                                    <span>😢 Cần chăm sóc (1-3)</span>
-                                    <span>😐 Ổn định (4-7)</span>
-                                    <span>😊 Phát triển (8-10)</span>
+                                    {[
+                                      { range: "1–2", label: "Rất chật vật" },
+                                      { range: "3–4", label: "Thiếu ổn định" },
+                                      { range: "5–6", label: "Tạm ổn" },
+                                      { range: "7–8", label: "Khá tốt" },
+                                      { range: "9–10", label: "Rất tốt" },
+                                    ].map((anchor) => {
+                                      const isActive =
+                                        (area.score <= 2 && anchor.range === "1–2") ||
+                                        (area.score >= 3 && area.score <= 4 && anchor.range === "3–4") ||
+                                        (area.score >= 5 && area.score <= 6 && anchor.range === "5–6") ||
+                                        (area.score >= 7 && area.score <= 8 && anchor.range === "7–8") ||
+                                        (area.score >= 9 && anchor.range === "9–10");
+                                      return (
+                                        <span
+                                          key={anchor.range}
+                                          className={cn(
+                                            "rounded-full px-1.5 py-0.5 transition-colors",
+                                            isActive ? "bg-app-accent/15 text-app-accent" : "",
+                                          )}
+                                        >
+                                          {anchor.range} {anchor.label}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               </div>
