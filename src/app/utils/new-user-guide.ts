@@ -5,6 +5,7 @@ import type { UserData } from "./storage-types";
 const GUIDE_DISMISSED_KEY = "visionboard_new_user_guide_dismissed";
 const GUIDE_SEEN_KEY = "visionboard_new_user_guide_seen_at";
 const GUIDE_UPDATED_EVENT = "visionboard:new-user-guide-updated";
+const FIRST_RUN_GUIDANCE_COMPLETED_KEY = "visionboard_first_run_guidance_completed_at";
 
 export type NewUserGuideStepId =
   | "dashboard_preview"
@@ -109,6 +110,7 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     hasCycle &&
     (Boolean(activeSystem?.dailyCheckIns.length) ||
       Boolean(activeSystem?.taskInstances.some((task) => task.completed)));
+  const hasCompletedReview = hasCycle && Boolean(activeSystem?.weeklyReviews.length);
 
   const steps: NewUserGuideStep[] = [
     {
@@ -160,6 +162,14 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
       href: "/12-week-system",
       ctaLabel: "Mở hôm nay",
     },
+    {
+      id: "complete_review",
+      title: "Làm review tuần đầu tiên",
+      description: "Cuối tuần mở tab Tuần để nhìn lại điểm đã làm, điều chỉnh tải và chọn cam kết cho tuần kế tiếp.",
+      completed: hasCompletedReview,
+      href: "/12-week-system?tab=week",
+      ctaLabel: hasCycle ? "Mở review tuần" : "Tạo chu kỳ trước",
+    },
   ];
 
   const completedCount = steps.filter((step) => step.completed).length;
@@ -199,6 +209,19 @@ export function hasSeenNewUserGuide(): boolean {
 export function markNewUserGuideSeen(): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(GUIDE_SEEN_KEY, new Date().toISOString());
+  emitGuideUpdate();
+}
+
+export function hasCompletedFirstRunGuidance(): boolean {
+  if (typeof window === "undefined") return false;
+  return Boolean(window.localStorage.getItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY));
+}
+
+export function markFirstRunGuidanceCompleted(): void {
+  if (typeof window === "undefined") return;
+  if (!window.localStorage.getItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY)) {
+    window.localStorage.setItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY, new Date().toISOString());
+  }
   emitGuideUpdate();
 }
 

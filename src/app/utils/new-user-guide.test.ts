@@ -136,6 +136,7 @@ describe("getNewUserGuideProgress", () => {
       ["feasibility", false],
       ["setup_cycle", false],
       ["complete_today", false],
+      ["complete_review", false],
     ]);
   });
 
@@ -156,8 +157,8 @@ describe("getNewUserGuideProgress", () => {
     const progress = getNewUserGuideProgress(data);
 
     expect(progress.completedCount).toBe(6);
-    expect(progress.nextStep).toBeNull();
-    expect(progress.isComplete).toBe(true);
+    expect(progress.nextStep?.id).toBe("complete_review");
+    expect(progress.isComplete).toBe(false);
     expect(progress.steps.map((step) => [step.id, step.completed])).toEqual([
       ["life_balance", true],
       ["life_insight", true],
@@ -165,6 +166,7 @@ describe("getNewUserGuideProgress", () => {
       ["feasibility", true],
       ["setup_cycle", true],
       ["complete_today", true],
+      ["complete_review", false],
     ]);
   });
 });
