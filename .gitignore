@@ -2,6 +2,7 @@ node_modules/
 dist/
 .codex-worktrees/
 .claude/
+.codex/
 .kilo/
 .superpowers/
 .DS_Store
