@@ -36,8 +36,10 @@ import {
   type TwelveWeekImportValidationRequest,
 } from "@/services/syncService";
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../../hooks/useBackendPlanHydration";
+import { startPageTour } from "../../hooks/usePageTour";
 import { useTheme } from "../../hooks/useTheme";
 import { isDemoMode, shouldEnable12WeekCloudImport, shouldEnable12WeekImportDryRun } from "../../utils/app-mode";
+import { hasCompletedFirstRunGuidance, hasSeenNewUserGuide, markNewUserGuideSeen } from "../../utils/new-user-guide";
 import {
   getAnonymousLocalDataMigrationCandidate,
   hasCompletedCloudImport,
@@ -61,6 +63,7 @@ import { AppPublicFooter } from "../layout/AppPublicFooter";
 import { MotivationalReminder } from "../MotivationalReminder";
 import { MotionPageTransition } from "../motion";
 import { NewUserGuideDialog } from "../NewUserGuide";
+import { startScreenGuide } from "../ScreenGuide";
 import { OfflineBanner } from "../states/OfflineBanner";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -107,6 +110,51 @@ import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
 import { SyncStatusPill } from "./SyncStatusPill";
 import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
 
+type ContextualGuide =
+  | { kind: "spotlight"; tourName: string }
+  | { kind: "screen"; screenId: string };
+
+function normalizePathname(pathname: string): string {
+  if (pathname === "/") return pathname;
+  return pathname.replace(/\/+$/, "");
+}
+
+function getContextualGuide(pathname: string, isSignedOutVisitor: boolean): ContextualGuide | null {
+  const normalizedPathname = normalizePathname(pathname);
+
+  if (!isSignedOutVisitor) {
+    if (normalizedPathname === "/" || normalizedPathname.startsWith("/dashboard")) {
+      return { kind: "spotlight", tourName: "dashboard" };
+    }
+    if (normalizedPathname.startsWith("/goals")) return { kind: "spotlight", tourName: "goaltracker" };
+    if (normalizedPathname.startsWith("/12-week-system")) {
+      return { kind: "spotlight", tourName: "twelve-week-system" };
+    }
+  }
+
+  if (normalizedPathname.startsWith("/onboarding")) return { kind: "screen", screenId: "onboarding" };
+  if (normalizedPathname.startsWith("/vision-board")) return { kind: "screen", screenId: "vision-board-editor" };
+  if (normalizedPathname.startsWith("/vision")) return { kind: "screen", screenId: "aspirational-vision" };
+  if (normalizedPathname.startsWith("/life-balance")) return { kind: "screen", screenId: "life-balance" };
+  if (normalizedPathname.startsWith("/life-insight")) return { kind: "screen", screenId: "life-insight" };
+  if (normalizedPathname.startsWith("/smart-goal-setup")) return { kind: "screen", screenId: "smart-goal" };
+  if (normalizedPathname.startsWith("/feasibility")) return { kind: "screen", screenId: "feasibility" };
+  if (normalizedPathname.startsWith("/12-week-setup") || normalizedPathname.startsWith("/12-week-plan-setup")) {
+    return { kind: "screen", screenId: "12-week-setup" };
+  }
+  if (normalizedPathname.startsWith("/12-week-plan-overview") || normalizedPathname.startsWith("/today")) {
+    return { kind: "spotlight", tourName: "twelve-week-system" };
+  }
+  if (normalizedPathname.startsWith("/gallery")) return { kind: "screen", screenId: "vision-board-gallery" };
+  if (normalizedPathname.startsWith("/journal")) return { kind: "screen", screenId: "reflection-journal" };
+  if (normalizedPathname.startsWith("/settings")) return { kind: "screen", screenId: "settings" };
+  if (normalizedPathname === "/billing" || normalizedPathname === "/billing/plan") {
+    return { kind: "screen", screenId: "billing-plan" };
+  }
+
+  return null;
+}
+
 export function RootLayout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -150,6 +198,7 @@ export function RootLayout() {
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const welcomeGuideOpenedThisSessionRef = useRef(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [localDataMigrationCandidate, setLocalDataMigrationCandidate] = useState<LocalDataMigrationCandidate | null>(
     null,
@@ -442,6 +491,82 @@ export function RootLayout() {
     hasTwelveWeek: Boolean(goal.twelveWeekSystem),
   }));
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
+
+  const hasUnseenContextualGuide = (() => {
+    if (typeof window === "undefined") return false;
+
+    const contextualGuide = getContextualGuide(location.pathname, isSignedOutVisitor);
+    if (!contextualGuide) return false;
+
+    try {
+      if (contextualGuide.kind === "screen") {
+        return window.localStorage.getItem(`visionboard_screen_guide_seen:${contextualGuide.screenId}`) !== "true";
+      }
+
+      return window.localStorage.getItem(`visionboard_page_tour_seen:${contextualGuide.tourName}`) !== "true";
+    } catch {
+      return false;
+    }
+  })();
+
+  const handleOpenGuide = useCallback(() => {
+    const contextualGuide = getContextualGuide(location.pathname, isSignedOutVisitor);
+    if (contextualGuide?.kind === "spotlight") {
+      startPageTour(contextualGuide.tourName, { force: true });
+      return;
+    }
+    if (contextualGuide?.kind === "screen") {
+      startScreenGuide(contextualGuide.screenId, { force: true });
+      return;
+    }
+
+    setGuideUserData(getUserData());
+    setIsGuideOpen(true);
+  }, [isSignedOutVisitor, location.pathname]);
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      shouldShowWorkspaceGate ||
+      shouldWaitForWorkspace ||
+      hasSeenNewUserGuide() ||
+      hasCompletedFirstRunGuidance()
+    ) {
+      return;
+    }
+
+    welcomeGuideOpenedThisSessionRef.current = true;
+    setGuideUserData(getUserData());
+    setIsGuideOpen(true);
+    markNewUserGuideSeen();
+  }, [shouldShowWorkspaceGate, shouldWaitForWorkspace]);
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      shouldShowWorkspaceGate ||
+      shouldWaitForWorkspace ||
+      isGuideOpen ||
+      welcomeGuideOpenedThisSessionRef.current ||
+      !hasSeenNewUserGuide() ||
+      hasCompletedFirstRunGuidance()
+    ) {
+      return undefined;
+    }
+
+    const contextualGuide = getContextualGuide(location.pathname, isSignedOutVisitor);
+    if (contextualGuide?.kind !== "spotlight") {
+      return undefined;
+    }
+
+    // Let the routed page mount its tour listener and target elements before
+    // asking the tour to open. If the welcome overview opened in this session,
+    // skip the automatic tour so both guidance layers never stack.
+    const timer = window.setTimeout(() => {
+      startPageTour(contextualGuide.tourName);
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [isGuideOpen, isSignedOutVisitor, location.pathname, shouldShowWorkspaceGate, shouldWaitForWorkspace]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -816,6 +941,32 @@ export function RootLayout() {
               </div>
             ) : null}
             <main id="main-content" className="relative" aria-label="Nội dung trang">
+              <div className="pointer-events-none sticky top-3 z-40 mx-auto flex w-full max-w-6xl justify-end px-3 pt-3 sm:px-6">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="pointer-events-auto relative border-app-line bg-app-surface/95 text-app-ink-soft shadow-app-sm backdrop-blur hover:text-app-ink"
+                      onClick={handleOpenGuide}
+                      aria-label="Mở hướng dẫn sử dụng"
+                    >
+                      <Compass className="size-4" aria-hidden="true" />
+                      {hasUnseenContextualGuide ? (
+                        <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
+                          <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
+                          <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
+                        </span>
+                      ) : null}
+                      <span className="hidden sm:inline">Hướng dẫn</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="end">
+                    Hướng dẫn sử dụng
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               {pageTransitionContent}
               {localDataMigrationPrompt}
 
@@ -848,10 +999,7 @@ export function RootLayout() {
               isActive={isActive}
               onNavigate={navigateAppRoute}
               onPrefetch={handlePrefetch}
-              onOpenGuide={() => {
-                setGuideUserData(getUserData());
-                setIsGuideOpen(true);
-              }}
+              onOpenGuide={handleOpenGuide}
               resolvedTheme={resolvedTheme === "dark" ? "dark" : "light"}
               onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               user={
@@ -1090,7 +1238,7 @@ export function RootLayout() {
                           <DropdownMenuTrigger asChild>
                             <button
                               type="button"
-                              className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                              className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                               aria-label="Mở menu"
                             >
                               <Menu className="h-[1.05rem] w-[1.05rem]" />
@@ -1103,8 +1251,7 @@ export function RootLayout() {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onSelect={() => {
-                                setGuideUserData(getUserData());
-                                setIsGuideOpen(true);
+                                handleOpenGuide();
                                 setMobileVisitorMenuOpen(false);
                               }}
                             >
@@ -1143,18 +1290,42 @@ export function RootLayout() {
                         </DropdownMenu>
                       </>
                     ) : user ? (
-                      renderAccountMenu("mobile")
+                      <>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                              onClick={handleOpenGuide}
+                              aria-label="Mở hướng dẫn sử dụng"
+                            >
+                              <Compass className="h-[1.05rem] w-[1.05rem]" />
+                              {hasUnseenContextualGuide ? (
+                                <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
+                                  <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
+                                  <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
+                                </span>
+                              ) : null}
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">Hướng dẫn sử dụng</TooltipContent>
+                        </Tooltip>
+                        {renderAccountMenu("mobile")}
+                      </>
                     ) : (
                       <button
                         type="button"
-                        className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                        onClick={() => {
-                          setGuideUserData(getUserData());
-                          setIsGuideOpen(true);
-                        }}
+                        className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                        onClick={handleOpenGuide}
                         aria-label="Mở hướng dẫn sử dụng"
                       >
                         <Compass className="h-[1.05rem] w-[1.05rem]" />
+                        {hasUnseenContextualGuide ? (
+                          <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
+                            <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
+                            <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
+                          </span>
+                        ) : null}
                       </button>
                     )}
                     {!isSignedOutVisitor && (
@@ -1256,8 +1427,7 @@ export function RootLayout() {
                       <button
                         type="button"
                         onClick={() => {
-                          setGuideUserData(getUserData());
-                          setIsGuideOpen(true);
+                          handleOpenGuide();
                           setMobileMenuOpen(false);
                         }}
                         className="mb-2 flex w-full items-center gap-3 rounded-lg border border-app-line bg-app-surface px-4 py-3 text-left text-sm font-medium tracking-normal text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink"

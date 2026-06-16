@@ -71,6 +71,12 @@ const productionMock = vi.hoisted(() => ({
   syncEntitlementsWithProvider: vi.fn(),
   syncPendingOutbox: vi.fn(),
 }));
+const pageTourMock = vi.hoisted(() => ({
+  startPageTour: vi.fn(),
+}));
+const screenGuideMock = vi.hoisted(() => ({
+  startScreenGuide: vi.fn(),
+}));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
@@ -112,6 +118,14 @@ vi.mock("../utils/production", () => ({
 
 vi.mock("@/app/features/assistant/AIAssistant", () => ({
   AIAssistant: () => <div data-testid="ai-assistant" />,
+}));
+
+vi.mock("../hooks/usePageTour", () => ({
+  startPageTour: pageTourMock.startPageTour,
+}));
+
+vi.mock("./ScreenGuide", () => ({
+  startScreenGuide: screenGuideMock.startScreenGuide,
 }));
 
 function setAuthContext(overrides: Record<string, unknown> = {}) {
@@ -255,13 +269,14 @@ function seedPlusSubscription(uid = "user_test") {
   activateAuthenticatedUserData(uid);
   const data = createFreshUserData();
   const grantedAt = "2026-05-01T00:00:00.000Z";
+  const renewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
   data.onboardingCompleted = true;
   data.subscription = {
     planCode: "PLUS",
     status: "active",
     billingCycle: "monthly",
     startedAt: grantedAt,
-    renewsAt: "2026-06-01T00:00:00.000Z",
+    renewsAt,
     providerMode: "api_contract",
   };
   data.entitlements = [
@@ -281,6 +296,10 @@ function renderAppShell(initialEntry: string) {
         children: [
           { index: true, element: <div data-testid="home-page">Home page</div> },
           { path: "onboarding", element: <div data-testid="onboarding-page">Onboarding page</div> },
+          { path: "vision", element: <div data-testid="vision-page">Vision page</div> },
+          { path: "vision-board/:id?", element: <div data-testid="vision-board-page">Vision board page</div> },
+          { path: "gallery", element: <div data-testid="gallery-page">Gallery page</div> },
+          { path: "life-insight", element: <div data-testid="life-insight-page">Life insight page</div> },
           { path: "smart-goal-setup", element: <div data-testid="smart-goal-setup-page">Smart goal setup page</div> },
           { path: "feasibility", element: <div data-testid="feasibility-page">Feasibility page</div> },
           { path: "12-week-setup", element: <div data-testid="twelve-week-setup-page">12-week setup page</div> },
@@ -308,6 +327,7 @@ function renderAppShell(initialEntry: string) {
 describe("RootLayout onboarding redirect", () => {
   beforeEach(() => {
     localStorage.clear();
+    localStorage.setItem("visionboard_new_user_guide_seen_at", new Date().toISOString());
     backendHydrationMock.value = {
       loading: false,
       result: null,
@@ -348,6 +368,8 @@ describe("RootLayout onboarding redirect", () => {
       message: "No premium entitlement.",
     });
     productionMock.syncPendingOutbox.mockClear();
+    pageTourMock.startPageTour.mockClear();
+    screenGuideMock.startScreenGuide.mockClear();
     autoCloudSyncMock.triggerSyncNow.mockClear();
     autoCloudSyncMock.triggerDrainOnly.mockClear();
     autoCloudSyncMock.resolveConflictKeepLocal.mockClear();
@@ -438,7 +460,8 @@ describe("RootLayout onboarding redirect", () => {
     expect(productionMock.syncPendingOutbox).not.toHaveBeenCalled();
   });
 
-  it("does not auto-open the new user guide on the first dashboard visit", async () => {
+  it("auto-opens the new user guide once on the first dashboard visit without starting the spotlight tour", async () => {
+    localStorage.removeItem("visionboard_new_user_guide_seen_at");
     seedAuthenticatedCompletedWorkspace();
     setAuthContext({
       user: { uid: "user_test", email: "fresh@example.com" },
@@ -448,8 +471,159 @@ describe("RootLayout onboarding redirect", () => {
     renderAppShell("/");
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Cách bắt đầu nhanh");
+    expect(localStorage.getItem("visionboard_new_user_guide_seen_at")).toEqual(expect.any(String));
+
+    await new Promise((resolve) => window.setTimeout(resolve, 750));
+
+    expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it("does not auto-open the new user guide again after it has been seen", async () => {
+    localStorage.setItem("visionboard_new_user_guide_seen_at", new Date().toISOString());
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/settings");
+
+    expect(await screen.findByTestId("settings-page")).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(localStorage.getItem("visionboard_new_user_guide_seen_at")).toBeNull();
+  });
+
+
+  it("does not auto-open spotlight tours after first-run guidance is completed", async () => {
+    localStorage.setItem("visionboard_first_run_guidance_completed_at", new Date().toISOString());
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it("opens the current dashboard spotlight tour from the persistent guide button", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    pageTourMock.startPageTour.mockClear();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Mở hướng dẫn sử dụng" })[0]);
+
+    expect(pageTourMock.startPageTour).toHaveBeenCalledWith("dashboard", { force: true });
+    expect(screenGuideMock.startScreenGuide).not.toHaveBeenCalled();
+  });
+
+  it("opens the current screen guide from the persistent guide button on settings", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/settings");
+
+    expect(await screen.findByTestId("settings-page")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Mở hướng dẫn sử dụng" })[0]);
+
+    expect(screenGuideMock.startScreenGuide).toHaveBeenCalledWith("settings", { force: true });
+    expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it("opens the aspirational vision guide from the persistent guide button", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/vision");
+
+    expect(await screen.findByTestId("vision-page")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Mở hướng dẫn sử dụng" })[0]);
+
+    expect(screenGuideMock.startScreenGuide).toHaveBeenCalledWith("aspirational-vision", { force: true });
+    expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it("opens the vision board editor guide instead of the long-term vision guide", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/vision-board");
+
+    expect(await screen.findByTestId("vision-board-page")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Mở hướng dẫn sử dụng" })[0]);
+
+    expect(screenGuideMock.startScreenGuide).toHaveBeenCalledWith("vision-board-editor", { force: true });
+    expect(screenGuideMock.startScreenGuide).not.toHaveBeenCalledWith("aspirational-vision", { force: true });
+    expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it("opens the vision board gallery guide from the persistent guide button", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell("/gallery");
+
+    expect(await screen.findByTestId("gallery-page")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Mở hướng dẫn sử dụng" })[0]);
+
+    expect(screenGuideMock.startScreenGuide).toHaveBeenCalledWith("vision-board-gallery", { force: true });
+    expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it("keeps a replay guide button on guided core-flow pages", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    const guidedRoutes = [
+      { path: "/onboarding", testId: "onboarding-page", screenId: "onboarding" },
+      { path: "/life-insight", testId: "life-insight-page", screenId: "life-insight" },
+      { path: "/smart-goal-setup", testId: "smart-goal-setup-page", screenId: "smart-goal" },
+      { path: "/feasibility", testId: "feasibility-page", screenId: "feasibility" },
+      { path: "/12-week-setup", testId: "twelve-week-setup-page", screenId: "12-week-setup" },
+    ] as const;
+
+    for (const route of guidedRoutes) {
+      const { ui } = renderAppShell(route.path);
+
+      expect(await screen.findByTestId(route.testId)).toBeInTheDocument();
+
+      pageTourMock.startPageTour.mockClear();
+      screenGuideMock.startScreenGuide.mockClear();
+      fireEvent.click(screen.getByRole("button", { name: "Mở hướng dẫn sử dụng" }));
+
+      expect(screenGuideMock.startScreenGuide).toHaveBeenCalledWith(route.screenId, { force: true });
+      expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+
+      ui.unmount();
+    }
   });
 
   it("shows the AI assistant on dashboard, goal, and setup help routes for signed-in users", async () => {

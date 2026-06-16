@@ -113,14 +113,14 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
   const compact = variant === "compact";
   const title = userData.isHydratedFromDemo
     ? compact
-      ? "Khám phá web theo thứ tự này"
-      : "Nếu đang xem dữ liệu mẫu, cứ đi theo checklist này là hiểu web nhanh nhất."
+      ? "Xem nhanh lộ trình dùng app"
+      : "Đang xem dữ liệu mẫu? Đi theo lộ trình này để hiểu luồng chính của app."
     : compact
-      ? "Đi tiếp theo đúng thứ tự này"
-      : `Nếu mới vào web, cứ đi theo ${progress.totalSteps} bước này là đủ gọn.`;
+      ? "Đi theo lộ trình gợi ý"
+      : `Mới bắt đầu? Đi theo ${progress.totalSteps} bước này là rõ nhất.`;
   const description = userData.isHydratedFromDemo
-    ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ luồng thật của sản phẩm."
-    : "Website này dễ dùng hơn nhiều nếu bạn đi đúng luồng: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
+    ? "Bạn đang xem bản có dữ liệu mẫu sẵn. Lộ trình này giúp bạn hiểu màn nào làm trước, màn nào làm sau."
+    : "Đi đúng thứ tự sẽ dễ hơn: nhìn lại hiện tại, chọn một trọng tâm, rồi biến nó thành kế hoạch 12 tuần rõ ràng.";
   const surfaceClass = compact
     ? "max-w-full overflow-hidden border border-app-line bg-app-surface shadow-sm"
     : "max-w-full overflow-hidden border border-app-line bg-app-surface text-app-ink shadow-sm";
@@ -180,10 +180,10 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
                 }}
                 className={secondaryButtonClass}
               >
-                Mở hướng dẫn đầy đủ
+                  Xem cách đi
               </Button>
               <Button variant="ghost" onClick={dismiss} className={ghostButtonClass}>
-                Ẩn checklist này
+                Ẩn hướng dẫn này
               </Button>
             </div>
           </div>
@@ -222,25 +222,24 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         <DialogHeader>
           <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
             <Sparkles className="h-3.5 w-3.5" />
-            Hướng dẫn sử dụng
+              Cách bắt đầu nhanh
           </div>
           <DialogTitle className="text-xl tracking-normal text-app-ink sm:text-2xl">
-            {userData.isHydratedFromDemo
-              ? "Khám phá sản phẩm theo checklist."
-              : `Đi web này theo ${progress.totalSteps} bước là dễ nhất.`}
+              {userData.isHydratedFromDemo
+                ? "Xem nhanh luồng chính của app theo đúng thứ tự."
+                : `Đi theo ${progress.totalSteps} bước này để biết nên làm gì trước.`}
           </DialogTitle>
           <DialogDescription className="text-sm leading-7 text-app-ink-soft">
-            {userData.isHydratedFromDemo
-              ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Checklist này giúp bạn hiểu luồng thật của sản phẩm mà không bị lạc giữa quá nhiều màn."
-              : "Nếu bạn mới dùng lần đầu, cứ coi đây là đường đi ngắn nhất để hiểu web và không bị lạc giữa quá nhiều màn."}
+              {userData.isHydratedFromDemo
+                ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng lộ trình này để hiểu màn nào làm trước và kết quả bạn sẽ nhận được sau mỗi bước."
+                : "Nếu mới dùng lần đầu, đây là đường đi ngắn nhất để có kết quả đầu tiên mà không bị rối."}
           </DialogDescription>
         </DialogHeader>
 
         {userData.isHydratedFromDemo && (
           <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
-            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, luồng chuẩn vẫn là: đo
-            bánh xe cuộc đời, chốt góc nhìn cuộc sống, viết mục tiêu SMART, kiểm tra tính thực tế rồi mới vào chu kỳ 12
-            tuần.
+            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi dùng thật, thứ tự nên đi vẫn là: nhìn bánh xe
+            cuộc sống, chốt insight, viết SMART Goal, kiểm tra khả thi rồi vào chu kỳ 12 tuần.
           </div>
         )}
 
@@ -251,7 +250,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
             </Badge>
             {progress.isComplete && (
               <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-                Đã hoàn tất hướng dẫn
+                Đã đi hết lộ trình
               </Badge>
             )}
           </div>
@@ -270,13 +269,13 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
                 }
               }}
             >
-              {dismissed ? "Hiện lại checklist" : "Ẩn checklist"}
+              {dismissed ? "Hiện lại lộ trình" : "Ẩn lộ trình"}
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Để sau
-            </Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Để sau
+              </Button>
             {nextStep && (
               <Button
                 onClick={() => {
