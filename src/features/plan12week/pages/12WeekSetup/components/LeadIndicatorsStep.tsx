@@ -403,7 +403,7 @@ export function LeadIndicatorsStep({
                     </span>
                   </button>
                   <p className={helperTextClass}>
-                    Điền 5 câu này giúp bạn rõ tại sao mình cam kết và bớt bỏ cuộc giữa chu kỳ.
+                    Điền 5 câu này nếu đã sẵn sàng. Để sau — bạn có thể bổ sung trong phần chỉnh kế hoạch.
                   </p>
                   {expandedCommitments[indicator.id] ? (
                     <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">

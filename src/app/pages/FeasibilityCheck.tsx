@@ -15,6 +15,8 @@ import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { MotionFadeIn } from "../components/motion";
 import { PageShell } from "../components/PageShell";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -266,65 +268,80 @@ export function FeasibilityCheck() {
 
   if (setupState === "checking") {
     return (
-      <CoreFlowGateState
-        currentStepId="feasibility"
-        eyebrow="Kiểm tra"
-        title="Đang chuẩn bị phần kiểm tra tính thực tế"
-        description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
-        loading
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="feasibility"
+          eyebrow="Kiểm tra"
+          title="Đang chuẩn bị phần kiểm tra tính thực tế"
+          description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
+          loading
+        />
+      </>
     );
   }
 
   if (setupState === "needs_life_balance") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_balance"
-        eyebrow="Kiểm tra"
-        title="Hoàn thành bước cân bằng trước"
-        description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào."
-        actionLabel="Bắt đầu cân bằng"
-        onAction={() => navigate("/onboarding")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_balance"
+          eyebrow="Kiểm tra"
+          title="Hoàn thành bước cân bằng trước"
+          description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào."
+          actionLabel="Bắt đầu cân bằng"
+          onAction={() => navigate("/onboarding")}
+        />
+      </>
     );
   }
 
   if (setupState === "needs_life_insight") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_insight"
-        eyebrow="Kiểm tra"
-        title="Chọn trọng tâm trước"
-        description="Bạn đã có dữ liệu cân bằng nhưng chưa chọn lĩnh vực ưu tiên cho mục tiêu này."
-        actionLabel="Mở bước chọn trọng tâm"
-        onAction={() => navigate("/life-insight")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_insight"
+          eyebrow="Kiểm tra"
+          title="Chọn trọng tâm trước"
+          description="Bạn đã có dữ liệu cân bằng nhưng chưa chọn lĩnh vực ưu tiên cho mục tiêu này."
+          actionLabel="Mở bước chọn trọng tâm"
+          onAction={() => navigate("/life-insight")}
+        />
+      </>
     );
   }
 
   if (setupState === "needs_smart_goal") {
     return (
-      <CoreFlowGateState
-        currentStepId="smart_goal"
-        eyebrow="Kiểm tra"
-        title="Viết mục tiêu trước"
-        description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn."
-        actionLabel="Viết mục tiêu"
-        onAction={() => navigate("/smart-goal-setup")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="smart_goal"
+          eyebrow="Kiểm tra"
+          title="Viết mục tiêu trước"
+          description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn."
+          actionLabel="Viết mục tiêu"
+          onAction={() => navigate("/smart-goal-setup")}
+        />
+      </>
     );
   }
 
   if (!pendingGoal || wheelScore === null) {
     return (
-      <CoreFlowGateState
-        currentStepId="smart_goal"
-        eyebrow="Kiểm tra"
-        title="Thiếu dữ liệu để kiểm tra"
-        description="Chưa đủ thông tin mục tiêu hoặc điểm trọng tâm. Quay lại bước viết mục tiêu để tiếp tục."
-        actionLabel="Viết mục tiêu"
-        onAction={() => navigate("/smart-goal-setup")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="smart_goal"
+          eyebrow="Kiểm tra"
+          title="Thiếu dữ liệu để kiểm tra"
+          description="Chưa đủ thông tin mục tiêu hoặc điểm trọng tâm. Quay lại bước viết mục tiêu để tiếp tục."
+          actionLabel="Viết mục tiêu"
+          onAction={() => navigate("/smart-goal-setup")}
+        />
+      </>
     );
   }
 
@@ -484,6 +501,7 @@ export function FeasibilityCheck() {
   if (result) {
     return (
       <PageShell maxWidth="md">
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
         <div className="space-y-6">
           <div>
             <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
@@ -505,6 +523,7 @@ export function FeasibilityCheck() {
 
   return (
     <PageShell maxWidth="xl">
+      <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1">

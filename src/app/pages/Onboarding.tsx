@@ -25,6 +25,8 @@ import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
 import { Slider } from "../components/ui/slider";
 import { cn } from "../components/ui/utils";
@@ -693,6 +695,7 @@ export function Onboarding() {
   if (step === "welcome") {
     return (
       <PageShell maxWidth="xl" className="focus:outline-none">
+        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
         <div ref={flowTopRef} tabIndex={-1} className="space-y-6 focus:outline-none">
           {progressHeader}
 
@@ -816,6 +819,7 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
+        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
       <div ref={flowTopRef} tabIndex={-1} className="w-full max-w-full space-y-6 focus:outline-none">
         {progressHeader}
         {draftBanner}
