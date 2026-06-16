@@ -52,6 +52,7 @@ import {
   saveUserData,
   sortReflectionsByDateDesc,
 } from "../utils/storage";
+import { formatDisplayDate } from "../utils/storage-date-utils";
 import { WaterReflectionPool } from "./ReflectionJournal/components/WaterReflectionPool";
 
 type MoodValue = "happy" | "neutral" | "sad" | "";
@@ -453,6 +454,11 @@ function ReflectionJournalContent() {
                   value={newReflection.date}
                   onChange={(event) => setNewReflection({ ...newReflection, date: event.target.value })}
                 />
+                {newReflection.date ? (
+                  <p className="text-xs text-app-ink-soft">
+                    Đã chọn: {formatDisplayDate(newReflection.date)}
+                  </p>
+                ) : null}
               </div>
               <div className="stack-tight">
                 <Label htmlFor="reflection-title">Tiêu đề</Label>

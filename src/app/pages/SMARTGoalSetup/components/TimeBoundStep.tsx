@@ -1,6 +1,7 @@
 import { Calendar, Hourglass } from "lucide-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { cn } from "@/app/components/ui/utils";
+import { formatDisplayDate } from "@/app/utils/storage-date-utils";
 import { parseNumberInput } from "@/lib/smart-goal";
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
@@ -282,6 +283,11 @@ export function TimeBoundStep({
             aria-invalid={showTargetDateError}
             aria-describedby={showTargetDateError ? "smart-target-date-error" : undefined}
           />
+          {smartData.timeBound.target_date ? (
+            <p className="mt-1 text-xs text-app-ink-soft">
+              Đã chọn: {formatDisplayDate(smartData.timeBound.target_date)}
+            </p>
+          ) : null}
 
           {/* 1-Click Date Suggestions */}
           <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3 rounded-xl border border-dashed border-app-line/80">

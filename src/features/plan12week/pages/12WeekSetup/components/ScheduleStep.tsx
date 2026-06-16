@@ -3,6 +3,7 @@
 import { Input } from "@/app/components/ui/input";
 import { cn } from "@/app/components/ui/utils";
 import { formatDateInputValue } from "@/app/utils/storage";
+import { formatDisplayDate } from "@/app/utils/storage-date-utils";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import {
   errorTextClass,
@@ -111,6 +112,9 @@ export function ScheduleStep({
               )}
               onChange={(event) => onChange("startDate", event.target.value)}
             />
+            {draft.startDate ? (
+              <p className={helperTextClass}>Đã chọn: {formatDisplayDate(draft.startDate)}</p>
+            ) : null}
             {startDateValidation.error ? (
               <p id="cycle-start-date-error" role="alert" className={errorTextClass}>
                 {startDateValidation.error}
