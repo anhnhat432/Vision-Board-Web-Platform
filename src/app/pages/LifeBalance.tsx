@@ -1,13 +1,25 @@
-import { AlertTriangle, ArrowRight, ChevronLeft, ChevronRight, Compass, Save, Sparkles, Target } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  RotateCcw,
+  Save,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useBlocker } from "react-router";
+import { Link, useBlocker, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { getLifeAreaIcon } from "../components/illustrations";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { MotionFadeIn, MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { PageShell } from "../components/PageShell";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import {
   AlertDialog,
@@ -29,7 +41,8 @@ import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { loadWithChunkReload } from "../utils/chunkLoad";
 import { getAreaColorConfig } from "../utils/life-area-theme";
-import { getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
+import { getSmartGoalStarter } from "../utils/smart-goal-starters";
+import { APP_STORAGE_KEYS, getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(() =>
   loadWithChunkReload(async () => ({
@@ -52,48 +65,48 @@ function getFocusInsight(areaName: string, score: number): { reason: string; tip
   switch (areaName) {
     case "Career":
       return {
-        reason: `Điểm Sự nghiệp của bạn hiện là ${score}/10đ. Khi khía cạnh này lệch nhịp, nó tạo ra cảm giác bế tắc hoặc thiếu định hướng phát triển, gián tiếp rút cạn năng lượng sáng tạo và tinh thần của bạn hằng ngày.`,
-        tip: "Hãy bắt đầu bằng việc thiết lập 1 mục tiêu SMART ngắn hạn cho công việc (ví dụ: tối ưu kỹ năng mới hoặc hoàn tất 1 dự án tồn đọng) để khơi lại cảm giác tiến triển.",
+        reason: `Sự nghiệp đang ở ${score}/10đ — khi khía cạnh này lệch nhịp, cảm giác bế tắc và thiếu năng lượng sáng tạo dễ lan sang các lĩnh vực khác.`,
+        tip: "Thiết lập 1 mục tiêu SMART ngắn hạn cho công việc (tối ưu kỹ năng hoặc hoàn tất dự án tồn đọng) để khơi lại đà tiến.",
       };
     case "Finance":
       return {
-        reason: `Tài chính của bạn đang ở mức ${score}/10đ. Sự bất ổn tài chính hoặc nỗi lo lắng về tiền bạc là nguyên nhân hàng đầu gây ra trạng thái stress thường trực, làm giảm chất lượng giấc ngủ và sự an tâm trong các mối quan hệ.`,
-        tip: "Đề xuất: Tập trung lập ngân sách chi tiết trong 12 tuần tới, cắt giảm chi tiêu không thiết yếu và xây dựng một quỹ khẩn cấp nhỏ để khôi phục cảm giác kiểm soát.",
+        reason: `Tài chính ở mức ${score}/10đ — bất ổn tiền bạc gây stress thường trực, ảnh hưởng giấc ngủ và sự an tâm trong quan hệ.`,
+        tip: "Lập ngân sách chi tiết 12 tuần, cắt chi tiêu không thiết yếu và xây quỹ khẩn cấp nhỏ để lấy lại cảm giác kiểm soát.",
       };
     case "Health":
       return {
-        reason: `Điểm Sức khỏe hiện là ${score}/10đ. Sức khỏe thể chất và tinh thần là nền móng của mọi khía cạnh khác. Khi nền móng này lung lay, hiệu suất công việc hay khả năng tận hưởng cuộc sống đều suy giảm nghiêm trọng.`,
-        tip: "Đề xuất: Đặt một mục tiêu siêu nhỏ và dễ thực hiện (ví dụ: ngủ trước 23h hoặc đi bộ 15 phút mỗi ngày) làm tiêu điểm số 1 trong chu kỳ 12 tuần này.",
+        reason: `Sức khỏe ở ${score}/10đ — đây là nền móng của mọi khía cạnh; khi lung lay, hiệu suất và niềm vui đều suy giảm.`,
+        tip: "Đặt 1 mục tiêu siêu nhỏ (ngủ trước 23h hoặc đi bộ 15 phút/ngày) làm tiêu điểm số 1 chu kỳ này.",
       };
     case "Education":
       return {
-        reason: `Điểm Học tập & Trí tuệ hiện là ${score}/10đ. Việc thiếu đi sự cập nhật kiến thức mới có thể làm bạn cảm thấy tụt hậu trước sự thay đổi nhanh chóng của công việc và cuộc sống.`,
-        tip: "Đề xuất: Dành ra 20 phút mỗi ngày đọc sách hoặc tham gia một khóa học ngắn hạn về kỹ năng bạn đang thiếu để mở rộng tư duy hằng ngày.",
+        reason: `Học tập & Trí tuệ ở ${score}/10đ — thiếu cập nhật kiến thức khiến bạn dễ cảm thấy tụt hậu trước thay đổi.`,
+        tip: "Dành 20 phút/ngày đọc sách hoặc tham gia khóa học ngắn hạn về kỹ năng đang thiếu.",
       };
     case "Relationships":
       return {
-        reason: `Mối quan hệ xã hội hiện đạt ${score}/10đ. Con người là sinh vật xã hội, việc thiếu kết nối chất lượng hoặc gặp xung đột thường xuyên sẽ tạo cảm giác cô đơn và trống trải sâu sắc.`,
-        tip: "Đề xuất: Lên lịch hẹn cà phê chất lượng với 1 người bạn tích cực hoặc chủ động giải quyết 1 khúc mắc tồn đọng trong mối quan hệ gần gũi.",
+        reason: `Quan hệ xã hội ở ${score}/10đ — thiếu kết nối chất lượng tạo cảm giác cô đơn và trống trải sâu sắc.`,
+        tip: "Lên lịch hẹn cà phê với 1 người bạn tích cực hoặc giải quyết 1 khúc mắc tồn đọng trong quan hệ gần gũi.",
       };
     case "Family":
       return {
-        reason: `Gia đình hiện ở mức ${score}/10đ. Gia đình là tổ ấm và là điểm tựa tinh thần tối hậu. Khi mối quan hệ gia đình căng thẳng hoặc nguội lạnh, bạn sẽ thiếu đi sự hỗ trợ vững chắc khi gặp bão giông bên ngoài.`,
-        tip: "Đề xuất: Hãy thiết lập các khoảng thời gian 'không điện thoại' khi ở bên người thân, chủ động lắng nghe và chia sẻ nhiều hơn.",
+        reason: `Gia đình ở mức ${score}/10đ — khi mối quan hệ gia đình nguội lạnh, bạn thiếu điểm tựa khi gặp bão giông bên ngoài.`,
+        tip: "Thiết lập thời gian 'không điện thoại' bên người thân, chủ động lắng nghe và chia sẻ nhiều hơn.",
       };
     case "Personal Growth":
       return {
-        reason: `Điểm Phát triển cá nhân hiện là ${score}/10đ. Việc thiếu kỷ luật với bản thân hoặc chưa tự hiểu mình làm bạn dễ bị cuốn theo các thói quen xấu và mục tiêu vô định.`,
-        tip: "Đề xuất: Thực hành viết nhật ký Stoic hằng ngày hoặc thiết lập 1 thói quen kỷ luật nhỏ (như thiền 5 phút) để củng cố sức mạnh nội tâm.",
+        reason: `Phát triển cá nhân ở ${score}/10đ — thiếu kỷ luật nội tâm khiến bạn dễ bị cuốn theo thói quen xấu.`,
+        tip: "Viết nhật ký Stoic hằng ngày hoặc thiền 5 phút để củng cố sức mạnh nội tâm.",
       };
     case "Leisure":
       return {
-        reason: `Giải trí & Nghỉ ngơi hiện ở mức ${score}/10đ. Làm việc quá sức mà thiếu đi sự nghỉ ngơi trọn vẹn là con đường ngắn nhất dẫn đến kiệt sức (burnout), triệt tiêu động lực làm việc lâu dài.`,
-        tip: "Đề xuất: Dành ra ít nhất nửa ngày cuối tuần hoàn toàn rời xa công việc để theo đuổi sở thích cá nhân, hồi phục hoàn toàn năng lượng.",
+        reason: `Giải trí & Nghỉ ngơi ở ${score}/10đ — làm việc quá sức mà thiếu nghỉ ngơi trọn vẹn dẫn thẳng đến kiệt sức.`,
+        tip: "Dành ít nhất nửa ngày cuối tuần rời xa công việc hoàn toàn để theo đuổi sở thích và hồi phục.",
       };
     default:
       return {
-        reason: "Khía cạnh này đang cần sự quan tâm đặc biệt để đưa cuộc sống của bạn trở lại quỹ đạo cân bằng.",
-        tip: "Hãy bắt đầu bằng việc đặt ra 1 hành động nhỏ cụ thể hằng ngày.",
+        reason: "Khía cạnh này đang cần sự quan tâm để đưa cuộc sống trở lại cân bằng.",
+        tip: "Bắt đầu bằng 1 hành động nhỏ cụ thể hằng ngày.",
       };
   }
 }
@@ -162,6 +175,8 @@ function createLifeBalanceSnapshot(lifeAreas: LifeArea[]) {
 }
 
 export function LifeBalance() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { userData, reloadUserData } = useSyncedUserData();
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
@@ -174,6 +189,14 @@ export function LifeBalance() {
   const debouncedSaveRef = useRef<FlushableDebouncedSave<LifeArea[]> | null>(null);
   const [isCheckInMode, setIsCheckInMode] = useState(false);
   const [activeClusterIndex, setActiveClusterIndex] = useState(0);
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<"current" | "focus" | "history">(() => {
+    if (tabParam === "focus" || tabParam === "history") {
+      return tabParam;
+    }
+    return "current";
+  });
+  const [selectedFocusAreaName, setSelectedFocusAreaName] = useState<string | null>(null);
 
   useScrollToTopOnChange(0, {
     targetRef: pageTopRef,
@@ -230,6 +253,24 @@ export function LifeBalance() {
     if (lifeAreas.length === 0) return null;
     return [...lifeAreas].sort((a, b) => a.score - b.score)[0];
   }, [lifeAreas]);
+
+  const focusArea = useMemo(() => {
+    if (lifeAreas.length === 0) return null;
+    if (selectedFocusAreaName) {
+      return lifeAreas.find((a) => a.name === selectedFocusAreaName) ?? weakestArea;
+    }
+    return weakestArea;
+  }, [lifeAreas, selectedFocusAreaName, weakestArea]);
+
+  const focusSmartGoalStarter = useMemo(
+    () => (focusArea ? getSmartGoalStarter(focusArea.name) : null),
+    [focusArea],
+  );
+
+  useEffect(() => {
+    const nextTab = tabParam === "focus" || tabParam === "history" ? tabParam : "current";
+    setActiveTab((current) => (current === nextTab ? current : nextTab));
+  }, [tabParam]);
 
   const historicalData = useMemo<LifeBalanceHistoryChartPoint[]>(() => {
     if (!userData) return [];
@@ -325,10 +366,35 @@ export function LifeBalance() {
     });
   };
 
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const nextTab = value === "focus" || value === "history" ? value : "current";
+      setActiveTab(nextTab);
+
+      const nextParams = new URLSearchParams(searchParams);
+      if (nextTab === "current") {
+        nextParams.delete("tab");
+      } else {
+        nextParams.set("tab", nextTab);
+      }
+
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const handleContinueToGoalSetup = () => {
+    if (!focusArea) return;
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, focusArea.name);
+    navigate("/smart-goal-setup");
+  };
+
+
   if (!userData || !hasLifeBalanceData) {
     return (
       <PageShell maxWidth="xl">
         <div ref={pageTopRef} className="pb-12">
+          <ScreenGuide {...SCREEN_GUIDES.lifeBalance} autoOpen />
           <header>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Bánh xe cuộc sống</p>
             <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
@@ -363,6 +429,7 @@ export function LifeBalance() {
 
   return (
     <PageShell maxWidth="xl">
+      <ScreenGuide {...SCREEN_GUIDES.lifeBalance} autoOpen />
       <AlertDialog open={blocker.state === "blocked"}>
         <AlertDialogContent className="surface-elevated rounded-2xl border border-app-line bg-app-surface shadow-[var(--shadow-3)]">
           <AlertDialogHeader>
@@ -462,9 +529,13 @@ export function LifeBalance() {
           </MotionFadeIn>
         </div>
 
-        <Tabs defaultValue="current" className="mt-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-8">
           <TabsList>
             <TabsTrigger value="current">Hiện tại</TabsTrigger>
+            <TabsTrigger value="focus">
+              <Target className="mr-1 h-3.5 w-3.5" />
+              Trọng tâm
+            </TabsTrigger>
             <TabsTrigger value="history" disabled={historicalData.length === 0}>
               Lịch sử
             </TabsTrigger>
@@ -790,6 +861,7 @@ export function LifeBalance() {
                                 } else {
                                   handleSave();
                                   setIsCheckInMode(false);
+                                  handleTabChange("focus");
                                 }
                               }}
                             >
@@ -839,6 +911,139 @@ export function LifeBalance() {
                 )}
               </div>
             </section>
+          </TabsContent>
+
+          {/* 2B-1: Tab Trọng tâm — chọn lĩnh vực + CTA tới SMART Goal */}
+          <TabsContent value="focus" className="mt-6">
+            {focusArea && focusSmartGoalStarter ? (
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {/* Left: Chọn trọng tâm */}
+                <div className="space-y-5">
+                  {/* Insight card gọn */}
+                  <section className="surface-raised rounded-2xl border border-app-status-success/20 bg-app-status-success/5 p-5">
+                    <h3 className="text-sm font-bold text-app-ink flex items-center gap-2">
+                      <Target className="h-4 w-4 text-app-status-success" />
+                      Đề xuất trọng tâm
+                    </h3>
+                    <p className="mt-2 text-xs text-app-ink-soft leading-relaxed">
+                      Dựa trên điểm vừa chấm, <strong>{getLifeAreaLabel(weakestArea.name)}</strong> ({weakestArea.score}đ) là lĩnh vực có cơ hội cải thiện rõ nhất.
+                    </p>
+                    <p className="mt-2 text-xs text-app-ink-muted leading-relaxed">
+                      {getFocusInsight(weakestArea.name, weakestArea.score).reason}
+                    </p>
+                  </section>
+
+                  {/* Picker chọn area khác */}
+                  <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5">
+                    <header className="pb-3 border-b border-app-line/60">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">
+                        Hoặc tự chọn lĩnh vực khác
+                      </h3>
+                      <p className="mt-1 text-xs text-app-ink-muted">Nhấp vào lĩnh vực bạn muốn đặt mục tiêu</p>
+                    </header>
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                      {lifeAreas.map((area) => {
+                        const isSelected = focusArea.name === area.name;
+                        const AreaIcon = getLifeAreaIcon(area.name);
+                        const colors = getAreaColorConfig(area.name);
+                        return (
+                          <button
+                            key={area.name}
+                            type="button"
+                            onClick={() => setSelectedFocusAreaName(area.name === weakestArea.name ? null : area.name)}
+                            className={cn(
+                              "group min-h-12 rounded-xl border p-2.5 text-left transition-all duration-200 outline-none cursor-pointer select-none",
+                              isSelected
+                                ? colors.selectedBg
+                                : "border-app-line bg-app-surface hover:bg-app-bg hover:border-app-line/80 active:scale-[0.97]",
+                              "focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg focus-visible:outline-none",
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={cn(
+                                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
+                                  isSelected
+                                    ? colors.iconSelectedBg
+                                    : "bg-app-bg text-app-ink-muted group-hover:bg-app-line group-hover:text-app-ink",
+                                )}
+                              >
+                                <AreaIcon className="h-4 w-4" aria-hidden="true" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className={cn("truncate text-xs font-bold", isSelected ? colors.text : "text-app-ink-soft group-hover:text-app-ink")}>
+                                  {getLifeAreaLabel(area.name)}
+                                </p>
+                                <p className={cn("text-xs font-semibold", isSelected ? colors.text : "text-app-ink-muted")}>
+                                  {area.score}/10
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                </div>
+
+                {/* Right: CTA + gợi ý */}
+                <div className="space-y-5 lg:sticky lg:top-6">
+                  {/* Focus Card */}
+                  <section className="surface-raised rounded-2xl border border-app-accent/20 bg-app-bg-subtle p-6 shadow-app-md relative overflow-hidden">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent">
+                      LĨNH VỰC TRỌNG TÂM
+                    </span>
+                    <h2 className="mt-2 font-serif text-2xl font-bold text-app-ink">{getLifeAreaLabel(focusArea.name)}</h2>
+                    <p className="mt-1 text-xs text-app-ink-soft">Điểm hiện tại: {focusArea.score}/10</p>
+
+                    {/* Gợi ý mục tiêu */}
+                    <div className="mt-4 p-4 rounded-xl border border-app-line bg-app-surface space-y-2">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
+                        <Sparkles className="h-3 w-3" />
+                        Gợi ý mục tiêu 12 tuần
+                      </span>
+                      <p className="text-xs font-serif italic text-app-ink leading-relaxed">
+                        "{focusSmartGoalStarter.specificGoalStatement}"
+                      </p>
+                      <p className="text-xs text-app-ink-muted italic">
+                        Lý do: {focusSmartGoalStarter.motivationReason}
+                      </p>
+                    </div>
+
+                    {/* CTA */}
+                    <motion.button
+                      whileHover={{ scale: 1.015 }}
+                      whileTap={{ scale: 0.985 }}
+                      type="button"
+                      onClick={handleContinueToGoalSetup}
+                      className="mt-6 group inline-flex min-h-12 w-full items-center justify-center gap-2 bg-app-accent px-6 py-3 rounded-xl text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] transition-all cursor-pointer"
+                    >
+                      Tạo mục tiêu SMART
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    </motion.button>
+                    <p className="mt-2 text-[11px] text-app-ink-muted text-center">
+                      Bước tiếp: biến trọng tâm thành mục tiêu 12 tuần rõ ràng.
+                    </p>
+
+                    {/* Link sang LifeInsight đầy đủ */}
+                    <div className="mt-4 pt-4 border-t border-app-line/60 flex justify-center">
+                      <Link
+                        to="/life-insight"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-app-ink-soft hover:text-app-ink transition-colors"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Xem bản đầy đủ trang Góc nhìn
+                      </Link>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            ) : (
+              <div className="surface-raised rounded-2xl border border-app-line p-8 text-center">
+                <Compass className="mx-auto h-10 w-10 text-app-accent" />
+                <p className="mt-3 text-sm text-app-ink-soft">Chưa có dữ liệu để gợi ý trọng tâm.</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

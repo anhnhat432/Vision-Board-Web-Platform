@@ -583,7 +583,7 @@ export function Onboarding() {
       strongest_area: getLifeAreaLabel(strongestArea.name),
     });
     setIsDirty(false);
-    navigate("/life-insight");
+    navigate("/life-balance?tab=focus");
   };
 
   const handleComplete = () => {
@@ -1113,7 +1113,7 @@ export function Onboarding() {
                             <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </>
                         ) : (
-                          "Xem insight của tôi"
+                          "Chọn trọng tâm"
                         )}
                       </button>
                     </div>
@@ -1130,7 +1130,7 @@ export function Onboarding() {
               >
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
                 <p className="text-sm font-medium leading-6 text-app-ink-soft">
-                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể xem insight với điểm mặc
+                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể chọn trọng tâm với điểm mặc
                   định 5 cho phần còn lại.
                 </p>
               </div>
@@ -1169,7 +1169,7 @@ export function Onboarding() {
                 className="order-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:order-2 sm:w-auto"
                 onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
               >
-                Xem insight của tôi
+                Chọn trọng tâm
                 {!canCompleteAssessment ? <span className="sr-only"> (Dùng điểm mặc định)</span> : null}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>

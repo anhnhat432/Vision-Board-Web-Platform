@@ -151,6 +151,24 @@ describe("getNewUserGuideProgress", () => {
     expect(progress.nextStep?.href).toBe("/smart-goal-setup");
   });
 
+  it("routes the merged Life Balance step to the focus tab when the score is done but focus is not chosen yet", () => {
+    const data = seedRealLifeBalance();
+
+    const progress = getNewUserGuideProgress(data);
+    const lifeBalanceStep = progress.steps.find((step) => step.id === "life_balance");
+    const smartGoalStep = progress.steps.find((step) => step.id === "smart_goal");
+
+    expect(progress.nextStep?.id).toBe("life_balance");
+    expect(lifeBalanceStep).toMatchObject({
+      completed: false,
+      href: "/life-balance?tab=focus",
+      ctaLabel: "Chọn trọng tâm",
+    });
+    expect(smartGoalStep).toMatchObject({
+      href: "/life-balance?tab=focus",
+    });
+  });
+
   it("treats a restored 12-week system as completed upstream core flow", () => {
     const data = seedBackendRestoredTwelveWeekSystem();
 
