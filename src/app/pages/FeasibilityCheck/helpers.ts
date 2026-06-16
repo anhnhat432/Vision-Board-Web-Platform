@@ -8,6 +8,7 @@ import type {
   FeasibilityBottleneck,
   PlanLoadRecommendation,
   Question,
+  PendingFeasibilityResult,
   ResultData,
   ResultType,
   SmartGoalQualityBridge,
@@ -22,6 +23,20 @@ export interface BuildResultOptions {
    * Numeric scoring is unaffected by this option.
    */
   goalArchetype?: GoalArchetype;
+}
+
+export const DEFAULT_FEASIBILITY_ANSWERS: Record<number, string> = {
+  1: "3to5",
+  2: "energy_stable",
+  3: "resources_mostly_ready",
+  4: "realistic",
+  5: "time",
+  6: "mostly",
+  7: "ready",
+};
+
+export function buildDefaultFeasibilityAnswers(): Record<number, string> {
+  return { ...DEFAULT_FEASIBILITY_ANSWERS };
 }
 
 export function getAnsweredQuestionCount(answers: Record<number, string | null | undefined>): number {
@@ -151,6 +166,40 @@ function buildPlanGuidance(input: {
     firstWeekGuidance: "Tuần 1 nên cân bằng: đủ rõ để tiến lên, đủ nhẹ để duy trì đều.",
     scopeRecommendation: `Giữ một kết quả chính, 2-3 việc lặp lại và một buổi nhìn lại cố định.${qualitySuffix}`,
   };
+}
+
+export function buildPendingFeasibilityResult(
+  result: ResultData,
+  savedAt = new Date().toISOString(),
+): PendingFeasibilityResult {
+  return {
+    resultType: result.type,
+    resultTitle: result.title,
+    resultSummary: result.summary,
+    recommendation: result.recommendation,
+    readinessScore: result.readinessScore,
+    adjustedScore: result.adjustedScore,
+    wheelScore: result.wheelScore,
+    diagnosticScore: result.diagnosticScore,
+    maxDiagnosticScore: result.maxDiagnosticScore,
+    axisScores: result.axisScores,
+    bottleneck: result.bottleneck,
+    planLoad: result.planLoad,
+    weeklyCapacity: result.weeklyCapacity,
+    firstWeekGuidance: result.firstWeekGuidance,
+    scopeRecommendation: result.scopeRecommendation,
+    smartGoalQualityLevel: result.smartGoalQualityLevel,
+    smartGoalQualityNote: result.smartGoalQualityNote,
+    savedAt,
+  };
+}
+
+export function buildQuickPlanFeasibilityResult(
+  wheelScore: number,
+  options?: BuildResultOptions & { savedAt?: string },
+): PendingFeasibilityResult {
+  const result = buildResult(buildDefaultFeasibilityAnswers(), wheelScore, options);
+  return buildPendingFeasibilityResult(result, options?.savedAt);
 }
 
 export function buildResult(

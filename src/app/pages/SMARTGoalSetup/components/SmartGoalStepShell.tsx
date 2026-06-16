@@ -54,6 +54,9 @@ interface SmartGoalStepShellProps {
   onJumpToStep: (stepKey: SmartStepKey) => void;
   onBack: () => void;
   onNext: () => void;
+  finalPrimaryCtaLabel?: string;
+  finalSecondaryCtaLabel?: string;
+  onFinalSecondaryAction?: () => void;
 }
 
 const STEP_NAMES: Record<SmartStepKey, string> = {
@@ -237,6 +240,9 @@ export function SmartGoalStepShell({
   onJumpToStep,
   onBack,
   onNext,
+  finalPrimaryCtaLabel,
+  finalSecondaryCtaLabel,
+  onFinalSecondaryAction,
 }: SmartGoalStepShellProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -266,40 +272,46 @@ export function SmartGoalStepShell({
 
   const isGoldStandard = clarityDoneCount === clarityItems.length;
 
-  const handleNextClick = () => {
+  const focusInvalidCurrentStep = () => {
+    setTimeout(() => {
+      const stepInputs: Record<SmartStepKey, string> = {
+        specific: "#smart-specific",
+        measurable: "#smart-metric-name",
+        achievable: "#smart-weekly-hours-slider, #smart-weekly-hours-input",
+        relevant: "#smart-relevant-reason",
+        timeBound: "#smart-target-weeks-slider, #smart-target-date",
+      };
+
+      const targetSelector = stepInputs[step.key];
+      const targetElement = targetSelector ? (document.querySelector(targetSelector) as HTMLElement) : null;
+
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        const isMobileDevice = window.innerWidth < 1024;
+        if (!isMobileDevice) {
+          targetElement.focus({ preventScroll: true });
+        }
+
+        targetElement.classList.add("animate-shake");
+        setTimeout(() => {
+          targetElement.classList.remove("animate-shake");
+        }, 450);
+      }
+    }, 50);
+  };
+
+  const handleValidatedAction = (action: () => void) => {
     if (!isCurrentStepValid) {
       onNext();
-
-      setTimeout(() => {
-        const stepInputs: Record<SmartStepKey, string> = {
-          specific: "#smart-specific",
-          measurable: "#smart-metric-name",
-          achievable: "#smart-weekly-hours-slider, #smart-weekly-hours-input",
-          relevant: "#smart-relevant-reason",
-          timeBound: "#smart-target-weeks-slider, #smart-target-date",
-        };
-
-        const targetSelector = stepInputs[step.key];
-        const targetElement = targetSelector ? (document.querySelector(targetSelector) as HTMLElement) : null;
-
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-
-          const isMobileDevice = window.innerWidth < 1024;
-          if (!isMobileDevice) {
-            targetElement.focus({ preventScroll: true });
-          }
-
-          targetElement.classList.add("animate-shake");
-          setTimeout(() => {
-            targetElement.classList.remove("animate-shake");
-          }, 450);
-        }
-      }, 50);
+      focusInvalidCurrentStep();
       return;
     }
-    onNext();
+    action();
   };
+
+  const handleNextClick = () => handleValidatedAction(onNext);
+  const handleFinalSecondaryClick = () => handleValidatedAction(onFinalSecondaryAction ?? onNext);
 
   useEffect(() => {
     if (!prevValidRef.current && isCurrentStepValid) {
@@ -404,6 +416,9 @@ export function SmartGoalStepShell({
   const hoursVal = smartGoalStarter.weeklyHours;
   const motivationReasonStr = smartGoalStarter.motivationReason;
   const weeksVal = smartGoalStarter.targetWeeks;
+  const isFinalStep = stepIndex === totalSteps - 1;
+  const primaryCtaLabel = isFinalStep && finalPrimaryCtaLabel ? finalPrimaryCtaLabel : STEP_CTA_LABELS[step.key];
+  const showFinalSecondaryCta = isFinalStep && finalSecondaryCtaLabel && onFinalSecondaryAction;
 
   const getPersonaData = (
     tone: "empathetic" | "pragmatic" | "strategic",
@@ -1159,6 +1174,18 @@ export function SmartGoalStepShell({
                   <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   Quay lại
                 </motion.button>
+                {showFinalSecondaryCta ? (
+                  <motion.button
+                    whileHover={{ scale: 1.015 }}
+                    whileTap={{ scale: 0.985 }}
+                    type="button"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg hover:text-app-accent active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer font-sans"
+                    onClick={handleFinalSecondaryClick}
+                  >
+                    <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                    {finalSecondaryCtaLabel}
+                  </motion.button>
+                ) : null}
                 <motion.button
                   whileHover={{ scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
@@ -1166,29 +1193,41 @@ export function SmartGoalStepShell({
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer font-sans"
                   onClick={handleNextClick}
                 >
-                  {STEP_CTA_LABELS[step.key]}
+                  {primaryCtaLabel}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </motion.button>
               </div>
 
               {/* Sticky Bottom CTA cho Mobile */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 p-4 border-t border-app-line bg-app-surface/90 backdrop-blur-md shadow-lg flex justify-between gap-3 lg:hidden">
-                <button
-                  type="button"
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface py-3 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
-                  onClick={onBack}
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  Quay lại
-                </button>
-                <button
-                  type="button"
-                  className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent py-3 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 transition-all duration-200 cursor-pointer font-sans"
-                  onClick={handleNextClick}
-                >
-                  {STEP_CTA_LABELS[step.key]}
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </button>
+              <div className="fixed bottom-0 left-0 right-0 z-40 p-4 border-t border-app-line bg-app-surface/90 backdrop-blur-md shadow-lg flex flex-col gap-3 lg:hidden">
+                <div className="flex justify-between gap-3">
+                  <button
+                    type="button"
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface py-3 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
+                    onClick={onBack}
+                  >
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    Quay lại
+                  </button>
+                  <button
+                    type="button"
+                    className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent py-3 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 transition-all duration-200 cursor-pointer font-sans"
+                    onClick={handleNextClick}
+                  >
+                    {primaryCtaLabel}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+                {showFinalSecondaryCta ? (
+                  <button
+                    type="button"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
+                    onClick={handleFinalSecondaryClick}
+                  >
+                    <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                    {finalSecondaryCtaLabel}
+                  </button>
+                ) : null}
               </div>
 
               {currentStepError && (

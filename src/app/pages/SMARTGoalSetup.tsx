@@ -15,6 +15,8 @@ import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { FormSkeleton } from "../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
@@ -32,6 +34,7 @@ import {
   hasActionableArchetypeHint,
   type UserIntentId,
 } from "../utils/user-intent";
+import { buildDefaultFeasibilityAnswers, buildQuickPlanFeasibilityResult } from "./FeasibilityCheck/helpers";
 import { AchievableStep } from "./SMARTGoalSetup/components/AchievableStep";
 import { AnvilForgingEffect } from "./SMARTGoalSetup/components/AnvilForgingEffect";
 import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
@@ -99,6 +102,9 @@ export function SMARTGoalSetup() {
   );
   const [currentStep, setCurrentStep] = useState(0);
   const [showAnvilEffect, setShowAnvilEffect] = useState(false);
+  const [postSmartGoalDestination, setPostSmartGoalDestination] = useState<"/feasibility" | "/12-week-setup">(
+    "/feasibility",
+  );
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
   const [userIntent, setUserIntentState] = useState<UserIntentId | null>(null);
@@ -292,7 +298,7 @@ export function SMARTGoalSetup() {
     enabled: setupState === "ready",
   });
 
-  const handleGoToFeasibility = () => {
+  const handleCompleteSmartGoal = (destination: "/feasibility" | "/12-week-setup") => {
     const specificGoalStatement = smartData.specific.goal_statement.trim();
     const measurableTarget = parseNumberInput(smartData.measurable.target_value);
     const weeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
@@ -337,6 +343,28 @@ export function SMARTGoalSetup() {
     setLastSavedAt(new Date());
     setAutoSaveStatus("saved");
     const finalQuality = evaluateSmartGoalQuality(smartGoal);
+
+    if (destination === "/12-week-setup") {
+      const wheelScore = getScoredLifeArea(currentUserData, focusArea)?.score ?? 6;
+      const quickFeasibilityResult = buildQuickPlanFeasibilityResult(wheelScore, {
+        smartGoalQualityLevel: finalQuality.level,
+        goalArchetype: archetype,
+      });
+
+      localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(quickFeasibilityResult));
+      localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(buildDefaultFeasibilityAnswers()));
+      localStorage.setItem("feasibilityActiveGoal", finalSnapshot);
+      localStorage.removeItem("feasibilityBackupAnswers");
+      localStorage.removeItem("feasibilityBackupResult");
+
+      trackAnalyticsEvent("feasibility_quick_plan_default_created", {
+        focus_area: focusArea,
+        result_type: quickFeasibilityResult.resultType,
+        adjusted_score: quickFeasibilityResult.adjustedScore,
+        plan_load: quickFeasibilityResult.planLoad,
+      });
+    }
+
     trackAnalyticsEvent("smart_goal_created", {
       focus_area: focusArea,
       target_mode: smartData.timeBound.mode,
@@ -347,10 +375,15 @@ export function SMARTGoalSetup() {
       score_bucket: getQualityScoreBucket(finalQuality.overallScore),
       goal_archetype: archetype,
       archetype_overridden: isArchetypeOverridden,
+      next_step: destination === "/12-week-setup" ? "quick_plan" : "feasibility",
     });
 
+    setPostSmartGoalDestination(destination);
     setShowAnvilEffect(true);
   };
+
+  const handleCreateQuickPlan = () => handleCompleteSmartGoal("/12-week-setup");
+  const handleGoToFeasibility = () => handleCompleteSmartGoal("/feasibility");
 
   const handleNext = () => {
     if (!isCurrentStepValid) {
@@ -364,7 +397,7 @@ export function SMARTGoalSetup() {
       return;
     }
 
-    handleGoToFeasibility();
+    handleCreateQuickPlan();
   };
 
   const handleBack = () => {
@@ -510,6 +543,7 @@ export function SMARTGoalSetup() {
   if (setupState === "checking") {
     return (
       <PageShell maxWidth="xl">
+        <ScreenGuide {...SCREEN_GUIDES.smartGoal} autoOpen />
         <div className="space-y-6">
           <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
           <FormSkeleton aria-label="Đang chuẩn bị bước viết mục tiêu" />
@@ -520,32 +554,39 @@ export function SMARTGoalSetup() {
 
   if (setupState === "needs_life_balance") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_balance"
-        eyebrow="Viết mục tiêu"
-        title="Hoàn thành bước cân bằng trước"
-        description="Chấm điểm các lĩnh vực cuộc sống trước để mục tiêu dựa trên dữ liệu thật, không phải số mặc định."
-        actionLabel="Bắt đầu cân bằng"
-        onAction={() => navigate("/onboarding")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.smartGoal} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_balance"
+          eyebrow="Viết mục tiêu"
+          title="Hoàn thành bước cân bằng trước"
+          description="Chấm điểm các lĩnh vực cuộc sống trước để mục tiêu dựa trên dữ liệu thật, không phải số mặc định."
+          actionLabel="Bắt đầu cân bằng"
+          onAction={() => navigate("/onboarding")}
+        />
+      </>
     );
   }
 
   if (setupState === "needs_life_insight") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_insight"
-        eyebrow="Viết mục tiêu"
-        title="Chọn trọng tâm trước"
-        description="Đã có dữ liệu cân bằng nhưng chưa chọn trọng tâm. Chọn một lĩnh vực rồi quay lại viết mục tiêu."
-        actionLabel="Mở bước chọn trọng tâm"
-        onAction={() => navigate("/life-insight")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.smartGoal} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_insight"
+          eyebrow="Viết mục tiêu"
+          title="Chọn trọng tâm trước"
+          description="Đã có dữ liệu cân bằng nhưng chưa chọn trọng tâm. Chọn một lĩnh vực rồi quay lại viết mục tiêu."
+          actionLabel="Mở bước chọn trọng tâm"
+          onAction={() => navigate("/life-insight")}
+        />
+      </>
     );
   }
 
   return (
     <PageShell maxWidth="hero">
+      <ScreenGuide {...SCREEN_GUIDES.smartGoal} autoOpen />
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}
@@ -636,6 +677,9 @@ export function SMARTGoalSetup() {
             onJumpToStep={handleJumpToStep}
             onBack={handleBack}
             onNext={handleNext}
+            finalPrimaryCtaLabel="Tạo kế hoạch nhanh"
+            finalSecondaryCtaLabel="Kiểm tra khả thi nâng cao"
+            onFinalSecondaryAction={handleGoToFeasibility}
           >
             {renderCurrentStepFields()}
           </SmartGoalStepShell>
@@ -643,7 +687,7 @@ export function SMARTGoalSetup() {
       </div>
       {showAnvilEffect && (
         <AnvilForgingEffect
-          onComplete={() => navigate("/feasibility")}
+          onComplete={() => navigate(postSmartGoalDestination)}
           goalStatement={smartData.specific.goal_statement}
         />
       )}

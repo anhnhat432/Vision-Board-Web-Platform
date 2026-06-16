@@ -26,7 +26,12 @@ import { FeasibilityBalanceScale } from "./FeasibilityCheck/components/Feasibili
 import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
-import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./FeasibilityCheck/helpers";
+import {
+  buildPendingFeasibilityResult,
+  buildResult,
+  getAnsweredQuestionCount,
+  hasCompleteFeasibilityAnswers,
+} from "./FeasibilityCheck/helpers";
 import type { PendingFeasibilityResult, ResultData, SmartGoalQualityBridge } from "./FeasibilityCheck/types";
 
 type FeasibilitySetupState = "checking" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "ready";
@@ -383,26 +388,7 @@ export function FeasibilityCheck() {
   const handleContinueToPlan = () => {
     if (!result) return;
 
-    const pendingFeasibilityResult: PendingFeasibilityResult = {
-      resultType: result.type,
-      resultTitle: result.title,
-      resultSummary: result.summary,
-      recommendation: result.recommendation,
-      readinessScore: result.readinessScore,
-      adjustedScore: result.adjustedScore,
-      wheelScore: result.wheelScore,
-      diagnosticScore: result.diagnosticScore,
-      maxDiagnosticScore: result.maxDiagnosticScore,
-      axisScores: result.axisScores,
-      bottleneck: result.bottleneck,
-      planLoad: result.planLoad,
-      weeklyCapacity: result.weeklyCapacity,
-      firstWeekGuidance: result.firstWeekGuidance,
-      scopeRecommendation: result.scopeRecommendation,
-      smartGoalQualityLevel: result.smartGoalQualityLevel,
-      smartGoalQualityNote: result.smartGoalQualityNote,
-      savedAt: new Date().toISOString(),
-    };
+    const pendingFeasibilityResult: PendingFeasibilityResult = buildPendingFeasibilityResult(result);
 
     const finalAnswersSnapshot = JSON.stringify(answers);
     debouncedSaveRef.current?.cancel();

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { QUESTIONS } from "./constants";
-import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./helpers";
+import {
+  buildDefaultFeasibilityAnswers,
+  buildQuickPlanFeasibilityResult,
+  buildResult,
+  getAnsweredQuestionCount,
+  hasCompleteFeasibilityAnswers,
+} from "./helpers";
 
 // ---------------------------------------------------------------------------
 // Helpers — build answer sets for specific scenarios
@@ -459,5 +465,57 @@ describe("result structure", () => {
     const result = buildResult(highCapacityClearGoal(), 8);
     expect(result.readinessScore).toBeGreaterThanOrEqual(0);
     expect(result.readinessScore).toBeLessThanOrEqual(20);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Quick plan path: skip Feasibility, use neutral defaults
+// ---------------------------------------------------------------------------
+
+describe("buildQuickPlanFeasibilityResult — quick plan default", () => {
+  it("returns a complete neutral default answer set for all 7 questions", () => {
+    const answers = buildDefaultFeasibilityAnswers();
+    expect(hasCompleteFeasibilityAnswers(answers)).toBe(true);
+    expect(getAnsweredQuestionCount(answers)).toBe(QUESTIONS.length);
+    for (const question of QUESTIONS) {
+      const value = answers[question.id];
+      const validValues = question.options.map((option) => option.value);
+      expect(validValues).toContain(value);
+    }
+  });
+
+  it("produces a finite, non-NaN PendingFeasibilityResult shape from a wheel score", () => {
+    const result = buildQuickPlanFeasibilityResult(6);
+    expect(Number.isFinite(result.readinessScore)).toBe(true);
+    expect(Number.isFinite(result.adjustedScore)).toBe(true);
+    expect(Number.isFinite(result.wheelScore)).toBe(true);
+    expect(Number.isFinite(result.diagnosticScore)).toBe(true);
+    expect(result.adjustedScore).toBeGreaterThanOrEqual(0);
+    expect(["realistic", "challenging", "too_ambitious"]).toContain(result.resultType);
+    expect(result.resultTitle.length).toBeGreaterThan(0);
+    expect(result.recommendation.length).toBeGreaterThan(0);
+    expect(result.axisScores).toHaveLength(QUESTIONS.length);
+    expect(result.savedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it("scales adjusted score down when wheel score is low", () => {
+    const lowWheel = buildQuickPlanFeasibilityResult(2);
+    const highWheel = buildQuickPlanFeasibilityResult(9);
+    expect(lowWheel.adjustedScore).toBeLessThan(highWheel.adjustedScore);
+  });
+
+  it("propagates smartGoalQualityLevel into the saved result", () => {
+    const result = buildQuickPlanFeasibilityResult(7, { smartGoalQualityLevel: "weak" });
+    expect(result.smartGoalQualityLevel).toBe("weak");
+    expect(result.smartGoalQualityNote).toBeDefined();
+  });
+
+  it("is shape-compatible with full 7-question buildResult output", () => {
+    const quick = buildQuickPlanFeasibilityResult(6);
+    const full = buildResult(buildDefaultFeasibilityAnswers(), 6);
+    expect(quick.adjustedScore).toBe(Math.max(0, full.adjustedScore));
+    expect(quick.readinessScore).toBe(full.readinessScore);
+    expect(quick.axisScores).toHaveLength(full.axisScores.length);
+    expect(quick.resultType).toBe(full.type);
   });
 });

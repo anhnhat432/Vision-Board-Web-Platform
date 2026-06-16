@@ -104,8 +104,9 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
   const hasAnyGoal = userData.goals.length > 0;
   const hasInsight = hasCycle || (hasLifeBalance && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea)));
   const hasSmartGoal = hasCycle || (hasInsight && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal)));
-  const hasFeasibility =
+  const hasSavedFeasibility =
     hasCycle || (hasSmartGoal && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult)));
+  const hasFeasibility = hasSmartGoal || hasSavedFeasibility;
   const hasTouchedToday =
     hasCycle &&
     (Boolean(activeSystem?.dailyCheckIns.length) ||
@@ -140,10 +141,10 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     {
       id: "feasibility",
       title: "Kiểm tra tính khả thi",
-      description: "Đo mức sẵn sàng trước khi dựng kế hoạch, để mục tiêu không quá nặng so với lịch sống hiện tại.",
+      description: "Đo mức sẵn sàng nâng cao nếu muốn làm kỹ hơn; đường mặc định vẫn có thể tạo kế hoạch nhanh.",
       completed: hasFeasibility,
       href: hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
-      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi" : "Viết mục tiêu SMART trước",
+      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi nâng cao" : "Viết mục tiêu SMART trước",
     },
     {
       id: "setup_cycle",
@@ -151,8 +152,8 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
       description:
         "Biến mục tiêu đó thành một chu kỳ có kết quả, việc lặp lại, chỉ số, tuần đầu và ngày review rõ ràng.",
       completed: hasCycle,
-      href: hasFeasibility ? "/12-week-setup" : "/feasibility",
-      ctaLabel: hasFeasibility ? "Tạo kế hoạch 12 tuần" : "Kiểm tra khả thi trước",
+      href: hasSmartGoal ? "/12-week-setup" : "/smart-goal-setup",
+      ctaLabel: hasSmartGoal ? "Tạo kế hoạch 12 tuần" : "Viết mục tiêu SMART trước",
     },
     {
       id: "complete_today",

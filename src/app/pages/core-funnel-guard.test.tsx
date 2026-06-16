@@ -25,6 +25,7 @@ vi.mock("@/lib/auth/AuthContext", () => ({
     refreshUserProfile: vi.fn(),
     isConfigured: false,
   }),
+  useOptionalAuthContext: () => null,
 }));
 
 vi.mock("@/features/plan12week/hooks", () => ({
@@ -155,7 +156,7 @@ describe("core funnel guards", () => {
     expect(screen.getByRole("button", { name: "Bắt đầu cân bằng" })).toBeInTheDocument();
   });
 
-  it("shows a recovery gate on 12-week setup when feasibility is missing", async () => {
+  it("loads 12-week setup with quick default feasibility when feasibility is missing", async () => {
     seedRealLifeBalanceWithoutInsight();
     localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
     localStorage.setItem(
@@ -170,15 +171,20 @@ describe("core funnel guards", () => {
       }),
     );
 
-    const user = userEvent.setup();
     const { router } = renderCoreFunnel("/12-week-setup");
 
-    expect(
-      await screen.findByRole("heading", { name: "Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Tạo kế hoạch 12 tuần" })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/12-week-setup");
 
-    await user.click(screen.getByRole("button", { name: "Mở kiểm tra tính khả thi" }));
-
-    expect(router.state.location.pathname).toBe("/feasibility");
+    const savedResult = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult) ?? "{}");
+    expect(savedResult).toMatchObject({
+      resultType: expect.any(String),
+      readinessScore: expect.any(Number),
+      adjustedScore: expect.any(Number),
+      wheelScore: 7,
+      maxDiagnosticScore: 28,
+    });
+    expect(savedResult.axisScores).toHaveLength(7);
+    expect(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers)).toBeTruthy();
   });
 });

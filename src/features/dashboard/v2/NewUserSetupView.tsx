@@ -30,11 +30,7 @@ function buildSetupSteps(userData: UserData): SetupStep[] {
   const hasAnyGoal = userData.goals.length > 0;
   const hasInsight = hasLifeBalance && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea));
   const hasSmartGoal = hasInsight && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal));
-  const hasGoalWithFeasibility = userData.goals.some(
-    (goal) => Boolean(goal.feasibilityResult) || typeof goal.readinessScore === "number",
-  );
-  const hasFeasibility =
-    hasSmartGoal && (hasGoalWithFeasibility || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult));
+  const canCreatePlan = hasSmartGoal;
 
   return [
     {
@@ -59,7 +55,7 @@ function buildSetupSteps(userData: UserData): SetupStep[] {
       title: "Kế hoạch 12 tuần",
       description: "Xây dựng các tactics việc lặp lại, mốc checkpoint tuần và ngày khóa review.",
       completed: false,
-      href: hasFeasibility ? "/12-week-setup" : hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
+      href: canCreatePlan ? "/12-week-setup" : "/smart-goal-setup",
     },
   ];
 }

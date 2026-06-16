@@ -169,6 +169,39 @@ describe("getNewUserGuideProgress", () => {
     });
   });
 
+  it("routes directly to 12-week setup after SMART Goal when feasibility has not been run", () => {
+    const data = seedRealLifeBalance();
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea: "Career",
+        specific: "Ra mắt hệ thống review cá nhân",
+        measurable: "Hoàn thành 12 tuần review",
+        achievable: "6 giờ mỗi tuần",
+        relevant: "Giữ nhịp thực thi dài hạn",
+        timeBound: "Trong 12 tuần tới",
+      }),
+    );
+
+    const progress = getNewUserGuideProgress(data);
+    const feasibilityStep = progress.steps.find((step) => step.id === "feasibility");
+    const setupStep = progress.steps.find((step) => step.id === "setup_cycle");
+
+    expect(progress.completedCount).toBe(4);
+    expect(progress.nextStep?.id).toBe("setup_cycle");
+    expect(feasibilityStep).toMatchObject({
+      completed: true,
+      href: "/feasibility",
+      ctaLabel: "Kiểm tra khả thi nâng cao",
+    });
+    expect(setupStep).toMatchObject({
+      completed: false,
+      href: "/12-week-setup",
+      ctaLabel: "Tạo kế hoạch 12 tuần",
+    });
+  });
+
   it("treats a restored 12-week system as completed upstream core flow", () => {
     const data = seedBackendRestoredTwelveWeekSystem();
 
@@ -186,5 +219,25 @@ describe("getNewUserGuideProgress", () => {
       ["complete_today", true],
       ["complete_review", false],
     ]);
+  });
+
+  it("marks feasibility complete when a SMART goal draft exists but no saved feasibility result", () => {
+    const data = seedRealLifeBalance();
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea: "Career",
+        specific: { goal_statement: "Write 2 English articles per week" },
+        measurable: { metric_name: "articles", target_value: 24 },
+      }),
+    );
+
+    const progress = getNewUserGuideProgress(data);
+    const feasibilityStep = progress.steps.find((step) => step.id === "feasibility");
+    const setupCycleStep = progress.steps.find((step) => step.id === "setup_cycle");
+
+    expect(feasibilityStep?.completed).toBe(true);
+    expect(setupCycleStep?.href).toBe("/12-week-setup");
   });
 });
