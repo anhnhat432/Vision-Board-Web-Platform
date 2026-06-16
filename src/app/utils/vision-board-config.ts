@@ -108,7 +108,7 @@ export const QUOTE_FONT_STYLES: QuoteFontStyle[] = [
     id: "serif",
     label: "Cổ điển",
     className: "font-semibold text-lg leading-relaxed",
-    fontFamily: '"Playfair Display", "Georgia", "Cormorant Garamond", serif',
+    fontFamily: '"Source Serif 4 Variable", "Source Serif 4", "Playfair Display", Georgia, serif',
   },
   {
     id: "bold",
