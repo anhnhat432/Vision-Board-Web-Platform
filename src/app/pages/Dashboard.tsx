@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, Award, CheckCircle2, Compass, Loader2, WifiOff, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Award, CheckCircle2, ChevronDown, Compass, Loader2, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
@@ -27,8 +27,10 @@ import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
+import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible";
 import { Skeleton } from "../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
@@ -66,25 +68,34 @@ import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-we
 
 const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
-    id: "start",
-    targetId: "dashboard-start-card",
-    title: "Bắt đầu từ khối này",
-    description:
-      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng luồng: góc nhìn, mục tiêu SMART, kiểm tra tính thực tế rồi mới vào 12 tuần.",
-  },
-  {
-    id: "attention",
+    id: "hero",
     targetId: "dashboard-next-card",
-    title: "Nhìn khối này trước khi quét cả màn",
-    description: "Phần đầu Trang chính gom ba tín hiệu quan trọng nhất để bạn biết nên mở vào đâu tiếp theo.",
+    title: "Đây là khối chính của Trang chủ",
+    description: "Hãy nhìn khối này trước để biết mục tiêu hiện tại và nút đi tiếp nhanh nhất.",
   },
   {
     id: "plan",
     targetId: "dashboard-plan-card",
-    title: "Phân biệt Free và Plus ở đây",
-    description: "Khối này cho biết bạn đang ở gói nào, quyền nào đã mở và chỗ để quản lý hoặc khôi phục lại nếu cần.",
+    title: "Đây là mục tiêu đang được ưu tiên",
+    description: "Khối bên phải cho bạn thấy trọng tâm chu kỳ hiện tại và tiến độ của nó.",
   },
 ];
+
+const DASHBOARD_SECONDARY_INSIGHTS_OPEN_KEY = "visionboard_dashboard_secondary_insights_open";
+
+function getInitialSecondaryInsightsOpen(isDesktopViewport: boolean): boolean {
+  if (typeof window === "undefined") return isDesktopViewport;
+
+  try {
+    const storedValue = window.localStorage.getItem(DASHBOARD_SECONDARY_INSIGHTS_OPEN_KEY);
+    if (storedValue === "true") return true;
+    if (storedValue === "false") return false;
+  } catch {
+    return isDesktopViewport;
+  }
+
+  return isDesktopViewport;
+}
 
 const LIFE_BALANCE_ROWS = [
   { label: "Sức khoẻ", aliases: ["Health"], fallbackScore: 7 },
@@ -631,6 +642,7 @@ function DashboardContent({
         ) : (
           <DashboardActiveLayout
             data={dashboardData}
+            userData={userData}
             displayName={dashboardDisplayName}
             caption={caption}
             balanceRows={balanceRows}
@@ -822,6 +834,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
 
 function DashboardActiveLayout({
   data,
+  userData,
   displayName,
   caption,
   balanceRows,
@@ -835,6 +848,7 @@ function DashboardActiveLayout({
   onTriggerDismiss,
 }: {
   data: DashboardData;
+  userData: UserData;
   displayName: string;
   caption: string;
   balanceRows: LifeBalanceRow[];
@@ -847,11 +861,23 @@ function DashboardActiveLayout({
   onTriggerAction: () => void;
   onTriggerDismiss: () => void;
 }) {
+  const isDesktopViewport = useBreakpoint();
+  const [secondaryInsightsOpen, setSecondaryInsightsOpen] = useState(() =>
+    getInitialSecondaryInsightsOpen(isDesktopViewport),
+  );
   const trendPoints =
     data.weeklyProgressPoints.length > 0
       ? data.weeklyProgressPoints
       : buildSystemWeeklyProgressPoints(data.activeSystem);
   const planHref = "/12-week-system?tab=week";
+  const handleSecondaryInsightsOpenChange = (open: boolean) => {
+    setSecondaryInsightsOpen(open);
+    try {
+      window.localStorage.setItem(DASHBOARD_SECONDARY_INSIGHTS_OPEN_KEY, String(open));
+    } catch {
+      // Ignore storage failures; the dashboard remains usable without persistence.
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -865,6 +891,10 @@ function DashboardActiveLayout({
           progressPercent={data.goalProgressSnapshot.percent || data.dashboardKpiLeadAverage}
           planHref={planHref}
         />
+      </div>
+
+      <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "75ms" }}>
+        <NewUserGuideBanner userData={userData} variant="compact" />
       </div>
 
       {/* Next Best Action Banner */}
@@ -905,36 +935,9 @@ function DashboardActiveLayout({
           >
             <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
           </div>
-
-          {/* Week Rhythm Card - Quieter border */}
-          <div
-            className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
-            style={{ animationDelay: "400ms" }}
-          >
-            <WeekRhythmCard
-              system={data.activeSystem}
-              currentWeek={data.dashboardKpiCurrentWeek}
-              totalWeeks={data.dashboardKpiTotalWeeks}
-              completedCount={
-                data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks
-              }
-              totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
-              leadAverage={data.dashboardKpiLeadAverage}
-              wheelScore={data.averageLifeScore}
-              streak={data.dashboardKpiStreak}
-            />
-          </div>
-
-          {/* Twelve Week Trend Card - Quieter / conditional display within card */}
-          <div
-            className="opacity-85 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
-            style={{ animationDelay: "500ms" }}
-          >
-            <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
-          </div>
         </div>
 
-        {/* Right Column: Secondary Insights & Inspiration */}
+        {/* Right Column: Review prompt stays visible; secondary insights move into the collapsible group below. */}
         <aside className="space-y-6">
           {data.reviewDueToday ? (
             <div className="relative appear-fade-up" style={{ animationDelay: "150ms" }}>
@@ -947,48 +950,96 @@ function DashboardActiveLayout({
               />
             </div>
           ) : null}
-
-          <div
-            className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
-            style={{ animationDelay: "250ms" }}
-          >
-            <BalanceCard rows={balanceRows} />
-          </div>
-
-          <div
-            className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
-            style={{ animationDelay: "350ms" }}
-          >
-            <DailyStoicCard />
-          </div>
-
-          <div
-            className="opacity-90 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
-            style={{ animationDelay: "450ms" }}
-          >
-            <QuoteBlock />
-          </div>
-
-          {/* 🎨 Cozy planning corner generated image asset for Active Users */}
-          <div
-            className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none opacity-90 hover:opacity-100 transition-all duration-200 appear-fade-up"
-            style={{ animationDelay: "550ms" }}
-          >
-            <img
-              src="/study_desk_hero.png"
-              alt="Góc học tập & lập kế hoạch ấm áp"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              width={320}
-              height={180}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
-              <p className="text-[10px] font-medium text-white/90 italic font-serif">
-                "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét."
-              </p>
-            </div>
-          </div>
         </aside>
       </div>
+
+      <Collapsible open={secondaryInsightsOpen} onOpenChange={handleSecondaryInsightsOpenChange}>
+        <section
+          className="rounded-2xl border border-app-line bg-app-surface/70 p-4 shadow-app-sm appear-fade-up sm:p-5"
+          style={{ animationDelay: "400ms" }}
+          aria-labelledby="dashboard-secondary-insights-title"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p
+                id="dashboard-secondary-insights-title"
+                className="text-sm font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+              >
+                Phân tích & nhịp độ
+              </p>
+              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
+                Biểu đồ, cân bằng và nguồn gợi ý được gom lại để phần việc hôm nay dễ quét hơn.
+              </p>
+            </div>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-app-line bg-app-bg px-4 py-2 text-sm font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              >
+                {secondaryInsightsOpen ? "Thu gọn" : "Mở phân tích"}
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-150 ${secondaryInsightsOpen ? "rotate-180" : ""}`}
+                  aria-hidden="true"
+                />
+              </button>
+            </CollapsibleTrigger>
+          </div>
+
+          <CollapsibleContent>
+            <div className="mt-5 grid gap-5 lg:grid-cols-3">
+              <div className="space-y-5 lg:col-span-2">
+                <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+                  <WeekRhythmCard
+                    system={data.activeSystem}
+                    currentWeek={data.dashboardKpiCurrentWeek}
+                    totalWeeks={data.dashboardKpiTotalWeeks}
+                    completedCount={
+                      data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks
+                    }
+                    totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
+                    leadAverage={data.dashboardKpiLeadAverage}
+                    wheelScore={data.averageLifeScore}
+                    streak={data.dashboardKpiStreak}
+                  />
+                </div>
+
+                <div className="opacity-85 hover:opacity-100 transition-opacity duration-200">
+                  <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
+                  <BalanceCard rows={balanceRows} />
+                </div>
+
+                <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+                  <DailyStoicCard />
+                </div>
+
+                <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
+                  <QuoteBlock />
+                </div>
+
+                <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-app-line shadow-3xs group select-none opacity-90 transition-opacity duration-200 hover:opacity-100">
+                  <img
+                    src="/study_desk_hero.png"
+                    alt="Góc học tập & lập kế hoạch ấm áp"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    width={320}
+                    height={180}
+                  />
+                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/50 via-transparent to-transparent p-4">
+                    <p className="font-serif text-[10px] font-medium italic text-white/90">
+                      "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </section>
+      </Collapsible>
     </div>
   );
 }
