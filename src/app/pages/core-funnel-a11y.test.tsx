@@ -177,6 +177,7 @@ describe("FeasibilityStepShell — a11y", () => {
   const question: Question = {
     id: 1,
     axis: "time",
+    tier: "core",
     axisLabel: "Thời gian",
     question: "Bạn có bao nhiêu giờ mỗi tuần để tập trung vào mục tiêu này?",
     helper: "Tính giờ thực tế, không phải giờ lý tưởng.",
@@ -247,15 +248,16 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { level: 1, name: /Có, mục tiêu rất thực tế/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /Mục tiêu rất thực tế/i })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /Bắt đầu lập Kế hoạch 12 tuần ngay/i }).length).toBeGreaterThan(0);
     const detailsTrigger = screen.getByRole("button", { name: /Xem phân tích chi tiết/i });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");
     expect(screen.getAllByRole("button", { name: /Xem phân tích chi tiết/i })).toHaveLength(1);
   });
 
-  it("expands detailed feasibility analysis by default on desktop", () => {
+  it("keeps detailed feasibility analysis collapsed by default on desktop and opens on demand", async () => {
     setViewportWidth(1024);
+    const user = userEvent.setup();
 
     render(
       <ResultStep
@@ -268,10 +270,13 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
     );
 
     const detailsTrigger = screen.getByRole("button", { name: /Xem phân tích chi tiết/i });
+    expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(detailsTrigger);
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("Hướng đi tiếp theo")).toBeInTheDocument();
-    expect(screen.getByText("Xem 7 góc nhìn")).toBeInTheDocument();
-    expect(screen.getByText("Xem nhịp triển khai gợi ý")).toBeInTheDocument();
+    expect(screen.getByText("Chi tiết 7 khía cạnh chẩn đoán")).toBeInTheDocument();
+    expect(screen.getByText("Mục tiêu SMART của bạn")).toBeInTheDocument();
+    expect(screen.getByText("Mức sẵn sàng tổng")).toBeInTheDocument();
   });
 });
 
@@ -450,7 +455,7 @@ describe("SpecificStep — a11y", () => {
     const textarea = screen.getByLabelText(/Mục tiêu cụ thể của bạn/i);
     const describedBy = textarea.getAttribute("aria-describedby") ?? "";
     expect(describedBy.split(/\s+/)).toEqual(expect.arrayContaining(["smart-specific-hint", "smart-specific-counter"]));
-    expect(document.getElementById("smart-specific-hint")?.textContent).toMatch(/kiểm chứng/i);
+    expect(document.getElementById("smart-specific-hint")?.textContent).toMatch(/kết quả bạn muốn đạt/i);
     expect(document.getElementById("smart-specific-counter")?.textContent).toMatch(/ký tự/i);
   });
 });
@@ -463,7 +468,7 @@ describe("MeasurableStep — a11y", () => {
     );
     const input = screen.getByLabelText(/Tên chỉ số đo lường/i);
     expect(input.getAttribute("aria-describedby")).toBe("smart-metric-name-hint");
-    expect(document.getElementById("smart-metric-name-hint")?.textContent).toMatch(/tăng hay đứng yên/i);
+    expect(document.getElementById("smart-metric-name-hint")?.textContent).toMatch(/đo tiến trình mỗi tuần/i);
   });
 });
 

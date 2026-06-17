@@ -15,6 +15,9 @@ import type {
   WeeklyCapacity,
 } from "./types";
 
+export const CORE_QUESTION_IDS = QUESTIONS.filter((q) => q.tier === "core").map((q) => q.id);
+export const ADVANCED_QUESTION_IDS = QUESTIONS.filter((q) => q.tier === "advanced").map((q) => q.id);
+
 export interface BuildResultOptions {
   smartGoalQualityLevel?: SmartGoalQualityBridge;
   /**
@@ -39,15 +42,39 @@ export function buildDefaultFeasibilityAnswers(): Record<number, string> {
   return { ...DEFAULT_FEASIBILITY_ANSWERS };
 }
 
-export function getAnsweredQuestionCount(answers: Record<number, string | null | undefined>): number {
-  return QUESTIONS.filter((question) => {
+export function buildFeasibilityAnswersWithDefaults(
+  answers: Record<number, string | null | undefined> = {},
+): Record<number, string> {
+  const normalizedAnswers = buildDefaultFeasibilityAnswers();
+
+  for (const question of QUESTIONS) {
     const answer = answers[question.id];
+    const isValidAnswer =
+      typeof answer === "string" && question.options.some((choice) => choice.value === answer.trim());
+
+    if (isValidAnswer) {
+      normalizedAnswers[question.id] = answer.trim();
+    }
+  }
+
+  return normalizedAnswers;
+}
+
+export function getAnsweredQuestionCount(
+  answers: Record<number, string | null | undefined>,
+  questionIds: readonly number[] = QUESTIONS.map((question) => question.id),
+): number {
+  return questionIds.filter((questionId) => {
+    const answer = answers[questionId];
     return typeof answer === "string" && answer.trim().length > 0;
   }).length;
 }
 
-export function hasCompleteFeasibilityAnswers(answers: Record<number, string | null | undefined>): boolean {
-  return getAnsweredQuestionCount(answers) === QUESTIONS.length;
+export function hasCompleteFeasibilityAnswers(
+  answers: Record<number, string | null | undefined>,
+  requiredQuestionIds: readonly number[] = CORE_QUESTION_IDS,
+): boolean {
+  return getAnsweredQuestionCount(answers, requiredQuestionIds) === requiredQuestionIds.length;
 }
 
 function getWheelPenalty(score: number): number {
@@ -203,13 +230,14 @@ export function buildQuickPlanFeasibilityResult(
 }
 
 export function buildResult(
-  answers: Record<number, string>,
+  answers: Record<number, string | null | undefined>,
   wheelScore: number,
   options?: BuildResultOptions,
 ): ResultData {
   const goalArchetype = options?.goalArchetype;
+  const normalizedAnswers = buildFeasibilityAnswersWithDefaults(answers);
   const axisScores: AxisScore[] = QUESTIONS.map((question) => {
-    const option = getSelectedOption(answers, question);
+    const option = getSelectedOption(normalizedAnswers, question);
     return {
       axis: question.axis,
       label: question.axisLabel,
@@ -240,7 +268,7 @@ export function buildResult(
           score: weakestAxis.score,
           action: getBottleneckAction(weakestAxis.axis),
         };
-  const weeklyCapacity = getWeeklyCapacity(answers);
+  const weeklyCapacity = getWeeklyCapacity(normalizedAnswers);
   const smartGoalQualityLevel = options?.smartGoalQualityLevel;
 
   const resultType: ResultType =

@@ -1,4 +1,5 @@
 import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ import { MotionFadeIn } from "../components/motion";
 import { PageShell } from "../components/PageShell";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
+import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -27,8 +29,11 @@ import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityS
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
 import {
+  ADVANCED_QUESTION_IDS,
   buildPendingFeasibilityResult,
+  buildFeasibilityAnswersWithDefaults,
   buildResult,
+  CORE_QUESTION_IDS,
   getAnsweredQuestionCount,
   hasCompleteFeasibilityAnswers,
 } from "./FeasibilityCheck/helpers";
@@ -41,6 +46,16 @@ type FlushableDebouncedSave<T> = {
   flush: () => void;
   cancel: () => void;
 };
+
+const CORE_QUESTIONS = QUESTIONS.filter((question) => question.tier === "core");
+const ALL_QUESTION_IDS = QUESTIONS.map((question) => question.id);
+
+function hasAdvancedAnswerDraft(answers: Record<number, string | null | undefined>): boolean {
+  return ADVANCED_QUESTION_IDS.some((questionId) => {
+    const answer = answers[questionId];
+    return typeof answer === "string" && answer.trim().length > 0;
+  });
+}
 
 function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: number): FlushableDebouncedSave<T> {
   let timer: number | null = null;
@@ -84,6 +99,7 @@ export function FeasibilityCheck() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
   const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+  const [showAdvancedQuestions, setShowAdvancedQuestions] = useState(false);
   const [focusArea, setFocusArea] = useState<string>("");
   const [wheelScore, setWheelScore] = useState<number | null>(null);
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
@@ -187,6 +203,7 @@ export function FeasibilityCheck() {
           if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
             const restoredAnswers = parsed as Record<number, string>;
             setAnswers(restoredAnswers);
+            setShowAdvancedQuestions(hasAdvancedAnswerDraft(restoredAnswers));
             setLastSavedSnapshot(JSON.stringify(restoredAnswers));
             setLastSavedAt(new Date());
           }
@@ -264,6 +281,13 @@ export function FeasibilityCheck() {
   }, [answeredCount, currentAnswersSnapshot, isDirty, setupState]);
 
   useDirtyFormGuard(isDirty, () => debouncedSaveRef.current?.flush());
+
+  const activeQuestions = showAdvancedQuestions ? QUESTIONS : CORE_QUESTIONS;
+
+  useEffect(() => {
+    if (currentStep < activeQuestions.length) return;
+    setCurrentStep(Math.max(activeQuestions.length - 1, 0));
+  }, [activeQuestions.length, currentStep]);
 
   useScrollToTopOnChange(currentStep, {
     targetRef: questionTopRef,
@@ -350,10 +374,12 @@ export function FeasibilityCheck() {
     );
   }
 
-  const currentQuestion = QUESTIONS[currentStep];
-  const totalSteps = QUESTIONS.length;
+  const currentQuestion = activeQuestions[currentStep] ?? activeQuestions[0] ?? QUESTIONS[0];
+  const totalSteps = activeQuestions.length;
   const selectedAnswer = answers[currentQuestion.id];
-  const answeredQuestionCount = getAnsweredQuestionCount(answers);
+  const activeQuestionIds = activeQuestions.map((question) => question.id);
+  const requiredQuestionIds = showAdvancedQuestions ? ALL_QUESTION_IDS : CORE_QUESTION_IDS;
+  const answeredQuestionCount = getAnsweredQuestionCount(answers, activeQuestionIds);
 
   const handleAnswerChange = (value: string) => {
     setAnswers((currentAnswers) => ({ ...currentAnswers, [currentQuestion.id]: value }));
@@ -373,12 +399,14 @@ export function FeasibilityCheck() {
       return;
     }
 
-    if (!hasCompleteFeasibilityAnswers(answers)) {
+    if (!hasCompleteFeasibilityAnswers(answers, requiredQuestionIds)) {
       return;
     }
 
+    const completedAnswers = buildFeasibilityAnswersWithDefaults(answers);
+    setAnswers(completedAnswers);
     setResult(
-      buildResult(answers, wheelScore, {
+      buildResult(completedAnswers, wheelScore, {
         smartGoalQualityLevel: smartGoalQualityLevelRef.current,
         goalArchetype: goalArchetypeRef.current,
       }),
@@ -389,8 +417,9 @@ export function FeasibilityCheck() {
     if (!result) return;
 
     const pendingFeasibilityResult: PendingFeasibilityResult = buildPendingFeasibilityResult(result);
+    const finalAnswers = buildFeasibilityAnswersWithDefaults(answers);
 
-    const finalAnswersSnapshot = JSON.stringify(answers);
+    const finalAnswersSnapshot = JSON.stringify(finalAnswers);
     debouncedSaveRef.current?.cancel();
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, finalAnswersSnapshot);
@@ -405,7 +434,7 @@ export function FeasibilityCheck() {
       bottleneck_axis: result.bottleneck.axis,
       plan_load: result.planLoad,
       weekly_capacity: result.weeklyCapacity,
-      answer_count: Object.keys(answers).length,
+      answer_count: requiredQuestionIds.length,
     });
 
     toast.success("Đã kiểm tra tính thực tế", {
@@ -425,6 +454,7 @@ export function FeasibilityCheck() {
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
           const restoredAnswers = parsed as Record<number, string>;
           setAnswers(restoredAnswers);
+          setShowAdvancedQuestions(hasAdvancedAnswerDraft(restoredAnswers));
           setLastSavedSnapshot(backupAnswers);
           setLastSavedAt(new Date());
           localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, backupAnswers);
@@ -482,7 +512,18 @@ export function FeasibilityCheck() {
     navigate("/smart-goal-setup");
   };
 
+  const handleAdvancedToggle = () => {
+    const currentQuestionId = currentQuestion.id;
+    const nextShowAdvanced = !showAdvancedQuestions;
+    const nextQuestions = nextShowAdvanced ? QUESTIONS : CORE_QUESTIONS;
+    const nextStep = nextQuestions.findIndex((question) => question.id === currentQuestionId);
+
+    setShowAdvancedQuestions(nextShowAdvanced);
+    setCurrentStep(nextStep >= 0 ? nextStep : Math.min(currentStep, nextQuestions.length - 1));
+  };
+
   const autoSave = <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />;
+  const resultAnswers = buildFeasibilityAnswersWithDefaults(answers);
 
   if (result) {
     return (
@@ -500,7 +541,7 @@ export function FeasibilityCheck() {
             pendingGoal={pendingGoal}
             onContinue={handleContinueToPlan}
             onAdjustGoal={handleAdjustGoal}
-            answers={answers}
+            answers={resultAnswers}
           />
         </div>
       </PageShell>
@@ -594,6 +635,47 @@ export function FeasibilityCheck() {
         <div className="mt-8 flex flex-col gap-6 md:grid md:grid-cols-12 md:items-start md:gap-8">
           {/* Cột trái chứa câu hỏi khảo sát */}
           <div className="order-1 md:col-span-7 w-full">
+            <div className="mb-4 rounded-card border border-app-line bg-app-surface/70 p-4 shadow-app-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                    Mặc định 3 câu cốt lõi
+                  </p>
+                  <p className="text-sm leading-6 text-app-ink-soft">
+                    Time, Energy và Confidence là đủ để tạo kết quả khả thi. Mở phần nâng cao nếu bạn muốn tinh chỉnh thêm
+                    Clarity, Obstacle, Routine và Resources.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAdvancedToggle}
+                  aria-expanded={showAdvancedQuestions}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                >
+                  <SlidersHorizontal className="h-4 w-4 text-app-accent" aria-hidden="true" />
+                  {showAdvancedQuestions ? "Ẩn nâng cao" : "Mở nâng cao"}
+                  <ChevronDown
+                    className={cn("h-4 w-4 text-app-ink-muted transition-transform", showAdvancedQuestions && "rotate-180")}
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                <span className="rounded-pill bg-app-accent-soft px-3 py-1 text-app-accent">
+                  {CORE_QUESTION_IDS.length} câu cốt lõi
+                </span>
+                <span
+                  className={cn(
+                    "rounded-pill border px-3 py-1",
+                    showAdvancedQuestions
+                      ? "border-app-accent/25 bg-app-accent-soft text-app-accent"
+                      : "border-app-line bg-app-bg-subtle text-app-ink-muted",
+                  )}
+                >
+                  {ADVANCED_QUESTION_IDS.length} câu nâng cao tùy chọn
+                </span>
+              </div>
+            </div>
             <FeasibilityStepShell
               currentQuestion={currentQuestion}
               currentStep={currentStep}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { QUESTIONS } from "./constants";
 import {
+  buildFeasibilityAnswersWithDefaults,
   buildDefaultFeasibilityAnswers,
   buildQuickPlanFeasibilityResult,
   buildResult,
@@ -135,16 +136,38 @@ describe("high capacity + clear goal", () => {
 });
 
 describe("feasibility answer completion validation", () => {
-  it("requires every question to have a non-null answer", () => {
+  it("requires only the three core questions by default and can still validate the full seven-question path", () => {
+    const coreOnlyAnswers: AnswerMap = {
+      1: "3to5",
+      2: "energy_stable",
+      7: "ready",
+    };
+    const missingCoreAnswer = { ...coreOnlyAnswers };
+    delete missingCoreAnswer[1];
     const completeAnswers = highCapacityClearGoal();
-    const missingAnswers = { ...completeAnswers };
-    delete missingAnswers[QUESTIONS[0].id];
-    const nullAnswers = { ...completeAnswers, [QUESTIONS[1].id]: null };
+    const fullQuestionIds = QUESTIONS.map((question) => question.id);
 
-    expect(getAnsweredQuestionCount(completeAnswers)).toBe(QUESTIONS.length);
-    expect(hasCompleteFeasibilityAnswers(completeAnswers)).toBe(true);
-    expect(hasCompleteFeasibilityAnswers(missingAnswers)).toBe(false);
-    expect(hasCompleteFeasibilityAnswers(nullAnswers)).toBe(false);
+    expect(getAnsweredQuestionCount(coreOnlyAnswers)).toBe(3);
+    expect(getAnsweredQuestionCount(coreOnlyAnswers, fullQuestionIds)).toBe(3);
+    expect(hasCompleteFeasibilityAnswers(coreOnlyAnswers)).toBe(true);
+    expect(hasCompleteFeasibilityAnswers(missingCoreAnswer)).toBe(false);
+    expect(hasCompleteFeasibilityAnswers(completeAnswers, fullQuestionIds)).toBe(true);
+    expect(hasCompleteFeasibilityAnswers({ ...completeAnswers, [QUESTIONS[1].id]: null }, fullQuestionIds)).toBe(false);
+  });
+});
+
+describe("default answer normalization", () => {
+  it("fills missing advanced answers with the neutral defaults while preserving core answers", () => {
+    const normalized = buildFeasibilityAnswersWithDefaults({
+      1: "gt5",
+      2: "energy_high",
+      7: "committed",
+    });
+
+    expect(normalized[1]).toBe("gt5");
+    expect(normalized[2]).toBe("energy_high");
+    expect(normalized[7]).toBe("committed");
+    expect(QUESTIONS.every((question) => typeof normalized[question.id] === "string")).toBe(true);
   });
 });
 
@@ -465,6 +488,35 @@ describe("result structure", () => {
     const result = buildResult(highCapacityClearGoal(), 8);
     expect(result.readinessScore).toBeGreaterThanOrEqual(0);
     expect(result.readinessScore).toBeLessThanOrEqual(20);
+  });
+});
+
+describe("partial answer scoring", () => {
+  it("produces a finite 7-axis result when only the core questions are answered", () => {
+    const result = buildResult(
+      {
+        1: "3to5",
+        2: "energy_stable",
+        7: "ready",
+      },
+      6,
+    );
+
+    expect(result.axisScores).toHaveLength(7);
+    expect(result.maxDiagnosticScore).toBe(28);
+    expect(Number.isFinite(result.diagnosticScore)).toBe(true);
+    expect(Number.isFinite(result.readinessScore)).toBe(true);
+    expect(Number.isFinite(result.adjustedScore)).toBe(true);
+    expect(result.axisScores.every((axis) => Number.isFinite(axis.score) && Number.isFinite(axis.percent))).toBe(true);
+  });
+
+  it("still scores correctly when all 7 answers are present", () => {
+    const result = buildResult(highCapacityClearGoal(), 8);
+
+    expect(result.axisScores).toHaveLength(7);
+    expect(result.maxDiagnosticScore).toBe(28);
+    expect(result.diagnosticScore).toBeGreaterThan(0);
+    expect(result.adjustedScore).toBeGreaterThanOrEqual(0);
   });
 });
 

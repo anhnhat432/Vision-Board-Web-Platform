@@ -2,12 +2,15 @@ export type FeasibilityAxis = "time" | "energy" | "resources" | "clarity" | "obs
 export type PlanLoadRecommendation = "lighter" | "balanced" | "push";
 export type WeeklyCapacity = "low" | "medium" | "high";
 
+export type QuestionTier = "core" | "advanced";
+
 export interface Question {
   id: number;
   axis: FeasibilityAxis;
   axisLabel: string;
   question: string;
   helper: string;
+  tier: QuestionTier;
   options: {
     value: string;
     label: string;

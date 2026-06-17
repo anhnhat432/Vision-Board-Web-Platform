@@ -108,6 +108,35 @@ function seedStaleGoalDrafts() {
   );
 }
 
+function seedReadyFeasibilityFlow() {
+  seedRealLifeBalanceWithoutInsight();
+  localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
+  localStorage.setItem(
+    APP_STORAGE_KEYS.pendingSmartGoal,
+    JSON.stringify({
+      focusArea: "Career",
+      specific: {
+        goal_statement: "Ra mắt hệ thống review cá nhân giúp tôi giữ nhịp thực thi mỗi tuần.",
+      },
+      measurable: {
+        metric_name: "tuần review",
+        target_value: 12,
+      },
+      achievable: {
+        weekly_time_commitment_hours: 4,
+        required_skills: [],
+        support_resources: [],
+      },
+      relevant: {
+        motivation_reason: "Giữ nhịp thực thi dài hạn.",
+      },
+      time_bound: {
+        target_weeks: 12,
+      },
+    }),
+  );
+}
+
 describe("core funnel guards", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -186,5 +215,43 @@ describe("core funnel guards", () => {
     });
     expect(savedResult.axisScores).toHaveLength(7);
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers)).toBeTruthy();
+  });
+
+  it("completes Feasibility with the 3 default core questions and saves a 7-answer compatible payload", async () => {
+    seedReadyFeasibilityFlow();
+    const user = userEvent.setup();
+    const { router } = renderCoreFunnel("/feasibility");
+
+    expect(await screen.findByText(/Mặc định 3 câu cốt lõi/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Mở nâng cao/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText(/^3\s+câu cốt lõi$/i)).toBeInTheDocument();
+
+    await screen.findByRole("heading", { name: /Mỗi tuần bạn có mấy giờ/i });
+    await user.click(screen.getByLabelText(/Từ 3-5 giờ/i));
+    await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+
+    await screen.findByRole("heading", { name: /Năng lượng còn lại/i });
+    await user.click(screen.getByLabelText(/Đủ dùng/i));
+    await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+
+    await screen.findByRole("heading", { name: /Độ tự tin hoàn thành/i });
+    await user.click(screen.getByRole("radio", { name: /Tự tin \(nếu tuần đầu vừa sức\)/i }));
+    await user.click(screen.getByRole("button", { name: "Xem phân tích khả thi" }));
+
+    expect(await screen.findByText(/Kết quả đánh giá khả thi/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Bắt đầu lập Kế hoạch 12 tuần/i }));
+
+    expect(router.state.location.pathname).toBe("/12-week-setup");
+    const savedResult = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult) ?? "{}");
+    const savedAnswers = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers) ?? "{}");
+
+    expect(savedResult.maxDiagnosticScore).toBe(28);
+    expect(savedResult.axisScores).toHaveLength(7);
+    expect(Object.keys(savedAnswers)).toHaveLength(7);
+    expect(savedAnswers).toMatchObject({
+      "1": "3to5",
+      "2": "energy_stable",
+      "7": "ready",
+    });
   });
 });
