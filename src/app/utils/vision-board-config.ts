@@ -1,4 +1,4 @@
-import type { VisionBoardItemStyle, VisionBoardSizePreset, VisionBoardThemeId } from "./storage-types";
+import type { VisionBoardItemStyle, VisionBoardSizePreset, VisionBoardStickerId, VisionBoardThemeId } from "./storage-types";
 
 export interface VisionBoardTheme {
   id: VisionBoardThemeId;
@@ -83,6 +83,34 @@ export const VISION_BOARD_THEMES: VisionBoardTheme[] = [
       gradient: "linear-gradient(135deg, #faf7ed 0%, #f1f5f9 58%, #e5e7eb 100%)",
     },
   },
+  {
+    id: "blossom",
+    label: "Hoa nở",
+    description: "Pastel dịu nhẹ, thêm hoa lá cho board mộng mơ.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(252, 231, 243, 0.95), rgba(245, 243, 255, 0.92), rgba(236, 250, 245, 0.95))",
+    gridColor: "rgba(219, 112, 147, 0.1)",
+    accentZone: "rgba(236, 72, 153, 0.06)",
+    textColor: "#4a1942",
+    defaultQuoteFont: "handwriting",
+    preview: {
+      gradient: "linear-gradient(135deg, #fce7f3 0%, #f5f3ff 50%, #ecfaf5 100%)",
+    },
+  },
+  {
+    id: "dreamscape",
+    label: "Mộng mơ",
+    description: "Gradient tím hồng nhẹ, bầu trời dreamy.",
+    canvasBackground:
+      "linear-gradient(160deg, rgba(243, 232, 255, 0.95), rgba(252, 211, 235, 0.88), rgba(255, 237, 213, 0.9))",
+    gridColor: "rgba(168, 85, 247, 0.08)",
+    accentZone: "rgba(192, 132, 252, 0.06)",
+    textColor: "#3b0764",
+    defaultQuoteFont: "serif",
+    preview: {
+      gradient: "linear-gradient(160deg, #f3e8ff 0%, #fcd3eb 50%, #ffedd5 100%)",
+    },
+  },
 ];
 
 export interface QuoteFontStyle {
@@ -122,7 +150,7 @@ export interface ImageFrameStyle {
   label: string;
   wrapperClassName: string;
   imageClassName: string;
-  decorationsLayout?: "polaroid" | "washi" | null;
+  decorationsLayout?: "polaroid" | "washi" | "scalloped" | "filmstrip" | "watercolor" | null;
 }
 
 export const IMAGE_FRAME_STYLES: ImageFrameStyle[] = [
@@ -154,6 +182,57 @@ export const IMAGE_FRAME_STYLES: ImageFrameStyle[] = [
     imageClassName: "rounded-md object-cover",
     decorationsLayout: null,
   },
+  {
+    id: "scalloped",
+    label: "Lượn sóng",
+    wrapperClassName: "rounded-[2rem] border-4 border-dashed border-rose-200/80 bg-white/90 p-2.5 shadow-md",
+    imageClassName: "rounded-2xl object-cover",
+    decorationsLayout: "scalloped",
+  },
+  {
+    id: "filmstrip",
+    label: "Phim nhựa",
+    wrapperClassName: "rounded-sm bg-neutral-800 border border-neutral-700 p-2 shadow-lg",
+    imageClassName: "rounded-[1px] object-cover",
+    decorationsLayout: "filmstrip",
+  },
+  {
+    id: "watercolor",
+    label: "Watercolor",
+    wrapperClassName: "rounded-xl border border-amber-200/60 p-2 shadow-md",
+    imageClassName: "rounded-lg object-cover",
+    decorationsLayout: "watercolor",
+  },
+];
+
+export interface StickerDefinition {
+  id: VisionBoardStickerId;
+  label: string;
+  defaultWidth: number;
+}
+
+export const STICKER_DEFS: StickerDefinition[] = [
+  { id: "flower-pink", label: "Hoa hồng", defaultWidth: 80 },
+  { id: "flower-white", label: "Hoa trắng", defaultWidth: 80 },
+  { id: "leaf-green", label: "Lá xanh", defaultWidth: 72 },
+  { id: "leaf-gold", label: "Lá vàng", defaultWidth: 72 },
+  { id: "star-gold", label: "Sao vàng", defaultWidth: 64 },
+  { id: "star-silver", label: "Sao bạc", defaultWidth: 64 },
+  { id: "heart-pink", label: "Tim hồng", defaultWidth: 64 },
+  { id: "heart-red", label: "Tim đỏ", defaultWidth: 64 },
+  { id: "ribbon-pink", label: "Ruy băng", defaultWidth: 100 },
+  { id: "confetti", label: "Confetti", defaultWidth: 120 },
+];
+
+export interface QuoteBackgroundPreset {
+  id: NonNullable<VisionBoardItemStyle["quoteBackground"]>;
+  label: string;
+}
+
+export const QUOTE_BACKGROUNDS: QuoteBackgroundPreset[] = [
+  { id: "none", label: "Mặc định" },
+  { id: "dots", label: "Chấm bi" },
+  { id: "highlight", label: "Gạch chân nổi bật" },
 ];
 
 export const SIZE_PRESETS: Record<VisionBoardSizePreset, { width: number; label: string }> = {

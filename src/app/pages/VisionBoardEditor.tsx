@@ -11,6 +11,7 @@ import {
   Plus,
   Save,
   Sparkles,
+  Sticker,
   Star,
   Sun,
   Target,
@@ -30,6 +31,8 @@ import {
   updateVisionBoard as backendUpdateVisionBoard,
 } from "@/services/visionBoardService";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -48,6 +51,7 @@ import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Textarea } from "../components/ui/textarea";
 import { ItemControlsPopover } from "../components/visionBoard/ItemControlsPopover";
+import { StickerSVG } from "../components/visionBoard/StickerSVGs";
 import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
 import { VisionBoardSidebar } from "../components/visionBoard/VisionBoardSidebar";
 import { type VisionBoardStorySeed, VisionBoardStoryWizard } from "../components/visionBoard/VisionBoardStoryWizard";
@@ -68,8 +72,16 @@ import {
   type VisionBoardItem,
   type VisionBoardThemeId,
 } from "../utils/storage";
+import type { VisionBoardStickerId } from "../utils/storage-types";
 import { LIFE_AREA_LABELS, LIFE_AREAS } from "../utils/storage-constants";
-import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS, VISION_BOARD_THEMES } from "../utils/vision-board-config";
+import {
+  IMAGE_FRAME_STYLES,
+  QUOTE_BACKGROUNDS,
+  QUOTE_FONT_STYLES,
+  SIZE_PRESETS,
+  STICKER_DEFS,
+  VISION_BOARD_THEMES,
+} from "../utils/vision-board-config";
 import {
   downloadDataUrl,
   EXPORT_RATIOS,
@@ -95,6 +107,7 @@ type VisionBoardItemStyle = NonNullable<VisionBoardItem["style"]>;
 type ImageFrameId = NonNullable<VisionBoardItemStyle["imageFrame"]>;
 type QuoteFontId = NonNullable<VisionBoardItemStyle["quoteFont"]>;
 type IconSizePreset = NonNullable<VisionBoardItemStyle["sizePreset"]>;
+type QuoteBackgroundId = NonNullable<VisionBoardItemStyle["quoteBackground"]>;
 
 const ICON_OPTIONS = Object.keys(ICON_COMPONENTS) as IconName[];
 const IMAGE_SUGGESTIONS = ["không gian làm việc đẹp", "buổi sáng khỏe mạnh", "du lịch tự do", "ngôi nhà mơ ước"];
@@ -239,6 +252,8 @@ export function VisionBoardEditor() {
   const [selectedImageFrame, setSelectedImageFrame] = useState<ImageFrameId>("shadow");
   const [selectedQuoteFont, setSelectedQuoteFont] = useState<QuoteFontId>("default");
   const [selectedIconSize, setSelectedIconSize] = useState<IconSizePreset>("M");
+  const [selectedStickerId, setSelectedStickerId] = useState<VisionBoardStickerId>("flower-pink");
+  const [selectedQuoteBg, setSelectedQuoteBg] = useState<QuoteBackgroundId>("none");
   const [isSearching, setIsSearching] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isVisionBoardLimitPaywallOpen, setIsVisionBoardLimitPaywallOpen] = useState(false);
@@ -518,7 +533,7 @@ export function VisionBoardEditor() {
       width: SIZE_PRESETS.L.width,
       height: 120,
       lifeAreaId: selectedLifeArea ?? undefined,
-      style: { sizePreset: "L", quoteFont: selectedQuoteFont },
+      style: { sizePreset: "L", quoteFont: selectedQuoteFont, quoteBackground: selectedQuoteBg },
     };
 
     setBoard({ ...board, items: [...board.items, newItem] });
@@ -563,6 +578,27 @@ export function VisionBoardEditor() {
       id: `item_${Date.now()}`,
       type: "icon",
       content: iconName,
+      x: 16 + ((board.items.length * 5) % 50),
+      y: 16 + ((board.items.length * 4) % 42),
+      width: iconWidth,
+      height: iconWidth,
+      style: { sizePreset: selectedIconSize },
+    };
+
+    setBoard({ ...board, items: [...board.items, newItem] });
+    setIsAddingItem(false);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleAddSticker = () => {
+    if (!board) return;
+
+    const stickerDef = STICKER_DEFS.find((s) => s.id === selectedStickerId);
+    const iconWidth = SIZE_PRESETS[selectedIconSize].width;
+    const newItem: VisionBoardItem = {
+      id: `item_${Date.now()}`,
+      type: "sticker",
+      content: selectedStickerId,
       x: 16 + ((board.items.length * 5) % 50),
       y: 16 + ((board.items.length * 4) % 42),
       width: iconWidth,
@@ -671,6 +707,7 @@ export function VisionBoardEditor() {
 
   return (
     <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <ScreenGuide {...SCREEN_GUIDES.visionBoardEditor} autoOpen className="mb-4" />
       <UpgradePaywallDialog
         open={isVisionBoardLimitPaywallOpen}
         onOpenChange={setIsVisionBoardLimitPaywallOpen}
@@ -1003,6 +1040,10 @@ export function VisionBoardEditor() {
                 <Target className="h-4 w-4" />
                 Mục tiêu
               </TabsTrigger>
+              <TabsTrigger value="sticker">
+                <Sticker className="h-4 w-4" />
+                Sticker
+              </TabsTrigger>
               <TabsTrigger value="icon">
                 <Sparkles className="h-4 w-4" />
                 Biểu tượng
@@ -1200,8 +1241,76 @@ export function VisionBoardEditor() {
                   ))}
                 </div>
               </div>
+              <div className="stack-tight">
+                <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
+                  <Palette className="h-4 w-4" />
+                  Nền câu nói
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {QUOTE_BACKGROUNDS.map((bg) => (
+                    <button
+                      key={bg.id}
+                      type="button"
+                      onClick={() => setSelectedQuoteBg(bg.id)}
+                      className={`rounded-md border px-3 py-1.5 text-xs font-medium transition ${
+                        selectedQuoteBg === bg.id
+                          ? "border-app-accent bg-app-accent-soft text-app-accent"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
+                      }`}
+                    >
+                      {bg.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <Button className="w-full" onClick={handleAddQuote} disabled={!quoteText.trim()}>
                 Thêm câu nói vào bảng
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="sticker" className="stack-stack pt-4">
+              <p className="text-sm text-app-ink-soft">Chọn sticker để trang trí bảng tầm nhìn.</p>
+              <div className="grid max-h-56 grid-cols-5 gap-3 overflow-y-auto sm:grid-cols-5">
+                {STICKER_DEFS.map((sticker) => {
+                  const isActive = selectedStickerId === sticker.id;
+                  return (
+                    <button
+                      key={sticker.id}
+                      type="button"
+                      onClick={() => setSelectedStickerId(sticker.id)}
+                      className={`flex flex-col items-center gap-1 rounded-xl border p-3 transition-colors duration-150 ${
+                        isActive
+                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
+                          : "border-app-line bg-app-surface hover:border-app-accent/50"
+                      }`}
+                    >
+                      <StickerSVG id={sticker.id} className="h-10 w-10" />
+                      <span className="mt-1 text-[10px] leading-tight text-app-ink-muted">{sticker.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="stack-tight">
+                <span className="text-sm font-semibold text-app-ink">Kích thước</span>
+                <div className="flex gap-2">
+                  {(["S", "M", "L", "XL"] as const).map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setSelectedIconSize(size)}
+                      className={`flex-1 rounded-md border px-3 py-2 text-sm ${
+                        selectedIconSize === size
+                          ? "border-app-accent bg-app-accent-soft text-app-accent"
+                          : "border-app-line bg-app-surface text-app-ink-soft"
+                      }`}
+                    >
+                      {SIZE_PRESETS[size].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleAddSticker}>
+                Thêm sticker vào bảng
               </Button>
             </TabsContent>
 
