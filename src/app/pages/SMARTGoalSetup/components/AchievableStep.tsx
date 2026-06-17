@@ -328,8 +328,8 @@ export function AchievableStep({
         </div>
 
         <p className={helperTextClass}>
-          Ví dụ: <span className="font-medium text-app-ink">"Đọc tài liệu tiếng Anh, Lập trình React cơ bản"</span>.
-          Giúp xác định xem bạn có cần dành thời gian học thêm kỹ năng mới hay không.
+          Định dạng: liệt kê các kỹ năng, cách nhau bằng dấu phẩy. Ví dụ:{" "}
+          <span className="font-medium text-app-ink">"Đọc tài liệu tiếng Anh, Lập trình React cơ bản"</span>.
         </p>
       </div>
 
@@ -451,8 +451,8 @@ export function AchievableStep({
         </div>
 
         <p className={helperTextClass}>
-          Ví dụ: <span className="font-medium text-app-ink">"Tài khoản học Udemy, Sách hướng dẫn, Bạn học cùng"</span>.
-          Đảm bảo bạn có đủ công cụ hỗ trợ để không bị tắc nghẽn khi bắt đầu.
+          Định dạng: liệt kê nguồn lực hoặc công cụ, cách nhau bằng dấu phẩy. Ví dụ:{" "}
+          <span className="font-medium text-app-ink">"Tài khoản học Udemy, Sách hướng dẫn, Bạn học cùng"</span>.
         </p>
       </div>
 

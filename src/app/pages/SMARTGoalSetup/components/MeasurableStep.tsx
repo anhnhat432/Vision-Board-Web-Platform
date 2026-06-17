@@ -108,11 +108,16 @@ export function MeasurableStep({
     .filter(Boolean)
     .join(" ");
   const targetDescribedBy = [
+    "smart-target-hint",
     targetNotAboveBaseline ? "smart-target-error" : null,
     showTargetError && !targetNotAboveBaseline ? "smart-target-required-error" : null,
   ]
     .filter(Boolean)
     .join(" ");
+  const baselineDescribedBy = ["smart-baseline-hint", baselineInvalid ? "smart-baseline-error" : null]
+    .filter(Boolean)
+    .join(" ");
+  const activeMetricUnit = metricUnitInput.trim();
 
   return (
     <div className="space-y-4">
@@ -396,26 +401,36 @@ export function MeasurableStep({
           <label htmlFor="smart-baseline" className={labelClass}>
             Mức xuất phát (Tùy chọn)
           </label>
-          <Input
-            id="smart-baseline"
-            type="number"
-            inputMode="decimal"
-            step="any"
-            placeholder="Ví dụ: 0, 5.5, 60..."
-            value={smartData.measurable.baseline_value}
-            onChange={(event) =>
-              setSmartData((previous) => ({
-                ...previous,
-                measurable: {
-                  ...previous.measurable,
-                  baseline_value: event.target.value,
-                },
-              }))
-            }
-            className={inputClass}
-            aria-invalid={baselineInvalid}
-            aria-describedby={baselineInvalid ? "smart-baseline-error" : undefined}
-          />
+          <div className="relative">
+            <Input
+              id="smart-baseline"
+              type="number"
+              inputMode="decimal"
+              step="any"
+              placeholder="Ví dụ: 0, 5.5, 60..."
+              value={smartData.measurable.baseline_value}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  measurable: {
+                    ...previous.measurable,
+                    baseline_value: event.target.value,
+                  },
+                }))
+              }
+              className={cn(inputClass, activeMetricUnit ? "pr-20 sm:pr-24" : undefined)}
+              aria-invalid={baselineInvalid}
+              aria-describedby={baselineDescribedBy}
+            />
+            {activeMetricUnit ? (
+              <span className="pointer-events-none absolute right-1 top-1/2 max-w-[6.5rem] -translate-y-1/2 truncate rounded-full bg-app-bg-subtle px-2 py-0.5 text-[11px] font-semibold text-app-ink-muted">
+                {activeMetricUnit}
+              </span>
+            ) : null}
+          </div>
+          <p id="smart-baseline-hint" className={helperTextClass}>
+            Giá trị hiện tại của bạn; chưa có thì để trống.
+          </p>
           {baselineInvalid ? <FieldError id="smart-baseline-error" message="Nhập con số hợp lệ." /> : null}
         </div>
         <div>
@@ -425,27 +440,37 @@ export function MeasurableStep({
               *
             </span>
           </label>
-          <Input
-            id="smart-target"
-            type="number"
-            inputMode="decimal"
-            step="any"
-            placeholder="Ví dụ: 3, 7.0, 75..."
-            value={smartData.measurable.target_value}
-            onChange={(event) =>
-              setSmartData((previous) => ({
-                ...previous,
-                measurable: {
-                  ...previous.measurable,
-                  target_value: event.target.value,
-                },
-              }))
-            }
-            onBlur={() => setBlurredFields((previous) => ({ ...previous, targetValue: true }))}
-            className={inputClass}
-            aria-invalid={showTargetError}
-            aria-describedby={targetDescribedBy || undefined}
-          />
+          <div className="relative">
+            <Input
+              id="smart-target"
+              type="number"
+              inputMode="decimal"
+              step="any"
+              placeholder="Ví dụ: 3, 7.0, 75..."
+              value={smartData.measurable.target_value}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  measurable: {
+                    ...previous.measurable,
+                    target_value: event.target.value,
+                  },
+                }))
+              }
+              onBlur={() => setBlurredFields((previous) => ({ ...previous, targetValue: true }))}
+              className={cn(inputClass, activeMetricUnit ? "pr-20 sm:pr-24" : undefined)}
+              aria-invalid={showTargetError}
+              aria-describedby={targetDescribedBy}
+            />
+            {activeMetricUnit ? (
+              <span className="pointer-events-none absolute right-1 top-1/2 max-w-[6.5rem] -translate-y-1/2 truncate rounded-full bg-app-bg-subtle px-2 py-0.5 text-[11px] font-semibold text-app-ink-muted">
+                {activeMetricUnit}
+              </span>
+            ) : null}
+          </div>
+          <p id="smart-target-hint" className={helperTextClass}>
+            Phải cao hơn mức xuất phát để thể hiện tiến bộ.
+          </p>
           {targetNotAboveBaseline ? (
             <FieldError id="smart-target-error" message="Mục tiêu cần lớn hơn mốc hiện tại" role="alert" />
           ) : null}
@@ -454,7 +479,6 @@ export function MeasurableStep({
           ) : null}
         </div>
       </div>
-      <p className={helperTextClass}>Mục tiêu phải lớn hơn mức xuất phát để thể hiện sự tiến bộ.</p>
 
       {(() => {
         const hasBaseline = smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue !== undefined;
