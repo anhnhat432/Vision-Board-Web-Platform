@@ -328,7 +328,7 @@ export interface SyncOutboxItem {
   failedAt?: string;
 }
 
-export type PricingPlanCode = "FREE" | "PLUS";
+export type PricingPlanCode = "FREE" | "PLUS" | "PRO";
 
 export type SubscriptionStatus =
   | "inactive"
