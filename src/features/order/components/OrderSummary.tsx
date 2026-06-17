@@ -63,7 +63,13 @@ export function OrderSummary({
             {selectedThemes.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {selectedThemes.map((theme) => (
-                  <CatalogThumbnail key={theme.itemId} item={theme} className="aspect-square w-full" compact showLabel />
+                  <CatalogThumbnail
+                    key={theme.itemId}
+                    item={theme}
+                    className="aspect-square w-full"
+                    compact
+                    showLabel
+                  />
                 ))}
               </div>
             )}

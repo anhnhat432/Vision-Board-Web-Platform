@@ -10,6 +10,7 @@ const PRODUCT_LINKS: ProductLink[] = [
   { label: "Tính năng", to: "/#features" },
   { label: "Gói & thanh toán", to: "/billing/plan" },
   { label: "Hỏi đáp thanh toán", to: "/billing/faq" },
+  { label: "Trung tâm trợ giúp", to: "/help" },
 ];
 
 const COMPANY_LINKS: CompanyLink[] = [

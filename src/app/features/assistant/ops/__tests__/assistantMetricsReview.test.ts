@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AssistantGoldenExample } from "../../assistantFeedback";
 import type { AssistantEvent, AssistantEventType } from "../../assistantObservability";
-import {
-  buildAssistantReviewReport,
-  formatAssistantReviewReport,
-} from "../assistantMetricsReview";
+import { buildAssistantReviewReport, formatAssistantReviewReport } from "../assistantMetricsReview";
 
 const WINDOW = { fromIso: "2026-06-01T00:00:00.000Z", toIso: "2026-06-08T00:00:00.000Z" };
 const IN_WINDOW = "2026-06-03T10:00:00.000Z";

@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
 import { getUserData, saveUserData } from "../utils/storage";
@@ -123,6 +125,8 @@ export function AspirationalVision() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <ScreenGuide {...SCREEN_GUIDES.aspirationalVision} autoOpen />
+
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">TẦM NHÌN</p>
         <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">

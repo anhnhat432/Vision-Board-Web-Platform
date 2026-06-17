@@ -39,8 +39,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-const PROPERTY_TAG =
-  "Feature: ux-ui-upgrade, Property 5: Máy trạng thái màn hình — loại trừ lẫn nhau và retry";
+const PROPERTY_TAG = "Feature: ux-ui-upgrade, Property 5: Máy trạng thái màn hình — loại trừ lẫn nhau và retry";
 
 // ─────────────────────────────────────────────────────────────
 // Domain types — phản chiếu chính xác `ScreenDataState` từ design.md

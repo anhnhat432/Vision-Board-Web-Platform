@@ -1,0 +1,78 @@
+[
+  {
+    "viewport": "mobile-375",
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "metrics": {
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "ul",
+          "text": "Mục tiêu rõLộ trình có hướngDữ liệu an toàn",
+          "left": 16,
+          "right": 441,
+          "width": 425,
+          "className": "flex gap-2 w-max"
+        },
+        {
+          "tag": "li",
+          "text": "Dữ liệu an toàn",
+          "left": 303,
+          "right": 441,
+          "width": 138,
+          "className": "inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
+        }
+      ]
+    },
+    "consoleCount": 0,
+    "pageErrorCount": 0,
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-login-overflow-375.png"
+  },
+  {
+    "viewport": "mobile-412",
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "metrics": {
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "ul",
+          "text": "Mục tiêu rõLộ trình có hướngDữ liệu an toàn",
+          "left": 16,
+          "right": 441,
+          "width": 425,
+          "className": "flex gap-2 w-max"
+        },
+        {
+          "tag": "li",
+          "text": "Dữ liệu an toàn",
+          "left": 303,
+          "right": 441,
+          "width": 138,
+          "className": "inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
+        }
+      ]
+    },
+    "consoleCount": 0,
+    "pageErrorCount": 0,
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-login-overflow-412.png"
+  },
+  {
+    "viewport": "tablet-768",
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "metrics": {
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": []
+    },
+    "consoleCount": 0,
+    "pageErrorCount": 0,
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-login-overflow-768.png"
+  }
+]

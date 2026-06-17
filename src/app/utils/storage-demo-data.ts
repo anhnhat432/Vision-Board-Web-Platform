@@ -447,7 +447,7 @@ export function createDemoUserData({
         {
           id: "board_item_1",
           type: "image",
-          content: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80",
+          content: "/curated/vision-board/career-goc-lam-viec.webp",
           x: 10,
           y: 12,
           width: 220,
@@ -456,7 +456,7 @@ export function createDemoUserData({
         {
           id: "board_item_2",
           type: "image",
-          content: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=480&h=360&fit=crop&q=80",
+          content: "/curated/vision-board/leisure-du-lich.webp",
           x: 58,
           y: 14,
           width: 210,

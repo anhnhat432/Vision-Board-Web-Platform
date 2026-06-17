@@ -9,14 +9,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import {
-  buildReferenceGraph,
-  classifyLayer,
-  inferKind,
-  loadTokenSet,
-  parseTokens,
-  resolveToken,
-} from "./token-parser";
+import { buildReferenceGraph, classifyLayer, inferKind, loadTokenSet, parseTokens, resolveToken } from "./token-parser";
 
 describe("token-parser — classifyLayer", () => {
   it("phân loại layer theo tiền tố tên token", () => {

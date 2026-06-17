@@ -72,7 +72,9 @@ export function startPageTour(tourName: string, options: StartPageTourOptions = 
   if (typeof window === "undefined") return;
 
   rememberPendingPageTour(tourName, options);
-  window.dispatchEvent(new CustomEvent<PageTourEventDetail>(PAGE_TOUR_EVENT, { detail: { tour: tourName, ...options } }));
+  window.dispatchEvent(
+    new CustomEvent<PageTourEventDetail>(PAGE_TOUR_EVENT, { detail: { tour: tourName, ...options } }),
+  );
 }
 
 export function usePageTour(tourName: string): PageTourState {

@@ -110,9 +110,7 @@ import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
 import { SyncStatusPill } from "./SyncStatusPill";
 import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
 
-type ContextualGuide =
-  | { kind: "spotlight"; tourName: string }
-  | { kind: "screen"; screenId: string };
+type ContextualGuide = { kind: "spotlight"; tourName: string } | { kind: "screen"; screenId: string };
 
 function normalizePathname(pathname: string): string {
   if (pathname === "/") return pathname;

@@ -127,7 +127,6 @@ function getErrorMessage(error: unknown): string {
   return "Xin lỗi, có lỗi xảy ra khi kết nối với trợ lý. Thử lại nhé.";
 }
 
-
 function getErrorCode(error: unknown): string | undefined {
   if (!error || typeof error !== "object" || !("errorCode" in error)) return undefined;
   const errorCode = (error as { errorCode?: unknown }).errorCode;

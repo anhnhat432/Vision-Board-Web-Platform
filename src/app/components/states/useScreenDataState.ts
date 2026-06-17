@@ -47,11 +47,7 @@ export interface ScreenDataStateResult {
  * Hàm thuần phân giải trạng thái hiển thị từ các đầu vào. Tách riêng để dễ
  * kiểm chứng (Property 5 — máy trạng thái màn hình).
  */
-export function resolveScreenStateKind(
-  status: ScreenLoadStatus,
-  isEmpty: boolean,
-  timedOut: boolean,
-): ScreenStateKind {
+export function resolveScreenStateKind(status: ScreenLoadStatus, isEmpty: boolean, timedOut: boolean): ScreenStateKind {
   if (status === "error" || timedOut) return "error";
   if (status === "loading") return "loading";
   return isEmpty ? "empty" : "ready";

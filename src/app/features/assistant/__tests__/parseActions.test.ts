@@ -267,7 +267,7 @@ Còn đây là cách cấu hình config code bình thường:
     expect(result.actions).toHaveLength(1);
     expect(result.actions[0].type).toBe("create_task");
     expect(result.actions[0].label).toBe("Thêm task: Đọc sách 10 phút");
-    
+
     // Check that only the proposed action json block was removed, and the normal config block is kept
     expect(result.textContent).toContain("Còn đây là cách cấu hình config code bình thường:");
     expect(result.textContent).toContain('"theme": "dark"');
@@ -291,4 +291,3 @@ Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiế
     expect(result.textContent).toBe("Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiếp tục cố gắng!");
   });
 });
-

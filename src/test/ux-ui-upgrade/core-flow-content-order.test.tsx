@@ -18,10 +18,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import {
-  type CoreFlowStepId,
-  CoreFlowProgress,
-} from "../../app/components/CoreFlowProgress";
+import { type CoreFlowStepId, CoreFlowProgress } from "../../app/components/CoreFlowProgress";
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -44,10 +41,7 @@ const EXPECTED_STEP_IDS: ReadonlyArray<CoreFlowStepId> = [
 
 describe("CoreFlowProgress — thứ tự bước cố định (Requirement 10.5)", () => {
   it("source định nghĩa CORE_FLOW_STEPS đúng thứ tự cốt lõi", () => {
-    const source = readFileSync(
-      path.resolve(REPO_ROOT, "src/app/components/CoreFlowProgress.tsx"),
-      "utf8",
-    );
+    const source = readFileSync(path.resolve(REPO_ROOT, "src/app/components/CoreFlowProgress.tsx"), "utf8");
 
     // Trích danh sách id theo thứ tự xuất hiện trong khai báo CORE_FLOW_STEPS.
     const idMatches = [...source.matchAll(/^\s*id:\s*"([^"]+)",/gm)].map((m) => m[1]);
@@ -77,32 +71,27 @@ describe("CoreFlowProgress — thứ tự bước cố định (Requirement 10.5
 // ─────────────────────────────────────────────────────────────
 
 describe("CoreFlowProgress — văn bản/nhãn hiển thị (Requirement 2.7)", () => {
-  it.each(EXPECTED_STEP_IDS)(
-    "render đúng caption 'Bước n / 6 · NHÃN' và mô tả sr-only cho %s",
-    (stepId) => {
-      const { container } = render(<CoreFlowProgress currentStepId={stepId} />);
-      const section = container.querySelector(
-        'section[aria-label="Tiến độ đường chính"]',
-      ) as HTMLElement;
-      expect(section).not.toBeNull();
+  it.each(EXPECTED_STEP_IDS)("render đúng caption 'Bước n / 6 · NHÃN' và mô tả sr-only cho %s", (stepId) => {
+    const { container } = render(<CoreFlowProgress currentStepId={stepId} />);
+    const section = container.querySelector('section[aria-label="Tiến độ đường chính"]') as HTMLElement;
+    expect(section).not.toBeNull();
 
-      const caption = section.querySelector("p")?.textContent ?? "";
-      const stepIndex = EXPECTED_STEP_IDS.indexOf(stepId) + 1;
-      expect(caption).toMatch(new RegExp(`^Bước ${stepIndex} / 6 · `));
+    const caption = section.querySelector("p")?.textContent ?? "";
+    const stepIndex = EXPECTED_STEP_IDS.indexOf(stepId) + 1;
+    expect(caption).toMatch(new RegExp(`^Bước ${stepIndex} / 6 · `));
 
-      // Mô tả sr-only ở vị trí cuối section, dùng cho a11y.
-      const srDescription = section.querySelectorAll("p");
-      const lastP = srDescription[srDescription.length - 1];
-      expect(lastP?.textContent ?? "").not.toBe("");
+    // Mô tả sr-only ở vị trí cuối section, dùng cho a11y.
+    const srDescription = section.querySelectorAll("p");
+    const lastP = srDescription[srDescription.length - 1];
+    expect(lastP?.textContent ?? "").not.toBe("");
 
-      // Progressbar phản ánh bước hiện tại.
-      const progressbar = within(section).getByRole("progressbar");
-      const expectedNow = Math.round((stepIndex / 6) * 100);
-      expect(progressbar.getAttribute("aria-valuenow")).toBe(String(expectedNow));
-      expect(progressbar.getAttribute("aria-valuemin")).toBe("0");
-      expect(progressbar.getAttribute("aria-valuemax")).toBe("100");
-    },
-  );
+    // Progressbar phản ánh bước hiện tại.
+    const progressbar = within(section).getByRole("progressbar");
+    const expectedNow = Math.round((stepIndex / 6) * 100);
+    expect(progressbar.getAttribute("aria-valuenow")).toBe(String(expectedNow));
+    expect(progressbar.getAttribute("aria-valuemin")).toBe("0");
+    expect(progressbar.getAttribute("aria-valuemax")).toBe("100");
+  });
 
   it("snapshot toàn bộ nhãn theo thứ tự bước (label + title + description)", () => {
     // Render lần lượt từng bước và trích bộ ba (label, title, description) từ
@@ -110,9 +99,7 @@ describe("CoreFlowProgress — văn bản/nhãn hiển thị (Requirement 2.7)",
     // baseline content theo Requirement 2.7.
     const labels = EXPECTED_STEP_IDS.map((id) => {
       const { container } = render(<CoreFlowProgress currentStepId={id} />);
-      const section = container.querySelector(
-        'section[aria-label="Tiến độ đường chính"]',
-      ) as HTMLElement;
+      const section = container.querySelector('section[aria-label="Tiến độ đường chính"]') as HTMLElement;
       const ps = section.querySelectorAll("p");
       const caption = ps[0]?.textContent ?? "";
       const description = ps[ps.length - 1]?.textContent ?? "";
@@ -160,9 +147,7 @@ describe("CoreFlowProgress — văn bản/nhãn hiển thị (Requirement 2.7)",
   it("progressbar có aria-label phản ánh bước hiện tại / tổng (Req 2.7)", () => {
     const { container } = render(<CoreFlowProgress currentStepId="smart_goal" />);
     const progressbar = container.querySelector('[role="progressbar"]') as HTMLElement;
-    expect(progressbar.getAttribute("aria-label")).toBe(
-      "Tiến độ đường chính: bước 3 trên 6",
-    );
+    expect(progressbar.getAttribute("aria-label")).toBe("Tiến độ đường chính: bước 3 trên 6");
   });
 });
 
@@ -175,10 +160,7 @@ describe("appRoutes — tập route core-flow giữ nguyên (Requirement 10.4, 1
     // Đọc src/app/routes.tsx — định nghĩa router thực tế của ứng dụng. Đây là
     // baseline content + thứ tự điều hướng được khoá theo Requirement 10.4
     // (giữ tập route) và 10.5 (giữ thứ tự).
-    const routerSource = readFileSync(
-      path.resolve(REPO_ROOT, "src/app/routes.tsx"),
-      "utf8",
-    );
+    const routerSource = readFileSync(path.resolve(REPO_ROOT, "src/app/routes.tsx"), "utf8");
 
     // Whitelist các path core-flow (không bắt route phụ như billing/admin/...).
     // Lưu ý: routes.tsx khai báo path tương đối (không bắt đầu bằng "/").

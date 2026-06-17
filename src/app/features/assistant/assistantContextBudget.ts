@@ -53,25 +53,15 @@ function field(total: number, limit: number): ContextBudgetField {
 export function buildContextBudgetReport(context: AssistantContext): ContextBudgetReport {
   const goals = field(context.goals?.length ?? 0, CONTEXT_PROMPT_LIMITS.goals);
   const todayTasks = field(context.todayTasks?.length ?? 0, CONTEXT_PROMPT_LIMITS.todayTasks);
-  const overdueTasks = field(
-    context.stuckSignals?.overdueTasks?.length ?? 0,
-    CONTEXT_PROMPT_LIMITS.overdueTasks,
-  );
+  const overdueTasks = field(context.stuckSignals?.overdueTasks?.length ?? 0, CONTEXT_PROMPT_LIMITS.overdueTasks);
   const missedCommitments = field(
     context.stuckSignals?.missedCommitments?.length ?? 0,
     CONTEXT_PROMPT_LIMITS.missedCommitments,
   );
-  const retrievedKnowledge = field(
-    context.retrievedKnowledge?.length ?? 0,
-    CONTEXT_PROMPT_LIMITS.retrievedKnowledge,
-  );
+  const retrievedKnowledge = field(context.retrievedKnowledge?.length ?? 0, CONTEXT_PROMPT_LIMITS.retrievedKnowledge);
 
   const totalTrimmed =
-    goals.trimmed +
-    todayTasks.trimmed +
-    overdueTasks.trimmed +
-    missedCommitments.trimmed +
-    retrievedKnowledge.trimmed;
+    goals.trimmed + todayTasks.trimmed + overdueTasks.trimmed + missedCommitments.trimmed + retrievedKnowledge.trimmed;
 
   return {
     goals,

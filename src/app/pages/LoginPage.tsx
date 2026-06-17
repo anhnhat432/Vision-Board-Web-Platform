@@ -52,6 +52,7 @@ export function LoginPage() {
   const {
     user,
     userProfile,
+    userProfileLoading,
     userProfileError,
     authLoading,
     error: authError,
@@ -64,6 +65,7 @@ export function LoginPage() {
   const location = useLocation();
   const stateRedirect = normalizeRedirectPath((location.state as Record<string, unknown> | null)?.from);
   const queryRedirect = normalizeRedirectPath(new URLSearchParams(location.search).get("next"));
+  const hasExplicitRedirect = Boolean(stateRedirect ?? queryRedirect);
   const redirectTo = stateRedirect ?? queryRedirect ?? "/";
 
   useEffect(() => {
@@ -148,6 +150,19 @@ export function LoginPage() {
       return <Navigate to={redirectTo.startsWith("/admin/") ? redirectTo : "/admin/dashboard"} replace />;
     }
 
+    const shouldWaitForDefaultProfileRoute =
+      !hasExplicitRedirect && (userProfileLoading || (!userProfile && !userProfileError));
+
+    if (shouldWaitForDefaultProfileRoute) {
+      return (
+        <LoginStatusCard
+          icon={<Loader2 className="h-5 w-5 animate-spin text-white" />}
+          title="Đang kiểm tra quyền truy cập"
+          description="Đang tải hồ sơ tài khoản để chuyển bạn đến đúng khu vực."
+        />
+      );
+    }
+
     if (userProfile) {
       return <Navigate to={redirectTo} replace />;
     }
@@ -174,7 +189,8 @@ export function LoginPage() {
       );
     }
 
-    // userProfileLoading hoặc (profile null && chưa có error) → redirect ngay
+    // Explicit redirect from a protected route can continue while profile loads;
+    // guards on that route will handle the final access decision.
     return <Navigate to={redirectTo} replace />;
   }
 

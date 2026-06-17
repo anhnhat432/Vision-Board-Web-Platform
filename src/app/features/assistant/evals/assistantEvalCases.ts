@@ -36,14 +36,7 @@ export type EvalCategory =
  * G5: route core flow để đo chất lượng theo từng màn hình.
  * Map sang priority flow trong AGENTS.md.
  */
-export type EvalRoute =
-  | "life_insight"
-  | "smart_goal"
-  | "feasibility"
-  | "twelve_week"
-  | "today"
-  | "review"
-  | "general";
+export type EvalRoute = "life_insight" | "smart_goal" | "feasibility" | "twelve_week" | "today" | "review" | "general";
 
 export interface AssistantEvalCase {
   id: string;

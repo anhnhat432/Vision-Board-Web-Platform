@@ -29,6 +29,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
       quote: 0,
       icon: 0,
       goal_card: 0,
+      sticker: 0,
     };
     const byArea: Record<string, number> = {};
 
@@ -127,6 +128,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
             <SummaryStat label="Câu nói" value={stats.counters.quote} />
             <SummaryStat label="Mục tiêu ghim" value={stats.counters.goal_card} />
             <SummaryStat label="Biểu tượng" value={stats.counters.icon} />
+            <SummaryStat label="Sticker" value={stats.counters.sticker} />
           </div>
           <div className="mt-3 rounded-[var(--r-tile)] bg-app-accent-soft p-3 text-xs text-app-ink">
             <span className="font-semibold">{stats.total}</span> phần tử đang có trên bảng

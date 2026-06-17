@@ -112,9 +112,7 @@ export function ScheduleStep({
               )}
               onChange={(event) => onChange("startDate", event.target.value)}
             />
-            {draft.startDate ? (
-              <p className={helperTextClass}>Đã chọn: {formatDisplayDate(draft.startDate)}</p>
-            ) : null}
+            {draft.startDate ? <p className={helperTextClass}>Đã chọn: {formatDisplayDate(draft.startDate)}</p> : null}
             {startDateValidation.error ? (
               <p id="cycle-start-date-error" role="alert" className={errorTextClass}>
                 {startDateValidation.error}

@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
 import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { PageShell } from "@/app/components/PageShell";
+import { ScreenGuide } from "@/app/components/ScreenGuide";
+import { SCREEN_GUIDES } from "@/app/components/screen-guides";
 import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { FormSkeleton } from "@/app/components/ui/skeleton";
@@ -44,7 +46,12 @@ import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persis
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { evaluateSmartGoalQuality, type PendingSMARTGoal, parsePendingSMARTGoal, parseSmartGoal } from "@/lib/smart-goal";
+import {
+  evaluateSmartGoalQuality,
+  type PendingSMARTGoal,
+  parsePendingSMARTGoal,
+  parseSmartGoal,
+} from "@/lib/smart-goal";
 import { createGoal, updateGoal } from "@/services/goalService";
 import { buildDefaultFeasibilityAnswers, buildQuickPlanFeasibilityResult } from "@/app/pages/FeasibilityCheck/helpers";
 import { LeadIndicatorsStepLab } from "./12WeekSetup/components/LeadIndicatorsStepLab";
@@ -609,6 +616,7 @@ export function TwelveWeekSetupLab() {
   if (isRealMode() && auth.authLoading) {
     return (
       <PageShell maxWidth="xl">
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
         <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
         <FormSkeleton className="mt-6" aria-label="Đang kiểm tra tài khoản" />
       </PageShell>
@@ -618,6 +626,7 @@ export function TwelveWeekSetupLab() {
   if (isLoading) {
     return (
       <PageShell maxWidth="xl">
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
         <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
         <FormSkeleton className="mt-6" aria-label="Đang chuẩn bị dữ liệu thiết lập 12 tuần" />
       </PageShell>
@@ -626,76 +635,91 @@ export function TwelveWeekSetupLab() {
 
   if (setupGate === "needs_life_balance") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_balance"
-        eyebrow="Thiết lập 12 tuần"
-        title="Hoàn thành Cân bằng cuộc sống trước khi tạo kế hoạch 12 tuần"
-        description="Kế hoạch 12 tuần cần điểm cân bằng thật để biết mục tiêu đang gắn với lĩnh vực nào. Hãy bắt đầu từ đánh giá cân bằng rồi quay lại flow chính."
-        actionLabel="Bắt đầu Cân bằng cuộc sống"
-        onAction={() => navigate("/onboarding")}
-        secondaryActionLabel="Về bảng điều khiển"
-        onSecondaryAction={() => navigate("/")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_balance"
+          eyebrow="Thiết lập 12 tuần"
+          title="Hoàn thành Cân bằng cuộc sống trước khi tạo kế hoạch 12 tuần"
+          description="Kế hoạch 12 tuần cần điểm cân bằng thật để biết mục tiêu đang gắn với lĩnh vực nào. Hãy bắt đầu từ đánh giá cân bằng rồi quay lại flow chính."
+          actionLabel="Bắt đầu Cân bằng cuộc sống"
+          onAction={() => navigate("/onboarding")}
+          secondaryActionLabel="Về bảng điều khiển"
+          onSecondaryAction={() => navigate("/")}
+        />
+      </>
     );
   }
 
   if (setupGate === "needs_life_insight") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_insight"
-        eyebrow="Thiết lập 12 tuần"
-        title="Chọn trọng tâm trước khi tạo kế hoạch 12 tuần"
-        description="Bạn cần một trọng tâm hợp lệ từ Góc nhìn cuộc sống để kế hoạch 12 tuần không bị quá rộng hoặc lệch khỏi dữ liệu cân bằng."
-        actionLabel="Mở Góc nhìn cuộc sống"
-        onAction={() => navigate("/life-insight")}
-        secondaryActionLabel="Bắt đầu Cân bằng cuộc sống"
-        onSecondaryAction={() => navigate("/onboarding")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_insight"
+          eyebrow="Thiết lập 12 tuần"
+          title="Chọn trọng tâm trước khi tạo kế hoạch 12 tuần"
+          description="Bạn cần một trọng tâm hợp lệ từ Góc nhìn cuộc sống để kế hoạch 12 tuần không bị quá rộng hoặc lệch khỏi dữ liệu cân bằng."
+          actionLabel="Mở Góc nhìn cuộc sống"
+          onAction={() => navigate("/life-insight")}
+          secondaryActionLabel="Bắt đầu Cân bằng cuộc sống"
+          onSecondaryAction={() => navigate("/onboarding")}
+        />
+      </>
     );
   }
 
   if (setupGate === "needs_smart_goal") {
     return (
-      <CoreFlowGateState
-        currentStepId="smart_goal"
-        eyebrow="Thiết lập 12 tuần"
-        title="Viết mục tiêu SMART trước khi tạo kế hoạch 12 tuần"
-        description="Kế hoạch cần mục tiêu đủ rõ về kết quả, chỉ số và thời hạn. Hoàn thiện mục tiêu SMART trước, sau đó kiểm tra tính khả thi và quay lại thiết lập."
-        actionLabel="Quay lại viết mục tiêu"
-        onAction={() => navigate("/smart-goal-setup")}
-        secondaryActionLabel="Mở Góc nhìn cuộc sống"
-        onSecondaryAction={() => navigate("/life-insight")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
+        <CoreFlowGateState
+          currentStepId="smart_goal"
+          eyebrow="Thiết lập 12 tuần"
+          title="Viết mục tiêu SMART trước khi tạo kế hoạch 12 tuần"
+          description="Kế hoạch cần mục tiêu đủ rõ về kết quả, chỉ số và thời hạn. Hoàn thiện mục tiêu SMART trước, sau đó kiểm tra tính khả thi và quay lại thiết lập."
+          actionLabel="Quay lại viết mục tiêu"
+          onAction={() => navigate("/smart-goal-setup")}
+          secondaryActionLabel="Mở Góc nhìn cuộc sống"
+          onSecondaryAction={() => navigate("/life-insight")}
+        />
+      </>
     );
   }
 
   if (setupGate === "needs_feasibility") {
     return (
-      <CoreFlowGateState
-        currentStepId="feasibility"
-        eyebrow="Thiết lập 12 tuần"
-        title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
-        description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
-        actionLabel="Mở kiểm tra tính khả thi"
-        onAction={() => navigate("/feasibility")}
-        secondaryActionLabel="Quay lại viết mục tiêu"
-        onSecondaryAction={() => navigate("/smart-goal-setup")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
+        <CoreFlowGateState
+          currentStepId="feasibility"
+          eyebrow="Thiết lập 12 tuần"
+          title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
+          description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
+          actionLabel="Mở kiểm tra tính khả thi"
+          onAction={() => navigate("/feasibility")}
+          secondaryActionLabel="Quay lại viết mục tiêu"
+          onSecondaryAction={() => navigate("/smart-goal-setup")}
+        />
+      </>
     );
   }
 
   if (!smartGoal || !feasibility) {
     return (
-      <CoreFlowGateState
-        currentStepId="feasibility"
-        eyebrow="Thiết lập 12 tuần"
-        title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
-        description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
-        actionLabel="Mở kiểm tra tính khả thi"
-        onAction={() => navigate("/feasibility")}
-        secondaryActionLabel="Quay lại viết mục tiêu"
-        onSecondaryAction={() => navigate("/smart-goal-setup")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
+        <CoreFlowGateState
+          currentStepId="feasibility"
+          eyebrow="Thiết lập 12 tuần"
+          title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
+          description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
+          actionLabel="Mở kiểm tra tính khả thi"
+          onAction={() => navigate("/feasibility")}
+          secondaryActionLabel="Quay lại viết mục tiêu"
+          onSecondaryAction={() => navigate("/smart-goal-setup")}
+        />
+      </>
     );
   }
 
@@ -1223,6 +1247,7 @@ export function TwelveWeekSetupLab() {
 
   return (
     <PageShell maxWidth="xl">
+      <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
       <div className="space-y-5 sm:space-y-6">
         <UpgradePaywallDialog
           open={isPaywallOpen}

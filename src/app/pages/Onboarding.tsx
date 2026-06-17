@@ -450,8 +450,6 @@ export function Onboarding() {
     return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
-
-
   useEffect(() => {
     void activeAreaIndex;
     if (step !== "assessment") {
@@ -805,7 +803,7 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
-        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
+      <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
       <div ref={flowTopRef} tabIndex={-1} className="w-full max-w-full space-y-6 focus:outline-none">
         {progressHeader}
         {draftBanner}
@@ -997,7 +995,9 @@ export function Onboarding() {
                                 {anchor.range}
                               </span>
                               <div className="min-w-0">
-                                <span className={cn("font-semibold", isActive ? "text-app-accent" : "text-app-ink-soft")}>
+                                <span
+                                  className={cn("font-semibold", isActive ? "text-app-accent" : "text-app-ink-soft")}
+                                >
                                   {anchor.label}
                                 </span>
                                 <span className="mx-1.5 text-app-ink-muted">·</span>

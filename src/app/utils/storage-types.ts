@@ -234,14 +234,27 @@ export interface Goal {
   createdAt: string;
 }
 
-export type VisionBoardItemType = "image" | "quote" | "icon" | "goal_card";
+export type VisionBoardItemType = "image" | "quote" | "icon" | "goal_card" | "sticker";
 
 export type VisionBoardSizePreset = "S" | "M" | "L" | "XL";
+
+export type VisionBoardStickerId =
+  | "flower-pink"
+  | "flower-white"
+  | "leaf-green"
+  | "leaf-gold"
+  | "star-gold"
+  | "star-silver"
+  | "heart-pink"
+  | "heart-red"
+  | "ribbon-pink"
+  | "confetti";
 
 export interface VisionBoardItemStyle {
   sizePreset?: VisionBoardSizePreset;
   quoteFont?: "default" | "handwriting" | "serif" | "bold";
-  imageFrame?: "shadow" | "polaroid" | "washi" | "minimal";
+  imageFrame?: "shadow" | "polaroid" | "washi" | "minimal" | "scalloped" | "filmstrip" | "watercolor";
+  quoteBackground?: "none" | "dots" | "highlight";
 }
 
 export interface VisionBoardItem {
@@ -256,7 +269,7 @@ export interface VisionBoardItem {
   style?: VisionBoardItemStyle;
 }
 
-export type VisionBoardThemeId = "aurora" | "sunset" | "forest" | "nightsky" | "minimal";
+export type VisionBoardThemeId = "aurora" | "sunset" | "forest" | "nightsky" | "minimal" | "blossom" | "dreamscape";
 
 export interface VisionBoard {
   id: string;
@@ -317,9 +330,9 @@ export interface SyncOutboxItem {
 
 export type PricingPlanCode = "FREE" | "PLUS" | "PRO";
 
-export type SubscriptionStatus = "inactive" | "trialing" | "active" | "canceled";
+export type SubscriptionStatus = "inactive" | "trialing" | "active" | "past_due" | "canceled" | "incomplete" | "unpaid";
 
-export type BillingCycle = "monthly" | "quarterly" | "season-pass";
+export type BillingCycle = "monthly" | "quarterly" | "season-pass" | "yearly" | "lifetime" | "twelve_week";
 
 export type BillingProviderMode = "local_test" | "mock_provider" | "api_contract";
 

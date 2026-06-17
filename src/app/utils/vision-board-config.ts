@@ -1,4 +1,9 @@
-import type { VisionBoardItemStyle, VisionBoardSizePreset, VisionBoardThemeId } from "./storage-types";
+import type {
+  VisionBoardItemStyle,
+  VisionBoardSizePreset,
+  VisionBoardStickerId,
+  VisionBoardThemeId,
+} from "./storage-types";
 
 export interface VisionBoardTheme {
   id: VisionBoardThemeId;
@@ -83,6 +88,34 @@ export const VISION_BOARD_THEMES: VisionBoardTheme[] = [
       gradient: "linear-gradient(135deg, #faf7ed 0%, #f1f5f9 58%, #e5e7eb 100%)",
     },
   },
+  {
+    id: "blossom",
+    label: "Hoa nở",
+    description: "Pastel dịu nhẹ, thêm hoa lá cho board mộng mơ.",
+    canvasBackground:
+      "linear-gradient(135deg, rgba(252, 231, 243, 0.95), rgba(245, 243, 255, 0.92), rgba(236, 250, 245, 0.95))",
+    gridColor: "rgba(219, 112, 147, 0.1)",
+    accentZone: "rgba(236, 72, 153, 0.06)",
+    textColor: "#4a1942",
+    defaultQuoteFont: "handwriting",
+    preview: {
+      gradient: "linear-gradient(135deg, #fce7f3 0%, #f5f3ff 50%, #ecfaf5 100%)",
+    },
+  },
+  {
+    id: "dreamscape",
+    label: "Mộng mơ",
+    description: "Gradient tím hồng nhẹ, bầu trời dreamy.",
+    canvasBackground:
+      "linear-gradient(160deg, rgba(243, 232, 255, 0.95), rgba(252, 211, 235, 0.88), rgba(255, 237, 213, 0.9))",
+    gridColor: "rgba(168, 85, 247, 0.08)",
+    accentZone: "rgba(192, 132, 252, 0.06)",
+    textColor: "#3b0764",
+    defaultQuoteFont: "serif",
+    preview: {
+      gradient: "linear-gradient(160deg, #f3e8ff 0%, #fcd3eb 50%, #ffedd5 100%)",
+    },
+  },
 ];
 
 export interface QuoteFontStyle {
@@ -122,7 +155,7 @@ export interface ImageFrameStyle {
   label: string;
   wrapperClassName: string;
   imageClassName: string;
-  decorationsLayout?: "polaroid" | "washi" | null;
+  decorationsLayout?: "polaroid" | "washi" | "scalloped" | "filmstrip" | "watercolor" | null;
 }
 
 export const IMAGE_FRAME_STYLES: ImageFrameStyle[] = [
@@ -154,6 +187,57 @@ export const IMAGE_FRAME_STYLES: ImageFrameStyle[] = [
     imageClassName: "rounded-md object-cover",
     decorationsLayout: null,
   },
+  {
+    id: "scalloped",
+    label: "Lượn sóng",
+    wrapperClassName: "rounded-[2rem] border-4 border-dashed border-rose-200/80 bg-white/90 p-2.5 shadow-md",
+    imageClassName: "rounded-2xl object-cover",
+    decorationsLayout: "scalloped",
+  },
+  {
+    id: "filmstrip",
+    label: "Phim nhựa",
+    wrapperClassName: "rounded-sm bg-neutral-800 border border-neutral-700 p-2 shadow-lg",
+    imageClassName: "rounded-[1px] object-cover",
+    decorationsLayout: "filmstrip",
+  },
+  {
+    id: "watercolor",
+    label: "Watercolor",
+    wrapperClassName: "rounded-xl border border-amber-200/60 p-2 shadow-md",
+    imageClassName: "rounded-lg object-cover",
+    decorationsLayout: "watercolor",
+  },
+];
+
+export interface StickerDefinition {
+  id: VisionBoardStickerId;
+  label: string;
+  defaultWidth: number;
+}
+
+export const STICKER_DEFS: StickerDefinition[] = [
+  { id: "flower-pink", label: "Hoa hồng", defaultWidth: 80 },
+  { id: "flower-white", label: "Hoa trắng", defaultWidth: 80 },
+  { id: "leaf-green", label: "Lá xanh", defaultWidth: 72 },
+  { id: "leaf-gold", label: "Lá vàng", defaultWidth: 72 },
+  { id: "star-gold", label: "Sao vàng", defaultWidth: 64 },
+  { id: "star-silver", label: "Sao bạc", defaultWidth: 64 },
+  { id: "heart-pink", label: "Tim hồng", defaultWidth: 64 },
+  { id: "heart-red", label: "Tim đỏ", defaultWidth: 64 },
+  { id: "ribbon-pink", label: "Ruy băng", defaultWidth: 100 },
+  { id: "confetti", label: "Confetti", defaultWidth: 120 },
+];
+
+export interface QuoteBackgroundPreset {
+  id: NonNullable<VisionBoardItemStyle["quoteBackground"]>;
+  label: string;
+}
+
+export const QUOTE_BACKGROUNDS: QuoteBackgroundPreset[] = [
+  { id: "none", label: "Mặc định" },
+  { id: "dots", label: "Chấm bi" },
+  { id: "highlight", label: "Gạch chân nổi bật" },
 ];
 
 export const SIZE_PRESETS: Record<VisionBoardSizePreset, { width: number; label: string }> = {
@@ -297,121 +381,121 @@ export const CURATED_IMAGES_BY_LIFE_AREA: CuratedImageByLifeArea[] = [
   {
     lifeAreaName: "Career",
     label: "Góc làm việc",
-    url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/career-goc-lam-viec.webp",
   },
   {
     lifeAreaName: "Career",
     label: "Làm việc sâu",
-    url: "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/career-lam-viec-sau.webp",
   },
   {
     lifeAreaName: "Career",
     label: "Dẫn dắt",
-    url: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/career-dan-dat.webp",
   },
   {
     lifeAreaName: "Finance",
     label: "Ngân sách",
-    url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/finance-ngan-sach.webp",
   },
   {
     lifeAreaName: "Finance",
     label: "Đủ đầy",
-    url: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/finance-du-day.webp",
   },
   {
     lifeAreaName: "Finance",
     label: "Đầu tư",
-    url: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/finance-dau-tu.webp",
   },
   {
     lifeAreaName: "Health",
     label: "Vận động",
-    url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/health-van-dong.webp",
   },
   {
     lifeAreaName: "Health",
     label: "Thiền",
-    url: "https://images.unsplash.com/photo-1544367563-121910aa6ccd?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/health-thien.webp",
   },
   {
     lifeAreaName: "Health",
     label: "Dinh dưỡng",
-    url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/health-dinh-duong.webp",
   },
   {
     lifeAreaName: "Education",
     label: "Đọc sách",
-    url: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/education-doc-sach.webp",
   },
   {
     lifeAreaName: "Education",
     label: "Học nhóm",
-    url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/education-hoc-nhom.webp",
   },
   {
     lifeAreaName: "Education",
     label: "Bàn học",
-    url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/education-ban-hoc.webp",
   },
   {
     lifeAreaName: "Relationships",
     label: "Trò chuyện",
-    url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/relationships-tro-chuyen.webp",
   },
   {
     lifeAreaName: "Relationships",
     label: "Cộng đồng",
-    url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/relationships-cong-dong.webp",
   },
   {
     lifeAreaName: "Relationships",
     label: "Nâng đỡ",
-    url: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/relationships-nang-do.webp",
   },
   {
     lifeAreaName: "Family",
     label: "Tổ ấm",
-    url: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/family-to-am.webp",
   },
   {
     lifeAreaName: "Family",
     label: "Bữa tối",
-    url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/family-bua-toi.webp",
   },
   {
     lifeAreaName: "Family",
     label: "Cuối tuần",
-    url: "https://images.unsplash.com/photo-1601002271885-4494478fa928?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/family-cuoi-tuan.webp",
   },
   {
     lifeAreaName: "Personal Growth",
     label: "Viết nhật ký",
-    url: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/growth-viet-nhat-ky.webp",
   },
   {
     lifeAreaName: "Personal Growth",
     label: "Suy ngẫm",
-    url: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/growth-suy-ngam.webp",
   },
   {
     lifeAreaName: "Personal Growth",
     label: "Thực hành",
-    url: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/growth-thuc-hanh.webp",
   },
   {
     lifeAreaName: "Leisure",
     label: "Du lịch",
-    url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/leisure-du-lich.webp",
   },
   {
     lifeAreaName: "Leisure",
     label: "Thiên nhiên",
-    url: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/leisure-thien-nhien.webp",
   },
   {
     lifeAreaName: "Leisure",
     label: "Nghỉ ngơi sáng tạo",
-    url: "https://images.unsplash.com/photo-1513159446163-9dd1f7e2c1f2?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/leisure-nghi-ngoi-sang-tao.webp",
   },
 ];

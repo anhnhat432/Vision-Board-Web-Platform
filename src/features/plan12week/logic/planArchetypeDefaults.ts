@@ -68,7 +68,11 @@ export interface ArchetypePlanFullDefaults {
 
 const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   skill_learning: {
-    leadIndicatorSuggestions: ["Luyện tập / làm bài thực hành", "Đọc tài liệu chính", "Pair review hoặc trình diễn nhỏ"],
+    leadIndicatorSuggestions: [
+      "Luyện tập / làm bài thực hành",
+      "Đọc tài liệu chính",
+      "Pair review hoặc trình diễn nhỏ",
+    ],
     milestoneTemplates: {
       week4: "Hoàn thành 1 dự án nhỏ làm kết quả đầu tiên.",
       week8: "Phát hành phiên bản thứ 2 sau khi nhận góp ý.",
@@ -159,7 +163,11 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     },
   },
   career_growth: {
-    leadIndicatorSuggestions: ["Khung làm sâu", "1:1 với stakeholder / mentor", "Chuẩn bị buổi trình diễn / buổi góp ý"],
+    leadIndicatorSuggestions: [
+      "Khung làm sâu",
+      "1:1 với stakeholder / mentor",
+      "Chuẩn bị buổi trình diễn / buổi góp ý",
+    ],
     milestoneTemplates: {
       week4: "Hoàn thành 3-4 phần việc IDP và có 2 buổi 1:1.",
       week8: "Hoàn tất phần việc lớn và lấy góp ý từ stakeholder.",

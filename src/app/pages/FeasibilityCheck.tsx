@@ -642,8 +642,8 @@ export function FeasibilityCheck() {
                     Mặc định 3 câu cốt lõi
                   </p>
                   <p className="text-sm leading-6 text-app-ink-soft">
-                    Time, Energy và Confidence là đủ để tạo kết quả khả thi. Mở phần nâng cao nếu bạn muốn tinh chỉnh thêm
-                    Clarity, Obstacle, Routine và Resources.
+                    Time, Energy và Confidence là đủ để tạo kết quả khả thi. Mở phần nâng cao nếu bạn muốn tinh chỉnh
+                    thêm Clarity, Obstacle, Routine và Resources.
                   </p>
                 </div>
                 <button
@@ -655,7 +655,10 @@ export function FeasibilityCheck() {
                   <SlidersHorizontal className="h-4 w-4 text-app-accent" aria-hidden="true" />
                   {showAdvancedQuestions ? "Ẩn nâng cao" : "Mở nâng cao"}
                   <ChevronDown
-                    className={cn("h-4 w-4 text-app-ink-muted transition-transform", showAdvancedQuestions && "rotate-180")}
+                    className={cn(
+                      "h-4 w-4 text-app-ink-muted transition-transform",
+                      showAdvancedQuestions && "rotate-180",
+                    )}
                     aria-hidden="true"
                   />
                 </button>

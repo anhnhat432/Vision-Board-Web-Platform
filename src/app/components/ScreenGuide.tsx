@@ -109,7 +109,16 @@ export function startScreenGuide(screenId: string, options: { force?: boolean } 
  * land on the screen; after that the guidance stays one click away and a
  * subtle dot reminds returning users it is there.
  */
-export function ScreenGuide({ screenId, title, intro, steps, tip, action, className, autoOpen = false }: ScreenGuideProps) {
+export function ScreenGuide({
+  screenId,
+  title,
+  intro,
+  steps,
+  tip,
+  action,
+  className,
+  autoOpen = false,
+}: ScreenGuideProps) {
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState(() => hasSeenGuide(screenId));
 
@@ -191,7 +200,7 @@ export function ScreenGuide({ screenId, title, intro, steps, tip, action, classN
             type="button"
             variant="ghost"
             size="sm"
-            className="relative gap-1.5 border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+            className="relative min-h-11 gap-1.5 border border-app-line bg-app-surface px-4 text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
             aria-label={`Hướng dẫn nhanh: ${title}`}
           >
             <HelpCircle className="size-4" aria-hidden="true" />
@@ -246,11 +255,17 @@ export function ScreenGuide({ screenId, title, intro, steps, tip, action, classN
           </div>
           <div className="flex flex-col gap-2 border-t border-app-line px-4 py-2.5 sm:flex-row sm:justify-end">
             {action ? (
-              <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={action.onClick}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-11 gap-1.5 px-4"
+                onClick={action.onClick}
+              >
                 {action.label}
               </Button>
             ) : null}
-            <Button type="button" size="sm" className="gap-1.5" onClick={handleGotIt}>
+            <Button type="button" size="sm" className="min-h-11 gap-1.5 px-4" onClick={handleGotIt}>
               <Check className="size-4" aria-hidden="true" />
               Tôi đã hiểu
             </Button>

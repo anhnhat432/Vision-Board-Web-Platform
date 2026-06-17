@@ -5,7 +5,12 @@ import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem } from "@/app/utils/storage-types";
-import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS } from "@/app/utils/vision-board-config";
+import {
+  IMAGE_FRAME_STYLES,
+  QUOTE_BACKGROUNDS,
+  QUOTE_FONT_STYLES,
+  SIZE_PRESETS,
+} from "@/app/utils/vision-board-config";
 
 export interface ItemControlsPopoverProps {
   item: VisionBoardItem;
@@ -20,6 +25,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
   const currentSize = item.style?.sizePreset ?? "M";
   const currentFrame = item.style?.imageFrame ?? "shadow";
   const currentFont = item.style?.quoteFont ?? "default";
+  const currentQuoteBg = item.style?.quoteBackground ?? "none";
 
   const updateStyle = (patch: Partial<NonNullable<VisionBoardItem["style"]>>) => {
     onUpdate(item.id, {
@@ -112,29 +118,52 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
         )}
 
         {item.type === "quote" && (
-          <div>
-            <p className="text-xs font-semibold text-app-ink-muted">Kiểu chữ</p>
-            <div className="mt-1.5 grid grid-cols-2 gap-1">
-              {QUOTE_FONT_STYLES.map((font) => (
-                <button
-                  key={font.id}
-                  type="button"
-                  onClick={() => updateStyle({ quoteFont: font.id })}
-                  className={`rounded-md border px-2 py-2 text-left transition ${
-                    currentFont === font.id ? "border-app-accent bg-app-accent-soft" : "border-app-line bg-app-surface"
-                  }`}
-                >
-                  <p
-                    className={`text-sm ${font.className}`}
-                    style={font.fontFamily ? { fontFamily: font.fontFamily } : undefined}
+          <>
+            <div>
+              <p className="text-xs font-semibold text-app-ink-muted">Kiểu chữ</p>
+              <div className="mt-1.5 grid grid-cols-2 gap-1">
+                {QUOTE_FONT_STYLES.map((font) => (
+                  <button
+                    key={font.id}
+                    type="button"
+                    onClick={() => updateStyle({ quoteFont: font.id })}
+                    className={`rounded-md border px-2 py-2 text-left transition ${
+                      currentFont === font.id
+                        ? "border-app-accent bg-app-accent-soft"
+                        : "border-app-line bg-app-surface"
+                    }`}
                   >
-                    Aa
-                  </p>
-                  <p className="mt-0.5 text-xs text-app-ink-muted">{font.label}</p>
-                </button>
-              ))}
+                    <p
+                      className={`text-sm ${font.className}`}
+                      style={font.fontFamily ? { fontFamily: font.fontFamily } : undefined}
+                    >
+                      Aa
+                    </p>
+                    <p className="mt-0.5 text-xs text-app-ink-muted">{font.label}</p>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+            <div>
+              <p className="text-xs font-semibold text-app-ink-muted">Nền câu nói</p>
+              <div className="mt-1.5 grid grid-cols-3 gap-1">
+                {QUOTE_BACKGROUNDS.map((bg) => (
+                  <button
+                    key={bg.id}
+                    type="button"
+                    onClick={() => updateStyle({ quoteBackground: bg.id })}
+                    className={`rounded-md border px-2 py-1.5 text-xs font-medium transition ${
+                      currentQuoteBg === bg.id
+                        ? "border-app-accent bg-app-accent-soft text-app-accent"
+                        : "border-app-line bg-app-surface text-app-ink-soft"
+                    }`}
+                  >
+                    {bg.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         <Button

@@ -57,8 +57,7 @@ interface FocusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 function FocusButton({ context, testId, children, ...rest }: FocusButtonProps) {
   const [focused, setFocused] = useState(false);
-  const baseClass =
-    context === "reflection" ? REFLECT_FOCUS_CLASS : EXEC_FOCUS_CLASS;
+  const baseClass = context === "reflection" ? REFLECT_FOCUS_CLASS : EXEC_FOCUS_CLASS;
 
   // Inline style mô phỏng ring 2px deterministic cho jsdom. `outline` được
   // chọn vì jsdom phản ánh đúng `outlineWidth` qua getComputedStyle.

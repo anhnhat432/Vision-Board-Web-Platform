@@ -1,4 +1,4 @@
-import { type ComponentType, lazy, Suspense } from "react";
+﻿import { type ComponentType, lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -99,6 +99,10 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/Onboarding"), "Onboarding"),
       },
       {
+        path: "help",
+        ...lazyRoute(() => import("./pages/HelpCenterPage"), "HelpCenterPage"),
+      },
+      {
         path: "life-insight",
         ...lazyRoute(() => import("./pages/LifeInsight"), "LifeInsight"),
       },
@@ -160,7 +164,7 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/BillingFAQPage"), "BillingFAQPage"),
       },
       {
-        // Protected routes — require authentication
+        // Protected routes â€” require authentication
         Component: ProtectedRoute,
         children: [
           {

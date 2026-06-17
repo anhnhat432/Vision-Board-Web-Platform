@@ -218,7 +218,7 @@ async function request<TResponse, TBody = unknown>(
       ...options,
       method,
       headers,
-      body: body === undefined ? undefined : (isFormData ? (body as any) : JSON.stringify(body)),
+      body: body === undefined ? undefined : isFormData ? (body as BodyInit) : JSON.stringify(body),
     });
   } catch (networkError) {
     const apiError =

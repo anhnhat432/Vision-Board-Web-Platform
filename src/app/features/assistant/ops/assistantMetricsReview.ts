@@ -433,4 +433,3 @@ export function formatAssistantReviewReport(report: AssistantReviewReport): stri
 
   return lines.join("\n");
 }
-

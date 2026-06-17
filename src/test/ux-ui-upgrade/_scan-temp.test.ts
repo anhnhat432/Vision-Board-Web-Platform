@@ -23,7 +23,8 @@ const STEP_PATHS = [
   "src/app/pages/ReflectionJournal",
 ];
 
-const NEUTRAL_RE = /\b(?:[a-z][a-z-]*-)?(?:slate|gray|zinc|neutral|stone)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/;
+const NEUTRAL_RE =
+  /\b(?:[a-z][a-z-]*-)?(?:slate|gray|zinc|neutral|stone)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/;
 
 test("TEMP: dump neutral-only violations on step screens", () => {
   const report = scanCoreFlowScreens(undefined, STEP_PATHS);

@@ -225,6 +225,8 @@ export function TwelveWeekTodayTab({
     firstPriorityTask?.completed && todayQueue.some((task) => task.id === firstPriorityTask.id),
   );
   const isFirstWeek = currentWeek === 1;
+  const hasStartedExecution = todayCompletedCount > 0 || Boolean(latestCheckIn);
+  const shouldShowFirstTaskGuide = isFirstWeek && Boolean(primaryTask) && !hasStartedExecution;
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
   const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
   const [isHeroDismissed, setIsHeroDismissed] = useState(false);
@@ -492,13 +494,37 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 text-[11px] text-app-ink-muted flex items-center gap-1.5 px-2 py-1 bg-app-accent-soft/35 border border-app-accent/15 rounded-xl w-fit shadow-4xs"
+          className={
+            shouldShowFirstTaskGuide
+              ? "order-1 w-full rounded-2xl border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/45 via-app-surface to-app-accent-subtle/30 px-4 py-3.5 text-left shadow-3xs"
+              : "order-1 flex w-fit items-center gap-1.5 rounded-xl border border-app-accent/15 bg-app-accent-soft/35 px-2 py-1 text-[11px] text-app-ink-muted shadow-4xs"
+          }
         >
-          <Sparkles className="h-3 w-3 text-app-accent shrink-0 animate-pulse" />
-          <span>
-            <span className="font-semibold text-app-accent">{nextActionState.title}:</span>{" "}
-            {nextActionState.description}
-          </span>
+          {shouldShowFirstTaskGuide ? (
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-app-accent">Bắt đầu tuần 1</p>
+                <p className="mt-1 text-sm font-semibold leading-5 text-app-ink">
+                  Bắt đầu từ việc ưu tiên bên dưới rồi tick xong để tạo đà.
+                </p>
+                <p className="mt-1 text-xs leading-5 text-app-ink-soft">
+                  Chỉ cần hoàn thành việc đầu tiên này là bạn đã khởi động được nhịp 12 tuần. Sau lần tick đầu, dải nhắc
+                  này sẽ tự ẩn.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3 shrink-0 text-app-accent animate-pulse" />
+              <span>
+                <span className="font-semibold text-app-accent">{nextActionState.title}:</span>{" "}
+                {nextActionState.description}
+              </span>
+            </>
+          )}
         </div>
       ) : (
         <div

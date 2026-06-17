@@ -721,7 +721,8 @@ export function LifeInsight() {
                                     color: colorConfig.accent,
                                     borderWidth: "1px",
                                     borderStyle: "solid",
-                                    transition: "border-color 200ms ease, background-color 200ms ease, color 200ms ease",
+                                    transition:
+                                      "border-color 200ms ease, background-color 200ms ease, color 200ms ease",
                                   }
                                 : {}
                             }

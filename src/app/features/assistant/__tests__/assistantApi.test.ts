@@ -125,27 +125,25 @@ describe("assistantApi sendAssistantMessageStream", () => {
 
   it("falls back to the JSON structured AI endpoint when stream route is unavailable", async () => {
     const { sendAssistantMessageStream } = await import("../assistantApi");
-    mocks.authedFetch
-      .mockResolvedValueOnce(new Response("Not found", { status: 404 }))
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            success: true,
-            data: {
-              assistantText: "Mình tạo bản nháp trước nhé.",
-              proposedActions: [
-                {
-                  id: "act_1",
-                  type: "create_goal",
-                  payload: { title: "Học React", category: "career" },
-                  label: "Tạo mục tiêu: Học React",
-                },
-              ],
-            },
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        ),
-      );
+    mocks.authedFetch.mockResolvedValueOnce(new Response("Not found", { status: 404 })).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            assistantText: "Mình tạo bản nháp trước nhé.",
+            proposedActions: [
+              {
+                id: "act_1",
+                type: "create_goal",
+                payload: { title: "Học React", category: "career" },
+                label: "Tạo mục tiêu: Học React",
+              },
+            ],
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
     const deltas: string[] = [];
 
     await sendAssistantMessageStream({ message: "tao muc tieu hoc react", context }, (delta) => deltas.push(delta));

@@ -226,6 +226,10 @@ export function buildAuthSyncMode(): AuthSyncMode {
   }
 }
 
+// Draft đến từ AI output / persisted store với schema động: mỗi nhánh
+// (specific|measurable|achievable|relevant|time_bound) có thể là string hoặc
+// object lồng nhau, nên dùng `any` có chủ đích cho lớp parse phòng thủ này.
+// biome-ignore lint/suspicious/noExplicitAny: parse draft schema động từ AI output
 function mapDraftToSmartGoal(draft: any): SmartGoal {
   const raw = draft || {};
   const specific = raw.specific || {};

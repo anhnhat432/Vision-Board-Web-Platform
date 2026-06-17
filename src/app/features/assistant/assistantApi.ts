@@ -80,7 +80,11 @@ function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
     }));
 }
 
-function createAssistantApiError(message: string, errorCode?: string, status?: number): Error & {
+function createAssistantApiError(
+  message: string,
+  errorCode?: string,
+  status?: number,
+): Error & {
   errorCode?: string;
   status?: number;
 } {
@@ -171,10 +175,7 @@ async function sendStructuredAssistantJsonFallback(
   );
 }
 
-async function readStructuredAssistantSse(
-  response: Response,
-  onDelta: (text: string) => void,
-): Promise<void> {
+async function readStructuredAssistantSse(response: Response, onDelta: (text: string) => void): Promise<void> {
   if (!response.body) {
     throw createAssistantApiError("Không thể nhận luồng dữ liệu từ trợ lý AI.", "ASSISTANT_STREAM_UNAVAILABLE");
   }

@@ -618,4 +618,3 @@ describe("normalizeGoal ad-hoc tasks preservation", () => {
     expect(taskIds).toContain("task_adhoc_123");
   });
 });
-

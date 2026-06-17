@@ -352,7 +352,10 @@ export function SMARTGoalSetup() {
       });
 
       localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(quickFeasibilityResult));
-      localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(buildDefaultFeasibilityAnswers()));
+      localStorage.setItem(
+        APP_STORAGE_KEYS.pendingFeasibilityAnswers,
+        JSON.stringify(buildDefaultFeasibilityAnswers()),
+      );
       localStorage.setItem("feasibilityActiveGoal", finalSnapshot);
       localStorage.removeItem("feasibilityBackupAnswers");
       localStorage.removeItem("feasibilityBackupResult");

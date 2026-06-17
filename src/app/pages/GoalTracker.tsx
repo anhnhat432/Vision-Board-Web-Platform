@@ -27,6 +27,7 @@ import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { PageHero } from "../components/layout/PageHero";
+import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -52,6 +53,7 @@ import { Skeleton } from "../components/ui/skeleton";
 import { SpotlightCard } from "../components/ui/spotlight-card";
 import { cn } from "../components/ui/utils";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
+import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -99,6 +101,30 @@ const CATEGORY_STYLES: Record<
     bar: "from-app-accent/80 to-app-accent",
   },
 };
+
+const GOALTRACKER_TOUR_STEPS: SpotlightTourStep[] = [
+  {
+    id: "hero",
+    targetId: "goaltracker-hero",
+    title: "Bắt đầu mục tiêu ở đây",
+    description:
+      "Khi chưa biết đi tiếp thế nào, dùng hai nút đầu trang để vào luồng 12 tuần có hướng dẫn hoặc tạo nhanh một mục tiêu SMART.",
+  },
+  {
+    id: "summary",
+    targetId: "goaltracker-summary",
+    title: "Xem sức khỏe mục tiêu trong một hàng",
+    description:
+      "Dải số liệu này cho biết bạn đang có bao nhiêu mục tiêu, bao nhiêu việc đã chốt và mục tiêu nào cần chú ý trước.",
+  },
+  {
+    id: "goals",
+    targetId: "goaltracker-goals",
+    title: "Quản lý mục tiêu chính ở khu vực này",
+    description:
+      "Danh sách bên dưới là nơi mở hệ 12 tuần, đánh dấu việc nhỏ, hoặc xử lý mục tiêu quá hạn mà không phải quét toàn bộ trang.",
+  },
+];
 
 const completedGoalStyle = `
   @keyframes completedBorderGlow {
@@ -539,6 +565,7 @@ function GoalTrackerContent({
   canSyncRemoteDelete: boolean;
 }) {
   const navigate = useNavigate();
+  const { isTourOpen, setIsTourOpen } = usePageTour("goaltracker");
   const autoCloudSync = useOptionalAutoCloudSyncContext();
   const reload = onReload;
   const [searchQuery, setSearchQuery] = useState("");
@@ -1213,6 +1240,13 @@ function GoalTrackerContent({
           openTwelveWeekCenter={openTwelveWeekCenter}
         />
       </div>
+      <SpotlightTour
+        open={isTourOpen}
+        onOpenChange={setIsTourOpen}
+        title="Tour Mục tiêu"
+        description="Ba điểm quan trọng để bạn biết nên tạo, theo dõi và xử lý mục tiêu ở đâu."
+        steps={GOALTRACKER_TOUR_STEPS}
+      />
     </div>
   );
 }

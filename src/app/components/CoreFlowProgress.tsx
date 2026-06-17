@@ -89,7 +89,7 @@ export function CoreFlowProgress({
             onClick={onExit}
             title={exitTooltip}
             aria-label={exitTooltip}
-            className="shrink-0 rounded-full px-2 py-1 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="shrink-0 rounded-full min-h-11 px-3 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           >
             {exitLabel}
           </button>

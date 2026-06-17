@@ -8,7 +8,7 @@ import type {
 } from "./storage-types";
 import { generateId } from "./storage-types";
 
-const VALID_TYPES = ["image", "quote", "icon", "goal_card"] as const;
+const VALID_TYPES = ["image", "quote", "icon", "goal_card", "sticker"] as const;
 const VALID_SIZE_PRESETS: VisionBoardSizePreset[] = ["S", "M", "L", "XL"];
 const VALID_QUOTE_FONTS: NonNullable<VisionBoardItemStyle["quoteFont"]>[] = ["default", "handwriting", "serif", "bold"];
 const VALID_IMAGE_FRAMES: NonNullable<VisionBoardItemStyle["imageFrame"]>[] = [
@@ -16,8 +16,20 @@ const VALID_IMAGE_FRAMES: NonNullable<VisionBoardItemStyle["imageFrame"]>[] = [
   "polaroid",
   "washi",
   "minimal",
+  "scalloped",
+  "filmstrip",
+  "watercolor",
 ];
-const VALID_THEMES: VisionBoardThemeId[] = ["aurora", "sunset", "forest", "nightsky", "minimal"];
+const VALID_QUOTE_BACKGROUNDS: NonNullable<VisionBoardItemStyle["quoteBackground"]>[] = ["none", "dots", "highlight"];
+const VALID_THEMES: VisionBoardThemeId[] = [
+  "aurora",
+  "sunset",
+  "forest",
+  "nightsky",
+  "minimal",
+  "blossom",
+  "dreamscape",
+];
 
 function normalizeFiniteNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -45,6 +57,13 @@ function normalizeVisionBoardItemStyle(value: unknown): VisionBoardItemStyle | u
     VALID_IMAGE_FRAMES.includes(raw.imageFrame as NonNullable<VisionBoardItemStyle["imageFrame"]>)
   ) {
     style.imageFrame = raw.imageFrame as NonNullable<VisionBoardItemStyle["imageFrame"]>;
+  }
+
+  if (
+    typeof raw.quoteBackground === "string" &&
+    VALID_QUOTE_BACKGROUNDS.includes(raw.quoteBackground as NonNullable<VisionBoardItemStyle["quoteBackground"]>)
+  ) {
+    style.quoteBackground = raw.quoteBackground as NonNullable<VisionBoardItemStyle["quoteBackground"]>;
   }
 
   return Object.keys(style).length > 0 ? style : undefined;

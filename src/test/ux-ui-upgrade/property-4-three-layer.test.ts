@@ -40,8 +40,7 @@ import {
 // Chuẩn bị dữ liệu (đọc một lần ở module scope — thuần, test-time)
 // ─────────────────────────────────────────────────────────────
 
-const PROPERTY_TAG =
-  "Feature: ux-ui-upgrade, Property 4: Bất biến cấu trúc 3 lớp (hướng tham chiếu + acyclic)";
+const PROPERTY_TAG = "Feature: ux-ui-upgrade, Property 4: Bất biến cấu trúc 3 lớp (hướng tham chiếu + acyclic)";
 
 const postLight: TokenSet = loadTokenSet({ mode: "light" });
 const postDark: TokenSet = loadTokenSet({ mode: "dark" });

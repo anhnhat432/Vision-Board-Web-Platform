@@ -29,6 +29,12 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Tạo điểm bắt đầu đủ rõ trước khi chọn trọng tâm và viết mục tiêu.",
   },
   {
+    match: (pathname: string) => pathname === "/help",
+    label: "Trợ giúp",
+    title: "Trung tâm trợ giúp – Dear Our Future",
+    tagline: "Hướng dẫn ngắn gọn để biến mục tiêu thành kế hoạch 12 tuần rõ ràng.",
+  },
+  {
     match: (pathname: string) => pathname === "/vision",
     label: "Tầm nhìn 3 năm",
     title: "Tầm nhìn 3 năm – Dear Our Future",

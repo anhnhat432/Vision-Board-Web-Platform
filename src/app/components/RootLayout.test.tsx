@@ -493,7 +493,6 @@ describe("RootLayout onboarding redirect", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-
   it("does not auto-open spotlight tours after first-run guidance is completed", async () => {
     localStorage.setItem("visionboard_first_run_guidance_completed_at", new Date().toISOString());
     seedAuthenticatedCompletedWorkspace();

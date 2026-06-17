@@ -130,25 +130,25 @@
   --destructive-foreground: #ffffff;
   --success: var(--app-status-success);
   --success-foreground: #ffffff;
-  --success-border: #A8D4BE;
+  --success-border: #a8d4be;
   --color-success-fg: var(--app-status-success);
-  --color-success-bg: #EAF4EE;
-  --color-success-border: #A8D4BE;
+  --color-success-bg: #eaf4ee;
+  --color-success-border: #a8d4be;
   --warning: var(--app-status-warning);
   --warning-foreground: #ffffff;
-  --warning-border: #F0D0A0;
+  --warning-border: #f0d0a0;
   --color-warning-fg: var(--app-status-warning);
-  --color-warning-bg: #FDF3E0;
-  --color-warning-border: #F0D0A0;
+  --color-warning-bg: #fdf3e0;
+  --color-warning-border: #f0d0a0;
   --info: var(--app-status-info);
   --info-foreground: #ffffff;
-  --info-border: #B0CCE8;
+  --info-border: #b0cce8;
   --color-info-fg: var(--app-status-info);
-  --color-info-bg: #E8F0F8;
-  --color-info-border: #B0CCE8;
+  --color-info-bg: #e8f0f8;
+  --color-info-border: #b0cce8;
   --color-danger-fg: var(--app-status-error);
-  --color-danger-bg: #F8EAEA;
-  --color-danger-border: #E8B0B0;
+  --color-danger-bg: #f8eaea;
+  --color-danger-border: #e8b0b0;
   --border: var(--app-line);
   --input: transparent;
   --input-background: var(--app-surface);
@@ -166,7 +166,7 @@
   --surface-stroke: var(--app-line);
   --shadow-panel: var(--app-shadow-md);
   --chart-1: var(--app-accent);
-  --chart-2: #3A7261;
+  --chart-2: #3a7261;
   --chart-3: var(--app-status-warning);
   --chart-4: var(--app-warm);
   --chart-5: var(--app-status-info);
@@ -247,7 +247,7 @@
   --destructive-foreground: #ffffff;
   --border: var(--app-line);
   --input: rgba(255, 255, 255, 0.04);
-  --ring: rgba(91, 165, 144, 0.40);
+  --ring: rgba(91, 165, 144, 0.4);
   --surface-muted: var(--app-bg-subtle);
   --border-muted: var(--app-line);
   --surface-panel: var(--app-surface);
@@ -257,10 +257,10 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --chart-1: var(--app-accent);
-  --chart-2: #3A9478;
-  --chart-3: #E8A830;
+  --chart-2: #3a9478;
+  --chart-3: #e8a830;
   --chart-4: var(--app-warm);
-  --chart-5: #6B9AC4;
+  --chart-5: #6b9ac4;
   --sidebar: var(--app-surface);
   --sidebar-foreground: var(--app-ink);
   --sidebar-primary: var(--app-accent);
@@ -366,10 +366,12 @@
   /* Skip to content link for keyboard users */
   a.skip-to-content {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    left: -9999px;
+    top: auto;
+    width: auto;
+    height: auto;
     padding: 0;
-    margin: -1px;
+    margin: 0;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
@@ -659,9 +661,17 @@
     overflow-y: visible;
     background-color: var(--app-bg);
     /* Subtle loang màu sage & terracotta mộc mạc tạo chiều sâu chánh niệm */
-    background-image: 
-      radial-gradient(circle at 5% 5%, rgba(58, 114, 97, 0.035) 0%, transparent 40%),
-      radial-gradient(circle at 95% 95%, rgba(211, 106, 71, 0.035) 0%, transparent 45%);
+    background-image:
+      radial-gradient(
+        circle at 5% 5%,
+        rgba(58, 114, 97, 0.035) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 95% 95%,
+        rgba(211, 106, 71, 0.035) 0%,
+        transparent 45%
+      );
     background-attachment: fixed;
   }
 
@@ -817,9 +827,17 @@
 
   .dark .app-shell {
     background-color: var(--background);
-    background-image: 
-      radial-gradient(circle at 5% 5%, rgba(91, 165, 144, 0.02) 0%, transparent 40%),
-      radial-gradient(circle at 95% 95%, rgba(232, 152, 120, 0.02) 0%, transparent 45%);
+    background-image:
+      radial-gradient(
+        circle at 5% 5%,
+        rgba(91, 165, 144, 0.02) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 95% 95%,
+        rgba(232, 152, 120, 0.02) 0%,
+        transparent 45%
+      );
   }
 
   .app-shell::after {
@@ -883,9 +901,9 @@
     transform: translateX(-50%);
     width: 8px;
     height: 8px;
-    background: radial-gradient(circle at 30% 30%, #E89878, #C96843);
+    background: radial-gradient(circle at 30% 30%, #e89878, #c96843);
     border-radius: 50%;
-    box-shadow: 
+    box-shadow:
       0 1px 2px rgba(26, 26, 26, 0.15),
       inset 0 0.5px 0.5px rgba(255, 255, 255, 0.4);
     z-index: 10;
@@ -898,7 +916,7 @@
     left: calc(50% + 1.5px);
     width: 1px;
     height: 4px;
-    background: #A39B8C;
+    background: #a39b8c;
     transform: rotate(15deg);
     z-index: 9;
     pointer-events: none;
@@ -2140,7 +2158,9 @@
     background: var(--app-surface);
     border: 1px solid var(--app-line);
     border-bottom: none;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.05), 0 -1px 0 rgba(26, 26, 26, 0.02);
+    box-shadow:
+      0 -8px 30px rgba(0, 0, 0, 0.05),
+      0 -1px 0 rgba(26, 26, 26, 0.02);
     border-radius: 1.5rem 1.5rem 0 0;
     padding: 0.65rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0));
   }
@@ -3549,16 +3569,31 @@ html.theme-transitioning *::after {
 
 /* 1. Audio Visualizer Waves Keyframes */
 @keyframes audio-wave-height-1 {
-  0%, 100% { height: 4px; }
-  50% { height: 12px; }
+  0%,
+  100% {
+    height: 4px;
+  }
+  50% {
+    height: 12px;
+  }
 }
 @keyframes audio-wave-height-2 {
-  0%, 100% { height: 6px; }
-  50% { height: 10px; }
+  0%,
+  100% {
+    height: 6px;
+  }
+  50% {
+    height: 10px;
+  }
 }
 @keyframes audio-wave-height-3 {
-  0%, 100% { height: 3px; }
-  50% { height: 11px; }
+  0%,
+  100% {
+    height: 3px;
+  }
+  50% {
+    height: 11px;
+  }
 }
 
 .animate-audio-wave-1 {
@@ -3582,8 +3617,8 @@ html.theme-transitioning *::after {
   background: rgba(255, 255, 255, 0.45) !important;
   backdrop-filter: blur(24px) saturate(120%) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 
-    0 10px 30px -10px rgba(0, 0, 0, 0.04), 
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.04),
     0 1px 2px rgba(0, 0, 0, 0.02) !important;
 }
 
@@ -3591,8 +3626,7 @@ html.dark .glass-premium {
   background: rgba(17, 17, 20, 0.45) !important;
   backdrop-filter: blur(24px) saturate(120%) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  box-shadow: 
-    0 10px 30px -10px rgba(0, 0, 0, 0.3), 
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.3),
     0 1px 2px rgba(0, 0, 0, 0.1) !important;
 }
-
