@@ -45,8 +45,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_REPO_ROOT, resolveCoreFlowFiles } from "./token-scan";
 
-const PROPERTY_TAG =
-  "Feature: ux-ui-upgrade, Property 3: Phân vùng ngữ cảnh màu (Execution ↔ Reflection)";
+const PROPERTY_TAG = "Feature: ux-ui-upgrade, Property 3: Phân vùng ngữ cảnh màu (Execution ↔ Reflection)";
 
 // ─────────────────────────────────────────────────────────────
 // Domain types
@@ -200,8 +199,7 @@ const NODES: ReadonlyArray<ScreenNode> = buildNodes();
 // ─────────────────────────────────────────────────────────────
 
 function findOpposingTokens(node: ScreenNode): string[] {
-  const isForbidden =
-    node.context === "execution" ? forbiddenForExecution : forbiddenForReflection;
+  const isForbidden = node.context === "execution" ? forbiddenForExecution : forbiddenForReflection;
   return [...node.tokens].filter(isForbidden).sort();
 }
 
@@ -255,12 +253,8 @@ describe("Property 3 — Phân vùng ngữ cảnh màu (task 6.5)", () => {
       }
     }
     if (violations.length > 0) {
-      const report = violations
-        .map((v) => `  ${v.relativePath} [${v.context}]: ${v.offending.join(", ")}`)
-        .join("\n");
-      throw new Error(
-        `Có ${violations.length} file vi phạm phân vùng ngữ cảnh màu:\n${report}`,
-      );
+      const report = violations.map((v) => `  ${v.relativePath} [${v.context}]: ${v.offending.join(", ")}`).join("\n");
+      throw new Error(`Có ${violations.length} file vi phạm phân vùng ngữ cảnh màu:\n${report}`);
     }
   });
 });

@@ -17,7 +17,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
     items: [
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/education-doc-sach.webp",
         x: 10,
         y: 15,
         width: 220,
@@ -27,7 +27,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
       },
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/education-ban-hoc.webp",
         x: 55,
         y: 10,
         width: 220,
@@ -63,7 +63,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
     items: [
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/career-goc-lam-viec.webp",
         x: 8,
         y: 10,
         width: 220,
@@ -73,7 +73,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
       },
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/career-dan-dat.webp",
         x: 58,
         y: 15,
         width: 220,
@@ -109,7 +109,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
     items: [
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/health-van-dong.webp",
         x: 12,
         y: 12,
         width: 220,
@@ -119,7 +119,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
       },
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1544367563-121910aa6ccd?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/health-thien.webp",
         x: 60,
         y: 8,
         width: 220,
@@ -155,7 +155,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
     items: [
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/relationships-tro-chuyen.webp",
         x: 10,
         y: 8,
         width: 220,
@@ -165,7 +165,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
       },
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/family-to-am.webp",
         x: 58,
         y: 12,
         width: 220,
@@ -201,7 +201,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
     items: [
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/finance-ngan-sach.webp",
         x: 8,
         y: 12,
         width: 220,
@@ -211,7 +211,7 @@ export const VISION_BOARD_TEMPLATES: VisionBoardTemplate[] = [
       },
       {
         type: "image",
-        content: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=480&h=360&fit=crop&q=80",
+        content: "/curated/vision-board/finance-du-day.webp",
         x: 55,
         y: 15,
         width: 220,

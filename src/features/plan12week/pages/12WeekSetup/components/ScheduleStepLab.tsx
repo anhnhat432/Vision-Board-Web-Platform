@@ -241,9 +241,7 @@ export function ScheduleStepLab({
                 onChange={(event) => onChange("startDate", event.target.value)}
               />
               {draft.startDate ? (
-                <p className="mt-1 text-[10px] text-app-ink-soft">
-                  Đã chọn: {formatDisplayDate(draft.startDate)}
-                </p>
+                <p className="mt-1 text-[10px] text-app-ink-soft">Đã chọn: {formatDisplayDate(draft.startDate)}</p>
               ) : null}
               {startDateValidation.error && (
                 <p role="alert" className="text-[10px] font-bold text-app-status-error mt-1">

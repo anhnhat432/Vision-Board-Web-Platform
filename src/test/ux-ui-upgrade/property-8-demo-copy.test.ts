@@ -51,8 +51,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_REPO_ROOT, resolveCoreFlowFiles } from "./token-scan";
 
-const PROPERTY_TAG =
-  "Feature: ux-ui-upgrade, Property 8: Không rò rỉ ngôn từ demo-only ở real-mode";
+const PROPERTY_TAG = "Feature: ux-ui-upgrade, Property 8: Không rò rỉ ngôn từ demo-only ở real-mode";
 
 // ─────────────────────────────────────────────────────────────
 // Tập cụm từ kiểm duyệt — đồng bộ với Requirement 9.1 / AGENTS.md
@@ -72,9 +71,7 @@ const BANNED_PHRASES: ReadonlyArray<string> = [
   "bản dùng thử trên trình duyệt",
 ] as const;
 
-const BANNED_PHRASES_LC: ReadonlyArray<string> = BANNED_PHRASES.map((p) =>
-  p.toLocaleLowerCase("vi-VN"),
-);
+const BANNED_PHRASES_LC: ReadonlyArray<string> = BANNED_PHRASES.map((p) => p.toLocaleLowerCase("vi-VN"));
 
 // ─────────────────────────────────────────────────────────────
 // Pre-process: loại nhánh demo-only và comment
@@ -136,14 +133,10 @@ const USER_FACING_ATTR_RE =
   /\b(?:aria-label|aria-description|aria-roledescription|aria-valuetext|placeholder|title|alt|description)\s*=\s*"((?:[^"\\]|\\.)*)"/g;
 
 /** `toast.X("...")` first arg là string literal (double quote). */
-const TOAST_CALL_RE =
-  /\btoast\.(?:info|success|warning|error|message)\s*\(\s*"((?:[^"\\]|\\.)*)"/g;
+const TOAST_CALL_RE = /\btoast\.(?:info|success|warning|error|message)\s*\(\s*"((?:[^"\\]|\\.)*)"/g;
 
 /** Inline JSX expression chỉ chứa một string literal: `{"..."}` hoặc `{'...'}`. */
-const JSX_EXPR_STRING_RE = new RegExp(
-  String.raw`\{\s*${STRING_LIT}\s*\}`,
-  "g",
-);
+const JSX_EXPR_STRING_RE = new RegExp(String.raw`\{\s*${STRING_LIT}\s*\}`, "g");
 
 /**
  * Lấy giá trị thật của một matched string literal (đã có dấu nháy).
@@ -214,10 +207,7 @@ function buildRealModeCoreFlowCopy(): { items: SourceCopy[]; flat: string[] } {
   const items: SourceCopy[] = [];
   const flatSet = new Set<string>();
   for (const filePath of files) {
-    const relativePath = path
-      .relative(DEFAULT_REPO_ROOT, filePath)
-      .split(path.sep)
-      .join("/");
+    const relativePath = path.relative(DEFAULT_REPO_ROOT, filePath).split(path.sep).join("/");
     const raw = readFileSync(filePath, "utf8");
     const cleaned = stripDemoOnlyAndComments(raw);
     for (const text of extractVisibleStrings(cleaned)) {
@@ -301,14 +291,9 @@ describe("Property 8 — Không rò rỉ ngôn từ demo-only ở real-mode (tas
     }
     if (violations.length > 0) {
       const report = violations
-        .map(
-          (v) =>
-            `  ${v.relativePath}: ${JSON.stringify(v.hits)} ← ${JSON.stringify(v.text)}`,
-        )
+        .map((v) => `  ${v.relativePath}: ${JSON.stringify(v.hits)} ← ${JSON.stringify(v.text)}`)
         .join("\n");
-      throw new Error(
-        `Có ${violations.length} chuỗi real-mode rò rỉ ngôn từ demo-only:\n${report}`,
-      );
+      throw new Error(`Có ${violations.length} chuỗi real-mode rò rỉ ngôn từ demo-only:\n${report}`);
     }
   });
 });

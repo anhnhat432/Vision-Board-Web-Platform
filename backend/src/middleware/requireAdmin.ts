@@ -63,11 +63,6 @@ export async function requireAdmin(
       next();
       return;
     }
-    if (claimRole !== undefined) {
-      setCachedRole(authUser.uid, "user");
-      next(new ApiError(403, "Forbidden."));
-      return;
-    }
 
     const cachedRole = getCachedRole(authUser.uid);
     if (cachedRole === "admin") {

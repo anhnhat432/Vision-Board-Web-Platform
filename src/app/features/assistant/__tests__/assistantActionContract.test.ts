@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  ASSISTANT_ACTION_CONTRACT_CASES,
-  buildActionBlock,
-} from "@shared/assistantActionContractCases";
-import {
-  sanitizeActionPayload,
-  VALID_ACTION_TYPES,
-  VALID_ROUTES,
-} from "@shared/assistantActionSchema";
+import { ASSISTANT_ACTION_CONTRACT_CASES, buildActionBlock } from "@shared/assistantActionContractCases";
+import { sanitizeActionPayload, VALID_ACTION_TYPES, VALID_ROUTES } from "@shared/assistantActionSchema";
 import { parseAssistantReply } from "../parseActions";
 
 describe("assistant action schema contract (frontend)", () => {

@@ -81,10 +81,7 @@ const PRIMITIVE_PALETTE_REGEX = new RegExp(
  * Khớp hex color literal: `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`.
  * Ưu tiên độ dài lớn trước để khớp trọn vẹn (8 → 6 → 4 → 3).
  */
-const HEX_LITERAL_REGEX = new RegExp(
-  String.raw`#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b`,
-  "g",
-);
+const HEX_LITERAL_REGEX = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
 
 /** Repo root suy ra từ vị trí module (src/test/ux-ui-upgrade → ../../..). */
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -197,11 +194,7 @@ export function resolveCoreFlowFiles(
  * Quét nội dung text của một file, trả về danh sách vi phạm.
  * Có thể truyền sẵn `content` để test thuần không cần đọc đĩa.
  */
-export function scanContent(
-  filePath: string,
-  content: string,
-  repoRoot: string = DEFAULT_REPO_ROOT,
-): TokenViolation[] {
+export function scanContent(filePath: string, content: string, repoRoot: string = DEFAULT_REPO_ROOT): TokenViolation[] {
   const violations: TokenViolation[] = [];
   const relativePath = path.relative(repoRoot, filePath).split(path.sep).join("/");
   const lines = content.split(/\r\n|\r|\n/);
@@ -233,15 +226,12 @@ export function scanContent(
   pushMatches(PRIMITIVE_PALETTE_REGEX, "primitive-palette");
 
   // Sắp xếp theo (line, column) để output ổn định, dễ đọc.
-  violations.sort((a, b) => (a.line - b.line) || (a.column - b.column));
+  violations.sort((a, b) => a.line - b.line || a.column - b.column);
   return violations;
 }
 
 /** Đọc và quét một file trên đĩa. */
-export function scanFile(
-  filePath: string,
-  repoRoot: string = DEFAULT_REPO_ROOT,
-): TokenViolation[] {
+export function scanFile(filePath: string, repoRoot: string = DEFAULT_REPO_ROOT): TokenViolation[] {
   const content = readFileSync(filePath, "utf8");
   return scanContent(filePath, content, repoRoot);
 }
@@ -293,10 +283,5 @@ export function formatViolations(violations: readonly TokenViolation[]): string 
   if (violations.length === 0) {
     return "No token-compliance violations found.";
   }
-  return violations
-    .map(
-      (v) =>
-        `${v.relativePath}:${v.line}:${v.column} [${v.kind}] ${v.matched}`,
-    )
-    .join("\n");
+  return violations.map((v) => `${v.relativePath}:${v.line}:${v.column} [${v.kind}] ${v.matched}`).join("\n");
 }

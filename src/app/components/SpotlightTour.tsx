@@ -483,7 +483,9 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
               </div>
             ) : targetOffscreen ? (
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-app-line bg-app-bg-subtle px-4 py-3 text-xs leading-5 text-app-ink-soft sm:px-5">
-                <span>Khu vực này nằm ở phần khác của trang. Mình sẽ không tự kéo màn hình để tránh làm bạn bị lệch nhịp.</span>
+                <span>
+                  Khu vực này nằm ở phần khác của trang. Mình sẽ không tự kéo màn hình để tránh làm bạn bị lệch nhịp.
+                </span>
                 <button
                   type="button"
                   onClick={handleScrollToTarget}

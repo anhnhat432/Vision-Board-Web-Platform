@@ -380,7 +380,9 @@ export function TwelveWeekRescueTriggerBanner({
             <AlertTriangle className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1 space-y-0.5">
-            <p className="font-serif text-base font-semibold text-app-status-warning leading-snug">{trigger.headline}</p>
+            <p className="font-serif text-base font-semibold text-app-status-warning leading-snug">
+              {trigger.headline}
+            </p>
             <p className="text-xs leading-relaxed text-app-ink-soft">{trigger.detail}</p>
           </div>
         </div>

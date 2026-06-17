@@ -262,10 +262,7 @@ export function LifeBalance() {
     return weakestArea;
   }, [lifeAreas, selectedFocusAreaName, weakestArea]);
 
-  const focusSmartGoalStarter = useMemo(
-    () => (focusArea ? getSmartGoalStarter(focusArea.name) : null),
-    [focusArea],
-  );
+  const focusSmartGoalStarter = useMemo(() => (focusArea ? getSmartGoalStarter(focusArea.name) : null), [focusArea]);
 
   useEffect(() => {
     const nextTab = tabParam === "focus" || tabParam === "history" ? tabParam : "current";
@@ -388,7 +385,6 @@ export function LifeBalance() {
     localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, focusArea.name);
     navigate("/smart-goal-setup");
   };
-
 
   if (!userData || !hasLifeBalanceData) {
     return (
@@ -520,7 +516,9 @@ export function LifeBalance() {
             delay={0.15}
             className="surface-raised rounded-xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 transition-all duration-300 hover:shadow-md hover:border-app-status-warning/50"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-status-warning">Lĩnh vực cần ưu tiên</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-status-warning">
+              Lĩnh vực cần ưu tiên
+            </p>
             <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
               <CountUp value={weakestArea.score} />
               <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
@@ -948,7 +946,8 @@ export function LifeBalance() {
                       Đề xuất trọng tâm
                     </h3>
                     <p className="mt-2 text-xs text-app-ink-soft leading-relaxed">
-                      Dựa trên điểm vừa chấm, <strong>{getLifeAreaLabel(weakestArea.name)}</strong> ({weakestArea.score}đ) là lĩnh vực có cơ hội cải thiện rõ nhất.
+                      Dựa trên điểm vừa chấm, <strong>{getLifeAreaLabel(weakestArea.name)}</strong> ({weakestArea.score}
+                      đ) là lĩnh vực có cơ hội cải thiện rõ nhất.
                     </p>
                     <p className="mt-2 text-xs text-app-ink-muted leading-relaxed">
                       {getFocusInsight(weakestArea.name, weakestArea.score).reason}
@@ -993,10 +992,20 @@ export function LifeBalance() {
                                 <AreaIcon className="h-4 w-4" aria-hidden="true" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className={cn("truncate text-xs font-bold", isSelected ? colors.text : "text-app-ink-soft group-hover:text-app-ink")}>
+                                <p
+                                  className={cn(
+                                    "truncate text-xs font-bold",
+                                    isSelected ? colors.text : "text-app-ink-soft group-hover:text-app-ink",
+                                  )}
+                                >
                                   {getLifeAreaLabel(area.name)}
                                 </p>
-                                <p className={cn("text-xs font-semibold", isSelected ? colors.text : "text-app-ink-muted")}>
+                                <p
+                                  className={cn(
+                                    "text-xs font-semibold",
+                                    isSelected ? colors.text : "text-app-ink-muted",
+                                  )}
+                                >
                                   {area.score}/10
                                 </p>
                               </div>
@@ -1015,7 +1024,9 @@ export function LifeBalance() {
                     <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent">
                       LĨNH VỰC TRỌNG TÂM
                     </span>
-                    <h2 className="mt-2 font-serif text-2xl font-bold text-app-ink">{getLifeAreaLabel(focusArea.name)}</h2>
+                    <h2 className="mt-2 font-serif text-2xl font-bold text-app-ink">
+                      {getLifeAreaLabel(focusArea.name)}
+                    </h2>
                     <p className="mt-1 text-xs text-app-ink-soft">Điểm hiện tại: {focusArea.score}/10</p>
 
                     {/* Gợi ý mục tiêu */}

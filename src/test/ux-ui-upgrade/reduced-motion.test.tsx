@@ -45,24 +45,15 @@ import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 interface MockMediaQueryList {
   matches: boolean;
   media: string;
-  addEventListener: (
-    event: "change",
-    handler: (e: MediaQueryListEvent) => void,
-  ) => void;
-  removeEventListener: (
-    event: "change",
-    handler: (e: MediaQueryListEvent) => void,
-  ) => void;
+  addEventListener: (event: "change", handler: (e: MediaQueryListEvent) => void) => void;
+  removeEventListener: (event: "change", handler: (e: MediaQueryListEvent) => void) => void;
   /** Mô phỏng OS bật/tắt prefers-reduced-motion. */
   trigger: (matches: boolean) => void;
   /** Số listener đang đăng ký (kiểm chứng cleanup khi unmount). */
   listenerCount: () => number;
 }
 
-function createMockMediaQuery(
-  initial: boolean,
-  query: string,
-): MockMediaQueryList {
+function createMockMediaQuery(initial: boolean, query: string): MockMediaQueryList {
   const handlers = new Set<(e: MediaQueryListEvent) => void>();
   const mq: MockMediaQueryList = {
     matches: initial,
@@ -121,12 +112,7 @@ function ReducedMotionHarness({ onClick }: HarnessProps) {
         Hành động chính
       </button>
       <p data-testid="harness-count">{count}</p>
-      <input
-        data-testid="harness-input"
-        type="text"
-        aria-label="Trường nhập"
-        defaultValue=""
-      />
+      <input data-testid="harness-input" type="text" aria-label="Trường nhập" defaultValue="" />
     </section>
   );
 }
@@ -184,9 +170,9 @@ function extractReducedMotionBlocks(css: string): string {
 const QUERY = "(prefers-reduced-motion: reduce)";
 
 const ESSENTIAL_MOTION_MAX_MS = 200; // R5.2
-const DEFAULT_MOTION_MIN_MS = 150;   // R5.4
-const DEFAULT_MOTION_MAX_MS = 500;   // R5.4
-const TOGGLE_BUDGET_MS = 500;        // R5.5
+const DEFAULT_MOTION_MIN_MS = 150; // R5.4
+const DEFAULT_MOTION_MAX_MS = 500; // R5.4
+const TOGGLE_BUDGET_MS = 500; // R5.5
 
 // ─────────────────────────────────────────────────────────────
 // 1) R5.5 — Toggle áp dụng ≤ 500ms KHÔNG cần tải lại trang
@@ -243,10 +229,7 @@ describe("Reduced-motion — toggle áp dụng ≤500ms không reload (R5.5)", (
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThanOrEqual(TOGGLE_BUDGET_MS);
     expect(screen.getByTestId("reduce-flag")).toHaveTextContent("reduce-on");
-    expect(screen.getByTestId("harness-action")).toHaveAttribute(
-      "class",
-      expect.stringMatching(/^motion-press\s*$/),
-    );
+    expect(screen.getByTestId("harness-action")).toHaveAttribute("class", expect.stringMatching(/^motion-press\s*$/));
 
     // Không bao giờ gọi reload (R5.5).
     expect(reloadSpy).not.toHaveBeenCalled();
@@ -263,9 +246,7 @@ describe("Reduced-motion — toggle áp dụng ≤500ms không reload (R5.5)", (
 
     expect(screen.getByTestId("reduce-flag")).toHaveTextContent("reduce-off");
     // Class trang trí được phục hồi khi tắt reduce → R5.4 (motion mặc định).
-    expect(screen.getByTestId("harness-action").className).toContain(
-      "motion-reveal",
-    );
+    expect(screen.getByTestId("harness-action").className).toContain("motion-reveal");
     expect(reloadSpy).not.toHaveBeenCalled();
   });
 
@@ -390,10 +371,7 @@ describe("Reduced-motion — vô hiệu hóa motion không thiết yếu (R5.1)"
     ];
 
     for (const cls of decorativeClasses) {
-      expect(
-        blocks,
-        `class trang trí ${cls} cần xuất hiện trong reduced-motion block`,
-      ).toContain(cls);
+      expect(blocks, `class trang trí ${cls} cần xuất hiện trong reduced-motion block`).toContain(cls);
     }
 
     // Mỗi rule trang trí thường gồm `animation: none` (có thể kèm !important)
@@ -422,9 +400,7 @@ describe("Reduced-motion — motion thiết yếu ≤ 200ms (R5.2)", () => {
   it("token --duration-instant ≤ 200ms để phục vụ overlay/dialog/tooltip thiết yếu", () => {
     const tokens = extractDurationTokens(readThemeCss());
     expect(tokens["--duration-instant"]).toBeDefined();
-    expect(tokens["--duration-instant"]).toBeLessThanOrEqual(
-      ESSENTIAL_MOTION_MAX_MS,
-    );
+    expect(tokens["--duration-instant"]).toBeLessThanOrEqual(ESSENTIAL_MOTION_MAX_MS);
   });
 
   it("overlay/dialog/sheet/popover/tooltip dưới reduced-motion dùng --duration-instant (≤200ms)", () => {
@@ -432,8 +408,7 @@ describe("Reduced-motion — motion thiết yếu ≤ 200ms (R5.2)", () => {
 
     // Có khối quy định lại animation/transition cho data-slot overlay
     // và khối đó dùng var(--duration-instant) thay vì duration dài hơn.
-    const overlayRule =
-      /\[data-slot="dialog-content"\][\s\S]*?\[data-slot="tooltip-content"\]\s*\{([\s\S]*?)\}/i;
+    const overlayRule = /\[data-slot="dialog-content"\][\s\S]*?\[data-slot="tooltip-content"\]\s*\{([\s\S]*?)\}/i;
     const m = overlayRule.exec(blocks);
     expect(m, "thiếu khối overlay essential motion trong reduced-motion block").not.toBeNull();
     if (m) {
@@ -452,9 +427,7 @@ describe("Reduced-motion — motion thiết yếu ≤ 200ms (R5.2)", () => {
     const tokens = extractDurationTokens(readThemeCss());
 
     // Lấy tất cả var(--duration-*) trong block reduced-motion.
-    const refs = [...blocks.matchAll(/var\(\s*(--duration-[\w-]+)\s*\)/g)].map(
-      (m) => m[1],
-    );
+    const refs = [...blocks.matchAll(/var\(\s*(--duration-[\w-]+)\s*\)/g)].map((m) => m[1]);
 
     // Mỗi tham chiếu phân giải về ms phải ≤ 200.
     for (const ref of refs) {

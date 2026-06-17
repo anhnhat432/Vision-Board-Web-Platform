@@ -833,9 +833,7 @@ describe("useAutoCloudSync", () => {
       setSignedIn("firebase_uid_trailing");
       vi.setSystemTime(base);
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Để lượt full-sync khi mount kết thúc (giải phóng inFlightRef) trước khi drain.
       await flushMicrotasks();
@@ -907,9 +905,7 @@ describe("useAutoCloudSync", () => {
       }
     });
 
-    type FloorInvariantOp =
-      | { type: "advance"; ms: number }
-      | { type: "drain" };
+    type FloorInvariantOp = { type: "advance"; ms: number } | { type: "drain" };
 
     // Sinh ngẫu nhiên một chuỗi thao tác: xen kẽ giữa việc tiến đồng hồ một lượng nhỏ
     // bất kỳ và việc gọi triggerDrainOnly (mô phỏng mutation/trigger drain tại các mốc
@@ -948,9 +944,7 @@ describe("useAutoCloudSync", () => {
         return drainSuccessResult;
       });
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Bỏ qua lượt full-sync khi mount (đi qua syncNow, không gọi sendPending) rồi reset mốc.
       await flushMicrotasks();
@@ -998,9 +992,7 @@ describe("useAutoCloudSync", () => {
         // R2.2/R2.3: hai lần gọi backend liên tiếp luôn cách nhau >= minSyncIntervalMs ms.
         for (let k = 1; k < sendTimes.length; k += 1) {
           const gap = sendTimes[k] - sendTimes[k - 1];
-          expect(gap, `${message} pair=${k - 1}->${k} gap=${gap}`).toBeGreaterThanOrEqual(
-            minSyncIntervalMs,
-          );
+          expect(gap, `${message} pair=${k - 1}->${k} gap=${gap}`).toBeGreaterThanOrEqual(minSyncIntervalMs);
         }
       }
     });
@@ -1009,18 +1001,13 @@ describe("useAutoCloudSync", () => {
     // (N rate-limited) rồi tiến qua floor để xác nhận chỉ có TỐI ĐA MỘT trailing flush
     // nổ (một lượt drain bổ sung, không phải N). Sau đó lặp lại một chu kỳ floor nữa để
     // xác nhận hook lên lịch lại được một timer mới qua các chu kỳ.
-    async function runMaxOneTrailingTimerScenario(
-      rateLimitedCalls: number,
-      minSyncIntervalMs: number,
-    ) {
+    async function runMaxOneTrailingTimerScenario(rateLimitedCalls: number, minSyncIntervalMs: number) {
       const base = new Date("2026-05-10T10:00:00.000Z").getTime();
       queueMock.pendingCount = 2; // pendingCount luôn > 0 để drain luôn được thử.
       setSignedIn("firebase_uid_max_one");
       vi.setSystemTime(base);
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Để lượt full-sync khi mount kết thúc (giải phóng inFlightRef) trước khi drain.
       await flushMicrotasks();
@@ -1121,12 +1108,7 @@ describe("useAutoCloudSync", () => {
     // - offline / apiNotConfigured / mutationSyncDisabled ⇒ drainSyncBaseReady = false (R5.1)
     // - hidden ⇒ document đang ẩn (R5.2)
     // - signedOut ⇒ ownerUid = null (R5.3)
-    type GuardUnreadyCondition =
-      | "offline"
-      | "apiNotConfigured"
-      | "mutationSyncDisabled"
-      | "hidden"
-      | "signedOut";
+    type GuardUnreadyCondition = "offline" | "apiNotConfigured" | "mutationSyncDisabled" | "hidden" | "signedOut";
 
     const ALL_GUARD_CONDITIONS: GuardUnreadyCondition[] = [
       "offline",
@@ -1153,10 +1135,7 @@ describe("useAutoCloudSync", () => {
     // drainSyncBaseReady/documentVisible/ownerUid tương ứng, rồi gọi triggerDrainOnly vài
     // lần với các bước tiến đồng hồ nhỏ, cuối cùng tiến vượt xa floor + flush microtasks.
     // Trả về tổng số lần sendPending12WeekMutations được gọi (phải luôn = 0).
-    async function runGuardScenario(
-      conditions: GuardUnreadyCondition[],
-      minSyncIntervalMs: number,
-    ) {
+    async function runGuardScenario(conditions: GuardUnreadyCondition[], minSyncIntervalMs: number) {
       const base = new Date("2026-05-10T10:00:00.000Z").getTime();
       queueMock.pendingCount = 2; // còn pending để drain luôn được thử nếu guard cho qua.
       vi.setSystemTime(base);
@@ -1187,9 +1166,7 @@ describe("useAutoCloudSync", () => {
         }
       }
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Lượt full-sync khi mount (nếu có) đi qua syncNow, không qua sendPending; reset mốc.
       await flushMicrotasks();
@@ -1235,9 +1212,7 @@ describe("useAutoCloudSync", () => {
         // Chọn ngẫu nhiên (đảm bảo ≥ 1) một hoặc nhiều điều kiện không sẵn sàng.
         const conditions = ALL_GUARD_CONDITIONS.filter(() => Math.random() < 0.5);
         if (conditions.length === 0) {
-          conditions.push(
-            ALL_GUARD_CONDITIONS[Math.floor(Math.random() * ALL_GUARD_CONDITIONS.length)],
-          );
+          conditions.push(ALL_GUARD_CONDITIONS[Math.floor(Math.random() * ALL_GUARD_CONDITIONS.length)]);
         }
         const message = `iteration=${i} conditions=${JSON.stringify(conditions)}`;
 
@@ -1260,9 +1235,7 @@ describe("useAutoCloudSync", () => {
       setSignedIn("firebase_uid_trailing_fire");
       vi.setSystemTime(base);
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Bỏ qua lượt full-sync khi mount (giải phóng inFlightRef) trước khi drain.
       await flushMicrotasks();
@@ -1323,9 +1296,7 @@ describe("useAutoCloudSync", () => {
         return { ...drainSuccessResult, pendingCount: 0 };
       });
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Lượt full-sync khi mount gọi syncNow một lần; xóa mock để theo dõi từ đây.
       await flushMicrotasks();
@@ -1376,9 +1347,7 @@ describe("useAutoCloudSync", () => {
       setSignedIn("firebase_uid_unmount");
       vi.setSystemTime(base);
 
-      const { result, unmount } = renderHook(() =>
-        useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }),
-      );
+      const { result, unmount } = renderHook(() => useAutoCloudSync({ intervalMs: 300_000, minSyncIntervalMs }));
 
       // Bỏ qua lượt full-sync khi mount (giải phóng inFlightRef) trước khi drain.
       await flushMicrotasks();
@@ -1441,9 +1410,7 @@ describe("useAutoCloudSync", () => {
         await result.current.triggerDrainOnly();
       });
       expect(sendPending).toHaveBeenCalledTimes(1);
-      expect(sendPending).toHaveBeenCalledWith(
-        expect.objectContaining({ ownerUid: "firebase_uid_userA" }),
-      );
+      expect(sendPending).toHaveBeenCalledWith(expect.objectContaining({ ownerUid: "firebase_uid_userA" }));
 
       // Tiến một chút trong cửa sổ floor rồi trigger drain lần hai → bị rate-limit chặn,
       // hẹn trailing flush cho user A (timer còn đang chờ).
@@ -1471,9 +1438,7 @@ describe("useAutoCloudSync", () => {
       // R4.2: timer của user A đã bị hủy ⇒ không có drain nào chạy từ timer cũ.
       expect(sendPending).not.toHaveBeenCalled();
       // Cụ thể hơn: chắc chắn không drain nhầm cho user A từ timer cũ.
-      expect(sendPending).not.toHaveBeenCalledWith(
-        expect.objectContaining({ ownerUid: "firebase_uid_userA" }),
-      );
+      expect(sendPending).not.toHaveBeenCalledWith(expect.objectContaining({ ownerUid: "firebase_uid_userA" }));
 
       unmount();
       sendPending.mockClear();

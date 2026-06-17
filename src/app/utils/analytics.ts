@@ -268,13 +268,7 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
     "archetype_overridden",
     "next_step",
   ],
-  feasibility_quick_plan_default_created: [
-    "source",
-    "focus_area",
-    "result_type",
-    "adjusted_score",
-    "plan_load",
-  ],
+  feasibility_quick_plan_default_created: ["source", "focus_area", "result_type", "adjusted_score", "plan_load"],
   feasibility_completed: [
     "focus_area",
     "result_type",

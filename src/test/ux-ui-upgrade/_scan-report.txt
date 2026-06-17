@@ -6,22 +6,22 @@
   "src/features/plan12week/pages/12WeekSetup/components/SetupCopilotPanel.tsx": 1
 }
 
-src/app/pages/GoalTracker.tsx:420:129 [primitive-palette] via-neutral-950
-src/app/pages/GoalTracker.tsx:420:150 [primitive-palette] to-neutral-950
-src/app/pages/GoalTracker.tsx:1005:90 [primitive-palette] from-neutral-950
-src/app/pages/GoalTracker.tsx:1005:112 [primitive-palette] via-neutral-950
-src/app/pages/GoalTracker.tsx:1525:51 [primitive-palette] bg-slate-100
-src/app/pages/GoalTracker.tsx:1525:69 [primitive-palette] bg-neutral-800
-src/app/pages/GoalTracker.tsx:1646:151 [primitive-palette] via-neutral-950
-src/app/pages/GoalTracker.tsx:1863:83 [primitive-palette] bg-neutral-900
-src/app/pages/GoalTracker.tsx:1968:27 [primitive-palette] bg-slate-100
-src/app/pages/GoalTracker.tsx:1968:45 [primitive-palette] bg-neutral-800
-src/app/pages/GoalTracker.tsx:2027:93 [primitive-palette] bg-neutral-900
-src/app/pages/GoalTracker.tsx:2027:113 [primitive-palette] bg-neutral-800
-src/app/pages/GoalTracker.tsx:2027:261 [primitive-palette] border-neutral-800
-src/app/pages/GoalTracker.tsx:2029:109 [primitive-palette] border-t-neutral-900
-src/app/pages/GoalTracker.tsx:2029:135 [primitive-palette] border-t-neutral-800
-src/app/pages/GoalTracker.tsx:2243:49 [primitive-palette] bg-neutral-900
+src/app/pages/GoalTracker.tsx:446:129 [primitive-palette] via-neutral-950
+src/app/pages/GoalTracker.tsx:446:150 [primitive-palette] to-neutral-950
+src/app/pages/GoalTracker.tsx:1032:90 [primitive-palette] from-neutral-950
+src/app/pages/GoalTracker.tsx:1032:112 [primitive-palette] via-neutral-950
+src/app/pages/GoalTracker.tsx:1559:51 [primitive-palette] bg-slate-100
+src/app/pages/GoalTracker.tsx:1559:69 [primitive-palette] bg-neutral-800
+src/app/pages/GoalTracker.tsx:1680:151 [primitive-palette] via-neutral-950
+src/app/pages/GoalTracker.tsx:1897:83 [primitive-palette] bg-neutral-900
+src/app/pages/GoalTracker.tsx:2002:27 [primitive-palette] bg-slate-100
+src/app/pages/GoalTracker.tsx:2002:45 [primitive-palette] bg-neutral-800
+src/app/pages/GoalTracker.tsx:2061:93 [primitive-palette] bg-neutral-900
+src/app/pages/GoalTracker.tsx:2061:113 [primitive-palette] bg-neutral-800
+src/app/pages/GoalTracker.tsx:2061:261 [primitive-palette] border-neutral-800
+src/app/pages/GoalTracker.tsx:2063:109 [primitive-palette] border-t-neutral-900
+src/app/pages/GoalTracker.tsx:2063:135 [primitive-palette] border-t-neutral-800
+src/app/pages/GoalTracker.tsx:2277:49 [primitive-palette] bg-neutral-900
 src/app/pages/LifeBalance.tsx:621:47 [primitive-palette] text-neutral-500
 src/app/pages/LifeBalance.tsx:673:68 [primitive-palette] text-neutral-700
 src/app/pages/LifeBalance.tsx:675:82 [primitive-palette] text-neutral-800

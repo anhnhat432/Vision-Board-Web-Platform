@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 
 import { authService } from "../services/authService";
+import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
@@ -18,6 +19,7 @@ const FORBIDDEN_PATCH_FIELDS = [
 export async function bootstrapProfile(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
   const profile = await authService.findOrCreateUser(user.uid, user.email ?? "", user.name);
+  clearAdminRoleCache(user.uid);
   res.status(200).json(successResponse(profile));
 }
 

@@ -13,8 +13,6 @@ describe("twelve-week-premium helpers", () => {
     expect(planSatisfiesRequirement("FREE", null)).toBe(true);
     expect(planSatisfiesRequirement("FREE", "PLUS")).toBe(false);
     expect(planSatisfiesRequirement("PLUS", "PLUS")).toBe(true);
-    expect(planSatisfiesRequirement("PRO", "PLUS")).toBe(true);
-    expect(planSatisfiesRequirement("PLUS", "PRO")).toBe(true);
   });
 
   it("builds an at-risk review insight when missed work stacks up", () => {

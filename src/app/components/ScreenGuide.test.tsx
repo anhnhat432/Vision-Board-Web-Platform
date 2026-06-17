@@ -55,7 +55,6 @@ describe("ScreenGuide", () => {
     expect(localStorage.getItem(seenKey("lazy-screen"))).toBe("true");
   });
 
-
   it("does not auto-open on later screens after first-run guidance already completed", async () => {
     localStorage.setItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY, new Date().toISOString());
 

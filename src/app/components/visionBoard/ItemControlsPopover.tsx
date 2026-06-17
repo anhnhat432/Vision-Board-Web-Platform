@@ -5,7 +5,12 @@ import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem } from "@/app/utils/storage-types";
-import { IMAGE_FRAME_STYLES, QUOTE_BACKGROUNDS, QUOTE_FONT_STYLES, SIZE_PRESETS } from "@/app/utils/vision-board-config";
+import {
+  IMAGE_FRAME_STYLES,
+  QUOTE_BACKGROUNDS,
+  QUOTE_FONT_STYLES,
+  SIZE_PRESETS,
+} from "@/app/utils/vision-board-config";
 
 export interface ItemControlsPopoverProps {
   item: VisionBoardItem;
@@ -123,7 +128,9 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                     type="button"
                     onClick={() => updateStyle({ quoteFont: font.id })}
                     className={`rounded-md border px-2 py-2 text-left transition ${
-                      currentFont === font.id ? "border-app-accent bg-app-accent-soft" : "border-app-line bg-app-surface"
+                      currentFont === font.id
+                        ? "border-app-accent bg-app-accent-soft"
+                        : "border-app-line bg-app-surface"
                     }`}
                   >
                     <p

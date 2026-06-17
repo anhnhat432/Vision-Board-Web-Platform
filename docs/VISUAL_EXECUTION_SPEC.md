@@ -903,3 +903,220 @@ Return:
 - Commands run and results.
 - Recommended fixes.
 ```
+
+---
+
+## 13. Skill-derived execution recipes (updated 2026-06-08)
+
+These recipes translate the installed design skills into copy-pasteable execution defaults. They sit under `docs/DESIGN.md` section 17 (skill reconciliation). When a recipe conflicts with the token contract or production safety, follow the docs.
+
+### 13.1 Elevation recipe (token-first)
+
+Do not hand-write `box-shadow` in JSX. Use the elevation tokens, which already encode a layered shadow:
+
+| Surface | Class | When |
+| --- | --- | --- |
+| Resting card / input | `shadow-app-sm` | Default product surfaces |
+| Raised panel / popover | `shadow-app-md` | Hovered or focused interactive cards, menus |
+| Modal / dialog | `shadow-app-lg` | Overlays that float above the page |
+| Peak overlay | `shadow-app-xl` | Rare; full-screen sheets |
+
+- One depth strategy per card family. Do not mix `.elevation-*` (Material `--shadow-1..5`) or `--shadow-glow-*` into a card group that uses `shadow-app-*`.
+- For a hover lift, step up one token (`shadow-app-sm` -> `shadow-app-md`) with `transition-shadow duration-200`, not a custom shadow.
+- On `bg-app-bg-subtle` bands and other non-white surfaces, prefer the soft shadow over a hard `border-app-line`; rgba shadow adapts to the surface.
+
+### 13.2 Contrast ladder
+
+Use the four-step ink ladder for emphasis; reserve color for meaning.
+
+```text
+Primary    text-app-ink        headings, key values, the answer
+Secondary  text-app-ink-soft   body, guidance, descriptions
+Muted       text-app-ink-muted  captions, metadata, placeholders
+Faint       app disabled token  disabled controls, lowest-priority hints
+```
+
+Accent (`text-app-accent`) and status (`text-app-status-*`) are for action and state only — never for routine emphasis.
+
+### 13.3 Interaction-state defaults
+
+Every interactive element needs the full set:
+
+```text
+hover    background/scale shift, transition 120-160ms
+active   scale(0.98) or translateY(1px)
+focus    visible ring (--app-focus-ring; --app-focus-ring-warm in Reflection), >= 2px
+disabled reduced emphasis, no layout shift, cursor not-allowed
+loading  preserve size (no layout shift), disable submit, show progress
+```
+
+Animate `transform` and `opacity` only. Never animate `top/left/width/height`.
+
+### 13.4 State-block recipe (ship-readiness)
+
+For any async surface, cover all five and pick the right severity (from `ux-audit`):
+
+```text
+loading  Skeleton/FormSkeleton matching final layout shape (reserve min-h to avoid CLS)
+empty     EmptyState: what is missing + why it matters + one CTA
+error     InlineStatusMessage tone="error": what happened + what is safe + retry
+                (local-first: a sync error is NOT data loss — say local data is safe)
+success   what changed + the next step (no exclamation marks)
+offline   OfflineBanner / LocalOnlyNotice: changes saved on this account, retry path
+```
+
+Release-blockers to design out: form input wiped on validation error, missing error state on sync/billing/auth, dialog that never restores focus on close, optimistic UI with no rollback.
+
+### 13.5 Icon usage (stack-aware)
+
+The project uses `lucide-react`. Do not swap icon libraries. Instead:
+
+- Keep one consistent stroke width across a screen.
+- Use icons that add scanning value; remove decorative icon clusters and icon backgrounds that only add noise.
+- Avoid cliché metaphors (rocket for "launch", shield for "security") when a plainer icon reads faster.
+- Every icon-only control needs an accessible name (`aria-label`) and, where the meaning is not obvious, a tooltip.
+
+### 13.6 Per-change skill pass (quick map)
+
+```text
+Copy-only tweak     -> typography-audit (+ ui-audit microcopy)
+Restyle a screen    -> ui-design (product-ui) -> design-in-code -> typography-audit -> ui-audit
+New/changed surface -> full chain: ui-design -> frontend-design -> design-in-code
+                        -> typography-audit -> ux-audit -> ui-audit -> web-design-reviewer
+Verify before merge -> ux-audit (state/focus/data-loss) + web-design-reviewer (375/768/1280/1920)
+```
+
+Run only what the change needs. Keep edits token-compliant, reduced-motion safe, and contract-preserving.
+
+---
+
+## 14. Elevated execution recipes (updated 2026-06-08)
+
+These recipes implement `docs/DESIGN.md` section 18 (Craft elevation). Use them only after a screen clears section 5.8 state coverage and the section 11 QA checklist. They push a passing screen toward premium. Every recipe stays inside the token contract; when a recipe cannot be done through tokens, stop and report.
+
+### 14.1 Type scale ramp (concrete)
+
+A modular ramp keeps hierarchy intentional. Use these as defaults; do not invent per-screen sizes.
+
+| Role | Classes | Line-height |
+| --- | --- | --- |
+| Route title (emotional) | `font-serif text-3xl sm:text-4xl lg:text-5xl` | `leading-tight` (~1.15-1.2, diacritic-safe) |
+| Step title in panel | `font-serif text-2xl sm:text-3xl` | `leading-tight` |
+| Section title | `font-sans text-lg sm:text-xl font-semibold` | `leading-snug` |
+| Card title | `text-base sm:text-lg font-semibold` | `leading-snug` |
+| Body | `text-sm sm:text-base` | `leading-6` (~1.5) |
+| Helper / caption | `text-xs sm:text-sm` | `leading-5` |
+| Eyebrow label | `text-xs font-semibold uppercase tracking-wide` | `leading-4` |
+
+Do not scale font-size with viewport width (no `vw` units). Do not jump more than one step between adjacent hierarchy levels on one surface.
+
+### 14.2 Vietnamese-safe text wrapping
+
+```text
+Headings / short hero copy:  text-balance   (CSS text-wrap: balance)
+Body paragraphs:             text-pretty    (CSS text-wrap: pretty)
+Measure on long copy:        max-w-prose  or  max-w-[65ch]
+```
+
+- Tailwind v4 ships `text-balance` and `text-pretty` utilities — use them, do not hand-roll JS line-breaking.
+- Do not wrap Vietnamese headings in fixed-height boxes or single-line `truncate` without testing the tallest tone stack (e.g. "Sức khỏe", "Phát triển", "Tài chính").
+- Keep display leading at `leading-tight`/`leading-snug` (never `leading-none`) so stacked diacritics are not clipped.
+
+### 14.3 Optical alignment
+
+```text
+Icon + text:     inline-flex items-center gap-2; icon ~0.9-1em of adjacent text
+Play/▶ in circle: nudge translate-x-[1px] (optical centre, not maths centre)
+Chevron/arrow:   align to text optical centre, not the line box
+Pill/button:     allow slightly more vertical padding for diacritics + ascenders
+Nested radius:   rounded-card outer -> rounded-control/rounded-input inner
+```
+
+Verify side-by-side cards share baselines: titles, values, and CTAs start/end on the same Y across the row. Pin CTAs to the card bottom (`mt-auto` in a `flex flex-col` card) so they align regardless of body length.
+
+### 14.4 Numeric display
+
+```text
+Any changing/aligned number:  tabular-nums
+Value vs unit:                value = text-app-ink (strong);  unit (/10, đ, %, tuần) = text-app-ink-muted, smaller, normal weight
+Vertical value lists:          align on the decimal / unit, not ragged-left
+```
+
+Only enable slashed-zero / case-sensitive / fraction OpenType features after confirming the loaded font ships them. Never fake bold or italic.
+
+### 14.5 Signature reveal (Framer Motion / `motion`)
+
+One orchestrated reveal per screen, tied to the user's data, fires once. Always honour reduced motion.
+
+```tsx
+import { motion, useReducedMotion } from "motion/react";
+
+function SignatureReveal({ children }: { children: React.ReactNode }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 28 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+Stagger a small set (≤6-8 items) on arrival:
+
+```tsx
+// parent: staggerChildren 0.04 (40ms); child: opacity + translateY 8px
+// reduced motion: render final state, no stagger, no transform
+```
+
+Rules: spring (soft, no overshoot) for result/insight reveals; standard `120-250ms` duration curves for chrome (hover, disclosure, step change). Never stagger a long list. Never gate auth/billing/sync/form submit behind motion. Reserve layout space so the reveal causes no CLS.
+
+### 14.6 Content realism (do / don't)
+
+| Don't | Do |
+| --- | --- |
+| `99.99%`, `50%`, `100 users` | `47%`, `6/8 lĩnh vực`, `tuần 4/12` |
+| "Người dùng A", "Acme", "John Doe" | "Chạy 5km liên tục", "Đọc xong 4 cuốn sách" |
+| Lorem Ipsum / English filler | real draft Vietnamese copy |
+| "Xem Insight Của Tôi" (Title Case) | "Xem insight của tôi" (sentence case) |
+| "Đã lưu thành công!" | "Đã lưu reflection. Tuần sau bắt đầu từ một điều chỉnh." |
+| "Oops! Có lỗi xảy ra" | "Chưa đồng bộ lên máy chủ. Dữ liệu vẫn an toàn trên thiết bị này. Thử lại." |
+| same date/avatar on every sample | varied, lived-in sample data |
+
+Applies to seed data, demo content, empty-state examples, vision-board samples, and screenshots — not just primary copy.
+
+### 14.7 Structural completeness checklist
+
+Add or fix when the touched surface is the natural home. Do not invent new routes/modules just to satisfy this (respect scope rules and anti-pattern 26).
+
+```text
+[ ] Skip-to-content link in the app shell (keyboard reachable).
+[ ] Branded, helpful 404 with a safe path back to the core journey.
+[ ] Every surface offers a safe way back (no dead ends).
+[ ] Branded favicon + correct <title>/description/og:image on public surfaces.
+[ ] Active route/step is visually signalled in navigation.
+[ ] No `#` links or dead handlers; not-ready actions are visibly disabled with a reason.
+```
+
+### 14.8 Premium pass checklist (mirror of DESIGN.md 18.8)
+
+Run only after the section 11 QA checklist passes and the screen scores `2-3` on the DESIGN.md section 14 rubric.
+
+```text
+[ ] One signature product-state moment, tied to user data, fires once (not looped).
+[ ] Screen reads perfectly with motion disabled.
+[ ] Icons/glyphs optically aligned; side-by-side items share baselines.
+[ ] Vietnamese display text: diacritic-safe leading, no clipped tone marks.
+[ ] Headings text-balance; body text-pretty + 45-75ch measure.
+[ ] Changing/aligned numbers use tabular-nums; units quieter than values.
+[ ] No placeholder smell (real VN copy, organic numbers, sentence case, no exclamation/"Oops!").
+[ ] Emphasis from the four-step ink ladder; colour reserved for action/state.
+[ ] One depth strategy (shadow-app-*), one radius system, concentric nesting.
+[ ] No dead `#` links; active location signalled; safe way back exists.
+[ ] Every elevation achieved through tokens — no contract or scope touched.
+```
+
+When a recipe here conflicts with the token contract, the warm brand, or production safety, follow `docs/DESIGN.md` and note the conflict.

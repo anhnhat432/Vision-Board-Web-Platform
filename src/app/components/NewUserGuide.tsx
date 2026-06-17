@@ -180,7 +180,7 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
                 }}
                 className={secondaryButtonClass}
               >
-                  Xem cách đi
+                Xem cách đi
               </Button>
               <Button variant="ghost" onClick={dismiss} className={ghostButtonClass}>
                 Ẩn hướng dẫn này
@@ -238,8 +238,8 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
 
         {userData.isHydratedFromDemo && (
           <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-3 text-xs leading-5 text-amber-900">
-            Luồng chuẩn khi dùng thật: Bánh xe cuộc sống → Chọn trọng tâm → SMART Goal → Kiểm tra khả thi →
-            Chu kỳ 12 tuần.
+            Luồng chuẩn khi dùng thật: Bánh xe cuộc sống → Chọn trọng tâm → SMART Goal → Kiểm tra khả thi → Chu kỳ 12
+            tuần.
           </div>
         )}
 

@@ -330,22 +330,9 @@ export interface SyncOutboxItem {
 
 export type PricingPlanCode = "FREE" | "PLUS" | "PRO";
 
-export type SubscriptionStatus =
-  | "inactive"
-  | "trialing"
-  | "active"
-  | "past_due"
-  | "canceled"
-  | "incomplete"
-  | "unpaid";
+export type SubscriptionStatus = "inactive" | "trialing" | "active" | "past_due" | "canceled" | "incomplete" | "unpaid";
 
-export type BillingCycle =
-  | "monthly"
-  | "quarterly"
-  | "season-pass"
-  | "yearly"
-  | "lifetime"
-  | "twelve_week";
+export type BillingCycle = "monthly" | "quarterly" | "season-pass" | "yearly" | "lifetime" | "twelve_week";
 
 export type BillingProviderMode = "local_test" | "mock_provider" | "api_contract";
 

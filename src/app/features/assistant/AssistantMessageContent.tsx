@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 interface AssistantMessageContentProps {
   content: string;
@@ -39,49 +39,52 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
     const parseInlineStyles = (inputText: string): React.ReactNode[] => {
       const parts = [];
       let currentIdx = 0;
-      
+
       // Regex tìm **bold**, *italic* hoặc ==highlight==
       const regex = /(\*\*|==|\*)(.*?)\1/g;
       let match = regex.exec(inputText);
-      
+
       while (match !== null) {
         const matchIndex = match.index;
         const [fullMatch, delimiter, innerText] = match;
-        
+
         // Add phần text trước match
         if (matchIndex > currentIdx) {
           parts.push(inputText.substring(currentIdx, matchIndex));
         }
-        
+
         // Add phần text định dạng
         if (delimiter === "**") {
           parts.push(
             <strong key={matchIndex} className="font-bold text-emerald-800 dark:text-emerald-300">
               {innerText}
-            </strong>
+            </strong>,
           );
         } else if (delimiter === "*") {
           parts.push(
             <em key={matchIndex} className="italic text-app-ink-soft/90">
               {innerText}
-            </em>
+            </em>,
           );
         } else if (delimiter === "==") {
           parts.push(
-            <mark key={matchIndex} className="bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-850 dark:text-emerald-300 px-1.5 py-0.5 rounded-md font-medium border border-emerald-500/10">
+            <mark
+              key={matchIndex}
+              className="bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-850 dark:text-emerald-300 px-1.5 py-0.5 rounded-md font-medium border border-emerald-500/10"
+            >
               {innerText}
-            </mark>
+            </mark>,
           );
         }
-        
+
         currentIdx = matchIndex + fullMatch.length;
         match = regex.exec(inputText);
       }
-      
+
       if (currentIdx < inputText.length) {
         parts.push(inputText.substring(currentIdx));
       }
-      
+
       return parts.length > 0 ? parts : [inputText];
     };
 
@@ -89,13 +92,16 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
       if (listItems.length > 0) {
         elements.push(
           <ul key={`list-${key}`} className="list-none pl-1.5 my-2.5 space-y-2">
-            {listItems.map((item, idx) => (
-              <li key={`item-${key}-${item.slice(0, 20)}`} className="flex items-start gap-2.5 text-[15px] leading-relaxed">
+            {listItems.map((item) => (
+              <li
+                key={`item-${key}-${item.slice(0, 20)}`}
+                className="flex items-start gap-2.5 text-[15px] leading-relaxed"
+              >
                 <span className="text-emerald-600 dark:text-emerald-400 mt-2 shrink-0 size-1.5 rounded-full bg-emerald-500/80 shadow-xs" />
                 <span className="flex-1">{parseInlineStyles(item)}</span>
               </li>
             ))}
-          </ul>
+          </ul>,
         );
         listItems = [];
         inList = false;
@@ -111,9 +117,12 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         flushList(i);
         const headerText = trimmedLine.replace(/^###\s*/, "");
         elements.push(
-          <h4 key={i} className="text-[15.5px] font-bold text-emerald-850 dark:text-emerald-400 mt-4 mb-2 font-serif tracking-wide leading-snug">
+          <h4
+            key={i}
+            className="text-[15.5px] font-bold text-emerald-850 dark:text-emerald-400 mt-4 mb-2 font-serif tracking-wide leading-snug"
+          >
             {parseInlineStyles(headerText)}
-          </h4>
+          </h4>,
         );
         continue;
       }
@@ -123,9 +132,12 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
         flushList(i);
         const headerText = trimmedLine.replace(/^##\s*/, "");
         elements.push(
-          <h3 key={i} className="text-[17px] font-bold text-emerald-900 dark:text-emerald-300 mt-5 mb-2.5 font-serif tracking-wide leading-snug border-b border-emerald-500/10 pb-1">
+          <h3
+            key={i}
+            className="text-[17px] font-bold text-emerald-900 dark:text-emerald-300 mt-5 mb-2.5 font-serif tracking-wide leading-snug border-b border-emerald-500/10 pb-1"
+          >
             {parseInlineStyles(headerText)}
-          </h3>
+          </h3>,
         );
         continue;
       }
@@ -152,12 +164,12 @@ export function AssistantMessageContent({ content, status }: AssistantMessageCon
 
       // Dòng bình thường
       if (inList) {
-        listItems[listItems.length - 1] += "\n" + trimmedLine;
+        listItems[listItems.length - 1] += `\n${trimmedLine}`;
       } else {
         elements.push(
           <p key={i} className="my-1.5 text-[15px] leading-relaxed text-app-ink/95 tracking-normal">
             {parseInlineStyles(line)}
-          </p>
+          </p>,
         );
       }
     }

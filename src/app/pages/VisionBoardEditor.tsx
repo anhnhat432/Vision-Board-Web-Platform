@@ -126,25 +126,25 @@ function getExportRatioDescription(ratio: ExportOptions["ratio"]): string {
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
   {
     label: "Không gian",
-    url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/khong-gian.webp",
   },
-  { label: "Bình minh", url: "https://images.unsplash.com/photo-1500672100127-fc5ed5f63ed3?w=480&h=360&fit=crop&q=80" },
-  { label: "Du lịch", url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=480&h=360&fit=crop&q=80" },
-  { label: "Nhà", url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=480&h=360&fit=crop&q=80" },
-  { label: "Vận động", url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=360&fit=crop&q=80" },
+  { label: "Bình minh", url: "/curated/vision-board/binh-minh.webp" },
+  { label: "Du lịch", url: "/curated/vision-board/du-lich.webp" },
+  { label: "Nhà", url: "/curated/vision-board/nha.webp" },
+  { label: "Vận động", url: "/curated/vision-board/van-dong.webp" },
   {
     label: "Thiên nhiên",
-    url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/thien-nhien.webp",
   },
-  { label: "Thành phố", url: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=480&h=360&fit=crop&q=80" },
-  { label: "Biển", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=480&h=360&fit=crop&q=80" },
-  { label: "Sách", url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=480&h=360&fit=crop&q=80" },
-  { label: "Ẩm thực", url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=480&h=360&fit=crop&q=80" },
+  { label: "Thành phố", url: "/curated/vision-board/thanh-pho.webp" },
+  { label: "Biển", url: "/curated/vision-board/bien.webp" },
+  { label: "Sách", url: "/curated/vision-board/sach.webp" },
+  { label: "Ẩm thực", url: "/curated/vision-board/am-thuc.webp" },
   {
     label: "Nghệ thuật",
-    url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=480&h=360&fit=crop&q=80",
+    url: "/curated/vision-board/nghe-thuat.webp",
   },
-  { label: "Vườn", url: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=480&h=360&fit=crop&q=80" },
+  { label: "Vườn", url: "/curated/vision-board/vuon.webp" },
 ];
 
 function createImageItem(

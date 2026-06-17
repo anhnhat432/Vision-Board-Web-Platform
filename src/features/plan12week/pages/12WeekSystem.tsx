@@ -1,7 +1,11 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Skeleton } from "@/app/components/ui/skeleton";
+import { ScreenGuide } from "@/app/components/ScreenGuide";
+import { SCREEN_GUIDES } from "@/app/components/screen-guides";
+import { SpotlightTour, type SpotlightTourStep } from "@/app/components/SpotlightTour";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
+import { usePageTour } from "@/app/hooks/usePageTour";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
@@ -12,6 +16,7 @@ import {
   shouldEnable12WeekPullSync,
 } from "@/app/utils/app-mode";
 import { trackPremiumInsightOpened } from "@/app/utils/monetization-analytics";
+import { hasCompletedFirstRunGuidance, markFirstRunGuidanceCompleted } from "@/app/utils/new-user-guide";
 import {
   APP_STORAGE_KEYS,
   clearArchivedOutbox,
@@ -66,6 +71,45 @@ const emptyMutationQueueSummary = {
   lastDrainStartedAt: null,
   lastDrainFinishedAt: null,
 };
+
+const TWELVE_WEEK_SYSTEM_TOUR_STEPS: SpotlightTourStep[] = [
+  {
+    id: "overview",
+    targetId: "twelve-week-header-card",
+    title: "Nhìn khối tổng quan trước",
+    description: "Khối đầu trang cho biết tuần hiện tại, việc ưu tiên và trạng thái giữ nhịp của cả chu kỳ.",
+  },
+  {
+    id: "tabs",
+    targetId: "twelve-week-tabs-nav",
+    title: "Đi theo 4 tab chính",
+    description: "Bạn không cần đọc cả màn cùng lúc. Hãy mở đúng tab theo việc đang cần làm hôm nay.",
+  },
+  {
+    id: "today",
+    targetId: "twelve-week-tab-today",
+    title: "Bắt đầu từ tab Hôm nay",
+    description: "Mỗi ngày chỉ cần mở tab này, hoàn thành việc nhỏ tiếp theo rồi đánh dấu xong để giữ đà.",
+  },
+  {
+    id: "week",
+    targetId: "twelve-week-tab-week",
+    title: "Cuối tuần vào tab Tuần",
+    description: "Tab này dùng để review ngắn, điều chỉnh tải và chuẩn bị tuần kế tiếp trước khi bạn bị lệch nhịp.",
+  },
+  {
+    id: "progress",
+    targetId: "twelve-week-tab-progress",
+    title: "Kiểm tra đà ở tab Tiến độ",
+    description: "Khi cần nhìn bức tranh lớn, mở tab này để xem điểm tuần, xu hướng và các cột mốc đã chạm tới.",
+  },
+  {
+    id: "settings",
+    targetId: "twelve-week-tab-settings",
+    title: "Chỉ vào Cài đặt khi cần đổi nhịp",
+    description: "Tab Cài đặt dành cho đổi ngày review, mức tải, nhắc việc và đồng bộ — không cần chỉnh mỗi ngày.",
+  },
+];
 
 export const WEEKLY_REVIEW_SNOOZE_STORAGE_KEY = "weekly_review_snooze";
 const WEEKLY_REVIEW_SNOOZE_MS = 24 * 60 * 60 * 1000;
@@ -132,6 +176,7 @@ function buildCycleReviewContent(input: {
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const tabPanelId = useId();
+  const { isTourOpen, setIsTourOpen } = usePageTour("twelve-week-system");
   const [isCloudDeleteConfirmed, setIsCloudDeleteConfirmed] = useState(false);
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile, logout } = useAuthContext();
   const {
@@ -208,6 +253,12 @@ export function TwelveWeekSystem() {
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+
+  useEffect(() => {
+    if (!isReady || !activeGoal || !system || hasCompletedFirstRunGuidance()) return;
+
+    markFirstRunGuidanceCompleted();
+  }, [activeGoal, isReady, system]);
 
   useEffect(() => {
     if (isReady && activeGoal && localStorage.getItem("show_12week_setup_success") === "true") {
@@ -1027,24 +1078,30 @@ export function TwelveWeekSystem() {
       />
 
       <div className="space-y-5">
+        <div className="flex justify-end">
+          <ScreenGuide {...SCREEN_GUIDES.twelveWeekSystem} />
+        </div>
+
         {/* 2. Page Header component */}
-        <TwelveWeekDashboardHeader
-          activeGoal={activeGoal}
-          system={system}
-          activePlanCode={activePlanCode}
-          currentWeek={currentWeek}
-          syncBadgeClass={syncBadgeClass}
-          syncBadgeLabel={syncBadgeLabel}
-          reviewDueToday={reviewDueToday}
-          todayRemainingCount={todayRemainingCount}
-          todayCompletedCount={todayCompletedCount}
-          weekCompletion={weekCompletion}
-          reviewStatusLabel={reviewStatusLabel}
-          firstPriorityTask={firstPriorityTask}
-          onOpenFocusTab={() => handleTabChange(reviewDueToday ? "week" : "today")}
-          onOpenGoals={() => navigate("/goals")}
-          onRenameGoal={handleRenameActiveGoal}
-        />
+        <div id="twelve-week-header-card">
+          <TwelveWeekDashboardHeader
+            activeGoal={activeGoal}
+            system={system}
+            activePlanCode={activePlanCode}
+            currentWeek={currentWeek}
+            syncBadgeClass={syncBadgeClass}
+            syncBadgeLabel={syncBadgeLabel}
+            reviewDueToday={reviewDueToday}
+            todayRemainingCount={todayRemainingCount}
+            todayCompletedCount={todayCompletedCount}
+            weekCompletion={weekCompletion}
+            reviewStatusLabel={reviewStatusLabel}
+            firstPriorityTask={firstPriorityTask}
+            onOpenFocusTab={() => handleTabChange(reviewDueToday ? "week" : "today")}
+            onOpenGoals={() => navigate("/goals")}
+            onRenameGoal={handleRenameActiveGoal}
+          />
+        </div>
 
         {/* 3. Goal Switcher select list */}
         <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
@@ -1324,6 +1381,14 @@ export function TwelveWeekSystem() {
           </div>
         </div>
       )}
+
+      <SpotlightTour
+        open={isTourOpen}
+        onOpenChange={setIsTourOpen}
+        title="Cách dùng hệ 12 tuần"
+        description="Đi qua 4 tab chính theo đúng nhịp: hôm nay, tuần, tiến độ, rồi quay lại khi cần."
+        steps={TWELVE_WEEK_SYSTEM_TOUR_STEPS}
+      />
     </div>
   );
 }

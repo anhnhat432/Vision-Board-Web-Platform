@@ -27,6 +27,8 @@ import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSy
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { deleteCloudWorkspace, exportAccountData } from "@/services/syncService";
 import { PageHero } from "../components/layout/PageHero";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -270,6 +272,7 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <ScreenGuide {...SCREEN_GUIDES.settings} autoOpen />
       <PageHero
         className="page-enter"
         eyebrow="CÀI ĐẶT"

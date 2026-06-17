@@ -1,11 +1,7 @@
 import { isRealMode } from "@/app/utils/app-mode";
 import { getApiBaseUrl } from "@/lib/api/apiClient";
 import { authedFetch } from "@/lib/auth/authedFetch";
-import {
-  type AssistantEvent,
-  type AssistantEventType,
-  setAssistantEventSink,
-} from "./assistantObservability";
+import { type AssistantEvent, type AssistantEventType, setAssistantEventSink } from "./assistantObservability";
 
 /**
  * G4: Forwarder gửi event observability (đã redacted) lên backend telemetry.

@@ -34,20 +34,13 @@ import { resolve } from "node:path";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { readBaselineSnapshot } from "./baseline";
-import {
-  buildReferenceGraph,
-  loadTokenSet,
-  type ReferenceGraph,
-  resolveToken,
-  type TokenSet,
-} from "./token-parser";
+import { buildReferenceGraph, loadTokenSet, type ReferenceGraph, resolveToken, type TokenSet } from "./token-parser";
 
 // ─────────────────────────────────────────────────────────────
 // Chuẩn bị dữ liệu (đọc một lần ở module scope — thuần, test-time)
 // ─────────────────────────────────────────────────────────────
 
-const PROPERTY_TAG =
-  "Feature: ux-ui-upgrade, Property 1: Token integrity — giữ tên, phân giải non-empty đúng kiểu";
+const PROPERTY_TAG = "Feature: ux-ui-upgrade, Property 1: Token integrity — giữ tên, phân giải non-empty đúng kiểu";
 
 /** Tên token Semantic + Component được chụp TRƯỚC đợt nâng cấp. */
 const baselineNames: string[] = [...readBaselineSnapshot().tokenNames];

@@ -1403,3 +1403,162 @@ npm run smoke:prod
 If a command does not exist or cannot run due to environment constraints, report it clearly instead of pretending it passed.
 
 For documentation-only changes, full frontend checks are usually not required. Still read the changed document and verify it does not contradict `guidelines/CURRENT_PROJECT_STATUS.md` or overstate production readiness.
+
+---
+
+## 17. Skill reconciliation and added craft (updated 2026-06-08)
+
+This repository now ships the design skills referenced in section 0 as installed Kiro skills (`ui-design`, `frontend-design`, `redesign-existing-projects`, `typography-audit`, `ui-audit`, `ux-audit`, `web-design-reviewer`, `design-in-code`). They are general-purpose craft skills written for any web project. This section records how to apply them inside Dear Our Future without breaking the token contract, the warm brand, or production safety.
+
+Rule of precedence (unchanged): when a skill recommends something that conflicts with this file, the token contract, code-backed scope, or production safety, **follow this file and note the conflict**. The skills sharpen execution; they do not redefine the product.
+
+### 17.1 Skill-to-product reconciliation matrix
+
+| Skill recommendation | Verdict for this product | Why |
+| --- | --- | --- |
+| `ui-design` product-ui track: calm-dense Linear-style restraint, 4px grid, one radius system, one depth strategy, utility copy on dashboards | **Adopt** | Matches the Execution workspace and Dashboard exactly. Use the product-ui track for core-flow/admin; use the marketing track only for public landing/marketing surfaces. |
+| `redesign-existing-projects`: concentric radius, hover/active feedback, skeletons over spinners, real form validation, max-width container, GPU-only motion | **Adopt** | Already echoed in sections 6.6, 8, and 11.1. These reduce AI-slop without touching contracts. |
+| `redesign-existing-projects`: "replace pure `#000000` with off-black / dark navy", "add a dark section for contrast" | **Adapt** | This product is light/warm-first (`--app-bg: #FCFAF7`). Dark mode is supported but must stay warm, never pure black, and never the default impression (section 6.4). Do not drop a single dark band into a cream page. |
+| `redesign-existing-projects` + `aesthetic-direction`: "Lucide/Feather are the default AI icon set — swap to Phosphor/Heroicons/Tabler" | **Reject (stack conflict)** | The project depends on `lucide-react@0.487.0`. Swapping icon libraries adds a dependency and a large diff for no product value. Instead differentiate through usage: consistent stroke width, meaningful (non-cliché) icon choices, no decorative icon clusters, remove icon backgrounds that add noise. |
+| `redesign-existing-projects`: "add noise/grain/mesh-gradient texture", "spotlight borders", "true glassmorphism", "colored tinted shadows" | **Reject on core journey / Adapt on marketing** | The core journey uses neutral `--app-shadow-*` and tokenized surfaces only (sections 6.2, 6.6). Atmosphere must come through tokens, not un-tokenized noise/glow/mesh. Vibrant/glass treatments stay on marketing/public surfaces. |
+| `frontend-design`: "pick a BOLD extreme — brutalist / maximalist / retro / neon, vary per generation, never converge" | **Adapt (scope it)** | The aesthetic direction is fixed: Dreamy Guided Productivity. "Bold expression" means precise spacing, one memorable product-state visual per screen, and confident typography **within** the warm world — not a new aesthetic per screen. Use `frontend-design` for anti-slop instincts and detail, not to reinvent the brand. |
+| `frontend-design`: "avoid Inter, pick a distinctive display font" | **Already handled** | Brand stack is `Be Vietnam Pro` (sans) + `Source Serif 4 Variable` (serif). The real action item is the font-loading gap in section 6.5 (Be Vietnam Pro not imported), not picking a new font. |
+| `typography-audit`: smart quotes, true weights/styles, tabular-nums, unitless line-height, 45-75ch measure, no body tracking | **Adopt** | Already captured in sections 6.5. Run this skill on any surface that adds or restyles text, Vietnamese-safety included. |
+| `ux-audit`: state coverage, form data loss on validation, focus restore, optimistic-UI rollback, skeleton CLS, ship-readiness tiers | **Adopt** | Directly supports the local-first state-transparency rule (section 4.9) and `VISUAL_EXECUTION_SPEC` section 5.8. Run before merging any core-flow surface. |
+| `ui-audit`: semantic HTML, accessible names, focus rings, AA contrast, 44px touch targets, lazy media, reduced motion | **Adopt** | These are hard gates in section 6.1 and 11.2. Non-negotiable on the core journey. |
+| `web-design-reviewer`: live desktop + mobile breakpoint verification (375 / 768 / 1280 / 1920) | **Adopt** | Use for the final visual verify pass on a touched screen. |
+| `design-in-code`: low-fi ASCII wireframe before visual polish | **Adopt** | Plan structure first on any non-trivial screen change, then apply tokens and motion. |
+
+### 17.2 Added craft, reconciled to the token contract
+
+These are concrete techniques pulled from the skills, expressed in a way that is safe for this codebase.
+
+Layered elevation (token-first). The `--app-shadow-*` tokens already encode a layered shadow (a 1px hairline plus one or two soft drops; see `src/styles/tokens.css`). Do not write raw `box-shadow` in components. When adjusting elevation at the token layer, keep the layered shape — a near-zero-blur hairline for edge definition plus a soft offset drop for lift — and for an interactive hover lift, deepen each layer's opacity by roughly `0.02` rather than swapping to a heavier preset. Continue to use only `shadow-app-sm/md/lg/xl`; never mix the Material `--shadow-1..5` or `--shadow-glow-*` into core-journey surfaces.
+
+Four-level contrast hierarchy (from `ui-design` product-ui). Drive emphasis with a four-step ink scale, not with color: `text-app-ink` (primary) -> `text-app-ink-soft` (secondary) -> `text-app-ink-muted` (muted) -> the faintest captions/disabled. Reserve accent and status color for meaning (action, success, warning, error), never for decoration or routine emphasis.
+
+Fix-priority order for an existing screen (from `redesign-existing-projects`, adapted). When upgrading a built screen, apply changes in this order for maximum impact at minimum risk, stopping at the token contract:
+
+```text
+1. Token compliance  -> replace primitive/hex/one-off colors with semantic tokens.
+2. Surface + hierarchy -> one dominant working surface; remove card-in-card and noise.
+3. CTA clarity        -> one outcome-based primary action; quieter secondaries.
+4. Interaction states -> hover/active/focus feedback, 200-300ms transforms only.
+5. State coverage     -> loading (skeleton), empty, error, success, offline/sync.
+6. Typography polish  -> measure, line-height, tabular-nums, real punctuation.
+7. Restrained motion  -> step/reveal/progress only, reduced-motion safe.
+```
+
+Anti-slop quick filter (from `aesthetic-direction`, scoped). On any core-journey surface, reject: default/system font for emotional moments, purple-on-white "AI gradient", generic three-equal-card feature rows as the primary layout, decorative blob/glow that does not explain state, and a carousel without narrative purpose. Study references for calm-dense craft: Linear, Notion, Stripe, Raycast. Translate the feeling into this product's tokens; never copy another product's surface directly.
+
+---
+
+## 18. Craft elevation — the next bar (updated 2026-06-08)
+
+Sections 0-17 establish the floor: token compliance, production safety, calm hierarchy, and reconciled skill craft. This section raises the **ceiling**. It captures the higher-end details that separate a screen that merely passes the rubric from one that feels considered and premium inside Dreamy Guided Productivity.
+
+These are craft elevations, not new license. Every rule below still sits under the precedence chain: production safety > code-backed scope > token contract > this file > skill craft. When an elevation cannot be done through tokens or would touch a contract, log it and stop.
+
+Apply this section when a touched screen already scores `2-3` across the section 14 rubric and you want to push it toward a `3`. Do not chase these elevations on a screen that still fails a hard gate — fix the floor first (section 17.2 fix-priority order).
+
+### 18.1 One signature moment per core screen
+
+Section 6.1 asks for "one memorable detail per screen". This raises the bar: each core-journey screen should have a single **signature product-state moment** — the one thing the user remembers — and it must be a reveal or transition tied to the user's own data, executed with precision and never repeated as ambient decoration.
+
+| Screen | Signature moment | Tie to user state |
+| --- | --- | --- |
+| Onboarding / Life Balance | The balance shape filling/settling as scores are entered | The user watches their own life take shape |
+| Life Insight | The focus area resolving from the full picture to one recommendation | "Out of everything, this is where to start" |
+| SMART Goal | The vague wish sharpening into a structured goal preview as fields complete | The goal becomes real in front of them |
+| Feasibility | The readiness meter filling to a supportive level, with adjustments nudging it | Progress feels earnable, not graded |
+| 12-Week Plan | The 12-week roadmap drawing in once setup is confirmed | The future becomes a visible path |
+| Today / Weekly Execution | The current-week focus settling/checking off | Today's win is tangible |
+| Reflection | The week summary easing in, then one calm adjustment surfacing | Learning, not judgment |
+
+Rules for the signature moment:
+
+- It fires once per arrival or once per result, not on a loop. Ambient continuous motion is not a signature moment (it is noise — see section 6.8 and anti-pattern 24).
+- It animates `transform`/`opacity` only, reserves its layout space (no CLS), and renders its final state immediately under `prefers-reduced-motion`.
+- It must survive being turned off: the screen must read perfectly with motion disabled. The moment is a reward, never a dependency for comprehension.
+- Only one per screen. A second "memorable" effect competing with the first dilutes both.
+
+### 18.2 Optical refinement
+
+Mathematical alignment is the floor; optical alignment is the bar. The eye, not the pixel grid, is the final judge.
+
+- **Optical centering.** Glyphs and icons with uneven visual weight (a play triangle, an arrow, a chevron) look off-center when mathematically centered. Nudge `1-2px` toward visual balance. A play icon in a round button almost always needs a small positive `translateX`.
+- **Icon-to-text baseline.** When an icon sits beside text, align to the text's optical center, not the line box. Prefer `inline-flex items-center` with a small size relationship (icon ≈ `0.9-1em` of the adjacent text) so the pairing reads as one unit.
+- **Optical padding asymmetry.** Containers often need slightly more bottom padding than top, and pill/button labels with ascenders/descenders or Vietnamese diacritics need a touch more vertical room than Latin-only copy. Trust the eye when math looks top-heavy.
+- **Concentric radius (reinforced).** Inside a `rounded-card` (14px) surface, nested controls step down to `rounded-control`/`rounded-input`, never another 14px. The inner corner must visually nest inside the outer (`outer ≈ inner + padding`).
+- **Consistent shared baselines.** In any side-by-side set (choice cards, week cards, summary tiles), shared elements — titles, scores, helper lines, CTAs — must start and end on the same Y across all items. Misaligned baselines read as broken even when each card is individually fine.
+
+### 18.3 Vietnamese-first typography craft
+
+This is a Vietnamese-first product. Vietnamese stacks tone marks above already-accented vowels (ế, ồ, ữ, ặ), which makes leading and clipping mistakes more visible than in Latin-only UI. These rules extend section 6.5.
+
+- **Leading safety for stacked diacritics.** Never set tight unitless line-height on Vietnamese display text. Large serif route titles stay at `~1.15-1.25` (not `1.0-1.1`) so stacked tone marks are not clipped by the line above or by a fixed-height container. Body stays `~1.5`.
+- **No clamped heading heights.** Do not put Vietnamese headings in fixed-height boxes or single-line `truncate` without testing the tallest diacritic stack. Prefer `text-wrap: balance` on headings and let height flex.
+- **Orphan and ragged control.** Use `text-balance` (Tailwind `text-balance` / CSS `text-wrap: balance`) on titles and short hero copy so the last line does not strand a single word; use `text-pretty` (`text-wrap: pretty`) on body paragraphs. This matters more in Vietnamese where words are space-separated syllables and orphans are frequent.
+- **Measure.** Hold body copy to `45-75ch` (`max-w-prose` / `max-w-[65ch]`). Vietnamese runs slightly longer than English for the same meaning; do not let it stretch full desktop width.
+- **No body tracking, ever.** Negative tracking crowds diacritics into the glyph above. Slight positive tracking is allowed only on tiny uppercase eyebrow labels.
+- **Diacritic-safe truncation.** When truncation is unavoidable (badges, dense chips), verify the tallest real label (e.g. "Phát triển", "Sức khỏe") is not vertically clipped, not just the average case.
+
+### 18.4 Numeric and data-display craft
+
+Scores, weeks, money, streaks, and progress are everywhere in this product. Numbers deserve the same care as prose.
+
+- **Tabular figures for any number that changes or aligns.** `font-variant-numeric: tabular-nums` (Tailwind `tabular-nums`) on scores, `/10` ratios, week numbers, counts, currency, and countdowns so digits do not jitter on update and columns align.
+- **Align by the decimal / the unit.** In a vertical list of values, align on the decimal point or the unit, not ragged-left. Keep the unit (`đ`, `/10`, `%`, `tuần`) typographically quieter than the value (`text-app-ink-muted`, smaller, normal weight) so the number reads first.
+- **One numeral style per surface.** Do not mix lining and oldstyle figures in one view. For data and execution UI use lining tabular figures.
+- **Verify before enabling exotic OpenType.** Only enable an OpenType feature (slashed zero, case-sensitive forms, fractions) after confirming the *loaded* font ships it. Source Serif 4 Variable and Inter both ship true tabular figures and true italics; do not assume Be Vietnam Pro features until it is actually imported (section 6.5 font-loading gap). Never fake bold/italic — use a weight/style the font ships.
+
+### 18.5 Content realism
+
+Placeholder smell is a top AI-slop tell. It shows up in seed data, demo content, empty-state examples, vision-board samples, and screenshots — surfaces that are easy to forget.
+
+- **No fake-round or fake-precise data.** Avoid `99.99%`, `50%`, `$100.00`, "100 users". Real progress is organic: `47%`, `6/8 lĩnh vực`, `tuần 4/12`.
+- **No "John Doe" / "Người dùng A" / "Acme".** Sample names and goals should sound like a real Vietnamese Gen Z user's ("Chạy 5km liên tục", "Đọc xong 4 cuốn sách"), not generic filler.
+- **Never Lorem Ipsum.** Write real draft Vietnamese copy even for placeholders and examples.
+- **Sentence case, not Title Case.** Headings and labels use sentence case ("Xem insight của tôi"), not "Xem Insight Của Tôi".
+- **No exclamation in success; no "Oops!" in errors.** Success is confident and quiet ("Đã lưu reflection. Tuần sau bắt đầu từ một điều chỉnh."). Errors are direct and local-first-aware ("Chưa đồng bộ lên máy chủ. Dữ liệu vẫn an toàn trên thiết bị này. Thử lại."). This extends section 7.5/7.6.
+- **Realistic dates and variety.** Do not stamp every sample item with the same date or the same avatar. Vary them so the product reads as lived-in.
+
+### 18.6 Structural completeness
+
+These are the things AI builds typically forget. They are not core-journey scope creep — they are baseline product integrity. Add or fix them when the touched surface is the natural home for them; do not invent new routes or modules just to satisfy the list (respect section 2 scope rules and anti-pattern 26).
+
+- **Skip-to-content link.** A keyboard-reachable "skip to main content" link at the top of the app shell. Essential for keyboard and screen-reader users.
+- **Branded, helpful 404.** A not-found state in the product world with a safe path back to the core journey — not a raw router default.
+- **A way back from every surface.** No dead ends. Every screen offers a safe return (back to dashboard / previous step), consistent with section 10.6.
+- **Favicon and social/meta tags.** A branded favicon and correct `<title>` / description / `og:image` on public surfaces. Verify these exist before any paid or shared link goes out.
+- **Active-location signal in navigation.** The current route/step is visually distinct so users always know where they are.
+- **Real destinations, not `#`.** No buttons or links that resolve to `#` or a dead handler. If an action is not ready, disable it visibly with a reason, do not fake it.
+
+### 18.7 Elevated motion — the orchestrated reveal
+
+Section 6.8 and `VISUAL_EXECUTION_SPEC` section 8 define safe, restrained motion. This raises the bar on *where* to spend motion budget.
+
+- **One orchestrated reveal beats scattered micro-interactions.** A single, well-timed staggered entrance on arrival or on a result reveal (the signature moment, section 18.1) creates more delight than many small hover tricks sprinkled everywhere. Spend the budget on the moment that matters.
+- **Stagger, don't dump.** When a small set of elements enters together (≤6-8 items: choice cards, week tiles, a summary), stagger them `30-50ms` each with opacity + a small `translateY`. Never mount a long list with motion.
+- **Spring for result reveals, duration for chrome.** A result/insight reveal may use a gentle spring (Framer Motion / `motion`) for a natural, weighty settle; routine chrome (hover, disclosure, step change) uses the standard `120-250ms` duration curves. Keep springs soft — no bounce or overshoot in production-critical flows.
+- **Reduced motion renders the destination.** Every orchestrated reveal must collapse to its final state instantly under `prefers-reduced-motion` / `useReducedMotion`. Motion is the reward; the result is the requirement.
+- **Never gate work behind motion.** Auth, billing, sync, and form submission never wait on an animation to finish.
+
+### 18.8 Premium pass checklist
+
+Run this only after a screen clears the section 13 Definition of Done and scores `2-3` across the section 14 rubric. It is the "is this actually premium" gate.
+
+```text
+[ ] Exactly one signature product-state moment, tied to the user's data, fires once (not looped).
+[ ] The screen reads perfectly with motion disabled.
+[ ] Icons and key glyphs are optically aligned, not just mathematically centered.
+[ ] Side-by-side items share baselines (titles, values, CTAs align across the row).
+[ ] Vietnamese display text has diacritic-safe leading and no clipped tone marks.
+[ ] Headings use text-balance; body uses text-pretty and a 45-75ch measure.
+[ ] All changing/aligned numbers use tabular figures; units are quieter than values.
+[ ] No placeholder smell: real Vietnamese sample copy, organic numbers, sentence case, no exclamation/"Oops!".
+[ ] Emphasis comes from the four-step ink ladder; color is reserved for action and state.
+[ ] One depth strategy (shadow-app-*), one radius system, concentric nesting respected.
+[ ] No dead `#` links; active location is signalled; a safe way back exists.
+[ ] Every elevation was achieved through tokens — no contract or scope was touched to get here.
+```

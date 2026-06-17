@@ -79,7 +79,10 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
           </div>
         )}
         {frame.decorationsLayout === "filmstrip" && (
-          <div className="pointer-events-none absolute inset-x-0 -bottom-1 flex justify-between px-1" aria-hidden="true">
+          <div
+            className="pointer-events-none absolute inset-x-0 -bottom-1 flex justify-between px-1"
+            aria-hidden="true"
+          >
             {["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"].map((slot) => (
               <span key={`fs-bot-${slot}`} className="inline-block h-1 w-1.5 rounded-[1px] bg-neutral-600" />
             ))}
@@ -103,8 +106,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-2xl"
           style={{
-            backgroundImage:
-              "radial-gradient(circle, rgba(236,72,153,0.12) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, rgba(236,72,153,0.12) 1px, transparent 1px)",
             backgroundSize: "12px 12px",
           }}
         />
@@ -138,13 +140,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
     const stickerId = item.content as VisionBoardStickerId;
     const size = item.style?.sizePreset ? { S: 64, M: 80, L: 100, XL: 120 }[item.style.sizePreset] : 80;
 
-    return (
-      <StickerSVG
-        id={stickerId}
-        className="select-none"
-        style={{ width: size, height: size }}
-      />
-    );
+    return <StickerSVG id={stickerId} className="select-none" style={{ width: size, height: size }} />;
   }
 
   if (item.type === "icon") {

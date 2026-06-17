@@ -1,8 +1,4 @@
-import {
-  type AssistantActionType,
-  isAssistantActionType,
-  sanitizeActionPayload,
-} from "@shared/assistantActionSchema";
+import { type AssistantActionType, isAssistantActionType, sanitizeActionPayload } from "@shared/assistantActionSchema";
 
 export type { AssistantActionType } from "@shared/assistantActionSchema";
 

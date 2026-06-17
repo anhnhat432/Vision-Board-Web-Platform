@@ -1078,7 +1078,7 @@ export function normalizeGoal(goal: Goal): Goal {
     endDate: formatDateInputValue(normalizedEndDate),
   });
   const legacyAdhocTasks = systemWithDefaults.taskInstances.filter(
-    (task) => task && task.id && !task.id.startsWith("tw_task_"),
+    (task) => task?.id && !task.id.startsWith("tw_task_"),
   );
   const taskInstances = [...generatedTaskInstances, ...legacyAdhocTasks];
   const systemForDerivedState = {

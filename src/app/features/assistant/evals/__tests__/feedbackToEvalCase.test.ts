@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AssistantGoldenExample } from "../../assistantFeedback";
 import { EVAL_CASES } from "../assistantEvalCases";
-import {
-  feedbackToEvalCases,
-  mergeFeedbackEvalCases,
-} from "../feedbackToEvalCase";
+import { feedbackToEvalCases, mergeFeedbackEvalCases } from "../feedbackToEvalCase";
 
 let counter = 0;
 function makeGolden(overrides: Partial<AssistantGoldenExample>): AssistantGoldenExample {
@@ -77,10 +74,7 @@ describe("feedbackToEvalCases", () => {
   });
 
   it("deduplicates identical feedback signals", () => {
-    const examples = [
-      makeGolden({ reason: "wrong_context" }),
-      makeGolden({ reason: "wrong_context" }),
-    ];
+    const examples = [makeGolden({ reason: "wrong_context" }), makeGolden({ reason: "wrong_context" })];
     const cases = feedbackToEvalCases(examples);
     expect(cases).toHaveLength(1);
   });

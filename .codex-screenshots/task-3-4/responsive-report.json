@@ -1,0 +1,759 @@
+[
+  {
+    "route": "/",
+    "routeName": "dashboard",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/",
+    "gotoError": null,
+    "metrics": {
+      "title": "Trang chính – Dear Our Future",
+      "h1": "Thiết lập cuộc sống mơ ước qua kế hoạch 12 tuần bền bỉ",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": 225,
+          "right": 413,
+          "width": 188,
+          "className": "absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -37,
+          "right": 131,
+          "width": 169,
+          "className": "absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -48,
+          "right": 336,
+          "width": 384,
+          "className": "pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/5 blur-[120px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -61,
+          "right": 439,
+          "width": 500,
+          "className": "pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -63,
+          "right": 193,
+          "width": 256,
+          "className": "pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 150,
+          "right": 406,
+          "width": 256,
+          "className": "pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]"
+        }
+      ],
+      "fixedBottom": [
+        {
+          "tag": "div",
+          "text": "",
+          "top": 844,
+          "bottom": 884,
+          "height": 40,
+          "className": "fixed bottom-4 right-4 z-30 md:hidden"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "top": 0,
+          "bottom": 900,
+          "height": 900,
+          "className": "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/55 backdrop-"
+        },
+        {
+          "tag": "div",
+          "text": "Cách bắt đầu nhanhXem nhanh luồng chính của app theo đúng thứ tự.Bản hiện tại đã",
+          "top": 54,
+          "bottom": 846,
+          "height": 792,
+          "className": "bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\dashboard-mobile-375.png"
+  },
+  {
+    "route": "/onboarding",
+    "routeName": "onboarding",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/onboarding",
+    "gotoError": null,
+    "metrics": {
+      "title": "Bắt đầu – Dear Our Future",
+      "h1": "Mở bản đồ cuộc sống 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\onboarding-mobile-375.png"
+  },
+  {
+    "route": "/smart-goal-setup",
+    "routeName": "smart",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/smart-goal-setup",
+    "gotoError": null,
+    "metrics": {
+      "title": "Mục tiêu SMART – Dear Our Future",
+      "h1": "Chọn trọng tâm trước",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\smart-mobile-375.png"
+  },
+  {
+    "route": "/12-week-system",
+    "routeName": "12-week-system",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/12-week-system",
+    "gotoError": null,
+    "metrics": {
+      "title": "Hệ 12 tuần – Dear Our Future",
+      "h1": "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": -66,
+          "right": 254,
+          "width": 320,
+          "className": "absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 89,
+          "right": 473,
+          "width": 384,
+          "className": "absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "button",
+          "text": "Cài đặt",
+          "left": 355,
+          "right": 465,
+          "width": 110,
+          "className": "font-medium whitespace-nowrap text-app-ink-soft hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:poi"
+        },
+        {
+          "tag": "svg",
+          "text": "",
+          "left": 374,
+          "right": 390,
+          "width": 16,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "path",
+          "text": "",
+          "left": 381,
+          "right": 387,
+          "width": 6,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "path",
+          "text": "",
+          "left": 377,
+          "right": 383,
+          "width": 6,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "circle",
+          "text": "",
+          "left": 383,
+          "right": 387,
+          "width": 4,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "circle",
+          "text": "",
+          "left": 376,
+          "right": 380,
+          "width": 4,
+          "className": "[object SVGAnimatedString]"
+        }
+      ],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\12-week-system-mobile-375.png"
+  },
+  {
+    "route": "/order",
+    "routeName": "order",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "gotoError": null,
+    "metrics": {
+      "title": "Tạo đơn – Dear Our Future",
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 82,
+      "scrollWidth": 457,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "Bỏ qua điều hướngDear Our FutureNhật ký 12 tuần để sống có chủ đích hơnCHÀO BẠN ",
+          "left": -41,
+          "right": 334,
+          "width": 375,
+          "className": ""
+        },
+        {
+          "tag": "div",
+          "text": "Bỏ qua điều hướngDear Our FutureNhật ký 12 tuần để sống có chủ đích hơnCHÀO BẠN ",
+          "left": -41,
+          "right": 334,
+          "width": 375,
+          "className": "flex min-h-screen flex-col bg-app-bg"
+        },
+        {
+          "tag": "header",
+          "text": "Dear Our FutureNhật ký 12 tuần để sống có chủ đích hơn",
+          "left": -41,
+          "right": 334,
+          "width": 375,
+          "className": "flex w-full items-center justify-center px-4 py-6"
+        },
+        {
+          "tag": "main",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnĐăng nhập để tiếp tục theo dõi tiến",
+          "left": -41,
+          "right": 334,
+          "width": 375,
+          "className": "flex flex-1 items-center justify-center px-4 pb-12"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnĐăng nhập để tiếp tục theo dõi tiến",
+          "left": -25,
+          "right": 318,
+          "width": 343,
+          "className": "w-full max-w-6xl"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnĐăng nhập để tiếp tục theo dõi tiến",
+          "left": -25,
+          "right": 318,
+          "width": 343,
+          "className": "grid lg:grid-cols-[1.1fr_1fr] gap-12"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "left": -25,
+          "right": 400,
+          "width": 425,
+          "className": "w-full"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "left": -25,
+          "right": 400,
+          "width": 425,
+          "className": "w-full max-w-md mx-auto lg:mx-0"
+        }
+      ],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\order-mobile-375.png"
+  },
+  {
+    "route": "/",
+    "routeName": "dashboard",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/",
+    "gotoError": null,
+    "metrics": {
+      "title": "Trang chính – Dear Our Future",
+      "h1": "Thiết lập cuộc sống mơ ước qua kế hoạch 12 tuần bền bỉ",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": 247,
+          "right": 453,
+          "width": 206,
+          "className": "absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -41,
+          "right": 144,
+          "width": 185,
+          "className": "absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -48,
+          "right": 336,
+          "width": 384,
+          "className": "pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/5 blur-[120px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -24,
+          "right": 476,
+          "width": 500,
+          "className": "pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -63,
+          "right": 193,
+          "width": 256,
+          "className": "pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 187,
+          "right": 443,
+          "width": 256,
+          "className": "pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]"
+        }
+      ],
+      "fixedBottom": [
+        {
+          "tag": "div",
+          "text": "",
+          "top": 864,
+          "bottom": 904,
+          "height": 40,
+          "className": "fixed bottom-4 right-4 z-30 md:hidden"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "top": 0,
+          "bottom": 920,
+          "height": 920,
+          "className": "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/55 backdrop-"
+        },
+        {
+          "tag": "div",
+          "text": "Cách bắt đầu nhanhXem nhanh luồng chính của app theo đúng thứ tự.Bản hiện tại đã",
+          "top": 55,
+          "bottom": 865,
+          "height": 810,
+          "className": "bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\dashboard-mobile-412.png"
+  },
+  {
+    "route": "/onboarding",
+    "routeName": "onboarding",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/onboarding",
+    "gotoError": null,
+    "metrics": {
+      "title": "Bắt đầu – Dear Our Future",
+      "h1": "Mở bản đồ cuộc sống 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\onboarding-mobile-412.png"
+  },
+  {
+    "route": "/smart-goal-setup",
+    "routeName": "smart",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/smart-goal-setup",
+    "gotoError": null,
+    "metrics": {
+      "title": "Mục tiêu SMART – Dear Our Future",
+      "h1": "Chọn trọng tâm trước",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\smart-mobile-412.png"
+  },
+  {
+    "route": "/12-week-system",
+    "routeName": "12-week-system",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/12-week-system",
+    "gotoError": null,
+    "metrics": {
+      "title": "Hệ 12 tuần – Dear Our Future",
+      "h1": "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": -57,
+          "right": 263,
+          "width": 320,
+          "className": "absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 117,
+          "right": 501,
+          "width": 384,
+          "className": "absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "button",
+          "text": "Cài đặt",
+          "left": 355,
+          "right": 465,
+          "width": 110,
+          "className": "font-medium whitespace-nowrap text-app-ink-soft hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:poi"
+        },
+        {
+          "tag": "span",
+          "text": "Cài đặt",
+          "left": 398,
+          "right": 446,
+          "width": 48,
+          "className": ""
+        }
+      ],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\12-week-system-mobile-412.png"
+  },
+  {
+    "route": "/order",
+    "routeName": "order",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "gotoError": null,
+    "metrics": {
+      "title": "Tạo đơn – Dear Our Future",
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 45,
+      "scrollWidth": 457,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "Bỏ qua điều hướngDear Our FutureNhật ký 12 tuần để sống có chủ đích hơnCHÀO BẠN ",
+          "left": -4,
+          "right": 408,
+          "width": 412,
+          "className": ""
+        },
+        {
+          "tag": "div",
+          "text": "Bỏ qua điều hướngDear Our FutureNhật ký 12 tuần để sống có chủ đích hơnCHÀO BẠN ",
+          "left": -4,
+          "right": 408,
+          "width": 412,
+          "className": "flex min-h-screen flex-col bg-app-bg"
+        },
+        {
+          "tag": "header",
+          "text": "Dear Our FutureNhật ký 12 tuần để sống có chủ đích hơn",
+          "left": -4,
+          "right": 408,
+          "width": 412,
+          "className": "flex w-full items-center justify-center px-4 py-6"
+        },
+        {
+          "tag": "main",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnĐăng nhập để tiếp tục theo dõi tiến",
+          "left": -4,
+          "right": 408,
+          "width": 412,
+          "className": "flex flex-1 items-center justify-center px-4 pb-12"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "left": 12,
+          "right": 437,
+          "width": 425,
+          "className": "w-full"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "left": 12,
+          "right": 437,
+          "width": 425,
+          "className": "w-full max-w-md mx-auto lg:mx-0"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạnMục tiêu rõLộ trình có hướngDữ liệu",
+          "left": 12,
+          "right": 437,
+          "width": 425,
+          "className": "lg:hidden mb-6"
+        },
+        {
+          "tag": "div",
+          "text": "CHÀO BẠN QUAY LẠIQuay lại với 12 tuần của bạn",
+          "left": 12,
+          "right": 437,
+          "width": 425,
+          "className": "text-center"
+        }
+      ],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\order-mobile-412.png"
+  },
+  {
+    "route": "/",
+    "routeName": "dashboard",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/",
+    "gotoError": null,
+    "metrics": {
+      "title": "Trang chính – Dear Our Future",
+      "h1": "Thiết lập cuộc sống mơ ước qua kế hoạch 12 tuần bền bỉ",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": 461,
+          "right": 845,
+          "width": 384,
+          "className": "absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -77,
+          "right": 269,
+          "width": 346,
+          "className": "absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -48,
+          "right": 336,
+          "width": 384,
+          "className": "pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/5 blur-[120px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 332,
+          "right": 832,
+          "width": 500,
+          "className": "pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -55,
+          "right": 201,
+          "width": 256,
+          "className": "pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 535,
+          "right": 791,
+          "width": 256,
+          "className": "pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]"
+        }
+      ],
+      "fixedBottom": [
+        {
+          "tag": "div",
+          "text": "",
+          "top": 0,
+          "bottom": 1024,
+          "height": 1024,
+          "className": "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/55 backdrop-"
+        },
+        {
+          "tag": "div",
+          "text": "Cách bắt đầu nhanhXem nhanh luồng chính của app theo đúng thứ tự.Bản hiện tại đã",
+          "top": 61,
+          "bottom": 963,
+          "height": 901,
+          "className": "bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\dashboard-tablet-768.png"
+  },
+  {
+    "route": "/onboarding",
+    "routeName": "onboarding",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/onboarding",
+    "gotoError": null,
+    "metrics": {
+      "title": "Bắt đầu – Dear Our Future",
+      "h1": "Mở bản đồ cuộc sống 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\onboarding-tablet-768.png"
+  },
+  {
+    "route": "/smart-goal-setup",
+    "routeName": "smart",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/smart-goal-setup",
+    "gotoError": null,
+    "metrics": {
+      "title": "Mục tiêu SMART – Dear Our Future",
+      "h1": "Chọn trọng tâm trước",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\smart-tablet-768.png"
+  },
+  {
+    "route": "/12-week-system",
+    "routeName": "12-week-system",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/12-week-system",
+    "gotoError": null,
+    "metrics": {
+      "title": "Hệ 12 tuần – Dear Our Future",
+      "h1": "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\12-week-system-tablet-768.png"
+  },
+  {
+    "route": "/order",
+    "routeName": "order",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "gotoError": null,
+    "metrics": {
+      "title": "Tạo đơn – Dear Our Future",
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": [],
+      "fixedBottom": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\order-tablet-768.png"
+  }
+]

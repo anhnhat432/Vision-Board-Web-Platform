@@ -758,7 +758,9 @@ export function OrderStatusPage() {
                             {line.label}
                             {line.qty > 1 ? ` × ${line.qty}` : ""}
                           </span>
-                          <span className="shrink-0 tabular-nums text-app-ink-soft">{formatVnd(line.lineTotalVnd)}</span>
+                          <span className="shrink-0 tabular-nums text-app-ink-soft">
+                            {formatVnd(line.lineTotalVnd)}
+                          </span>
                         </li>
                       ))}
                       {INCLUDED_DOCS.map((doc) => (
@@ -821,7 +823,9 @@ export function OrderStatusPage() {
                     <MapPin className="h-3.5 w-3.5" />
                     Địa chỉ giao
                   </div>
-                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-app-ink-soft">{order.shippingAddress}</p>
+                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-app-ink-soft">
+                    {order.shippingAddress}
+                  </p>
                 </div>
               </div>
 
@@ -884,7 +888,9 @@ export function OrderStatusPage() {
                   <div
                     key={step.status}
                     className={`flex items-start gap-4 rounded-xl border px-4 py-4 ${
-                      isActive ? "border-app-status-success/40 bg-app-status-success/10" : "border-app-line bg-app-surface"
+                      isActive
+                        ? "border-app-status-success/40 bg-app-status-success/10"
+                        : "border-app-line bg-app-surface"
                     }`}
                   >
                     <div
@@ -901,12 +907,18 @@ export function OrderStatusPage() {
                           {getOrderStatusLabel(step.status)}
                         </p>
                         {isCurrent && (
-                          <Badge variant="outline" className="border-app-status-success/40 bg-app-surface text-app-status-success">
+                          <Badge
+                            variant="outline"
+                            className="border-app-status-success/40 bg-app-surface text-app-status-success"
+                          >
                             Trạng thái hiện tại
                           </Badge>
                         )}
                         {!isCurrent && isCompleted && (
-                          <Badge variant="outline" className="border-app-status-success/40 bg-app-surface text-app-status-success">
+                          <Badge
+                            variant="outline"
+                            className="border-app-status-success/40 bg-app-surface text-app-status-success"
+                          >
                             Đã hoàn thành
                           </Badge>
                         )}
@@ -1043,7 +1055,10 @@ export function OrderStatusPage() {
                     </div>
 
                     {item.id === order.id && (
-                      <Badge variant="outline" className="border-app-status-info/40 bg-app-surface text-app-status-info">
+                      <Badge
+                        variant="outline"
+                        className="border-app-status-info/40 bg-app-surface text-app-status-info"
+                      >
                         Đang xem
                       </Badge>
                     )}

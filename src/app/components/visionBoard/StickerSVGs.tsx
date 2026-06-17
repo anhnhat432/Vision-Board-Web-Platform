@@ -75,11 +75,7 @@ const stickers: Record<VisionBoardStickerId, ReactElement> = {
         strokeWidth="1"
         opacity="0.9"
       />
-      <path
-        d="M32 14L36.5 26L48 28L39 36L42 48L32 42L22 48L25 36L16 28L27.5 26L32 14Z"
-        fill="#f59e0b"
-        opacity="0.4"
-      />
+      <path d="M32 14L36.5 26L48 28L39 36L42 48L32 42L22 48L25 36L16 28L27.5 26L32 14Z" fill="#f59e0b" opacity="0.4" />
     </svg>
   ),
   "star-silver": (
@@ -91,11 +87,7 @@ const stickers: Record<VisionBoardStickerId, ReactElement> = {
         strokeWidth="1"
         opacity="0.9"
       />
-      <path
-        d="M32 14L36.5 26L48 28L39 36L42 48L32 42L22 48L25 36L16 28L27.5 26L32 14Z"
-        fill="#94a3b8"
-        opacity="0.3"
-      />
+      <path d="M32 14L36.5 26L48 28L39 36L42 48L32 42L22 48L25 36L16 28L27.5 26L32 14Z" fill="#94a3b8" opacity="0.3" />
     </svg>
   ),
   "heart-pink": (

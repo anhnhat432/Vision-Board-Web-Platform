@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+﻿import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -151,6 +151,13 @@ describe("app routes", () => {
     const route = renderRoute("/terms");
 
     expect(await screen.findByRole("heading", { level: 1, name: /Điều khoản dịch vụ/i })).toBeInTheDocument();
+    await route.dispose();
+  });
+
+  it("resolves /help through the app route table", async () => {
+    const route = renderRoute("/help");
+
+    expect(await screen.findByRole("heading", { level: 1, name: /Trung tâm trợ giúp/i })).toBeInTheDocument();
     await route.dispose();
   });
 

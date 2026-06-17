@@ -336,7 +336,7 @@ export function TwelveWeekSystemTabs({
 
   return (
     <>
-      <nav className="mt-4" aria-label="Điều hướng hệ 12 tuần">
+      <nav id="twelve-week-tabs-nav" className="mt-4" aria-label="Điều hướng hệ 12 tuần">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
@@ -347,6 +347,7 @@ export function TwelveWeekSystemTabs({
               return (
                 <TabsTrigger
                   key={value}
+                  data-tour-id={`twelve-week-tab-${value}`}
                   id={`${tabPanelId}-${value}-tab`}
                   value={value}
                   aria-controls={tabPanelId}
@@ -480,7 +481,7 @@ export function TwelveWeekSystemTabs({
                 onPickTinyTask={onPickTinyTask}
                 onReducePlan={onApplySuggestedPlan}
                 nextWeekRecommendation={nextWeekRecommendation}
-                onAcceptNextWeekRecommendation={onApplySuggestedPlan}
+                onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation ?? onApplySuggestedPlan}
                 weeklyReflectionInsights={weeklyReflectionInsights}
               />
             </Suspense>

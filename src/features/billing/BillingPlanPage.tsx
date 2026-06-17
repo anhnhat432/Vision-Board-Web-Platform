@@ -20,6 +20,8 @@ import { BillingTrustSignals } from "../../app/components/BillingTrustSignals";
 import { PageHero } from "../../app/components/layout/PageHero";
 import { PrimaryActionCard } from "../../app/components/layout/PrimaryActionCard";
 import { SectionBlock } from "../../app/components/layout/SectionBlock";
+import { ScreenGuide } from "../../app/components/ScreenGuide";
+import { SCREEN_GUIDES } from "../../app/components/screen-guides";
 import { UpgradePaywallDialog } from "../../app/components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -463,6 +465,7 @@ export function BillingPlan() {
 
   return (
     <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <ScreenGuide {...SCREEN_GUIDES.billingPlan} autoOpen />
       <Dialog open={refundDialogOrder !== null} onOpenChange={(open) => !open && setRefundDialogOrder(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
@@ -651,9 +654,7 @@ export function BillingPlan() {
           className={`rounded-xl p-4 ${isExpired ? "border-app-status-error/20 bg-app-status-error/8" : "border-app-line bg-app-warm-soft"}`}
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle
-              className={`mt-0.5 h-5 w-5 ${isExpired ? "text-app-status-error" : "text-app-warm"}`}
-            />
+            <AlertTriangle className={`mt-0.5 h-5 w-5 ${isExpired ? "text-app-status-error" : "text-app-warm"}`} />
             <div className="flex-1">
               <p className={`font-medium ${isExpired ? "text-app-status-error" : "text-app-ink"}`}>
                 {isInRenewalPriority
@@ -662,9 +663,7 @@ export function BillingPlan() {
                     ? "Gói Plus đã hết hạn"
                     : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
               </p>
-              <p
-                className={`mt-1 text-sm leading-6 ${isExpired ? "text-app-status-error" : "text-app-ink-soft"}`}
-              >
+              <p className={`mt-1 text-sm leading-6 ${isExpired ? "text-app-status-error" : "text-app-ink-soft"}`}>
                 {isInRenewalPriority
                   ? "Quyền Plus vẫn được giữ trong thời gian này. Gia hạn ngay để không bị tạm dừng."
                   : isExpired

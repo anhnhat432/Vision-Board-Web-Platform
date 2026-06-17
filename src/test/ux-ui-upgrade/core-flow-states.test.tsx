@@ -18,10 +18,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EmptyState } from "../../app/components/states/EmptyState";
 import { ScreenStateView } from "../../app/components/states/ScreenStateView";
-import {
-  SCREEN_DATA_STATE_TIMEOUT_MS,
-  useScreenDataState,
-} from "../../app/components/states/useScreenDataState";
+import { SCREEN_DATA_STATE_TIMEOUT_MS, useScreenDataState } from "../../app/components/states/useScreenDataState";
 
 // ─────────────────────────────────────────────────────────────
 // 1) Shared state component — delegate đúng component dùng chung
@@ -189,18 +186,10 @@ describe("ScreenStateView + useScreenDataState — chuyển nhánh loading→err
     vi.useRealTimers();
   });
 
-  function Harness({
-    onRetry,
-  }: {
-    onRetry: () => void;
-  }) {
+  function Harness({ onRetry }: { onRetry: () => void }) {
     const { kind, retry } = useScreenDataState({ status: "loading", onRetry });
     return (
-      <ScreenStateView
-        state={kind}
-        empty={<EmptyState title="Trống" testId="harness-empty" />}
-        onRetry={retry}
-      >
+      <ScreenStateView state={kind} empty={<EmptyState title="Trống" testId="harness-empty" />} onRetry={retry}>
         <p data-testid="harness-ready">sẵn sàng</p>
       </ScreenStateView>
     );

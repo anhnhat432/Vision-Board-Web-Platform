@@ -26,13 +26,9 @@
 
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import {
-  SYNC_STATE_TOKEN,
-  type SyncState,
-} from "@/features/plan12week/pages/12WeekSystem/helpers";
+import { SYNC_STATE_TOKEN, type SyncState } from "@/features/plan12week/pages/12WeekSystem/helpers";
 
-const PROPERTY_TAG =
-  "Feature: ux-ui-upgrade, Property 6: Ánh xạ Sync_State → status token là đơn ánh";
+const PROPERTY_TAG = "Feature: ux-ui-upgrade, Property 6: Ánh xạ Sync_State → status token là đơn ánh";
 
 /** 4 giá trị Sync_State được khai báo trong design (Section 3 — Sync State Indicator). */
 const SYNC_STATES: ReadonlyArray<SyncState> = ["synced", "syncing", "offline", "error"];
@@ -55,19 +51,15 @@ describe("Property 6 — Ánh xạ Sync_State → status token là đơn ánh (t
 
   it(PROPERTY_TAG, () => {
     fc.assert(
-      fc.property(
-        fc.constantFrom<SyncState>(...SYNC_STATES),
-        fc.constantFrom<SyncState>(...SYNC_STATES),
-        (a, b) => {
-          // Đơn ánh: hai Sync_State khác nhau ⇒ hai token khác nhau (Req 8.3).
-          if (a !== b) {
-            expect(SYNC_STATE_TOKEN[a]).not.toBe(SYNC_STATE_TOKEN[b]);
-          } else {
-            // Ràng buộc xác định: cùng input ⇒ cùng output (deterministic).
-            expect(SYNC_STATE_TOKEN[a]).toBe(SYNC_STATE_TOKEN[b]);
-          }
-        },
-      ),
+      fc.property(fc.constantFrom<SyncState>(...SYNC_STATES), fc.constantFrom<SyncState>(...SYNC_STATES), (a, b) => {
+        // Đơn ánh: hai Sync_State khác nhau ⇒ hai token khác nhau (Req 8.3).
+        if (a !== b) {
+          expect(SYNC_STATE_TOKEN[a]).not.toBe(SYNC_STATE_TOKEN[b]);
+        } else {
+          // Ràng buộc xác định: cùng input ⇒ cùng output (deterministic).
+          expect(SYNC_STATE_TOKEN[a]).toBe(SYNC_STATE_TOKEN[b]);
+        }
+      }),
       { numRuns: 100 },
     );
   });

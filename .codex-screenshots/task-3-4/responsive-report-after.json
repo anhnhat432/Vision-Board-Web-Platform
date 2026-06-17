@@ -1,0 +1,566 @@
+[
+  {
+    "route": "/",
+    "routeName": "dashboard",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Thiết lập cuộc sống mơ ước qua kế hoạch 12 tuần bền bỉ",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": 225,
+          "right": 413,
+          "width": 188,
+          "className": "absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -37,
+          "right": 131,
+          "width": 169,
+          "className": "absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -48,
+          "right": 336,
+          "width": 384,
+          "className": "pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/5 blur-[120px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -61,
+          "right": 439,
+          "width": 500,
+          "className": "pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -63,
+          "right": 193,
+          "width": 256,
+          "className": "pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 150,
+          "right": 406,
+          "width": 256,
+          "className": "pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-dashboard-mobile-375.png"
+  },
+  {
+    "route": "/onboarding",
+    "routeName": "onboarding",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/onboarding",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Mở bản đồ cuộc sống 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-onboarding-mobile-375.png"
+  },
+  {
+    "route": "/smart-goal-setup",
+    "routeName": "smart",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/smart-goal-setup",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Chọn trọng tâm trước",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-smart-mobile-375.png"
+  },
+  {
+    "route": "/12-week-system",
+    "routeName": "12-week-system",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/12-week-system",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": -66,
+          "right": 254,
+          "width": 320,
+          "className": "absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 89,
+          "right": 473,
+          "width": 384,
+          "className": "absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "button",
+          "text": "Cài đặt",
+          "left": 355,
+          "right": 465,
+          "width": 110,
+          "className": "font-medium whitespace-nowrap text-app-ink-soft hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:poi"
+        },
+        {
+          "tag": "svg",
+          "text": "",
+          "left": 374,
+          "right": 390,
+          "width": 16,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "path",
+          "text": "",
+          "left": 381,
+          "right": 387,
+          "width": 6,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "path",
+          "text": "",
+          "left": 377,
+          "right": 383,
+          "width": 6,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "circle",
+          "text": "",
+          "left": 383,
+          "right": 387,
+          "width": 4,
+          "className": "[object SVGAnimatedString]"
+        },
+        {
+          "tag": "circle",
+          "text": "",
+          "left": 376,
+          "right": 380,
+          "width": 4,
+          "className": "[object SVGAnimatedString]"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-12-week-system-mobile-375.png"
+  },
+  {
+    "route": "/order",
+    "routeName": "order",
+    "viewport": "mobile-375",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "wideElements": [
+        {
+          "tag": "ul",
+          "text": "Mục tiêu rõLộ trình có hướngDữ liệu an toàn",
+          "left": 16,
+          "right": 441,
+          "width": 425,
+          "className": "flex gap-2 w-max"
+        },
+        {
+          "tag": "li",
+          "text": "Dữ liệu an toàn",
+          "left": 303,
+          "right": 441,
+          "width": 138,
+          "className": "inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-order-mobile-375.png"
+  },
+  {
+    "route": "/",
+    "routeName": "dashboard",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Thiết lập cuộc sống mơ ước qua kế hoạch 12 tuần bền bỉ",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": 247,
+          "right": 453,
+          "width": 206,
+          "className": "absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -41,
+          "right": 144,
+          "width": 185,
+          "className": "absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -48,
+          "right": 336,
+          "width": 384,
+          "className": "pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/5 blur-[120px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -24,
+          "right": 476,
+          "width": 500,
+          "className": "pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -63,
+          "right": 193,
+          "width": 256,
+          "className": "pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 187,
+          "right": 443,
+          "width": 256,
+          "className": "pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-dashboard-mobile-412.png"
+  },
+  {
+    "route": "/onboarding",
+    "routeName": "onboarding",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/onboarding",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Mở bản đồ cuộc sống 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-onboarding-mobile-412.png"
+  },
+  {
+    "route": "/smart-goal-setup",
+    "routeName": "smart",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/smart-goal-setup",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Chọn trọng tâm trước",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-smart-mobile-412.png"
+  },
+  {
+    "route": "/12-week-system",
+    "routeName": "12-week-system",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/12-week-system",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": -57,
+          "right": 263,
+          "width": 320,
+          "className": "absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 117,
+          "right": 501,
+          "width": 384,
+          "className": "absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
+        },
+        {
+          "tag": "button",
+          "text": "Cài đặt",
+          "left": 355,
+          "right": 465,
+          "width": 110,
+          "className": "font-medium whitespace-nowrap text-app-ink-soft hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:poi"
+        },
+        {
+          "tag": "span",
+          "text": "Cài đặt",
+          "left": 398,
+          "right": 446,
+          "width": 48,
+          "className": ""
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-12-week-system-mobile-412.png"
+  },
+  {
+    "route": "/order",
+    "routeName": "order",
+    "viewport": "mobile-412",
+    "width": 412,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 412,
+      "clientWidth": 412,
+      "wideElements": [
+        {
+          "tag": "ul",
+          "text": "Mục tiêu rõLộ trình có hướngDữ liệu an toàn",
+          "left": 16,
+          "right": 441,
+          "width": 425,
+          "className": "flex gap-2 w-max"
+        },
+        {
+          "tag": "li",
+          "text": "Dữ liệu an toàn",
+          "left": 303,
+          "right": 441,
+          "width": 138,
+          "className": "inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-order-mobile-412.png"
+  },
+  {
+    "route": "/",
+    "routeName": "dashboard",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Thiết lập cuộc sống mơ ước qua kế hoạch 12 tuần bền bỉ",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": [
+        {
+          "tag": "div",
+          "text": "",
+          "left": 461,
+          "right": 845,
+          "width": 384,
+          "className": "absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -77,
+          "right": 269,
+          "width": 346,
+          "className": "absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -48,
+          "right": 336,
+          "width": 384,
+          "className": "pointer-events-none absolute -left-12 -top-12 -z-0 h-96 w-96 rounded-full bg-app-accent/5 blur-[120px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 332,
+          "right": 832,
+          "width": 500,
+          "className": "pointer-events-none absolute -right-16 top-1/4 -z-0 h-[500px] w-[500px] rounded-full bg-amber-500/5 blur-[150px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": -55,
+          "right": 201,
+          "width": 256,
+          "className": "pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-800/10 blur-[80px]"
+        },
+        {
+          "tag": "div",
+          "text": "",
+          "left": 535,
+          "right": 791,
+          "width": 256,
+          "className": "pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 blur-[80px]"
+        }
+      ]
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-dashboard-tablet-768.png"
+  },
+  {
+    "route": "/onboarding",
+    "routeName": "onboarding",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/onboarding",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Mở bản đồ cuộc sống 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-onboarding-tablet-768.png"
+  },
+  {
+    "route": "/smart-goal-setup",
+    "routeName": "smart",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/smart-goal-setup",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Chọn trọng tâm trước",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-smart-tablet-768.png"
+  },
+  {
+    "route": "/12-week-system",
+    "routeName": "12-week-system",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/12-week-system",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-12-week-system-tablet-768.png"
+  },
+  {
+    "route": "/order",
+    "routeName": "order",
+    "viewport": "tablet-768",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:5173/login?next=%2Forder",
+    "gotoError": null,
+    "metrics": {
+      "h1": "Quay lại với 12 tuần của bạn",
+      "overflowX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "wideElements": []
+    },
+    "consoleItems": [],
+    "pageErrors": [],
+    "screenshotPath": "D:\\Projects\\Vision Board Web Platform\\.codex-screenshots\\task-3-4\\after-order-tablet-768.png"
+  }
+]

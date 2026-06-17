@@ -511,7 +511,8 @@ export function TwelveWeekTodayTab({
                   Bắt đầu từ việc ưu tiên bên dưới rồi tick xong để tạo đà.
                 </p>
                 <p className="mt-1 text-xs leading-5 text-app-ink-soft">
-                  Chỉ cần hoàn thành việc đầu tiên này là bạn đã khởi động được nhịp 12 tuần. Sau lần tick đầu, dải nhắc này sẽ tự ẩn.
+                  Chỉ cần hoàn thành việc đầu tiên này là bạn đã khởi động được nhịp 12 tuần. Sau lần tick đầu, dải nhắc
+                  này sẽ tự ẩn.
                 </p>
               </div>
             </div>

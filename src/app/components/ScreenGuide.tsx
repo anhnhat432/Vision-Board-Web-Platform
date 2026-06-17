@@ -109,7 +109,16 @@ export function startScreenGuide(screenId: string, options: { force?: boolean } 
  * land on the screen; after that the guidance stays one click away and a
  * subtle dot reminds returning users it is there.
  */
-export function ScreenGuide({ screenId, title, intro, steps, tip, action, className, autoOpen = false }: ScreenGuideProps) {
+export function ScreenGuide({
+  screenId,
+  title,
+  intro,
+  steps,
+  tip,
+  action,
+  className,
+  autoOpen = false,
+}: ScreenGuideProps) {
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState(() => hasSeenGuide(screenId));
 
@@ -246,7 +255,13 @@ export function ScreenGuide({ screenId, title, intro, steps, tip, action, classN
           </div>
           <div className="flex flex-col gap-2 border-t border-app-line px-4 py-2.5 sm:flex-row sm:justify-end">
             {action ? (
-              <Button type="button" variant="outline" size="sm" className="min-h-11 gap-1.5 px-4" onClick={action.onClick}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-11 gap-1.5 px-4"
+                onClick={action.onClick}
+              >
                 {action.label}
               </Button>
             ) : null}

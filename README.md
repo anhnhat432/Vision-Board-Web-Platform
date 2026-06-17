@@ -4,6 +4,8 @@ Full-stack web app for turning a life vision into SMART goals, feasibility check
 
 Live production demo: https://vision-board-web-platform.vercel.app
 
+Hướng dẫn sử dụng (tiếng Việt): [docs/HUONG_DAN_SU_DUNG.md](docs/HUONG_DAN_SU_DUNG.md)
+
 ## Product Flow
 
 The app is intentionally focused on one core journey:
@@ -516,12 +518,14 @@ To enable the AI Assistant in production (`VITE_APP_MODE=real`), you must config
 - `AI_MODEL`: Model name for the chosen provider. For Groq you may alternatively set `GROQ_MODEL`.
 
 If you use Gemini specifically, set:
+
 - `GEMINI_API_KEY`: Gemini API key.
 - `GEMINI_MODEL`: Fast/default Gemini model name (recommended `gemini-2.5-flash-lite`).
 - `GEMINI_SMART_MODEL`: Smart Gemini model for planning, SMART goal, feasibility, reflection, and multi-step workflow prompts (recommended `gemini-3.1-flash-lite`).
 - `AI_SMART_MODEL`: Optional Gemini smart-model override. When the smart Gemini model is rate-limited or unavailable, the assistant retries the fast model once.
 
 If you use Groq specifically, you can also set:
+
 - `GROQ_API_KEY`: Groq API Key.
 - `GROQ_MODEL`: Groq Model. The current production assistant uses `meta-llama/llama-4-scout-17b-16e-instruct` (on_demand); set this explicitly so the deployment does not rely on the code default.
 

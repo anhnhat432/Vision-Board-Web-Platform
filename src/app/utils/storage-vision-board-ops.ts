@@ -20,12 +20,16 @@ const VALID_IMAGE_FRAMES: NonNullable<VisionBoardItemStyle["imageFrame"]>[] = [
   "filmstrip",
   "watercolor",
 ];
-const VALID_QUOTE_BACKGROUNDS: NonNullable<VisionBoardItemStyle["quoteBackground"]>[] = [
-  "none",
-  "dots",
-  "highlight",
+const VALID_QUOTE_BACKGROUNDS: NonNullable<VisionBoardItemStyle["quoteBackground"]>[] = ["none", "dots", "highlight"];
+const VALID_THEMES: VisionBoardThemeId[] = [
+  "aurora",
+  "sunset",
+  "forest",
+  "nightsky",
+  "minimal",
+  "blossom",
+  "dreamscape",
 ];
-const VALID_THEMES: VisionBoardThemeId[] = ["aurora", "sunset", "forest", "nightsky", "minimal", "blossom", "dreamscape"];
 
 function normalizeFiniteNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;

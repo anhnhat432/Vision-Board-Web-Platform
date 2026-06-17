@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { PageHero } from "../components/layout/PageHero";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -298,6 +300,7 @@ function ReflectionJournalContent() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <WaterReflectionPool />
+      <ScreenGuide {...SCREEN_GUIDES.reflectionJournal} autoOpen />
       <AlertDialog
         open={Boolean(reflectionToDelete)}
         onOpenChange={(open) => {
@@ -455,9 +458,7 @@ function ReflectionJournalContent() {
                   onChange={(event) => setNewReflection({ ...newReflection, date: event.target.value })}
                 />
                 {newReflection.date ? (
-                  <p className="text-xs text-app-ink-soft">
-                    Đã chọn: {formatDisplayDate(newReflection.date)}
-                  </p>
+                  <p className="text-xs text-app-ink-soft">Đã chọn: {formatDisplayDate(newReflection.date)}</p>
                 ) : null}
               </div>
               <div className="stack-tight">

@@ -8,7 +8,6 @@ import { isPaidCheckoutDisabled } from "../utils/app-mode";
 import { formatVndAmount } from "../utils/billing-pricing";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { syncEntitlementsWithProvider } from "../utils/production";
-import { upgradePlanLocally } from "../utils/storage";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -157,11 +156,13 @@ export function BillingCheckoutQR() {
     setEntitlementSyncStatus("syncing");
     setEntitlementSyncMessage(null);
 
+    // Anonymous viewer of a public order receipt: never grant Plus locally.
+    // Entitlement must be tied to an authenticated account via a verified
+    // backend sync. Ask the user to sign in to claim Plus on their account.
     if (!user) {
-      const planCode = upgradePlanLocally("PLUS");
-      setEntitlementSyncStatus("synced");
-      setEntitlementSyncMessage(`Đã mở gói ${planCode} trên thiết bị này.`);
-      return true;
+      setEntitlementSyncStatus("failed");
+      setEntitlementSyncMessage("Đã nhận thanh toán. Hãy đăng nhập vào tài khoản đã đặt đơn để mở quyền Plus.");
+      return false;
     }
 
     try {
@@ -214,13 +215,18 @@ export function BillingCheckoutQR() {
   }, [order?.orderId, order?.status, syncCompletedOrderAccess]);
 
   const handleCompletedOrderContinue = useCallback(async () => {
+    if (!user) {
+      navigate(`/login?next=${encodeURIComponent(`/billing/checkout/${order?.orderId}`)}`);
+      return;
+    }
+
     if (entitlementSyncStatus !== "synced") {
       const synced = await syncCompletedOrderAccess();
       if (!synced) return;
     }
 
     navigate("/12-week-system");
-  }, [entitlementSyncStatus, navigate, syncCompletedOrderAccess]);
+  }, [entitlementSyncStatus, navigate, order?.orderId, syncCompletedOrderAccess, user]);
 
   // ─── Success state ──────────────────────────────────────────────────────
 
@@ -254,7 +260,13 @@ export function BillingCheckoutQR() {
             className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-app-accent disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSyncingEntitlement && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isSyncingEntitlement ? "Đang cập nhật..." : syncFailed ? "Đồng bộ lại quyền Plus" : "Bắt đầu ngay"}
+            {isSyncingEntitlement
+              ? "Đang cập nhật..."
+              : syncFailed && !user
+                ? "Đăng nhập để mở Plus"
+                : syncFailed
+                  ? "Đồng bộ lại quyền Plus"
+                  : "Bắt đầu ngay"}
           </button>
         </div>
       </div>

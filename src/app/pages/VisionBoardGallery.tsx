@@ -27,6 +27,8 @@ import {
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { VisionMapIllustration } from "../components/illustrations";
 import { PageHero } from "../components/layout/PageHero";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -173,6 +175,7 @@ export function VisionBoardGallery() {
 
   return (
     <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} autoOpen className="mb-4" />
       <AlertDialog
         open={Boolean(boardToDelete)}
         onOpenChange={(open) => {

@@ -207,15 +207,17 @@ const apiContractBillingProvider: BillingProvider = {
       };
     }
 
-    const currentPlan = getCurrentPlan();
-    const { planCode } = applyBillingAccessPayload(response, "api_contract");
-
+    // CRITICAL: A checkout-creation response without a `checkoutUrl` is not
+    // a payment confirmation. Never grant entitlement here — that must wait
+    // for a backend-verified entitlement sync (webhook or signed-in
+    // /billing/entitlement). Surface a clear error instead so user retries.
     return {
-      ok: true,
-      status: getPlanRank(planCode) > getPlanRank(currentPlan) ? "upgraded" : "already_active",
+      ok: false,
+      status: "error",
       providerMode: "api_contract",
-      planCode,
-      message: response.message ?? `Đã đồng bộ gói ${planCode} từ đơn vị thanh toán.`,
+      planCode: getCurrentPlan(),
+      message:
+        response.message ?? "Không tạo được phiên thanh toán từ đơn vị thanh toán. Vui lòng thử lại sau ít phút.",
     };
   },
   syncEntitlements: async (goalId) => {

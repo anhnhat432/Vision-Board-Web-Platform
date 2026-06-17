@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { mockProvider, resetAssistantSession } from "../assistantEngine";
 import type { AssistantContext } from "../buildAssistantContext";
-import {
-  EVAL_CASES,
-  EVAL_CATEGORIES,
-  SAFETY_CRITICAL_CATEGORIES,
-} from "../evals/assistantEvalCases";
+import { EVAL_CASES, EVAL_CATEGORIES, SAFETY_CRITICAL_CATEGORIES } from "../evals/assistantEvalCases";
 import { formatEvalSummary, runAssistantEvals } from "../evals/evalRunner";
 import { parseAssistantReply } from "../parseActions";
 
