@@ -5,6 +5,8 @@ import { cn } from "@/app/components/ui/utils";
 import type { CatalogItem } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 
+import { CatalogThumbnail } from "./CatalogThumbnail";
+
 export interface ThemePickerProps {
   themes: CatalogItem[];
   selected: string[];
@@ -33,7 +35,7 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--order-text-muted)]" />
         <Input placeholder="Tìm chủ đề..." value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {filtered.map((theme) => {
           const isOn = selected.includes(theme.itemId);
           return (
@@ -43,7 +45,7 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
               onClick={() => toggle(theme.itemId)}
               aria-pressed={isOn}
               className={cn(
-                "group relative rounded-[var(--r-card)] border bg-[var(--order-card)] p-3 text-left transition-all duration-150",
+                "group relative rounded-[var(--r-card)] border bg-[var(--order-card)] p-3.5 text-left transition-all duration-150",
                 isOn
                   ? "border-[var(--order-accent)] ring-2 ring-[var(--order-accent-soft)]"
                   : "border-[var(--order-border)] hover:-translate-y-[2px] hover:border-[var(--order-accent)]/60",
@@ -54,20 +56,7 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
                   <Check className="h-3 w-3" />
                 </span>
               )}
-              {theme.thumbnail ? (
-                <img
-                  src={theme.thumbnail}
-                  alt={theme.label}
-                  className="mb-2 aspect-square w-full rounded-[var(--r-card-sm)] object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div
-                  data-testid="catalog-thumbnail-placeholder"
-                  aria-hidden="true"
-                  className="mb-2 aspect-square w-full rounded-[var(--r-card-sm)] bg-gradient-to-br from-[var(--order-accent-soft)]/40 to-[var(--order-bg)]"
-                />
-              )}
+              <CatalogThumbnail item={theme} className="mb-2 aspect-square w-full" compact />
               <div className="text-sm font-medium">{theme.label}</div>
               <div className="mt-1 text-xs font-medium text-[var(--order-accent)]">{formatVnd(theme.priceVnd)}</div>
             </button>

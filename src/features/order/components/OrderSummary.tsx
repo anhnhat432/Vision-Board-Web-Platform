@@ -6,6 +6,8 @@ import type { CatalogItem } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 import type { OrderLine } from "@/features/order/storage/order";
 
+import { CatalogThumbnail } from "./CatalogThumbnail";
+
 export interface OrderSummaryProps {
   lines: OrderLine[];
   subtotalVnd: number;
@@ -33,51 +35,39 @@ export function OrderSummary({
   selectedThemes,
   selectedSticker,
 }: OrderSummaryProps) {
-  const previewFrame = selectedFrame?.thumbnail ? selectedFrame : null;
-  const previewThemes = selectedThemes.filter((t) => t.thumbnail);
-  const previewSticker = selectedSticker?.thumbnail ? selectedSticker : null;
-  const hasPreview = Boolean(previewFrame || previewThemes.length > 0 || previewSticker);
+  const hasSelectedPreview = Boolean(selectedFrame || selectedThemes.length > 0 || selectedSticker);
 
   return (
     <aside className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-sm">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--order-eyebrow)]">Kit của bạn</h3>
       <div className="mt-3">
-        {!hasPreview ? (
-          <div className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-[var(--r-card-sm)] bg-[var(--order-bg)] text-center">
-            <Package className="h-8 w-8 text-[var(--order-accent)]" />
-            <p className="px-4 text-xs text-[var(--order-text-muted)]">Chọn khung và set ảnh để xem trước</p>
+        {!hasSelectedPreview ? (
+          <div className="relative flex aspect-[4/3] w-full flex-col justify-end overflow-hidden rounded-[var(--r-card-sm)] border border-[var(--order-border)] bg-[var(--order-bg)] text-center">
+            <img
+              src="/printed_vision_kit.png"
+              alt="Bộ Vision Board Kit vật lý"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="relative bg-[var(--order-card)]/90 px-4 py-3 text-left backdrop-blur">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--order-accent)]">
+                <Package className="h-4 w-4" />
+                Vision Board Kit
+              </div>
+              <p className="mt-1 text-xs text-[var(--order-text-muted)]">Chọn khung và set ảnh để xem trước</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
-            {previewFrame && (
-              <img
-                src={previewFrame.thumbnail}
-                alt={previewFrame.label}
-                className="aspect-[3/4] w-full rounded-[var(--r-card-sm)] object-cover"
-                loading="lazy"
-              />
-            )}
-            {previewThemes.length > 0 && (
+            {selectedFrame && <CatalogThumbnail item={selectedFrame} className="aspect-[3/4] w-full" showLabel />}
+            {selectedThemes.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
-                {previewThemes.map((t) => (
-                  <img
-                    key={t.itemId}
-                    src={t.thumbnail}
-                    alt={t.label}
-                    className="aspect-square w-full rounded-[var(--r-card-sm)] object-cover"
-                    loading="lazy"
-                  />
+                {selectedThemes.map((theme) => (
+                  <CatalogThumbnail key={theme.itemId} item={theme} className="aspect-square w-full" compact showLabel />
                 ))}
               </div>
             )}
-            {previewSticker && (
-              <img
-                src={previewSticker.thumbnail}
-                alt={previewSticker.label}
-                className="h-16 w-16 rounded-[var(--r-card-sm)] object-cover"
-                loading="lazy"
-              />
-            )}
+            {selectedSticker && <CatalogThumbnail item={selectedSticker} className="h-16 w-16" compact showLabel />}
           </div>
         )}
       </div>

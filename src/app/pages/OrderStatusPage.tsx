@@ -665,6 +665,7 @@ export function OrderStatusPage() {
   }
 
   const isCancelled = backendRawStatus === "cancelled";
+  const shouldShowPaymentCta = order.status === "pending" && !isCancelled;
   const visualTimelineStep = getOrderStatusStepIndex(order.status);
   const nextStatus = isBackendBacked ? null : getNextOrderStatus(order.status);
   const hasGoalLink = Boolean(order.goalId || (order.goalTitle.trim() && order.goalTitle !== UNLINKED_GOAL_TITLE));
@@ -979,6 +980,34 @@ export function OrderStatusPage() {
         </div>
 
         <div className="stack-section">
+          {shouldShowPaymentCta ? (
+            <Card className="border border-app-accent/20 bg-app-accent-soft/40 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <QrCode className="h-4 w-4 text-app-accent" />
+                  Thanh toán đơn kit
+                </CardTitle>
+                <CardDescription>
+                  Hoàn tất thanh toán để đội Dear Our Future xác nhận và chuẩn bị kit của bạn.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {typeof order.totalVnd === "number" && order.totalVnd > 0 ? (
+                  <div className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2 text-sm">
+                    <span className="text-app-ink-soft">Tổng tạm tính</span>
+                    <span className="font-semibold tabular-nums text-app-accent">{formatVnd(order.totalVnd)}</span>
+                  </div>
+                ) : null}
+                <Button type="button" className="w-full bg-app-accent text-white hover:bg-app-accent" asChild>
+                  <Link to="/billing/confirm">
+                    <QrCode className="h-4 w-4" />
+                    Thanh toán ngay / Xem mã QR
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Đơn gần đây</CardTitle>

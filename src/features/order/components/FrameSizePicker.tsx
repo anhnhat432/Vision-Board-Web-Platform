@@ -4,6 +4,8 @@ import { cn } from "@/app/components/ui/utils";
 import type { CatalogItem } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 
+import { CatalogThumbnail } from "./CatalogThumbnail";
+
 export interface FrameSizePickerProps {
   frames: CatalogItem[];
   selected: string | null;
@@ -33,20 +35,7 @@ export function FrameSizePicker({ frames, selected, onChange }: FrameSizePickerP
                 <Check className="h-3.5 w-3.5" />
               </span>
             )}
-            {frame.thumbnail ? (
-              <img
-                src={frame.thumbnail}
-                alt={frame.label}
-                className="mb-3 aspect-[3/4] w-full rounded-[var(--r-card-sm)] object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div
-                data-testid="catalog-thumbnail-placeholder"
-                aria-hidden="true"
-                className="mb-3 aspect-[3/4] w-full rounded-[var(--r-card-sm)] bg-gradient-to-br from-[var(--order-accent-soft)]/40 to-[var(--order-bg)]"
-              />
-            )}
+            <CatalogThumbnail item={frame} className="mb-3 aspect-[3/4] w-full" />
             <div className="text-base font-semibold">{frame.label}</div>
             {frame.description && (
               <div className="mt-1 text-xs text-[var(--order-text-muted)]">{frame.description}</div>

@@ -2,6 +2,8 @@ import { Button } from "@/app/components/ui/button";
 import type { CatalogItem } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 
+import { CatalogThumbnail } from "./CatalogThumbnail";
+
 export interface StickerAddonProps {
   sticker: CatalogItem | null;
   value: { itemId: string; qty: number } | null;
@@ -24,20 +26,7 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
     <div className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          {sticker.thumbnail ? (
-            <img
-              src={sticker.thumbnail}
-              alt={sticker.label}
-              className="h-14 w-14 shrink-0 rounded-[var(--r-card-sm)] object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div
-              data-testid="catalog-thumbnail-placeholder"
-              aria-hidden="true"
-              className="h-14 w-14 shrink-0 rounded-[var(--r-card-sm)] bg-gradient-to-br from-[var(--order-accent-soft)]/40 to-[var(--order-bg)]"
-            />
-          )}
+          <CatalogThumbnail item={sticker} className="h-16 w-16 shrink-0" compact />
           <div>
             <div className="font-medium">{sticker.label}</div>
             <div className="text-xs text-[var(--order-text-muted)]">{formatVnd(sticker.priceVnd)} / tờ</div>
