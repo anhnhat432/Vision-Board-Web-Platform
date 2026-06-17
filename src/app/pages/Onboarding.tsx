@@ -53,48 +53,38 @@ const LIFE_AREA_DETAILS: Record<string, string> = {
   Leisure: "Nghỉ ngơi, vui chơi, sở thích và khoảng trống để hồi phục.",
 };
 
-const LIFE_AREA_QUESTIONS: Record<string, string[]> = {
-  Career: [
-    "Bạn có thấy công việc hiện tại có ý nghĩa và tiến triển tốt?",
-    "Môi trường làm việc có giúp bạn học hỏi và phát triển kỹ năng?",
-    "Mức độ hài lòng với vị trí và lộ trình nghề nghiệp hiện tại?",
-  ],
-  Finance: [
-    "Thu nhập hiện tại có đáp ứng tốt các nhu cầu thiết yếu?",
-    "Bạn có cảm giác an tâm với quỹ dự phòng và các khoản tiết kiệm?",
-    "Kế hoạch tài chính dài hạn của bạn có rõ ràng không?",
-  ],
-  Health: [
-    "Mức năng lượng hằng ngày của bạn có đủ để làm việc hiệu quả?",
-    "Chế độ ăn uống, giấc ngủ và tập luyện có đang được duy trì tốt?",
-    "Sức khỏe tinh thần của bạn có đang ở trạng thái cân bằng?",
-  ],
-  Education: [
-    "Bạn có đang chủ động học hỏi thêm kiến thức mới hoặc kỹ năng mới?",
-    "Có dành thời gian đọc sách hay tham gia các khóa học nâng cấp bản thân?",
-    "Khả năng thích nghi trước các xu hướng mới có tốt không?",
-  ],
-  Relationships: [
-    "Bạn bè xung quanh có đem lại nguồn năng lượng tích cực không?",
-    "Mối quan hệ yêu đương/đối tác có thấu hiểu và sẻ chia tốt?",
-    "Mức độ gắn kết với các cộng đồng hoặc hội nhóm của bạn?",
-  ],
-  Family: [
-    "Thời gian bạn dành cho gia đình có chất lượng không?",
-    "Mức độ thấu hiểu, yêu thương và giúp đỡ lẫn nhau giữa các thành viên?",
-    "Bạn có cảm giác bình yên và điểm tựa vững chắc mỗi khi về nhà?",
-  ],
-  "Personal Growth": [
-    "Bạn có thấu hiểu điểm mạnh, điểm yếu và các giá trị cốt lõi của mình?",
-    "Mức độ duy trì các thói quen tốt và kỷ luật với chính mình?",
-    "Bạn có đang sống đúng với định hướng và lý tưởng cá nhân?",
-  ],
-  Leisure: [
-    "Bạn có thời gian nghỉ ngơi trọn vẹn, tách biệt khỏi công việc?",
-    "Có đang duy trì các sở thích, đam mê cá nhân lành mạnh?",
-    "Khoảng trống thời gian để tái tạo năng lượng có đủ không?",
-  ],
+const LIFE_AREA_QUESTIONS: Record<string, string> = {
+  Career: "Bạn hài lòng bao nhiêu với công việc và hướng đi nghề nghiệp hiện tại?",
+  Finance: "Bạn cảm thấy an tâm bao nhiêu với tình hình tài chính hiện tại?",
+  Health: "Bạn đánh giá thế nào về sức khỏe thể chất và tinh thần hiện tại?",
+  Education: "Bạn hài lòng bao nhiêu với tốc độ học hỏi và phát triển kiến thức?",
+  Relationships: "Bạn cảm thấy thế nào về chất lượng các mối quan hệ xung quanh?",
+  Family: "Bạn hài lòng bao nhiêu với sự gắn kết và bình yên trong gia đình?",
+  "Personal Growth": "Bạn đánh giá thế nào về mức kỷ luật và sự hiểu mình hiện tại?",
+  Leisure: "Bạn hài lòng bao nhiêu với thời gian nghỉ ngơi và giải trí?",
 };
+
+interface ScoreAnchor {
+  range: string;
+  label: string;
+  description: string;
+}
+
+const SCORE_ANCHORS: ScoreAnchor[] = [
+  { range: "1–2", label: "Rất chật vật", description: "Gần như không có hoặc đang rất khó khăn" },
+  { range: "3–4", label: "Thiếu ổn định", description: "Có nhưng thiếu động lực hoặc bế tắc" },
+  { range: "5–6", label: "Tạm ổn", description: "Chưa tệ nhưng chưa thực sự hài lòng" },
+  { range: "7–8", label: "Khá tốt", description: "Đang trên đà tiến triển tích cực" },
+  { range: "9–10", label: "Rất tốt", description: "Rất hài lòng, đúng hướng và có năng lượng" },
+];
+
+function getActiveScoreAnchor(score: number): ScoreAnchor | null {
+  if (score <= 2) return SCORE_ANCHORS[0];
+  if (score <= 4) return SCORE_ANCHORS[1];
+  if (score <= 6) return SCORE_ANCHORS[2];
+  if (score <= 8) return SCORE_ANCHORS[3];
+  return SCORE_ANCHORS[4];
+}
 
 const LIFE_AREA_ICON_MAP: Record<string, LucideIcon> = {
   Career: BriefcaseBusiness,
@@ -450,7 +440,6 @@ export function Onboarding() {
   const [showBreathing, setShowBreathing] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState<number | null>(0);
-  const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -461,10 +450,7 @@ export function Onboarding() {
     return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
-  useEffect(() => {
-    void activeAreaIndex;
-    setIsQuestionsOpen(false);
-  }, [activeAreaIndex]);
+
 
   useEffect(() => {
     void activeAreaIndex;
@@ -942,45 +928,15 @@ export function Onboarding() {
                     </div>
                   </div>
 
+                  {/* Câu hỏi chính - hiển thị trực tiếp */}
                   <div className="mt-5 rounded-control border border-app-line bg-app-bg-subtle p-4">
-                    <p className="text-sm font-medium leading-6 text-app-ink-soft">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Câu hỏi đánh giá</p>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-app-ink">
+                      {LIFE_AREA_QUESTIONS[area.name] ?? "Bạn hài lòng bao nhiêu với khía cạnh này?"}
+                    </p>
+                    <p className="mt-1.5 text-xs leading-5 text-app-ink-muted">
                       {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
                     </p>
-                    <div className="mt-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsQuestionsOpen((prev) => !prev)}
-                        className="inline-flex min-h-11 items-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                        aria-expanded={isQuestionsOpen}
-                        aria-controls="active-area-questions"
-                      >
-                        {isQuestionsOpen ? "Ẩn câu hỏi tự vấn" : "Gợi ý câu hỏi tự vấn"}
-                        {isQuestionsOpen ? (
-                          <ChevronUp className="h-4 w-4" aria-hidden="true" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" aria-hidden="true" />
-                        )}
-                      </button>
-
-                      <AnimatePresence initial={false}>
-                        {isQuestionsOpen && (
-                          <motion.div
-                            id="active-area-questions"
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
-                            className="overflow-hidden"
-                          >
-                            <ul className="mt-3 list-disc space-y-2 rounded-control border border-app-line bg-app-surface p-4 pl-6 text-sm leading-6 text-app-ink-soft">
-                              {(LIFE_AREA_QUESTIONS[area.name] ?? []).map((question) => (
-                                <li key={question}>{question}</li>
-                              ))}
-                            </ul>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
                   </div>
 
                   <div className="mt-6 space-y-5">
@@ -1010,6 +966,44 @@ export function Onboarding() {
                             >
                               {scoreVal}
                             </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Mốc neo thang điểm - hiển thị luôn */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Mốc tham khảo</p>
+                      <div className="grid gap-1.5">
+                        {SCORE_ANCHORS.map((anchor) => {
+                          const activeAnchor = getActiveScoreAnchor(area.score);
+                          const isActive = activeAnchor === anchor;
+                          return (
+                            <div
+                              key={anchor.range}
+                              className={cn(
+                                "flex items-center gap-3 rounded-control border px-3 py-2 text-xs transition-colors",
+                                isActive
+                                  ? "border-app-accent/40 bg-app-accent-soft"
+                                  : "border-app-line bg-app-bg-subtle",
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "shrink-0 rounded-pill px-2 py-0.5 font-bold tabular-nums",
+                                  isActive ? "bg-app-accent text-white" : "bg-app-surface text-app-ink-muted",
+                                )}
+                              >
+                                {anchor.range}
+                              </span>
+                              <div className="min-w-0">
+                                <span className={cn("font-semibold", isActive ? "text-app-accent" : "text-app-ink-soft")}>
+                                  {anchor.label}
+                                </span>
+                                <span className="mx-1.5 text-app-ink-muted">·</span>
+                                <span className="text-app-ink-muted">{anchor.description}</span>
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
@@ -1060,12 +1054,6 @@ export function Onboarding() {
                           +
                         </button>
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-app-ink-muted">
-                      <span className="rounded-pill bg-app-bg-subtle px-3 py-2 text-center">0-3 Cần chăm sóc</span>
-                      <span className="rounded-pill bg-app-bg-subtle px-3 py-2 text-center">4-7 Ổn định</span>
-                      <span className="rounded-pill bg-app-bg-subtle px-3 py-2 text-center">8-10 Đang mạnh</span>
                     </div>
                   </div>
 

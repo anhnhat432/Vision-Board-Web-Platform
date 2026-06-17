@@ -117,10 +117,10 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
       : "Đang xem dữ liệu mẫu? Đi theo lộ trình này để hiểu luồng chính của app."
     : compact
       ? "Đi theo lộ trình gợi ý"
-      : `Mới bắt đầu? Đi theo ${progress.totalSteps} bước này là rõ nhất.`;
+      : `Đi theo ${progress.totalSteps} bước này để không bị lạc.`;
   const description = userData.isHydratedFromDemo
-    ? "Bạn đang xem bản có dữ liệu mẫu sẵn. Lộ trình này giúp bạn hiểu màn nào làm trước, màn nào làm sau."
-    : "Đi đúng thứ tự sẽ dễ hơn: nhìn lại hiện tại, chọn một trọng tâm, rồi biến nó thành kế hoạch 12 tuần rõ ràng.";
+    ? "Web đã có dữ liệu mẫu sẵn. Lộ trình này giúp bạn hiểu màn nào làm trước, màn nào làm sau."
+    : "Đi đúng thứ tự sẽ dễ hơn: đánh giá, chọn trọng tâm, viết SMART Goal, rồi bắt đầu chu kỳ 12 tuần.";
   const surfaceClass = compact
     ? "max-w-full overflow-hidden border border-app-line bg-app-surface shadow-sm"
     : "max-w-full overflow-hidden border border-app-line bg-app-surface text-app-ink shadow-sm";
@@ -222,24 +222,24 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         <DialogHeader>
           <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
             <Sparkles className="h-3.5 w-3.5" />
-              Cách bắt đầu nhanh
+            Cách bắt đầu nhanh
           </div>
           <DialogTitle className="text-xl tracking-normal text-app-ink sm:text-2xl">
-              {userData.isHydratedFromDemo
-                ? "Xem nhanh luồng chính của app theo đúng thứ tự."
-                : `Đi theo ${progress.totalSteps} bước này để biết nên làm gì trước.`}
+            {userData.isHydratedFromDemo
+              ? "Xem nhanh luồng chính của app theo đúng thứ tự."
+              : `Đi theo ${progress.totalSteps} bước này để biết nên làm gì trước.`}
           </DialogTitle>
-          <DialogDescription className="text-sm leading-7 text-app-ink-soft">
-              {userData.isHydratedFromDemo
-                ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng lộ trình này để hiểu màn nào làm trước và kết quả bạn sẽ nhận được sau mỗi bước."
-                : "Nếu mới dùng lần đầu, đây là đường đi ngắn nhất để có kết quả đầu tiên mà không bị rối."}
+          <DialogDescription className="text-sm leading-6 text-app-ink-soft">
+            {userData.isHydratedFromDemo
+              ? "Web đã có dữ liệu mẫu sẵn. Đi theo thứ tự này để hiểu luồng thật."
+              : "Nếu mới dùng lần đầu, đây là đường đi ngắn nhất để có kết quả đầu tiên mà không bị rối."}
           </DialogDescription>
         </DialogHeader>
 
         {userData.isHydratedFromDemo && (
-          <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
-            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi dùng thật, thứ tự nên đi vẫn là: nhìn bánh xe
-            cuộc sống, chốt insight, viết SMART Goal, kiểm tra khả thi rồi vào chu kỳ 12 tuần.
+          <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-3 text-xs leading-5 text-amber-900">
+            Luồng chuẩn khi dùng thật: Bánh xe cuộc sống → Chọn trọng tâm → SMART Goal → Kiểm tra khả thi →
+            Chu kỳ 12 tuần.
           </div>
         )}
 
@@ -273,9 +273,9 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  Để sau
-              </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Để sau
+            </Button>
             {nextStep && (
               <Button
                 onClick={() => {

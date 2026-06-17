@@ -116,7 +116,7 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
   const steps: NewUserGuideStep[] = [
     {
       id: "life_balance",
-      title: "Đánh giá Cân bằng & Chọn trọng tâm",
+      title: "1. Đánh giá Cân bằng & Chọn trọng tâm",
       description: "Chấm điểm 8 lĩnh vực rồi chọn một trọng tâm để hành động trong 12 tuần tới.",
       completed: hasInsight,
       href: hasLifeBalance ? "/life-balance?tab=focus" : "/onboarding",
@@ -124,7 +124,7 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     },
     {
       id: "life_insight",
-      title: "Xem góc nhìn cuộc sống (bản đầy đủ)",
+      title: "2. Xem góc nhìn cuộc sống (bản đầy đủ)",
       description: "Bản chi tiết hơn với radar chart và phân tích — nếu muốn xem thêm sau khi đã chọn trọng tâm.",
       completed: hasInsight,
       href: "/life-insight",
@@ -132,15 +132,15 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     },
     {
       id: "smart_goal",
-      title: "Viết mục tiêu SMART",
-      description: "Biến trọng tâm đó thành mục tiêu có kết quả, chỉ số đo, thời gian và lý do rõ ràng.",
+      title: "3. Viết mục tiêu SMART",
+      description: "Biến trọng tâm thành mục tiêu cụ thể, đo được, có thời hạn rõ ràng.",
       completed: hasSmartGoal,
       href: hasInsight ? "/smart-goal-setup" : hasLifeBalance ? "/life-balance?tab=focus" : "/onboarding",
       ctaLabel: hasInsight ? "Viết mục tiêu SMART" : "Chọn trọng tâm trước",
     },
     {
       id: "feasibility",
-      title: "Kiểm tra tính khả thi",
+      title: "4. Kiểm tra tính khả thi",
       description: "Đo mức sẵn sàng nâng cao nếu muốn làm kỹ hơn; đường mặc định vẫn có thể tạo kế hoạch nhanh.",
       completed: hasFeasibility,
       href: hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
@@ -148,24 +148,23 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     },
     {
       id: "setup_cycle",
-      title: "Chốt chu kỳ 12 tuần",
-      description:
-        "Biến mục tiêu đó thành một chu kỳ có kết quả, việc lặp lại, chỉ số, tuần đầu và ngày review rõ ràng.",
+      title: "5. Chốt chu kỳ 12 tuần",
+      description: "Chia mục tiêu thành việc cần làm mỗi tuần và bắt đầu chu kỳ hành động.",
       completed: hasCycle,
       href: hasSmartGoal ? "/12-week-setup" : "/smart-goal-setup",
       ctaLabel: hasSmartGoal ? "Tạo kế hoạch 12 tuần" : "Viết mục tiêu SMART trước",
     },
     {
       id: "complete_today",
-      title: "Chạm việc đầu tiên hôm nay",
-      description: "Mở trung tâm 12 tuần, tick ít nhất một việc hoặc chốt check-in để tuần bắt đầu có nhịp.",
+      title: "6. Chạm việc đầu tiên hôm nay",
+      description: "Mở danh sách hôm nay và hoàn thành ít nhất 1 việc để tạo đà.",
       completed: hasTouchedToday,
       href: "/12-week-system",
       ctaLabel: "Mở hôm nay",
     },
     {
       id: "complete_review",
-      title: "Làm review tuần đầu tiên",
+      title: "7. Làm review tuần đầu tiên",
       description: "Cuối tuần mở tab Tuần để nhìn lại điểm đã làm, điều chỉnh tải và chọn cam kết cho tuần kế tiếp.",
       completed: hasCompletedReview,
       href: "/12-week-system?tab=week",

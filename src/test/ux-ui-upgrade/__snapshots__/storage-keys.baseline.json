@@ -1,6 +1,6 @@
 {
   "generatedFrom": "production sources under src + src/app/utils/storage-constants.ts",
-  "keyCount": 82,
+  "keyCount": 86,
   "keys": [
     "assistant.action_audit_log",
     "assistant.chat.history",
@@ -63,12 +63,14 @@
     "vb:order-catalog",
     "vbwp.celebratedCycle.",
     "visionboard:chunk-load-reload",
+    "visionboard_dashboard_secondary_insights_open",
     "visionboard_data_mutation_queue",
     "visionboard_data_mutation_queue:anonymous",
     "visionboard_data_mutation_queue:auth:",
     "visionboard_data_mutation_queue:device_id",
     "visionboard_data_mutation_queue:recovery:",
     "visionboard_demo_feedback",
+    "visionboard_first_run_guidance_completed_at",
     "visionboard_last_browser_notification",
     "visionboard_last_entitlement_sync",
     "visionboard_last_outbox_sync",
@@ -80,8 +82,10 @@
     "visionboard_new_user_guide_dismissed",
     "visionboard_new_user_guide_seen_at",
     "visionboard_orders_v1",
+    "visionboard_page_tour_seen:",
     "visionboard_pull_cursor:auth:",
     "visionboard_rescue_dismissed",
+    "visionboard_screen_guide_seen:",
     "visionboard_user_data",
     "weekly_review_snooze"
   ]
