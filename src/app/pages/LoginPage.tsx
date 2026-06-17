@@ -261,7 +261,7 @@ export function LoginPage() {
   const displayError = localError ?? authError;
 
   return (
-    <div className="flex min-h-screen flex-col bg-app-bg">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-app-bg">
       <a href="#login-main" className="skip-to-content">
         Bỏ qua điều hướng
       </a>
@@ -278,9 +278,13 @@ export function LoginPage() {
         </div>
       </header>
 
-      <main id="login-main" aria-label="Đăng nhập" className="flex flex-1 items-center justify-center px-4 pb-12">
-        <div className="w-full max-w-6xl">
-          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12">
+      <main
+        id="login-main"
+        aria-label="Đăng nhập"
+        className="flex w-full flex-1 items-center justify-center overflow-x-hidden px-4 pb-12"
+      >
+        <div className="w-full max-w-6xl min-w-0">
+          <div className="grid min-w-0 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block">
               <div className="rounded-[14px] border border-app-line bg-app-surface p-8">
@@ -313,8 +317,8 @@ export function LoginPage() {
             </div>
 
             {/* Right column - Form card */}
-            <div className="w-full">
-              <div className="w-full max-w-md mx-auto lg:mx-0">
+            <div className="w-full min-w-0">
+              <div className="mx-auto w-full max-w-full sm:max-w-md lg:mx-0">
                 {/* Mobile hero - simplified */}
                 <div className="lg:hidden mb-6">
                   <div className="text-center">

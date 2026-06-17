@@ -203,7 +203,7 @@ export function Dashboard() {
           <div className="space-y-6">
             <Skeleton className="h-14 rounded-[18px] bg-app-surface" />
             <Skeleton className="h-56 rounded-[18px] bg-app-surface" />
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Skeleton className="h-48 rounded-[18px] bg-app-surface lg:col-span-2" />
               <Skeleton className="h-48 rounded-[18px] bg-app-surface" />
             </div>
@@ -913,7 +913,7 @@ function DashboardActiveLayout({
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Left Column: Today Tasks & Execution Core */}
         <div className="space-y-6 lg:col-span-2">
           <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
@@ -986,7 +986,7 @@ function DashboardActiveLayout({
           </div>
 
           <CollapsibleContent>
-            <div className="mt-5 grid gap-5 lg:grid-cols-3">
+            <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-5 lg:col-span-2">
                 <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
                   <WeekRhythmCard
