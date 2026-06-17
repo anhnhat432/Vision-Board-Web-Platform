@@ -362,8 +362,8 @@ export function TwelveWeekSystemTabs({
                   <span>{label}</span>
                   {hasDot && (
                     <span className="absolute top-1 right-1 flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-warm opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-app-warm" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-status-warning opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-warning" />
                     </span>
                   )}
                 </TabsTrigger>
@@ -520,7 +520,7 @@ export function TwelveWeekSystemTabs({
                   <div className="mb-4 flex justify-end">
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink transition-colors duration-150 hover:bg-app-bg"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink transition-colors duration-150 hover:bg-app-bg"
                       onClick={() => setShowFullProgress(false)}
                     >
                       Quay lại tóm tắt

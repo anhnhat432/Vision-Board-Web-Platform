@@ -193,7 +193,7 @@ export function LeadIndicatorsStep({
               type="button"
               onClick={() => addExampleIndicator(example)}
               disabled={!canAddIndicator}
-              className="rounded-full border border-app-line px-3 py-1 text-xs text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-app-line px-3 py-1 text-xs text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               {example.name}
             </button>
@@ -403,7 +403,7 @@ export function LeadIndicatorsStep({
                     </span>
                   </button>
                   <p className={helperTextClass}>
-                    Điền 5 câu này giúp bạn rõ tại sao mình cam kết và bớt bỏ cuộc giữa chu kỳ.
+                    Điền 5 câu này nếu đã sẵn sàng. Để sau — bạn có thể bổ sung trong phần chỉnh kế hoạch.
                   </p>
                   {expandedCommitments[indicator.id] ? (
                     <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">

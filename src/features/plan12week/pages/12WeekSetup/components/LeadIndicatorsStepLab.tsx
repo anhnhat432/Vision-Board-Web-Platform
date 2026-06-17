@@ -109,7 +109,7 @@ const TACTIC_SUGGESTIONS: Record<string, string[]> = {
   ],
   "Project Completion": [
     "Code phát triển tính năng mới",
-    "Thiết kế bản vẽ / UI mockup",
+    "Thiết kế bản vẽ / phác thảo UI",
     "Kiểm thử và sửa lỗi bug 30 phút",
     "Viết tài liệu hướng dẫn dự án",
   ],
@@ -172,7 +172,7 @@ export function LeadIndicatorsStepLab({
             onAddIndicator();
           }}
           disabled={!canAddIndicator}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-xl bg-app-accent text-white hover:bg-app-accent-hover disabled:opacity-50 transition-all px-3.5 py-1.5 text-xs font-bold shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none font-sans"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-app-accent text-white hover:bg-app-accent-hover disabled:opacity-50 transition-all px-3.5 py-1.5 text-xs font-bold shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none font-sans"
         >
           <Plus className="h-4 w-4" />
           Thêm việc

@@ -21,6 +21,12 @@ describe("VisionBoardItemRenderer", () => {
     expect(screen.getByText("Tôi là bình minh").style.fontFamily).toContain("Caveat");
   });
 
+  it("renders serif quote font family from the self-hosted stack", () => {
+    render(<VisionBoardItemRenderer item={{ ...BASE_ITEM, style: { quoteFont: "serif" } }} goalsById={{}} />);
+
+    expect(screen.getByText("Tôi là bình minh").style.fontFamily).toContain("Source Serif 4");
+  });
+
   it("renders large icon at 128px", () => {
     const { container } = render(
       <VisionBoardItemRenderer

@@ -68,20 +68,20 @@ export interface ArchetypePlanFullDefaults {
 
 const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   skill_learning: {
-    leadIndicatorSuggestions: ["Luyện tập / làm bài thực hành", "Đọc tài liệu chính", "Pair review hoặc demo nhỏ"],
+    leadIndicatorSuggestions: ["Luyện tập / làm bài thực hành", "Đọc tài liệu chính", "Pair review hoặc trình diễn nhỏ"],
     milestoneTemplates: {
       week4: "Hoàn thành 1 dự án nhỏ làm kết quả đầu tiên.",
       week8: "Phát hành phiên bản thứ 2 sau khi nhận góp ý.",
       week12: "Có portfolio hoặc 3-4 sản phẩm thực hành đo được.",
     },
     weekOneFocus: "Chọn 1 dự án nhỏ làm kết quả đầu tiên, bắt đầu vòng góp ý.",
-    weekOneExpectedOutput: "1 mini project chạy được + 1 buổi pair review/demo nhỏ.",
+    weekOneExpectedOutput: "1 mini project chạy được + 1 buổi pair review/trình diễn nhỏ.",
     firstAction: {
       standard: "Lên lịch 1 buổi luyện tập 30-60 phút trong 24h tới và viết tên buổi vào lịch.",
       lowFeasibility: "Đặt lịch 1 buổi luyện 15 phút ngay hôm nay hoặc ngày mai — chỉ cần bắt đầu, chưa cần dài.",
     },
     weekOneTacticLoadHint: "balanced",
-    reviewPrompt: "Tuần này học được kỹ năng nào mới? Có kết quả nào để demo chưa?",
+    reviewPrompt: "Tuần này học được kỹ năng nào mới? Có kết quả nào để trình diễn chưa?",
     antiPatterns: [
       "Học lý thuyết không có sản phẩm — dễ ảo tưởng tiến bộ.",
       "Dùng số giờ học làm chỉ số chính thay vì số sản phẩm.",
@@ -159,7 +159,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     },
   },
   career_growth: {
-    leadIndicatorSuggestions: ["Khung làm sâu", "1:1 với stakeholder / mentor", "Chuẩn bị demo / buổi góp ý"],
+    leadIndicatorSuggestions: ["Khung làm sâu", "1:1 với stakeholder / mentor", "Chuẩn bị buổi trình diễn / buổi góp ý"],
     milestoneTemplates: {
       week4: "Hoàn thành 3-4 phần việc IDP và có 2 buổi 1:1.",
       week8: "Hoàn tất phần việc lớn và lấy góp ý từ stakeholder.",

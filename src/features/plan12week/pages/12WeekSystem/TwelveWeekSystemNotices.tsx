@@ -75,14 +75,14 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-app-warm px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-warm/90 hover:shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-warning px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-warning/90 hover:shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={() => handleTabChange("week")}
           >
             Mở review tuần
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={handleSnoozeWeeklyReview}
           >
             Nhắc lại sau 24h
@@ -104,14 +104,14 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-app-warm px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-warm/90 hover:shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-warning px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-warning/90 hover:shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
             Thiết lập lại chu kỳ
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Mở cài đặt
@@ -127,7 +127,7 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-app-status-error px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-error/90 hover:shadow-2xs disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-error px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-error/90 hover:shadow-2xs disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
           >
@@ -135,7 +135,7 @@ export function TwelveWeekSystemNotices({
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Xem trạng thái sync

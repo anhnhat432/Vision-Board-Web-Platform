@@ -37,8 +37,12 @@ export const AUXILIARY_USER_DATA_STORAGE_KEYS = [
   "visionboard_mock_billing_account",
   "visionboard_new_user_guide_dismissed",
   "visionboard_new_user_guide_seen_at",
+  "visionboard_first_run_guidance_completed_at",
   "visionboard_rescue_dismissed",
 ] as const;
+
+export const SCREEN_GUIDE_SEEN_STORAGE_PREFIX = "visionboard_screen_guide_seen:";
+export const PAGE_TOUR_SEEN_STORAGE_PREFIX = "visionboard_page_tour_seen:";
 
 export const AUXILIARY_USER_DATA_STORAGE_PREFIXES = [
   `${USER_DATA_STORAGE_KEY}:auth:`,
@@ -50,6 +54,8 @@ export const AUXILIARY_USER_DATA_STORAGE_PREFIXES = [
   "visionboard_data_mutation_queue:recovery:",
   LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX,
   "visionboard_mock_billing_session_",
+  SCREEN_GUIDE_SEEN_STORAGE_PREFIX,
+  PAGE_TOUR_SEEN_STORAGE_PREFIX,
 ] as const;
 
 export const DEFAULT_APP_PREFERENCES: AppPreferences = {

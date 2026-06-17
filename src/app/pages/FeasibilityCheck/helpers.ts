@@ -8,11 +8,15 @@ import type {
   FeasibilityBottleneck,
   PlanLoadRecommendation,
   Question,
+  PendingFeasibilityResult,
   ResultData,
   ResultType,
   SmartGoalQualityBridge,
   WeeklyCapacity,
 } from "./types";
+
+export const CORE_QUESTION_IDS = QUESTIONS.filter((q) => q.tier === "core").map((q) => q.id);
+export const ADVANCED_QUESTION_IDS = QUESTIONS.filter((q) => q.tier === "advanced").map((q) => q.id);
 
 export interface BuildResultOptions {
   smartGoalQualityLevel?: SmartGoalQualityBridge;
@@ -24,15 +28,53 @@ export interface BuildResultOptions {
   goalArchetype?: GoalArchetype;
 }
 
-export function getAnsweredQuestionCount(answers: Record<number, string | null | undefined>): number {
-  return QUESTIONS.filter((question) => {
+export const DEFAULT_FEASIBILITY_ANSWERS: Record<number, string> = {
+  1: "3to5",
+  2: "energy_stable",
+  3: "resources_mostly_ready",
+  4: "realistic",
+  5: "time",
+  6: "mostly",
+  7: "ready",
+};
+
+export function buildDefaultFeasibilityAnswers(): Record<number, string> {
+  return { ...DEFAULT_FEASIBILITY_ANSWERS };
+}
+
+export function buildFeasibilityAnswersWithDefaults(
+  answers: Record<number, string | null | undefined> = {},
+): Record<number, string> {
+  const normalizedAnswers = buildDefaultFeasibilityAnswers();
+
+  for (const question of QUESTIONS) {
     const answer = answers[question.id];
+    const isValidAnswer =
+      typeof answer === "string" && question.options.some((choice) => choice.value === answer.trim());
+
+    if (isValidAnswer) {
+      normalizedAnswers[question.id] = answer.trim();
+    }
+  }
+
+  return normalizedAnswers;
+}
+
+export function getAnsweredQuestionCount(
+  answers: Record<number, string | null | undefined>,
+  questionIds: readonly number[] = QUESTIONS.map((question) => question.id),
+): number {
+  return questionIds.filter((questionId) => {
+    const answer = answers[questionId];
     return typeof answer === "string" && answer.trim().length > 0;
   }).length;
 }
 
-export function hasCompleteFeasibilityAnswers(answers: Record<number, string | null | undefined>): boolean {
-  return getAnsweredQuestionCount(answers) === QUESTIONS.length;
+export function hasCompleteFeasibilityAnswers(
+  answers: Record<number, string | null | undefined>,
+  requiredQuestionIds: readonly number[] = CORE_QUESTION_IDS,
+): boolean {
+  return getAnsweredQuestionCount(answers, requiredQuestionIds) === requiredQuestionIds.length;
 }
 
 function getWheelPenalty(score: number): number {
@@ -153,14 +195,49 @@ function buildPlanGuidance(input: {
   };
 }
 
+export function buildPendingFeasibilityResult(
+  result: ResultData,
+  savedAt = new Date().toISOString(),
+): PendingFeasibilityResult {
+  return {
+    resultType: result.type,
+    resultTitle: result.title,
+    resultSummary: result.summary,
+    recommendation: result.recommendation,
+    readinessScore: result.readinessScore,
+    adjustedScore: result.adjustedScore,
+    wheelScore: result.wheelScore,
+    diagnosticScore: result.diagnosticScore,
+    maxDiagnosticScore: result.maxDiagnosticScore,
+    axisScores: result.axisScores,
+    bottleneck: result.bottleneck,
+    planLoad: result.planLoad,
+    weeklyCapacity: result.weeklyCapacity,
+    firstWeekGuidance: result.firstWeekGuidance,
+    scopeRecommendation: result.scopeRecommendation,
+    smartGoalQualityLevel: result.smartGoalQualityLevel,
+    smartGoalQualityNote: result.smartGoalQualityNote,
+    savedAt,
+  };
+}
+
+export function buildQuickPlanFeasibilityResult(
+  wheelScore: number,
+  options?: BuildResultOptions & { savedAt?: string },
+): PendingFeasibilityResult {
+  const result = buildResult(buildDefaultFeasibilityAnswers(), wheelScore, options);
+  return buildPendingFeasibilityResult(result, options?.savedAt);
+}
+
 export function buildResult(
-  answers: Record<number, string>,
+  answers: Record<number, string | null | undefined>,
   wheelScore: number,
   options?: BuildResultOptions,
 ): ResultData {
   const goalArchetype = options?.goalArchetype;
+  const normalizedAnswers = buildFeasibilityAnswersWithDefaults(answers);
   const axisScores: AxisScore[] = QUESTIONS.map((question) => {
-    const option = getSelectedOption(answers, question);
+    const option = getSelectedOption(normalizedAnswers, question);
     return {
       axis: question.axis,
       label: question.axisLabel,
@@ -191,7 +268,7 @@ export function buildResult(
           score: weakestAxis.score,
           action: getBottleneckAction(weakestAxis.axis),
         };
-  const weeklyCapacity = getWeeklyCapacity(answers);
+  const weeklyCapacity = getWeeklyCapacity(normalizedAnswers);
   const smartGoalQualityLevel = options?.smartGoalQualityLevel;
 
   const resultType: ResultType =

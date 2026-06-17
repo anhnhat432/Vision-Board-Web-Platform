@@ -136,6 +136,7 @@ describe("getNewUserGuideProgress", () => {
       ["feasibility", false],
       ["setup_cycle", false],
       ["complete_today", false],
+      ["complete_review", false],
     ]);
   });
 
@@ -150,14 +151,65 @@ describe("getNewUserGuideProgress", () => {
     expect(progress.nextStep?.href).toBe("/smart-goal-setup");
   });
 
+  it("routes the merged Life Balance step to the focus tab when the score is done but focus is not chosen yet", () => {
+    const data = seedRealLifeBalance();
+
+    const progress = getNewUserGuideProgress(data);
+    const lifeBalanceStep = progress.steps.find((step) => step.id === "life_balance");
+    const smartGoalStep = progress.steps.find((step) => step.id === "smart_goal");
+
+    expect(progress.nextStep?.id).toBe("life_balance");
+    expect(lifeBalanceStep).toMatchObject({
+      completed: false,
+      href: "/life-balance?tab=focus",
+      ctaLabel: "Chọn trọng tâm",
+    });
+    expect(smartGoalStep).toMatchObject({
+      href: "/life-balance?tab=focus",
+    });
+  });
+
+  it("routes directly to 12-week setup after SMART Goal when feasibility has not been run", () => {
+    const data = seedRealLifeBalance();
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea: "Career",
+        specific: "Ra mắt hệ thống review cá nhân",
+        measurable: "Hoàn thành 12 tuần review",
+        achievable: "6 giờ mỗi tuần",
+        relevant: "Giữ nhịp thực thi dài hạn",
+        timeBound: "Trong 12 tuần tới",
+      }),
+    );
+
+    const progress = getNewUserGuideProgress(data);
+    const feasibilityStep = progress.steps.find((step) => step.id === "feasibility");
+    const setupStep = progress.steps.find((step) => step.id === "setup_cycle");
+
+    expect(progress.completedCount).toBe(4);
+    expect(progress.nextStep?.id).toBe("setup_cycle");
+    expect(feasibilityStep).toMatchObject({
+      completed: true,
+      href: "/feasibility",
+      ctaLabel: "Kiểm tra khả thi nâng cao",
+    });
+    expect(setupStep).toMatchObject({
+      completed: false,
+      href: "/12-week-setup",
+      ctaLabel: "Tạo kế hoạch 12 tuần",
+    });
+  });
+
   it("treats a restored 12-week system as completed upstream core flow", () => {
     const data = seedBackendRestoredTwelveWeekSystem();
 
     const progress = getNewUserGuideProgress(data);
 
     expect(progress.completedCount).toBe(6);
-    expect(progress.nextStep).toBeNull();
-    expect(progress.isComplete).toBe(true);
+    expect(progress.nextStep?.id).toBe("complete_review");
+    expect(progress.isComplete).toBe(false);
     expect(progress.steps.map((step) => [step.id, step.completed])).toEqual([
       ["life_balance", true],
       ["life_insight", true],
@@ -165,6 +217,27 @@ describe("getNewUserGuideProgress", () => {
       ["feasibility", true],
       ["setup_cycle", true],
       ["complete_today", true],
+      ["complete_review", false],
     ]);
+  });
+
+  it("marks feasibility complete when a SMART goal draft exists but no saved feasibility result", () => {
+    const data = seedRealLifeBalance();
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea: "Career",
+        specific: { goal_statement: "Write 2 English articles per week" },
+        measurable: { metric_name: "articles", target_value: 24 },
+      }),
+    );
+
+    const progress = getNewUserGuideProgress(data);
+    const feasibilityStep = progress.steps.find((step) => step.id === "feasibility");
+    const setupCycleStep = progress.steps.find((step) => step.id === "setup_cycle");
+
+    expect(feasibilityStep?.completed).toBe(true);
+    expect(setupCycleStep?.href).toBe("/12-week-setup");
   });
 });

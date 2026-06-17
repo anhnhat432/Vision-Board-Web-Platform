@@ -23,7 +23,23 @@ AGENTS.md
 
 If these documents disagree, preserve production safety and code-backed scope first.
 
-`guidelines/PRODUCTION_ROADMAP.md` was not present in this workspace when this file was revised. If it exists later, read it. If it is still missing, use `guidelines/CURRENT_PROJECT_STATUS.md` as the scope anchor and report the missing roadmap instead of inventing roadmap content.
+`guidelines/PRODUCTION_ROADMAP.md` is still **not present** in this workspace (verified again on 2026-06-07). `AGENTS.md` and `.roo/rules/00-project-agent-rules.md` reference it as the active roadmap, but the file does not exist. The `guidelines/` folder currently contains `CURRENT_PROJECT_STATUS.md`, `SOFT_LAUNCH_CHECKLIST.md`, `MVP_1_SCOPE.md`, `VercelDeploymentChecklist.md`, `AI_OPTIMIZATION_LOOP.md`, and `AI_BASELINE_REPORT.md`. Until the roadmap exists, use `guidelines/CURRENT_PROJECT_STATUS.md` as the scope anchor and `guidelines/SOFT_LAUNCH_CHECKLIST.md` for release-readiness items, and report the missing roadmap instead of inventing roadmap content.
+
+### Skill-assisted design workflow
+
+This repository ships specialized design skills. Load them through the skill tool when the task matches, and treat their output as supporting craft guidance under this file's authority:
+
+```text
+ui-design            -> visual system, palette, layout track (product vs marketing), CRO for landing
+frontend-design      -> distinctive detail + anti-AI-slop, scoped inside Dreamy Guided Productivity
+typography-audit     -> punctuation, font setup, sizing, spacing, OpenType, hierarchy
+ui-audit             -> accessibility, interaction, forms, motion, microcopy QA
+ux-audit             -> React state coverage, form data loss, focus, optimistic UI, ship-readiness
+web-design-reviewer  -> live desktop/mobile visual inspection and layout-break detection
+redesign-existing-projects -> upgrading an existing screen without breaking behavior
+```
+
+Skill guidance never overrides production safety, code-backed scope, or the token contract in this file. When a skill recommends a pattern that conflicts with these docs, follow the docs and note the conflict.
 
 ### Agent workflow summary
 
@@ -210,6 +226,13 @@ This is not a file-by-file bug list. It summarizes recurring UI risks visible in
 | Mobile layouts can become dense, wide, or hard to tap. | Design mobile-first: one column, no horizontal scroll, readable text, no clipped badges/buttons, and roughly 44px touch targets for primary controls. |
 | Typography can collapse into generic sans/system usage for emotional moments. | Use serif for emotional transitions, insights, reflection, and vision-board moments; use sans for body, forms, buttons, navigation, and execution UI. |
 | Visual effects can become decorative without clarifying the user's state. | Tie every distinctive visual to progress, a decision, a result preview, or next action. |
+| Multiple shadow systems coexist: `--app-shadow-*` (neutral sm->xl), `--shadow-1..5` (Material-style), and `--shadow-glow-*`. They are easy to mix and weaken elevation consistency. | Prefer the `--app-shadow-*` scale for product UI. Use the Material-style or glow scales only where they already exist; do not add a third elevation system. |
+| Marketing "tone" tokens (`--tone-*`, `.product-visual`, `.ambient-glow`, blue-purple gradients, purple/pink/cyan accents) clash with the rustic Forest Green / Terracotta brand, signalling two unmerged design languages (vibrant landing vs calm app). | Confine vibrant tone tokens to marketing/public surfaces. Do not let them leak into the core journey; converge gradually on the warm/forest semantic system. |
+| `sidebar-*` tokens still use neutral grey `oklch` values with `--sidebar-primary: #030213` (near purple-black) and are not mapped to `--app-accent`, drifting from brand. | When touching the sidebar, map its tokens to `--app-accent` / semantic tokens instead of the neutral defaults. |
+| `font-serif` is applied directly across ~263 JSX sites (over 100 files) instead of a shared heading component, making the typography scale hard to maintain. There is no shared `Heading` component; only `layout/PageHeader.tsx` and per-screen heroes (`SmartGoalHero.tsx`, `DashboardHero.tsx`, `WizardHero.tsx`). | When touching related surfaces, consolidate emotional headings toward a shared heading component/pattern rather than scattering `font-serif`. No large refactor is required up front. |
+| `theme.css` exceeds 3500 lines (two `@layer components` blocks) and still retains decorative classes once marked "removed/superseded". Some are truly gone (left as comments: `.surface-aurora`, `.hero-surface`, `.gradient-shell`), but several are still live: `washi-tape-*`, `studio-pin`, `surface-glass`/`surface-glass-deep`, `glass-surface`/`glass-surface-gradient-border`, `ambient-glow`, and the full `product-visual` family. This accumulates CSS debt. | Remove dead decorative classes incrementally when touching them. Do not bulk-delete without verifying usage first (several glass/tape/pin classes are still referenced). |
+| Primary action banners can invert hierarchy: the `NextBestAction` banner on the Dashboard uses very small type (`text-xs`, `text-[9px]` eyebrow), so the main CTA reads smaller than its supporting content. | The primary action must carry strong typographic weight and must never be smaller than supporting copy on the same surface. |
+| Decorative `animate-pulse` runs continuously on some elements (`NextBestAction`, gradient blobs in the 12-week system page) without a `prefers-reduced-motion` / `motion-safe` guard. | Infinite decorative motion must respect reduced motion; gate looping animation behind `motion-safe` / `useReducedMotion`. |
 
 Migration order for UI polish:
 
@@ -418,9 +441,29 @@ Creative levers:
 
 A visually striking screen succeeds only when the user can understand the next action within 5 seconds.
 
+Distinctive-design discipline (from `frontend-design`, scoped to this product):
+
+- Commit to one intentional aesthetic direction per screen — but the direction is fixed: "Dreamy Guided Productivity" (warm, calm, guided), not a free choice of brutalist/maximalist/retro styles. `frontend-design`'s "pick a bold extreme" applies to expression *within* this world, not to inventing a new one per screen.
+- Each major screen earns one memorable detail executed with precision (a balance shape, a feasibility meter, a roadmap), not a cluster of effects. One thing the user remembers, tied to their state.
+- Atmosphere over flat fills, but only through tokens: prefer a tokenized soft surface, subtle texture, or warm tint over a dead solid block — never an un-tokenized gradient mesh, glow field, or noise overlay on core-journey surfaces.
+- Hard anti-slop rules (these override `frontend-design`'s freedom): no Inter/system-default look for emotional moments (use the serif token), no purple-on-white "AI gradient", no decorative blob/glow that does not explain state. The token contract and production safety always win over visual ambition.
+- Match implementation effort to the vision: refined restraint here means precise spacing, typography, and subtle motion — not elaborate maximalist effects. Elegance comes from executing the calm vision well.
+
 ### 6.2 Design token contract
 
-The codebase has a semantic token system in `src/styles/tokens.css` and a Tailwind bridge in `tailwind.config.js`. New UI work must use semantic/component tokens instead of hard-coded primitive colors.
+The codebase runs Tailwind CSS v4 (`@import 'tailwindcss'`, `@config`, `@theme inline`) alongside a legacy `tailwind.config.js`. The style entry point is `src/styles/index.css` (there is no `src/index.css`), which imports in this exact order:
+
+```text
+fonts.css                          -> font imports
+features/order/styles/order-theme.css -> order/billing scoped theme
+tailwind.css                       -> Tailwind core (source(none)) + @config + tw-animate-css
+tokens.css                         -> 3-layer token system: Primitive -> Semantic -> Component (~355 lines)
+theme.css                          -> Radix/shadcn bridge + base layer + two components layers (~3598 lines)
+```
+
+`tokens.css` loads before `theme.css`, so `theme.css` can consume `--app-*` semantic vars. The token system is layered as Primitive -> Semantic -> Component. The binding rule: never consume primitive tokens directly in components; use only semantic or component tokens. New UI work must use semantic/component tokens instead of hard-coded primitive colors.
+
+Concrete primitive base values (do not consume directly): brand green base `--green-700: #2A5447`, terracotta warm base `--terra-600: #A8522F`, neutral canvas `--neutral-050: #FCFAF7`, ink `--neutral-950: #1A1A1A`. Semantic radii: `--app-radius-card: 14px`, `--app-radius-input: 10px`, `--app-radius-control: 11px`, `--app-radius-pill: 9999px`.
 
 | Role | Tailwind/CSS token | Use for |
 | --- | --- | --- |
@@ -452,6 +495,9 @@ Rules:
 - If a token is missing, add or request a scoped semantic token instead of hardcoding a one-off color.
 - Keep light/warm mode as the default brand impression. Dark mode must be supported but should not drive the product identity.
 - New gradients, textures, glow colors, and shadow recipes are allowed only when tokenized, scoped, accessible, and tied to a user state or outcome.
+- Prefer the `--app-shadow-*` scale (`shadow-app-sm/md/lg`) for product elevation. Do not introduce a new elevation system; reuse the `--shadow-1..5` or `--shadow-glow-*` scales only where they already exist.
+- Keep vibrant marketing tone tokens (`--tone-*`, `.product-visual`, `.ambient-glow`, blue-purple gradients, purple/pink/cyan accents) on marketing/public surfaces. Do not let them enter the core journey; converge gradually on the warm/forest semantic system.
+- When touching the sidebar, map `sidebar-*` tokens to `--app-accent` / semantic tokens rather than keeping the neutral grey `oklch` defaults or the near purple-black `--sidebar-primary`.
 
 ### 6.3 Color direction
 
@@ -527,10 +573,30 @@ Default hierarchy:
 
 Avoid the visual outcome of "Inter everywhere" or system-default SaaS typography. `Inter` may remain a fallback in code, but emotional moments should not look like generic product UI when `font-serif` and existing tokens are available.
 
+Token-backed font stack:
+
+```text
+Sans  = Be Vietnam Pro (fallback Inter)
+Serif = Source Serif 4 Variable
+```
+
+Known font-loading gap (verified in code): `Be Vietnam Pro` is the first family in `--app-font-sans` and the Tailwind `sans` stack, but it is **not imported** in `src/styles/fonts.css` (only Inter 400/500/600 and Source Serif 4 Variable are). On machines without it installed, sans text silently falls back to Inter. Treat this as a known issue: when touching font setup, either import `Be Vietnam Pro` (via `@fontsource`) so the declared brand font actually loads, or align the token to the font that is truly available. Do not assume Be Vietnam Pro is rendering until it is imported.
+
+Decorative families (Playfair Display, Cormorant Garamond, Caveat, Patrick Hand) are imported in `fonts.css` but are not declared in the design tokens or Tailwind config, so they are currently used ad hoc (for example `vision-board-config.ts` references Playfair Display + Cormorant Garamond inline). Treat them as out-of-system until a scoped token exists. If a touched surface needs one, add a scoped semantic token rather than referencing the family by name in components.
+
+`font-serif` is currently applied directly across 264+ JSX sites. When touching emotional headings, prefer consolidating them into a shared heading component or pattern rather than spreading `font-serif` further. No large refactor is required up front; tighten the surface that is being edited.
+
+Typographic craft baseline (from `typography-audit`):
+
+- Line height: use unitless values so they scale. Body copy sits around `1.45-1.5`; large serif titles tighten to `1.1-1.2`; small captions can drop to `~1.4`. Never set a fixed `px` line-height that headings can inherit and overlap.
+- Measure (line length): keep body text around `45-75` characters per line. On wide surfaces, constrain prose with `max-w-prose` / `max-w-[65ch]` rather than letting it run full width.
+- Letter spacing: do not add tracking to body text — professional faces are already spaced for reading. The current `body { letter-spacing: -0.005em }` in `theme.css` is a borderline negative track; do not deepen it, and never apply negative tracking to Vietnamese body copy (diacritics need their natural spacing). Slight positive tracking is allowed only for tiny uppercase eyebrow labels.
+- OpenType: the body already enables `font-feature-settings: "cv11","ss03","ss04"`. Keep kerning and default ligatures on. Use `font-variant-numeric: tabular-nums` for any aligned numbers; do not fake bold/italic on a weight the font does not ship.
+- Punctuation: use real typographic punctuation in display copy — curly quotes (`""` `''`), en/em dashes, and a real ellipsis (`…`) instead of three periods. This is the most visible amateur-typography tell.
+
 Vietnamese readability rules:
 
-- Use stable line-height.
-- Do not scale font size with viewport width.
+- Use stable line-height; do not scale font size with viewport width.
 - Avoid negative letter spacing for normal Vietnamese copy.
 - Prevent clipped text in buttons, tabs, badges, pills, toasts, and cards.
 - Avoid tiny all-caps labels when Vietnamese diacritics become cramped.
@@ -543,7 +609,7 @@ Cards should generally use:
 - `rounded-card`.
 - `border border-app-line`.
 - `bg-app-surface` or a semantic soft surface.
-- `shadow-app-sm` only when elevation clarifies hierarchy.
+- `shadow-app-sm` only when elevation clarifies hierarchy. Use the `--app-shadow-*` scale; do not reach for the Material-style `--shadow-1..5` or `--shadow-glow-*` recipes for product cards.
 - One main idea.
 - Clear heading.
 - Meaningful visual marker, preview, or state.
@@ -560,6 +626,14 @@ Avoid:
 - Admin-dashboard styling on user-facing product screens.
 
 Use a card when the boundary changes meaning: a selectable option, saved result, editable object, modal, or repeated item. If a card only groups normal page content, prefer a plain section with spacing.
+
+Surface craft rules (from `ui-design` product-ui track):
+
+- Concentric radius: for nested elements, `outer-radius = inner-radius + padding`. A `rounded-card` (14px) surface with 12px padding wants inner controls near `rounded-input`/`rounded-control` (10-11px), not another 14px. Mismatched nested radii are the most common unnoticed visual error in production UI.
+- One depth strategy per surface family. Product cards use the `--app-shadow-*` scale (`shadow-app-sm`). Do not mix the Material `--shadow-1..5` (`.elevation-*`) or the `--shadow-glow-*` recipes into the same card group.
+- On non-white backgrounds (e.g. `bg-app-bg-subtle` bands), prefer a soft shadow over a hard border: rgba shadow adapts to any surface, a solid border line can look heavy.
+- Images inside product surfaces should carry a 1px inset outline (`outline`, not `border`, with `outline-offset: -1px`) so they read as intentional and do not shift layout. Use a light outline in light mode and a faint white outline in dark mode.
+- Calm-dense default (Linear-style restraint): make the work surface dominant; let navigation and orientation chrome recede after arrival. Reduce brightness, saturation, and icon size on supporting chrome before shrinking the content area. Audit every border, icon, and tint — if it does not clarify meaning, remove or soften it.
 
 ### 6.7 Buttons
 
@@ -618,6 +692,7 @@ Default timing:
 Rules:
 
 - Respect `prefers-reduced-motion` with `useReducedMotion` or equivalent CSS strategy.
+- Looping decorative motion (`animate-pulse`, drifting gradient blobs, ambient glow) must be gated behind `motion-safe` / reduced-motion checks. It currently runs unguarded on some surfaces such as `NextBestAction` and the 12-week system gradient blobs.
 - In reduced-motion mode, render the final state without transform/stagger.
 - Animate opacity, transform, and intentional progress values.
 - Avoid animating layout-affecting properties unless space is reserved.
@@ -649,6 +724,16 @@ Do not write like:
 - A generic AI marketing page.
 - A psychological diagnosis.
 - A strict productivity coach.
+
+AI-slop copy filter (from `redesign-existing-projects`) — avoid these tells in any language:
+
+- Marketing cliches: "Elevate", "Seamless", "Unleash", "Next-Gen", "Game-changer", "Delve", "Tapestry", "In the world of…" and their Vietnamese equivalents ("nâng tầm", "đột phá", "bứt phá" used as filler).
+- "Oops!" or exclamation-heavy errors. Be direct and calm: "Connection failed. Please try again." / "Chưa lưu được lên máy chủ. Hãy thử đồng bộ lại."
+- Exclamation marks in success messages. Be confident, not loud.
+- Passive voice. Prefer active: "We couldn't save your changes" / "Chúng mình chưa lưu được thay đổi".
+- Title Case On Every Header. Use sentence case (English) and natural Vietnamese capitalization.
+- Fake round numbers (`99.99%`, `50%`) and placeholder names ("John Doe", "Acme Corp"). Use organic, realistic values when showing examples.
+- Lorem Ipsum. Always write real draft copy.
 
 Good:
 
@@ -1023,6 +1108,15 @@ Mobile:
 - Use progressive disclosure.
 - Prevent text overflow in buttons, cards, tabs, badges, and pills.
 - Use sticky bottom CTA only when it does not cover form fields or important content.
+- Use `min-h-[100dvh]` (not `100vh`) for full-height sections so the iOS Safari URL bar does not cause layout jump.
+
+Layout/interaction craft (from `redesign-existing-projects`, apply when it does not fight production safety):
+
+- Keep a `max-width` container (≈1200-1440px) so content does not stretch edge-to-edge on wide screens.
+- Animate `transform` and `opacity` only — never `top/left/width/height` — for GPU-smooth motion. This reinforces the motion rules below.
+- Add real interaction feedback: hover (background/scale shift), active/pressed (`scale(0.98)` or `translateY(1px)`), and `200-300ms` transitions on interactive elements.
+- Pin CTAs to the bottom of cards in a comparable row so they align on one line regardless of content height; align shared elements (titles, prices, descriptions) across side-by-side cards.
+- Prefer skeleton loaders that match the layout shape over generic spinners.
 
 Tablet:
 
@@ -1077,6 +1171,20 @@ Which verification commands match the risk?
 ```
 
 If a requested visual change conflicts with production safety, preserve production safety and report the tradeoff.
+
+Recommended skill pass per phase of a screen task:
+
+```text
+Plan/visual direction   -> ui-design (product-ui track for execution/admin, marketing track only for public landing)
+Bold expression (scoped) -> frontend-design (distinctive detail + anti-slop, kept inside Dreamy Guided Productivity)
+Low-fi structure first  -> design-in-code (ASCII wireframe, structure before polish)
+Typography pass         -> typography-audit (punctuation, line-height, measure, OpenType, Vietnamese safety)
+Implementation review   -> ux-audit (state coverage, form data loss, focus, optimistic-UI rollback)
+Accessibility + QA       -> ui-audit (a11y, interaction, motion, microcopy)
+Live visual verify      -> web-design-reviewer (desktop + mobile breakpoints)
+```
+
+Run only the skills relevant to the change. A copy-only tweak does not need a full visual reviewer pass; a new screen usually needs the full chain.
 
 ### During editing
 

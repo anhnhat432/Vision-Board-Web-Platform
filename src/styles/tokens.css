@@ -24,9 +24,9 @@
   --green-050: #F2F7F4;   /* accent-subtle base */
 
   /* Terracotta palette */
-  --terra-800: #A8522F;
-  --terra-700: #C96843;
-  --terra-600: #D36A47;   /* warm base - calmer, deeper terracotta */
+  --terra-800: #6E2D11;   /* deepest active warm */
+  --terra-700: #8A4220;   /* hover for warm */
+  --terra-600: #A8522F;   /* warm base — deeper terracotta to satisfy ≥4.5:1 vs white & warm-soft */
   --terra-100: #FCEDE5;   /* warm-soft base */
   --terra-050: #FEF6F1;   /* warm-subtle base */
 
@@ -34,7 +34,7 @@
   --neutral-950: #1A1A1A;
   --neutral-700: #4A4A4A;
   --neutral-500: #6B6B6B;
-  --neutral-400: #8A8A8A;
+  --neutral-400: #767068;   /* warm taupe — control affordance neutral, ≥3:1 vs white */
   --neutral-300: #B8B2AA;
   --neutral-200: #D4CFC8;
   --neutral-150: #EAE5DB;   /* slightly warmer, softer border */
@@ -52,7 +52,7 @@
   --color-leisure-accent: #0ea5e9;
   /* Status palette */
   --status-green:  #3A7D5E;
-  --status-amber:  #C4841A;
+  --status-amber:  #9A6308;   /* deeper amber — ≥4.5:1 vs white */
   --status-red:    #B84040;
   --status-blue:   #3A6B9E;
 }
@@ -94,8 +94,8 @@
   --app-ink-link:    var(--green-700);    /* link inline */
 
   /* — Border / Divider — */
-  --app-line:        var(--neutral-150);  /* border mặc định */
-  --app-line-strong: var(--neutral-200);  /* border emphasized */
+  --app-line:        var(--neutral-150);  /* border mặc định (decorative) */
+  --app-line-strong: var(--neutral-400);  /* control affordance ≥3:1 vs surface */
 
   /* — Accent (Forest Green) — Execution / Action / Progress — */
   --app-accent:        var(--green-700);
@@ -119,9 +119,11 @@
   --app-status-error:   var(--status-red);
   --app-status-info:    var(--status-blue);
 
-  /* — Focus Ring — */
-  --app-focus-ring: 0 0 0 4px rgba(47, 93, 80, 0.2);
-  --app-focus-ring-warm: 0 0 0 4px rgba(217, 119, 87, 0.2);
+  /* — Focus Ring —
+   * Solid 3px ring, alpha 0.85 → visible color giữ contrast ≥3:1 trên surface/bg
+   * sau alpha-compositing (WCAG 2.1 SC 1.4.11 / 2.4.7). */
+  --app-focus-ring: 0 0 0 3px rgba(42, 84, 71, 0.85);
+  --app-focus-ring-warm: 0 0 0 3px rgba(168, 82, 47, 0.85);
 
   /* — Elevation / Shadow — */
   /* Neutral shadows, không màu accent/warm — giữ cảm giác nhẹ nhàng, trẻ trung */
@@ -163,26 +165,36 @@ html.dark {
   --app-ink-soft:    #C8C2B5;
   --app-ink-muted:   #A39B8C;  /* AA contrast ~6.9:1 trên #1C1A15 */
   --app-ink-disabled: #6B6358;
-  --app-ink-on-accent: #FFFFFF;
-  --app-ink-on-warm:  #FFFFFF;
+  --app-ink-on-accent: #0A1F18;  /* dark forest text trên accent sáng — ≥4.5:1 cho mọi accent state */
+  --app-ink-on-warm:  #1A0E06;   /* dark warm-brown text trên warm sáng — ≥4.5:1 cho mọi warm state */
   --app-ink-link:    #5BA590;
 
   --app-line:        #3A342B;
-  --app-line-strong: #4A4239;
+  --app-line-strong: #87796A;  /* lighter neutral để control affordance ≥3:1 vs dark surface */
 
   --app-accent:        #5BA590;
   --app-accent-hover:  #4D9480;
-  --app-accent-active: #3E7A68;
-  --app-accent-soft:   #1F3A33;
+  --app-accent-active: #4A957F;  /* slightly lighter để dark text vẫn đủ 4.5:1 */
+  --app-accent-soft:   #143027;  /* darker để text-app-accent vẫn ≥4.5:1 */
   --app-accent-subtle: #192E28;
 
   --app-warm:          #E89878;
   --app-warm-hover:    #D98060;
-  --app-warm-active:   #C96843;
+  --app-warm-active:   #D27148;  /* lighter để dark text trên warm-active vẫn ≥4.5:1 */
   --app-warm-soft:     #3A2820;
   --app-warm-subtle:   #2E201A;
   --app-warm-strong:   #F8D5C2;
   --app-warm-border:   #5C3A2E;
+
+  /* — Status (dark mode brighter để ≥4.5:1 vs surface tối) — */
+  --app-status-success: #6BB58A;
+  --app-status-warning: #D9A45A;
+  --app-status-error:   #E07878;
+  --app-status-info:    #7AA8D9;
+
+  /* — Focus Ring (dark mode) — solid 3px alpha 0.85 trên màu sáng hơn */
+  --app-focus-ring: 0 0 0 3px rgba(91, 165, 144, 0.85);
+  --app-focus-ring-warm: 0 0 0 3px rgba(232, 152, 120, 0.85);
 
   --app-shadow-sm:
     0 1px 3px rgba(0, 0, 0, 0.20),
@@ -217,7 +229,7 @@ html.dark {
   --btn-ghost-bg-hover:      var(--app-accent-subtle);
   --btn-ghost-bg-active:     var(--app-accent-soft);
   --btn-ghost-text:          var(--app-accent);
-  --btn-ghost-border:        var(--app-line);
+  --btn-ghost-border:        var(--app-line-strong);  /* control affordance ≥3:1 */
 
   /* — Button: Outline — */
   --btn-outline-bg:          var(--app-surface);
@@ -232,7 +244,7 @@ html.dark {
 
   /* — Input — */
   --input-bg:                var(--app-surface);
-  --input-border:            var(--app-line);
+  --input-border:            var(--app-line-strong);  /* control affordance ≥3:1 */
   --input-border-focus:      var(--app-accent);
   --input-border-error:      var(--app-status-error);
   --input-text:              var(--app-ink);
@@ -274,6 +286,19 @@ html.dark {
   --reflection-tag-bg:       var(--app-warm-soft);
   --reflection-tag-text:     var(--app-warm-strong);
   --reflection-focus-ring:   var(--app-focus-ring-warm);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Component Tokens — Dark Mode Overrides
+ * Đặt SAU khối `:root` của component tokens để cascade theo đúng
+ * thứ tự. Lý do: `--app-status-error` ở dark mode (#E07878) sáng để
+ * icon trên surface tối đạt ≥3:1 (control affordance), nhưng không đủ
+ * tối để text #FFF trên nền nút danger đạt ≥4.5:1. Tách
+ * `--btn-danger-bg` khỏi status token chỉ ở dark mode để giữ cả hai
+ * mục tiêu contrast.
+ * ───────────────────────────────────────────────────────────── */
+html.dark {
+  --btn-danger-bg: #B84040; /* ~5.19:1 vs #FFFFFF — khớp light mode */
 }
 
 /* ─────────────────────────────────────────────────────────────

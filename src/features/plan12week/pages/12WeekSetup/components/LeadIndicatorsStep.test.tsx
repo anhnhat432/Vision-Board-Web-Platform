@@ -135,6 +135,8 @@ describe("LeadIndicatorsStep commitment model", () => {
       />,
     );
 
+    expect(screen.getAllByText(/Để sau/).length).toBeGreaterThan(0);
+
     await user.click(screen.getByRole("button", { name: "Submit draft" }));
 
     expect(onSubmit).toHaveBeenCalledWith(

@@ -5,6 +5,7 @@ import type { UserData } from "./storage-types";
 const GUIDE_DISMISSED_KEY = "visionboard_new_user_guide_dismissed";
 const GUIDE_SEEN_KEY = "visionboard_new_user_guide_seen_at";
 const GUIDE_UPDATED_EVENT = "visionboard:new-user-guide-updated";
+const FIRST_RUN_GUIDANCE_COMPLETED_KEY = "visionboard_first_run_guidance_completed_at";
 
 export type NewUserGuideStepId =
   | "dashboard_preview"
@@ -103,53 +104,55 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
   const hasAnyGoal = userData.goals.length > 0;
   const hasInsight = hasCycle || (hasLifeBalance && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea)));
   const hasSmartGoal = hasCycle || (hasInsight && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal)));
-  const hasFeasibility =
+  const hasSavedFeasibility =
     hasCycle || (hasSmartGoal && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult)));
+  const hasFeasibility = hasSmartGoal || hasSavedFeasibility;
   const hasTouchedToday =
     hasCycle &&
     (Boolean(activeSystem?.dailyCheckIns.length) ||
       Boolean(activeSystem?.taskInstances.some((task) => task.completed)));
+  const hasCompletedReview = hasCycle && Boolean(activeSystem?.weeklyReviews.length);
 
   const steps: NewUserGuideStep[] = [
     {
       id: "life_balance",
-      title: "1. Làm Bánh xe cuộc sống",
-      description: "Trả lời 8 câu hỏi về 8 lĩnh vực để thấy bạn đang mạnh — yếu ở đâu.",
-      completed: hasLifeBalance,
-      href: "/onboarding",
-      ctaLabel: "Bắt đầu đánh giá",
+      title: "1. Đánh giá Cân bằng & Chọn trọng tâm",
+      description: "Chấm điểm 8 lĩnh vực rồi chọn một trọng tâm để hành động trong 12 tuần tới.",
+      completed: hasInsight,
+      href: hasLifeBalance ? "/life-balance?tab=focus" : "/onboarding",
+      ctaLabel: hasLifeBalance ? "Chọn trọng tâm" : "Đánh giá cân bằng",
     },
     {
       id: "life_insight",
-      title: "2. Chọn lĩnh vực muốn cải thiện",
-      description: "Chọn 1 lĩnh vực trọng tâm để tập trung cải thiện trong 12 tuần tới.",
+      title: "2. Xem góc nhìn cuộc sống (bản đầy đủ)",
+      description: "Bản chi tiết hơn với radar chart và phân tích — nếu muốn xem thêm sau khi đã chọn trọng tâm.",
       completed: hasInsight,
       href: "/life-insight",
-      ctaLabel: "Chọn trọng tâm",
+      ctaLabel: "Mở bản đầy đủ",
     },
     {
       id: "smart_goal",
       title: "3. Viết mục tiêu SMART",
       description: "Biến trọng tâm thành mục tiêu cụ thể, đo được, có thời hạn rõ ràng.",
       completed: hasSmartGoal,
-      href: hasInsight ? "/smart-goal-setup" : "/life-insight",
-      ctaLabel: hasInsight ? "Viết mục tiêu" : "Chọn trọng tâm trước",
+      href: hasInsight ? "/smart-goal-setup" : hasLifeBalance ? "/life-balance?tab=focus" : "/onboarding",
+      ctaLabel: hasInsight ? "Viết mục tiêu SMART" : "Chọn trọng tâm trước",
     },
     {
       id: "feasibility",
       title: "4. Kiểm tra tính khả thi",
-      description: "Trả lời vài câu hỏi nhanh để xem mục tiêu có phù hợp với cuộc sống hiện tại.",
+      description: "Đo mức sẵn sàng nâng cao nếu muốn làm kỹ hơn; đường mặc định vẫn có thể tạo kế hoạch nhanh.",
       completed: hasFeasibility,
       href: hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
-      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi" : "Viết mục tiêu trước",
+      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi nâng cao" : "Viết mục tiêu SMART trước",
     },
     {
       id: "setup_cycle",
       title: "5. Chốt chu kỳ 12 tuần",
       description: "Chia mục tiêu thành việc cần làm mỗi tuần và bắt đầu chu kỳ hành động.",
       completed: hasCycle,
-      href: hasFeasibility ? "/12-week-setup" : "/feasibility",
-      ctaLabel: hasFeasibility ? "Tạo kế hoạch 12 tuần" : "Kiểm tra khả thi trước",
+      href: hasSmartGoal ? "/12-week-setup" : "/smart-goal-setup",
+      ctaLabel: hasSmartGoal ? "Tạo kế hoạch 12 tuần" : "Viết mục tiêu SMART trước",
     },
     {
       id: "complete_today",
@@ -158,6 +161,14 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
       completed: hasTouchedToday,
       href: "/12-week-system",
       ctaLabel: "Mở hôm nay",
+    },
+    {
+      id: "complete_review",
+      title: "7. Làm review tuần đầu tiên",
+      description: "Cuối tuần mở tab Tuần để nhìn lại điểm đã làm, điều chỉnh tải và chọn cam kết cho tuần kế tiếp.",
+      completed: hasCompletedReview,
+      href: "/12-week-system?tab=week",
+      ctaLabel: hasCycle ? "Mở review tuần" : "Tạo chu kỳ trước",
     },
   ];
 
@@ -198,6 +209,19 @@ export function hasSeenNewUserGuide(): boolean {
 export function markNewUserGuideSeen(): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(GUIDE_SEEN_KEY, new Date().toISOString());
+  emitGuideUpdate();
+}
+
+export function hasCompletedFirstRunGuidance(): boolean {
+  if (typeof window === "undefined") return false;
+  return Boolean(window.localStorage.getItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY));
+}
+
+export function markFirstRunGuidanceCompleted(): void {
+  if (typeof window === "undefined") return;
+  if (!window.localStorage.getItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY)) {
+    window.localStorage.setItem(FIRST_RUN_GUIDANCE_COMPLETED_KEY, new Date().toISOString());
+  }
   emitGuideUpdate();
 }
 

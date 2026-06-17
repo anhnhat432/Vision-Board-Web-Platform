@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Ref } from "react";
 import { soundService } from "@/app/services/soundService";
 import { Label } from "../../../components/ui/label";
+import { Progress } from "../../../components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import { cn } from "../../../components/ui/utils";
 import type { Question } from "../types";
@@ -47,6 +48,7 @@ export function FeasibilityStepShell({
 }: FeasibilityStepShellProps) {
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
+  const progressValue = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
 
   const handleAnswerSelect = (value: string) => {
     soundService.click();
@@ -99,16 +101,11 @@ export function FeasibilityStepShell({
             </span>
           </div>
 
-          {/* Question progress line with gradient glow */}
-          <div
-            className="h-2 w-full overflow-hidden rounded-pill bg-app-line/20 border border-app-line/10"
-            aria-hidden="true"
-          >
-            <div
-              className="h-full rounded-pill bg-gradient-to-r from-app-accent to-app-accent/70 shadow-[0_0_8px_var(--app-accent)] transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-            />
-          </div>
+          <Progress
+            value={progressValue}
+            aria-label={`Tiến độ câu hỏi khả thi ${currentStep + 1}/${totalSteps}`}
+            className="h-2 bg-app-line/20"
+          />
 
           <RadioGroup
             value={selectedAnswer}

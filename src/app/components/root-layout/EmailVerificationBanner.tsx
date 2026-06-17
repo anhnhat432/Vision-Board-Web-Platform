@@ -134,15 +134,15 @@ export function EmailVerificationBanner() {
     <>
       <div
         role="alert"
-        className="relative z-50 border-b border-app-warm-border bg-app-warm-soft px-4 py-3 text-sm text-app-warm-strong sm:px-6"
+        className="relative z-50 border-b border-app-warm-border bg-app-warm-soft px-4 py-2 text-sm text-app-warm-strong sm:px-6"
       >
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-5xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="inline-flex items-center gap-2 font-semibold">
               <HardDrive className="h-4 w-4 flex-none" />
               Email chưa xác thực: <span className="break-all">{pendingEmail || "chưa có email"}</span>
             </p>
-            <p className="mt-1 text-xs leading-5 text-app-warm-strong">
+            <p className="mt-0.5 text-xs leading-4 text-app-warm-strong">
               Xác thực giúp chúng tôi gửi biên nhận, hỗ trợ hoàn tiền và bảo vệ tài khoản khi dùng tính năng trả phí
               hoặc đồng bộ cloud.
               {lastSentLabel ? ` Gần nhất đã gửi: ${lastSentLabel}.` : ""}

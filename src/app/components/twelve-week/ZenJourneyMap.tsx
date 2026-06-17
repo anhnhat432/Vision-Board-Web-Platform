@@ -123,7 +123,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
               // Cắt nhỏ path chỉ hiển thị phần đến tuần hiện tại
               strokeDasharray="4000"
               strokeDashoffset={800 - Math.min(100, (currentWeek / 12) * 100) * 8}
-              className="transition-all duration-1000 ease-in-out"
+              className="transition-all duration-500 ease-in-out"
             />
 
             {/* 3. VẼ CÁC ĐƯỜNG NỐI VÀ ĐIỂM DỪNG CHÂN */}

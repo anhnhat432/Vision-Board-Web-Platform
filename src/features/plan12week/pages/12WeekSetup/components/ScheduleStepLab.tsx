@@ -6,6 +6,7 @@ import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { cn } from "@/app/components/ui/utils";
 import { soundService } from "@/app/services/soundService";
 import { formatDateInputValue } from "@/app/utils/storage";
+import { formatDisplayDate } from "@/app/utils/storage-date-utils";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { helperTextClass, inputClass, labelClass } from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
 import { REVIEW_DAYS } from "../constants";
@@ -239,6 +240,11 @@ export function ScheduleStepLab({
                 className={cn(inputClass, "rounded-xl h-11 sm:h-10")}
                 onChange={(event) => onChange("startDate", event.target.value)}
               />
+              {draft.startDate ? (
+                <p className="mt-1 text-[10px] text-app-ink-soft">
+                  Đã chọn: {formatDisplayDate(draft.startDate)}
+                </p>
+              ) : null}
               {startDateValidation.error && (
                 <p role="alert" className="text-[10px] font-bold text-app-status-error mt-1">
                   {startDateValidation.error}

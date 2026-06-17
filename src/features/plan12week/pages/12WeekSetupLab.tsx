@@ -44,8 +44,9 @@ import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persis
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { type PendingSMARTGoal, parsePendingSMARTGoal, parseSmartGoal } from "@/lib/smart-goal";
+import { evaluateSmartGoalQuality, type PendingSMARTGoal, parsePendingSMARTGoal, parseSmartGoal } from "@/lib/smart-goal";
 import { createGoal, updateGoal } from "@/services/goalService";
+import { buildDefaultFeasibilityAnswers, buildQuickPlanFeasibilityResult } from "@/app/pages/FeasibilityCheck/helpers";
 import { LeadIndicatorsStepLab } from "./12WeekSetup/components/LeadIndicatorsStepLab";
 import { OutcomeStepLab } from "./12WeekSetup/components/OutcomeStepLab";
 import { ScheduleStepLab } from "./12WeekSetup/components/ScheduleStepLab";
@@ -151,7 +152,6 @@ function readTwelveWeekSetupPrerequisites(): TwelveWeekSetupPrerequisites {
 
   if (!selectedFocusArea) return { status: "gate", gate: "needs_life_insight", aspirationalVision };
   if (!pendingSmartGoal) return { status: "gate", gate: "needs_smart_goal", aspirationalVision };
-  if (!pendingFeasibilityResult) return { status: "gate", gate: "needs_feasibility", aspirationalVision };
 
   let parsedSmartGoalValue: unknown;
   try {
@@ -168,20 +168,46 @@ function readTwelveWeekSetupPrerequisites(): TwelveWeekSetupPrerequisites {
   const parsedSmartGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedSmartGoalValue, selectedFocusArea);
   if (!parsedSmartGoal) return { status: "gate", gate: "needs_smart_goal", aspirationalVision };
 
-  let parsedFeasibility: unknown;
-  try {
-    parsedFeasibility = JSON.parse(pendingFeasibilityResult);
-  } catch (error) {
-    console.warn("Pending feasibility result could not be parsed.", error);
-    return { status: "gate", gate: "needs_feasibility", aspirationalVision, clearPendingFeasibility: true };
-  }
-
-  if (!isPendingFeasibilityResult(parsedFeasibility)) {
-    return { status: "gate", gate: "needs_feasibility", aspirationalVision };
-  }
-
-  if (!getScoredLifeArea(data, selectedFocusArea)) {
+  const scoredFocusArea = getScoredLifeArea(data, selectedFocusArea);
+  if (!scoredFocusArea) {
     return { status: "gate", gate: "needs_life_insight", aspirationalVision };
+  }
+
+  let parsedFeasibility: PendingFeasibilityResult;
+
+  if (pendingFeasibilityResult) {
+    let parsedFeasibilityValue: unknown;
+    try {
+      parsedFeasibilityValue = JSON.parse(pendingFeasibilityResult);
+    } catch (error) {
+      console.warn("Pending feasibility result could not be parsed.", error);
+      return { status: "gate", gate: "needs_feasibility", aspirationalVision, clearPendingFeasibility: true };
+    }
+
+    if (!isPendingFeasibilityResult(parsedFeasibilityValue)) {
+      return { status: "gate", gate: "needs_feasibility", aspirationalVision };
+    }
+
+    parsedFeasibility = parsedFeasibilityValue;
+  } else {
+    const smartGoalQualityLevel = normalizedSmartGoal ? evaluateSmartGoalQuality(normalizedSmartGoal).level : undefined;
+    parsedFeasibility = buildQuickPlanFeasibilityResult(scoredFocusArea.score, { smartGoalQualityLevel });
+    const defaultAnswers = buildDefaultFeasibilityAnswers();
+    const activeGoalSnapshot = normalizedSmartGoal ? JSON.stringify(normalizedSmartGoal) : pendingSmartGoal;
+
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(parsedFeasibility));
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(defaultAnswers));
+    localStorage.setItem("feasibilityActiveGoal", activeGoalSnapshot);
+    localStorage.removeItem("feasibilityBackupAnswers");
+    localStorage.removeItem("feasibilityBackupResult");
+
+    trackAnalyticsEvent("feasibility_quick_plan_default_created", {
+      source: "12_week_setup",
+      focus_area: selectedFocusArea,
+      result_type: parsedFeasibility.resultType,
+      adjusted_score: parsedFeasibility.adjustedScore,
+      plan_load: parsedFeasibility.planLoad ?? "balanced",
+    });
   }
 
   const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);

@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
+import { APP_STORAGE_KEYS, getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
 import { LifeBalance } from "./LifeBalance";
 
-function renderLifeBalance() {
+function renderLifeBalance(initialEntry = "/life-balance") {
   const router = createMemoryRouter(
     [
       {
@@ -17,8 +17,12 @@ function renderLifeBalance() {
         path: "/onboarding",
         element: <div data-testid="onboarding-page">Onboarding page</div>,
       },
+      {
+        path: "/smart-goal-setup",
+        element: <div data-testid="smart-goal-setup-page">SMART Goal setup</div>,
+      },
     ],
-    { initialEntries: ["/life-balance"] },
+    { initialEntries: [initialEntry] },
   );
 
   return {
@@ -96,37 +100,42 @@ describe("LifeBalance", () => {
     expect(avgCaption).toBeInTheDocument();
 
     // Strongest = Education (score 8) → "Học tập"; weakest = Relationships (score 4) → "Mối quan hệ"
-    const strongestCard = screen.getByText("Lĩnh vực mạnh nhất").closest("article");
+    const strongestCard = screen.getByText("Lĩnh vực mạnh nhất").closest("div");
     expect(strongestCard).not.toBeNull();
     expect(strongestCard).toHaveTextContent("Học tập");
     expect(strongestCard).toHaveTextContent("8");
 
-    const weakestCard = screen.getByText("Lĩnh vực cần ưu tiên").closest("article");
+    const weakestCard = screen.getByText("Lĩnh vực cần ưu tiên").closest("div");
     expect(weakestCard).not.toBeNull();
     expect(weakestCard).toHaveTextContent("Mối quan hệ");
     expect(weakestCard).toHaveTextContent("4");
   });
 
-  it("enables save button after editing a score and persists on save", async () => {
+  it("auto-saves after editing a score", async () => {
     const user = userEvent.setup();
     seedRealLifeBalance();
     renderLifeBalance();
 
-    const saveButton = await screen.findByRole("button", { name: /Lưu thay đổi/i });
-    expect(saveButton).toBeDisabled();
-
-    const firstSlider = (await screen.findAllByRole("slider"))[0];
-    firstSlider.focus();
-    await user.keyboard("{Home}");
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu Check-in nhanh/i }));
+    await user.click(await screen.findByRole("button", { name: /Tăng Sự nghiệp/i }));
 
     await waitFor(() => {
-      expect(saveButton).not.toBeDisabled();
+      expect(getUserData().currentWheelOfLife[0]?.score).toBe(8);
     });
+  });
 
-    await user.click(saveButton);
+  it("opens the merged focus tab from the onboarding handoff and saves the chosen focus area", async () => {
+    const user = userEvent.setup();
+    seedRealLifeBalance();
+    const { router } = renderLifeBalance("/life-balance?tab=focus");
+
+    const continueButton = await screen.findByRole("button", { name: /Tạo mục tiêu SMART/i });
+    await user.click(screen.getByRole("button", { name: /Sự nghiệp/i }));
+    await user.click(continueButton);
 
     await waitFor(() => {
-      expect(getUserData().currentWheelOfLife[0]?.score).toBe(1);
+      expect(router.state.location.pathname).toBe("/smart-goal-setup");
     });
+    expect(localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)).toBe("Career");
   });
 });

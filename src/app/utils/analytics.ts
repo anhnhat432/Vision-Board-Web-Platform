@@ -76,6 +76,14 @@ export interface AnalyticsEventPayloads {
     score_bucket?: string;
     goal_archetype?: string;
     archetype_overridden?: boolean;
+    next_step?: "quick_plan" | "feasibility";
+  };
+  feasibility_quick_plan_default_created: {
+    source?: AnalyticsSource;
+    focus_area: string;
+    result_type: string;
+    adjusted_score: number;
+    plan_load: string;
   };
   feasibility_completed: {
     focus_area: string;
@@ -258,6 +266,14 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
     "score_bucket",
     "goal_archetype",
     "archetype_overridden",
+    "next_step",
+  ],
+  feasibility_quick_plan_default_created: [
+    "source",
+    "focus_area",
+    "result_type",
+    "adjusted_score",
+    "plan_load",
   ],
   feasibility_completed: [
     "focus_area",

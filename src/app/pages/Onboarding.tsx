@@ -25,6 +25,8 @@ import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
 import { Slider } from "../components/ui/slider";
 import { cn } from "../components/ui/utils";
@@ -32,39 +34,13 @@ import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
+import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getLifeAreaLabel, getUserData, LIFE_AREAS, type LifeArea, updateWheelOfLife } from "../utils/storage";
 import { ZenBreathingGate } from "./Onboarding/components/ZenBreathingGate";
 
 type OnboardingStep = "welcome" | "assessment";
 
 type AutoSaveDraftStatus = "idle" | "saving" | "saved";
-
-interface AreaColorConfig {
-  accent: string;
-}
-
-const getAreaColorConfig = (name: string): AreaColorConfig => {
-  switch (name) {
-    case "Career":
-      return { accent: "var(--color-career-accent)" };
-    case "Finance":
-      return { accent: "var(--color-finance-accent)" };
-    case "Health":
-      return { accent: "var(--color-health-accent)" };
-    case "Education":
-      return { accent: "var(--color-education-accent)" };
-    case "Relationships":
-      return { accent: "var(--color-relationships-accent)" };
-    case "Family":
-      return { accent: "var(--color-family-accent)" };
-    case "Personal Growth":
-      return { accent: "var(--color-personal-growth-accent)" };
-    case "Leisure":
-      return { accent: "var(--color-leisure-accent)" };
-    default:
-      return { accent: "var(--app-accent)" };
-  }
-};
 
 const LIFE_AREA_DETAILS: Record<string, string> = {
   Career: "Việc học, công việc, hướng đi nghề nghiệp và cảm giác tiến triển.",
@@ -593,7 +569,7 @@ export function Onboarding() {
       strongest_area: getLifeAreaLabel(strongestArea.name),
     });
     setIsDirty(false);
-    navigate("/life-insight");
+    navigate("/life-balance?tab=focus");
   };
 
   const handleComplete = () => {
@@ -705,6 +681,7 @@ export function Onboarding() {
   if (step === "welcome") {
     return (
       <PageShell maxWidth="xl" className="focus:outline-none">
+        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
         <div ref={flowTopRef} tabIndex={-1} className="space-y-6 focus:outline-none">
           {progressHeader}
 
@@ -828,6 +805,7 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
+        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
       <div ref={flowTopRef} tabIndex={-1} className="w-full max-w-full space-y-6 focus:outline-none">
         {progressHeader}
         {draftBanner}
@@ -1123,7 +1101,7 @@ export function Onboarding() {
                             <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </>
                         ) : (
-                          "Xem insight của tôi"
+                          "Chọn trọng tâm"
                         )}
                       </button>
                     </div>
@@ -1140,7 +1118,7 @@ export function Onboarding() {
               >
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
                 <p className="text-sm font-medium leading-6 text-app-ink-soft">
-                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể xem insight với điểm mặc
+                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể chọn trọng tâm với điểm mặc
                   định 5 cho phần còn lại.
                 </p>
               </div>
@@ -1179,7 +1157,7 @@ export function Onboarding() {
                 className="order-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:order-2 sm:w-auto"
                 onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
               >
-                Xem insight của tôi
+                Chọn trọng tâm
                 {!canCompleteAssessment ? <span className="sr-only"> (Dùng điểm mặc định)</span> : null}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>

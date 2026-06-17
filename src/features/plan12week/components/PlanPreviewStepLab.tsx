@@ -219,7 +219,7 @@ export function PlanPreviewStepLab({
           Giao diện check-in Today của bạn đã sẵn sàng!
         </h4>
         <p className="text-xs text-app-ink-soft leading-relaxed font-medium">
-          Giao diện mockup trên điện thoại mô phỏng chính xác những gì bạn sẽ trải nghiệm hằng ngày. Bấm Kích hoạt ở
+          Giao diện minh họa trên điện thoại tái hiện chính xác những gì bạn sẽ trải nghiệm hằng ngày. Bấm Kích hoạt ở
           dưới để bắt đầu tuần đầu tiên rực rỡ nhé!
         </p>
       </div>

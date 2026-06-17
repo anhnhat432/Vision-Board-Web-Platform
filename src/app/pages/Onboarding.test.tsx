@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { createMemoryRouter, MemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
@@ -46,13 +46,13 @@ describe("Onboarding", () => {
 
     const startButton = await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i });
     const breathingStartButton = await screen.findByRole("button", { name: /Tập thở thư giãn/i });
-    expect(breathingStartButton).toHaveClass("bg-white");
+    expect(breathingStartButton).toHaveClass("bg-app-surface");
     expect(breathingStartButton).not.toHaveClass("gradient-brand");
 
     scrollToMock.mockClear();
     await user.click(startButton);
 
-    expect(await screen.findByRole("heading", { name: /Đánh giá mức độ hài lòng/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Rà 8 lĩnh vực để mở Life Insight/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "smooth" });
     });
@@ -76,7 +76,7 @@ describe("Onboarding", () => {
     expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
 
     await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
-    expect(await screen.findByRole("button", { name: /Xem insight của tôi/i })).toBeEnabled();
+    expect(await screen.findByRole("button", { name: /Chọn trọng tâm/i })).toBeEnabled();
   });
 
   it("frames onboarding as a short eight-area scoring step", async () => {
@@ -201,7 +201,7 @@ describe("Onboarding", () => {
 
     expect(summary).toHaveTextContent("1/8");
     expect(summary).toHaveTextContent(/Điểm trung bình/i);
-    expect(summary).toHaveTextContent(/Tập trung/i);
+    expect(summary).toHaveTextContent(/Cần chăm sóc/i);
   });
 
   it("allows skipping an individual area without changing its score", async () => {
@@ -228,18 +228,25 @@ describe("Onboarding", () => {
   it("lets users continue from assessment with default scores when areas remain unreviewed", async () => {
     const user = userEvent.setup();
 
-    render(
-      <MemoryRouter>
-        <Onboarding />
-      </MemoryRouter>,
+    const router = createMemoryRouter(
+      [
+        { path: "/onboarding", element: <Onboarding /> },
+        { path: "/life-balance", element: <div data-testid="life-balance-page">Life Balance page</div> },
+      ],
+      { initialEntries: ["/onboarding"] },
     );
+    render(<RouterProvider router={router} />);
 
     await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
-    const continueButton = await screen.findByRole("button", { name: /Xem insight của tôi \(Dùng điểm mặc định\)/i });
+    const continueButton = await screen.findByRole("button", { name: /Chọn trọng tâm/i });
     await user.click(continueButton);
 
     const data = getUserData();
     expect(data.onboardingCompleted).toBe(true);
     expect(data.currentWheelOfLife.every((area) => area.score === 5)).toBe(true);
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/life-balance");
+    });
+    expect(router.state.location.search).toBe("?tab=focus");
   });
 });

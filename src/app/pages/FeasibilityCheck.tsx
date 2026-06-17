@@ -1,4 +1,5 @@
 import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -15,6 +16,9 @@ import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { MotionFadeIn } from "../components/motion";
 import { PageShell } from "../components/PageShell";
+import { ScreenGuide } from "../components/ScreenGuide";
+import { SCREEN_GUIDES } from "../components/screen-guides";
+import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -24,7 +28,15 @@ import { FeasibilityBalanceScale } from "./FeasibilityCheck/components/Feasibili
 import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
-import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./FeasibilityCheck/helpers";
+import {
+  ADVANCED_QUESTION_IDS,
+  buildPendingFeasibilityResult,
+  buildFeasibilityAnswersWithDefaults,
+  buildResult,
+  CORE_QUESTION_IDS,
+  getAnsweredQuestionCount,
+  hasCompleteFeasibilityAnswers,
+} from "./FeasibilityCheck/helpers";
 import type { PendingFeasibilityResult, ResultData, SmartGoalQualityBridge } from "./FeasibilityCheck/types";
 
 type FeasibilitySetupState = "checking" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "ready";
@@ -34,6 +46,16 @@ type FlushableDebouncedSave<T> = {
   flush: () => void;
   cancel: () => void;
 };
+
+const CORE_QUESTIONS = QUESTIONS.filter((question) => question.tier === "core");
+const ALL_QUESTION_IDS = QUESTIONS.map((question) => question.id);
+
+function hasAdvancedAnswerDraft(answers: Record<number, string | null | undefined>): boolean {
+  return ADVANCED_QUESTION_IDS.some((questionId) => {
+    const answer = answers[questionId];
+    return typeof answer === "string" && answer.trim().length > 0;
+  });
+}
 
 function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: number): FlushableDebouncedSave<T> {
   let timer: number | null = null;
@@ -77,6 +99,7 @@ export function FeasibilityCheck() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
   const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+  const [showAdvancedQuestions, setShowAdvancedQuestions] = useState(false);
   const [focusArea, setFocusArea] = useState<string>("");
   const [wheelScore, setWheelScore] = useState<number | null>(null);
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
@@ -180,6 +203,7 @@ export function FeasibilityCheck() {
           if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
             const restoredAnswers = parsed as Record<number, string>;
             setAnswers(restoredAnswers);
+            setShowAdvancedQuestions(hasAdvancedAnswerDraft(restoredAnswers));
             setLastSavedSnapshot(JSON.stringify(restoredAnswers));
             setLastSavedAt(new Date());
           }
@@ -258,6 +282,13 @@ export function FeasibilityCheck() {
 
   useDirtyFormGuard(isDirty, () => debouncedSaveRef.current?.flush());
 
+  const activeQuestions = showAdvancedQuestions ? QUESTIONS : CORE_QUESTIONS;
+
+  useEffect(() => {
+    if (currentStep < activeQuestions.length) return;
+    setCurrentStep(Math.max(activeQuestions.length - 1, 0));
+  }, [activeQuestions.length, currentStep]);
+
   useScrollToTopOnChange(currentStep, {
     targetRef: questionTopRef,
     focusRef: questionHeadingRef,
@@ -266,72 +297,89 @@ export function FeasibilityCheck() {
 
   if (setupState === "checking") {
     return (
-      <CoreFlowGateState
-        currentStepId="feasibility"
-        eyebrow="Kiểm tra"
-        title="Đang chuẩn bị phần kiểm tra tính thực tế"
-        description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
-        loading
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="feasibility"
+          eyebrow="Kiểm tra"
+          title="Đang chuẩn bị phần kiểm tra tính thực tế"
+          description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
+          loading
+        />
+      </>
     );
   }
 
   if (setupState === "needs_life_balance") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_balance"
-        eyebrow="Kiểm tra"
-        title="Hoàn thành bước cân bằng trước"
-        description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào."
-        actionLabel="Bắt đầu cân bằng"
-        onAction={() => navigate("/onboarding")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_balance"
+          eyebrow="Kiểm tra"
+          title="Hoàn thành bước cân bằng trước"
+          description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào."
+          actionLabel="Bắt đầu cân bằng"
+          onAction={() => navigate("/onboarding")}
+        />
+      </>
     );
   }
 
   if (setupState === "needs_life_insight") {
     return (
-      <CoreFlowGateState
-        currentStepId="life_insight"
-        eyebrow="Kiểm tra"
-        title="Chọn trọng tâm trước"
-        description="Bạn đã có dữ liệu cân bằng nhưng chưa chọn lĩnh vực ưu tiên cho mục tiêu này."
-        actionLabel="Mở bước chọn trọng tâm"
-        onAction={() => navigate("/life-insight")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="life_insight"
+          eyebrow="Kiểm tra"
+          title="Chọn trọng tâm trước"
+          description="Bạn đã có dữ liệu cân bằng nhưng chưa chọn lĩnh vực ưu tiên cho mục tiêu này."
+          actionLabel="Mở bước chọn trọng tâm"
+          onAction={() => navigate("/life-insight")}
+        />
+      </>
     );
   }
 
   if (setupState === "needs_smart_goal") {
     return (
-      <CoreFlowGateState
-        currentStepId="smart_goal"
-        eyebrow="Kiểm tra"
-        title="Viết mục tiêu trước"
-        description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn."
-        actionLabel="Viết mục tiêu"
-        onAction={() => navigate("/smart-goal-setup")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="smart_goal"
+          eyebrow="Kiểm tra"
+          title="Viết mục tiêu trước"
+          description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn."
+          actionLabel="Viết mục tiêu"
+          onAction={() => navigate("/smart-goal-setup")}
+        />
+      </>
     );
   }
 
   if (!pendingGoal || wheelScore === null) {
     return (
-      <CoreFlowGateState
-        currentStepId="smart_goal"
-        eyebrow="Kiểm tra"
-        title="Thiếu dữ liệu để kiểm tra"
-        description="Chưa đủ thông tin mục tiêu hoặc điểm trọng tâm. Quay lại bước viết mục tiêu để tiếp tục."
-        actionLabel="Viết mục tiêu"
-        onAction={() => navigate("/smart-goal-setup")}
-      />
+      <>
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
+        <CoreFlowGateState
+          currentStepId="smart_goal"
+          eyebrow="Kiểm tra"
+          title="Thiếu dữ liệu để kiểm tra"
+          description="Chưa đủ thông tin mục tiêu hoặc điểm trọng tâm. Quay lại bước viết mục tiêu để tiếp tục."
+          actionLabel="Viết mục tiêu"
+          onAction={() => navigate("/smart-goal-setup")}
+        />
+      </>
     );
   }
 
-  const currentQuestion = QUESTIONS[currentStep];
-  const totalSteps = QUESTIONS.length;
+  const currentQuestion = activeQuestions[currentStep] ?? activeQuestions[0] ?? QUESTIONS[0];
+  const totalSteps = activeQuestions.length;
   const selectedAnswer = answers[currentQuestion.id];
-  const answeredQuestionCount = getAnsweredQuestionCount(answers);
+  const activeQuestionIds = activeQuestions.map((question) => question.id);
+  const requiredQuestionIds = showAdvancedQuestions ? ALL_QUESTION_IDS : CORE_QUESTION_IDS;
+  const answeredQuestionCount = getAnsweredQuestionCount(answers, activeQuestionIds);
 
   const handleAnswerChange = (value: string) => {
     setAnswers((currentAnswers) => ({ ...currentAnswers, [currentQuestion.id]: value }));
@@ -351,12 +399,14 @@ export function FeasibilityCheck() {
       return;
     }
 
-    if (!hasCompleteFeasibilityAnswers(answers)) {
+    if (!hasCompleteFeasibilityAnswers(answers, requiredQuestionIds)) {
       return;
     }
 
+    const completedAnswers = buildFeasibilityAnswersWithDefaults(answers);
+    setAnswers(completedAnswers);
     setResult(
-      buildResult(answers, wheelScore, {
+      buildResult(completedAnswers, wheelScore, {
         smartGoalQualityLevel: smartGoalQualityLevelRef.current,
         goalArchetype: goalArchetypeRef.current,
       }),
@@ -366,28 +416,10 @@ export function FeasibilityCheck() {
   const handleContinueToPlan = () => {
     if (!result) return;
 
-    const pendingFeasibilityResult: PendingFeasibilityResult = {
-      resultType: result.type,
-      resultTitle: result.title,
-      resultSummary: result.summary,
-      recommendation: result.recommendation,
-      readinessScore: result.readinessScore,
-      adjustedScore: result.adjustedScore,
-      wheelScore: result.wheelScore,
-      diagnosticScore: result.diagnosticScore,
-      maxDiagnosticScore: result.maxDiagnosticScore,
-      axisScores: result.axisScores,
-      bottleneck: result.bottleneck,
-      planLoad: result.planLoad,
-      weeklyCapacity: result.weeklyCapacity,
-      firstWeekGuidance: result.firstWeekGuidance,
-      scopeRecommendation: result.scopeRecommendation,
-      smartGoalQualityLevel: result.smartGoalQualityLevel,
-      smartGoalQualityNote: result.smartGoalQualityNote,
-      savedAt: new Date().toISOString(),
-    };
+    const pendingFeasibilityResult: PendingFeasibilityResult = buildPendingFeasibilityResult(result);
+    const finalAnswers = buildFeasibilityAnswersWithDefaults(answers);
 
-    const finalAnswersSnapshot = JSON.stringify(answers);
+    const finalAnswersSnapshot = JSON.stringify(finalAnswers);
     debouncedSaveRef.current?.cancel();
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, finalAnswersSnapshot);
@@ -402,7 +434,7 @@ export function FeasibilityCheck() {
       bottleneck_axis: result.bottleneck.axis,
       plan_load: result.planLoad,
       weekly_capacity: result.weeklyCapacity,
-      answer_count: Object.keys(answers).length,
+      answer_count: requiredQuestionIds.length,
     });
 
     toast.success("Đã kiểm tra tính thực tế", {
@@ -422,6 +454,7 @@ export function FeasibilityCheck() {
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
           const restoredAnswers = parsed as Record<number, string>;
           setAnswers(restoredAnswers);
+          setShowAdvancedQuestions(hasAdvancedAnswerDraft(restoredAnswers));
           setLastSavedSnapshot(backupAnswers);
           setLastSavedAt(new Date());
           localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, backupAnswers);
@@ -479,11 +512,23 @@ export function FeasibilityCheck() {
     navigate("/smart-goal-setup");
   };
 
+  const handleAdvancedToggle = () => {
+    const currentQuestionId = currentQuestion.id;
+    const nextShowAdvanced = !showAdvancedQuestions;
+    const nextQuestions = nextShowAdvanced ? QUESTIONS : CORE_QUESTIONS;
+    const nextStep = nextQuestions.findIndex((question) => question.id === currentQuestionId);
+
+    setShowAdvancedQuestions(nextShowAdvanced);
+    setCurrentStep(nextStep >= 0 ? nextStep : Math.min(currentStep, nextQuestions.length - 1));
+  };
+
   const autoSave = <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />;
+  const resultAnswers = buildFeasibilityAnswersWithDefaults(answers);
 
   if (result) {
     return (
       <PageShell maxWidth="md">
+        <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
         <div className="space-y-6">
           <div>
             <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
@@ -496,7 +541,7 @@ export function FeasibilityCheck() {
             pendingGoal={pendingGoal}
             onContinue={handleContinueToPlan}
             onAdjustGoal={handleAdjustGoal}
-            answers={answers}
+            answers={resultAnswers}
           />
         </div>
       </PageShell>
@@ -505,6 +550,7 @@ export function FeasibilityCheck() {
 
   return (
     <PageShell maxWidth="xl">
+      <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1">
@@ -568,14 +614,14 @@ export function FeasibilityCheck() {
                   <button
                     type="button"
                     onClick={handleDiscardBackup}
-                    className="px-3.5 py-1.5 text-xs font-semibold rounded-control border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle transition-all duration-200"
+                    className="inline-flex min-h-11 items-center justify-center px-3.5 py-1.5 text-xs font-semibold rounded-control border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle transition-all duration-200"
                   >
                     Bỏ qua
                   </button>
                   <button
                     type="button"
                     onClick={handleRestoreAnswers}
-                    className="px-4 py-1.5 text-xs font-bold rounded-control bg-app-accent text-white hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm"
+                    className="inline-flex min-h-11 items-center justify-center px-4 py-1.5 text-xs font-bold rounded-control bg-app-accent text-white hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm"
                   >
                     Khôi phục ✏️
                   </button>
@@ -589,6 +635,47 @@ export function FeasibilityCheck() {
         <div className="mt-8 flex flex-col gap-6 md:grid md:grid-cols-12 md:items-start md:gap-8">
           {/* Cột trái chứa câu hỏi khảo sát */}
           <div className="order-1 md:col-span-7 w-full">
+            <div className="mb-4 rounded-card border border-app-line bg-app-surface/70 p-4 shadow-app-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-app-ink-muted">
+                    Mặc định 3 câu cốt lõi
+                  </p>
+                  <p className="text-sm leading-6 text-app-ink-soft">
+                    Time, Energy và Confidence là đủ để tạo kết quả khả thi. Mở phần nâng cao nếu bạn muốn tinh chỉnh thêm
+                    Clarity, Obstacle, Routine và Resources.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAdvancedToggle}
+                  aria-expanded={showAdvancedQuestions}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                >
+                  <SlidersHorizontal className="h-4 w-4 text-app-accent" aria-hidden="true" />
+                  {showAdvancedQuestions ? "Ẩn nâng cao" : "Mở nâng cao"}
+                  <ChevronDown
+                    className={cn("h-4 w-4 text-app-ink-muted transition-transform", showAdvancedQuestions && "rotate-180")}
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                <span className="rounded-pill bg-app-accent-soft px-3 py-1 text-app-accent">
+                  {CORE_QUESTION_IDS.length} câu cốt lõi
+                </span>
+                <span
+                  className={cn(
+                    "rounded-pill border px-3 py-1",
+                    showAdvancedQuestions
+                      ? "border-app-accent/25 bg-app-accent-soft text-app-accent"
+                      : "border-app-line bg-app-bg-subtle text-app-ink-muted",
+                  )}
+                >
+                  {ADVANCED_QUESTION_IDS.length} câu nâng cao tùy chọn
+                </span>
+              </div>
+            </div>
             <FeasibilityStepShell
               currentQuestion={currentQuestion}
               currentStep={currentStep}

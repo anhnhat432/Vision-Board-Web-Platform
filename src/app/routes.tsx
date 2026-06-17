@@ -67,6 +67,7 @@ export const appRoutes = [
   {
     path: "/login",
     ...lazyRoute(() => import("./pages/LoginPage"), "LoginPage"),
+    errorElement: <AppErrorBoundary />,
   },
   {
     path: "/",

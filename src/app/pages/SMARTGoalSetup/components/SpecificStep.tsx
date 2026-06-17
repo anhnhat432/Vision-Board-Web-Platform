@@ -196,7 +196,7 @@ export function SpecificStep({
                     }));
                     setHasBlurredGoalStatement(true);
                   }}
-                  className="text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none whitespace-nowrap snap-start shadow-sm flex-shrink-0 cursor-pointer"
+                  className="inline-flex min-h-11 items-center text-xs text-left bg-app-surface hover:bg-app-accent-soft/30 text-app-ink px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-app-line hover:border-app-accent/20 transition-all duration-150 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none whitespace-nowrap snap-start shadow-sm flex-shrink-0 cursor-pointer"
                 >
                   ✨ <span className="font-medium">{suggestion}</span>
                 </button>

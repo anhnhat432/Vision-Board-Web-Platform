@@ -186,7 +186,7 @@ export function AchievableStep({
                 setHasBlurredWeeklyHours(true);
               }}
               className={cn(
-                "text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
+                "inline-flex min-h-11 items-center justify-center text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                 parsedWeeklyHours === Number(hours)
                   ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
                   : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
@@ -328,8 +328,8 @@ export function AchievableStep({
         </div>
 
         <p className={helperTextClass}>
-          Ví dụ: <span className="font-medium text-app-ink">"Đọc tài liệu tiếng Anh, Lập trình React cơ bản"</span>.
-          Giúp xác định xem bạn có cần dành thời gian học thêm kỹ năng mới hay không.
+          Định dạng: liệt kê các kỹ năng, cách nhau bằng dấu phẩy. Ví dụ:{" "}
+          <span className="font-medium text-app-ink">"Đọc tài liệu tiếng Anh, Lập trình React cơ bản"</span>.
         </p>
       </div>
 
@@ -451,8 +451,8 @@ export function AchievableStep({
         </div>
 
         <p className={helperTextClass}>
-          Ví dụ: <span className="font-medium text-app-ink">"Tài khoản học Udemy, Sách hướng dẫn, Bạn học cùng"</span>.
-          Đảm bảo bạn có đủ công cụ hỗ trợ để không bị tắc nghẽn khi bắt đầu.
+          Định dạng: liệt kê nguồn lực hoặc công cụ, cách nhau bằng dấu phẩy. Ví dụ:{" "}
+          <span className="font-medium text-app-ink">"Tài khoản học Udemy, Sách hướng dẫn, Bạn học cùng"</span>.
         </p>
       </div>
 

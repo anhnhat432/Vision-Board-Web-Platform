@@ -676,7 +676,7 @@ export function TwelveWeekDangerZone({
             </p>
             <p className="mt-1 text-xs text-app-ink-muted">
               {localDataOnly
-                ? "Hủy bỏ toàn bộ mục tiêu, kế hoạch và dữ liệu trên trình duyệt này. Không thể khôi phục."
+                ? "Hủy bỏ toàn bộ mục tiêu, kế hoạch và dữ liệu trên thiết bị này. Không thể khôi phục."
                 : "Xóa toàn bộ hồ sơ, dữ liệu đám mây và chấm dứt tài khoản đăng nhập của bạn vĩnh viễn."}
             </p>
           </div>

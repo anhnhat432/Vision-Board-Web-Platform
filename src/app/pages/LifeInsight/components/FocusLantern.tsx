@@ -242,7 +242,7 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
 
       {/* Vòng tròn hào quang phát sáng chậm đệm phía sau */}
       <div
-        className={`absolute rounded-xl transition-all duration-1000 pointer-events-none ${
+        className={`absolute rounded-xl transition-all duration-500 pointer-events-none ${
           triggerGlow
             ? `-inset-3.5 opacity-100 scale-125 ${config.glowBg.replace("/40", "/75")} shadow-lg ${config.shadowGlow}`
             : `-inset-1.5 opacity-50 scale-100 motion-safe:animate-[pulse_3s_infinite] ${config.glowBg}`

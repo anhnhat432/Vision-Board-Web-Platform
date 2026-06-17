@@ -264,19 +264,19 @@ export function PublicVisitorView({
       {/* Local data restore banner if present */}
       {hasLocalData ? (
         <section
-          className="rounded-2xl border border-app-warm-border bg-app-warm-soft/40 p-5 md:p-6 max-w-6xl mx-auto"
+          className="rounded-2xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 md:p-6 max-w-6xl mx-auto"
           aria-labelledby="dashboard-local-data-title"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-app-warm shadow-sm">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-surface text-app-status-warning shadow-sm">
                 <HardDrive className="h-4 w-4" />
               </div>
               <div>
-                <h2 id="dashboard-local-data-title" className="text-base font-semibold text-app-warm-strong">
+                <h2 id="dashboard-local-data-title" className="text-base font-semibold text-app-status-warning">
                   Có dữ liệu đã lưu trên thiết bị này
                 </h2>
-                <p className="mt-1 text-xs leading-relaxed text-app-warm-strong/90">
+                <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">
                   Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài
                   khoản nếu chưa có xác nhận của bạn.
                 </p>
@@ -286,7 +286,7 @@ export function PublicVisitorView({
               <button
                 type="button"
                 onClick={onSignIn}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-warm px-4 py-2.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-warm-hover focus-visible:outline-none"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-status-warning px-4 py-2.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-status-warning/90 focus-visible:outline-none"
               >
                 <LogIn className="h-4 w-4" />
                 Đăng nhập để khôi phục
@@ -294,7 +294,7 @@ export function PublicVisitorView({
               <button
                 type="button"
                 onClick={onSignUp}
-                className="inline-flex items-center justify-center rounded-lg border border-app-warm-border bg-white px-4 py-2.5 text-xs font-semibold text-app-warm-strong transition-colors duration-150 hover:bg-app-warm-soft focus-visible:outline-none"
+                className="inline-flex items-center justify-center rounded-lg border border-app-status-warning/30 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-status-warning transition-colors duration-150 hover:bg-app-status-warning/10 focus-visible:outline-none"
               >
                 Tạo tài khoản mới
               </button>

@@ -30,11 +30,7 @@ function buildSetupSteps(userData: UserData): SetupStep[] {
   const hasAnyGoal = userData.goals.length > 0;
   const hasInsight = hasLifeBalance && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea));
   const hasSmartGoal = hasInsight && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal));
-  const hasGoalWithFeasibility = userData.goals.some(
-    (goal) => Boolean(goal.feasibilityResult) || typeof goal.readinessScore === "number",
-  );
-  const hasFeasibility =
-    hasSmartGoal && (hasGoalWithFeasibility || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult));
+  const canCreatePlan = hasSmartGoal;
 
   return [
     {
@@ -59,7 +55,7 @@ function buildSetupSteps(userData: UserData): SetupStep[] {
       title: "Kế hoạch 12 tuần",
       description: "Xây dựng các tactics việc lặp lại, mốc checkpoint tuần và ngày khóa review.",
       completed: false,
-      href: hasFeasibility ? "/12-week-setup" : hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
+      href: canCreatePlan ? "/12-week-setup" : "/smart-goal-setup",
     },
   ];
 }
@@ -140,8 +136,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           </h1>
 
           <p className="text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic max-w-2xl">
-            Nơi khát vọng được đóng gói thành các thói quen cụ thể. Chậm rãi ghim mục tiêu của bạn lên bảng ước mơ và
-            thực hiện đều đặn mỗi ngày.
+            Biến mục tiêu lớn thành kế hoạch 12 tuần và việc cần làm mỗi ngày, để bạn biết bắt đầu từ đâu.
           </p>
 
           <div className="pt-2 flex items-center">

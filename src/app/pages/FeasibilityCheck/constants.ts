@@ -7,6 +7,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Thời gian thật",
     question: "Mỗi tuần bạn có mấy giờ cho mục tiêu này?",
     helper: "Tính theo quỹ thời gian thực tế, trừ đi lịch làm việc và sinh hoạt.",
+    tier: "core",
     options: [
       {
         value: "lt1",
@@ -48,6 +49,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Năng lượng hiện tại",
     question: "Năng lượng còn lại của bạn sau ngày làm việc?",
     helper: "Để thiết kế tuần đầu tiên phù hợp với sức bền thực tế của bạn.",
+    tier: "core",
     options: [
       {
         value: "energy_drained",
@@ -89,6 +91,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Nguồn lực / kỹ năng",
     question: "Bạn đã có đủ kỹ năng và công cụ cần thiết chưa?",
     helper: "Nếu thiếu, kế hoạch tuần đầu sẽ ưu tiên việc học hỏi và chuẩn bị.",
+    tier: "advanced",
     options: [
       {
         value: "resources_missing",
@@ -130,6 +133,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Độ rõ mục tiêu",
     question: "Mục tiêu này có thực sự rõ ràng với bạn?",
     helper: "Mục tiêu càng cụ thể, việc chia nhỏ theo tuần càng dễ dàng.",
+    tier: "advanced",
     options: [
       {
         value: "overwhelming",
@@ -171,6 +175,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Trở ngại chính",
     question: "Trở ngại lớn nhất có thể cản bước bạn?",
     helper: "Hãy gọi tên trở ngại để chúng ta chủ động tìm giải pháp phòng ngừa.",
+    tier: "advanced",
     options: [
       {
         value: "motivation",
@@ -220,6 +225,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Lịch cố định",
     question: "Bạn đã xếp lịch cố định cho mục tiêu chưa?",
     helper: "Khung giờ cố định giúp bạn xây dựng thói quen bền vững nhất.",
+    tier: "advanced",
     options: [
       {
         value: "rarely",
@@ -261,6 +267,7 @@ export const QUESTIONS: Question[] = [
     axisLabel: "Tự tin hoàn thành",
     question: "Độ tự tin hoàn thành tuần đầu tiên của bạn?",
     helper: "Hãy lắng nghe cảm giác thật để thiết kế một khởi đầu thắng lợi.",
+    tier: "core",
     options: [
       {
         value: "exploring",

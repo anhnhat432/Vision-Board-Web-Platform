@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -148,52 +148,103 @@ function renderDashboard() {
   return render(<RouterProvider router={router} />);
 }
 
+const SECONDARY_INSIGHTS_OPEN_KEY = "visionboard_dashboard_secondary_insights_open";
+
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string): MediaQueryList => {
+      const minWidthMatch = query.match(/min-width:\s*(\d+)px/);
+      const matches = minWidthMatch ? width >= Number(minWidthMatch[1]) : false;
+
+      return {
+        matches,
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      } as MediaQueryList;
+    },
+  });
+}
+
 describe("Dashboard active 12-week system UX", () => {
   beforeEach(() => {
     localStorage.clear();
     planHookMock.loadPlan.mockReset();
     setAuthContext();
-    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1024 });
+    setViewportWidth(1024);
   });
 
-  it("orders the signed-in active dashboard as hero, mobile Today, goals, rhythm, then trend in the DOM", async () => {
+  it("keeps the active dashboard primary cards first and groups secondary insights on desktop", async () => {
     seedActiveDashboard();
     renderDashboard();
 
     const hero = await screen.findByTestId("dashboard-primary-action-card");
     const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu chu kỳ" });
+    const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
+    const secondaryTitle = screen.getByText("Phân tích & nhịp độ");
     const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
     const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
-    const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
 
     expect(hero).toHaveTextContent("Tuần 1 / 12");
-    expect(todayHeading).toBeDefined();
+    expect(screen.getByRole("button", { name: /Thu gọn/ })).toBeInTheDocument();
     expect(hero.compareDocumentPosition(todayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(goalsHeading.compareDocumentPosition(secondaryTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(secondaryTitle.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("keeps mobile signed-in dashboard scannable with Today before active system cards", async () => {
-    Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
+  it("collapses secondary insights by default on mobile and remembers the disclosure state", async () => {
+    setViewportWidth(390);
     seedActiveDashboard();
     renderDashboard();
 
     const hero = await screen.findByTestId("dashboard-primary-action-card");
     const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu chu kỳ" });
-    const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
-    const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
-    const kpiRow = await screen.findByTestId("dashboard-kpi-row");
     const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
+    const secondaryTitle = screen.getByText("Phân tích & nhịp độ");
 
-    expect(todayHeading).toBeDefined();
     expect(hero.compareDocumentPosition(todayHeading as HTMLElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(goalsHeading.compareDocumentPosition(secondaryTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.getByText("Phân tích & nhịp độ")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Mở phân tích/ })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Nhịp tuần 1" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Đường 12 tuần" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Mở phân tích/ }));
+
+    expect(localStorage.getItem(SECONDARY_INSIGHTS_OPEN_KEY)).toBe("true");
+    const kpiRow = await screen.findByTestId("dashboard-kpi-row");
+    expect(screen.getByRole("heading", { name: "Nhịp tuần 1" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Đường 12 tuần" })).toBeInTheDocument();
     expect(goalsHeading.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+
+    fireEvent.click(screen.getByRole("button", { name: /Thu gọn/ }));
+
+    expect(localStorage.getItem(SECONDARY_INSIGHTS_OPEN_KEY)).toBe("false");
+    expect(screen.queryByRole("heading", { name: "Nhịp tuần 1" })).not.toBeInTheDocument();
     expect(screen.getAllByText("Launch a focused dashboard").length).toBeGreaterThan(0);
     expect(screen.queryByTestId("dashboard-main-card")).toBeNull();
+  });
+
+  it("honors the saved secondary insights collapsed state on desktop reload", async () => {
+    localStorage.setItem(SECONDARY_INSIGHTS_OPEN_KEY, "false");
+    seedActiveDashboard();
+    renderDashboard();
+
+    await screen.findByTestId("dashboard-primary-action-card");
+
+    expect(screen.getByRole("button", { name: /Mở phân tích/ })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Nhịp tuần 1" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Cân bằng cuộc sống" })).not.toBeInTheDocument();
   });
 
   it("renders balance rows without the old deferred radar", async () => {

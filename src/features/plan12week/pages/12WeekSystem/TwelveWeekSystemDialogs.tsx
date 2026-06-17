@@ -179,7 +179,7 @@ export function TwelveWeekSystemDialogs({
             </div>
             <div className="space-y-1.5 pt-2">
               <Label htmlFor="cloud-delete-text-input" className="text-xs font-semibold text-app-ink-soft">
-                Nhập chữ <span className="font-bold text-app-warm">XOACLOUD</span> để xác nhận:
+                Nhập chữ <span className="font-bold text-app-status-error">XOACLOUD</span> để xác nhận:
               </Label>
               <Input
                 id="cloud-delete-text-input"

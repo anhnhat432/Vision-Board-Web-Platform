@@ -47,7 +47,7 @@ const LIFE_AREA_FIELDS: Array<{ area: AspirationalVisionArea; label: string; pla
   },
 ];
 
-const warmTextareaClass = `${textareaClass} border-app-warm-border focus-visible:border-app-warm focus-visible:ring-app-warm/30`;
+const warmTextareaClass = `${textareaClass} border-app-accent/30 focus-visible:border-app-accent focus-visible:ring-app-accent/30`;
 
 function createVisionId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -134,14 +134,14 @@ export function AspirationalVision() {
       </header>
 
       <section
-        className="mt-6 rounded-[14px] border border-app-warm-border bg-app-warm-soft p-6 md:p-8"
+        className="mt-6 rounded-[14px] border border-app-line bg-app-bg-subtle p-6 md:p-8"
         aria-label="Biểu mẫu tầm nhìn"
       >
         <div className="max-w-3xl">
-          <p className="font-serif text-xl font-medium leading-7 text-app-warm-strong">
+          <p className="font-serif text-xl font-medium leading-7 text-app-ink">
             Trong 3 năm tới, bạn muốn cuộc sống mình trông như thế nào?
           </p>
-          <p className="mt-2 text-sm leading-6 text-app-warm-strong">
+          <p className="mt-2 text-sm leading-6 text-app-ink-soft">
             Viết chậm, cụ thể vừa đủ. Tầm nhìn này là điểm neo, không phải cam kết phải hoàn hảo.
           </p>
         </div>
@@ -181,10 +181,10 @@ export function AspirationalVision() {
                     type="button"
                     aria-pressed={selected}
                     onClick={() => setHorizonYears(year as 3 | 5)}
-                    className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 ${
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
                       selected
-                        ? "border-app-warm bg-app-warm text-white"
-                        : "border-app-warm-border bg-app-surface text-app-warm-strong hover:border-app-warm"
+                        ? "border-app-accent bg-app-accent text-white"
+                        : "border-app-line bg-app-surface text-app-ink hover:border-app-accent"
                     }`}
                   >
                     {year} năm
@@ -197,7 +197,7 @@ export function AspirationalVision() {
           <div>
             <div>
               <h2 className="text-base font-semibold text-app-ink">Các mảng đời sống</h2>
-              <p className="mt-1 text-sm leading-6 text-app-warm-strong">
+              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                 Điền ít nhất một mảng. Các mảng còn lại có thể để trống.
               </p>
             </div>
@@ -225,10 +225,10 @@ export function AspirationalVision() {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-app-warm-border pt-5 sm:flex-row">
+          <div className="flex flex-col gap-3 border-t border-app-line pt-5 sm:flex-row">
             <Button
               type="button"
-              className="w-full bg-app-warm text-white hover:bg-app-warm-hover focus-visible:ring-app-warm/30 sm:w-auto"
+              className="w-full bg-app-accent text-white hover:bg-app-accent-hover focus-visible:ring-app-accent/30 sm:w-auto"
               onClick={handleSubmit}
             >
               <Save className="h-4 w-4" />
@@ -237,7 +237,7 @@ export function AspirationalVision() {
             <Button
               type="button"
               variant="outline"
-              className="w-full border-app-warm-border bg-app-surface text-app-warm-strong focus-visible:ring-app-warm/30 sm:w-auto"
+              className="w-full border-app-line bg-app-surface text-app-ink focus-visible:ring-app-accent/30 sm:w-auto"
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4" />

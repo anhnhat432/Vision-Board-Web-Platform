@@ -31,7 +31,7 @@ export function OfflineBanner() {
   return (
     <div
       className={cn(
-        "fixed top-0 left-0 right-0 z-[100] flex items-center justify-between gap-3 px-4 py-2 text-sm font-medium leading-5 text-white bg-red-600 animate-in slide-in-from-top duration-300",
+        "fixed top-0 left-0 right-0 z-[100] flex items-center justify-between gap-3 px-4 py-2 text-sm font-medium leading-5 text-white bg-app-status-error animate-in slide-in-from-top duration-300",
         "transition-all",
       )}
       role="status"
@@ -49,7 +49,7 @@ export function OfflineBanner() {
             window.sessionStorage.setItem(OFFLINE_BANNER_DISMISSED_KEY, "1");
           }
         }}
-        className="shrink-0 rounded-full p-1 transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        className="shrink-0 rounded-full p-1 transition-colors hover:bg-app-status-error/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         aria-label="Tắt thông báo"
       >
         <X className="h-4 w-4" />
