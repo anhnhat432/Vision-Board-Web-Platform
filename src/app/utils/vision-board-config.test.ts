@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { LIFE_AREAS } from "./storage-constants";
 import {
   CURATED_IMAGES_BY_LIFE_AREA,
@@ -16,8 +14,8 @@ function expectUnique(values: string[]): void {
 }
 
 describe("vision board config", () => {
-  it("defines five complete themes with unique ids", () => {
-    expect(VISION_BOARD_THEMES).toHaveLength(5);
+  it("defines seven complete themes with unique ids", () => {
+    expect(VISION_BOARD_THEMES).toHaveLength(7);
     expectUnique(VISION_BOARD_THEMES.map((theme) => theme.id));
 
     for (const theme of VISION_BOARD_THEMES) {
@@ -38,8 +36,8 @@ describe("vision board config", () => {
     expectUnique(QUOTE_FONT_STYLES.map((style) => style.id));
   });
 
-  it("defines four image frame styles", () => {
-    expect(IMAGE_FRAME_STYLES).toHaveLength(4);
+  it("defines seven image frame styles with unique ids", () => {
+    expect(IMAGE_FRAME_STYLES).toHaveLength(7);
     expectUnique(IMAGE_FRAME_STYLES.map((style) => style.id));
   });
 
