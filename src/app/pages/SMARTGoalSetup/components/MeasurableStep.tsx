@@ -181,7 +181,7 @@ export function MeasurableStep({
                   type="button"
                   onClick={() => handleUnitChange(unit)}
                   className={cn(
-                    "inline-flex min-h-11 items-center justify-center text-[10px] px-3 sm:px-2.5 py-1.5 sm:py-0.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
+                    "inline-flex min-h-11 items-center justify-center text-xs px-3 sm:px-2.5 py-1.5 sm:py-0.5 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                     metricUnitInput === unit
                       ? "bg-app-accent text-white border-app-accent"
                       : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/15",
