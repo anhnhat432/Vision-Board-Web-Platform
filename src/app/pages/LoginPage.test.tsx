@@ -251,4 +251,22 @@ describe("LoginPage", () => {
 
     expect(await screen.findByTestId("destination")).toHaveTextContent("/12-week-system");
   });
+
+  it("waits for the profile before sending authenticated users to the default route", () => {
+    setAuthContext({
+      user: { uid: "user_pending_profile" },
+      userProfile: null,
+      userProfileLoading: true,
+      userProfileError: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Đang kiểm tra quyền truy cập" })).toBeInTheDocument();
+    expect(screen.getByText("Đang tải hồ sơ tài khoản để chuyển bạn đến đúng khu vực.")).toBeInTheDocument();
+  });
 });
