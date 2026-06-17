@@ -1051,7 +1051,7 @@ export function LifeBalance() {
                     <div className="mt-4 pt-4 border-t border-app-line/60 flex justify-center">
                       <Link
                         to="/life-insight"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-app-ink-soft hover:text-app-ink transition-colors"
+                        className="inline-flex min-h-11 items-center gap-1 px-3 py-2 text-xs font-medium text-app-ink-soft hover:text-app-ink transition-colors"
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
                         Xem bản đầy đủ trang Góc nhìn
