@@ -309,6 +309,35 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     expect(screen.getByTestId("today-next-action-panel")).toHaveAttribute("data-state", "primary-task");
   });
 
+  it("shows a first-task fallback guide for week 1 before the user completes anything", () => {
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          currentWeek: 1,
+          todayCompletedCount: 0,
+          latestCheckIn: null,
+        })}
+      />,
+    );
+
+    const panel = screen.getByTestId("today-next-action-panel");
+    expect(panel).toHaveTextContent("Bắt đầu tuần 1");
+    expect(panel).toHaveTextContent("Bắt đầu từ việc ưu tiên bên dưới rồi tick xong để tạo đà.");
+  });
+
+  it("hides the first-task fallback guide after the first task is completed", () => {
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          currentWeek: 1,
+          todayCompletedCount: 1,
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("today-next-action-panel")).not.toHaveTextContent("Bắt đầu tuần 1");
+  });
+
   it("shows same-day check-in as saved and ignores older check-ins", () => {
     const { rerender } = render(
       <TwelveWeekTodayTab
