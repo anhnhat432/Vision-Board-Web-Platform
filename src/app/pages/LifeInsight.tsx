@@ -710,16 +710,18 @@ export function LifeInsight() {
                               "after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
                               isSelected
                                 ? "border-transparent bg-app-accent-soft"
-                                : `border-app-line bg-app-surface/60 text-app-ink ${colors.hoverBorder} ${colors.hoverBg} hover:shadow-xs active:scale-[0.97]`,
+                                : `border-app-line/80 bg-app-surface/40 text-app-ink ${colors.hoverBorder} ${colors.hoverBg} hover:shadow-xs active:scale-[0.97]`,
                               "focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg focus-visible:outline-none",
                             )}
                             style={
                               isSelected
                                 ? {
                                     borderColor: colorConfig.accent,
+                                    backgroundColor: `color-mix(in srgb, ${colorConfig.accent} 9%, var(--app-surface))`,
                                     color: colorConfig.accent,
                                     borderWidth: "1px",
                                     borderStyle: "solid",
+                                    transition: "border-color 200ms ease, background-color 200ms ease, color 200ms ease",
                                   }
                                 : {}
                             }
@@ -732,8 +734,9 @@ export function LifeInsight() {
                               style={
                                 isSelected
                                   ? {
-                                      backgroundColor: `color-mix(in srgb, ${colorConfig.accent} 20%, transparent)`,
+                                      backgroundColor: `color-mix(in srgb, ${colorConfig.accent} 16%, transparent)`,
                                       color: colorConfig.accent,
+                                      transition: "background-color 200ms ease, color 200ms ease",
                                     }
                                   : {}
                               }
