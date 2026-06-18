@@ -127,7 +127,9 @@ describe("OrderPage", () => {
   });
 
   it("shows error when backend fails and allows retry", async () => {
-    vi.mocked(createOrder).mockRejectedValueOnce(new Error("Máy chủ bận. Vui lòng thử lại."));
+    vi.mocked(createOrder).mockRejectedValueOnce(
+      Object.assign(new Error(""), { status: 500 }),
+    );
 
     renderOrderPage();
     await selectFrameAndTheme();
@@ -138,8 +140,13 @@ describe("OrderPage", () => {
 
     // Error message appears (rendered in both desktop + mobile sections)
     await waitFor(() => {
-      expect(screen.getAllByText("Máy chủ bận. Vui lòng thử lại.").length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText("Máy chủ đang gặp sự cố. Đơn của bạn đã được lưu cục bộ, có thể thử lại sau.").length,
+      ).toBeGreaterThan(0);
     });
+
+    // Should NOT navigate (status >= 500 is not offline)
+    expect(screen.queryByText("order-status")).not.toBeInTheDocument();
 
     // Should still have saved local order
     const [localOrder] = getOrders();
@@ -153,7 +160,25 @@ describe("OrderPage", () => {
     await waitFor(() => {
       expect(screen.findByText("order-status")).toBeDefined();
     });
-    expect(saveOrderLink).toHaveBeenCalled();
+    // saveOrderLink should be called with the SAME local order id (no duplicate)
+    expect(saveOrderLink).toHaveBeenCalledWith(localOrder.id, "srv-2");
+    expect(getOrders()).toHaveLength(1);
+  });
+
+  it("navigates to order-status on network error without showing error", async () => {
+    vi.mocked(createOrder).mockRejectedValueOnce(new Error("Network Error"));
+
+    renderOrderPage();
+    await selectFrameAndTheme();
+    await fillShippingForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
+    await confirmDialog();
+
+    // Offline error → navigate anyway, no error shown
+    expect(await screen.findByText("order-status")).toBeInTheDocument();
+    expect(screen.queryByText(/Không thể/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Thử lại" })).not.toBeInTheDocument();
   });
 
   it("blocks submit when email not verified in real mode", async () => {
