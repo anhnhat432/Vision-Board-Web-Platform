@@ -1,4 +1,4 @@
-import { ArrowRight, Calendar, Sparkles } from "lucide-react";
+import { ArrowRight, Calendar, ImageIcon, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
 
@@ -49,23 +49,11 @@ export function DashboardHero({
       data-tour-id="dashboard-next-card"
       className="relative overflow-hidden rounded-3xl border border-emerald-100/50 dark:border-neutral-800/80 bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/30 dark:from-neutral-950 dark:via-neutral-950 dark:to-emerald-950/10 p-6 md:p-8 lg:p-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-center shadow-app-sm hover:shadow-app-md transition-shadow duration-300 select-none w-full"
     >
-      {/* Decorative ambient light - Gradient Mesh effect */}
-      <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 blur-[80px] dark:from-emerald-500/20" />
-      <div className="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-gradient-to-tr from-amber-500/5 to-pink-500/5 blur-[80px]" />
-
-      {/* Grid Pattern overlay for texture */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
-
-      {/* 📌 Pin indicator on top header corner */}
-      <span className="hidden sm:inline absolute top-4 left-4 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default">
-        📌
-      </span>
-
       {/* Welcome content */}
       <div className="relative z-10 space-y-4 pt-2">
         <div className="flex flex-wrap items-center gap-2.5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0 animate-pulse" />
+          <p className="text-[10px] font-bold uppercase tracking-wide text-app-accent flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0" />
             {caption}
           </p>
           <span className="rounded-full border border-emerald-100/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/85 px-3.5 py-0.5 text-xs font-semibold text-app-accent flex items-center gap-1.5 shadow-[0_2px_8px_-4px_rgba(16,185,129,0.2)]">
@@ -76,18 +64,17 @@ export function DashboardHero({
 
         <h1 className="font-serif text-3xl sm:text-4xl font-bold leading-[1.2] tracking-tight text-app-ink md:text-[2.75rem]">
           Chào tuần mới,{" "}
-          <span className="font-serif font-bold underline decoration-amber-400/60 decoration-wavy underline-offset-8 italic bg-gradient-to-r from-amber-600 to-amber-700 dark:from-amber-400 dark:to-amber-500 bg-clip-text text-transparent">
+          <span className="font-serif font-bold underline decoration-amber-400/60 underline-offset-8 italic text-amber-600 dark:text-amber-400">
             {displayName}
           </span>
         </h1>
 
         <p className="text-xs sm:text-sm font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
-          Hãy tập trung năng lượng vào các cam kết cốt lõi. Một chu kỳ hành động tĩnh tại và chất lượng đang chờ đón
-          bạn.
+          Tập trung vào vài việc quan trọng nhất tuần này.
         </p>
 
         {/* Life Quote Banner with deep and delicate design */}
-        <div className="border-l-2 border-amber-500/50 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl shadow-2xs backdrop-blur-xs">
+        <div className="border-l-2 border-amber-500/50 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl shadow-2xs">
           <p className="font-serif italic text-amber-800 dark:text-amber-400 text-xs leading-relaxed">
             “{selectedQuote}”
           </p>
@@ -97,19 +84,16 @@ export function DashboardHero({
       {/* Featured Goal focus card - premium dreamy polaroid layout */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/card relative z-10 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-app-md hover:shadow-app-lg transition-all duration-300 -rotate-[1deg] hover:rotate-0 hover:scale-[1.01] overflow-hidden backdrop-blur-md"
+        className="group/card relative z-10 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-app-md hover:shadow-app-lg transition-all duration-300 overflow-hidden"
       >
-        {/* Background gradient dreamy mờ ảo giả lập Vision Board */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-amber-500/5 to-violet-500/5 opacity-80 pointer-events-none" />
-
-        <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5 mt-2 relative z-10">
-          <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
+        <p className="text-[9px] font-extrabold uppercase tracking-wide text-app-accent flex items-center gap-1.5 mt-2 relative z-10">
+          <Sparkles className="h-3.5 w-3.5 text-app-accent" />
           Tiêu điểm chu kỳ
         </p>
 
         {/* Visual Dreamy Vision Anchor */}
-        <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10 transition-transform duration-500 group-hover/card:scale-[1.02]">
-          <span className="text-3xl animate-bounce duration-1000">🎨</span>
+          <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
+            <ImageIcon className="h-6 w-6 text-neutral-400" />
           <div className="absolute inset-0 bg-black/2 flex items-end p-2">
             <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/85 dark:bg-neutral-900/85 px-2 py-0.5 rounded-md backdrop-blur-xs">
               BẢNG TẦM NHÌN
