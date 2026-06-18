@@ -141,6 +141,10 @@ export function PublicVisitorView({
                   ✨ DEAR OUR FUTURE
                 </span>
 
+                <p className="text-[11px] sm:text-xs font-medium tracking-wide text-app-ink-muted">
+                  Dành cho người trẻ có hoài bão nhưng dễ mất đà.
+                </p>
+
                 <h1 className="max-w-2xl font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[3.5rem]">
                   Thiết lập cuộc sống mơ ước qua <br className="hidden sm:inline" />
                   <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-8">
@@ -149,10 +153,10 @@ export function PublicVisitorView({
                   bền bỉ
                 </h1>
 
-                {/* Shortened and high impact caption (under 3 lines on mobile) */}
+                {/* Problem-first caption — nêu nỗi đau rồi nối sang giá trị (under 3 lines on mobile) */}
                 <p className="max-w-[48ch] text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic">
-                  Nơi mục tiêu lớn được chia nhỏ thành thói quen kỷ luật mỗi ngày. Đánh giá bánh xe cuộc sống, xây dựng
-                  mục tiêu SMART và thực thi dứt khoát.
+                  Có nhiều mục tiêu nhưng không biết bắt đầu từ đâu, và thường bỏ cuộc sau vài tuần? Dear Our Future biến
+                  mong muốn mơ hồ thành việc làm cụ thể mỗi ngày, theo lộ trình 12 tuần có cơ sở khoa học.
                 </p>
               </div>
 
