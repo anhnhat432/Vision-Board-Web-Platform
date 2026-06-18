@@ -36,6 +36,7 @@ import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getLifeAreaLabel, getUserData, LIFE_AREAS, type LifeArea, updateWheelOfLife } from "../utils/storage";
+import { mergeOnboardingLifeAreas } from "../utils/onboarding-life-areas";
 import { ZenBreathingGate } from "./Onboarding/components/ZenBreathingGate";
 
 type OnboardingStep = "welcome" | "assessment";
@@ -133,14 +134,10 @@ function parseOnboardingDraft(raw: string | null): OnboardingDraft | null {
     const parsed = JSON.parse(raw) as Partial<OnboardingDraft> | null;
     if (!parsed || typeof parsed !== "object" || parsed.completed) return null;
 
-    const draftLifeAreas = Array.isArray(parsed.lifeAreas) ? parsed.lifeAreas : [];
-    const lifeAreas = LIFE_AREAS.map((baseArea, index) => {
-      const draftArea = draftLifeAreas.find((area) => area?.name === baseArea.name) ?? draftLifeAreas[index];
-      return { ...baseArea, score: normalizeDraftScore(draftArea?.score) };
-    });
+    const lifeAreas = mergeOnboardingLifeAreas(parsed.lifeAreas, normalizeDraftScore);
     const reviewedAreaIndices = Array.isArray(parsed.reviewedAreaIndices)
       ? parsed.reviewedAreaIndices.filter(
-          (index): index is number => Number.isInteger(index) && index >= 0 && index < LIFE_AREAS.length,
+          (index): index is number => Number.isInteger(index) && index >= 0 && index < lifeAreas.length,
         )
       : [];
 
