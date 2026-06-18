@@ -106,7 +106,7 @@ describe("feature entitlements", () => {
         billingCycle: "monthly",
         providerMode: "api_contract",
         startedAt: now,
-        renewsAt: "2026-06-15T00:00:00.000Z",
+        renewsAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString(),
         isLocalTestMode: false,
       },
       entitlements: [{ key: "advanced_analytics", sourcePlan: "PLUS", grantedAt: now }],
