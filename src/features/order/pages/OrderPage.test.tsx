@@ -26,7 +26,7 @@ vi.mock("@/app/utils/app-mode", () => ({
 
 let _mockUserValue: { emailVerified: boolean } = mockUser(true);
 vi.mock("@/lib/auth/AuthContext", () => ({
-  useOptionalAuthContext: () => ({ user: _mockUserValue }),
+  useOptionalAuthContext: () => (_isRealMode ? { user: _mockUserValue } : null),
 }));
 
 function renderOrderPage() {
