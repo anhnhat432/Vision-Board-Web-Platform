@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getAreaColorConfig, type AreaColorConfig } from "./life-area-theme";
+import { getAreaColorConfig } from "./life-area-theme";
 
 describe("getAreaColorConfig", () => {
   const standardNames = [
