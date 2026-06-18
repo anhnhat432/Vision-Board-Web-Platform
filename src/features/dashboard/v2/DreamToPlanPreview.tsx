@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Sparkles, Target } from "lucide-react";
+import { ArrowRight, Check, Palette, Sparkles, Target, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 
@@ -130,7 +130,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
           }`}
         >
-          🎨 1. Tầm nhìn
+          <Palette className="h-3.5 w-3.5" /> 1. Tầm nhìn
         </button>
         <button
           type="button"
@@ -141,7 +141,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
           }`}
         >
-          🎯 2. Chuẩn SMART
+          <Target className="h-3.5 w-3.5" /> 2. Chuẩn SMART
         </button>
         <button
           type="button"
@@ -152,7 +152,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
           }`}
         >
-          ⚡ 3. Việc Today
+          <Zap className="h-3.5 w-3.5" /> 3. Việc Today
         </button>
       </div>
 
@@ -160,13 +160,13 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch relative">
         {/* Floating Streak Pop Badge */}
         <div
-          className={`absolute top-4 right-4 md:right-8 z-30 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-3.5 py-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 shadow-md border border-emerald-500/25 transition-all duration-500 backdrop-blur-xs ${
+          className={`absolute top-4 right-4 md:right-8 z-30 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-3.5 py-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 shadow-md border border-emerald-500/25 transition-all duration-500 ${
             showStreakPop
-              ? "translate-y-0 scale-100 opacity-100 animate-bounce"
+              ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-2 scale-95 opacity-0 pointer-events-none"
           }`}
         >
-          <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+          <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400" />
           <span>Streak +1 Ngày! 🔥</span>
         </div>
 
@@ -180,9 +180,6 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
           <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#262626_1px,transparent_1px)] [background-size:14px_14px] opacity-40 pointer-events-none" />
 
           <div className="relative z-10 space-y-4">
-            <span className="hidden sm:inline absolute -top-4 -left-2 text-xl filter drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.06)] z-20">
-              📌
-            </span>
             <div className="space-y-1 pl-4">
               <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-accent">
                 Bảng tầm nhìn
@@ -223,9 +220,6 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/3 via-transparent to-amber-500/2 opacity-80 rounded-3xl" />
 
           <div className="relative z-10 space-y-4">
-            <span className="hidden sm:inline absolute -top-4 -left-2 text-xl filter drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.06)] z-20">
-              📌
-            </span>
             <div className="space-y-1 pl-4">
               <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
                 Tiêu điểm sắc nét
@@ -241,7 +235,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
                 <span className="rounded-full bg-app-accent/10 px-2.5 py-0.5 text-[9px] font-bold text-app-accent border border-app-accent/10">
                   {data.weekLabel}
                 </span>
-                <span className="text-[8px] font-extrabold text-neutral-400 uppercase tracking-widest">SMART GOAL</span>
+                <span className="text-[8px] font-extrabold text-neutral-400 uppercase tracking-wide">SMART GOAL</span>
               </div>
 
               <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-100 leading-relaxed flex items-start gap-2">
@@ -305,9 +299,6 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
           <div className="absolute left-7 top-0 bottom-0 w-0.5 bg-red-400/15" />
 
           <div className="relative z-10 space-y-4 pl-4">
-            <span className="hidden sm:inline absolute -top-4 -left-6 text-xl filter drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.06)] z-20">
-              📌
-            </span>
             <div className="space-y-1">
               <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 font-sans">
                 Kỷ luật tự thân
@@ -383,12 +374,12 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
       <div className="hidden md:flex items-center justify-between px-16 text-neutral-300 dark:text-neutral-800 select-none py-1">
         <div className="flex items-center gap-2">
           <div className="h-px w-24 bg-gradient-to-r from-transparent to-neutral-300 dark:to-neutral-800" />
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Từ bảng ước mơ</span>
+          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">Từ bảng ước mơ</span>
           <ArrowRight className="size-3 text-neutral-400" />
         </div>
         <div className="flex items-center gap-2">
           <div className="h-px w-24 bg-gradient-to-r from-transparent to-neutral-300 dark:to-neutral-800" />
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Chuẩn hóa hành động</span>
+          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">Chuẩn hóa hành động</span>
           <ArrowRight className="size-3 text-neutral-400" />
         </div>
       </div>

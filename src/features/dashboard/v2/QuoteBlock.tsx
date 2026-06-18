@@ -10,12 +10,7 @@ export function QuoteBlock({
   author = "Vision Board",
 }: QuoteBlockProps) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white/40 dark:bg-neutral-900/10 backdrop-blur-sm p-6 -rotate-[1.5deg] hover:rotate-0 hover:border-app-accent/20 transition-all duration-300 select-none shadow-[0_4px_24px_rgba(0,0,0,0.005)]">
-      {/* 📌 Floating wood pin at the top center of the quote note */}
-      <span className="hidden sm:inline absolute -top-3 left-1/2 transform -translate-x-1/2 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
-        📌
-      </span>
-
+    <div className="relative overflow-hidden rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white/90 dark:bg-neutral-900/80 p-6 hover:border-app-accent/20 transition-all duration-300 select-none shadow-[0_4px_24px_rgba(0,0,0,0.005)]">
       {/* Background Decorative Quote Icon */}
       <div className="absolute -right-3 -top-3 text-app-accent-soft/10 pointer-events-none transform rotate-180">
         <Quote className="h-16 w-16" />

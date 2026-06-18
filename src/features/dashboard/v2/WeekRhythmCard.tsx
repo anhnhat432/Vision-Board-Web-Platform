@@ -50,19 +50,19 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 hover:shadow-app-sm transition-all duration-300",
     iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   "Tỷ lệ lead": {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 hover:shadow-app-sm transition-all duration-300",
     iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   Nhịp: {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 hover:shadow-app-sm transition-all duration-300",
     iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
   Chuỗi: {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 hover:shadow-app-sm transition-all duration-300",
     iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
   },
 };
@@ -129,7 +129,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
           aria-hidden="true"
         >
           <div
-            className="w-full rounded-full bg-gradient-to-t from-app-accent to-[#5ba590] animate-pulse"
+            className="w-full rounded-full bg-gradient-to-t from-app-accent to-[#5ba590]"
             style={{ height: `${fillHeight}%` }}
           />
         </div>
@@ -222,19 +222,11 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/80 bg-white/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
+      className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/80 p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       {/* Grid Pattern overlay for texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808004_1px,transparent_1px),linear-gradient(to_bottom,#80808004_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
-
-      {/* Ambient glow mesh */}
-      <div className="pointer-events-none absolute -right-20 -bottom-20 h-48 w-48 rounded-full bg-app-accent/5 blur-[50px]" />
-
-      {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
-        📌
-      </span>
 
       <div className="flex flex-col gap-1 border-b border-neutral-200/50 dark:border-neutral-800/55 pb-4 mb-6 pt-2 relative z-10">
         <h2
