@@ -8,6 +8,7 @@ import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AuditLogModel } from "../models/auditLogModel";
 import { OrderCatalogModel } from "../models/OrderCatalogModel";
+import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
 import {
   setImageStorageAdapterForTesting,
@@ -34,10 +35,24 @@ const originalFindOne = OrderCatalogModel.findOne;
 const originalFindOneAndUpdate = OrderCatalogModel.findOneAndUpdate;
 const originalAuditCreate = AuditLogModel.create;
 
+// Mock UserModel.findOne so requireAdmin does not buffer when MongoDB is unavailable.
+const originalUserFindOne = UserModel.findOne;
+function createUserModelMock() {
+  const query = {
+    select() { return query; },
+    maxTimeMS() { return query; },
+    async lean() { return null; },
+  };
+  return query;
+}
+(UserModel as unknown as { findOne: unknown }).findOne = createUserModelMock;
+
 function restoreModels(): void {
   (OrderCatalogModel as unknown as MockableModel).findOne = originalFindOne;
   (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = originalFindOneAndUpdate;
   (AuditLogModel as unknown as { create: unknown }).create = originalAuditCreate;
+  // Re-apply UserModel mock (same pattern as AuditLogModel above)
+  (UserModel as unknown as { findOne: unknown }).findOne = createUserModelMock;
 }
 
 function createAdminCatalogTestApp(): Express {
