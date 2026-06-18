@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/app/components/ui/alert-dialog";
 import { isRealMode } from "@/app/utils/app-mode";
+import { isRateLimitError } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { useOrderCatalog } from "@/features/order/hooks/useOrderCatalog";
 import {
@@ -67,6 +68,7 @@ export function OrderPage() {
   const [notes, setNotes] = useState<NotesFieldValue>({ keywords: [], note: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [pendingLocalOrderId, setPendingLocalOrderId] = useState<string | null>(null);
   const [touched, setTouched] = useState<Partial<Record<ValidateErrorKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -139,13 +141,55 @@ export function OrderPage() {
   }
 
   function extractApiErrorMessage(err: unknown): string {
-    if (err && typeof err === "object" && "message" in err) {
-      return String((err as { message: unknown }).message);
+    if (isRateLimitError(err)) {
+      return "Hệ thống đang bận, vui lòng thử lại sau giây lát.";
     }
-    return "Không thể kết nối máy chủ. Vui lòng thử lại.";
+    const status = (err as { status?: number }).status;
+    if (status === 401 || status === 403) {
+      return "Bạn không có quyền hoặc phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+    }
+    if (status !== undefined && status >= 500) {
+      return "Máy chủ đang gặp sự cố. Đơn của bạn đã được lưu cục bộ, có thể thử lại sau.";
+    }
+    if (err && typeof err === "object" && "message" in err) {
+      const message = String((err as { message: unknown }).message);
+      if (message.length < 120 && /[àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(message)) {
+        return message;
+      }
+    }
+    return "Không thể gửi đơn lên máy chủ. Vui lòng thử lại.";
   }
 
-  function handleSubmit() {
+  function buildOrderPayload() {
+    return {
+      itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
+      sticker: draft.stickerSelection,
+      fullName: shipping.fullName,
+      email: shipping.email,
+      phone: shipping.phone,
+      shippingAddress: shipping.shippingAddress,
+      goalId: shipping.goalId,
+      goalTitle: shipping.goalTitle,
+      keywords: notes.keywords,
+      note: notes.note,
+    };
+  }
+
+  function isOfflineError(err: unknown): boolean {
+    return (err as { status?: number }).status === undefined;
+  }
+
+  function handleBackendError(err: unknown) {
+    setSubmitError(extractApiErrorMessage(err));
+    setSubmitting(false);
+  }
+
+  function navigateToOrderStatus(orderId: string) {
+    navigate(`/order-status/${orderId}`);
+  }
+
+  /** Kiểm tra validation + email verify, rồi mở dialog xác nhận. */
+  function handlePlaceOrder() {
     if (!validation.ok) {
       setSubmitAttempted(true);
       return;
@@ -162,24 +206,13 @@ export function OrderPage() {
     setShowConfirmDialog(true);
   }
 
+  /** Thực sự gửi đơn sau khi user xác nhận trong dialog. */
   async function handleConfirmSubmit() {
     setShowConfirmDialog(false);
     setSubmitting(true);
     setSubmitError(null);
 
-    const payload = {
-      itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
-      sticker: draft.stickerSelection,
-      fullName: shipping.fullName,
-      email: shipping.email,
-      phone: shipping.phone,
-      shippingAddress: shipping.shippingAddress,
-      goalId: shipping.goalId,
-      goalTitle: shipping.goalTitle,
-      keywords: notes.keywords,
-      note: notes.note,
-    };
-
+    // 1. Create local order ONCE
     let order: ReturnType<typeof createLocalOrder>;
     try {
       order = createLocalOrder({
@@ -202,19 +235,44 @@ export function OrderPage() {
       return;
     }
 
-    let backendFailed = false;
+    setPendingLocalOrderId(order.id);
+
+    // 2. Best-effort backend sync
+    const payload = buildOrderPayload();
     try {
       const backendOrder = await createOrder(payload);
       saveOrderLink(order.id, backendOrder.id);
-    } catch (err: unknown) {
-      backendFailed = true;
-      setSubmitError(extractApiErrorMessage(err));
-    } finally {
       setSubmitting(false);
+      navigateToOrderStatus(order.id);
+    } catch (err: unknown) {
+      if (isOfflineError(err)) {
+        setSubmitting(false);
+        navigateToOrderStatus(order.id);
+        return;
+      }
+      handleBackendError(err);
     }
+  }
 
-    if (!backendFailed) {
-      navigate(`/order-status/${order.id}`);
+  async function retryBackendSync() {
+    if (!pendingLocalOrderId) return;
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const payload = buildOrderPayload();
+    try {
+      const backendOrder = await createOrder(payload);
+      saveOrderLink(pendingLocalOrderId, backendOrder.id);
+      setSubmitting(false);
+      navigateToOrderStatus(pendingLocalOrderId);
+    } catch (err: unknown) {
+      if (isOfflineError(err)) {
+        setSubmitting(false);
+        navigateToOrderStatus(pendingLocalOrderId);
+        return;
+      }
+      handleBackendError(err);
     }
   }
 
@@ -324,7 +382,7 @@ export function OrderPage() {
               isSubmittable={validation.ok}
               isSubmitting={submitting}
               missingFields={missingFields}
-              onSubmit={handleSubmit}
+              onSubmit={handlePlaceOrder}
               selectedFrame={selectedFrame}
               selectedThemes={selectedThemes}
               selectedSticker={selectedSticker}
@@ -333,7 +391,7 @@ export function OrderPage() {
               <div className="mt-3 space-y-2">
                 <p className="text-sm text-destructive">{submitError}</p>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleConfirmSubmit}>
+                  <Button variant="outline" size="sm" onClick={retryBackendSync}>
                     Thử lại
                   </Button>
                 </div>
@@ -360,7 +418,7 @@ export function OrderPage() {
               type="button"
               className="shrink-0 bg-[var(--order-accent)] text-white hover:bg-[var(--order-accent)]/90"
               disabled={submitting}
-              onClick={handleSubmit}
+              onClick={handlePlaceOrder}
             >
               {submitting ? "Đang gửi..." : validation.ok ? "Đặt đơn" : "Kiểm tra lại"}
             </Button>
@@ -368,7 +426,7 @@ export function OrderPage() {
           {submitError && (
             <div className="mx-auto mt-2 max-w-6xl space-y-2">
               <p className="text-xs text-destructive">{submitError}</p>
-              <Button variant="outline" size="sm" onClick={handleConfirmSubmit}>
+              <Button variant="outline" size="sm" onClick={retryBackendSync}>
                 Thử lại
               </Button>
             </div>
