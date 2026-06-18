@@ -98,7 +98,7 @@ const LIFE_AREA_ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const JOURNEY_STEPS = [
-  { title: "Đánh giá", description: "Chấm 8 lĩnh vực đủ thật." },
+  { title: "Đánh giá", description: `Chấm ${LIFE_AREAS.length} lĩnh vực đủ thật.` },
   { title: "Trọng tâm", description: "Nhìn ra nơi cần chăm sóc trước." },
   { title: "Kế hoạch", description: "Biến insight thành nhịp 12 tuần." },
 ];
@@ -249,15 +249,17 @@ function LifeAtlasPanel({
 }) {
   const reviewedAreaCount = reviewedAreaIndices.size;
   const showPreview = mode === "welcome";
+  const areaCount = lifeAreas.length;
+  const segmentAngle = 360 / areaCount;
   const growthAreaIndex = Math.max(
     0,
     lifeAreas.findIndex((area) => area.name === growthArea.name),
   );
-  const pinPoint = polarPoint(140, 140, 108, growthAreaIndex * 45);
+  const pinPoint = polarPoint(140, 140, 108, growthAreaIndex * segmentAngle);
 
   return (
     <section
-      aria-label="Bản đồ cuộc sống 8 vùng"
+      aria-label={`Bản đồ cuộc sống ${areaCount} vùng`}
       className="relative overflow-hidden rounded-card border border-app-line bg-app-surface p-4 shadow-app-md sm:p-5"
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(0,0,0,0.035),transparent)] opacity-40 dark:opacity-20" />
@@ -270,14 +272,14 @@ function LifeAtlasPanel({
             </h2>
           </div>
           <span className="shrink-0 rounded-pill border border-app-line bg-app-bg-subtle px-3 py-1 text-xs font-semibold text-app-ink-soft">
-            {showPreview ? "8 vùng" : `${reviewedAreaCount}/8`}
+            {showPreview ? `${areaCount} vùng` : `${reviewedAreaCount}/${areaCount}`}
           </span>
         </div>
 
         <div className="relative mx-auto aspect-square w-full max-w-[360px] rounded-[28px] border border-app-line bg-app-bg-subtle p-3 shadow-app-sm">
           <svg
             role="img"
-            aria-label="Atlas cuộc sống gồm 8 vùng, vùng đã chấm được tô rõ hơn"
+            aria-label={`Atlas cuộc sống gồm ${areaCount} vùng, vùng đã chấm được tô rõ hơn`}
             className={cn(
               "h-full w-full",
               !showPreview && !reviewedAreaIndices.size && "opacity-85",
@@ -285,7 +287,7 @@ function LifeAtlasPanel({
             )}
             viewBox="0 0 280 280"
           >
-            <title>Atlas cuộc sống 8 vùng</title>
+            <title>{`Atlas cuộc sống ${areaCount} vùng`}</title>
             <circle cx="140" cy="140" r="122" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
             {[54, 84, 114].map((radius) => (
               <circle
@@ -299,8 +301,8 @@ function LifeAtlasPanel({
                 strokeWidth="1"
               />
             ))}
-            {Array.from({ length: 4 }).map((_, index) => {
-              const angle = index * 45;
+            {lifeAreas.map((_, index) => {
+              const angle = index * segmentAngle;
               const start = polarPoint(140, 140, 28, angle);
               const end = polarPoint(140, 140, 124, angle);
               return (
@@ -318,14 +320,15 @@ function LifeAtlasPanel({
             })}
             {lifeAreas.map((area, index) => {
               const scoreRatio = Math.max(0.08, Math.min(area.score / 10, 1));
-              const startAngle = index * 45 - 20;
-              const endAngle = index * 45 + 20;
+              const half = segmentAngle * (20 / 45);
+              const startAngle = index * segmentAngle - half;
+              const endAngle = index * segmentAngle + half;
               const isReviewed = reviewedAreaIndices.has(index);
               const isActive = activeAreaIndex === index;
               const visible = showPreview || isReviewed || isActive;
               const accent = getAreaColorConfig(area.name).accent;
               const outerRadius = 42 + scoreRatio * 72;
-              const labelPoint = polarPoint(140, 140, 134, index * 45);
+              const labelPoint = polarPoint(140, 140, 134, index * segmentAngle);
 
               return (
                 <g key={area.name}>
@@ -374,7 +377,7 @@ function LifeAtlasPanel({
         {showPreview ? (
           <div className="grid gap-2 text-sm text-app-ink-soft sm:grid-cols-3">
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
-              <strong className="block text-app-ink">1. Rà 8 vùng</strong>
+              <strong className="block text-app-ink">{`1. Rà ${areaCount} vùng`}</strong>
               Chọn điểm đủ thật.
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
@@ -402,7 +405,7 @@ function LifeAtlasPanel({
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Đã rà</span>
-              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">{reviewedAreaCount}/8</p>
+              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">{reviewedAreaCount}/{areaCount}</p>
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Cần chăm sóc</span>
