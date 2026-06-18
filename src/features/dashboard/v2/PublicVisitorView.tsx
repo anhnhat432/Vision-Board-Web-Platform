@@ -197,7 +197,7 @@ export function PublicVisitorView({
               </button>
             </div>
 
-            <p className="mt-5 text-xs text-app-ink-muted">Không cần đăng nhập · Thiết lập trong 3 phút</p>
+            <p className="mt-5 text-xs text-app-ink-muted">Miễn phí · Thiết lập trong 3 phút</p>
           </div>
 
           <div className="relative">
@@ -396,7 +396,7 @@ export function PublicVisitorView({
                 Bắt đầu chu kỳ 12 tuần của bạn
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-emerald-100/70">
-                Dành vài phút thiết lập lộ trình hành động ngay hôm nay. Miễn phí, không cần đăng nhập.
+                Dành vài phút thiết lập lộ trình hành động ngay hôm nay. Hoàn toàn miễn phí.
               </p>
             </div>
             <div className="flex shrink-0 flex-col items-center gap-3 lg:items-end">
