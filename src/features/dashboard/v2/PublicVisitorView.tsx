@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, Compass, HardDrive, Lock, LogIn, Palette, Smartphone, Target, UserPlus, Zap } from "lucide-react";
+import { ArrowRight, Check, Compass, HardDrive, Lock, LogIn, Minus, Smartphone, UserPlus } from "lucide-react";
 import { useState } from "react";
 
 import { Link } from "react-router";
@@ -60,10 +60,77 @@ const GOAL_PREVIEWS: GoalPreviewData[] = [
 ];
 
 const PREVIEW_CHIPS = [
-  { id: "reading", label: "📚 Đọc sách" },
-  { id: "ielts", label: "🎧 IELTS 7.0" },
-  { id: "gym", label: "🏋️ Gym" },
-  { id: "portfolio", label: "💻 Portfolio" },
+  { id: "reading", label: "Đọc sách" },
+  { id: "ielts", label: "IELTS 7.0" },
+  { id: "gym", label: "Tập gym" },
+  { id: "portfolio", label: "Portfolio" },
+] as const;
+
+const STEPS = [
+  {
+    no: "01",
+    eyebrow: "Nhìn nhận",
+    title: "Cân bằng cuộc sống",
+    description: "Chấm điểm 8 khía cạnh để thấy nơi đang lệch nhịp và cần ưu tiên trước.",
+    meta: "≈ 3 phút",
+  },
+  {
+    no: "02",
+    eyebrow: "Định vị",
+    title: "Đặt mục tiêu SMART",
+    description: "Chọn một lĩnh vực trọng tâm và đóng gói mong muốn thành mục tiêu đo lường được.",
+    meta: "≈ 5 phút",
+  },
+  {
+    no: "03",
+    eyebrow: "Thiết lập",
+    title: "Kế hoạch 12 tuần",
+    description: "Dựng thói quen lặp lại và các mốc checkpoint để đo tiến độ một cách tự nhiên.",
+    meta: "≈ 5 phút",
+  },
+  {
+    no: "04",
+    eyebrow: "Thực thi",
+    title: "Hành động mỗi ngày",
+    description: "Mở danh sách việc hôm nay, hoàn thành, và phản tư ngắn vào cuối tuần.",
+    meta: "2 phút/ngày",
+  },
+] as const;
+
+const BEFORE_POINTS = [
+  '"Muốn sống khỏe hơn" — mong muốn mơ hồ, không biết bắt đầu từ đâu.',
+  "Viết to-do list rồi quên sạch sau vài tuần.",
+  "Thiếu nhịp cam kết mỗi ngày và một ngày cố định để nhìn lại.",
+] as const;
+
+const AFTER_POINTS = [
+  "Một mục tiêu SMART rõ ràng, xuất phát từ bức tranh cuộc sống của bạn.",
+  "Lộ trình 12 tuần mạch lạc với chỉ số tiến độ theo dõi được.",
+  "Mỗi sáng mở Today, làm vài việc cốt lõi, rồi đóng lại.",
+] as const;
+
+const FEATURE_ROWS = [
+  {
+    tag: "Miễn phí",
+    title: "Bắt đầu không tốn xu nào",
+    description: "Dữ liệu lưu ngay trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập.",
+    href: "/life-balance",
+    icon: Lock,
+  },
+  {
+    tag: "Đúng thứ tự",
+    title: "Không phải trang trắng như Notion",
+    description: "Dear Our Future dẫn bạn qua từng bước có cơ sở, không bị rối khi mới bắt đầu.",
+    href: "/12-week-setup",
+    icon: Compass,
+  },
+  {
+    tag: "Gọn nhẹ",
+    title: "Đủ nhẹ cho buổi sáng vội",
+    description: "Mở Today, tick xong việc, đóng lại. Không cần học giao diện phức tạp.",
+    href: "/12-week-system?tab=today",
+    icon: Smartphone,
+  },
 ] as const;
 
 interface PublicVisitorViewProps {
@@ -74,30 +141,6 @@ interface PublicVisitorViewProps {
   onSignUp: () => void;
 }
 
-const FEATURE_ROWS = [
-  {
-    tag: "Miễn phí",
-    title: "Bắt đầu không tốn xu nào",
-    description: "Dữ liệu lưu trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập.",
-    href: "/life-balance",
-    icon: Lock,
-  },
-  {
-    tag: "Đúng thứ tự",
-    title: "Không phải trang trắng như Notion",
-    description: "Dear Our Future dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.",
-    href: "/12-week-setup",
-    icon: Compass,
-  },
-  {
-    tag: "Mobile-ready",
-    title: "Đủ nhẹ cho buổi sáng vội",
-    description: "Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng.",
-    href: "/12-week-system?tab=today",
-    icon: Smartphone,
-  },
-] as const;
-
 export function PublicVisitorView({
   isDemo: _isDemo,
   hasLocalData,
@@ -105,8 +148,6 @@ export function PublicVisitorView({
   onSignIn,
   onSignUp,
 }: PublicVisitorViewProps) {
-  const primaryLabel = "Thiết lập chu kỳ 12 tuần ngay";
-  const heroStartLabel = "Thiết lập chu kỳ 12 tuần ngay";
   const [selectedPreviewId, setSelectedPreviewId] = useState(GOAL_PREVIEWS[0].id);
   const selectedPreview = GOAL_PREVIEWS.find((p) => p.id === selectedPreviewId) ?? GOAL_PREVIEWS[0];
 
@@ -116,147 +157,70 @@ export function PublicVisitorView({
   };
 
   const scrollToHowItWorks = () => {
-    document.getElementById("dashboard-how-it-works-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <div className="space-y-16 md:space-y-24">
-      {/* 1. Hero Section - Light-first Editorial style */}
-      <section className="relative -mx-4 overflow-hidden bg-gradient-to-b from-[#fafaf9] to-white dark:from-neutral-950 dark:to-neutral-900 px-4 pb-16 pt-8 sm:-mx-6 sm:px-6 md:pt-14 lg:min-h-[80vh] lg:flex lg:items-center lg:py-20">
+    <div className="space-y-20 md:space-y-28">
+      {/* ── Hero ── */}
+      <section className="relative -mx-4 px-4 pt-10 pb-4 sm:-mx-6 sm:px-6 md:pt-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          <div className="appear-fade-up">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">Dear Our Future</p>
 
-        <div className="relative z-10 flex flex-col gap-12 lg:gap-16 max-w-6xl mx-auto w-full">
-          <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:items-center">
-            <div className="appear-fade-up space-y-6">
-              <div className="space-y-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-500/5 dark:border-emerald-900/30 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 shadow-3xs">
-                  DEAR OUR FUTURE
-                </span>
+            <h1 className="mt-5 font-serif text-[2.4rem] font-medium leading-[1.08] tracking-tight text-app-ink sm:text-5xl md:text-[3.6rem]">
+              Cuộc sống mơ ước,
+              <br className="hidden sm:inline" /> bắt đầu từ một{" "}
+              <span className="italic text-app-accent">kế hoạch 12 tuần</span>.
+            </h1>
 
-                <p className="text-[11px] sm:text-xs font-medium tracking-wide text-app-ink-muted">
-                  Dành cho người trẻ có hoài bão nhưng dễ mất đà.
-                </p>
+            <p className="mt-6 max-w-[46ch] text-sm leading-relaxed text-app-ink-soft sm:text-base">
+              Bạn có nhiều mục tiêu nhưng không biết bắt đầu từ đâu, và hay bỏ cuộc sau vài tuần? Dear Our Future biến
+              mong muốn mơ hồ thành việc cụ thể mỗi ngày — và giúp bạn đi hết chặng.
+            </p>
 
-                <h1 className="max-w-2xl font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[3.5rem]">
-                  Thiết lập cuộc sống mơ ước qua <br className="hidden sm:inline" />
-                  <span className="underline decoration-app-accent/55 underline-offset-8">
-                    kế hoạch 12 tuần
-                  </span>{" "}
-                  bền bỉ
-                </h1>
-
-                {/* Problem-first caption — nêu nỗi đau rồi nối sang giá trị (under 3 lines on mobile) */}
-                <p className="max-w-[48ch] text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic">
-                  Có nhiều mục tiêu nhưng không biết bắt đầu từ đâu, và thường bỏ cuộc sau vài tuần? Dear Our Future biến
-                  mong muốn mơ hồ thành việc làm cụ thể mỗi ngày, theo lộ trình 12 tuần có cơ sở khoa học.
-                </p>
-              </div>
-
-              {/* Visual preview journey diagram: Vision -> Goal -> 12-week -> Action */}
-              <div className="bg-white/80 dark:bg-neutral-900/80 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 p-4 shadow-3xs max-w-xl">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-app-ink-muted mb-2.5">
-                  Hành trình 5 giây gặt hái kết quả:
-                </p>
-                <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
-                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                    <div className="text-base mb-1 flex justify-center"><Palette className="h-4 w-4" /></div>
-                    <div className="font-bold text-neutral-800 dark:text-neutral-200">1. Tầm nhìn</div>
-                    <div className="text-[9px] text-neutral-400 font-medium">Bảng ước mơ</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                    <div className="text-base mb-1 flex justify-center"><Target className="h-4 w-4" /></div>
-                    <div className="font-bold text-neutral-800 dark:text-neutral-200">2. Mục tiêu</div>
-                    <div className="text-[9px] text-neutral-400 font-medium">Chuẩn SMART</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                    <div className="text-base mb-1 flex justify-center"><CalendarDays className="h-4 w-4" /></div>
-                    <div className="font-bold text-neutral-800 dark:text-neutral-200">3. Kế hoạch</div>
-                    <div className="text-[9px] text-neutral-400 font-medium">Lộ trình 12 tuần</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-app-accent-soft text-app-accent border border-app-accent/15">
-                    <div className="text-base mb-1 flex justify-center"><Zap className="h-4 w-4" /></div>
-                    <div className="font-bold">4. Hành động</div>
-                    <div className="text-[9px] text-app-accent/80 font-medium">Việc Today</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Interactive Goal Preview Chips */}
-              <div className="space-y-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-app-ink-muted">
-                  Chọn xem ví dụ thực tế:
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {PREVIEW_CHIPS.map((chip) => (
-                    <button
-                      key={chip.id}
-                      type="button"
-                      aria-pressed={selectedPreviewId === chip.id}
-                      onClick={() => handlePreviewSelect(chip.id)}
-                      className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg cursor-pointer ${
-                        selectedPreviewId === chip.id
-                          ? "bg-app-accent text-white shadow-sm hover:bg-app-accent-hover"
-                          : "border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:border-app-accent/40 hover:text-app-accent hover:-translate-y-px"
-                      }`}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Buttons - Highly visible, min 44px on mobile */}
-              <div className="flex flex-col gap-3 sm:flex-row pt-2 max-w-xl">
-                <button
-                  type="button"
-                  onClick={onStart}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40 cursor-pointer w-full sm:w-auto"
-                >
-                  {heroStartLabel}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={scrollToHowItWorks}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-transparent px-8 py-3.5 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-all duration-200 hover:bg-neutral-50/50 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none cursor-pointer w-full sm:w-auto"
-                >
-                  Xem lộ trình ghim chu kỳ
-                </button>
-              </div>
-
-              <div className="pt-0.5 flex items-center gap-2">
-                <p className="text-[10px] font-medium text-app-ink-muted flex items-center gap-1.5">
-                  <span>•</span>
-                  Thiết lập nhanh trong 3 phút để nhận Bánh xe cuộc sống và gợi ý mục tiêu đầu tiên.
-                </p>
-              </div>
+            <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={onStart}
+                className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-app-accent px-7 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+              >
+                Bắt đầu miễn phí
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </button>
+              <button
+                type="button"
+                onClick={scrollToHowItWorks}
+                className="inline-flex items-center text-sm font-semibold text-app-ink-soft underline-offset-4 transition-colors hover:text-app-ink hover:underline focus-visible:outline-none"
+              >
+                Xem cách hoạt động
+              </button>
             </div>
 
-            {/* Cozy planning corner generated image asset for public landing */}
-            <div className="hidden lg:block relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-sm aspect-[4/3] w-full group select-none transition-all duration-300 hover:shadow-md">
-              <img
-                src="/study_desk_hero.png"
-                alt="Góc học tập & lập kế hoạch ấm áp"
-                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-5">
-                <p className="text-xs font-medium text-white/90 italic font-serif leading-relaxed">
-                  "Một góc yên để nhìn lại mục tiêu và bắt đầu chu kỳ mới."
-                </p>
-              </div>
-            </div>
+            <p className="mt-5 text-xs text-app-ink-muted">Không cần đăng nhập · Thiết lập trong 3 phút</p>
           </div>
 
-          {/* SaaS Mockup Centerpiece - Dream-to-Plan Preview */}
-          <div className="w-full">
-            <DreamToPlanPreview previewData={selectedPreview} />
+          <div className="relative">
+            <div className="overflow-hidden rounded-[1.75rem] border border-app-line shadow-[0_28px_64px_-32px_rgba(15,40,30,0.35)]">
+              <img
+                src="/study_desk_hero.png"
+                alt="Góc học tập và lập kế hoạch"
+                className="aspect-[4/3] w-full object-cover dark:brightness-90"
+              />
+            </div>
+            <div className="absolute -bottom-5 left-5 right-8 rounded-2xl border border-app-line bg-app-surface px-4 py-3 shadow-md sm:right-12">
+              <p className="font-serif text-sm italic leading-relaxed text-app-ink-soft">
+                "Một góc yên để nhìn lại mục tiêu và bắt đầu chu kỳ mới."
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Local data restore banner if present */}
+      {/* ── Local data restore banner ── */}
       {hasLocalData ? (
         <section
-          className="rounded-2xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 md:p-6 max-w-6xl mx-auto"
+          className="mx-auto max-w-6xl rounded-2xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 md:p-6"
           aria-labelledby="dashboard-local-data-title"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -295,232 +259,157 @@ export function PublicVisitorView({
         </section>
       ) : null}
 
-      {/* Before → After Clarity Section */}
-      <RevealOnScroll
-        as="section"
-        className="grid gap-6 sm:grid-cols-2 max-w-6xl mx-auto px-4"
-        aria-label="So sánh trước và sau"
-      >
-        <div className="rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-[#fbfbfa]/60 p-6 transition-all duration-300 hover:border-neutral-300">
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-neutral-500">
-            <span>✕</span> Trước khi sử dụng
-          </p>
-          <h3 className="mt-3 text-sm font-bold text-neutral-800 dark:text-neutral-200">Mục tiêu mơ hồ</h3>
-          <ul className="mt-4 space-y-2.5 text-xs font-medium leading-relaxed text-neutral-500">
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-neutral-400 font-bold">✕</span>
-              <span>"Muốn sống khỏe hơn" — ý muốn mơ hồ không biết bắt đầu từ đâu.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-neutral-400 font-bold">✕</span>
-              <span>Viết To-do list rồi nhanh chóng quên sạch sau 2 tuần.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-neutral-400 font-bold">✕</span>
-              <span>Thiếu nhịp điệu cam kết hàng ngày và ngày khóa review tuần.</span>
-            </li>
-          </ul>
+      {/* ── Product preview ── */}
+      <RevealOnScroll as="section" className="mx-auto max-w-6xl px-4" aria-label="Xem thử một mục tiêu thật">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">Xem thử</p>
+            <h2 className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink sm:text-3xl">
+              Một mục tiêu thật trông như thế nào
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Chọn ví dụ mục tiêu">
+            {PREVIEW_CHIPS.map((chip) => {
+              const active = selectedPreviewId === chip.id;
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => handlePreviewSelect(chip.id)}
+                  className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg ${
+                    active
+                      ? "bg-app-accent text-white"
+                      : "border border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent"
+                  }`}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-
-        <div className="relative rounded-2xl border border-emerald-500/15 border-t-2 border-t-emerald-600 bg-emerald-500/5 p-6 shadow-sm transition-all duration-300 hover:shadow-md">
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 border border-emerald-500/10">
-            <span>✓</span> Kế hoạch 12 tuần rõ nét
-          </p>
-          <h3 className="mt-3 text-sm font-bold text-neutral-800 dark:text-neutral-200">Kỷ luật & Trọng tâm</h3>
-          <ul className="mt-4 space-y-2.5 text-xs font-medium leading-relaxed text-emerald-800 dark:text-emerald-400">
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-emerald-600 font-bold">✓</span>
-              <span>Có 1 mục tiêu SMART xuất phát từ bảng tầm nhìn.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-emerald-600 font-bold">✓</span>
-              <span>Chiến thuật 12 tuần chặt chẽ và chỉ số lead hoàn thành.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-emerald-600 font-bold">✓</span>
-              <span>Mở danh sách việc Today tinh gọn mỗi sáng và hành động dứt khoát.</span>
-            </li>
-          </ul>
-        </div>
+        <DreamToPlanPreview previewData={selectedPreview} />
       </RevealOnScroll>
 
-      {/* 4-step Roadmap Section - Vision Board Studio paper cards styled */}
-      <RevealOnScroll
-        as="section"
-        className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800 bg-[#fbfbfa]/40 p-6 md:p-10 shadow-3xs max-w-6xl mx-auto w-full"
-        aria-labelledby="dashboard-how-it-works-title"
-      >
-        <div className="flex flex-col gap-1.5 max-w-2xl">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-500">
-            Lộ trình của bạn
-          </p>
+      {/* ── How it works ── */}
+      <RevealOnScroll as="section" id="how-it-works" className="mx-auto max-w-6xl px-4" aria-labelledby="how-it-works-title">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-accent">Cách hoạt động</p>
           <h2
-            id="dashboard-how-it-works-title"
-            className="font-serif text-2xl font-normal leading-[1.25] text-app-ink sm:text-[2.25rem]"
+            id="how-it-works-title"
+            className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink sm:text-[2.1rem]"
           >
-            Lộ trình 4 bước chuyển mình rõ nét
+            Bốn bước, từ mong muốn đến hành động
           </h2>
         </div>
 
-        {/* Polaroid/Paper Cards Stepper */}
-        <div className="relative mt-10 select-none">
-          <ol className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-4 z-10">
-            {/* Step 1 */}
-            <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
-                01
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
-                  Bước 1 · Nhìn nhận
-                </div>
-                <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Cân bằng cuộc sống</h4>
-                <p className="text-xs text-neutral-500 leading-relaxed font-medium">
-                  Đánh giá 8 khía cạnh cuộc sống để phát hiện điểm lệch nhịp cần cải thiện đầu tiên.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between text-[9px] font-bold text-emerald-700">
-                <span>● Radar cuộc sống</span>
-                <span>≈3 phút</span>
-              </div>
+        <ol className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-app-line bg-app-line sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((step) => (
+            <li key={step.no} className="flex flex-col gap-3 bg-app-surface p-6">
+              <span className="font-serif text-3xl font-medium text-neutral-300 dark:text-neutral-700">
+                {step.no}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">{step.eyebrow}</span>
+              <h3 className="font-serif text-lg font-medium text-app-ink">{step.title}</h3>
+              <p className="text-sm leading-relaxed text-app-ink-soft">{step.description}</p>
+              <span className="mt-auto pt-3 text-xs font-medium text-app-ink-muted">{step.meta}</span>
             </li>
+          ))}
+        </ol>
+      </RevealOnScroll>
 
-            {/* Step 2 */}
-            <li className="bg-[#fffde7] text-neutral-800 p-6 rounded-2xl border border-yellow-200/80 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-yellow-300 select-none">
-                02
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-yellow-700 uppercase tracking-wider">Bước 2 · Định vị</div>
-                <h4 className="text-xs font-bold text-neutral-800">Đặt mục tiêu SMART</h4>
-                <p className="text-xs text-neutral-600 leading-relaxed font-medium">
-                  Chọn lĩnh vực ưu tiên và đóng gói mong muốn thành mục tiêu SMART đo lường được.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-yellow-200/40 flex items-center justify-between text-[9px] font-bold text-yellow-700">
-                <span>● 1 tiêu điểm sắc nét</span>
-                <span>≈5 phút</span>
-              </div>
-            </li>
+      {/* ── Before / After ── */}
+      <RevealOnScroll as="section" className="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-2" aria-label="So sánh trước và sau">
+        <div className="rounded-2xl border border-app-line bg-app-bg-subtle p-6 md:p-7">
+          <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Trước</span>
+          <h3 className="mt-2 font-serif text-xl font-medium text-app-ink">Mục tiêu còn mơ hồ</h3>
+          <ul className="mt-5 space-y-3.5">
+            {BEFORE_POINTS.map((point) => (
+              <li key={point} className="flex items-start gap-3 text-sm leading-relaxed text-app-ink-soft">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-line text-app-ink-muted">
+                  <Minus className="h-3 w-3" />
+                </span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            {/* Step 3 */}
-            <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
-                03
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
-                  Bước 3 · Thiết lập
-                </div>
-                <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Kế hoạch 12 tuần</h4>
-                <p className="text-xs text-neutral-500 leading-relaxed font-medium">
-                  Xây dựng thói quen lặp lại (tactics) và checkpoint đo lường tiến độ tự động.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between text-[9px] font-bold text-app-accent">
-                <span>● Lộ trình 12 tuần</span>
-                <span>≈5 phút</span>
-              </div>
-            </li>
-
-            {/* Step 4 */}
-            <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
-                04
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
-                  Bước 4 · Thực thi
-                </div>
-                <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Hành động mỗi ngày</h4>
-                <p className="text-xs text-neutral-500 leading-relaxed font-medium">
-                  Mở việc Today mỗi sáng, tick hoàn thành và phản tư ngắn vào cuối tuần.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between text-[9px] font-bold text-app-accent">
-                <span>● Today & Kỷ luật</span>
-                <span>2 phút mỗi ngày</span>
-              </div>
-            </li>
-          </ol>
+        <div className="rounded-2xl border border-app-accent/25 bg-app-accent-soft/40 p-6 md:p-7">
+          <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">Sau 12 tuần</span>
+          <h3 className="mt-2 font-serif text-xl font-medium text-app-ink">Kỷ luật và trọng tâm</h3>
+          <ul className="mt-5 space-y-3.5">
+            {AFTER_POINTS.map((point) => (
+              <li key={point} className="flex items-start gap-3 text-sm leading-relaxed text-app-ink">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent text-white">
+                  <Check className="h-3 w-3" strokeWidth={3} />
+                </span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </RevealOnScroll>
 
-      {/* Feature cards Grid */}
+      {/* ── Feature cards ── */}
       <RevealOnScroll
         as="section"
-        className="grid gap-6 lg:grid-cols-3 max-w-6xl mx-auto px-4 w-full"
+        className="mx-auto grid max-w-6xl gap-5 px-4 lg:grid-cols-3"
         aria-label="Vì sao chọn Dear Our Future"
       >
         {FEATURE_ROWS.map((feature) => {
           const Icon = feature.icon;
-
           return (
             <Link
               key={feature.title}
               to={feature.href}
-              className="group relative rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/40 dark:bg-neutral-900/20 backdrop-blur-sm p-6 shadow-3xs hover:-translate-y-px hover:border-app-accent/35 hover:shadow-2xs transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 cursor-pointer"
+              className="group rounded-2xl border border-app-line bg-app-surface p-6 transition-colors hover:border-app-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
-              <div className="flex flex-col gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-app-accent group-hover:text-white">
-                  <Icon className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-wide text-app-accent/80">
-                    {feature.tag}
-                  </p>
-                  <h2 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 transition-colors duration-200 group-hover:text-app-accent">
-                    {feature.title}
-                  </h2>
-                  <p className="text-xs font-semibold leading-relaxed text-neutral-500">{feature.description}</p>
-                  <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
-                    Tìm hiểu thêm
-                    <ArrowRight className="h-3 w-3" />
-                  </span>
-                </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-colors group-hover:bg-app-accent group-hover:text-white">
+                <Icon className="h-5 w-5" />
               </div>
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-app-accent/80">
+                {feature.tag}
+              </p>
+              <h3 className="mt-1.5 font-serif text-lg font-medium text-app-ink">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{feature.description}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-app-accent transition-transform group-hover:translate-x-0.5">
+                Tìm hiểu thêm
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
             </Link>
           );
         })}
       </RevealOnScroll>
 
-      {/* 5. Bottom CTA Section - Vision Board dark studio themed */}
-      <RevealOnScroll
-        as="section"
-        className="max-w-6xl mx-auto px-4 w-full"
-        aria-labelledby="dashboard-public-cta-title"
-      >
-        <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-emerald-950 text-white p-8 md:p-14 shadow-2xl text-center sm:text-left">
-
-          <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-4 max-w-2xl">
-              <span className="text-[9px] font-bold uppercase tracking-wide text-emerald-400 block">
+      {/* ── Closing CTA ── */}
+      <RevealOnScroll as="section" className="mx-auto max-w-6xl px-4" aria-labelledby="closing-cta-title">
+        <div className="overflow-hidden rounded-3xl bg-emerald-950 px-8 py-12 text-center md:px-14 md:py-16 lg:text-left">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="mx-auto max-w-xl lg:mx-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
                 Gửi lời chào tới tương lai
-              </span>
-              <h2
-                id="dashboard-public-cta-title"
-                className="font-serif text-3xl font-normal leading-[1.25] text-white sm:text-5xl"
-              >
-                Bắt đầu chu kỳ <br className="hidden sm:inline" /> 12 tuần của bạn
+              </p>
+              <h2 id="closing-cta-title" className="mt-3 font-serif text-3xl font-medium leading-tight text-white sm:text-[2.6rem]">
+                Bắt đầu chu kỳ 12 tuần của bạn
               </h2>
-              <p className="text-xs font-normal leading-relaxed text-slate-300">
-                Dành vài phút thiết lập lộ trình hành động 12 tuần của bạn ngay hôm nay.
+              <p className="mt-4 text-sm leading-relaxed text-emerald-100/70">
+                Dành vài phút thiết lập lộ trình hành động ngay hôm nay. Miễn phí, không cần đăng nhập.
               </p>
             </div>
-
-            <div className="shrink-0 flex flex-col items-center lg:items-end gap-3.5">
+            <div className="flex shrink-0 flex-col items-center gap-3 lg:items-end">
               <button
                 type="button"
                 onClick={onStart}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-400 hover:bg-amber-500 px-8 py-4 text-xs font-bold text-neutral-950 shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none"
+                className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-emerald-950 shadow-sm transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               >
-                <UserPlus className="h-4 w-4 text-neutral-950" />
-                {primaryLabel}
+                <UserPlus className="h-4 w-4" />
+                Thiết lập chu kỳ 12 tuần
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
-              <p className="text-[10px] font-normal text-slate-400 flex items-center gap-1.5">
-                <span>•</span>
-                Nhận ngay việc làm hôm nay để khởi động
-              </p>
+              <p className="text-xs text-emerald-100/60">Nhận ngay việc làm hôm nay để khởi động</p>
             </div>
           </div>
         </div>
