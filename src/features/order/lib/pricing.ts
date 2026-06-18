@@ -44,8 +44,11 @@ export function calcSubtotal(lines: OrderLine[]): number {
   return lines.reduce((sum, line) => sum + line.lineTotalVnd, 0);
 }
 
+/** TODO: cấu hình sau khi có bảng giá vận chuyển. Cần sync với backend `orderService.ts`. */
+const SHIPPING_COST_VND = 0;
+
 export function calcShipping(_draft: OrderDraft): number {
-  return 0;
+  return SHIPPING_COST_VND;
 }
 
 export function calcTotal(subtotal: number, shipping: number): number {

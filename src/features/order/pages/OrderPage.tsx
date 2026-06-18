@@ -1,6 +1,18 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "@/app/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
+import { isRealMode } from "@/app/utils/app-mode";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import { useOrderCatalog } from "@/features/order/hooks/useOrderCatalog";
 import {
   buildOrderLines,
@@ -57,6 +69,10 @@ export function OrderPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [touched, setTouched] = useState<Partial<Record<ValidateErrorKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const { user } = useAuthContext();
+  const emailVerified = isRealMode() ? (user?.emailVerified ?? false) : true;
 
   const frames = useMemo(() => catalog.filter((i) => i.type === "frame"), [catalog]);
   const themes = useMemo(() => catalog.filter((i) => i.type === "theme"), [catalog]);
@@ -122,27 +138,51 @@ export function OrderPage() {
     return "pending";
   }
 
-  async function handleSubmit() {
+  function extractApiErrorMessage(err: unknown): string {
+    if (err && typeof err === "object" && "message" in err) {
+      return String((err as { message: unknown }).message);
+    }
+    return "Không thể kết nối máy chủ. Vui lòng thử lại.";
+  }
+
+  function handleSubmit() {
     if (!validation.ok) {
       setSubmitAttempted(true);
       return;
     }
+    setSubmitError(null);
+
+    if (!emailVerified) {
+      setSubmitError(
+        "Email của bạn chưa được xác thực. Vui lòng kiểm tra hộp thư và xác thực email trước khi đặt đơn.",
+      );
+      return;
+    }
+
+    setShowConfirmDialog(true);
+  }
+
+  async function handleConfirmSubmit() {
+    setShowConfirmDialog(false);
     setSubmitting(true);
     setSubmitError(null);
+
+    const payload = {
+      itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
+      sticker: draft.stickerSelection,
+      fullName: shipping.fullName,
+      email: shipping.email,
+      phone: shipping.phone,
+      shippingAddress: shipping.shippingAddress,
+      goalId: shipping.goalId,
+      goalTitle: shipping.goalTitle,
+      keywords: notes.keywords,
+      note: notes.note,
+    };
+
+    let order: ReturnType<typeof createLocalOrder>;
     try {
-      const payload = {
-        itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
-        sticker: draft.stickerSelection,
-        fullName: shipping.fullName,
-        email: shipping.email,
-        phone: shipping.phone,
-        shippingAddress: shipping.shippingAddress,
-        goalId: shipping.goalId,
-        goalTitle: shipping.goalTitle,
-        keywords: notes.keywords,
-        note: notes.note,
-      };
-      const order = createLocalOrder({
+      order = createLocalOrder({
         lines,
         subtotalVnd: subtotal,
         shippingVnd: shippingCost,
@@ -156,17 +196,25 @@ export function OrderPage() {
         keywords: notes.keywords,
         note: notes.note,
       });
-      try {
-        const backendOrder = await createOrder(payload);
-        saveOrderLink(order.id, backendOrder.id);
-      } catch {
-        // offline: fall through to local-only status page
-      }
-      navigate(`/order-status/${order.id}`);
     } catch {
       setSubmitError("Không thể tạo đơn lúc này. Vui lòng thử lại.");
+      setSubmitting(false);
+      return;
+    }
+
+    let backendFailed = false;
+    try {
+      const backendOrder = await createOrder(payload);
+      saveOrderLink(order.id, backendOrder.id);
+    } catch (err: unknown) {
+      backendFailed = true;
+      setSubmitError(extractApiErrorMessage(err));
     } finally {
       setSubmitting(false);
+    }
+
+    if (!backendFailed) {
+      navigate(`/order-status/${order.id}`);
     }
   }
 
@@ -281,7 +329,16 @@ export function OrderPage() {
               selectedThemes={selectedThemes}
               selectedSticker={selectedSticker}
             />
-            {submitError && <p className="mt-2 text-xs text-destructive">{submitError}</p>}
+            {submitError && (
+              <div className="mt-3 space-y-2">
+                <p className="text-sm text-destructive">{submitError}</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleConfirmSubmit}>
+                    Thử lại
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -308,9 +365,73 @@ export function OrderPage() {
               {submitting ? "Đang gửi..." : validation.ok ? "Đặt đơn" : "Kiểm tra lại"}
             </Button>
           </div>
-          {submitError && <p className="mx-auto mt-1 max-w-6xl text-xs text-destructive">{submitError}</p>}
+          {submitError && (
+            <div className="mx-auto mt-2 max-w-6xl space-y-2">
+              <p className="text-xs text-destructive">{submitError}</p>
+              <Button variant="outline" size="sm" onClick={handleConfirmSubmit}>
+                Thử lại
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận đặt đơn</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vui lòng kiểm tra lại thông tin đơn hàng trước khi xác nhận.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 text-sm">
+            {selectedFrame && (
+              <div className="flex justify-between">
+                <span className="text-app-ink-soft">Khung</span>
+                <span className="font-medium text-app-ink">{selectedFrame.label}</span>
+              </div>
+            )}
+            {selectedThemes.length > 0 && (
+              <div className="flex justify-between">
+                <span className="text-app-ink-soft">Set ảnh</span>
+                <span className="font-medium text-app-ink">{selectedThemes.map((t) => t.label).join(", ")}</span>
+              </div>
+            )}
+            {selectedSticker && (
+              <div className="flex justify-between">
+                <span className="text-app-ink-soft">Sticker</span>
+                <span className="font-medium text-app-ink">{selectedSticker.label} ×{draft.stickerSelection?.qty ?? 1}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-app-ink-soft">Tạm tính</span>
+              <span className="font-medium text-app-ink">{formatVnd(subtotal)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-app-ink-soft">Vận chuyển</span>
+              <span className="font-medium text-app-ink">{formatVnd(shippingCost)}</span>
+            </div>
+            <div className="flex justify-between border-t border-[var(--order-border)] pt-2">
+              <span className="font-semibold text-app-ink">Tổng cộng</span>
+              <span className="font-semibold text-[var(--order-accent)]">{formatVnd(total)}</span>
+            </div>
+            {shipping.shippingAddress && (
+              <div className="text-xs text-app-ink-muted">
+                Giao đến: {shipping.shippingAddress}
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Xem lại</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[var(--order-accent)] text-white hover:bg-[var(--order-accent)]/90"
+              onClick={handleConfirmSubmit}
+            >
+              Xác nhận đặt đơn
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

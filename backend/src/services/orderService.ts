@@ -184,6 +184,7 @@ class OrderService {
     }
 
     const subtotalVnd = lines.reduce((s, l) => s + l.lineTotalVnd, 0);
+    // TODO: cấu hình sau khi có bảng giá vận chuyển. Cần sync với frontend `pricing.ts`.
     const shippingVnd = 0;
     const totalVnd = subtotalVnd + shippingVnd;
 
