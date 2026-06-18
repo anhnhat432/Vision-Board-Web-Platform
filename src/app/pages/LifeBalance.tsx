@@ -41,6 +41,7 @@ import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { loadWithChunkReload } from "../utils/chunkLoad";
 import { getAreaColorConfig } from "../utils/life-area-theme";
+import { getFocusInsight } from "../utils/life-balance-insight";
 import { getSmartGoalStarter } from "../utils/smart-goal-starters";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
 
@@ -60,56 +61,6 @@ const LIFE_AREA_DETAILS: Record<string, string> = {
   "Personal Growth": "Tự hiểu mình, thói quen cá nhân và khả năng giữ lời với bản thân.",
   Leisure: "Nghỉ ngơi, vui chơi, sở thích và khoảng trống để hồi phục.",
 };
-
-function getFocusInsight(areaName: string, score: number): { reason: string; tip: string } {
-  switch (areaName) {
-    case "Career":
-      return {
-        reason: `Sự nghiệp đang ở ${score}/10đ — khi khía cạnh này lệch nhịp, cảm giác bế tắc và thiếu năng lượng sáng tạo dễ lan sang các lĩnh vực khác.`,
-        tip: "Thiết lập 1 mục tiêu SMART ngắn hạn cho công việc (tối ưu kỹ năng hoặc hoàn tất dự án tồn đọng) để khơi lại đà tiến.",
-      };
-    case "Finance":
-      return {
-        reason: `Tài chính ở mức ${score}/10đ — bất ổn tiền bạc gây stress thường trực, ảnh hưởng giấc ngủ và sự an tâm trong quan hệ.`,
-        tip: "Lập ngân sách chi tiết 12 tuần, cắt chi tiêu không thiết yếu và xây quỹ khẩn cấp nhỏ để lấy lại cảm giác kiểm soát.",
-      };
-    case "Health":
-      return {
-        reason: `Sức khỏe ở ${score}/10đ — đây là nền móng của mọi khía cạnh; khi lung lay, hiệu suất và niềm vui đều suy giảm.`,
-        tip: "Đặt 1 mục tiêu siêu nhỏ (ngủ trước 23h hoặc đi bộ 15 phút/ngày) làm tiêu điểm số 1 chu kỳ này.",
-      };
-    case "Education":
-      return {
-        reason: `Học tập & Trí tuệ ở ${score}/10đ — thiếu cập nhật kiến thức khiến bạn dễ cảm thấy tụt hậu trước thay đổi.`,
-        tip: "Dành 20 phút/ngày đọc sách hoặc tham gia khóa học ngắn hạn về kỹ năng đang thiếu.",
-      };
-    case "Relationships":
-      return {
-        reason: `Quan hệ xã hội ở ${score}/10đ — thiếu kết nối chất lượng tạo cảm giác cô đơn và trống trải sâu sắc.`,
-        tip: "Lên lịch hẹn cà phê với 1 người bạn tích cực hoặc giải quyết 1 khúc mắc tồn đọng trong quan hệ gần gũi.",
-      };
-    case "Family":
-      return {
-        reason: `Gia đình ở mức ${score}/10đ — khi mối quan hệ gia đình nguội lạnh, bạn thiếu điểm tựa khi gặp bão giông bên ngoài.`,
-        tip: "Thiết lập thời gian 'không điện thoại' bên người thân, chủ động lắng nghe và chia sẻ nhiều hơn.",
-      };
-    case "Personal Growth":
-      return {
-        reason: `Phát triển cá nhân ở ${score}/10đ — thiếu kỷ luật nội tâm khiến bạn dễ bị cuốn theo thói quen xấu.`,
-        tip: "Viết nhật ký Stoic hằng ngày hoặc thiền 5 phút để củng cố sức mạnh nội tâm.",
-      };
-    case "Leisure":
-      return {
-        reason: `Giải trí & Nghỉ ngơi ở ${score}/10đ — làm việc quá sức mà thiếu nghỉ ngơi trọn vẹn dẫn thẳng đến kiệt sức.`,
-        tip: "Dành ít nhất nửa ngày cuối tuần rời xa công việc hoàn toàn để theo đuổi sở thích và hồi phục.",
-      };
-    default:
-      return {
-        reason: "Khía cạnh này đang cần sự quan tâm để đưa cuộc sống trở lại cân bằng.",
-        tip: "Bắt đầu bằng 1 hành động nhỏ cụ thể hằng ngày.",
-      };
-  }
-}
 
 const CORE_CLUSTERS = [
   {
@@ -589,13 +540,13 @@ export function LifeBalance() {
                     </p>
 
                     <p className="text-xs text-app-ink-muted leading-relaxed font-medium">
-                      {getFocusInsight(weakestArea.name, weakestArea.score).reason}
+                      {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).reason}
                     </p>
 
                     <div className="bg-app-surface border border-app-line rounded-xl p-3 text-[11px] text-app-accent font-semibold flex gap-2 items-start shadow-3xs">
                       <Sparkles className="h-4 w-4 shrink-0 text-app-accent animate-pulse mt-0.5" />
                       <p className="leading-relaxed">
-                        <strong>Hành động đề xuất:</strong> {getFocusInsight(weakestArea.name, weakestArea.score).tip}
+                        <strong>Hành động đề xuất:</strong> {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).tip}
                       </p>
                     </div>
                   </div>
@@ -939,18 +890,17 @@ export function LifeBalance() {
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Left: Chọn trọng tâm */}
                 <div className="space-y-5">
-                  {/* Insight card gọn */}
+                  {/* Insight card cá nhân hóa */}
                   <section className="surface-raised rounded-2xl border border-app-status-success/20 bg-app-status-success/5 p-5">
                     <h3 className="text-sm font-bold text-app-ink flex items-center gap-2">
                       <Target className="h-4 w-4 text-app-status-success" />
-                      Đề xuất trọng tâm
+                      {focusArea.name === weakestArea?.name ? "Đề xuất trọng tâm" : "Trọng tâm bạn chọn"}
                     </h3>
                     <p className="mt-2 text-xs text-app-ink-soft leading-relaxed">
-                      Dựa trên điểm vừa chấm, <strong>{getLifeAreaLabel(weakestArea.name)}</strong> ({weakestArea.score}
-                      đ) là lĩnh vực có cơ hội cải thiện rõ nhất.
+                      {getFocusInsight(focusArea, lifeAreas, getLifeAreaLabel(focusArea.name)).headline}
                     </p>
                     <p className="mt-2 text-xs text-app-ink-muted leading-relaxed">
-                      {getFocusInsight(weakestArea.name, weakestArea.score).reason}
+                      {getFocusInsight(focusArea, lifeAreas, getLifeAreaLabel(focusArea.name)).reason}
                     </p>
                   </section>
 
