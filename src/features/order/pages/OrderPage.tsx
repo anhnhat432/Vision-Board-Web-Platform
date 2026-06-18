@@ -1,6 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "@/app/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
+import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { useOrderCatalog } from "@/features/order/hooks/useOrderCatalog";
 import {
   buildOrderLines,
@@ -39,6 +50,7 @@ const FIELD_LABELS: Record<ValidateErrorKey, string> = {
 export function OrderPage() {
   const navigate = useNavigate();
   const { catalog, isLoading, isFromFallback } = useOrderCatalog();
+  const authContext = useOptionalAuthContext();
   const [draft, setDraft] = useState<OrderDraft>({
     frameItemId: null,
     themeItemIds: [],
@@ -57,6 +69,8 @@ export function OrderPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [touched, setTouched] = useState<Partial<Record<ValidateErrorKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingLocalOrderId, setPendingLocalOrderId] = useState<string | null>(null);
 
   const frames = useMemo(() => catalog.filter((i) => i.type === "frame"), [catalog]);
   const themes = useMemo(() => catalog.filter((i) => i.type === "theme"), [catalog]);
@@ -122,27 +136,55 @@ export function OrderPage() {
     return "pending";
   }
 
-  async function handleSubmit() {
+  function extractApiErrorMessage(err: unknown): string {
+    if (err && typeof err === "object" && "message" in err) {
+      return String((err as { message: unknown }).message);
+    }
+    return "Không thể kết nối máy chủ. Vui lòng thử lại.";
+  }
+
+  /** Kiểm tra validation + email verify, rồi mở dialog xác nhận. */
+  function handlePlaceOrder() {
     if (!validation.ok) {
       setSubmitAttempted(true);
       return;
     }
+
+    // Fix #2: kiểm tra email verification trước khi mở dialog
+    const emailVerified = authContext?.user?.emailVerified ?? true;
+    if (!emailVerified) {
+      setSubmitError(
+        "Email của bạn chưa được xác thực. Vui lòng kiểm tra hộp thư và xác thực email trước khi đặt đơn.",
+      );
+      return;
+    }
+
+    setSubmitError(null);
+    setShowConfirmDialog(true);
+  }
+
+  /** Thực sự gửi đơn sau khi user xác nhận trong dialog. */
+  async function handleConfirmSubmit() {
+    setShowConfirmDialog(false);
     setSubmitting(true);
     setSubmitError(null);
+
+    const payload = {
+      itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
+      sticker: draft.stickerSelection,
+      fullName: shipping.fullName,
+      email: shipping.email,
+      phone: shipping.phone,
+      shippingAddress: shipping.shippingAddress,
+      goalId: shipping.goalId,
+      goalTitle: shipping.goalTitle,
+      keywords: notes.keywords,
+      note: notes.note,
+    };
+
+    let order: ReturnType<typeof createLocalOrder>;
     try {
-      const payload = {
-        itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
-        sticker: draft.stickerSelection,
-        fullName: shipping.fullName,
-        email: shipping.email,
-        phone: shipping.phone,
-        shippingAddress: shipping.shippingAddress,
-        goalId: shipping.goalId,
-        goalTitle: shipping.goalTitle,
-        keywords: notes.keywords,
-        note: notes.note,
-      };
-      const order = createLocalOrder({
+      order = createLocalOrder({
         lines,
         subtotalVnd: subtotal,
         shippingVnd: shippingCost,
@@ -156,15 +198,20 @@ export function OrderPage() {
         keywords: notes.keywords,
         note: notes.note,
       });
-      try {
-        const backendOrder = await createOrder(payload);
-        saveOrderLink(order.id, backendOrder.id);
-      } catch {
-        // offline: fall through to local-only status page
-      }
-      navigate(`/order-status/${order.id}`);
     } catch {
-      setSubmitError("Không thể tạo đơn lúc này. Vui lòng thử lại.");
+      setSubmitError("Không thể lưu đơn lúc này. Vui lòng thử lại.");
+      setSubmitting(false);
+      return;
+    }
+
+    // Fix #1 + #5: hiển thị lỗi backend, cho phép retry hoặc xem đơn local
+    try {
+      const backendOrder = await createOrder(payload);
+      saveOrderLink(order.id, backendOrder.id);
+      navigate(`/order-status/${order.id}`);
+    } catch (err: unknown) {
+      setSubmitError(extractApiErrorMessage(err));
+      setPendingLocalOrderId(order.id);
     } finally {
       setSubmitting(false);
     }
@@ -276,12 +323,30 @@ export function OrderPage() {
               isSubmittable={validation.ok}
               isSubmitting={submitting}
               missingFields={missingFields}
-              onSubmit={handleSubmit}
+              onSubmit={handlePlaceOrder}
               selectedFrame={selectedFrame}
               selectedThemes={selectedThemes}
               selectedSticker={selectedSticker}
             />
-            {submitError && <p className="mt-2 text-xs text-destructive">{submitError}</p>}
+            {submitError && (
+              <div className="mt-2 space-y-2">
+                <p className="text-xs text-destructive">{submitError}</p>
+                {pendingLocalOrderId && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/order-status/${pendingLocalOrderId}`)}
+                    >
+                      Xem đơn local
+                    </Button>
+                    <Button size="sm" onClick={handleConfirmSubmit} disabled={submitting}>
+                      Thử lại
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -303,13 +368,53 @@ export function OrderPage() {
               type="button"
               className="shrink-0 bg-[var(--order-accent)] text-white hover:bg-[var(--order-accent)]/90"
               disabled={submitting}
-              onClick={handleSubmit}
+              onClick={handlePlaceOrder}
             >
               {submitting ? "Đang gửi..." : validation.ok ? "Đặt đơn" : "Kiểm tra lại"}
             </Button>
           </div>
-          {submitError && <p className="mx-auto mt-1 max-w-6xl text-xs text-destructive">{submitError}</p>}
+          {submitError && (
+            <div className="mx-auto mt-1 max-w-6xl space-y-1">
+              <p className="text-xs text-destructive">{submitError}</p>
+              {pendingLocalOrderId && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/order-status/${pendingLocalOrderId}`)}
+                  >
+                    Xem đơn local
+                  </Button>
+                  <Button size="sm" onClick={handleConfirmSubmit} disabled={submitting}>
+                    Thử lại
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Fix #4: Dialog xác nhận trước khi đặt đơn */}
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Xác nhận đặt đơn</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bạn có chắc muốn đặt đơn kit in ấn với tổng giá trị{" "}
+                <span className="font-semibold tabular-nums text-[var(--order-accent)]">
+                  {formatVnd(total)}
+                </span>
+                ?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Xem lại</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmSubmit} disabled={submitting}>
+                {submitting ? "Đang gửi..." : "Xác nhận đặt đơn"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
