@@ -15,19 +15,11 @@ export function TodayMiniCard({ title = "Hành động hôm nay", tasks, complet
 
   return (
     <section
-      className="rounded-3xl border border-app-accent/20 bg-white/75 dark:bg-neutral-900/75 backdrop-blur-md shadow-[0_16px_40px_-12px_rgba(47,93,80,0.04),0_4px_12px_-6px_rgba(0,0,0,0.01)] transition-all duration-300 hover:border-app-accent/35 hover:shadow-[0_20px_48px_-12px_rgba(47,93,80,0.06)] overflow-hidden relative select-none"
+      className="rounded-3xl border border-app-accent/20 bg-white/90 dark:bg-neutral-900/90 shadow-[0_16px_40px_-12px_rgba(47,93,80,0.04),0_4px_12px_-6px_rgba(0,0,0,0.01)] transition-all duration-300 hover:border-app-accent/35 hover:shadow-[0_20px_48px_-12px_rgba(47,93,80,0.06)] overflow-hidden relative select-none"
       aria-labelledby="dashboard-today-mini-title"
     >
       {/* Grid Pattern overlay for texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none" />
-
-      {/* Ambient glow mesh */}
-      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-app-accent/5 blur-[40px]" />
-
-      {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
-        📌
-      </span>
 
       <div className="flex flex-col gap-1.5 p-6 pb-4 bg-gradient-to-b from-app-accent-soft/20 via-app-accent-soft/5 to-transparent border-b border-neutral-200/50 dark:border-neutral-800/55 pt-7 relative z-10">
         <div className="flex items-center justify-between">
@@ -49,7 +41,7 @@ export function TodayMiniCard({ title = "Hành động hôm nay", tasks, complet
 
         {completedCount > 0 && totalCount > 0 && (
           <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
             {completedCount >= totalCount
               ? "Tuyệt vời! Bạn đã hoàn thành toàn bộ công việc hôm nay."
               : "Tiếp tục đà tiến bước của bạn!"}

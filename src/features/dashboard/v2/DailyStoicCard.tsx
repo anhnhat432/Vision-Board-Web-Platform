@@ -121,11 +121,6 @@ export function DailyStoicCard() {
       className="w-full aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] select-none relative"
       style={{ perspective: "1000px", WebkitPerspective: "1000px" }}
     >
-      {/* 📌 Floating wood pin at the top center of Stoic card framework */}
-      <span className="hidden sm:inline absolute -top-3 left-1/2 transform -translate-x-1/2 text-xl z-30 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
-        📌
-      </span>
-
       <div
         className="relative w-full h-full transition-transform duration-700"
         style={{
@@ -161,11 +156,7 @@ export function DailyStoicCard() {
 
           <div className="flex flex-col items-center gap-4 text-center my-auto">
             <div className="relative flex items-center justify-center w-16 h-16 rounded-full border border-amber-200/20 bg-amber-900/30">
-              <Sparkles className="h-6 w-6 text-amber-300 animate-pulse" />
-              <div
-                className="absolute inset-0 rounded-full border border-dashed border-amber-400/20 animate-spin"
-                style={{ animationDuration: "16s" }}
-              />
+              <Sparkles className="h-6 w-6 text-amber-300" />
             </div>
             <div>
               <h3 className="font-serif text-lg font-normal text-amber-100 tracking-wide">Lá Bài Trí Tuệ</h3>
@@ -175,7 +166,7 @@ export function DailyStoicCard() {
             </div>
           </div>
 
-          <span className="text-[9px] font-extrabold text-amber-400/30 mb-2 tracking-widest uppercase">
+          <span className="text-[9px] font-extrabold text-amber-400/30 mb-2 tracking-wide uppercase">
             TAP TO REFLECT
           </span>
         </button>
@@ -218,7 +209,7 @@ export function DailyStoicCard() {
 
             <div className="mt-4 pt-3 border-t border-neutral-200/80 dark:border-neutral-800/80">
               <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200 leading-relaxed mb-2">
-                💡 {currentQuote.question}
+                {currentQuote.question}
               </p>
 
               <textarea

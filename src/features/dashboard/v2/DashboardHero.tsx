@@ -95,7 +95,7 @@ export function DashboardHero({
           <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
             <ImageIcon className="h-6 w-6 text-neutral-400" />
           <div className="absolute inset-0 bg-black/2 flex items-end p-2">
-            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/85 dark:bg-neutral-900/85 px-2 py-0.5 rounded-md backdrop-blur-xs">
+            <span className="text-[8px] font-bold tracking-wide text-neutral-600 dark:text-neutral-400 bg-white/85 dark:bg-neutral-900/85 px-2 py-0.5 rounded-md">
               BẢNG TẦM NHÌN
             </span>
           </div>

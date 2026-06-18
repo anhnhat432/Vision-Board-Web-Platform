@@ -459,7 +459,7 @@ export function PublicVisitorView({
             <Link
               key={feature.title}
               to={feature.href}
-              className="group relative rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/40 dark:bg-neutral-900/20 backdrop-blur-sm p-6 shadow-3xs hover:-translate-y-px hover:border-app-accent/35 hover:shadow-2xs transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 cursor-pointer"
+              className="group relative rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/80 p-6 shadow-3xs hover:-translate-y-px hover:border-app-accent/35 hover:shadow-2xs transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 cursor-pointer"
             >
               <div className="flex flex-col gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-app-accent group-hover:text-white">

@@ -18,7 +18,7 @@ export function DashboardFooter({ lastSavedLabel }: DashboardFooterProps) {
             rel="noopener noreferrer"
             className="hover:text-app-accent font-semibold transition-colors duration-150 flex items-center gap-0.5"
           >
-            ✦ Created By Deerflow
+            Created By Deerflow
           </a>
         </div>
       </div>

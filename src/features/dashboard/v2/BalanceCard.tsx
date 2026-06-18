@@ -51,16 +51,11 @@ const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; tex
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
     <section
-      className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/80 bg-white/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 relative select-none overflow-hidden"
+      className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/80 p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 relative select-none overflow-hidden"
       aria-labelledby="dashboard-balance-title"
     >
       {/* Grid Pattern overlay for texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808004_1px,transparent_1px),linear-gradient(to_bottom,#80808004_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
-
-      {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
-        📌
-      </span>
 
       <div className="flex flex-col gap-1 border-b border-neutral-200/50 dark:border-neutral-800/55 pb-4 mb-5 pt-2 relative z-10">
         <h2
