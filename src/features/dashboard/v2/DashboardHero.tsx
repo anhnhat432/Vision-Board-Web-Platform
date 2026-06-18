@@ -1,6 +1,7 @@
 import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
+import { getDashboardHeroMessage } from "./dashboard-hero-message";
 
 interface DashboardHeroProps {
   caption: string;
@@ -29,19 +30,16 @@ export function DashboardHero({
   const safeProgress = clampPercent(progressPercent);
   const weekLabel = currentWeek ? `Tuần ${currentWeek} / ${totalWeeks}` : "Tuần -- / 12";
 
-  const selectedQuote = useMemo(() => {
-    const quotes = [
-      "Chậm lại một chút để nhìn rõ hơn hướng đi của mình.",
-      "Mỗi ngày một hành động nhỏ, kiên trì tạo nên hành trình lớn.",
-      "Tập trung vào hiện tại, kết quả sẽ tự an bài.",
-      "Giữ tâm tĩnh tại giữa những ồn ào của cuộc sống.",
-      "Sự nhất quán quan trọng hơn tốc độ.",
-      "Lắng nghe bản thân và bước tiếp với sự rõ ràng.",
-      "Một tuần trôi qua ý nghĩa bắt đầu từ một ngày sống trọn vẹn.",
-    ];
-    const day = new Date().getDate();
-    return quotes[day % quotes.length];
-  }, []);
+  const { subheading, quote } = useMemo(
+    () =>
+      getDashboardHeroMessage({
+        currentWeek,
+        totalWeeks,
+        progressPercent,
+        featuredGoalTitle,
+      }),
+    [currentWeek, totalWeeks, progressPercent, featuredGoalTitle],
+  );
 
   return (
     <section
@@ -82,14 +80,13 @@ export function DashboardHero({
         </h1>
 
         <p className="text-xs sm:text-sm font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
-          Hãy tập trung năng lượng vào các cam kết cốt lõi. Một chu kỳ hành động tĩnh tại và chất lượng đang chờ đón
-          bạn.
+          {subheading}
         </p>
 
         {/* Life Quote Banner with deep and delicate design */}
         <div className="border-l-2 border-amber-500/50 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl shadow-2xs backdrop-blur-xs">
           <p className="font-serif italic text-amber-800 dark:text-amber-400 text-xs leading-relaxed">
-            “{selectedQuote}”
+            “{quote}”
           </p>
         </div>
       </div>
