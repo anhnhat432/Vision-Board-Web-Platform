@@ -1,4 +1,4 @@
-import { BookOpen, Check, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { BookOpen, Check, ChevronDown, ChevronUp, Sparkles, Target } from "lucide-react";
 import { useState } from "react";
 import { VisionMapIllustration } from "@/app/components/illustrations";
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
@@ -71,20 +71,20 @@ interface CardStepTheme {
 
 const getStepTheme = (index: number): CardStepTheme => {
   const stepsMeta = [
-    { stage: "Nhìn nhận", rotate: "-rotate-[0.6deg]" },
-    { stage: "Định vị", rotate: "rotate-[0.5deg]" },
-    { stage: "Thiết lập", rotate: "-rotate-[0.4deg]" },
-    { stage: "Hành động", rotate: "rotate-[0.6deg]" },
+    { stage: "Nhìn nhận" },
+    { stage: "Định vị" },
+    { stage: "Thiết lập" },
+    { stage: "Hành động" },
   ];
-  const meta = stepsMeta[index] || { stage: "Thiết lập", rotate: "rotate-0" };
+  const meta = stepsMeta[index] || { stage: "Thiết lập" };
 
   return {
     border: "border-neutral-200/80 dark:border-neutral-800/80",
-    hoverBg: "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/40 hover:border-app-accent/30 hover:rotate-0",
+    hoverBg: "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/40 hover:border-app-accent/30",
     iconBgPending: "bg-neutral-100 dark:bg-neutral-900",
     iconTextPending: "text-neutral-500",
     badgeText: `Bước ${index + 1} · ${meta.stage}`,
-    rotate: meta.rotate,
+    rotate: "",
   };
 };
 
@@ -110,9 +110,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
   return (
     <div className="space-y-6 max-w-6xl mx-auto w-full">
       {/* 1. Editorial Greeting Banner - Premium Light-first Studio style */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs backdrop-blur-md">
-        {/* Ambient background light */}
-        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-app-accent/5 blur-[80px]" />
+      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs">
 
         {/* Ambient background Vision Map Illustration */}
         <div
@@ -123,13 +121,13 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
         </div>
 
         <div className="relative z-10 space-y-4 max-w-3xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-500/5 dark:border-amber-900/30 px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400 shadow-sm">
-            📌 Studio Ước Mơ & Thực Thi
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-500/5 dark:border-amber-900/30 px-3 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400 shadow-sm">
+            Studio Ước Mơ & Thực Thi
           </span>
 
           <h1 className="font-serif text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink sm:text-[2.5rem]">
             Chào {capitalizeVietnameseName(displayName)}, hãy thiết lập <br className="hidden sm:inline" />{" "}
-            <span className="underline decoration-app-accent/55 decoration-wavy underline-offset-4">
+            <span className="underline decoration-app-accent/55 underline-offset-4">
               chu kỳ 12 tuần
             </span>{" "}
             đầu tiên
@@ -141,7 +139,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
 
           <div className="pt-2 flex items-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 px-3.5 py-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5 text-app-accent animate-pulse" />
+              <Sparkles className="h-3.5 w-3.5 text-app-accent" />
               <span>Cần xem hướng dẫn nhanh?</span>
               <button
                 type="button"
@@ -165,7 +163,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           <div className="space-y-1">
             <h2
               id="dashboard-new-user-title"
-              className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2.5"
+              className="text-xs font-bold uppercase tracking-wide text-app-ink flex items-center gap-2.5"
             >
               <BookOpen className="h-4.5 w-4.5 text-app-accent" />
               Bản đồ ghim chu kỳ
@@ -199,7 +197,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                     step.completed
                       ? "border-neutral-200 bg-neutral-50/20 dark:bg-neutral-900/5 opacity-55 hover:opacity-85 hover:border-neutral-300"
                       : isNextStep
-                        ? "bg-white dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15 -rotate-[0.5deg] scale-[1.01]"
+                        ? "bg-white dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15"
                         : `bg-white/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
                   }`}
                 >
@@ -238,7 +236,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                       </span>
 
                       {isNextStep && !step.completed && (
-                        <span className="inline-block rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-emerald-500/10 animate-pulse">
+                        <span className="inline-block rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide border border-emerald-500/10">
                           Đề xuất
                         </span>
                       )}
@@ -262,7 +260,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                 className="w-full flex items-center justify-between px-5 py-4 text-xs font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50/50 dark:hover:bg-neutral-900/40 transition-colors cursor-pointer select-none"
               >
                 <span className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-app-accent" />💡 Xem cách một chu kỳ 12 tuần vận hành mẫu
+                  <Sparkles className="h-4 w-4 text-app-accent" /> Xem cách một chu kỳ 12 tuần vận hành mẫu
                 </span>
                 {showSamplePlan ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
@@ -278,11 +276,8 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           {/* Mini Wheel of Life Visual Anchor & Study Corner Image */}
           <div className="space-y-4">
             {hasLifeBalance && userData.currentWheelOfLife && userData.currentWheelOfLife.length > 0 ? (
-              <div className="rounded-3xl border border-neutral-200/80 bg-white/60 dark:bg-neutral-950/20 p-5 shadow-xs relative -rotate-[0.5deg]">
-                <span className="hidden sm:inline absolute -top-3 left-6 text-lg filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                  📌
-                </span>
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-app-accent mb-4">
+              <div className="rounded-3xl border border-neutral-200/80 bg-white/60 dark:bg-neutral-950/20 p-5 shadow-xs relative">
+                <p className="text-[10px] font-extrabold uppercase tracking-wide text-app-accent mb-4">
                   Kết quả chấm điểm của bạn
                 </p>
                 <div className="space-y-3">
@@ -307,26 +302,23 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-square w-full group select-none transition-all duration-300 hover:shadow-md hover:-rotate-[0.5deg]">
-                  <span className="hidden sm:inline absolute -top-3 left-6 text-lg z-20 select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
-                    📌
-                  </span>
+                <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-square w-full group select-none transition-all duration-300 hover:shadow-md">
                   <img
                     src="/vision_board_detail.png"
                     alt="Bảng tầm nhìn chi tiết mẫu"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 dark:brightness-[0.85] dark:contrast-[1.05]"
+                    className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent flex items-end p-4">
                     <p className="text-[10px] font-medium text-white/90 italic font-serif leading-relaxed">
-                      "Tầm nhìn rõ ràng là một nửa chặng đường thành công."
+                      "Có tầm nhìn rõ ràng là bước đầu tiên."
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-dashed border-neutral-200/80 dark:border-neutral-800 p-5 text-center space-y-2.5 bg-white/30 backdrop-blur-3xs">
-                  <span className="text-2xl">🎯</span>
+                <div className="rounded-2xl border border-dashed border-neutral-200/80 dark:border-neutral-800 p-5 text-center space-y-2.5 bg-white/30">
+                  <Target className="h-5 w-5 mx-auto text-app-accent" />
                   <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
-                    Kiến tạo cuộc sống mơ ước
+                    Định hình cuộc sống bạn muốn
                   </h4>
                   <p className="text-[10px] leading-relaxed text-neutral-500 dark:text-neutral-400 font-semibold">
                     Dành 3 phút chấm Bánh xe cuộc sống để nhìn rõ các khía cạnh cần ưu tiên trước khi bước vào lập kế
@@ -341,13 +333,13 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
               <img
                 src="/study_desk_hero.png"
                 alt="Góc học tập & lập kế hoạch ấm áp"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover"
                 width={320}
                 height={180}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
                 <p className="text-[10px] font-medium text-white/90 italic font-serif">
-                  "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét."
+                  "Một góc nhỏ để giữ nhịp mỗi ngày."
                 </p>
               </div>
             </div>
