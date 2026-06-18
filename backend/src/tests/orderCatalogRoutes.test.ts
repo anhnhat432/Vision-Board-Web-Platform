@@ -8,6 +8,7 @@ import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AuditLogModel } from "../models/auditLogModel";
 import { OrderCatalogModel } from "../models/OrderCatalogModel";
+import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
 import { orderCatalogRoutes } from "../routes/orderCatalogRoutes";
 
@@ -47,6 +48,19 @@ const originalAuditCreate = AuditLogModel.create;
 // Mock globally to prevent buffering timeouts when database is not connected
 (AuditLogModel as unknown as { create: unknown }).create = async () => null;
 
+// Mock UserModel.findOne so requireAdmin does not buffer when MongoDB is unavailable.
+// Returns null (user not found) → non-admin → 403.
+const originalUserFindOne = UserModel.findOne;
+function createUserModelMock() {
+  const query = {
+    select() { return query; },
+    maxTimeMS() { return query; },
+    async lean() { return null; },
+  };
+  return query;
+}
+(UserModel as unknown as { findOne: unknown }).findOne = createUserModelMock;
+
 function mockFind(items: unknown[], captured: CapturedFindCall[]): void {
   (OrderCatalogModel as unknown as MockableModel).find = (filter: unknown) => {
     const call: CapturedFindCall = { filter, sort: undefined };
@@ -71,6 +85,8 @@ function restoreFind(): void {
   (OrderCatalogModel as unknown as MockableModel).findOneAndUpdate = originalFindOneAndUpdate;
   (OrderCatalogModel as unknown as MockableModel).create = originalCreate;
   (AuditLogModel as unknown as { create: unknown }).create = async () => null;
+  // Re-apply UserModel mock (same pattern as AuditLogModel above)
+  (UserModel as unknown as { findOne: unknown }).findOne = createUserModelMock;
 }
 
 function createCatalogTestApp(): Express {

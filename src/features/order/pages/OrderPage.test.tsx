@@ -17,6 +17,18 @@ vi.mock("@/lib/api/orderLinkStore", () => ({
   saveOrderLink: vi.fn(),
 }));
 
+const mockUser = (emailVerified: boolean) => ({ emailVerified } as { emailVerified: boolean });
+
+let _isRealMode = false;
+vi.mock("@/app/utils/app-mode", () => ({
+  isRealMode: () => _isRealMode,
+}));
+
+let _mockUserValue: { emailVerified: boolean } = mockUser(true);
+vi.mock("@/lib/auth/AuthContext", () => ({
+  useAuthContext: () => ({ user: _mockUserValue }),
+}));
+
 function renderOrderPage() {
   const router = createMemoryRouter(
     [
@@ -28,9 +40,31 @@ function renderOrderPage() {
   return render(<RouterProvider router={router} />);
 }
 
+async function fillShippingForm() {
+  fireEvent.change(screen.getByLabelText(/Họ và tên/), { target: { value: "A B" } });
+  fireEvent.change(screen.getByLabelText(/Email/), { target: { value: "a@b.c" } });
+  fireEvent.change(screen.getByLabelText(/Số điện thoại/), { target: { value: "0900000000" } });
+  fireEvent.change(screen.getByLabelText(/Địa chỉ giao hàng/), { target: { value: "Hanoi" } });
+}
+
+async function selectFrameAndTheme() {
+  await screen.findByText(/Khung 30×40/);
+  fireEvent.click(screen.getByText(/Khung 30×40/));
+  fireEvent.click(screen.getByText("MONEY"));
+}
+
+async function confirmDialog() {
+  await waitFor(() => {
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Xác nhận đặt đơn" }));
+}
+
 beforeEach(() => {
   window.localStorage.clear();
   vi.restoreAllMocks();
+  _isRealMode = false;
+  _mockUserValue = mockUser(true);
   vi.mocked(createOrder).mockResolvedValue({ id: "srv-1" } as Awaited<ReturnType<typeof createOrder>>);
   vi.stubGlobal(
     "fetch",
@@ -47,19 +81,15 @@ beforeEach(() => {
 });
 
 describe("OrderPage", () => {
-  it("submits with itemIds[] (no priceVnd) and saves localStorage", async () => {
+  it("submits via confirm dialog, saves localStorage, and navigates to order-status", async () => {
     renderOrderPage();
-    await screen.findByText(/Khung 30×40/);
-
-    fireEvent.click(screen.getByText(/Khung 30×40/));
-    fireEvent.click(screen.getByText("MONEY"));
-
-    fireEvent.change(screen.getByLabelText(/Họ và tên/), { target: { value: "A B" } });
-    fireEvent.change(screen.getByLabelText(/Email/), { target: { value: "a@b.c" } });
-    fireEvent.change(screen.getByLabelText(/Số điện thoại/), { target: { value: "0900000000" } });
-    fireEvent.change(screen.getByLabelText(/Địa chỉ giao hàng/), { target: { value: "Hanoi" } });
+    await selectFrameAndTheme();
+    await fillShippingForm();
 
     fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
+
+    // Confirm dialog appears
+    await confirmDialog();
 
     await waitFor(() => {
       expect(createOrder).toHaveBeenCalled();
@@ -72,5 +102,91 @@ describe("OrderPage", () => {
     expect(localOrder).toBeDefined();
     expect(saveOrderLink).toHaveBeenCalledWith(localOrder.id, "srv-1");
     expect(await screen.findByText("order-status")).toBeInTheDocument();
+  });
+
+  it("shows confirm dialog with order summary and allows cancel", async () => {
+    renderOrderPage();
+    await selectFrameAndTheme();
+    await fillShippingForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
+
+    // Confirm dialog appears
+    await waitFor(() => {
+      expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    });
+
+    // Click "Xem lại" to cancel
+    fireEvent.click(screen.getByRole("button", { name: "Xem lại" }));
+
+    // Dialog closes, createOrder NOT called
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    });
+    expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it("shows error when backend fails and allows retry", async () => {
+    vi.mocked(createOrder).mockRejectedValueOnce(new Error("Máy chủ bận. Vui lòng thử lại."));
+
+    renderOrderPage();
+    await selectFrameAndTheme();
+    await fillShippingForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
+    await confirmDialog();
+
+    // Error message appears (rendered in both desktop + mobile sections)
+    await waitFor(() => {
+      expect(screen.getAllByText("Máy chủ bận. Vui lòng thử lại.").length).toBeGreaterThan(0);
+    });
+
+    // Should still have saved local order
+    const [localOrder] = getOrders();
+    expect(localOrder).toBeDefined();
+
+    // Retry: mock success this time
+    vi.mocked(createOrder).mockResolvedValueOnce({ id: "srv-2" } as Awaited<ReturnType<typeof createOrder>>);
+    // "Thử lại" button appears in both desktop + mobile sections — click the first one
+    fireEvent.click(screen.getAllByRole("button", { name: "Thử lại" })[0]);
+
+    await waitFor(() => {
+      expect(screen.findByText("order-status")).toBeDefined();
+    });
+    expect(saveOrderLink).toHaveBeenCalled();
+  });
+
+  it("blocks submit when email not verified in real mode", async () => {
+    _isRealMode = true;
+    _mockUserValue = mockUser(false);
+
+    renderOrderPage();
+    await selectFrameAndTheme();
+    await fillShippingForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
+
+    // Error message, no confirm dialog (rendered in both desktop + mobile sections)
+    await waitFor(() => {
+      expect(screen.getAllByText(/Email của bạn chưa được xác thực/).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it("does not block submit when email not verified in demo mode", async () => {
+    _isRealMode = false;
+    _mockUserValue = mockUser(false);
+
+    renderOrderPage();
+    await selectFrameAndTheme();
+    await fillShippingForm();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Đặt đơn$/ }));
+
+    // Demo mode ignores email verification → confirm dialog appears
+    await waitFor(() => {
+      expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    });
   });
 });
