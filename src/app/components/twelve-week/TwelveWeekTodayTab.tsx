@@ -415,80 +415,35 @@ export function TwelveWeekTodayTab({
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      {/* ── Dashboard status cards ── */}
-      <div data-testid="today-dashboard-cards" className="order-0 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Today completion ring */}
-        <div className="rounded-2xl border border-app-line/40 bg-app-surface px-4 py-3.5 flex items-center gap-3.5 shadow-2xs">
-          <svg className="w-10 h-10 shrink-0 -rotate-90" viewBox="0 0 40 40" aria-hidden="true">
-            <circle cx="20" cy="20" r="16" fill="none" stroke="var(--app-line)" strokeWidth="3" />
-            <circle
-              cx="20" cy="20" r="16" fill="none" stroke="var(--app-accent)"
-              strokeWidth="3" strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 16}`}
-              strokeDashoffset={`${2 * Math.PI * 16 * (1 - Math.min(todayCompletedCount / Math.max(checkInTotal, 1), 1))}`}
-              className="transition-[stroke-dashoffset] duration-700 ease-out"
-            />
-          </svg>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">Hôm nay</p>
-            <p className="text-lg font-bold text-app-ink tabular-nums leading-tight mt-0.5">
-              {todayCompletedCount}<span className="text-app-ink-muted/50 text-sm font-medium">/{checkInTotal}</span>
-            </p>
-          </div>
-        </div>
+      {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
+      <div data-testid="today-dashboard-cards" className="order-0 flex flex-wrap items-center gap-2.5">
+        <span
+          className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
+            overdueOpenCount > 0
+              ? "border-app-warm-border/40 bg-app-warm-soft/30 text-app-warm"
+              : "border-app-line/50 bg-app-surface text-app-ink-soft"
+          }`}
+        >
+          <span
+            className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold tabular-nums ${
+              overdueOpenCount > 0 ? "bg-app-warm text-white" : "bg-app-bg-subtle text-app-ink-muted"
+            }`}
+          >
+            {overdueOpenCount}
+          </span>
+          {overdueOpenCount > 0 ? "việc trễ hạn" : "không có việc trễ"}
+        </span>
 
-        {/* Week progress */}
-        <div className="rounded-2xl border border-app-line/40 bg-app-surface px-4 py-3.5 flex items-center gap-3.5 shadow-2xs">
-          <div className="w-10 h-10 shrink-0 rounded-xl bg-app-accent-soft flex items-center justify-center">
-            <span className="text-sm font-bold text-app-accent tabular-nums">{currentWeek}</span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">Tuần {currentWeek}/12</p>
-            <p className="text-lg font-bold text-app-ink tabular-nums leading-tight mt-0.5">{weekCompletion.percent}%</p>
-          </div>
-        </div>
-
-        {/* Overdue alert */}
-        <div className={`rounded-2xl border px-4 py-3.5 flex items-center gap-3.5 shadow-2xs ${
-          overdueOpenCount > 0
-            ? "border-app-warm-border/30 bg-app-warm-soft/15"
-            : "border-app-line/40 bg-app-surface"
-        }`}>
-          <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${
-            overdueOpenCount > 0 ? "bg-app-warm-soft text-app-warm" : "bg-app-bg-subtle text-app-ink-muted"
-          }`}>
-            <span className="text-sm font-bold tabular-nums">{overdueOpenCount}</span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">Trễ hạn</p>
-            <p className={`text-lg font-bold leading-tight mt-0.5 tabular-nums ${
-              overdueOpenCount > 0 ? "text-app-warm" : "text-app-ink"
-            }`}>
-              {overdueOpenCount > 0 ? `${overdueOpenCount} việc` : "—"}
-            </p>
-          </div>
-        </div>
-
-        {/* Review status */}
-        <div className={`rounded-2xl border px-4 py-3.5 flex items-center gap-3.5 shadow-2xs ${
-          reviewDueToday
-            ? "border-app-warm-border/30 bg-app-warm-soft/15"
-            : "border-app-line/40 bg-app-surface"
-        }`}>
-          <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${
-            reviewDueToday ? "bg-app-warm-soft text-app-warm" : "bg-app-accent-soft text-app-accent"
-          }`}>
-            <CalendarClock className="h-4.5 w-4.5" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">Review</p>
-            <p className={`text-sm font-bold leading-tight mt-0.5 ${
-              reviewDueToday ? "text-app-warm" : "text-app-accent"
-            }`}>
-              {reviewDueToday ? "Đến hạn" : "Đã xong"}
-            </p>
-          </div>
-        </div>
+        <span
+          className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
+            reviewDueToday
+              ? "border-app-warm-border/40 bg-app-warm-soft/30 text-app-warm"
+              : "border-app-accent/20 bg-app-accent-soft/40 text-app-accent"
+          }`}
+        >
+          <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
+          {reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}
+        </span>
       </div>
 
       {!primaryTask && (

@@ -216,73 +216,108 @@ export function TwelveWeekDashboardHeader({
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
   const PhaseIcon = phaseInfo.icon;
   const _domainLabel = activeGoal.focusArea || activeGoal.category;
+  const cyclePercent = Math.max(
+    0,
+    Math.min(100, Math.round((currentWeek / Math.max(1, system.totalWeeks)) * 100)),
+  );
+  const weekPercent = Math.max(0, Math.min(100, Math.round(weekCompletion.percent)));
 
   return (
-    <header className="rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-2">
+    <header className="relative overflow-hidden rounded-3xl bg-emerald-950 p-6 text-white shadow-lg md:p-8">
+      {/* lớp sáng mảnh phía trên — tạo chiều sâu, không dùng blur/mesh */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent"
+      />
+
+      <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+        <div className="min-w-0 space-y-3">
           <div
             data-testid="twelve-week-header-description"
-            className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted"
+            className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider"
           >
-            <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">HỆ THỐNG 12 TUẦN</span>
-            <span>·</span>
-            <span className="bg-app-bg/60 border border-app-line/40 px-2 py-0.5 rounded-md">
+            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-emerald-200">
+              Hệ thống 12 tuần
+            </span>
+            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-emerald-200">
               Tuần {currentWeek} / {system.totalWeeks}
             </span>
-            <span>·</span>
-            <span className="inline-flex items-center gap-1 bg-app-accent-soft/60 px-2.5 py-0.5 rounded-full text-app-accent border border-app-accent/10">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 text-emerald-950">
               <PhaseIcon className="h-3 w-3 shrink-0" />
-              <span>
-                Nhịp <span>{phaseInfo.label}</span>
-              </span>
+              <span>Nhịp {phaseInfo.label}</span>
             </span>
           </div>
 
-          <div className="space-y-1">
-            <InlineGoalTitleEdit
-              title={activeGoal.title}
-              fallbackTitle="Kế hoạch hiện tại"
-              onSave={onRenameGoal}
-              headingLevel={1}
-              titleClassName="break-words font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink"
-              inputClassName="h-auto rounded-lg px-2 py-1 font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink"
-            />
-            <div className="flex flex-wrap items-center gap-2 text-[10px] text-app-ink-soft">
-              <span className="bg-app-bg/40 px-1.5 py-0.5 rounded-md border border-app-line/20">
-                Gói {getPlanLabel(activePlanCode)}
-              </span>
-              <span>·</span>
-              <span
-                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}
-              >
-                {syncBadgeLabel}
-              </span>
-            </div>
+          <InlineGoalTitleEdit
+            title={activeGoal.title}
+            fallbackTitle="Kế hoạch hiện tại"
+            onSave={onRenameGoal}
+            headingLevel={1}
+            titleClassName="break-words font-serif text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white"
+            inputClassName="h-auto rounded-lg bg-white/10 px-2 py-1 font-serif text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white"
+          />
+
+          <div className="flex flex-wrap items-center gap-2 text-[10px] text-emerald-200/70">
+            <span className="rounded-md border border-emerald-400/15 px-1.5 py-0.5">Gói {getPlanLabel(activePlanCode)}</span>
+            <span>·</span>
+            <span
+              className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}
+            >
+              {syncBadgeLabel}
+            </span>
+          </div>
+
+          <div
+            data-testid="twelve-week-header-actions"
+            className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:items-center"
+          >
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-amber-400 px-6 py-2.5 text-xs font-bold text-emerald-950 shadow-sm transition-colors hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50"
+              onClick={onOpenFocusTab}
+            >
+              <span>{reviewDueToday ? "Review tuần này" : "Xem việc hôm nay"}</span>
+              <Target className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/5 px-5 py-2.5 text-xs font-semibold text-emerald-100 transition-colors hover:bg-emerald-400/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40"
+              onClick={onOpenGoals}
+            >
+              Mở mục tiêu
+            </button>
           </div>
         </div>
 
-        {/* Action Button: Slimmer premium buttons */}
-        <div
-          data-testid="twelve-week-header-actions"
-          className="flex flex-col sm:flex-row items-center gap-2.5 pt-1 sm:pt-0 shrink-0"
-        >
-          <button
-            type="button"
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-app-accent-hover hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-2xs"
-            onClick={onOpenFocusTab}
-          >
-            <span>{reviewDueToday ? "Review tuần này →" : "Xem việc hôm nay →"}</span>
-            <Target className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
+        {/* Bảng tiến độ — điểm nhấn số liệu nổi bật */}
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-900/40 p-4">
+          <div className="col-span-2">
+            <div className="flex items-end justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-200/70">
+                Tiến độ chu kỳ
+              </span>
+              <span className="font-serif text-lg font-semibold tabular-nums text-white">
+                {currentWeek}
+                <span className="text-sm text-emerald-200/60">/{system.totalWeeks}</span>
+              </span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-emerald-400/15" aria-hidden="true">
+              <div className="h-full rounded-full bg-amber-400" style={{ width: `${cyclePercent}%` }} />
+            </div>
+          </div>
 
-          <button
-            type="button"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 shadow-3xs"
-            onClick={onOpenGoals}
-          >
-            Mở mục tiêu
-          </button>
+          <div className="rounded-xl bg-emerald-400/5 p-3">
+            <div className="font-serif text-2xl font-semibold tabular-nums text-white">{weekPercent}%</div>
+            <div className="mt-0.5 text-[10px] font-medium text-emerald-200/70">Tuần này</div>
+          </div>
+          <div className="rounded-xl bg-emerald-400/5 p-3">
+            <div className="font-serif text-2xl font-semibold tabular-nums text-white">
+              {todayCompletedCount}
+              <span className="text-sm text-emerald-200/60">/{todayCompletedCount + todayRemainingCount}</span>
+            </div>
+            <div className="mt-0.5 text-[10px] font-medium text-emerald-200/70">Việc hôm nay</div>
+          </div>
         </div>
       </div>
     </header>
