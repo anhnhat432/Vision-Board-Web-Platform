@@ -79,7 +79,7 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
       <div className="mt-5 h-[180px] overflow-hidden relative">
         {currentWeek !== null && currentWeek < 3 ? (
           <div className="absolute inset-0 bg-white/95 dark:bg-neutral-900/95 z-10 flex flex-col items-center justify-center text-center p-4 rounded-xl">
-            <span className="text-2xl mb-1 animate-pulse">📈</span>
+            <span className="text-2xl mb-1"><TrendingUp className="h-6 w-6 text-app-accent mx-auto" /></span>
             <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Đường 12 tuần đang chuẩn bị</p>
             <p className="text-[10px] text-neutral-500 leading-relaxed max-w-[28ch] mt-1 font-semibold">
               Biểu đồ sẽ tự động vẽ từ Tuần 3 khi bạn có đủ dữ liệu hành động tích lũy.
