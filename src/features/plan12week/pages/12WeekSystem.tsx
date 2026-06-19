@@ -1037,17 +1037,7 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 relative">
-      {/* Decorative dreamy gradient blobs for execution center feeling */}
-      <div
-        className="absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
-        style={{ animationDuration: "8s" }}
-      />
-      <div
-        className="absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
-        style={{ animationDuration: "12s" }}
-      />
-
+    <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
       {/* 1. Subcomponent Dialogs Container */}
       <TwelveWeekSystemDialogs
         isUpgradeDialogOpen={isUpgradeDialogOpen}

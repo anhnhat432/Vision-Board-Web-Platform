@@ -69,8 +69,7 @@ export function TwelveWeekDashboardState({
 
   if (kind === "loading") {
     return (
-      <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-app-line bg-gradient-to-br from-app-surface to-app-bg/30 p-8 text-center shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-app-accent-soft/10 rounded-full blur-3xl -z-10" />
+      <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-app-line bg-app-surface p-8 text-center shadow-app-sm">
         <Loader2 className="mx-auto h-8 w-8 animate-spin text-app-accent" aria-hidden="true" />
         <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-app-ink-muted">{eyebrow}</p>
         <h1 className="mt-1 font-serif text-xl font-semibold text-app-ink">{title}</h1>
@@ -83,12 +82,8 @@ export function TwelveWeekDashboardState({
   }
 
   return (
-    <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-app-line/60 bg-app-surface p-8 md:p-12 text-center shadow-xs relative overflow-hidden">
-      {/* Soft decorative background glow circles */}
-      <div className="absolute -top-12 -right-12 w-48 h-48 bg-app-accent-soft/20 rounded-full blur-3xl -z-10" />
-      <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-app-status-warning/10 rounded-full blur-3xl -z-10" />
-
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-app-accent-soft to-app-accent-soft/50 text-app-accent shadow-xs">
+    <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-app-line bg-app-surface p-8 md:p-12 text-center shadow-app-sm">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-app-accent-soft text-app-accent">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-app-accent">{eyebrow}</p>
@@ -99,7 +94,7 @@ export function TwelveWeekDashboardState({
 
       {/* 3 Step Onboarding Visual - Warm soft cards */}
       <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3 text-left">
-        <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
+        <div className="rounded-2xl border border-app-line bg-app-bg p-6 transition-colors hover:border-app-accent/40">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
             1
           </span>
@@ -109,8 +104,8 @@ export function TwelveWeekDashboardState({
           </p>
         </div>
 
-        <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-status-warning/15 text-xs font-bold text-app-status-warning">
+        <div className="rounded-2xl border border-app-line bg-app-bg p-6 transition-colors hover:border-app-accent/40">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
             2
           </span>
           <h3 className="mt-4 font-serif text-base font-semibold text-app-ink">Mục tiêu SMART</h3>
@@ -119,7 +114,7 @@ export function TwelveWeekDashboardState({
           </p>
         </div>
 
-        <div className="relative bg-gradient-to-b from-app-bg/60 to-app-bg/20 border border-app-line/40 rounded-2xl p-6 shadow-2xs hover:shadow-xs hover:border-app-line transition-all duration-300">
+        <div className="rounded-2xl border border-app-line bg-app-bg p-6 transition-colors hover:border-app-accent/40">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
             3
           </span>
@@ -223,9 +218,8 @@ export function TwelveWeekDashboardHeader({
   const _domainLabel = activeGoal.focusArea || activeGoal.category;
 
   return (
-    <header className="relative border border-app-line/40 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/15 rounded-2xl p-5 md:p-6 shadow-xs overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-app-accent-soft/10 to-transparent rounded-bl-full pointer-events-none" />
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between relative z-10">
+    <header className="rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 space-y-2">
           <div
             data-testid="twelve-week-header-description"
