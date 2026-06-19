@@ -113,19 +113,19 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
   it("renders the compact mobile status strip before the hero and work grid", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
 
-    const strip = screen.getByTestId("today-mobile-compact-strip");
+    const strip = screen.getByTestId("today-dashboard-cards");
     const hero = screen.getByTestId("today-primary-hero");
     const workGrid = screen.getByTestId("today-main-work-grid");
 
-    expect(strip).toHaveClass("order-0", "grid-cols-3", "sm:hidden");
+    expect(strip).toHaveClass("order-0");
     expect(strip.compareDocumentPosition(hero)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(hero.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("renders 'Việc quan trọng nhất hôm nay' headline when there is an open primary task", () => {
+  it("renders 'Ưu tiên duy nhất' headline when there is an open primary task", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
-    expect(screen.getByText(/Việc quan trọng nhất hôm nay/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ưu tiên duy nhất/i)).toBeInTheDocument();
   });
 
   it("displays the primary task title and lead indicator name in the hero", () => {
@@ -143,7 +143,7 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
 
   it("shows the 'hôm nay đã đủ' messaging in the hero", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
-    expect(screen.getByText(/Chỉ cần xong việc này là hôm nay đã đủ/i)).toBeInTheDocument();
+    expect(screen.getByText(/Xong việc này là bạn đã giữ đúng tiến độ/i)).toBeInTheDocument();
   });
 
   it("does not render the hero when there is no primary task", () => {
@@ -202,7 +202,8 @@ describe("TwelveWeekTodayTab — Performance Time Blocking", () => {
       />,
     );
 
-    expect(screen.getByText("Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi.")).toBeInTheDocument();
+    expect(screen.getByText(/Khung giờ chiến lược/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dành thời gian không xao nhãng cho việc quan trọng nhất/i)).toBeInTheDocument();
   });
 });
 
@@ -246,7 +247,7 @@ describe("TwelveWeekTodayTab — empty Today state", () => {
       />,
     );
 
-    const cta = screen.getAllByRole("button", { name: /Mở tab Tuần/i })[0];
+    const cta = screen.getAllByRole("button", { name: /Mở review tuần/i })[0];
     await userEvent.click(cta);
     expect(onOpenWeekTab).toHaveBeenCalledTimes(1);
   });
@@ -287,16 +288,15 @@ describe("TwelveWeekTodayTab — empty Today state", () => {
 });
 
 describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
-  it("shows a next-action panel for the open primary task", () => {
+  it("shows the hero card and hides the next-action panel when a primary task is open", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
 
-    const panel = screen.getByTestId("today-next-action-panel");
-    expect(panel).toHaveAttribute("data-state", "primary-task");
-    expect(panel).not.toHaveTextContent("Viết draft 800 từ");
-    expect(within(panel).queryByRole("button", { name: /Đánh dấu xong/i })).toBeNull();
+    expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
+    expect(screen.queryByTestId("today-next-action-panel")).toBeNull();
+    expect(screen.getByTestId("today-primary-hero")).toHaveTextContent("Viết draft 800 từ");
   });
 
-  it("keeps the next-action panel on primary work when review is due and check-in is saved", () => {
+  it("keeps the hero card visible when review is due and check-in is saved while a primary task exists", () => {
     render(
       <TwelveWeekTodayTab
         {...makeProps({
@@ -306,10 +306,11 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       />,
     );
 
-    expect(screen.getByTestId("today-next-action-panel")).toHaveAttribute("data-state", "primary-task");
+    expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
+    expect(screen.queryByTestId("today-next-action-panel")).toBeNull();
   });
 
-  it("shows a first-task fallback guide for week 1 before the user completes anything", () => {
+  it("shows the hero card for week 1 before the user completes anything", () => {
     render(
       <TwelveWeekTodayTab
         {...makeProps({
@@ -320,12 +321,11 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       />,
     );
 
-    const panel = screen.getByTestId("today-next-action-panel");
-    expect(panel).toHaveTextContent("Bắt đầu tuần 1");
-    expect(panel).toHaveTextContent("Bắt đầu từ việc ưu tiên bên dưới rồi tick xong để tạo đà.");
+    expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
+    expect(screen.queryByTestId("today-next-action-panel")).toBeNull();
   });
 
-  it("hides the first-task fallback guide after the first task is completed", () => {
+  it("hides the next-action panel after the first task is completed because the hero card handles status", () => {
     render(
       <TwelveWeekTodayTab
         {...makeProps({
@@ -335,7 +335,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       />,
     );
 
-    expect(screen.getByTestId("today-next-action-panel")).not.toHaveTextContent("Bắt đầu tuần 1");
+    expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
+    expect(screen.queryByTestId("today-next-action-panel")).toBeNull();
   });
 
   it("shows same-day check-in as saved and ignores older check-ins", () => {
@@ -369,8 +370,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Cập nhật check-in hôm nay/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /^Lưu check-in hôm nay$/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cập nhật check-in/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Lưu check-in$/i })).not.toBeInTheDocument();
   });
 
   it("offers a Week handoff from the check-in card when review is due", async () => {
@@ -409,8 +410,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
 
     const panel = screen.getByTestId("today-next-action-panel");
     expect(panel).toHaveAttribute("data-state", "review-due");
-    expect(within(panel).queryByRole("button", { name: /Mở tab Tuần/i })).toBeNull();
-    expect(screen.getAllByRole("button", { name: /Mở tab Tuần/i })).toHaveLength(1);
+    expect(within(panel).queryByRole("button", { name: /Mở review tuần/i })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /Xem đánh giá tuần/i })).toHaveLength(1);
     expect(screen.getByTestId("today-check-in-open-week")).toBeInTheDocument();
   });
 
@@ -436,7 +437,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
   it("renders cleaner check-in description (no duplicate 'tick việc' instruction)", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     // New copy is short and doesn't duplicate the tick instruction
-    expect(screen.getByText(/Chọn năng lượng và ghi 1 ý ngắn/i)).toBeInTheDocument();
+    expect(screen.getByText(/30 giây/i)).toBeInTheDocument();
+    expect(screen.getByText(/Lắng nghe bản thân/i)).toBeInTheDocument();
     expect(screen.queryByText(/Tick việc, chọn năng lượng/i)).toBeNull();
   });
 
@@ -451,14 +453,14 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
   it("calls onSaveCheckIn when 'Lưu check-in hôm nay' button is clicked", async () => {
     const onSaveCheckIn = vi.fn();
     render(<TwelveWeekTodayTab {...makeProps({ onSaveCheckIn })} />);
-    const buttons = screen.getAllByRole("button", { name: /Lưu check-in hôm nay/i });
+    const buttons = screen.getAllByRole("button", { name: /Lưu check-in/i });
     await userEvent.click(buttons[0]);
     expect(onSaveCheckIn).toHaveBeenCalledTimes(1);
   });
 
   it("renders a single save check-in CTA to avoid duplicate mobile actions", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
-    expect(screen.getAllByRole("button", { name: /Lưu check-in hôm nay/i })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /Lưu check-in/i })).toHaveLength(1);
   });
 
   it("shows a sticky mobile check-in CTA only while today's check-in form has unsaved edits", () => {
@@ -553,7 +555,7 @@ describe("TwelveWeekTodayTab — rescue mode nudge", () => {
     render(<TwelveWeekTodayTab {...makeProps({ rescueStatus: { ...baseStatus } })} />);
     const hero = screen.getByTestId("today-primary-hero");
     const nudge = screen.getByTestId("today-rescue-nudge");
-    const checkInHeading = screen.getByText("Check-in 30 giây");
+    const checkInHeading = screen.getByText("Check-in hôm nay");
 
     expect(hero.compareDocumentPosition(nudge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(hero.compareDocumentPosition(checkInHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -619,9 +621,9 @@ describe("TwelveWeekTodayTab — rescue mode nudge", () => {
 });
 
 describe("TwelveWeekTodayTab — first week emphasis", () => {
-  it("shows 'Việc đầu tiên của tuần 1' headline when currentWeek === 1", () => {
+  it("shows 'Tuần 1 · Khởi đầu' headline when currentWeek === 1", () => {
     render(<TwelveWeekTodayTab {...makeProps({ currentWeek: 1 })} />);
-    expect(screen.getByText(/Việc đầu tiên của tuần 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tuần 1 · Khởi đầu/i)).toBeInTheDocument();
   });
 
   it("renders the first-week encouragement line when currentWeek === 1", () => {
@@ -637,8 +639,8 @@ describe("TwelveWeekTodayTab — first week emphasis", () => {
 
   it("keeps the standard hero headline when currentWeek > 1", () => {
     render(<TwelveWeekTodayTab {...makeProps({ currentWeek: 5 })} />);
-    expect(screen.getByText(/Việc quan trọng nhất hôm nay/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Việc đầu tiên của tuần 1/i)).toBeNull();
+    expect(screen.getByText(/Ưu tiên duy nhất/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Tuần 1 · Khởi đầu/i)).toBeNull();
   });
 
   it("continues to support task toggling on first-week plans", async () => {

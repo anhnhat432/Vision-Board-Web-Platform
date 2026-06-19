@@ -25,9 +25,9 @@ interface DayMoodInfo {
 }
 
 const MOOD_COLORS = {
-  high: "text-amber-500 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30",
-  steady: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/30",
-  low: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900/30",
+  high: "text-app-status-warning bg-app-status-warning/10 border-app-status-warning/25",
+  steady: "text-app-status-success bg-app-status-success/10 border-app-status-success/25",
+  low: "text-app-status-info bg-app-status-info/10 border-app-status-info/25",
   none: "text-app-ink-muted bg-app-bg/50 border-app-line",
 };
 
