@@ -1,6 +1,8 @@
-import { ArrowRight, Calendar, ImageIcon, Sparkles } from "lucide-react";
+import { ArrowRight, Calendar, ImageIcon } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
+
+import { getDashboardHeroMessage } from "./dashboard-hero-message";
 
 interface DashboardHeroProps {
   caption: string;
@@ -29,102 +31,72 @@ export function DashboardHero({
   const safeProgress = clampPercent(progressPercent);
   const weekLabel = currentWeek ? `Tuần ${currentWeek} / ${totalWeeks}` : "Tuần -- / 12";
 
-  const selectedQuote = useMemo(() => {
-    const quotes = [
-      "Chậm lại một chút để nhìn rõ hơn hướng đi của mình.",
-      "Mỗi ngày một hành động nhỏ, kiên trì tạo nên hành trình lớn.",
-      "Tập trung vào hiện tại, kết quả sẽ tự an bài.",
-      "Giữ tâm tĩnh tại giữa những ồn ào của cuộc sống.",
-      "Sự nhất quán quan trọng hơn tốc độ.",
-      "Lắng nghe bản thân và bước tiếp với sự rõ ràng.",
-      "Một tuần trôi qua ý nghĩa bắt đầu từ một ngày sống trọn vẹn.",
-    ];
-    const day = new Date().getDate();
-    return quotes[day % quotes.length];
-  }, []);
+  const { subheading, quote } = useMemo(
+    () => getDashboardHeroMessage({ currentWeek, totalWeeks, progressPercent, featuredGoalTitle }),
+    [currentWeek, totalWeeks, progressPercent, featuredGoalTitle],
+  );
 
   return (
     <section
       data-testid="dashboard-primary-action-card"
       data-tour-id="dashboard-next-card"
-      className="relative overflow-hidden rounded-3xl border border-emerald-100/50 dark:border-neutral-800/80 bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/30 dark:from-neutral-950 dark:via-neutral-950 dark:to-emerald-950/10 p-6 md:p-8 lg:p-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-center shadow-app-sm hover:shadow-app-md transition-shadow duration-300 select-none w-full"
+      className="grid w-full select-none gap-6 rounded-3xl border border-app-line bg-app-surface p-6 shadow-app-sm md:grid-cols-[minmax(0,1fr)_340px] md:items-center md:p-8 lg:p-10"
     >
       {/* Welcome content */}
-      <div className="relative z-10 space-y-4 pt-2">
+      <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2.5">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-app-accent flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0" />
-            {caption}
-          </p>
-          <span className="rounded-full border border-emerald-100/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/85 px-3.5 py-0.5 text-xs font-semibold text-app-accent flex items-center gap-1.5 shadow-[0_2px_8px_-4px_rgba(16,185,129,0.2)]">
-            <Calendar className="h-3.5 w-3.5 text-app-accent/80" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-app-accent">{caption}</p>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-bg px-3 py-0.5 text-xs font-semibold text-app-ink-soft">
+            <Calendar className="h-3.5 w-3.5 text-app-accent" />
             {weekLabel}
           </span>
         </div>
 
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold leading-[1.2] tracking-tight text-app-ink md:text-[2.75rem]">
-          Chào tuần mới,{" "}
-          <span className="font-serif font-bold underline decoration-amber-400/60 underline-offset-8 italic text-amber-600 dark:text-amber-400">
-            {displayName}
-          </span>
+        <h1 className="font-serif text-3xl font-medium leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[2.6rem]">
+          Chào tuần mới, <span className="italic text-app-accent">{displayName}</span>
         </h1>
 
-        <p className="text-xs sm:text-sm font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
-          Tập trung vào vài việc quan trọng nhất tuần này.
-        </p>
+        <p className="max-w-xl text-sm leading-relaxed text-app-ink-soft">{subheading}</p>
 
-        {/* Life Quote Banner with deep and delicate design */}
-        <div className="border-l-2 border-amber-500/50 bg-amber-500/5 pl-4 py-2 mt-4 max-w-xl rounded-r-xl shadow-2xs">
-          <p className="font-serif italic text-amber-800 dark:text-amber-400 text-xs leading-relaxed">
-            “{selectedQuote}”
-          </p>
+        <div className="mt-4 max-w-xl rounded-r-xl border-l-2 border-app-accent/50 bg-app-accent-soft/40 py-2 pl-4">
+          <p className="font-serif text-sm italic leading-relaxed text-app-ink-soft">“{quote}”</p>
         </div>
       </div>
 
-      {/* Featured Goal focus card - premium dreamy polaroid layout */}
+      {/* Featured goal focus card */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/card relative z-10 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-app-md hover:shadow-app-lg transition-all duration-300 overflow-hidden"
+        className="group/card rounded-3xl border border-app-line bg-app-bg-subtle p-6 transition-colors hover:border-app-accent/40"
       >
-        <p className="text-[9px] font-extrabold uppercase tracking-wide text-app-accent flex items-center gap-1.5 mt-2 relative z-10">
-          <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-app-accent">
+          <ImageIcon className="h-3.5 w-3.5" />
           Tiêu điểm chu kỳ
         </p>
 
-        {/* Visual Dreamy Vision Anchor */}
-          <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
-            <ImageIcon className="h-6 w-6 text-neutral-400" />
-          <div className="absolute inset-0 bg-black/2 flex items-end p-2">
-            <span className="text-[8px] font-bold tracking-wide text-neutral-600 dark:text-neutral-400 bg-white/85 dark:bg-neutral-900/85 px-2 py-0.5 rounded-md">
-              BẢNG TẦM NHÌN
-            </span>
-          </div>
+        <div className="my-3 flex h-20 w-full items-center justify-center overflow-hidden rounded-2xl border border-app-line bg-app-surface">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Bảng tầm nhìn</span>
         </div>
 
-        <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200 relative z-10">
+        <p className="line-clamp-2 break-words font-serif text-base font-medium leading-snug text-app-ink transition-colors group-hover/card:text-app-accent">
           {featuredGoalTitle}
         </p>
 
-        {/* Slender modern progress line */}
-        <div className="mt-4 flex items-center gap-3 relative z-10">
-          <div
-            className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800"
-            aria-hidden="true"
-          >
+        <div className="mt-4 flex items-center gap-3">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-app-line" aria-hidden="true">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-app-accent to-green-600 transition-all duration-500 ease-out"
+              className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
               style={{ width: `${safeProgress}%` }}
             />
           </div>
-          <span className="text-xs font-extrabold text-app-accent tabular-nums">{safeProgress}%</span>
+          <span className="text-xs font-bold tabular-nums text-app-accent">{safeProgress}%</span>
         </div>
 
         <Link
           to={planHref}
-          className="mt-4.5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-xs font-bold text-white shadow-app-sm hover:shadow-app-md hover:-translate-y-px active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 group cursor-pointer relative z-10"
+          className="group mt-5 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-app-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           <span>Mở kế hoạch 12 tuần</span>
-          <ArrowRight className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover:translate-x-0.5" />
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
     </section>
