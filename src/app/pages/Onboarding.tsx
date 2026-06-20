@@ -10,11 +10,13 @@ import {
   Home,
   Info,
   type LucideIcon,
+  Plus,
   Smile,
   Sparkles,
   Sprout,
   Users,
   WalletCards,
+  X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -36,7 +38,7 @@ import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getLifeAreaLabel, getUserData, LIFE_AREAS, type LifeArea, updateWheelOfLife } from "../utils/storage";
-import { mergeOnboardingLifeAreas } from "../utils/onboarding-life-areas";
+import { buildCustomArea, CUSTOM_AREA_NAME_MAX, isDefaultLifeArea, MAX_LIFE_AREAS, mergeOnboardingLifeAreas, removeAreaAtIndex } from "../utils/onboarding-life-areas";
 import { ZenBreathingGate } from "./Onboarding/components/ZenBreathingGate";
 
 type OnboardingStep = "welcome" | "assessment";
@@ -441,6 +443,9 @@ export function Onboarding() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState<number | null>(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [newAreaName, setNewAreaName] = useState("");
+  const [addError, setAddError] = useState<string | null>(null);
+  const [isAddingArea, setIsAddingArea] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -624,7 +629,7 @@ export function Onboarding() {
       setLastSavedAt(null);
       setAutoSaveStatus("saved");
       setIsDirty(false);
-      toast.success("Đã lưu phần bạn đã chỉnh. Bạn có thể quay lại rà đủ 8 lĩnh vực bất kỳ lúc nào.");
+      toast.success("Đã lưu phần bạn đã chỉnh. Bạn có thể quay lại rà các lĩnh vực bất kỳ lúc nào.");
     } else {
       toast.info("Chưa có điểm nào được chỉnh. Dữ liệu chưa lưu.");
     }
@@ -633,6 +638,43 @@ export function Onboarding() {
     }
     navigate("/");
   };
+
+  const handleAddCustomArea = useCallback(() => {
+    const result = buildCustomArea(newAreaName, lifeAreas);
+    if (!result.ok) {
+      setAddError(result.error);
+      return;
+    }
+    setLifeAreas((prev) => [...prev, result.area]);
+    setActiveAreaIndex(lifeAreas.length);
+    setNewAreaName("");
+    setAddError(null);
+    setIsAddingArea(false);
+    setIsDirty(true);
+    trackAnalyticsEvent("life_area_custom_added", { source: "onboarding" });
+  }, [newAreaName, lifeAreas]);
+
+  const handleRemoveCustomArea = useCallback(
+    (index: number) => {
+      const area = lifeAreas[index];
+      if (!area) return;
+      if (isDefaultLifeArea(area.name)) return;
+      const { lifeAreas: nextAreas, reviewed: nextReviewed } = removeAreaAtIndex(
+        lifeAreas,
+        reviewedAreaIndices,
+        index,
+      );
+      setLifeAreas(nextAreas);
+      setReviewedAreaIndices(nextReviewed);
+      setActiveAreaIndex((cur) => {
+        if (cur == null) return cur;
+        if (cur === index) return Math.max(0, index - 1);
+        return cur > index ? cur - 1 : cur;
+      });
+      setIsDirty(true);
+    },
+    [lifeAreas, reviewedAreaIndices],
+  );
 
   const progressHeader = (
     <div>
@@ -854,7 +896,7 @@ export function Onboarding() {
                       type="button"
                       onClick={() => setActiveAreaIndex(index)}
                       className={cn(
-                        "min-h-12 rounded-control border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+                        "relative min-h-12 rounded-control border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                         isSelected
                           ? "border-app-accent bg-app-accent-soft text-app-accent"
                           : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink",
@@ -873,11 +915,81 @@ export function Onboarding() {
                           Đã rà · {area.score}đ
                         </span>
                       ) : null}
+                      {!isDefaultLifeArea(area.name) ? (
+                        <button
+                          type="button"
+                          className="absolute top-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full text-app-ink-muted hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveCustomArea(index);
+                          }}
+                          aria-label={`Xóa lĩnh vực ${label}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      ) : null}
                     </button>
                   );
                 })}
               </div>
             </div>
+
+            {/* Thêm lĩnh vực tùy chỉnh */}
+            {lifeAreas.length < MAX_LIFE_AREAS ? (
+              <div className="mt-3">
+                {isAddingArea ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newAreaName}
+                        onChange={(e) => {
+                          setNewAreaName(e.target.value);
+                          if (addError) setAddError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAddCustomArea();
+                          if (e.key === "Escape") {
+                            setIsAddingArea(false);
+                            setNewAreaName("");
+                            setAddError(null);
+                          }
+                        }}
+                        maxLength={CUSTOM_AREA_NAME_MAX}
+                        placeholder="Tên lĩnh vực mới…"
+                        className="flex-1 min-h-10 rounded-control border border-app-line bg-app-surface px-3 py-2 text-sm text-app-ink placeholder:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomArea}
+                        disabled={!newAreaName.trim()}
+                        className="inline-flex min-h-10 items-center justify-center rounded-pill bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Thêm
+                      </button>
+                    </div>
+                    {addError ? (
+                      <p className="text-xs font-medium text-app-status-danger" role="alert">
+                        {addError}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingArea(true)}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                    Thêm lĩnh vực
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="mt-3 text-xs font-medium text-app-ink-muted">
+                Đã đạt tối đa {MAX_LIFE_AREAS} lĩnh vực.
+              </p>
+            )}
 
             {(() => {
               const index = activeAreaIndex ?? 0;
@@ -900,7 +1012,7 @@ export function Onboarding() {
                       </div>
                       <div>
                         <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
-                          Lĩnh vực {index + 1} / 8
+                          Lĩnh vực {index + 1} / {lifeAreas.length}
                         </span>
                         <h2
                           ref={activeAreaHeadingRef}
@@ -1074,7 +1186,7 @@ export function Onboarding() {
                         className="inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                         onClick={() => {
                           handleSkipArea(index);
-                          if (index < 7) {
+                          if (index < lifeAreas.length - 1) {
                             setActiveAreaIndex(index + 1);
                           }
                         }}
@@ -1088,14 +1200,14 @@ export function Onboarding() {
                         style={{ backgroundColor: colorConfig.accent }}
                         onClick={() => {
                           markAreaReviewed(index);
-                          if (index < 7) {
+                          if (index < lifeAreas.length - 1) {
                             setActiveAreaIndex(index + 1);
                           } else {
                             completeAssessment();
                           }
                         }}
                       >
-                        {index < 7 ? (
+                        {index < lifeAreas.length - 1 ? (
                           <>
                             Rà lĩnh vực tiếp theo
                             <ArrowRight className="h-4 w-4" aria-hidden="true" />

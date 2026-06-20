@@ -237,6 +237,9 @@ export interface AnalyticsEventPayloads {
     preview_id: string;
     source: AnalyticsSource;
   };
+  life_area_custom_added: {
+    source: AnalyticsSource;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventPayloads;
@@ -342,6 +345,7 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
     "unresolved_local_mutation_count",
   ],
   landing_goal_preview_selected: ["preview_id", "source"],
+  life_area_custom_added: ["source"],
 };
 
 const REMOTE_ANALYTICS_AREAS = new Set(["core_funnel", "12_week", "monetization"]);
