@@ -146,34 +146,34 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
     case "on_track":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-2xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-card-lg shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-2xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-card-lg shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-2xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-card-lg shadow-xs",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-2xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-card-lg shadow-xs",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-app-line/60 bg-app-surface rounded-2xl shadow-xs",
+        container: "border-app-line/60 bg-app-surface rounded-card-lg shadow-xs",
         badge: "border-app-line bg-app-bg text-app-ink-soft px-3 py-1 rounded-full",
         badgeLabel: "Chưa có dữ liệu",
       };
@@ -300,17 +300,17 @@ export function TwelveWeekProgressTab({
           titleClassName="font-serif text-xl font-bold leading-tight sm:leading-snug text-app-ink sm:text-2xl pt-1"
           descriptionClassName="text-sm leading-relaxed text-app-ink-soft"
           contentClassName="stack-stack"
-          className="rounded-3xl bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/20 border border-app-accent/25 shadow-xs pt-8"
+          className="rounded-card bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/20 border border-app-accent/25 shadow-xs pt-8"
           action={
             nextActionHandler ? (
-              <div className="rounded-2xl border border-app-line/40 bg-app-bg-subtle/70 backdrop-blur-xs p-4 shadow-3xs">
+              <div className="rounded-card-lg border border-app-line/40 bg-app-bg-subtle/70 backdrop-blur-xs p-4 shadow-3xs">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                   Tiếp theo nên làm
                 </p>
                 <p className="mt-1.5 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
                 <Button
                   size="lg"
-                  className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-xl sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
+                  className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-card sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
                   onClick={nextActionHandler}
                 >
                   {nextActionSuggestion.buttonLabel}
@@ -350,7 +350,7 @@ export function TwelveWeekProgressTab({
       </div>
 
       {goalTitle ? (
-        <div className="rounded-2xl border border-app-line/60 bg-gradient-to-br from-app-surface to-app-bg/20 p-4 sm:p-5 shadow-2xs">
+        <div className="rounded-card-lg border border-app-line/60 bg-gradient-to-br from-app-surface to-app-bg/20 p-4 sm:p-5 shadow-2xs">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Mục tiêu đang theo dõi</p>
           <InlineGoalTitleEdit
             title={goalTitle}
@@ -380,7 +380,7 @@ export function TwelveWeekProgressTab({
         <div className="grid gap-6 md:grid-cols-3 pt-2">
           {/* Card 1 */}
           <div className="relative pt-3">
-            <Card className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-bg-subtle/40 shadow-2xs hover:shadow-xs transition-all duration-300">
+            <Card className="rounded-card border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-bg-subtle/40 shadow-2xs hover:shadow-xs transition-all duration-300">
               <CardContent className="p-5 md:p-6">
                 <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                   <CalendarDays className="h-3.5 w-3.5 text-app-accent-soft-strong" />
@@ -401,7 +401,7 @@ export function TwelveWeekProgressTab({
           {/* Card 2 */}
           <div className="relative pt-3">
             <PaperPin className="-top-1.5" />
-            <Card className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-bg-subtle/40 shadow-2xs hover:shadow-xs transition-all duration-300">
+            <Card className="rounded-card border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-bg-subtle/40 shadow-2xs hover:shadow-xs transition-all duration-300">
               <CardContent className="p-5 md:p-6">
                 <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                   <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
@@ -434,7 +434,7 @@ export function TwelveWeekProgressTab({
 
           {/* Card 3 */}
           <div className="relative pt-3">
-            <Card className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-bg-subtle/40 shadow-2xs hover:shadow-xs transition-all duration-300">
+            <Card className="rounded-card border border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-bg-subtle/40 shadow-2xs hover:shadow-xs transition-all duration-300">
               <CardContent className="p-5 md:p-6">
                 {reviewDoneCount === 0 && <WeeklyReviewIllustration className="mb-3 w-20 text-app-accent opacity-80" />}
                 <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
@@ -457,7 +457,7 @@ export function TwelveWeekProgressTab({
       </SectionBlock>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+        <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 font-serif text-lg font-bold leading-tight text-app-ink">
               <BarChart3 className="h-5 w-5 text-app-accent" />
@@ -468,7 +468,7 @@ export function TwelveWeekProgressTab({
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
-            <div className="rounded-2xl border border-app-accent/15 bg-gradient-to-br from-app-accent-soft/50 to-app-accent-soft/20 p-5 shadow-3xs">
+            <div className="rounded-card-lg border border-app-accent/15 bg-gradient-to-br from-app-accent-soft/50 to-app-accent-soft/20 p-5 shadow-3xs">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <p className="text-sm font-semibold text-app-ink">Tuần {currentWeek} đang là trọng tâm</p>
@@ -488,7 +488,7 @@ export function TwelveWeekProgressTab({
 
         <div className="relative">
           <WashiTape className="w-20 h-4 bg-app-accent-soft/30 rotate-[2deg] -top-1.5 left-auto right-4 translate-x-0" />
-          <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+          <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 font-serif text-lg font-bold leading-tight text-app-ink">
                 <Target className="h-5 w-5 text-app-accent" />
@@ -499,7 +499,7 @@ export function TwelveWeekProgressTab({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-3xl border border-app-line/60 bg-gradient-to-br from-app-bg-subtle to-app-surface p-5 shadow-3xs">
+              <div className="rounded-card border border-app-line/60 bg-gradient-to-br from-app-bg-subtle to-app-surface p-5 shadow-3xs">
                 <div className="stack-stack">
                   {milestoneItems.map((item, index) => {
                     const isLastItem = index === milestoneItems.length - 1;
@@ -509,7 +509,7 @@ export function TwelveWeekProgressTab({
                         {!isLastItem && (
                           <div className="absolute left-[13px] top-8 h-full w-[2px] bg-gradient-to-b from-app-accent/30 to-app-line/10" />
                         )}
-                        <div className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-app-accent/80 text-[10px] font-bold text-white shadow-sm ring-4 ring-app-accent-soft/50">
+                        <div className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-app-accent/80 text-[10px] font-bold text-white shadow-app-sm ring-4 ring-app-accent-soft/50">
                           {index + 1}
                         </div>
                         <p className="pt-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-app-accent">
@@ -531,7 +531,7 @@ export function TwelveWeekProgressTab({
       {hasAdvancedAnalytics ? (
         <div className="stack-section">
           {executionHeatmap.length > 0 && (
-            <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+            <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
                 <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">
                   Bản đồ thực thi
@@ -617,7 +617,7 @@ export function TwelveWeekProgressTab({
           )}
 
           {weeklyTrend.length > 0 && (
-            <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+            <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
                 <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">
                   Xu hướng thực thi theo tuần
@@ -634,7 +634,7 @@ export function TwelveWeekProgressTab({
                     return (
                       <div
                         key={point.weekNumber}
-                        className={`rounded-2xl border p-4.5 transition-all duration-200 ${
+                        className={`rounded-card-lg border p-4.5 transition-all duration-200 ${
                           isCurrent
                             ? "border-app-accent/30 bg-app-accent-soft/30 shadow-xs"
                             : "border-app-line/60 bg-app-bg/50 hover:bg-app-bg/80"
@@ -678,7 +678,7 @@ export function TwelveWeekProgressTab({
           )}
 
           {tacticBreakdown.length > 0 && (
-            <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+            <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
               <CardHeader className="pb-4">
                 <CardTitle className="font-serif text-lg font-bold leading-tight text-app-ink">
                   Phân tích theo việc lặp lại
@@ -691,7 +691,7 @@ export function TwelveWeekProgressTab({
                 {tacticBreakdown.map((item) => (
                   <div
                     key={item.tacticId}
-                    className="flex items-center gap-4 rounded-2xl border border-app-line/60 bg-app-bg/40 px-4.5 py-4 hover:shadow-2xs hover:bg-app-bg/60 transition-all duration-200"
+                    className="flex items-center gap-4 rounded-card-lg border border-app-line/60 bg-app-bg/40 px-4.5 py-4 hover:shadow-2xs hover:bg-app-bg/60 transition-all duration-200"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -716,7 +716,7 @@ export function TwelveWeekProgressTab({
                       </p>
                     </div>
                     <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-card ${
                         item.trend === "up"
                           ? "bg-app-accent-soft/60 text-app-accent"
                           : item.trend === "down"
@@ -739,14 +739,14 @@ export function TwelveWeekProgressTab({
           )}
         </div>
       ) : (
-        <Card className="relative overflow-hidden border border-app-warm-border/30 bg-gradient-to-br from-app-warm-soft/10 via-app-warm-subtle/5 to-transparent backdrop-blur-md shadow-2xl rounded-2xl transition-all duration-300 hover:shadow-app-warm/5 hover:border-app-warm-border/50">
+        <Card className="relative overflow-hidden border border-app-warm-border/30 bg-gradient-to-br from-app-warm-soft/10 via-app-warm-subtle/5 to-transparent backdrop-blur-md shadow-2xl rounded-card-lg transition-all duration-300 hover:shadow-app-warm/5 hover:border-app-warm-border/50">
           {/* Background Accents */}
           <div className="absolute -right-16 -top-16 -z-10 w-32 h-32 rounded-full bg-app-warm-soft/15 blur-2xl pointer-events-none" />
           <div className="absolute -left-16 -bottom-16 -z-10 w-32 h-32 rounded-full bg-app-warm-subtle/10 blur-2xl pointer-events-none" />
 
           <CardContent className="flex flex-col items-center gap-5 p-8 text-center sm:p-10">
             {/* Glowing Lock Icon */}
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-app-warm via-app-warm to-app-warm/75 text-white shadow-lg shadow-app-warm/15 ring-4 ring-app-warm/10 transition-transform duration-300 hover:scale-105">
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-card-lg bg-gradient-to-br from-app-warm via-app-warm to-app-warm/75 text-white shadow-app-lg shadow-app-warm/15 ring-4 ring-app-warm/10 transition-transform duration-300 hover:scale-105">
               <Lock className="h-7 w-7" />
               <Sparkles className="absolute -right-2.5 -top-2.5 h-5 w-5 text-app-warm-strong animate-pulse" />
             </div>
@@ -763,7 +763,7 @@ export function TwelveWeekProgressTab({
             </div>
 
             <div className="flex flex-col items-center gap-3">
-              <Badge className="border border-app-warm-border/30 bg-app-warm-soft/30 text-app-warm-strong hover:bg-app-warm-soft/50 px-3.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-sm transition-all">
+              <Badge className="border border-app-warm-border/30 bg-app-warm-soft/30 text-app-warm-strong hover:bg-app-warm-soft/50 px-3.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-app-sm transition-all">
                 <TrendingUp className="h-3.5 w-3.5" />
                 Tính năng Plus cao cấp
               </Badge>
@@ -771,7 +771,7 @@ export function TwelveWeekProgressTab({
               {onOpenSettingsTab && (
                 <Button
                   onClick={onOpenSettingsTab}
-                  className="mt-2 bg-app-warm hover:bg-app-warm-hover text-white font-medium px-6 py-2 rounded-xl shadow-md shadow-app-warm/15 hover:shadow-lg hover:shadow-app-warm/25 transition-all duration-300 flex items-center gap-2 text-sm"
+                  className="mt-2 bg-app-warm hover:bg-app-warm-hover text-white font-medium px-6 py-2 rounded-card shadow-app-md shadow-app-warm/15 hover:shadow-app-lg hover:shadow-app-warm/25 transition-all duration-300 flex items-center gap-2 text-sm"
                 >
                   Khám phá gói Plus
                   <ArrowRight className="h-4 w-4" />

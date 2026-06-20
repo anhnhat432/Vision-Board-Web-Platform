@@ -148,7 +148,7 @@ export function UpgradePaywallDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden rounded-card border border-app-line bg-app-surface p-0 shadow-md sm:!max-w-4xl">
+      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden rounded-card border border-app-line bg-app-surface p-0 shadow-app-md sm:!max-w-4xl">
         <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-card">
           <div className="border-b border-app-line bg-app-surface px-5 py-6 sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -313,7 +313,7 @@ export function UpgradePaywallDialog({
                       </div>
                     </div>
 
-                    <div className="mt-5 rounded-xl border border-app-line bg-app-surface px-4 py-4">
+                    <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Giá gói</p>
                       <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
                       <p className="mt-2 flex items-center gap-2 text-sm font-medium text-app-ink-soft">
@@ -353,7 +353,7 @@ export function UpgradePaywallDialog({
                 ) : (
                   <div
                     key={plan.code}
-                    className="overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 shadow-[var(--shadow-1)] sm:p-6"
+                    className="overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-5 shadow-[var(--shadow-1)] sm:p-6"
                   >
                     {isRecommended && (
                       <span className="absolute right-4 top-4 rounded-full bg-app-accent px-3 py-1 text-xs font-medium text-white">
@@ -381,7 +381,7 @@ export function UpgradePaywallDialog({
                       </div>
                     </div>
 
-                    <div className="mt-5 rounded-xl border border-app-line bg-app-surface px-4 py-4">
+                    <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Giá gói</p>
                       <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
                       <p className="mt-2 flex items-center gap-2 text-sm font-medium text-app-ink-soft">

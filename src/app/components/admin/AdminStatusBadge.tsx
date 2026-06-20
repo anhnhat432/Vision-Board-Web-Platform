@@ -17,10 +17,10 @@ const TONE_CLASS: Record<AdminBadgeTone, string> = {
   confirmed: "bg-sky-500/15 text-sky-200 border-sky-500/30",
   printing: "bg-violet-500/15 text-violet-200 border-violet-500/30",
   shipping: "bg-blue-500/15 text-blue-200 border-blue-500/30",
-  delivered: "bg-emerald-500/15 text-emerald-200 border-emerald-500/30",
+  delivered: "bg-app-accent-soft text-app-accent border-app-accent/30",
   cancelled: "bg-rose-500/15 text-rose-200 border-rose-500/30",
-  completed: "bg-emerald-500/15 text-emerald-200 border-emerald-500/30",
-  expired: "bg-slate-500/15 text-slate-300 border-slate-500/30",
+  completed: "bg-app-accent-soft text-app-accent border-app-accent/30",
+  expired: "bg-app-bg-subtle text-app-ink-soft border-app-line-strong",
   rejected: "bg-rose-500/15 text-rose-200 border-rose-500/30",
   failed: "bg-rose-500/15 text-rose-200 border-rose-500/30",
 };

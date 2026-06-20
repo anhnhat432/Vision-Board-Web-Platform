@@ -50,34 +50,34 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
     case "on_track":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-card shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-3xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 rounded-card shadow-xs",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-3xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/10 rounded-card shadow-xs",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
         container:
-          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-3xl shadow-xs",
+          "border-app-line/60 bg-gradient-to-br from-app-surface via-app-surface to-app-warm-soft/15 rounded-card shadow-xs",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-app-line/60 bg-app-surface rounded-3xl shadow-xs",
+        container: "border-app-line/60 bg-app-surface rounded-card shadow-xs",
         badge: "border-app-line bg-app-bg text-app-ink-soft px-3 py-1 rounded-full",
         badgeLabel: "Chưa có dữ liệu",
       };
@@ -201,14 +201,14 @@ export function ProgressSummaryCard({
                 )}
               </div>
               {nextActionHandler && (
-                <div className="mt-4.5 rounded-2xl border border-app-line/60 bg-app-bg/50 backdrop-blur-xs p-4 shadow-sm">
+                <div className="mt-4.5 rounded-card-lg border border-app-line/60 bg-app-bg/50 backdrop-blur-xs p-4 shadow-app-sm">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                     Tiếp theo nên làm
                   </p>
                   <p className="mt-1 text-sm font-medium leading-relaxed text-app-ink">{nextActionSuggestion.label}</p>
                   <Button
                     size="lg"
-                    className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-xl sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
+                    className="mt-3.5 w-full bg-app-accent text-white hover:bg-app-accent/90 rounded-card sm:w-auto shadow-2xs hover:shadow-xs transition-all duration-150"
                     onClick={nextActionHandler}
                   >
                     {nextActionSuggestion.buttonLabel}
@@ -227,7 +227,7 @@ export function ProgressSummaryCard({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
+        <Card className="rounded-card-lg border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <CalendarDays className="h-3.5 w-3.5 text-app-accent-soft-strong" />
@@ -244,7 +244,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
+        <Card className="rounded-card-lg border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
@@ -255,7 +255,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
+        <Card className="rounded-card-lg border border-app-line/60 bg-gradient-to-b from-app-surface to-app-bg/10 shadow-2xs hover:shadow-xs transition-all duration-300">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <Flag className="h-3.5 w-3.5 text-app-accent" />
@@ -273,7 +273,7 @@ export function ProgressSummaryCard({
         </Card>
       </div>
 
-      <Card className="rounded-3xl border border-app-line/60 bg-app-surface shadow-xs">
+      <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
         <CardContent className="stack-stack p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -289,13 +289,13 @@ export function ProgressSummaryCard({
             <div className="flex flex-wrap gap-2.5">
               <div
                 data-testid="progress-current-milestone"
-                className="rounded-xl border border-app-line/60 bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft shadow-3xs"
+                className="rounded-card border border-app-line/60 bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft shadow-3xs"
               >
                 Hiện tại: <span className="font-bold text-app-accent">{currentPhaseLabel}</span>
               </div>
               <div
                 data-testid="progress-next-milestone"
-                className="rounded-xl border border-app-line/60 bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft shadow-3xs"
+                className="rounded-card border border-app-line/60 bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft shadow-3xs"
               >
                 Mốc tiếp theo: <span className="font-bold text-app-accent">{nextMilestoneLabel}</span>
               </div>
@@ -323,7 +323,7 @@ export function ProgressSummaryCard({
                   data-milestone={isMilestone ? "true" : "false"}
                   aria-current={isCurrent ? "step" : undefined}
                   aria-label={weekLabel}
-                  className={`min-h-14 rounded-xl border px-2 py-2 text-center text-xs transition-all duration-200 hover:scale-105 ${
+                  className={`min-h-14 rounded-card border px-2 py-2 text-center text-xs transition-all duration-200 hover:scale-105 ${
                     isCurrent
                       ? "border-app-accent bg-app-accent text-white shadow-2xs font-bold"
                       : isReviewed
@@ -343,7 +343,7 @@ export function ProgressSummaryCard({
             })}
           </ol>
 
-          <div className="rounded-2xl border border-app-line/60 bg-app-bg/50 px-4 py-3.5 text-sm leading-relaxed text-app-ink-soft shadow-3xs">
+          <div className="rounded-card-lg border border-app-line/60 bg-app-bg/50 px-4 py-3.5 text-sm leading-relaxed text-app-ink-soft shadow-3xs">
             {reviewDueToday
               ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
               : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}
@@ -356,7 +356,7 @@ export function ProgressSummaryCard({
           <Button
             variant="outline"
             onClick={onViewFull}
-            className="rounded-xl border-app-line/80 hover:bg-app-bg transition-colors px-6 py-2 text-sm font-semibold"
+            className="rounded-card border-app-line/80 hover:bg-app-bg transition-colors px-6 py-2 text-sm font-semibold"
           >
             Xem đầy đủ tiến độ
           </Button>

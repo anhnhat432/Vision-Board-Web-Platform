@@ -132,7 +132,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
   };
 
   return (
-    <Card className="border border-app-line bg-app-surface shadow-lg hover:shadow-xl transition-all duration-300">
+    <Card className="border border-app-line bg-app-surface shadow-app-lg hover:shadow-xl transition-all duration-300">
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -150,7 +150,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               type="button"
               onClick={handleUseDefaults}
               disabled={disabled}
-              className="border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white transition-all duration-200 shadow-sm rounded-lg"
+              className="border-app-accent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white transition-all duration-200 shadow-app-sm rounded-lg"
             >
               <Sparkles className="h-4 w-4" />
               Dùng gợi ý mặc định
@@ -164,7 +164,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
           {blocksByDay.map(({ day, blocks }) => (
             <div
               key={day}
-              className="min-h-40 rounded-xl border border-app-line/60 bg-app-bg-subtle/40 p-4 transition-all duration-300 hover:bg-app-bg-subtle/60 hover:shadow-sm"
+              className="min-h-40 rounded-card border border-app-line/60 bg-app-bg-subtle/40 p-4 transition-all duration-300 hover:bg-app-bg-subtle/60 hover:shadow-app-sm"
             >
               <p className="text-sm font-bold text-app-ink tracking-wide border-b border-app-line/50 pb-2 mb-3">
                 {DAY_LABELS[day]}
@@ -177,7 +177,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                     <div
                       key={block.id}
                       data-testid="weekly-time-block-chip"
-                      className={`rounded-xl border p-3.5 text-xs shadow-sm hover:scale-[1.02] hover:shadow-md transition-all duration-200 ${TYPE_CHIP_CLASS[block.type]}`}
+                      className={`rounded-card border p-3.5 text-xs shadow-app-sm hover:scale-[1.02] hover:shadow-app-md transition-all duration-200 ${TYPE_CHIP_CLASS[block.type]}`}
                     >
                       <p className="font-bold tracking-wide text-app-ink dark:text-inherit">
                         {TYPE_LABELS[block.type]}
@@ -213,11 +213,11 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
           {(["strategic", "buffer", "breakout"] as const).map((type) => (
             <div
               key={type}
-              className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all duration-300 ${TYPE_CARD_CLASS[type]}`}
+              className={`rounded-card border p-5 shadow-app-sm hover:shadow-app-md transition-all duration-300 ${TYPE_CARD_CLASS[type]}`}
             >
               <Badge
                 variant="outline"
-                className={`${TYPE_CHIP_CLASS[type]} px-2.5 py-0.5 rounded-full text-xs shadow-sm`}
+                className={`${TYPE_CHIP_CLASS[type]} px-2.5 py-0.5 rounded-full text-xs shadow-app-sm`}
               >
                 {TYPE_LABELS[type]}
               </Badge>
@@ -230,7 +230,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
       </CardContent>
 
       <Dialog open={Boolean(editingDraft)} onOpenChange={(open) => !open && setEditingDraft(null)}>
-        <DialogContent className="sm:max-w-lg rounded-2xl">
+        <DialogContent className="sm:max-w-lg rounded-card-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-app-ink">Sửa khung thời gian</DialogTitle>
             <DialogDescription className="text-sm text-app-ink-soft mt-1">
@@ -249,7 +249,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                     setEditingDraft((draft) => (draft ? { ...draft, dayOfWeek: day as TimeBlockDayOfWeek } : draft))
                   }
                 >
-                  <SelectTrigger id="time-block-day" className="rounded-xl border-app-line">
+                  <SelectTrigger id="time-block-day" className="rounded-card border-app-line">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -274,7 +274,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                     onChange={(event) =>
                       setEditingDraft((draft) => (draft ? { ...draft, startTime: event.target.value } : draft))
                     }
-                    className="rounded-xl border-app-line"
+                    className="rounded-card border-app-line"
                   />
                 </div>
                 <div className="space-y-2">
@@ -291,7 +291,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                     onChange={(event) =>
                       setEditingDraft((draft) => (draft ? { ...draft, durationMinutes: event.target.value } : draft))
                     }
-                    className="rounded-xl border-app-line"
+                    className="rounded-card border-app-line"
                   />
                 </div>
               </div>
@@ -306,7 +306,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                   onChange={(event) =>
                     setEditingDraft((draft) => (draft ? { ...draft, note: event.target.value } : draft))
                   }
-                  className="rounded-xl border-app-line"
+                  className="rounded-card border-app-line"
                   placeholder="Thêm mục tiêu, công việc phụ..."
                 />
               </div>
@@ -318,13 +318,13 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               ) : null}
 
               <div className="flex flex-col gap-2 sm:flex-row sm:justify-end pt-3">
-                <Button type="button" variant="outline" onClick={() => setEditingDraft(null)} className="rounded-xl">
+                <Button type="button" variant="outline" onClick={() => setEditingDraft(null)} className="rounded-card">
                   Huỷ
                 </Button>
                 <Button
                   type="button"
                   onClick={handleSaveDraft}
-                  className="bg-app-accent hover:bg-app-accent/90 text-white rounded-xl font-bold px-5"
+                  className="bg-app-accent hover:bg-app-accent/90 text-white rounded-card font-bold px-5"
                 >
                   Lưu khung
                 </Button>

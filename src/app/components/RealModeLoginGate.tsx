@@ -24,10 +24,10 @@ export function RealModeLoginGate({ target }: RealModeLoginGateProps) {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-3xl items-center">
         <Card
           data-testid="real-mode-login-gate"
-          className="w-full overflow-hidden border border-app-line bg-app-surface shadow-sm"
+          className="w-full overflow-hidden border border-app-line bg-app-surface shadow-app-sm"
         >
           <CardContent className="stack-stack p-6 text-center sm:p-8 lg:p-10">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-white shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-white shadow-app-sm">
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="stack-tight">

@@ -443,11 +443,11 @@ export function TwelveWeekWeekTab({
         <>
           {/* ── Hero Score Card ──────────────────────────────────────────────── */}
           <StaggerSection>
-            <div className="weekly-grain-overlay rounded-3xl border border-app-line/45 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/15 shadow-xs relative overflow-hidden p-6 sm:p-8 pt-10 weekly-card-lift">
+            <div className="weekly-grain-overlay rounded-card border border-app-line/45 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/15 shadow-xs relative overflow-hidden p-6 sm:p-8 pt-10 weekly-card-lift">
               <PaperPin />
               <WashiTape className="opacity-75 rotate-[-1deg] -top-3.5" />
               {/* Large score focal glow */}
-              <div className="weekly-score-hero rounded-2xl" />
+              <div className="weekly-score-hero rounded-card-lg" />
 
               {/* Header metadata row */}
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-app-ink-muted relative z-10">
@@ -522,7 +522,7 @@ export function TwelveWeekWeekTab({
 
           {/* ── Tactic Indicator Grid ────────────────────────────────────────── */}
           <StaggerSection>
-            <div className="rounded-3xl border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-5 relative pt-10 weekly-card-lift">
+            <div className="rounded-card border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-5 relative pt-10 weekly-card-lift">
               <WashiTape className="opacity-60 rotate-[1deg] -top-3.5" />
               <div className="flex items-center justify-between border-b border-app-line/30 pb-3.5 pt-1">
                 <h3 className="text-lg font-bold text-app-ink font-serif">Hành động cam kết</h3>
@@ -548,7 +548,7 @@ export function TwelveWeekWeekTab({
                     return (
                       <div
                         key={indicator.id || indicator.name}
-                        className="weekly-stagger-item weekly-card-lift group flex flex-col gap-2.5 p-4 rounded-2xl border border-app-line/40 bg-app-bg-subtle/70 hover:bg-app-accent-subtle/25 transition-all duration-300 shadow-3xs"
+                        className="weekly-stagger-item weekly-card-lift group flex flex-col gap-2.5 p-4 rounded-card-lg border border-app-line/40 bg-app-bg-subtle/70 hover:bg-app-accent-subtle/25 transition-all duration-300 shadow-3xs"
                         style={{ "--stagger-index": idx + 1 } as React.CSSProperties}
                       >
                         {/* Top row: name + core/optional badge */}
@@ -602,7 +602,7 @@ export function TwelveWeekWeekTab({
 
           {/* ── Review reminder ──────────────────────────────────────────────── */}
           <StaggerSection>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl border border-app-line/40 bg-app-bg/20 weekly-card-lift">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-card-lg border border-app-line/40 bg-app-bg/20 weekly-card-lift">
               <div className="space-y-0.5">
                 <p className="text-sm font-semibold text-app-ink">Nhìn lại & Đánh giá tuần</p>
                 <p className="text-xs text-app-ink-soft">
@@ -612,7 +612,7 @@ export function TwelveWeekWeekTab({
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs font-semibold px-4.5 py-2.5 h-10 rounded-xl border-app-line bg-app-surface text-app-ink hover:bg-app-bg transition-all shrink-0 shadow-2xs weekly-btn-press"
+                className="text-xs font-semibold px-4.5 py-2.5 h-10 rounded-card border-app-line bg-app-surface text-app-ink hover:bg-app-bg transition-all shrink-0 shadow-2xs weekly-btn-press"
                 onClick={() => setIsStartingEarly(true)}
               >
                 Bắt đầu review sớm
@@ -627,7 +627,7 @@ export function TwelveWeekWeekTab({
       {/* ========================================================================= */}
       {!reviewIsCompleted && canShowFormReview && (
         <StaggerSection>
-          <div className="rounded-3xl border border-app-line/45 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 p-6 sm:p-8 shadow-xs space-y-4 weekly-card-lift">
+          <div className="rounded-card border border-app-line/45 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/10 p-6 sm:p-8 shadow-xs space-y-4 weekly-card-lift">
             <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
               <span className="font-serif text-sm font-semibold tracking-normal normal-case text-app-ink bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
                 Tuần {currentWeekLimit} / {system.totalWeeks}
@@ -686,7 +686,7 @@ export function TwelveWeekWeekTab({
       {showForm && (
         <div
           className={cn(
-            "rounded-3xl border border-app-line/45 bg-app-surface p-5 sm:p-8 shadow-xs space-y-6 relative pt-10 weekly-card-lift",
+            "rounded-card border border-app-line/45 bg-app-surface p-5 sm:p-8 shadow-xs space-y-6 relative pt-10 weekly-card-lift",
             !canShowFormReview && "hidden",
           )}
         >
@@ -762,7 +762,7 @@ export function TwelveWeekWeekTab({
                 <p className="text-xs text-app-ink-muted">Chọn trạng thái cho các cam kết tuần trước.</p>
 
                 {previousCommitments.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-app-line bg-app-surface px-4 py-3.5 text-xs leading-relaxed text-app-ink-soft">
+                  <div className="rounded-card border border-dashed border-app-line bg-app-surface px-4 py-3.5 text-xs leading-relaxed text-app-ink-soft">
                     Tuần đầu chưa có cam kết tuần trước. Hãy đặt ưu tiên tuần sau tại mục 4 bên dưới.
                   </div>
                 ) : (
@@ -779,7 +779,7 @@ export function TwelveWeekWeekTab({
                       return (
                         <div
                           key={commitment}
-                          className="p-3.5 rounded-xl border border-app-line/40 bg-app-surface space-y-2.5 hover:border-app-line/60 transition-colors duration-200"
+                          className="p-3.5 rounded-card border border-app-line/40 bg-app-surface space-y-2.5 hover:border-app-line/60 transition-colors duration-200"
                         >
                           <p className="text-xs sm:text-sm font-semibold text-app-ink leading-snug">{commitment}</p>
                           {commitmentQuote && (
@@ -854,7 +854,7 @@ export function TwelveWeekWeekTab({
                 <Textarea
                   id="weekly-insights"
                   rows={3}
-                  className="mt-2 text-xs sm:text-sm bg-app-surface border-app-line/60 rounded-xl placeholder:text-app-ink-muted/50 p-3 focus:ring-1 focus:ring-app-accent/20 transition-shadow duration-200"
+                  className="mt-2 text-xs sm:text-sm bg-app-surface border-app-line/60 rounded-card placeholder:text-app-ink-muted/50 p-3 focus:ring-1 focus:ring-app-accent/20 transition-shadow duration-200"
                   value={weeklyForm.insights}
                   placeholder="Ví dụ: Tuần qua mình nhận ra học sâu 90 phút buổi sáng hiệu quả hơn học lắt nhắt buổi tối. Tuần sau sẽ dời khung giờ..."
                   onChange={(event) => onWeeklyFormChange("insights", event.target.value)}
@@ -890,7 +890,7 @@ export function TwelveWeekWeekTab({
           {/* Review readiness indicator */}
           <div
             data-testid="weekly-review-readiness"
-            className="rounded-xl border border-app-line/40 bg-app-bg/30 px-4 py-3 text-xs text-app-ink-soft flex items-center justify-between gap-3"
+            className="rounded-card border border-app-line/40 bg-app-bg/30 px-4 py-3 text-xs text-app-ink-soft flex items-center justify-between gap-3"
           >
             <p className="font-semibold text-app-ink shrink">
               {isFutureReviewWeek
@@ -921,7 +921,7 @@ export function TwelveWeekWeekTab({
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs font-semibold px-4 py-2 rounded-xl border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9.5 transition-all weekly-btn-press"
+                className="text-xs font-semibold px-4 py-2 rounded-card border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9.5 transition-all weekly-btn-press"
                 onClick={() => {
                   setIsEditingReview(false);
                   setIsStartingEarly(false);
@@ -932,7 +932,7 @@ export function TwelveWeekWeekTab({
             )}
             <Button
               size="sm"
-              className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4.5 py-2.5 rounded-xl shadow-2xs h-9.5 transition-all weekly-btn-press active:shadow-sm"
+              className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4.5 py-2.5 rounded-card shadow-2xs h-9.5 transition-all weekly-btn-press active:shadow-app-sm"
               onClick={handleSaveReviewClick}
               disabled={isSavingReview || !canSubmitWeeklyReview}
               aria-busy={isSavingReview}
@@ -952,7 +952,7 @@ export function TwelveWeekWeekTab({
           <StaggerSection>
             <div
               data-testid="weekly-review-summary"
-              className="weekly-grain-overlay rounded-3xl border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-6 weekly-card-lift"
+              className="weekly-grain-overlay rounded-card border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-xs space-y-6 weekly-card-lift"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-app-line/30 pb-4">
@@ -969,7 +969,7 @@ export function TwelveWeekWeekTab({
                     </span>
                   )}
                 </div>
-                <Badge className="bg-app-warm-soft text-app-warm border-app-warm-border/10 font-bold px-3 py-1 rounded-xl text-xs shadow-2xs">
+                <Badge className="bg-app-warm-soft text-app-warm border-app-warm-border/10 font-bold px-3 py-1 rounded-card text-xs shadow-2xs">
                   Đã chốt
                 </Badge>
               </div>
@@ -981,7 +981,7 @@ export function TwelveWeekWeekTab({
               )}
 
               {/* Focal score area — dual column with glow */}
-              <div className="flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-app-line/40 bg-app-bg/10 justify-between items-stretch relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row gap-6 p-5 rounded-card-lg border border-app-line/40 bg-app-bg/10 justify-between items-stretch relative overflow-hidden">
                 <div className="weekly-score-hero" />
                 <div className="flex-1 flex flex-col justify-between space-y-2 relative z-10">
                   <span className="text-xs font-bold uppercase tracking-wider text-app-ink-muted block">
@@ -1039,7 +1039,7 @@ export function TwelveWeekWeekTab({
                       return (
                         <div
                           key={indicator.id || indicator.name}
-                          className="flex items-center justify-between text-xs sm:text-sm text-app-ink bg-app-bg/5 p-3 rounded-xl border border-app-line/10 hover:bg-app-accent-subtle/15 transition-colors duration-200"
+                          className="flex items-center justify-between text-xs sm:text-sm text-app-ink bg-app-bg/5 p-3 rounded-card border border-app-line/10 hover:bg-app-accent-subtle/15 transition-colors duration-200"
                         >
                           <span className="truncate max-w-[70%] font-medium">· {indicator.name}</span>
                           <span className="text-xs text-app-ink-soft font-bold shrink-0 bg-app-surface px-2 py-0.5 rounded-md border border-app-line/25">
@@ -1071,7 +1071,7 @@ export function TwelveWeekWeekTab({
                   <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">
                     Bài học rút ra
                   </span>
-                  <blockquote className="font-serif italic text-app-ink leading-relaxed bg-gradient-to-r from-app-accent-soft/40 to-app-accent-soft/10 p-4.5 rounded-2xl border border-app-accent/15 relative">
+                  <blockquote className="font-serif italic text-app-ink leading-relaxed bg-gradient-to-r from-app-accent-soft/40 to-app-accent-soft/10 p-4.5 rounded-card-lg border border-app-accent/15 relative">
                     <span className="absolute top-2 left-3 text-app-accent/20 text-3xl font-serif leading-none select-none">
                       “
                     </span>
@@ -1112,7 +1112,7 @@ export function TwelveWeekWeekTab({
                 <Button
                   type="button"
                   variant="outline"
-                  className="text-xs font-semibold px-4.5 py-2.5 rounded-xl border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg transition-all weekly-btn-press"
+                  className="text-xs font-semibold px-4.5 py-2.5 rounded-card border border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg transition-all weekly-btn-press"
                   onClick={() => setIsEditingReview(true)}
                 >
                   Chỉnh sửa đánh giá
@@ -1124,7 +1124,7 @@ export function TwelveWeekWeekTab({
           {/* ── Next Week Action Card ─────────────────────────────────────── */}
           {nextWeekRecommendation && (
             <StaggerSection>
-              <div className="rounded-2xl border border-app-warm-border/10 bg-app-warm-soft/20 p-5 shadow-xs space-y-4 weekly-card-lift">
+              <div className="rounded-card-lg border border-app-warm-border/10 bg-app-warm-soft/20 p-5 shadow-xs space-y-4 weekly-card-lift">
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-app-warm block">
                     Chuẩn bị tuần sau
@@ -1136,7 +1136,7 @@ export function TwelveWeekWeekTab({
                 <div className="flex items-center gap-2 pt-1">
                   <Button
                     type="button"
-                    className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs h-9 weekly-btn-press"
+                    className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4 py-2 rounded-card shadow-xs h-9 weekly-btn-press"
                     onClick={onAcceptNextWeekRecommendation}
                   >
                     Áp dụng gợi ý tuần sau
@@ -1145,7 +1145,7 @@ export function TwelveWeekWeekTab({
                     <Button
                       type="button"
                       variant="outline"
-                      className="text-xs font-semibold px-4 py-2 rounded-xl border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9 weekly-btn-press"
+                      className="text-xs font-semibold px-4 py-2 rounded-card border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9 weekly-btn-press"
                       onClick={onOpenTodayTab}
                     >
                       Quay lại hôm nay
@@ -1204,11 +1204,11 @@ export function TwelveWeekWeekTab({
       {showForm && canShowFormReview && (
         <div
           data-testid="weekly-review-mobile-sticky-cta"
-          className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-xl md:border md:shadow-lg"
+          className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-card md:border md:shadow-app-lg"
         >
           <Button
             size="lg"
-            className="w-full bg-app-warm text-white shadow-lg hover:bg-app-warm-hover rounded-xl weekly-btn-press"
+            className="w-full bg-app-warm text-white shadow-app-lg hover:bg-app-warm-hover rounded-card weekly-btn-press"
             onClick={handleSaveReviewClick}
             disabled={isSavingReview || !canSubmitWeeklyReview}
             aria-busy={isSavingReview}

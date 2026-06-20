@@ -225,7 +225,7 @@ export function AppSidebar({
             <DropdownMenuContent
               side="top"
               align="start"
-              className="w-[240px] rounded-2xl border border-app-line bg-app-surface p-1.5 shadow-app-lg"
+              className="w-[240px] rounded-card border border-app-line bg-app-surface p-1.5 shadow-app-lg"
             >
               <DropdownMenuLabel className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted/90 border-b border-app-line/45 mb-1">
                 Tài khoản

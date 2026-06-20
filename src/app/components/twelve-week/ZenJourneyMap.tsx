@@ -61,7 +61,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
   const pathD = generateSmoothPath();
 
   return (
-    <div className="relative w-full rounded-3xl border border-app-line/50 bg-gradient-to-b from-app-surface via-app-bg/40 to-app-surface p-5 shadow-sm pt-8 overflow-hidden">
+    <div className="relative w-full rounded-card border border-app-line/50 bg-gradient-to-b from-app-surface via-app-bg/40 to-app-surface p-5 shadow-app-sm pt-8 overflow-hidden">
       <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
       {/* Khung tiêu đề chánh niệm */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3 pt-1">
@@ -80,7 +80,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
             Đã hoàn thành review
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-amber-500" />
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-app-highlight" />
             Tuần hiện tại (Lửa trại)
           </span>
           <span className="flex items-center gap-1">
@@ -307,7 +307,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
 
       {/* TẤM CARD CHI TIẾT TRẠM DỪNG CHÂN NẰM THÔNG THOÁNG BÊN DƯỚI BẢN ĐỒ */}
       {activeWeek && (
-        <div className="mt-6 rounded-3xl border border-app-line bg-gradient-to-br from-app-surface via-app-bg/30 to-app-surface p-6 shadow-sm transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
+        <div className="mt-6 rounded-card border border-app-line bg-gradient-to-br from-app-surface via-app-bg/30 to-app-surface p-6 shadow-app-sm transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3">
             <div className="flex items-center gap-2.5">
               <span className="text-2xl">🪨</span>
@@ -345,13 +345,13 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
           </div>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
+            <div className="rounded-card bg-app-surface/60 p-4 border border-app-line/40 shadow-app-sm flex flex-col justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Điểm hiệu suất</span>
               <p className="mt-2 font-serif text-3xl font-bold text-app-ink tabular-nums">
                 {activeWeek.weeklyScore} <span className="text-xs font-sans font-normal text-app-ink-muted">điểm</span>
               </p>
             </div>
-            <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
+            <div className="rounded-card bg-app-surface/60 p-4 border border-app-line/40 shadow-app-sm flex flex-col justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                 Hoàn thành cốt lõi
               </span>
@@ -359,7 +359,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 {activeWeek.leadCompletionPercent}%
               </p>
             </div>
-            <div className="rounded-xl bg-app-surface/60 p-4 border border-app-line/40 shadow-sm flex flex-col justify-between">
+            <div className="rounded-card bg-app-surface/60 p-4 border border-app-line/40 shadow-app-sm flex flex-col justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                 Chỉ số tiến triển
               </span>

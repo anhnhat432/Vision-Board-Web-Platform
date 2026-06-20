@@ -58,10 +58,10 @@ describe("token-parser — parseTokens (tokens.css thật)", () => {
   });
 
   it("override giá trị :root bằng html.dark ở mode dark", () => {
-    expect(lightSet.get("--app-bg")?.rawValue).toBe("var(--neutral-050)");
+    expect(lightSet.get("--app-bg")?.rawValue).toBe("#F7F4ED");
     expect(darkSet.get("--app-bg")?.rawValue).toBe("#1C1A15");
-    expect(lightSet.get("--app-accent")?.rawValue).toBe("var(--green-700)");
-    expect(darkSet.get("--app-accent")?.rawValue).toBe("#5BA590");
+    expect(lightSet.get("--app-accent")?.rawValue).toBe("#0C5E3A");
+    expect(darkSet.get("--app-accent")?.rawValue).toBe("#2FA36B");
   });
 });
 
@@ -69,14 +69,14 @@ describe("token-parser — resolveToken", () => {
   const set = loadTokenSet({ mode: "light" });
 
   it("đi hết chuỗi var() tới literal Primitive, non-empty đúng kiểu", () => {
-    // --btn-primary-bg → --app-accent → --green-700 → #2A5447
+    // --btn-primary-bg → --app-accent → #0C5E3A
     const btn = resolveToken("--btn-primary-bg", set);
-    expect(btn.resolvedValue).toBe("#2A5447");
+    expect(btn.resolvedValue).toBe("#0C5E3A");
     expect(btn.isNonEmpty).toBe(true);
     expect(btn.kindValid).toBe(true);
 
     const radius = resolveToken("--card-radius", set);
-    expect(radius.resolvedValue).toBe("14px");
+    expect(radius.resolvedValue).toBe("18px");
     expect(radius.kindValid).toBe(true);
 
     const shadow = resolveToken("--input-focus-ring", set);
@@ -103,7 +103,7 @@ describe("token-parser — buildReferenceGraph", () => {
 
   it("trích đúng các tham chiếu var() trong rawValue", () => {
     const graph = buildReferenceGraph(set);
-    expect(graph.get("--app-accent")).toEqual(["--green-700"]);
+    expect(graph.get("--app-accent")).toEqual([]);
     expect(graph.get("--btn-primary-bg")).toEqual(["--app-accent"]);
     // Primitive literal không có tham chiếu.
     expect(graph.get("--green-700")).toEqual([]);
@@ -111,11 +111,11 @@ describe("token-parser — buildReferenceGraph", () => {
 
   it("chuỗi tham chiếu phân giải về literal sau hữu hạn bước (acyclic)", () => {
     const graph = buildReferenceGraph(set);
-    // --btn-primary-bg → --app-accent → --green-700 (literal)
+    // --btn-primary-bg → --app-accent (literal #0C5E3A)
     const refs1 = graph.get("--btn-primary-bg") ?? [];
     expect(refs1).toContain("--app-accent");
     const refs2 = graph.get("--app-accent") ?? [];
-    expect(refs2).toContain("--green-700");
+    expect(refs2).toEqual([]);
     const refs3 = graph.get("--green-700") ?? [];
     expect(refs3).toEqual([]);
   });

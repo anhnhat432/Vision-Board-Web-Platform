@@ -140,15 +140,15 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
 
 function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
   if (!isActive) {
-    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:border-app-line-strong hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl shadow-none";
+    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:border-app-line-strong hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-card-lg shadow-none";
   }
   switch (value) {
     case "low":
-      return "border-app-status-info/40 bg-app-status-info/10 text-app-status-info dark:bg-app-status-info/20 dark:text-app-status-info font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-app-status-info/20";
+      return "border-app-status-info/40 bg-app-status-info/10 text-app-status-info dark:bg-app-status-info/20 dark:text-app-status-info font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-status-info/20";
     case "high":
-      return "border-app-status-warning/40 bg-app-status-warning/10 text-app-status-warning dark:bg-app-status-warning/20 dark:text-app-status-warning font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-app-status-warning/20";
+      return "border-app-status-warning/40 bg-app-status-warning/10 text-app-status-warning dark:bg-app-status-warning/20 dark:text-app-status-warning font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-status-warning/20";
     default:
-      return "border-app-status-success/40 bg-app-status-success/10 text-app-status-success dark:bg-app-status-success/20 dark:text-app-status-success font-bold shadow-sm transition-all duration-300 rounded-2xl scale-[1.03] ring-2 ring-app-status-success/20";
+      return "border-app-status-success/40 bg-app-status-success/10 text-app-status-success dark:bg-app-status-success/20 dark:text-app-status-success font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-status-success/20";
   }
 }
 
@@ -389,7 +389,7 @@ export function TwelveWeekTodayTab({
   const reviewDuePrompt = reviewDueToday ? (
     <div
       data-testid="today-review-due-prompt"
-      className="order-2 rounded-2xl border border-app-warm-border/15 bg-app-warm-soft/10 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between transition-all duration-150"
+      className="order-2 rounded-card-lg border border-app-warm-border/15 bg-app-warm-soft/10 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between transition-all duration-150"
     >
       <div className="min-w-0">
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-app-warm-strong">
@@ -403,7 +403,7 @@ export function TwelveWeekTodayTab({
       {onOpenWeekTab ? (
         <Button
           variant="ghost"
-          className="shrink-0 text-app-warm hover:text-app-warm-hover text-xs font-bold rounded-xl px-3 py-2 transition-all"
+          className="shrink-0 text-app-warm hover:text-app-warm-hover text-xs font-bold rounded-card px-3 py-2 transition-all"
           onClick={onOpenWeekTab}
         >
           Mở review tuần
@@ -450,7 +450,7 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 bg-app-surface rounded-2xl border border-app-line/30 shadow-app-sm overflow-hidden"
+          className="order-1 bg-app-surface rounded-card-lg border border-app-line/30 shadow-app-sm overflow-hidden"
         >
           <div className="flex flex-col sm:flex-row">
             <div className="w-1.5 sm:w-2 bg-app-accent/50 shrink-0" aria-hidden="true" />
@@ -469,7 +469,7 @@ export function TwelveWeekTodayTab({
                 <div className="mt-5">
                   <Button
                     variant="default"
-                    className="bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-sm shadow-sm rounded-xl px-6 h-11 transition-all active:scale-[0.98]"
+                    className="bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-sm shadow-app-sm rounded-card px-6 h-11 transition-all active:scale-[0.98]"
                     onClick={nextActionState.onAction}
                   >
                     {nextActionState.actionLabel}
@@ -487,7 +487,7 @@ export function TwelveWeekTodayTab({
       {missedTasks.length > 0 && (
         <div
           data-testid="today-overdue-recovery"
-          className="order-4 rounded-2xl border border-app-warm-border/20 bg-app-warm-soft/10 p-4 sm:p-5 flex flex-col gap-3"
+          className="order-4 rounded-card-lg border border-app-warm-border/20 bg-app-warm-soft/10 p-4 sm:p-5 flex flex-col gap-3"
         >
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-warm-soft text-app-warm">
@@ -562,7 +562,7 @@ export function TwelveWeekTodayTab({
       {hasPrimaryTask && firstPriorityTask && !isHeroDismissed && (
         <div
           data-testid="today-primary-hero"
-          className={`order-2 bg-app-surface rounded-2xl border shadow-app-sm overflow-hidden ${
+          className={`order-2 bg-app-surface rounded-card-lg border shadow-app-sm overflow-hidden ${
             isPrimaryTaskCompleted
               ? "border-app-accent/20"
               : primaryTaskOverdue
@@ -640,7 +640,7 @@ export function TwelveWeekTodayTab({
                   <div className="mt-5 flex flex-wrap items-center gap-3">
                     <Button
                       data-testid="today-primary-mark-done"
-                      className="bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-sm shadow-sm rounded-xl px-6 h-11 transition-all active:scale-[0.98]"
+                      className="bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-sm shadow-app-sm rounded-card px-6 h-11 transition-all active:scale-[0.98]"
                       onClick={() => handleTaskCompletionChange(firstPriorityTask.id, true)}
                     >
                       <Check className="mr-1.5 h-4 w-4" />
@@ -649,7 +649,7 @@ export function TwelveWeekTodayTab({
                     {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
                       <Button
                         variant="outline"
-                        className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg font-semibold text-sm rounded-xl px-5 h-11 shadow-3xs transition-all active:scale-[0.98]"
+                        className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg font-semibold text-sm rounded-card px-5 h-11 shadow-3xs transition-all active:scale-[0.98]"
                         onClick={() => onRescheduleTaskWithinWeek(firstPriorityTask.id)}
                       >
                         <CalendarClock className="mr-1.5 h-4 w-4 text-app-ink-soft" />
@@ -672,7 +672,7 @@ export function TwelveWeekTodayTab({
           <div className={fadeInClassName}>
             <Card
               data-tour-id="system-today-queue"
-              className="h-full min-w-0 overflow-hidden rounded-2xl border border-app-line/30 bg-app-surface shadow-2xs"
+              className="h-full min-w-0 overflow-hidden rounded-card-lg border border-app-line/30 bg-app-surface shadow-2xs"
             >
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3.5 sm:px-7 sm:pt-6 sm:pb-4 border-b border-app-line/20">
                 <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
@@ -702,7 +702,7 @@ export function TwelveWeekTodayTab({
                       }
                       actions={
                         onOpenWeekTab && !reviewDueToday ? (
-                          <Button variant="outline" onClick={onOpenWeekTab} className="bg-app-surface rounded-xl">
+                          <Button variant="outline" onClick={onOpenWeekTab} className="bg-app-surface rounded-card">
                             Mở tab Tuần
                             <ArrowRight className="ml-1 h-4 w-4" />
                           </Button>
@@ -722,7 +722,7 @@ export function TwelveWeekTodayTab({
                       }
                       actions={
                         onNavigateToSetup ? (
-                          <Button variant="secondary" onClick={onNavigateToSetup} className="rounded-xl">
+                          <Button variant="secondary" onClick={onNavigateToSetup} className="rounded-card">
                             {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
                             <ArrowRight className="ml-1 h-4 w-4" />
                           </Button>
@@ -877,7 +877,7 @@ export function TwelveWeekTodayTab({
                   </MotionStaggerList>
                 )}
                 {secondaryTodayTasks.length > 0 && (
-                  <details className="group min-w-0 rounded-2xl border border-app-line bg-app-surface px-4 py-3.5 shadow-3xs transition-all duration-150">
+                  <details className="group min-w-0 rounded-card-lg border border-app-line bg-app-surface px-4 py-3.5 shadow-3xs transition-all duration-150">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-semibold text-app-ink">
                       <span>Sau việc đầu tiên</span>
                       <span className="rounded-lg border border-app-line bg-app-bg px-2 py-0.5 text-[10px] font-medium text-app-ink-soft">
@@ -891,7 +891,7 @@ export function TwelveWeekTodayTab({
                       {secondaryPreviewTasks.map((task, index) => (
                         <div
                           key={task.id}
-                          className="flex min-w-0 items-center gap-3 rounded-xl border border-app-line/20 bg-app-bg/20 px-3.5 py-2.5"
+                          className="flex min-w-0 items-center gap-3 rounded-card border border-app-line/20 bg-app-bg/20 px-3.5 py-2.5"
                         >
                           <div className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-lg bg-app-line/80 text-[10px] font-bold text-app-ink-soft">
                             {index + 2}
@@ -916,7 +916,7 @@ export function TwelveWeekTodayTab({
                     )}
                   </details>
                 )}
-                <div className="rounded-xl border border-app-line bg-app-bg/30 p-4">
+                <div className="rounded-card border border-app-line bg-app-bg/30 p-4">
                   <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-app-ink-soft">
                     <span>Tiến độ tuần {currentWeek}</span>
                     <span className="text-app-ink">{weekCompletion.percent}%</span>
@@ -926,7 +926,7 @@ export function TwelveWeekTodayTab({
                 {primaryTaskCompletedToday && (
                   <p
                     data-testid="today-primary-done-nudge"
-                    className="rounded-xl border border-app-accent/20 bg-app-accent-soft/40 px-4 py-3 text-xs leading-relaxed text-app-accent font-medium"
+                    className="rounded-card border border-app-accent/20 bg-app-accent-soft/40 px-4 py-3 text-xs leading-relaxed text-app-accent font-medium"
                   >
                     Việc quan trọng nhất đã chốt xong – hãy lưu check-in ngắn để khép lại hôm nay.
                   </p>
@@ -935,7 +935,7 @@ export function TwelveWeekTodayTab({
             </Card>
           </div>
           <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
-            <Card className="h-full min-w-0 overflow-hidden rounded-2xl border border-app-line/30 bg-app-surface shadow-2xs">
+            <Card className="h-full min-w-0 overflow-hidden rounded-card-lg border border-app-line/30 bg-app-surface shadow-2xs">
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3.5 sm:px-7 sm:pt-6 sm:pb-4 border-b border-app-line/20">
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -998,7 +998,7 @@ export function TwelveWeekTodayTab({
                             aria-checked={isActive}
                             aria-label={`${option.label}: ${option.hint}`}
                             variant="outline"
-                            className={`h-auto min-h-12 min-w-0 justify-center px-2 py-2.5 rounded-xl transition-all duration-200 ${moodStyle}`}
+                            className={`h-auto min-h-12 min-w-0 justify-center px-2 py-2.5 rounded-card transition-all duration-200 ${moodStyle}`}
                             onClick={() => onDailyMoodChange(option.value)}
                           >
                             <span className="flex flex-col items-center gap-1 min-w-0">
@@ -1030,7 +1030,7 @@ export function TwelveWeekTodayTab({
                 <div className="flex flex-col gap-2 mt-5">
                   <Button
                     variant="default"
-                    className="w-full h-10 bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-sm shadow-sm rounded-lg transition-all active:scale-[0.98]"
+                    className="w-full h-10 bg-app-accent hover:bg-app-accent-hover text-white font-semibold text-sm shadow-app-sm rounded-lg transition-all active:scale-[0.98]"
                     onClick={handleSaveCheckInClick}
                     disabled={isSavingCheckIn}
                     aria-busy={isSavingCheckIn}

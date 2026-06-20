@@ -23,7 +23,7 @@ export function OrderHero() {
 
         <div className="flex flex-col sm:flex-row gap-5 items-stretch w-full lg:w-auto shrink-0">
           {/* Visual Anchor */}
-          <div className="relative overflow-hidden rounded-2xl border border-[var(--order-border)] shadow-sm aspect-[16/10] w-full sm:w-56 shrink-0 bg-white/50">
+          <div className="relative overflow-hidden rounded-card-lg border border-[var(--order-border)] shadow-app-sm aspect-[16/10] w-full sm:w-56 shrink-0 bg-app-surface/50">
             <img
               src="/printed_vision_kit.png"
               alt="Bộ Vision Board Kit vật lý"

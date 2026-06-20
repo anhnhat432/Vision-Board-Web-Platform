@@ -1057,7 +1057,7 @@ function GoalTrackerContent({
               </Button>
             }
             aside={
-              <div className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg shadow-xs aspect-[4/3] w-full max-w-[240px] shrink-0">
+              <div className="relative overflow-hidden rounded-card border border-app-line bg-app-bg shadow-xs aspect-[4/3] w-full max-w-[240px] shrink-0">
                 <img
                   src="/vision_board_canvas.png"
                   alt="Bản đồ tầm nhìn và mục tiêu"

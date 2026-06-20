@@ -726,7 +726,7 @@ export function SmartGoalStepShell({
               initial={{ scale: 0, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0 }}
-              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-app-status-warning/15 text-app-status-warning border border-app-status-warning/30 px-3 py-1 text-[10px] font-extrabold shadow-md animate-[pulse_2.2s_infinite] z-25"
+              className="absolute -top-3.5 -right-3 flex items-center gap-1 rounded-full bg-app-status-warning/15 text-app-status-warning border border-app-status-warning/30 px-3 py-1 text-[10px] font-extrabold shadow-app-md animate-[pulse_2.2s_infinite] z-25"
             >
               <span>🏆 Chuẩn Vàng</span>
             </motion.div>
@@ -885,7 +885,7 @@ export function SmartGoalStepShell({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -65, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed top-0 left-0 right-0 z-45 bg-app-surface/90 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-md flex items-center justify-between gap-3 lg:hidden"
+            className="fixed top-0 left-0 right-0 z-45 bg-app-surface/90 border-b border-app-line backdrop-blur-md px-4 py-3 shadow-app-md flex items-center justify-between gap-3 lg:hidden"
           >
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-extrabold uppercase tracking-widest text-app-accent mb-0.5 select-none flex items-center gap-1">
@@ -970,7 +970,7 @@ export function SmartGoalStepShell({
                         isActive
                           ? "border-app-accent bg-app-accent-soft text-app-accent scale-[1.03] shadow-sm"
                           : isDone
-                            ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent hover:scale-[1.02] active:scale-[0.97]"
+                            ? "border-app-accent/30 bg-app-accent text-white hover:bg-app-accent-hover hover:scale-[1.02] active:scale-[0.97]"
                             : "border-app-line bg-app-bg text-app-ink-muted hover:bg-app-accent-soft/30 hover:text-app-accent active:scale-[0.97] disabled:cursor-default",
                       )}
                     >
@@ -1200,7 +1200,7 @@ export function SmartGoalStepShell({
               </div>
 
               {/* Sticky Bottom CTA cho Mobile */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 p-4 border-t border-app-line bg-app-surface/90 backdrop-blur-md shadow-lg flex flex-col gap-3 lg:hidden">
+              <div className="fixed bottom-0 left-0 right-0 z-40 p-4 border-t border-app-line bg-app-surface/90 backdrop-blur-md shadow-app-lg flex flex-col gap-3 lg:hidden">
                 <div className="flex justify-between gap-3">
                   <button
                     type="button"

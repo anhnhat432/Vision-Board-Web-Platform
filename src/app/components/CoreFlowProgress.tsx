@@ -118,7 +118,7 @@ export function CoreFlowProgress({
           aria-hidden="true"
         />
         <span
-          className="absolute top-0 bottom-0 w-2 rounded-full bg-white/50 blur-[1px] transition-all duration-500 motion-safe:animate-pulse"
+          className="absolute top-0 bottom-0 w-2 rounded-full bg-app-surface/50 blur-[1px] transition-all duration-500 motion-safe:animate-pulse"
           style={{ left: `calc(${progressValue}% - 4px)` }}
           aria-hidden="true"
         />

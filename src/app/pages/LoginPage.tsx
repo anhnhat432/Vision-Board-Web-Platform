@@ -245,9 +245,9 @@ export function LoginPage() {
     // Sign-in not configured — show a notice instead of a broken form
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4">
-        <div className="w-full max-w-md surface-raised rounded-xl border border-app-line bg-app-surface p-6">
+        <div className="w-full max-w-md surface-raised rounded-card border border-app-line bg-app-surface p-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-app-sm ring-1 ring-app-accent/20">
               <Target className="h-5 w-5 text-white" />
             </div>
             <span className="text-base font-semibold tracking-tight text-app-ink">Vision Board</span>
@@ -285,7 +285,7 @@ export function LoginPage() {
       <header className="flex w-full items-center justify-center px-4 py-6">
         <div className="flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-app-accent shadow-sm ring-1 ring-app-accent/20">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-app-accent shadow-app-sm ring-1 ring-app-accent/20">
               <Target className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-app-ink">Dear Our Future</span>
@@ -303,7 +303,7 @@ export function LoginPage() {
           <div className="grid min-w-0 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block">
-              <div className="rounded-[14px] border border-white/15 bg-grad-aspire p-8 text-white">
+              <div className="rounded-[14px] border border-app-line/15 bg-grad-aspire p-8 text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{captionText}</p>
                 <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-white max-w-md">
                   {heroTitle}
@@ -314,7 +314,7 @@ export function LoginPage() {
                 <div className="mt-8 grid grid-cols-1 gap-3 max-w-sm">
                   {TRUST_FEATURES.map(({ icon: Icon, title, sub }) => (
                     <div key={title} className="flex items-start gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-lg bg-white/15 text-white shrink-0">
+                      <div className="flex size-9 items-center justify-center rounded-lg bg-app-surface/15 text-white shrink-0">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
@@ -374,7 +374,7 @@ export function LoginPage() {
                     <Link
                       to={{ pathname: "/login", search: "" }}
                       className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
-                        isSignIn ? "bg-app-surface text-app-ink shadow-sm" : "text-app-ink-soft hover:text-app-ink"
+                        isSignIn ? "bg-app-surface text-app-ink shadow-app-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
                       Đăng nhập
@@ -382,7 +382,7 @@ export function LoginPage() {
                     <Link
                       to={{ pathname: "/login", search: "?mode=signup" }}
                       className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
-                        !isSignIn ? "bg-app-surface text-app-ink shadow-sm" : "text-app-ink-soft hover:text-app-ink"
+                        !isSignIn ? "bg-app-surface text-app-ink shadow-app-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
                       Đăng ký
@@ -735,7 +735,7 @@ function LoginStatusCard({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4">
       <div className="w-full max-w-md rounded-[14px] border border-app-line bg-app-surface p-6 text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-app-accent shadow-lg">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-app-accent shadow-app-lg">
           {icon}
         </div>
         <h1 className="mt-4 font-serif text-xl font-medium tracking-tight text-app-ink">{title}</h1>

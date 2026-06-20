@@ -13,7 +13,7 @@ interface RescueAlertProps {
 export function RescueAlert({ trigger, ctaLabel, onAction, onDismiss, onVisible }: RescueAlertProps) {
   return (
     <section
-      className="surface-raised rounded-xl border border-app-status-warning/30 bg-app-status-warning/10 p-4 text-sm text-app-status-warning md:p-5"
+      className="surface-raised rounded-card border border-app-status-warning/30 bg-app-status-warning/10 p-4 text-sm text-app-status-warning md:p-5"
       aria-label="Cảnh báo tuần này"
       onAnimationStart={onVisible}
     >

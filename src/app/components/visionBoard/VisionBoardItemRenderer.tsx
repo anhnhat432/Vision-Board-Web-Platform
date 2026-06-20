@@ -67,7 +67,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
         {frame.decorationsLayout === "watercolor" && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -top-2 -left-2 h-8 w-8 rounded-full bg-amber-200/30 blur-md"
+            className="pointer-events-none absolute -top-2 -left-2 h-8 w-8 rounded-full bg-app-highlight/30 blur-md"
           />
         )}
         {!item.content ? (
@@ -89,7 +89,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
         )}
         {areaLabel && frame.decorationsLayout !== "polaroid" && (
           <span
-            className="absolute bottom-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-sm"
+            className="absolute bottom-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-app-sm"
             style={{ backgroundColor: areaColor }}
           >
             {areaLabel}
@@ -125,7 +125,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
       quoteBackgroundOverlay = (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-2xl"
+          className="pointer-events-none absolute inset-0 rounded-card-lg"
           style={{
             backgroundImage: "radial-gradient(circle, rgba(236,72,153,0.12) 1px, transparent 1px)",
             backgroundSize: "12px 12px",
@@ -139,13 +139,13 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 shadow-app-lg"
+        className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-5 shadow-app-lg"
         style={{ width: `${width}px`, ...quoteBackgroundStyle }}
       >
         {quoteBackgroundOverlay}
         {areaLabel && (
           <span
-            className="absolute top-2 right-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-sm"
+            className="absolute top-2 right-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-app-sm"
             style={{ backgroundColor: areaColor }}
           >
             {areaLabel}
@@ -178,7 +178,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="flex items-center justify-center rounded-2xl bg-app-accent text-white shadow-app-lg"
+        className="flex items-center justify-center rounded-card-lg bg-app-accent text-white shadow-app-lg"
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         <Icon className="h-10 w-10" style={{ width: size * 0.4, height: size * 0.4 }} />

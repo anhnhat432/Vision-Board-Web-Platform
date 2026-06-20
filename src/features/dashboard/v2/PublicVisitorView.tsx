@@ -392,8 +392,58 @@ export function PublicVisitorView({
                 <div className="dof-display" style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
                   04 / 12
               </div>
-            </EditorialCard>
+              </div>
+            </div>
           </div>
+
+          {/* JOURNEY STRIP */}
+          <EditorialCard
+            tone="ink"
+            className="dof-up mt-[52px]"
+            style={{ animationDelay: ".2s" }}
+          >
+            <Eyebrow
+              tone="muted"
+              style={{ color: "var(--app-highlight)", marginBottom: 18 }}
+            >
+              Hành trình 4 bước gặt hái kết quả
+            </Eyebrow>
+            <div className="dof-journey-grid">
+              {JOURNEY_STEPS.map((step) => (
+                <div key={step.n} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div
+                    className="dof-display"
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: step.active ? "var(--app-highlight)" : "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 7,
+                        background: step.active ? "var(--app-highlight)" : "color-mix(in srgb, var(--app-highlight) 18%, transparent)",
+                        color: step.active ? "var(--app-ink)" : "var(--app-highlight)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 12,
+                      }}
+                    >
+                      {step.n}
+                    </span>
+                    {step.title}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: "var(--app-ink-muted)" }}>{step.caption}</div>
+                </div>
+              ))}
+            </div>
+          </EditorialCard>
         </section>
 
         {/* LOCAL DATA RESTORE BANNER */}
@@ -828,8 +878,8 @@ export function PublicVisitorView({
                   >
                     <span>{step.footLeft}</span>
                     <span>{step.footRight}</span>
-              </div>
-            </EditorialCard>
+                  </div>
+                </div>
               );
             })}
           </div>

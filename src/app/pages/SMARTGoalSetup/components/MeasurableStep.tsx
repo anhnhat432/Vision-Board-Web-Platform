@@ -525,7 +525,7 @@ export function MeasurableStep({
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className={cn("h-full rounded-full shadow-md", themeColor, glowColor)}
+                className={cn("h-full rounded-full shadow-app-md", themeColor, glowColor)}
               />
             </div>
             <div className="flex justify-between text-[11px] font-bold text-app-ink-muted select-none">

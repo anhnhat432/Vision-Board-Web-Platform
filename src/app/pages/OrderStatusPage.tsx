@@ -459,7 +459,7 @@ export function OrderStatusPage() {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 lg:py-12">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)]">
-          <div className="overflow-hidden surface-raised rounded-xl border border-app-line bg-app-surface">
+          <div className="overflow-hidden surface-raised rounded-card border border-app-line bg-app-surface">
             <div className="border-b border-app-line p-5 text-center sm:p-6">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                 <QrCode className="h-6 w-6" />
@@ -504,7 +504,7 @@ export function OrderStatusPage() {
           </div>
 
           <div className="space-y-5">
-            <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-6">
+            <div className="surface-raised rounded-card border border-app-line bg-app-surface p-6">
               <h3 className="mb-1 text-lg font-semibold text-app-ink">Thông tin chuyển khoản</h3>
               <p className="text-sm text-app-ink-muted">
                 Nhấn nút sao chép từng dòng để tránh nhập sai. Nội dung chuyển khoản là phần quan trọng nhất.
@@ -658,7 +658,7 @@ export function OrderStatusPage() {
   if (!order) {
     return (
       <div className="stack-section pb-12">
-        <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center lg:p-12">
+        <div className="surface-empty rounded-card-lg border border-dashed border-app-line bg-app-bg/50 p-8 text-center lg:p-12">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-app-bg text-app-ink">
             <ClipboardList className="h-10 w-10 text-app-accent" />
           </div>
@@ -734,7 +734,7 @@ export function OrderStatusPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="stack-section">
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-app-lg">
             <CardHeader>
               <CardTitle>Chi tiết đơn</CardTitle>
               <CardDescription>
@@ -753,7 +753,7 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
+                <div className="rounded-card border border-app-line bg-app-bg-subtle p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Target className="h-3.5 w-3.5 text-app-accent" />
                     Mục tiêu đang gắn
@@ -768,7 +768,7 @@ export function OrderStatusPage() {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
+                <div className="rounded-card border border-app-line bg-app-bg-subtle p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
                     Chi tiết đơn
@@ -828,7 +828,7 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-app-line bg-app-surface p-4">
+                <div className="rounded-card border border-app-line bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     <Mail className="h-3.5 w-3.5" />
                     Người nhận
@@ -841,7 +841,7 @@ export function OrderStatusPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-app-line bg-app-surface p-4">
+                <div className="rounded-card border border-app-line bg-app-surface p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     <MapPin className="h-3.5 w-3.5" />
                     Địa chỉ giao
@@ -863,7 +863,7 @@ export function OrderStatusPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
+                  <div className="rounded-card border border-app-line bg-app-bg-subtle p-4">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                       <Package className="h-3.5 w-3.5" />
                       Ghi chú cho kit
@@ -892,7 +892,7 @@ export function OrderStatusPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-app-lg">
             <CardHeader>
               <CardTitle>Tiến trình đơn</CardTitle>
               <CardDescription>
@@ -910,7 +910,7 @@ export function OrderStatusPage() {
                 return (
                   <div
                     key={step.status}
-                    className={`flex items-start gap-4 rounded-xl border px-4 py-4 ${
+                    className={`flex items-start gap-4 rounded-card border px-4 py-4 ${
                       isActive
                         ? "border-app-status-success/40 bg-app-status-success/10"
                         : "border-app-line bg-app-surface"
@@ -955,7 +955,7 @@ export function OrderStatusPage() {
               })}
 
               {isCancelled && (
-                <div className="rounded-xl border border-app-status-error/30 bg-app-status-error/10 p-4">
+                <div className="rounded-card border border-app-status-error/30 bg-app-status-error/10 p-4">
                   <p className="text-sm font-semibold text-app-status-error">Đơn này đã bị huỷ.</p>
                   <p className="mt-1 text-sm leading-7 text-app-ink-soft">
                     Bạn có thể tạo đơn mới nếu vẫn muốn đặt kit.
@@ -972,7 +972,7 @@ export function OrderStatusPage() {
                     <p className="text-sm text-app-ink-soft">Phần này chỉ xuất hiện khi đơn chưa kết nối máy chủ.</p>
                   </div>
 
-                  <div className="rounded-xl border border-app-line bg-app-bg-subtle p-4">
+                  <div className="rounded-card border border-app-line bg-app-bg-subtle p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
@@ -1024,7 +1024,7 @@ export function OrderStatusPage() {
             />
           ) : null}
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-app-lg">
             <CardHeader>
               <CardTitle>Đơn gần đây</CardTitle>
               <CardDescription>Giữ luồng đơn gọn và cho phép mở nhanh lại các đơn vừa tạo.</CardDescription>
@@ -1035,7 +1035,7 @@ export function OrderStatusPage() {
                 <button
                   key={item.id}
                   type="button"
-                  className={`w-full rounded-xl border px-4 py-4 text-left transition-colors ${
+                  className={`w-full rounded-card border px-4 py-4 text-left transition-colors ${
                     item.id === order.id
                       ? "border-app-status-info/40 bg-app-status-info/10"
                       : "border-app-line bg-app-surface hover:bg-app-bg-subtle"
@@ -1125,7 +1125,7 @@ function KitPaymentCta({
   const showLocalOnly = demoMode || (!user || !backendOrderId);
 
   return (
-    <Card className="border border-app-accent/20 bg-app-accent-soft/40 shadow-sm">
+    <Card className="border border-app-accent/20 bg-app-accent-soft/40 shadow-app-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <QrCode className="h-4 w-4 text-app-accent" />

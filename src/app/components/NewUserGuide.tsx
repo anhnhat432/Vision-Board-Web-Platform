@@ -55,7 +55,7 @@ function StepList({ userData }: { userData: UserData }) {
             step.completed
               ? "border-app-status-success/20 bg-app-status-success/10"
               : step.id === progress.nextStep?.id
-                ? "border-app-accent/20 bg-app-accent-soft shadow-lg"
+                ? "border-app-accent/20 bg-app-accent-soft shadow-app-lg"
                 : "border-app-line bg-app-surface"
           }`}
         >
@@ -122,8 +122,8 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
     ? "Web đã có dữ liệu mẫu sẵn. Lộ trình này giúp bạn hiểu màn nào làm trước, màn nào làm sau."
     : "Đi đúng thứ tự sẽ dễ hơn: đánh giá, chọn trọng tâm, viết SMART Goal, rồi bắt đầu chu kỳ 12 tuần.";
   const surfaceClass = compact
-    ? "max-w-full overflow-hidden border border-app-line bg-app-surface shadow-sm"
-    : "max-w-full overflow-hidden border border-app-line bg-app-surface text-app-ink shadow-sm";
+    ? "max-w-full overflow-hidden border border-app-line bg-app-surface shadow-app-sm"
+    : "max-w-full overflow-hidden border border-app-line bg-app-surface text-app-ink shadow-app-sm";
   const contentClass = compact ? "p-4" : "p-5 sm:p-6 lg:p-7";
   const layoutClass = compact
     ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-center"

@@ -239,7 +239,7 @@ export function TimeBoundStep({
                   className={cn(
                     "inline-flex min-h-11 items-center justify-center text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer whitespace-nowrap snap-start flex-shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                     parsedTargetWeeks === Number(weeks)
-                      ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
+                      ? "bg-app-accent text-white border-app-accent shadow-app-md shadow-app-accent/20"
                       : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
                   )}
                 >
@@ -320,7 +320,7 @@ export function TimeBoundStep({
                     className={cn(
                       "inline-flex min-h-11 items-center justify-center text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer whitespace-nowrap snap-start flex-shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                       isSelected
-                        ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
+                        ? "bg-app-accent text-white border-app-accent shadow-app-md shadow-app-accent/20"
                         : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
                     )}
                   >

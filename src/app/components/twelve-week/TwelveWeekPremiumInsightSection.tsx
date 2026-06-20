@@ -43,7 +43,7 @@ export function TwelveWeekPremiumInsightSection({
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left motion-safe:transition-colors hover:bg-white/50"
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left motion-safe:transition-colors hover:bg-app-surface/50"
         >
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">

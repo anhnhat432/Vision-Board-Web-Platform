@@ -59,10 +59,10 @@ export function TwelveWeekNextWeekRecommendationCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-80">Gợi ý cho tuần sau</p>
-            <Badge variant="outline" className="border-white/60 bg-white/85">
+            <Badge variant="outline" className="border-app-line/60 bg-app-surface/85">
               {ADJUSTMENT_BADGE_LABEL[recommendation.recommendation]}
             </Badge>
-            <Badge variant="outline" className="border-white/60 bg-white/85">
+            <Badge variant="outline" className="border-app-line/60 bg-app-surface/85">
               {CONFIDENCE_LABEL[recommendation.confidence]}
             </Badge>
           </div>
