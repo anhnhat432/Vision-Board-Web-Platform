@@ -2,6 +2,8 @@ import {
   ArrowRight,
   Award,
   BookOpen,
+  Calendar,
+  Check,
   Crown,
   Flame,
   LockKeyhole,
@@ -9,6 +11,7 @@ import {
   Sparkles,
   Target,
   Trophy,
+  Unlock,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -161,149 +164,240 @@ function AchievementsContent() {
   const completionRate = totalAchievementCount > 0 ? Math.round((unlockedCount / totalAchievementCount) * 100) : 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">THÀNH TỰU</p>
-        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
-          Cột mốc của bạn
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
-          Nơi ghi lại những dấu hiệu nhỏ cho thấy bạn đã bắt đầu, duy trì và đi xa hơn hôm qua.
-        </p>
-      </header>
+    <div className="min-h-screen bg-app-bg-subtle">
+      <main className="achievements-stagger mx-auto max-w-[1100px] px-9 py-[30px] pb-16">
 
-      <section className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Tổng quan thành tựu">
-        {[
-          { label: "Tổng thành tựu", value: totalAchievementCount, suffix: "huy hiệu" },
-          { label: "Đã mở khóa", value: unlockedCount, suffix: "cột mốc" },
-          { label: "Hoàn thành", value: `${completionRate}%`, suffix: "bộ sưu tập" },
-        ].map((stat) => (
-          <div key={stat.label} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{stat.label}</p>
-            <p className="mt-2 text-3xl font-medium leading-none text-app-ink tabular-nums">{stat.value}</p>
-            <p className="mt-2 text-xs text-app-ink-muted">{stat.suffix}</p>
+        {/* ── Hero ── */}
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-app-accent" />
+            Thành tựu
           </div>
-        ))}
-      </section>
-
-      {unlockedCount === 0 && (
-        <EmptyState
-          className="mt-6"
-          as="section"
-          icon={<Award className="h-7 w-7" />}
-          title={emptyNarratives.noAchievements.title}
-          description={emptyNarratives.noAchievements.body}
-          actions={
-            <>
-              <Button type="button" onClick={() => navigate("/goals")}>
-                <Target className="h-4 w-4" />
-                Tạo mục tiêu
-              </Button>
-              <Button type="button" variant="outline" onClick={() => navigate("/journal")}>
-                <BookOpen className="h-4 w-4" />
-                Viết nhật ký
-              </Button>
-            </>
-          }
-        />
-      )}
-
-      <section className="mt-8" aria-label="Danh sách thành tựu">
-        <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">BỘ HUY HIỆU</p>
-          <h2 className="mt-1 text-base font-semibold text-app-ink">Những cột mốc đang mở dần</h2>
+          <h1
+            className="mb-[11px] font-serif text-[clamp(28px,3.2vw,38px)] font-extrabold leading-[1.02] -tracking-[0.02em] text-app-ink"
+          >
+            Cột mốc của bạn
+          </h1>
+          <p className="max-w-[54ch] text-[14.5px] leading-[1.55] text-app-ink-soft">
+            Nơi ghi lại những dấu hiệu nhỏ cho thấy bạn đã bắt đầu, duy trì và đi xa hơn hôm qua.
+          </p>
         </div>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-          {achievementCards.map((achievement) => {
-            const Icon = ICON_MAP[achievement.icon] ?? Trophy;
-            const isUnlocked = achievement.unlocked;
 
-            return (
-              // biome-ignore lint/a11y/useKeyWithClickEvents: click only achievement badge
-              <article
-                key={achievement.key}
-                onClick={() => isUnlocked && setSelectedAchievement(achievement)}
-                className={`surface-raised relative rounded-xl border border-app-line bg-app-surface p-5 transition-all ${
-                  isUnlocked ? "cursor-pointer hover:scale-[1.02] hover:shadow-app-md" : "opacity-60"
-                }`}
-              >
-                {/* Wax Seal Stamp (Con dấu sáp đỏ) cho huy hiệu đã đạt */}
-                {isUnlocked && (
-                  <div
-                    className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-red-700 to-red-900 shadow-app-md transform rotate-12 border border-red-800 animate-[bounce_0.6s_ease-out_1]"
-                    title="Đã đóng dấu chứng nhận"
-                  >
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full border border-red-600/40 bg-red-800 text-[6px] font-bold text-red-200 select-none shadow-inner">
-                      印
-                    </div>
-                  </div>
-                )}
+        {/* ── KPI Cards ── */}
+        <section aria-label="Tổng quan thành tựu" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-card border border-app-line bg-app-surface px-6 py-[22px]">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">
+              Tổng thành tựu
+            </p>
+            <div className="flex items-end gap-2.5">
+              <span className="font-serif text-[38px] font-extrabold leading-none text-app-ink tabular-nums">
+                {totalAchievementCount}
+              </span>
+              <span className="mb-0.5 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-app-accent-subtle text-app-accent">
+                <Award className="h-[18px] w-[18px]" strokeWidth={2} />
+              </span>
+            </div>
+            <p className="mt-2.5 text-xs font-medium text-app-ink-muted">huy hiệu</p>
+          </div>
 
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-lg ${
-                    isUnlocked ? "bg-app-accent-soft text-app-accent" : "bg-app-bg text-app-ink-muted"
+          <div className="rounded-card border border-app-line bg-app-surface px-6 py-[22px]">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">
+              Đã mở khóa
+            </p>
+            <div className="flex items-end gap-2.5">
+              <span className="font-serif text-[38px] font-extrabold leading-none text-app-ink tabular-nums">
+                {unlockedCount}
+              </span>
+              <span className="mb-0.5 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-app-accent-subtle text-app-accent">
+                <Unlock className="h-[18px] w-[18px]" strokeWidth={2} />
+              </span>
+            </div>
+            <p className="mt-2.5 text-xs font-medium text-app-ink-muted">cột mốc</p>
+          </div>
+
+          <div className="rounded-card border border-app-line bg-app-surface px-6 py-[22px]">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">
+              Hoàn thành
+            </p>
+            <span className="font-serif text-[38px] font-extrabold leading-none text-app-accent tabular-nums">
+              {completionRate}%
+            </span>
+            <div className="mt-[13px] h-[7px] overflow-hidden rounded-pill bg-app-bg-subtle">
+              <div
+                className="achievements-bar h-full rounded-pill bg-app-accent"
+                style={{ width: `${completionRate}%` }}
+              />
+            </div>
+            <p className="mt-2.5 text-xs font-medium text-app-ink-muted">bộ sưu tập</p>
+          </div>
+        </section>
+
+        {/* ── Empty State ── */}
+        {unlockedCount === 0 && (
+          <EmptyState
+            className="mb-6"
+            as="section"
+            icon={<Award className="h-7 w-7" />}
+            title={emptyNarratives.noAchievements.title}
+            description={emptyNarratives.noAchievements.body}
+            actions={
+              <>
+                <Button type="button" onClick={() => navigate("/goals")}>
+                  <Target className="h-4 w-4" />
+                  Tạo mục tiêu
+                </Button>
+                <Button type="button" variant="outline" onClick={() => navigate("/journal")}>
+                  <BookOpen className="h-4 w-4" />
+                  Viết nhật ký
+                </Button>
+              </>
+            }
+          />
+        )}
+
+        {/* ── Badge Grid ── */}
+        <section aria-label="Danh sách thành tựu">
+          <div className="mb-4">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+              Bộ huy hiệu
+            </p>
+            <h2 className="font-serif text-[21px] font-bold -tracking-[0.01em] text-app-ink">
+              Những cột mốc đang mở dần
+            </h2>
+          </div>
+
+          <div className="achievements-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {achievementCards.map((achievement) => {
+              const Icon = ICON_MAP[achievement.icon] ?? Trophy;
+              const isUnlocked = achievement.unlocked;
+
+              return (
+                <article
+                  key={achievement.key}
+                  onClick={() => isUnlocked && setSelectedAchievement(achievement)}
+                  className={`achievements-badge relative rounded-card px-[22px] pb-5 pt-[22px] ${
+                    isUnlocked
+                      ? "unlocked cursor-pointer border border-app-line bg-app-surface"
+                      : "locked cursor-default border border-dashed"
                   }`}
                 >
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-sm font-medium leading-5 text-app-ink">{achievement.title}</h3>
-                <p className="mt-1 text-xs leading-5 text-app-ink-soft">{achievement.description}</p>
-                {isUnlocked && achievement.earnedAt ? (
-                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-app-ink-muted">
-                    {formatAchievementDate(achievement.earnedAt)}
+                  {/* Seal stamp for unlocked */}
+                  {isUnlocked && (
+                    <span
+                      className="achievements-seal absolute right-3.5 top-3.5 flex h-[26px] w-[26px] items-center justify-center rounded-full border-2 border-white bg-[#C0392B] shadow-[0_4px_10px_-3px_rgba(192,57,43,0.7)] text-white"
+                      style={{ transform: "rotate(-8deg)" }}
+                    >
+                      <Check className="h-[13px] w-[13px]" strokeWidth={3} />
+                    </span>
+                  )}
+
+                  {/* Icon chip */}
+                  <span
+                    className={`mb-4 flex h-[50px] w-[50px] items-center justify-center rounded-[14px] ${
+                      isUnlocked
+                        ? "bg-app-accent-subtle text-app-accent"
+                        : "bg-app-bg-subtle text-app-ink-muted"
+                    }`}
+                  >
+                    <Icon className="h-[25px] w-[25px]" strokeWidth={1.9} />
+                  </span>
+
+                  {/* Title */}
+                  <h3
+                    className={`mb-1.5 text-[15px] font-bold leading-[1.3] ${
+                      isUnlocked ? "text-app-ink" : "text-app-ink-muted"
+                    }`}
+                  >
+                    {achievement.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p
+                    className={`mb-4 text-[12.5px] leading-[1.5] ${
+                      isUnlocked ? "text-app-ink-soft" : "text-app-ink-muted"
+                    }`}
+                  >
+                    {achievement.description}
                   </p>
-                ) : (
-                  <p className="mt-4 flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-app-ink-muted">
-                    <LockKeyhole className="h-3 w-3" />
-                    Đang khóa
-                  </p>
-                )}
-              </article>
-            );
-          })}
+
+                  {/* Footer: date or locked label */}
+                  {isUnlocked && achievement.earnedAt ? (
+                    <span className="inline-flex items-center gap-[7px] font-mono text-xs font-semibold text-app-accent">
+                      <Calendar className="h-[13px] w-[13px]" strokeWidth={2} />
+                      {formatAchievementDate(achievement.earnedAt)}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-[7px] text-[10.5px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">
+                      <LockKeyhole className="h-3 w-3" strokeWidth={2.2} />
+                      Đang khóa
+                    </span>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── CTA Buttons ── */}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/goals")}
+            className="inline-flex items-center gap-2 rounded-pill bg-app-accent px-[22px] py-3 text-[13.5px] font-bold text-white transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg-subtle"
+          >
+            Tiếp tục mục tiêu
+            <ArrowRight className="h-[15px] w-[15px]" strokeWidth={2.2} />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/gallery")}
+            className="inline-flex items-center gap-2 rounded-pill border border-app-line bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle active:scale-[0.98] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg-subtle"
+          >
+            <Sparkles className="h-[15px] w-[15px]" strokeWidth={2.2} />
+            Mở thư viện vision board
+          </button>
         </div>
-      </section>
+
+      </main>
 
       {selectedAchievement && (
         <Stoic3DCoin achievement={selectedAchievement} onClose={() => setSelectedAchievement(null)} />
       )}
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <Button type="button" variant="outline" onClick={() => navigate("/goals")}>
-          Tiếp tục mục tiêu
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-        <Button type="button" variant="outline" onClick={() => navigate("/gallery")}>
-          Mở thư viện vision board
-        </Button>
-      </div>
     </div>
   );
 }
 
 function AchievementsSkeleton() {
   return (
-    <div
-      className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <span className="sr-only">Đang tải thành tựu...</span>
-      <div className="space-y-3">
-        <Skeleton className="h-3 w-24 rounded bg-app-line/60" />
-        <Skeleton className="h-9 w-2/3 max-w-md rounded bg-app-line/60" />
-        <Skeleton className="h-4 w-3/4 max-w-lg rounded bg-app-line/60" />
-      </div>
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[0, 1, 2, 3].map((index) => (
-          <Skeleton key={index} className="h-20 rounded-xl bg-app-line/60" />
-        ))}
-      </div>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[0, 1, 2, 3, 4, 5].map((index) => (
-          <Skeleton key={index} className="h-40 rounded-xl bg-app-line/60" />
-        ))}
+    <div className="min-h-screen bg-app-bg-subtle">
+      <div
+        className="mx-auto max-w-[1100px] px-9 py-[30px] pb-16"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <span className="sr-only">Đang tải thành tựu...</span>
+
+        {/* Hero skeleton */}
+        <div className="mb-6 space-y-3">
+          <Skeleton className="h-2.5 w-24 rounded bg-app-line/60" />
+          <Skeleton className="h-9 w-2/3 max-w-md rounded bg-app-line/60" />
+          <Skeleton className="h-4 w-3/4 max-w-lg rounded bg-app-line/60" />
+        </div>
+
+        {/* KPI skeleton */}
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[0, 1, 2].map((index) => (
+            <Skeleton key={index} className="h-[120px] rounded-card bg-app-line/30" />
+          ))}
+        </div>
+
+        {/* Badge grid skeleton */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+            <Skeleton key={index} className="h-[200px] rounded-card bg-app-line/30" />
+          ))}
+        </div>
       </div>
     </div>
   );

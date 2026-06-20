@@ -3954,3 +3954,115 @@ html.dark .weekly-grain-overlay::before {
   .tab-pane .bar-fill { transform: none; }
   .tab-pane .dof-path { stroke-dashoffset: 0; }
 }
+
+/* ── Vision Board: animations & utilities ────────────────────── */
+@keyframes dof-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes dof-glow {
+  0%, 100% { opacity: 0.4; transform: scale(0.96); }
+  50% { opacity: 0.8; transform: scale(1.04); }
+}
+
+@keyframes dof-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dof-bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-2px) rotate(-4deg); }
+}
+
+/* Vision Board custom scrollbar */
+.dof-scroll-vb::-webkit-scrollbar {
+  width: 9px;
+}
+.dof-scroll-vb::-webkit-scrollbar-thumb {
+  background: rgba(23, 21, 15, 0.16);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dof-float,
+  .dof-glow,
+  .dof-rise,
+  .dof-bob {
+    animation: none !important;
+  }
+}
+
+/* ── Achievements: stagger animation for hero section ─────────── */
+.achievements-stagger > * {
+  animation: dof-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.achievements-stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.achievements-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.achievements-stagger > *:nth-child(3) { animation-delay: 0.14s; }
+.achievements-stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.achievements-stagger > *:nth-child(n+5) { animation-delay: 0.26s; }
+
+/* ── Achievements: stagger animation for badge grid ──────────── */
+.achievements-grid > * {
+  animation: dof-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.achievements-grid > *:nth-child(1) { animation-delay: 0.10s; }
+.achievements-grid > *:nth-child(2) { animation-delay: 0.16s; }
+.achievements-grid > *:nth-child(3) { animation-delay: 0.22s; }
+.achievements-grid > *:nth-child(4) { animation-delay: 0.28s; }
+.achievements-grid > *:nth-child(5) { animation-delay: 0.34s; }
+.achievements-grid > *:nth-child(6) { animation-delay: 0.40s; }
+.achievements-grid > *:nth-child(7) { animation-delay: 0.46s; }
+
+/* ── Achievements: progress bar fill ─────────────────────────── */
+.achievements-bar {
+  transform-origin: left center;
+  animation: dof-bar 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both;
+}
+
+/* ── Achievements: seal stamp bounce ─────────────────────────── */
+@keyframes dof-seal {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50% { transform: rotate(-8deg) scale(1.08); }
+}
+.achievements-seal {
+  animation: dof-seal 3.2s ease-in-out infinite;
+}
+
+/* ── Achievements: badge hover transitions ───────────────────── */
+.achievements-badge {
+  transition: box-shadow 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+              transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+              border-color 0.2s;
+}
+.achievements-badge.unlocked:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 46px -28px rgba(12, 94, 58, 0.45);
+  border-color: rgba(12, 94, 58, 0.28);
+}
+.achievements-badge.locked:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -30px rgba(23, 21, 15, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievements-stagger > *,
+  .achievements-grid > *,
+  .achievements-bar,
+  .achievements-seal {
+    animation: none !important;
+  }
+  .achievements-bar { transform: none; }
+}
+
+/* ── Achievements: locked badge surface ──────────────────────── */
+.achievements-badge.locked {
+  background: var(--app-bg);
+  border-color: var(--app-line);
+}
+html.dark .achievements-badge.locked {
+  background: var(--app-surface);
+  border-color: var(--app-line);
+}

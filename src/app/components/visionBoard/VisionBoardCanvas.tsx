@@ -53,16 +53,33 @@ export function VisionBoardCanvas({
     <div
       ref={exportRef}
       className={`relative h-[450px] min-w-0 overflow-hidden sm:h-[580px] lg:h-[620px] xl:h-[600px] ${className ?? ""}`}
-      style={{ background: "var(--grad-vision)" }}
+      style={{ background: "var(--grad-vision)", borderRadius: "20px" }}
       data-theme-id={theme.id}
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-70"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(${theme.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${theme.gridColor} 1px, transparent 1px)`,
-          backgroundSize: "36px 36px",
+          backgroundImage: `radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)`,
+          backgroundSize: "20px 20px",
+          opacity: 0.55,
         }}
       />
+      {items.length === 0 && (
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            width: "340px",
+            height: "340px",
+            borderRadius: "50%",
+            background: "rgba(198,242,78,0.12)",
+            filter: "blur(60px)",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            animation: "dof-glow 5s ease-in-out infinite",
+          }}
+        />
+      )}
 
       {showZones &&
         zoneAreas.map((area, index) => {
