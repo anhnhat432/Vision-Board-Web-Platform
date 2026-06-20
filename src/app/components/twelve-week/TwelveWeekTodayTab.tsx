@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
-import { SectionBlock } from "@/app/components/layout/SectionBlock";
+
 import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
@@ -38,7 +38,6 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
 import { useReducedMotion } from "../ui/use-reduced-motion";
@@ -226,10 +225,6 @@ export function TwelveWeekTodayTab({
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
-  // Hover-lift nhẹ theo thiết kế editorial; tắt khi người dùng giảm chuyển động.
-  const cardLiftClass = prefersReducedMotion
-    ? ""
-    : "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-app-md";
   const loadingIconClassName = prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin";
 
   const canUseOverdueTaskActions = Boolean(
