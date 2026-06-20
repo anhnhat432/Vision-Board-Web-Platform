@@ -375,9 +375,9 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         accountId: orderId,
         amount,
         purpose: order.purpose,
-        planCode: order.planCode,
+        planCode: isPhysicalOrder ? (order.planCode ?? null) : "PLUS",
         userId: order.userId,
-        ...(isPhysicalOrder ? {} : { subscriptionId: "physical_order_only" }),
+        ...(isPhysicalOrder ? { physicalOrder: true } : { subscriptionId: orderId }),
       });
       processedCount++;
     } catch (error: unknown) {

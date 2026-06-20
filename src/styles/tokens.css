@@ -88,7 +88,7 @@
   /* — Text — */
   --app-ink:         #17150F;  /* body, label chính */
   --app-ink-soft:    #5C574B;  /* description, sub-label */
-  --app-ink-muted:   #9C988C;  /* placeholder, caption (AA contrast) */
+  --app-ink-muted:   var(--neutral-500);  /* placeholder, caption (AA contrast) */
   --app-ink-disabled: var(--neutral-300); /* input/button disabled */
   --app-ink-on-accent: var(--neutral-000); /* text trên nền accent */
   --app-ink-on-warm:  var(--neutral-000); /* text trên nền warm */
@@ -96,7 +96,7 @@
 
   /* — Border / Divider — */
   --app-line:        rgba(23,21,15,0.08);  /* border mặc định (decorative) */
-  --app-line-strong: rgba(23,21,15,0.16);  /* control affordance ≥3:1 vs surface */
+  --app-line-strong: var(--neutral-400);  /* control affordance ≥3:1 vs surface */
 
   /* — Accent (Forest Green) — Execution / Action / Progress — */
   --app-accent:        #0C5E3A;
@@ -187,11 +187,11 @@ html.dark {
   --app-line:        #3A342B;
   --app-line-strong: #87796A;  /* lighter neutral để control affordance ≥3:1 vs dark surface */
 
-  --app-accent:        #2FA36B;
-  --app-accent-hover:  #38B377;
-  --app-accent-active: #279A5E;
-  --app-accent-soft:   rgba(47, 163, 107, 0.16);
-  --app-accent-subtle: rgba(47, 163, 107, 0.08);
+  --app-accent:        #5BA590;  /* sáng hơn để text accent ≥4.5:1 trên accent-soft (dark) */
+  --app-accent-hover:  #6FB7A2;
+  --app-accent-active: #4F9482;
+  --app-accent-soft:   rgba(91, 165, 144, 0.16);
+  --app-accent-subtle: rgba(91, 165, 144, 0.08);
 
   --app-warm:          #E89878;
   --app-warm-hover:    #D98060;
