@@ -25,7 +25,6 @@ import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twe
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { useCelebration } from "../components/celebration/useCelebration";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { PageHero } from "../components/layout/PageHero";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
@@ -130,12 +129,12 @@ const GOALTRACKER_TOUR_STEPS: SpotlightTourStep[] = [
 const completedGoalStyle = `
   @keyframes completedBorderGlow {
     0%, 100% {
-      border-color: var(--app-status-success, rgba(16, 185, 129, 0.35));
+      border-color: rgba(16, 185, 129, 0.35);
       box-shadow: 0 0 12px rgba(16, 185, 129, 0.08), inset 0 0 4px rgba(16, 185, 129, 0.02);
     }
     50% {
-      border-color: var(--app-status-success, rgba(52, 211, 153, 0.7));
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.18), inset 0 0 6px rgba(16, 185, 129, 0.04);
+      border-color: rgba(52, 211, 153, 0.7);
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.22), inset 0 0 6px rgba(52, 211, 153, 0.04);
     }
   }
   .completed-goal-glow {
@@ -229,21 +228,21 @@ const getGoalHealthStatus = (
     return {
       label: "Hoàn thành ✨",
       bgClass:
-        "bg-app-status-success/10 text-app-status-success border border-app-status-success/25",
+        "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
     };
   }
   if (isOverdue) {
     return {
       label: "Cần chỉnh nhịp 🌊",
       bgClass:
-        "bg-app-status-error/10 text-app-status-error border border-app-status-error/25",
+        "bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30",
     };
   }
   if (stats.reviewDueToday) {
     return {
       label: "Đến ngày review 📋",
       bgClass:
-        "bg-app-status-warning/10 text-app-status-warning border border-app-status-warning/25",
+        "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40",
     };
   }
   if (isNearDeadline) {
@@ -254,7 +253,7 @@ const getGoalHealthStatus = (
   }
   return {
     label: "Đang đi đều 🌱",
-    bgClass: "bg-app-status-info/10 text-app-status-info border border-app-status-info/25",
+    bgClass: "bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/40",
   };
 };
 
@@ -444,7 +443,7 @@ function TodayFocusCard({
   };
 
   return (
-    <div className="rounded-[18px] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/30 via-app-surface to-app-surface p-5 shadow-app-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
+    <div className="rounded-[18px] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/30 via-white to-white dark:via-neutral-950 dark:to-neutral-950 p-5 shadow-app-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
       {/* Washi tape decoration */}
       <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/15 dark:bg-app-accent/25 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/20 z-10" />
       <div className="absolute -left-12 -bottom-12 w-28 h-28 rounded-full bg-app-accent/5 blur-2xl pointer-events-none" />
@@ -474,7 +473,7 @@ function TodayFocusCard({
               <button
                 type="button"
                 onClick={() => handleToggleTask(goal.id, firstOpenTask.id)}
-                          className="flex h-11 w-11 -my-3 -ml-3 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 rounded-lg cursor-pointer"
+                className="flex h-11 w-11 -my-3 -ml-3 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 aria-label="Chốt việc"
               >
                 <span className="flex size-4.5 items-center justify-center rounded-full border border-app-line bg-app-surface hover:border-app-accent transition-all duration-200">
@@ -492,7 +491,7 @@ function TodayFocusCard({
       <div className="shrink-0 z-10 self-end sm:self-center">
         <Button
           onClick={handleCtaClick}
-          className="bg-app-accent text-white hover:bg-app-accent-hover font-bold rounded-lg px-4.5 py-2.5 text-xs sm:text-sm shadow-app-sm active:scale-[0.97] transition-all duration-200 flex items-center gap-1.5"
+          className="bg-app-accent text-white hover:bg-app-accent-hover font-bold rounded-lg px-4.5 py-2.5 text-xs sm:text-sm shadow-app-sm transition-all duration-200 flex items-center gap-1.5"
         >
           {ctaLabel}
           <ArrowRight className="h-4 w-4" />
@@ -511,7 +510,7 @@ function WeeklyQuestLine({ system }: WeeklyQuestLineProps) {
 
   if (!quest.hasSchedule) {
     return (
-      <div className="bg-app-bg-subtle/20 rounded-lg p-2.5 border border-app-line/20 text-[11px] text-app-ink-muted/80 italic font-sans">
+      <div className="bg-app-bg-subtle/20 rounded-lg p-2.5 border border-app-line/20 text-[11px] text-app-ink-muted/80 italic">
         Không có lịch trình tuần này.
       </div>
     );
@@ -525,7 +524,7 @@ function WeeklyQuestLine({ system }: WeeklyQuestLineProps) {
         <span className="font-bold text-app-ink-soft">Nhiệm vụ tuần:</span>{" "}
         <span className="text-app-ink-muted">Hoàn thành {targetDays} ngày hành động</span>
       </div>
-      <div className="font-bold text-app-status-success shrink-0 pl-2 tabular-nums">
+      <div className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0 pl-2 tabular-nums">
         {completedDays}/{targetDays} ngày đã chốt
       </div>
     </div>
@@ -576,7 +575,6 @@ function GoalTrackerContent({
   const [viewUserData, setViewUserData] = useState(userData);
   const [isGoalLimitPaywallOpen, setIsGoalLimitPaywallOpen] = useState(false);
   const [locallyUpdatedSystemGoalIds, setLocallyUpdatedSystemGoalIds] = useState<Set<string>>(new Set());
-  const celebrate = useCelebration();
 
   useEffect(() => {
     setViewUserData(userData);
@@ -789,11 +787,6 @@ function GoalTrackerContent({
         if (justCompletedGoal) {
           celebrateSpotlight({ x: 0.82, y: 0.14 });
           soundService.success();
-          celebrate("goal", {
-            id: goalId,
-            title: goal.title,
-            description: "Bạn vừa hoàn thành một mục tiêu lớn.",
-          });
         } else {
           celebrateSpark({ x: 0.82, y: 0.14 });
           soundService.click();
@@ -841,11 +834,6 @@ function GoalTrackerContent({
       if (justCompletedGoal) {
         celebrateSpotlight({ x: 0.82, y: 0.14 });
         soundService.success();
-        celebrate("goal", {
-          id: goalId,
-          title: goal.title,
-          description: "Bạn vừa hoàn thành một mục tiêu lớn.",
-        });
       } else {
         celebrateSpark({ x: 0.82, y: 0.14 });
         soundService.click();
@@ -998,7 +986,7 @@ function GoalTrackerContent({
   }, [goalsWithMetadata]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6 lg:px-8 touch-manipulation">
+    <div className="mx-auto max-w-6xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
       <style>{completedGoalStyle}</style>
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
@@ -1041,7 +1029,7 @@ function GoalTrackerContent({
           {/* Hero Section gọn gàng & chuyên nghiệp */}
           <PageHero
             tourId="goaltracker-hero"
-            className="bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/20 border-app-line/80 rounded-[18px]"
+            className="bg-gradient-to-br from-white via-white to-app-accent-soft/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-app-accent-soft/5 border-app-line/80 rounded-[18px]"
             eyebrow="MỤC TIÊU"
             title={
               <span className="font-serif text-3xl font-semibold leading-tight tracking-normal text-app-ink sm:text-4xl">
@@ -1051,7 +1039,7 @@ function GoalTrackerContent({
             description="Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều đặn."
             primaryCta={
               <Button
-                className="bg-app-accent text-white rounded-lg px-5 py-2.5 text-sm font-bold hover:bg-app-accent-hover active:scale-[0.97] transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] active:scale-[0.97] inline-flex items-center justify-center gap-2 w-full sm:w-auto !whitespace-normal sm:!whitespace-nowrap !h-auto sm:!h-10 focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none"
+                className="bg-app-accent text-white rounded-lg px-5 py-2.5 text-sm font-bold hover:bg-app-accent-hover transition-all duration-200 shadow-app-sm hover:shadow-app-md hover:scale-[1.01] inline-flex items-center justify-center gap-2 w-full sm:w-auto !whitespace-normal sm:!whitespace-nowrap !h-auto sm:!h-10"
                 onClick={handleStartGuidedGoalFlow}
               >
                 <Zap className="h-4.5 w-4.5" />
@@ -1108,7 +1096,7 @@ function GoalTrackerContent({
                 placeholder="Tìm theo tên hoặc mô tả mục tiêu…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-app-line bg-app-bg pl-11 pr-4 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent transition-all duration-200 cursor-text"
+                className="w-full rounded-xl border border-app-line bg-app-bg pl-11 pr-4 py-2.5 text-sm text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent transition-all duration-200"
               />
             </div>
 
@@ -1129,7 +1117,7 @@ function GoalTrackerContent({
                 actions={
                   <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                     <Button
-                      className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-app-sm hover:scale-[1.01] active:scale-[0.97] transition-all px-6 py-2.5 rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none"
+                      className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-app-sm hover:scale-[1.01] transition-all px-6 py-2.5 rounded-lg text-sm"
                       onClick={handleStartGuidedGoalFlow}
                     >
                       Bắt đầu từ trọng tâm →
@@ -1162,25 +1150,20 @@ function GoalTrackerContent({
                       </div>
                     </div>
                     <div className="space-y-5">
-                      {displayTwelveWeekGoals.map((goal, idx) => {
+                      {displayTwelveWeekGoals.map((goal) => {
                         const meta = goalsWithMetadata.find((m) => m.goal.id === goal.id);
                         return (
-                          <div
+                          <GoalCard
                             key={goal.id}
-                            className="weekly-stagger-item"
-                            style={{ "--stagger-index": idx } as React.CSSProperties}
-                          >
-                            <GoalCard
-                              goal={goal}
-                              currentPlanCode={currentPlanCode}
-                              progress={meta?.progress ?? 0}
-                              isOverdue={meta?.isOverdue ?? false}
-                              isNearDeadline={meta?.isNearDeadline ?? false}
-                              handleToggleTask={handleToggleTask}
-                              openTwelveWeekCenter={openTwelveWeekCenter}
-                              setGoalToDelete={setGoalToDelete}
-                            />
-                          </div>
+                            goal={goal}
+                            currentPlanCode={currentPlanCode}
+                            progress={meta?.progress ?? 0}
+                            isOverdue={meta?.isOverdue ?? false}
+                            isNearDeadline={meta?.isNearDeadline ?? false}
+                            handleToggleTask={handleToggleTask}
+                            openTwelveWeekCenter={openTwelveWeekCenter}
+                            setGoalToDelete={setGoalToDelete}
+                          />
                         );
                       })}
                     </div>
@@ -1200,25 +1183,20 @@ function GoalTrackerContent({
                       </div>
                     </div>
                     <div className="space-y-5">
-                      {displayStandardGoals.map((goal, idx) => {
+                      {displayStandardGoals.map((goal) => {
                         const meta = goalsWithMetadata.find((m) => m.goal.id === goal.id);
                         return (
-                          <div
+                          <GoalCard
                             key={goal.id}
-                            className="weekly-stagger-item"
-                            style={{ "--stagger-index": idx } as React.CSSProperties}
-                          >
-                            <GoalCard
-                              goal={goal}
-                              currentPlanCode={currentPlanCode}
-                              progress={meta?.progress ?? 0}
-                              isOverdue={meta?.isOverdue ?? false}
-                              isNearDeadline={meta?.isNearDeadline ?? false}
-                              handleToggleTask={handleToggleTask}
-                              openTwelveWeekCenter={openTwelveWeekCenter}
-                              setGoalToDelete={setGoalToDelete}
-                            />
-                          </div>
+                            goal={goal}
+                            currentPlanCode={currentPlanCode}
+                            progress={meta?.progress ?? 0}
+                            isOverdue={meta?.isOverdue ?? false}
+                            isNearDeadline={meta?.isNearDeadline ?? false}
+                            handleToggleTask={handleToggleTask}
+                            openTwelveWeekCenter={openTwelveWeekCenter}
+                            setGoalToDelete={setGoalToDelete}
+                          />
                         );
                       })}
                     </div>
@@ -1309,40 +1287,36 @@ function GoalSummaryStrip({
       value: `${completedTasks}/${totalTasks}`,
       note: `${completionRate}% hoàn thành`,
       icon: CheckCircle2,
-      colorClass: "text-app-status-success bg-app-status-success/10",
+      colorClass: "text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/30",
     },
     {
       title: "Chu kỳ",
       value: activeSystems,
       note: "đang chạy",
       icon: Zap,
-      colorClass: "text-app-status-warning bg-app-status-warning/10",
+      colorClass: "text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/30",
     },
     {
       title: "Cần chú ý",
       value: needsAttention,
       note: "quá hạn / review",
       icon: AlertTriangle,
-      colorClass: "text-app-status-error bg-app-status-error/10",
+      colorClass: "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-950/30",
     },
   ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 items-stretch" data-tour-id="goaltracker-summary">
-      {items.map((item, idx) => {
+      {items.map((item) => {
         const Icon = item.icon;
         return (
           <div
             key={item.title}
-            className="weekly-stagger-item"
-            style={{ "--stagger-index": idx } as React.CSSProperties}
+            className="h-full rounded-[18px] border border-app-line/70 bg-app-surface p-5 flex items-center justify-between gap-4 shadow-app-sm hover:border-app-accent/20 hover:shadow-app-md transition-all duration-300"
           >
-            <div
-              className="h-full rounded-[18px] border border-app-line/60 bg-app-surface p-5 flex items-center justify-between gap-4 shadow-app-sm hover:border-app-accent/20 hover:shadow-app-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 cursor-default"
-            >
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold tracking-[0.05em] text-app-ink-soft">{item.title}</p>
-              <p className="mt-1.5 font-serif text-xl sm:text-2xl lg:text-3xl font-black text-app-ink tabular-nums leading-tight">
+              <p className="mt-1.5 font-serif text-xl sm:text-2xl lg:text-3xl font-black text-app-ink tabular-nums leading-none">
                 {item.value}
               </p>
               <p className="mt-2 text-xs font-medium text-app-ink-muted leading-tight">{item.note}</p>
@@ -1355,7 +1329,6 @@ function GoalSummaryStrip({
             >
               <Icon className="h-4.5 w-4.5" />
             </div>
-          </div>
           </div>
         );
       })}
@@ -1396,7 +1369,7 @@ function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalFilterCh
             type="button"
             onClick={() => setActiveFilter(chip.id)}
             className={cn(
-              "inline-flex min-h-11 items-center justify-center px-3.5 py-1.5 text-xs font-bold rounded-full border active:scale-[0.96] transition-all duration-200 gap-2 shadow-app-sm shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:outline-none",
+              "inline-flex min-h-11 items-center justify-center px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all duration-200 gap-2 shadow-app-sm shrink-0",
               isActive
                 ? "bg-app-accent text-white border-app-accent"
                 : "bg-app-bg text-app-ink-soft border-app-line hover:border-app-accent/25 hover:bg-app-surface",
@@ -1479,9 +1452,9 @@ function GoalCard({
   const glowClass =
     progress === 100
       ? prefersReducedMotion
-        ? "border-app-status-success/40 shadow-[0_0_12px_rgba(16,185,129,0.1)] bg-app-status-success/5"
-        : "completed-goal-glow bg-app-status-success/5 border-app-status-success/25"
-      : "bg-app-surface border-app-line/60";
+        ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)] bg-emerald-50/15 dark:bg-emerald-950/5"
+        : "completed-goal-glow bg-emerald-50/15 dark:bg-emerald-950/5 border-emerald-500/25 dark:border-emerald-500/15"
+      : "bg-app-surface border-app-line/70";
 
   return (
     <div id={`goal-card-${goal.id}`} className="perspective-1000 w-full relative">
@@ -1499,7 +1472,7 @@ function GoalCard({
             {/* Nút xóa thùng rác nhỏ ở góc trên bên phải, visually quieter */}
             <button
               type="button"
-              className="absolute top-2 right-2 h-11 w-11 rounded-lg text-app-ink-muted/30 hover:text-app-status-error hover:bg-app-status-error/5 transition-all duration-200 flex items-center justify-center z-20 cursor-pointer focus-visible:ring-2 focus-visible:ring-app-status-error/40 focus-visible:outline-none"
+              className="absolute top-2 right-2 h-11 w-11 rounded-lg text-app-ink-muted/30 hover:text-app-status-error hover:bg-app-status-error/5 transition-all duration-200 flex items-center justify-center z-20"
               onClick={() => setGoalToDelete(goal.id)}
               aria-label={`Xóa mục tiêu ${goal.title}`}
             >
@@ -1583,7 +1556,7 @@ function GoalCard({
                     </span>
                   </div>
                   <div
-                    className="h-1.5 rounded-full bg-app-bg overflow-hidden"
+                    className="h-1.5 rounded-full bg-app-line/40 overflow-hidden"
                     aria-hidden="true"
                   >
                     <div
@@ -1601,7 +1574,7 @@ function GoalCard({
                   {system && (
                     <Button
                       type="button"
-                      className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover active:scale-[0.97] px-4 py-2 text-xs sm:text-sm font-bold shadow-app-sm transition-all duration-200 inline-flex items-center gap-1.5 h-9"
+                      className="rounded-lg bg-app-accent text-white hover:bg-app-accent-hover px-4 py-2 text-xs sm:text-sm font-bold shadow-app-sm transition-all duration-200 inline-flex items-center gap-1.5 h-9"
                       onClick={() => openTwelveWeekCenter(goal.id)}
                     >
                       Tiếp tục chu kỳ
@@ -1615,10 +1588,10 @@ function GoalCard({
                       variant="outline"
                       size="sm"
                       onClick={() => setIsFlipped(true)}
-                      className="rounded-lg border border-app-status-success/30 text-app-status-success hover:bg-app-status-success/10 px-3.5 py-2 text-xs font-bold transition-all h-9 flex items-center gap-1.5 active:scale-[0.97]"
+                      className="rounded-lg border border-emerald-200 text-emerald-700 hover:bg-emerald-50/50 dark:border-emerald-900/40 dark:text-emerald-400 px-3.5 py-2 text-xs font-bold transition-all h-9 flex items-center gap-1.5"
                       aria-pressed={isFlipped}
                     >
-                      <Award className="h-4 w-4 text-app-accent" />
+                      <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       Vinh danh
                     </Button>
                   )}
@@ -1649,7 +1622,7 @@ function GoalCard({
                         <button
                           type="button"
                           onClick={() => handleToggleTask(goal.id, task.id)}
-                className="flex h-11 w-11 -my-3 -ml-3 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 rounded-lg cursor-pointer touch-auto"
+                          className="flex h-11 w-11 -my-3 -ml-3 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                           aria-label={task.completed ? "Hủy chốt việc" : "Chốt việc"}
                         >
                           <span className="flex size-4.5 items-center justify-center">
@@ -1674,7 +1647,7 @@ function GoalCard({
                     ))}
 
                     {displayTasks.length === 0 && (
-                      <p className="text-xs italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1 font-sans">
+                      <p className="text-xs italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1">
                         {system ? "Không có việc hôm nay." : "Đã chốt hết việc chưa xong."}
                       </p>
                     )}
@@ -1704,21 +1677,21 @@ function GoalCard({
         >
           <SpotlightCard
             className={cn(
-              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-app-accent-soft/15 via-app-surface to-app-accent-soft/10 shadow-app-lg flex flex-col justify-between overflow-y-auto",
+              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-app-bg dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
               progress === 100 &&
                 (prefersReducedMotion
-                  ? "border-app-accent/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
+                  ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
                   : "completed-goal-glow"),
             )}
           >
             <div className="space-y-4">
               {/* Certificate Header */}
               <div className="flex items-center gap-3 border-b border-app-line pb-3">
-                <div className="flex h-10 w-10 shrink-0 rounded-xl items-center justify-center bg-app-status-warning/10 text-app-status-warning shadow-sm">
+                <div className="flex h-10 w-10 shrink-0 rounded-xl items-center justify-center bg-amber-500/10 text-amber-500 shadow-app-sm">
                   <Award className="h-5.5 w-5.5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-app-status-warning">
+                  <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-amber-600 dark:text-amber-400">
                     Thành tích xuất sắc
                   </h4>
                   <p className="text-sm font-semibold text-app-ink-soft">Mục tiêu đã hoàn thành</p>
@@ -1738,7 +1711,7 @@ function GoalCard({
                   </div>
                   <div className="bg-app-bg/50 rounded-lg p-2.5 border border-app-line/40">
                     <p className="text-app-ink-muted font-medium">Nhiệm vụ đã chốt</p>
-                    <p className="mt-1 font-bold text-app-status-success text-sm tabular-nums">
+                    <p className="mt-1 font-bold text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">
                       {completionDetails.completedTasks}/{completionDetails.totalTasks} việc
                     </p>
                   </div>
@@ -1746,7 +1719,7 @@ function GoalCard({
               </div>
 
               {/* Encouragement message */}
-              <p className="text-sm italic leading-relaxed text-app-ink-soft bg-app-status-success/5 border border-app-status-success/15 rounded-xl p-3 font-serif">
+              <p className="text-sm italic leading-relaxed text-app-ink-soft bg-emerald-50/15 dark:bg-emerald-950/5 border border-emerald-500/10 rounded-xl p-3 font-serif">
                 “Bạn đã biến một mục tiêu lớn thành kết quả cụ thể. Hãy ghi nhận nỗ lực này.”
               </p>
             </div>
@@ -1766,7 +1739,7 @@ function GoalCard({
                 <Button
                   size="sm"
                   onClick={() => openTwelveWeekCenter(goal.id)}
-                  className="rounded-lg bg-app-status-success hover:bg-app-status-success/80 text-white px-4 py-2 text-xs sm:text-sm font-bold active:scale-[0.97] transition-all h-9 flex items-center gap-1.5"
+                  className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs sm:text-sm font-bold transition-all h-9 flex items-center gap-1.5"
                 >
                   Mở chu kỳ
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -1809,7 +1782,7 @@ function GoalsSidebar({
       {isSidebarEmpty ? (
         /* Widget Daily Overview tuyệt đẹp khi rỗng */
         <div className="rounded-[18px] border border-app-line bg-app-surface p-6 shadow-app-sm text-center py-10 space-y-4">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-app-status-success/10 text-app-status-success shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 shadow-app-sm">
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <div className="space-y-2">
@@ -1842,7 +1815,7 @@ function GoalsSidebar({
                     <button
                       type="button"
                       onClick={() => handleToggleTask(task.goalId, task.taskId)}
-                      className="flex h-11 w-11 -my-3.5 -ml-3.5 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 rounded-lg cursor-pointer"
+                      className="flex h-11 w-11 -my-3.5 -ml-3.5 shrink-0 items-center justify-center text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                       aria-label="Chốt việc"
                     >
                       <span className="flex size-4 items-center justify-center rounded-full border border-app-line bg-app-surface hover:border-app-accent transition-all duration-200">
@@ -1856,7 +1829,7 @@ function GoalsSidebar({
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-app-ink-muted/80 italic leading-relaxed font-sans">
+                <p className="text-xs text-app-ink-muted/80 italic leading-relaxed">
                   Tuyệt vời! Bạn không còn việc nào chưa chốt hôm nay.
                 </p>
               )}
@@ -1865,10 +1838,10 @@ function GoalsSidebar({
 
           {/* Widget 2: Cần đánh giá (Review due) */}
           {needsReviewGoals.length > 0 && (
-            <div className="rounded-[18px] bg-app-status-warning/5 p-5 border border-app-status-warning/15">
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-app-status-warning mb-3.5 flex items-center gap-2">
+            <div className="rounded-[18px] bg-amber-50/30 dark:bg-amber-950/15 p-5 border border-transparent">
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-amber-600 dark:text-amber-400 mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-warning"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                 </span>
                 Cần đánh giá trong tuần
               </h3>
@@ -1879,7 +1852,7 @@ function GoalsSidebar({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 rounded-md border-app-status-warning/30 bg-transparent text-app-status-warning hover:bg-app-status-warning/10 px-3.5 text-xs font-bold"
+                      className="h-8 rounded-md border-amber-200 dark:border-amber-900 bg-transparent text-amber-600 dark:text-amber-400 hover:bg-amber-100/30 px-3.5 text-xs font-bold"
                       onClick={() => openTwelveWeekCenter(goal.id)}
                     >
                       Mở Review ngay
@@ -1892,10 +1865,10 @@ function GoalsSidebar({
 
           {/* Widget 3: Mục tiêu cần chỉnh nhịp */}
           {atRiskGoals.length > 0 && (
-            <div className="rounded-[18px] bg-app-status-error/5 p-5 border border-transparent">
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-app-status-error mb-3.5 flex items-center gap-2">
+            <div className="rounded-[18px] bg-orange-50/30 dark:bg-orange-950/15 p-5 border border-transparent">
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-orange-700 dark:text-orange-400 mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-error"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                 </span>
                 Cần chỉnh nhịp 🌊
               </h3>
@@ -1906,7 +1879,7 @@ function GoalsSidebar({
                     {goal.twelveWeekSystem && (
                       <button
                         type="button"
-                        className="text-xs font-bold text-app-status-error hover:underline shrink-0"
+                        className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline shrink-0"
                         onClick={() => openTwelveWeekCenter(goal.id)}
                       >
                         Xem kế hoạch
@@ -1921,7 +1894,7 @@ function GoalsSidebar({
       )}
 
       {/* Widget Nhắc nhở tĩnh tâm */}
-      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle p-4 shadow-app-sm opacity-90">
+      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle dark:bg-app-bg-subtle/20 p-4 shadow-app-sm opacity-90">
         <p className="text-xs italic leading-relaxed text-app-ink-soft font-serif font-medium">
           “Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.”
         </p>
@@ -2026,14 +1999,14 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
         const dateKey = formatDateStr(targetDate);
         const stats = tasksMap.get(dateKey) || { total: 0, completed: 0 };
 
-        let colorClass = "bg-app-bg-subtle border border-transparent";
+        let colorClass = "bg-app-bg-subtle dark:bg-app-bg-subtle/40 border border-transparent";
         if (stats.total > 0) {
           if (stats.completed === stats.total) {
-            colorClass = "bg-app-accent border border-app-accent/10";
+            colorClass = "bg-emerald-500 border border-emerald-600/10";
           } else if (stats.completed > 0) {
-            colorClass = "bg-app-accent/50 border border-app-accent/10";
+            colorClass = "bg-emerald-300 border border-emerald-400/10";
           } else {
-            colorClass = "bg-app-status-error/20 border border-app-status-error/20";
+            colorClass = "bg-rose-100/80 border border-rose-200/20 dark:bg-rose-950/20 dark:border-rose-900/10";
           }
         }
 
@@ -2060,7 +2033,7 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
     <div className="space-y-1.5 pt-1">
       <div className="flex items-center justify-between text-xs font-bold text-app-ink-soft">
         <span>Nhịp độ hành động</span>
-        <span className="text-xs text-app-ink-muted font-normal font-sans">Hover xem chi tiết</span>
+        <span className="text-xs text-app-ink-muted font-normal">Hover xem chi tiết</span>
       </div>
 
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
@@ -2085,9 +2058,9 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
                     )}
                   />
                   {/* Custom CSS Tooltip */}
-                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-app-ink text-app-surface text-[10px] font-sans rounded px-2 py-1 whitespace-nowrap shadow-md pointer-events-none transform -translate-y-0.5 border border-app-line leading-normal">
+                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-app-ink text-app-bg text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-app-md pointer-events-none transform -translate-y-0.5 border border-app-line/40 leading-normal">
                     {day.label}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink" />
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink dark:border-t-app-ink" />
                   </div>
                 </div>
               ))}
@@ -2219,7 +2192,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
                 <DialogTitle className="font-serif text-lg font-bold text-app-ink">Gửi tôi ở tuần thứ 12</DialogTitle>
               </div>
             </DialogHeader>
-            <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
+            <DialogDescription className="text-sm text-app-ink-soft leading-relaxed mt-2">
               Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra
               khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
             </DialogDescription>
@@ -2234,7 +2207,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               />
             </div>
 
-            <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
+            <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-3">
               <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
                 {tempText.length}/500 ký tự
               </span>
@@ -2271,18 +2244,18 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
         className={cn(
           "rounded-lg border px-3.5 py-2 text-xs font-bold transition-all inline-flex items-center gap-1.5 h-9",
           isUnlocked
-            ? "border-app-accent/30 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft/70"
-            : "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning hover:bg-app-status-warning/20",
+            ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/75 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-400"
+            : "border-amber-200 bg-amber-50/70 text-amber-700 hover:bg-amber-100/70 dark:border-amber-900/40 dark:bg-amber-950/10 dark:text-amber-400",
         )}
       >
         {isUnlocked ? (
           <>
-            <MailOpen className="h-4 w-4 text-app-accent" />
+            <MailOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Đọc thư
           </>
         ) : (
           <>
-            <Lock className="h-3.5 w-3.5 text-app-status-warning" />
+            <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
             Thư tuần 12 (Khóa)
           </>
         )}
@@ -2293,11 +2266,11 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
         <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
           <DialogHeader className="space-y-1.5 text-left border-b border-app-line pb-3">
             <div className="flex items-center gap-2">
-              <MailOpen className="h-5 w-5 text-app-accent shrink-0" />
+              <MailOpen className="h-5 w-5 text-emerald-600 shrink-0" />
               <DialogTitle className="font-serif text-lg font-bold text-app-ink">Thư gửi từ quá khứ</DialogTitle>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-sm text-app-ink-soft font-sans mt-2">
+          <DialogDescription className="text-sm text-app-ink-soft mt-2">
             Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
           </DialogDescription>
 
@@ -2305,7 +2278,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">“{letterText}”</p>
           </div>
 
-          <DialogFooter className="flex flex-row justify-between items-center gap-3 font-sans w-full mt-2">
+          <DialogFooter className="flex flex-row justify-between items-center gap-3 w-full mt-2">
             <button
               type="button"
               onClick={handleOpenWrite}
@@ -2316,7 +2289,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             <Button
               size="sm"
               onClick={() => setIsReadOpen(false)}
-              className="rounded-lg bg-app-accent hover:bg-app-accent-hover text-white font-bold h-9 px-4 py-2 text-xs sm:text-sm"
+              className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 px-4 py-2 text-xs sm:text-sm"
             >
               Tuyệt vời
             </Button>
@@ -2333,7 +2306,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               <DialogTitle className="font-serif text-lg font-bold text-app-ink">Chỉnh sửa thư gửi tuần 12</DialogTitle>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
+          <DialogDescription className="text-sm text-app-ink-soft leading-relaxed mt-2">
             Chỉnh sửa hoặc xóa bức thư gửi cho chính bạn ở cuối hành trình mục tiêu.
           </DialogDescription>
 
@@ -2347,7 +2320,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             />
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-3">
             <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
               {tempText.length}/500 ký tự
             </span>

@@ -377,7 +377,7 @@ function ReflectionJournalContent() {
           hasReflections && (
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-md shadow-app-warm/15"
+              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-app-md shadow-app-warm/15"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết nhật ký mới
@@ -385,7 +385,7 @@ function ReflectionJournalContent() {
           )
         }
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
             <img
               src="/reflection_journal.png"
               alt="Nhật ký phản tư chánh niệm"
@@ -418,7 +418,7 @@ function ReflectionJournalContent() {
               className={cn(
                 "inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                 filterType === type
-                  ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
+                  ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-app-sm"
                   : "text-app-ink-soft hover:bg-app-bg",
               )}
             >
@@ -441,7 +441,7 @@ function ReflectionJournalContent() {
                 className={cn(
                   "inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                   filterMood === mood
-                    ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-sm"
+                    ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-app-sm"
                     : "text-app-ink-soft hover:bg-app-bg",
                 )}
               >
@@ -601,7 +601,7 @@ function ReflectionJournalContent() {
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-sm transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                           isActive
-                            ? "bg-app-warm text-white border-app-warm shadow-sm font-semibold"
+                            ? "bg-app-warm text-white border-app-warm shadow-app-sm font-semibold"
                             : "bg-app-surface border-app-warm-border text-app-ink-soft hover:bg-app-warm-soft",
                         )}
                       >
@@ -616,7 +616,7 @@ function ReflectionJournalContent() {
               <Button
                 onClick={handleAddReflection}
                 disabled={!newReflection.title || !newReflection.content}
-                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shadow-md shadow-app-warm/15"
+                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shadow-app-md shadow-app-warm/15"
               >
                 Lưu nhật ký
               </Button>
@@ -670,7 +670,7 @@ function ReflectionJournalContent() {
         <EmptyState
           variant="card"
           illustration={
-            <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto mb-4">
+            <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto mb-4">
               <img
                 src="/reflection_journal.png"
                 alt="Nhật ký phản tư chánh niệm"
@@ -683,7 +683,7 @@ function ReflectionJournalContent() {
           actions={
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 shadow-md shadow-app-warm/15"
+              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 shadow-app-md shadow-app-warm/15"
             >
               <Plus className="h-4 w-4 mr-2" />
               Viết entry đầu tiên

@@ -1288,7 +1288,7 @@ export function TwelveWeekSystem() {
       {/* Success Overlay */}
       {showSuccessOverlay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-ink/40 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden animate-scale-up">
+          <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-app-xl relative overflow-hidden animate-scale-up">
             {/* Decorative soft gradient blobs inside the card */}
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-app-accent-soft/20 rounded-full blur-xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-status-warning/10 rounded-full blur-xl pointer-events-none" />
@@ -1378,7 +1378,7 @@ export function TwelveWeekSystem() {
 
             <button
               type="button"
-              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-app-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer"
               style={{ backgroundColor: "var(--color-accent)" }}
               onClick={() => {
                 setShowSuccessOverlay(false);

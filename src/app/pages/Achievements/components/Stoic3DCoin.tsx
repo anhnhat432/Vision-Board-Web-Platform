@@ -187,7 +187,7 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity duration-300">
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation on modal container */}
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-app-line bg-gradient-to-b from-app-surface to-app-bg shadow-2xl transition-all duration-300 md:max-w-xl"
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-app-line bg-gradient-to-b from-app-surface to-app-bg shadow-app-xl transition-all duration-300 md:max-w-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -260,7 +260,7 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
 
               {/* MẶT TRƯỚC (Front Face) */}
               <div
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-full border-[6px] border-amber-700 bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-800 shadow-xl"
+                className="absolute inset-0 flex flex-col items-center justify-center rounded-full border-[6px] border-amber-700 bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-800 shadow-app-xl"
                 style={{
                   backfaceVisibility: "hidden",
                   transform: "translateZ(0px)",
@@ -282,7 +282,7 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
 
               {/* MẶT SAU (Back Face) */}
               <div
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-full border-[6px] border-amber-700 bg-gradient-to-br from-amber-800 via-amber-700 to-amber-950 p-4 text-center shadow-xl"
+                className="absolute inset-0 flex flex-col items-center justify-center rounded-full border-[6px] border-amber-700 bg-gradient-to-br from-amber-800 via-amber-700 to-amber-950 p-4 text-center shadow-app-xl"
                 style={{
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg) translateZ(0.5px)",

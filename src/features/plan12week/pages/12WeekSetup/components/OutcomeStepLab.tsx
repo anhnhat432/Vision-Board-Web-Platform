@@ -161,9 +161,9 @@ export function OutcomeStepLab({
                   onChange("goalType", item.value);
                 }}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-all duration-200 active:scale-95 font-sans focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                   isActive
-                    ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-105"
+                    ? "border-app-accent bg-app-accent text-white shadow-app-sm shadow-app-accent/20 scale-105"
                     : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30",
                 )}
               >

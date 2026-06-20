@@ -45,7 +45,7 @@ const TIMELINE_PHASES = [
     weekEnd: 4,
     icon: PhaseRampChipIcon,
     tileClassName: "border-app-accent-soft bg-app-accent-soft/40 text-app-accent hover:border-app-accent/60",
-    activeClassName: "border-app-accent bg-app-accent text-white shadow-sm",
+    activeClassName: "border-app-accent bg-app-accent text-white shadow-app-sm",
   },
   {
     label: FEATURE_TERMS.peak,
@@ -53,7 +53,7 @@ const TIMELINE_PHASES = [
     weekEnd: 8,
     icon: PhasePeakChipIcon,
     tileClassName: "border-app-warm-border bg-app-warm/30 text-app-warm-strong hover:border-app-warm-strong/40",
-    activeClassName: "border-app-warm-strong bg-app-warm-strong text-white shadow-sm",
+    activeClassName: "border-app-warm-strong bg-app-warm-strong text-white shadow-app-sm",
   },
   {
     label: FEATURE_TERMS.harvest,
@@ -61,8 +61,8 @@ const TIMELINE_PHASES = [
     weekEnd: 12,
     icon: PhaseHarvestChipIcon,
     tileClassName:
-      "border-app-accent/30 bg-app-accent-soft/40 text-app-accent hover:border-app-accent/60 dark:border-app-accent/40 dark:bg-app-accent/20 dark:text-app-accent",
-    activeClassName: "border-app-accent bg-app-accent text-white shadow-sm",
+      "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100",
+    activeClassName: "border-emerald-600 bg-emerald-700 text-white shadow-app-sm",
   },
 ];
 
@@ -191,14 +191,14 @@ export function PlanPreview({
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-accent">Kết quả</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">1 mục tiêu 12 tuần</p>
           </div>
-          <div className="rounded-[var(--r-tile)] border border-app-accent/30 bg-app-accent-soft/30 p-3 dark:border-app-accent/40 dark:bg-app-accent/20">
-            <Zap className="h-4 w-4 text-app-accent" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-accent">Lead</p>
+          <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-500/30 dark:bg-emerald-950/30">
+            <Zap className="h-4 w-4 text-emerald-700 dark:text-emerald-200" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-200">Lead</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">{weekOneLeadMetrics.length} việc lặp lại</p>
           </div>
-          <div className="rounded-[var(--r-tile)] border border-app-status-warning/30 bg-app-status-warning/10 p-3 dark:border-app-status-warning/30 dark:bg-app-status-warning/10">
-            <CalendarDays className="h-4 w-4 text-app-status-warning" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-status-warning">Week 1</p>
+          <div className="rounded-[var(--r-tile)] border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/30">
+            <CalendarDays className="h-4 w-4 text-amber-700 dark:text-amber-200" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-amber-700 dark:text-amber-200">Week 1</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">{totalWeekOneTasks} việc đầu tiên</p>
           </div>
         </div>
@@ -279,7 +279,7 @@ export function PlanPreview({
                           <div
                             key={task.id}
                             className={`flex items-start gap-3 rounded-[var(--r-control)] border p-3 ${
-                              task.title.startsWith("[CỐT LÕI]") ? "border-app-warm-border bg-app-warm-soft" : "border-app-line"
+                              task.title.startsWith("[CỐT LÕI]") ? "border-orange-200 bg-orange-50" : "border-app-line"
                             }`}
                           >
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-primary text-xs font-medium text-primary-foreground">
@@ -353,14 +353,14 @@ export function PlanPreview({
                 <div
                   key={indicator.id}
                   className={`flex items-center justify-between rounded-[var(--r-control)] border p-3 ${
-                    idx < 2 ? "border-app-accent/30 bg-app-accent-soft" : "border-app-line"
+                    idx < 2 ? "border-green-200 bg-green-50" : "border-app-line"
                   }`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{indicator.name}</span>
                       {idx < 2 && (
-                        <Badge variant="outline" className="bg-app-accent-soft text-app-accent text-xs">
+                        <Badge variant="outline" className="bg-green-100 text-green-800 text-xs">
                           Cốt lõi
                         </Badge>
                       )}
@@ -391,7 +391,7 @@ export function PlanPreview({
         </Button>
         <div className="flex flex-col items-end gap-2">
           {validationMessage ? (
-            <p role="alert" className="max-w-md text-right text-sm font-medium text-app-status-error">
+            <p role="alert" className="max-w-md text-right text-sm font-medium text-rose-700">
               {validationMessage}
             </p>
           ) : null}

@@ -170,7 +170,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
           <div className="grid gap-6 sm:grid-cols-4 relative z-10">
             {/* Mốc 1: Tuần 1 */}
             <div className="flex sm:flex-col items-start sm:items-center text-left sm:text-center gap-4 sm:gap-2">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm ring-4 ring-app-accent-soft/30 font-bold text-xs">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-app-sm ring-4 ring-app-accent-soft/30 font-bold text-xs">
                 W1
               </div>
               <div className="min-w-0">
@@ -209,7 +209,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
 
             {/* Mốc 4: Tuần 12 */}
             <div className="flex sm:flex-col items-start sm:items-center text-left sm:text-center gap-4 sm:gap-2">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm ring-4 ring-app-accent-soft/30 font-bold text-xs">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-app-sm ring-4 ring-app-accent-soft/30 font-bold text-xs">
                 W12
               </div>
               <div className="min-w-0">
