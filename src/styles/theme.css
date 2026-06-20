@@ -3866,3 +3866,91 @@ html.dark .weekly-grain-overlay::before {
     transition: none !important;
   }
 }
+
+/* ── 12 Week System: staggered card entrance ────────────────── */
+@keyframes dof-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-pane > * {
+  animation: dof-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.tab-pane > *:nth-child(1)  { animation-delay: 0.02s; }
+.tab-pane > *:nth-child(2)  { animation-delay: 0.07s; }
+.tab-pane > *:nth-child(3)  { animation-delay: 0.12s; }
+.tab-pane > *:nth-child(4)  { animation-delay: 0.17s; }
+.tab-pane > *:nth-child(5)  { animation-delay: 0.22s; }
+.tab-pane > *:nth-child(6)  { animation-delay: 0.27s; }
+.tab-pane > *:nth-child(7)  { animation-delay: 0.32s; }
+.tab-pane > *:nth-child(8)  { animation-delay: 0.37s; }
+.tab-pane > *:nth-child(n+9) { animation-delay: 0.42s; }
+
+/* ── 12 Week System: progress bar grow animation ────────────── */
+@keyframes dof-bar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.tab-pane .bar-fill {
+  transform-origin: left center;
+  animation: dof-bar 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s both;
+}
+
+/* ── 12 Week System: hero gauge draw animation ──────────────── */
+@keyframes dof-gauge {
+  from { stroke-dashoffset: var(--tws-gauge-max, 339); }
+  to   { stroke-dashoffset: var(--tws-gauge-target, 283); }
+}
+.tab-pane .dof-gauge {
+  animation: dof-gauge 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s both;
+}
+
+/* ── 12 Week System: glow pulse on hero gauge ───────────────── */
+@keyframes dof-glow {
+  0%, 100% { opacity: 0.45; transform: scale(0.95); }
+  50%      { opacity: 0.85; transform: scale(1.05); }
+}
+.tab-pane .dof-glow {
+  animation: dof-glow 4s ease-in-out infinite;
+}
+
+/* ── 12 Week System: Zen path draw animation ────────────────── */
+@keyframes dof-draw {
+  to { stroke-dashoffset: 0; }
+}
+.tab-pane .dof-path {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: dof-draw 2s cubic-bezier(0.4, 0.1, 0.2, 1) 0.4s forwards;
+}
+
+/* ── 12 Week System: campfire pulse ─────────────────────────── */
+@keyframes dof-fire {
+  0%, 100% { r: 13; opacity: 1; }
+  50%      { r: 15; opacity: 0.85; }
+}
+.tab-pane .dof-fire {
+  animation: dof-fire 1.8s ease-in-out infinite;
+}
+
+@keyframes dof-fire-ring {
+  0%   { r: 13; opacity: 0.5; }
+  100% { r: 26; opacity: 0; }
+}
+.tab-pane .dof-fire-ring {
+  animation: dof-fire-ring 1.8s ease-out infinite;
+}
+
+/* ── 12 Week System: reduced motion ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .tab-pane > *,
+  .tab-pane .bar-fill,
+  .tab-pane .dof-gauge,
+  .tab-pane .dof-path,
+  .tab-pane .dof-glow,
+  .tab-pane .dof-fire,
+  .tab-pane .dof-fire-ring {
+    animation: none !important;
+  }
+  .tab-pane .bar-fill { transform: none; }
+  .tab-pane .dof-path { stroke-dashoffset: 0; }
+}

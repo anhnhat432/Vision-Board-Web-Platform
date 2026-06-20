@@ -34,7 +34,7 @@ export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
   const suggestion = generateExecutionSuggestion(score);
 
   return (
-    <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
+    <div className="surface-raised rounded-xl border border-[rgba(23,21,15,0.08)] bg-white p-5 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Phản hồi thực hiện</p>
