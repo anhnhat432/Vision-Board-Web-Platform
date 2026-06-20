@@ -11,17 +11,21 @@
  */
 
 import { createHash } from "node:crypto";
-
-import { PaymentOrderModel, type PaymentOrderDocument } from "../models/PaymentOrderModel";
-import * as backendMonitoring from "../monitoring/sentry";
-import {
-  resolveActiveEntitlementKeys,
-  type BillingEntitlementKey,
-  type BillingSubscriptionEntity,
-  type BillingSubscriptionRepository,
+import type {
+  BillingService,
+  BillingSubscriptionRepository,
+  UserEntitlementSnapshot,
 } from "./billingService";
+import type {
+  BillingEntitlementKey,
+  BillingSubscriptionEntity,
+} from "./billingService";
+import { resolveActiveEntitlementKeys } from "./billingService";
 import { billingService } from "./billingServiceInstance";
+import { PaymentOrderModel, type PaymentOrderDocument } from "../models/PaymentOrderModel";
+import { OrderModel } from "../models/OrderModel";
 import { deliverReceiptForOrder } from "./paymentReceiptDeliveryService";
+import * as backendMonitoring from "../monitoring/sentry";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -373,19 +377,38 @@ export async function completePaymentOrderFromCassoTransaction(
 
   try {
     const payloadHash = createHash("sha256").update(JSON.stringify(tx)).digest("hex");
-    await billing.upsertSubscriptionFromProviderEvent({
-      provider: "casso",
-      providerEventId: `casso_${cassoTransactionId}`,
-      eventType: "checkout_completed",
-      payloadHash,
-      userId: order.userId,
-      planCode: "PLUS",
-      status: "active",
-      billingCycle: "twelve_week",
-      currentPeriodStart: now,
-      currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
-      providerSubscriptionId: order.orderId,
-    });
+
+    const isPhysicalOrder = order.purpose === "physical_order";
+
+    if (isPhysicalOrder) {
+      const physicalOrderId = order.metadata?.physicalOrderId;
+      if (physicalOrderId) {
+        const physicalOrder = await OrderModel.findById(physicalOrderId);
+        if (physicalOrder?.status === "pending") {
+          await OrderModel.updateOne(
+            { _id: physicalOrderId, status: "pending" },
+            {
+              $set: { status: "confirmed" },
+              $push: { statusHistory: { status: "confirmed", changedAt: now, changedBy: `reconciliation:${order.orderId}` } },
+            },
+          );
+        }
+      }
+    } else {
+      await billing.upsertSubscriptionFromProviderEvent({
+        provider: "casso",
+        providerEventId: `casso_${cassoTransactionId}`,
+        eventType: "checkout_completed",
+        payloadHash,
+        userId: order.userId,
+        planCode: "PLUS",
+        status: "active",
+        billingCycle: "twelve_week",
+        currentPeriodStart: now,
+        currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
+        providerSubscriptionId: order.orderId,
+      });
+    }
 
     order.status = "completed";
     order.completedAt = now;

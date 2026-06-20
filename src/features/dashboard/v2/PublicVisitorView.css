@@ -1,0 +1,162 @@
+/*
+ * Landing public "Dear Our Future" — dùng token --app-* chung với toàn app
+ * để landing và các trang còn lại chung 1 nguồn màu, tự đồng bộ dark/light.
+ */
+.dof-landing {
+  background: var(--app-bg);
+  color: var(--app-ink);
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Bù lại padding mặc định của shell app khi landing chiếm trọn khung. */
+.dof-landing,
+.dof-landing * {
+  box-sizing: border-box;
+}
+
+.dof-landing ::selection {
+  background: var(--app-highlight);
+  color: var(--app-ink);
+}
+
+.dof-display {
+  font-family: var(--app-font-serif);
+}
+
+@keyframes dof-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dof-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-9px) rotate(var(--r, 0deg));
+  }
+}
+
+.dof-landing .dof-up {
+  animation: dof-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.dof-landing .dof-float {
+  animation: dof-float 6s ease-in-out infinite;
+}
+
+/* Tôn trọng người dùng giảm chuyển động: tắt float + reveal động. */
+@media (prefers-reduced-motion: reduce) {
+  .dof-landing .dof-up,
+  .dof-landing .dof-float {
+    animation: none;
+  }
+}
+
+/* ---- Typography responsive (clamp như prototype) ---- */
+.dof-landing .dof-hero-title {
+  font-size: clamp(40px, 5.4vw, 74px);
+}
+.dof-landing .dof-h2 {
+  font-size: clamp(26px, 3.4vw, 40px);
+}
+.dof-landing .dof-h2-lg {
+  font-size: clamp(28px, 4vw, 48px);
+}
+.dof-landing .dof-cta-title {
+  font-size: clamp(32px, 4.5vw, 56px);
+}
+
+/* ---- Grid layouts ---- */
+.dof-landing .dof-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
+  align-items: center;
+}
+.dof-landing .dof-journey-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.dof-landing .dof-preview-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+}
+.dof-landing .dof-preview-left {
+  border-right: 1px dashed rgba(23, 21, 15, 0.12);
+  padding-right: 26px;
+}
+.dof-landing .dof-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.dof-landing .dof-quad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.dof-landing .dof-tri-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.dof-landing .dof-navlink {
+  transition: color 0.15s ease;
+}
+.dof-landing .dof-navlink:hover {
+  color: var(--app-accent);
+}
+
+/* Header: trên mobile ẩn anchor điều hướng để chừa chỗ cho
+   Đăng nhập / Đăng ký / âm thanh tập trung. */
+@media (max-width: 640px) {
+  .dof-landing .dof-nav-anchors {
+    display: none !important;
+  }
+}
+
+/* ---- Tablet: thu các lưới 4/3 cột về 2 cột ---- */
+@media (max-width: 1000px) {
+  .dof-landing .dof-quad-grid,
+  .dof-landing .dof-tri-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---- Mobile: stack toàn bộ, ẩn art hero phụ cho gọn ---- */
+@media (max-width: 760px) {
+  .dof-landing .dof-hero-grid,
+  .dof-landing .dof-preview-card,
+  .dof-landing .dof-two-col,
+  .dof-landing .dof-quad-grid,
+  .dof-landing .dof-tri-grid {
+    grid-template-columns: 1fr;
+  }
+  .dof-landing .dof-journey-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dof-landing .dof-preview-left {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px dashed rgba(23, 21, 15, 0.12);
+    padding-bottom: 22px;
+  }
+  .dof-landing .dof-hero-art {
+    margin-top: 12px;
+  }
+}

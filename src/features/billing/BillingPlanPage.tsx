@@ -16,6 +16,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
+import { BillingPlusIllustration } from "../../app/components/illustrations/BillingPlusIllustration";
 import { BillingTrustSignals } from "../../app/components/BillingTrustSignals";
 import { PageHero } from "../../app/components/layout/PageHero";
 import { PrimaryActionCard } from "../../app/components/layout/PrimaryActionCard";
@@ -566,13 +567,8 @@ export function BillingPlan() {
         title="Chọn gói phù hợp với bạn"
         description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
-            <img
-              src="/plus_value.png"
-              alt="Gói nâng cấp Plus"
-              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              loading="lazy"
-            />
+          <div className="relative overflow-hidden rounded-2xl border border-app-line dark:border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto flex items-center justify-center bg-app-surface p-6">
+            <BillingPlusIllustration className="h-full w-full max-h-48 text-app-accent" />
           </div>
         }
       />

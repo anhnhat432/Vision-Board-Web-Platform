@@ -170,7 +170,7 @@ export function TimeBoundStep({
               </div>
 
               {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng */}
-              <div className="rounded-xl border border-dashed border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C]/50 px-4 py-3 flex items-center gap-3 shadow-none">
+              <div className="rounded-xl border border-dashed border-app-line bg-app-surface dark:bg-app-surface/50 px-4 py-3 flex items-center gap-3 shadow-none">
                 <Calendar className="h-5 w-5 text-app-accent shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.12em] text-app-accent font-extrabold">
@@ -223,7 +223,7 @@ export function TimeBoundStep({
           </div>
 
           {/* 1-Click Weeks Suggestions */}
-          <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3 rounded-xl border border-dashed border-app-line/80">
+          <div className="mt-4 bg-app-bg-subtle/30 dark:bg-app-bg-subtle/15 p-3 rounded-xl border border-dashed border-app-line/80">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
               <span>💡</span> Chọn nhanh số tuần:
             </p>
@@ -290,7 +290,7 @@ export function TimeBoundStep({
           ) : null}
 
           {/* 1-Click Date Suggestions */}
-          <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3 rounded-xl border border-dashed border-app-line/80">
+          <div className="mt-4 bg-app-bg-subtle/30 dark:bg-app-bg-subtle/15 p-3 rounded-xl border border-dashed border-app-line/80">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
               <span>💡</span> Chọn nhanh mốc thời gian:
             </p>
@@ -333,7 +333,7 @@ export function TimeBoundStep({
 
           {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng cho chế độ chọn ngày */}
           {smartData.timeBound.target_date && (
-            <div className="rounded-xl border border-dashed border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C]/50 px-4 py-3 flex items-center gap-3 shadow-none">
+            <div className="rounded-xl border border-dashed border-app-line bg-app-surface dark:bg-app-surface/50 px-4 py-3 flex items-center gap-3 shadow-none">
               <Calendar className="h-5 w-5 text-app-accent shrink-0" />
               <div>
                 <p className="text-[10px] uppercase tracking-[0.12em] text-app-accent font-extrabold">

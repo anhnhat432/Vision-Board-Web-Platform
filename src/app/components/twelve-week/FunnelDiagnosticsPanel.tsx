@@ -41,25 +41,25 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
   return (
     <section
       data-testid="funnel-diagnostics-panel"
-      className="rounded-[var(--r-card)] border border-slate-300 bg-slate-50/80 p-4 shadow-sm sm:p-5"
+      className="rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle/80 p-4 shadow-sm sm:p-5"
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-slate-200 text-slate-700">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-app-line text-app-ink-soft">
             <Activity className="h-4 w-4" aria-hidden="true" />
           </span>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-700">Funnel diagnostics (dev)</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-app-ink-soft">Funnel diagnostics (dev)</p>
         </div>
-        <span className="rounded-[var(--r-pill)] border border-slate-300 bg-app-surface px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
+        <span className="rounded-[var(--r-pill)] border border-app-line bg-app-surface px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
           Local-only
         </span>
       </header>
 
       <p
         data-testid="funnel-diagnostics-privacy-note"
-        className="mt-[var(--space-inline)] flex items-start gap-1.5 text-xs leading-5 text-slate-600"
+        className="mt-[var(--space-inline)] flex items-start gap-1.5 text-xs leading-5 text-app-ink-soft"
       >
-        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700" aria-hidden="true" />
+        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-app-accent" aria-hidden="true" />
         <span>
           Panel chỉ hiển thị số đếm và bucket — không hiển thị nội dung mục tiêu, tên việc, ghi chú, email, hoặc id tài
           khoản. Dữ liệu chỉ đọc từ trình duyệt này, không gửi đi đâu.
@@ -128,15 +128,15 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
         <Row label="Review đến hạn hôm nay" value={boolText(data.execution.reviewDueToday)} />
       </Section>
 
-      <p className="mt-4 text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">Snapshot at {data.generatedAt}</p>
+      <p className="mt-4 text-[0.65rem] uppercase tracking-[0.18em] text-app-ink-muted">Snapshot at {data.generatedAt}</p>
     </section>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div data-section={title} className="mt-4 rounded-[var(--r-card)] border border-white/72 bg-white/82 p-3">
-      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
+    <div data-section={title} className="mt-4 rounded-[var(--r-card)] border border-app-line/70 bg-app-surface/80 p-3">
+      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">{title}</p>
       <dl className="mt-2 grid gap-1 sm:grid-cols-2">{children}</dl>
     </div>
   );
@@ -144,9 +144,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-slate-200/70 bg-white/72 px-2.5 py-1.5">
-      <dt className="text-xs text-slate-600">{label}</dt>
-      <dd className="text-xs font-semibold text-slate-900">{value}</dd>
+    <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-app-line/70 bg-app-surface/70 px-2.5 py-1.5">
+      <dt className="text-xs text-app-ink-soft">{label}</dt>
+      <dd className="text-xs font-semibold text-app-ink">{value}</dd>
     </div>
   );
 }

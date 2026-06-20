@@ -53,7 +53,7 @@ export function VisionBoardCanvas({
     <div
       ref={exportRef}
       className={`relative h-[450px] min-w-0 overflow-hidden sm:h-[580px] lg:h-[620px] xl:h-[600px] ${className ?? ""}`}
-      style={{ background: theme.canvasBackground }}
+      style={{ background: "var(--grad-vision)" }}
       data-theme-id={theme.id}
     >
       <div
@@ -192,7 +192,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
-      className={`absolute cursor-move touch-none select-none transition-transform duration-300 hover:scale-[1.015] ${
+      className={`absolute cursor-move touch-none select-none transition-transform duration-[var(--duration-base)] ease-[var(--ease-emphasized)] hover:scale-[1.015] shadow-app-lg ${
         isSelected ? "rounded-xl ring-2 ring-app-accent ring-offset-2" : ""
       }`}
       style={{

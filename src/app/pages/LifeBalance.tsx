@@ -15,6 +15,8 @@ import { Link, useBlocker, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { getLifeAreaIcon } from "../components/illustrations";
+import { MountainMoonIllustration } from "../components/illustrations/CalmEmptyIllustrations";
+import { emptyNarratives } from "../components/empty-states/narratives";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { MotionFadeIn, MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { PageShell } from "../components/PageShell";
@@ -190,6 +192,11 @@ export function LifeBalance() {
     [lifeAreas],
   );
 
+  const radarDotColors = useMemo(
+    () => lifeAreas.map((area) => getAreaColorConfig(area.name).accent),
+    [lifeAreas],
+  );
+
   const averageScore = useMemo(() => {
     if (lifeAreas.length === 0) return 0;
     return lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length;
@@ -353,16 +360,16 @@ export function LifeBalance() {
           </header>
 
           <section className="mt-8 surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
-            <Compass className="mx-auto h-12 w-12 text-app-accent" aria-hidden="true" />
-            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có dữ liệu bánh xe</h2>
+            <MountainMoonIllustration className="mx-auto h-32 w-auto text-app-accent" aria-hidden="true" />
+            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">{emptyNarratives.noLifeBalance.title}</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
-              Bắt đầu bằng cách chấm điểm 8 lĩnh vực để xem bức tranh.
+              {emptyNarratives.noLifeBalance.body}
             </p>
             <Link
               to="/onboarding"
               className="mt-6 inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-app-accent"
             >
-              Bắt đầu chấm điểm
+              {emptyNarratives.noLifeBalance.cta}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </section>
@@ -493,7 +500,7 @@ export function LifeBalance() {
           <TabsContent value="current" className="mt-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full max-w-full overflow-hidden">
               <div className="space-y-6">
-                <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm">
+                <section className="surface-raised rounded-2xl border border-app-line bg-gradient-to-br from-app-accent-subtle/10 via-app-surface to-app-bg p-5 md:p-6 shadow-app-md">
                   <header className="pb-3 border-b border-app-line/60 flex items-center justify-between">
                     <div>
                       <h2 className="text-sm font-bold text-app-ink uppercase tracking-wider">
@@ -511,20 +518,25 @@ export function LifeBalance() {
                     )}
                   </header>
                   <div className="mt-4">
-                    <SimpleRadarChart className="mx-auto max-w-[420px]" data={radarData} height={340} />
+                    <SimpleRadarChart
+                      className="mx-auto max-w-[460px]"
+                      data={radarData}
+                      height={360}
+                      dotColors={radarDotColors}
+                    />
                   </div>
                 </section>
 
                 {/* Box Giải thích & Nhận định Tiêu điểm Chuyên sâu */}
-                <section className="surface-raised rounded-2xl border border-amber-500/10 bg-amber-500/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                <section className="surface-raised rounded-2xl border border-app-accent/10 bg-app-accent/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
 
                   <header className="flex items-center gap-2 pb-3 border-b border-app-line/20">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent dark:text-app-accent">
                       <Target className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-amber-700">
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-app-accent">
                         Trọng tâm Hành động đề xuất
                       </h2>
                       <p className="text-[10px] text-app-ink-muted font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
@@ -534,7 +546,7 @@ export function LifeBalance() {
                   <div className="mt-4 space-y-3">
                     <p className="text-xs font-bold text-app-ink-soft leading-normal">
                       Khía cạnh cần ưu tiên cải thiện:{" "}
-                      <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">
+                      <span className="text-app-accent bg-app-accent-soft px-2 py-0.5 rounded-md border border-app-accent/20">
                         {getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)
                       </span>
                     </p>
@@ -567,7 +579,7 @@ export function LifeBalance() {
                           <Compass className="h-5 w-5 text-app-accent animate-spin-slow" />
                           Cập nhật Bánh xe cuộc sống hằng tuần
                         </h3>
-                        <p className="text-xs text-neutral-500 leading-relaxed font-semibold">
+                        <p className="text-xs text-app-ink-muted leading-relaxed font-semibold">
                           Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh qua 3 chặng tương tác nhẹ để luôn làm
                           chủ nhịp điệu cuộc sống.
                         </p>
@@ -619,9 +631,9 @@ export function LifeBalance() {
                                 >
                                   <AreaIcon className="h-4 w-4" />
                                 </span>
-                                <span className="text-xs font-bold text-neutral-700">{label}</span>
+                                <span className="text-xs font-bold text-app-ink-soft">{label}</span>
                               </div>
-                              <span className="font-serif text-lg font-extrabold text-neutral-800">{area.score}đ</span>
+                              <span className="font-serif text-lg font-extrabold text-app-ink">{area.score}đ</span>
                             </MotionStaggerItem>
                           );
                         })}
@@ -650,21 +662,21 @@ export function LifeBalance() {
                       >
                         {/* Progress Header */}
                         <header className="pb-4 border-b border-app-line/60 space-y-2">
-                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-app-accent">
                             <span>Chặng {activeClusterIndex + 1} / 3</span>
                             <span>{Math.round(((activeClusterIndex + 1) / 3) * 100)}% Hoàn thành</span>
                           </div>
 
                           {/* Progress Bar */}
-                          <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-app-bg-subtle rounded-full h-1.5 overflow-hidden">
                             <div
-                              className="bg-emerald-600 h-1.5 rounded-full transition-all duration-300"
+                              className="bg-app-accent h-1.5 rounded-full transition-all duration-300"
                               style={{ width: `${((activeClusterIndex + 1) / 3) * 100}%` }}
                             />
                           </div>
 
                           <h3 className="font-serif text-lg font-bold text-app-ink mt-2">{cluster.title}</h3>
-                          <p className="text-xs text-neutral-400 font-semibold">{cluster.description}</p>
+                          <p className="text-xs text-app-ink-muted font-semibold">{cluster.description}</p>
                         </header>
 
                         {/* Danh sách thẻ slider trong cụm */}
@@ -696,21 +708,21 @@ export function LifeBalance() {
                                       <AreaIcon className="h-5 w-5" />
                                     </span>
                                     <div>
-                                      <h4 className="text-xs font-bold text-neutral-800">{label}</h4>
-                                      <p className="text-[10px] text-neutral-500 font-semibold leading-normal">
+                                      <h4 className="text-xs font-bold text-app-ink">{label}</h4>
+                                      <p className="text-[10px] text-app-ink-muted font-semibold leading-normal">
                                         {LIFE_AREA_DETAILS[area.name]}
                                       </p>
                                     </div>
                                   </div>
 
-                                  <div className="flex items-baseline gap-1 bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/50 px-2.5 py-1 rounded-lg">
+                                  <div className="flex items-baseline gap-1 bg-app-surface/80 dark:bg-app-surface/80 border border-app-line/50 px-2.5 py-1 rounded-lg">
                                     <span
-                                      className="font-serif text-lg font-extrabold text-neutral-800"
+                                      className="font-serif text-lg font-extrabold text-app-ink"
                                       style={{ color: colorConfig.accent }}
                                     >
                                       {area.score}
                                     </span>
-                                    <span className="text-[10px] text-neutral-400 font-bold">/10</span>
+                                    <span className="text-[10px] text-app-ink-muted font-bold">/10</span>
                                   </div>
                                 </div>
 
@@ -721,7 +733,7 @@ export function LifeBalance() {
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
                                       type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none font-sans"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink-soft hover:bg-app-bg-subtle active:scale-95 transition-all select-none font-sans"
                                       onClick={() => handleScoreChange(areaIndex, [Math.max(1, area.score - 1)])}
                                       aria-label={`Giảm ${label}`}
                                     >
@@ -745,7 +757,7 @@ export function LifeBalance() {
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
                                       type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none font-sans"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink-soft hover:bg-app-bg-subtle active:scale-95 transition-all select-none font-sans"
                                       onClick={() => handleScoreChange(areaIndex, [Math.min(10, area.score + 1)])}
                                       aria-label={`Tăng ${label}`}
                                     >
@@ -753,7 +765,7 @@ export function LifeBalance() {
                                     </motion.button>
                                   </div>
 
-                                  <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase tracking-wider px-1">
+                                  <div className="flex justify-between text-[9px] font-bold text-app-ink-muted uppercase tracking-wider px-1">
                                     {[
                                       { range: "1–2", label: "Rất chật vật" },
                                       { range: "3–4", label: "Thiếu ổn định" },
@@ -810,7 +822,7 @@ export function LifeBalance() {
                               whileHover={{ scale: 1.015 }}
                               whileTap={{ scale: 0.985 }}
                               type="button"
-                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-500 hover:text-neutral-700 cursor-pointer font-sans"
+                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-app-ink-muted hover:text-app-ink cursor-pointer font-sans"
                               onClick={() => setIsCheckInMode(false)}
                             >
                               Hủy bỏ

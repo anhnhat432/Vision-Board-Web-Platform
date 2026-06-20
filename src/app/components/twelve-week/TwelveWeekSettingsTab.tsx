@@ -32,7 +32,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <SlidersHorizontal className="h-5 w-5 text-emerald-500" />
+            <SlidersHorizontal className="h-5 w-5 text-app-accent" />
             Nhịp kế hoạch
             <span className="sr-only">Cài đặt mục tiêu</span>
           </span>
@@ -50,7 +50,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
         />
         <div className="mt-6 border-t border-app-line pt-6">
           <p className="text-sm font-semibold text-app-ink mb-3 flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-sky-500" />
+            <CalendarClock className="h-4 w-4 text-app-status-info" />
             Lịch tuần tham chiếu
           </p>
           <WeeklyTimeBlocksPanel value={props.system.weeklyTimeBlocks ?? []} onChange={props.onTimeBlocksChange} />
@@ -62,7 +62,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
         <SectionBlock
           title={
             <span className="flex items-center gap-2 text-app-ink">
-              <Crown className="h-5 w-5 text-amber-500" />
+              <Crown className="h-5 w-5 text-app-status-warning" />
               Đăng ký & Quyền truy cập
             </span>
           }
@@ -88,7 +88,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <Bell className="h-5 w-5 text-sky-500" />
+            <Bell className="h-5 w-5 text-app-status-info" />
             Nhắc nhở & Thiết bị
           </span>
         }
@@ -108,7 +108,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <Settings2 className="h-5 w-5 text-purple-500" />
+            <Settings2 className="h-5 w-5 text-app-accent" />
             Tùy chọn thực thi
           </span>
         }
@@ -126,7 +126,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <Database className="h-5 w-5 text-indigo-500" />
+            <Database className="h-5 w-5 text-app-status-info" />
             Đồng bộ & An toàn dữ liệu
           </span>
         }
@@ -174,7 +174,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
         <SectionBlock
           title={
             <span className="flex items-center gap-2 text-app-ink">
-              <Zap className="h-5 w-5 text-amber-500" />
+              <Zap className="h-5 w-5 text-app-status-warning" />
               Lối tắt nhanh
             </span>
           }
@@ -210,7 +210,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
       <SectionBlock
         title={
           <span className="flex items-center gap-2 text-app-ink">
-            <MessageSquare className="h-5 w-5 text-emerald-500" />
+            <MessageSquare className="h-5 w-5 text-app-accent" />
             Góp ý
           </span>
         }
@@ -221,7 +221,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
             source="settings"
             context="12_week_settings"
             triggerLabel="Góp ý"
-            triggerClassName="border-amber-300 bg-amber-50/50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/20 dark:text-amber-400 font-semibold shadow-sm transition-all duration-200 rounded-xl px-4 py-2"
+            triggerClassName="border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning hover:bg-app-status-warning/20 font-semibold shadow-sm transition-all duration-200 rounded-xl px-4 py-2"
           />
         </div>
       </SectionBlock>

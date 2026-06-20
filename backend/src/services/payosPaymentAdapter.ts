@@ -228,11 +228,11 @@ export function mapPayosSubscriptionStatus(providerStatus: string): BillingSubsc
   return null;
 }
 
-function assertPayosConfigReady(config: PayosConfig): void {
+function assertPayosConfigReady(config: PayosConfig, amount: number): void {
   if (!isPayosConfigured()) {
     throw new PaymentProviderNotConfiguredError("payos");
   }
-  if (!Number.isFinite(config.plusPriceVnd) || config.plusPriceVnd < 1000) {
+  if (!Number.isFinite(amount) || amount < 1000) {
     throw new PaymentProviderNotConfiguredError("payos");
   }
 }
@@ -250,13 +250,19 @@ export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOpti
 
     async createCheckoutSession(input: CreateCheckoutSessionInput): Promise<CheckoutSessionResult> {
       const config = getPayosConfig();
-      assertPayosConfigReady(config);
+      const amount = input.amount && Number.isFinite(input.amount) && input.amount >= 1000
+        ? input.amount
+        : config.plusPriceVnd;
+      assertPayosConfigReady(config, amount);
       assertPayosPlanSupported(input);
+
+      const purpose = input.purpose ?? "plus_subscription";
+      const isPhysicalOrder = purpose === "physical_order";
+      const itemName = isPhysicalOrder ? "Vision Board Kit" : "Vision Board Plus 12 tuần";
 
       const now = options.now?.() ?? new Date();
       const orderId = (options.orderIdGenerator?.() ?? generatePayosLocalOrderId()).trim().toUpperCase();
       const orderCode = createPayosOrderCodeFromOrderId(orderId);
-      const amount = config.plusPriceVnd;
       const expiresAt = new Date(now.getTime() + ORDER_EXPIRY_MINUTES * 60 * 1000);
       const payosClient = options.client ?? createPayosClient(config);
 
@@ -271,7 +277,7 @@ export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOpti
         expiredAt: Math.floor(expiresAt.getTime() / 1000),
         items: [
           {
-            name: "Vision Board Plus 12 tuần",
+            name: itemName,
             quantity: 1,
             price: amount,
           },
@@ -301,6 +307,7 @@ export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOpti
         currency: "VND",
         status: "pending",
         provider: "payos",
+        purpose,
         bankAccount: paymentLink.accountNumber || "payos",
         bankName: paymentLink.bin || "payos",
         accountName: paymentLink.accountName || "PayOS",
@@ -310,6 +317,7 @@ export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOpti
         receiptName: input.receiptName,
         expiresAt: providerExpiresAt,
         metadata: {
+          physicalOrderId: input.physicalOrderId || undefined,
           payos: {
             orderCode,
             paymentLinkId: paymentLink.paymentLinkId,

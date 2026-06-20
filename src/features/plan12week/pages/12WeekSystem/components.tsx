@@ -223,11 +223,11 @@ export function TwelveWeekDashboardHeader({
   const weekPercent = Math.max(0, Math.min(100, Math.round(weekCompletion.percent)));
 
   return (
-    <header className="relative overflow-hidden rounded-3xl bg-emerald-950 p-6 text-white shadow-lg md:p-8">
+    <header className="relative overflow-hidden rounded-3xl bg-app-accent p-6 text-white shadow-lg md:p-8">
       {/* lớp sáng mảnh phía trên — tạo chiều sâu, không dùng blur/mesh */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
       />
 
       <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
@@ -236,13 +236,13 @@ export function TwelveWeekDashboardHeader({
             data-testid="twelve-week-header-description"
             className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider"
           >
-            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-emerald-200">
+            <span className="rounded-md border border-white/20 bg-white/10 px-2 py-0.5 text-white/90">
               Hệ thống 12 tuần
             </span>
-            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-emerald-200">
+            <span className="rounded-md border border-white/20 bg-white/10 px-2 py-0.5 text-white/90">
               Tuần {currentWeek} / {system.totalWeeks}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 text-emerald-950">
+            <span className="inline-flex items-center gap-1 rounded-full bg-app-highlight px-2.5 py-0.5 text-app-ink">
               <PhaseIcon className="h-3 w-3 shrink-0" />
               <span>Nhịp {phaseInfo.label}</span>
             </span>
@@ -257,8 +257,8 @@ export function TwelveWeekDashboardHeader({
             inputClassName="h-auto rounded-lg bg-white/10 px-2 py-1 font-serif text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white"
           />
 
-          <div className="flex flex-wrap items-center gap-2 text-[10px] text-emerald-200/70">
-            <span className="rounded-md border border-emerald-400/15 px-1.5 py-0.5">Gói {getPlanLabel(activePlanCode)}</span>
+          <div className="flex flex-wrap items-center gap-2 text-[10px] text-white/70">
+            <span className="rounded-md border border-white/15 px-1.5 py-0.5">Gói {getPlanLabel(activePlanCode)}</span>
             <span>·</span>
             <span
               className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}
@@ -273,7 +273,7 @@ export function TwelveWeekDashboardHeader({
           >
             <button
               type="button"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-amber-400 px-6 py-2.5 text-xs font-bold text-emerald-950 shadow-sm transition-colors hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-app-surface px-6 py-2.5 text-xs font-bold text-app-accent shadow-sm transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/50"
               onClick={onOpenFocusTab}
             >
               <span>{reviewDueToday ? "Review tuần này" : "Xem việc hôm nay"}</span>
@@ -282,7 +282,7 @@ export function TwelveWeekDashboardHeader({
 
             <button
               type="button"
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/5 px-5 py-2.5 text-xs font-semibold text-emerald-100 transition-colors hover:bg-emerald-400/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/30 bg-white/5 px-5 py-2.5 text-xs font-semibold text-white/90 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               onClick={onOpenGoals}
             >
               Mở mục tiêu
@@ -291,32 +291,32 @@ export function TwelveWeekDashboardHeader({
         </div>
 
         {/* Bảng tiến độ — điểm nhấn số liệu nổi bật */}
-        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-900/40 p-4">
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/15 bg-black/20 p-4">
           <div className="col-span-2">
             <div className="flex items-end justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-200/70">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
                 Tiến độ chu kỳ
               </span>
               <span className="font-serif text-lg font-semibold tabular-nums text-white">
                 {currentWeek}
-                <span className="text-sm text-emerald-200/60">/{system.totalWeeks}</span>
+                <span className="text-sm text-white/60">/{system.totalWeeks}</span>
               </span>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-emerald-400/15" aria-hidden="true">
-              <div className="h-full rounded-full bg-amber-400" style={{ width: `${cyclePercent}%` }} />
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15" aria-hidden="true">
+              <div className="h-full rounded-full bg-app-highlight" style={{ width: `${cyclePercent}%` }} />
             </div>
           </div>
 
-          <div className="rounded-xl bg-emerald-400/5 p-3">
+          <div className="rounded-xl bg-white/5 p-3">
             <div className="font-serif text-2xl font-semibold tabular-nums text-white">{weekPercent}%</div>
-            <div className="mt-0.5 text-[10px] font-medium text-emerald-200/70">Tuần này</div>
+            <div className="mt-0.5 text-[10px] font-medium text-white/70">Tuần này</div>
           </div>
-          <div className="rounded-xl bg-emerald-400/5 p-3">
+          <div className="rounded-xl bg-white/5 p-3">
             <div className="font-serif text-2xl font-semibold tabular-nums text-white">
               {todayCompletedCount}
-              <span className="text-sm text-emerald-200/60">/{todayCompletedCount + todayRemainingCount}</span>
+              <span className="text-sm text-white/60">/{todayCompletedCount + todayRemainingCount}</span>
             </div>
-            <div className="mt-0.5 text-[10px] font-medium text-emerald-200/70">Việc hôm nay</div>
+            <div className="mt-0.5 text-[10px] font-medium text-white/70">Việc hôm nay</div>
           </div>
         </div>
       </div>

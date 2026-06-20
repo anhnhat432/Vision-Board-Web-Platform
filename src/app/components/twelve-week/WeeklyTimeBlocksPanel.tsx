@@ -39,17 +39,17 @@ const TYPE_DESCRIPTIONS: Record<TimeBlockType, string> = {
 
 const TYPE_CHIP_CLASS: Record<TimeBlockType, string> = {
   strategic:
-    "border-emerald-300 bg-gradient-to-br from-emerald-50 via-emerald-50/60 to-transparent text-emerald-900 dark:from-emerald-950/40 dark:to-transparent dark:text-emerald-300 font-bold",
+    "border-app-accent/30 bg-gradient-to-br from-app-accent-soft/60 via-app-accent-soft/30 to-transparent text-app-accent dark:from-app-accent/20 dark:to-transparent dark:text-app-accent font-bold",
   buffer:
-    "border-sky-300 bg-gradient-to-br from-sky-50 via-sky-50/60 to-transparent text-sky-900 dark:from-sky-950/40 dark:to-transparent dark:text-sky-300 font-bold",
+    "border-app-status-info/30 bg-gradient-to-br from-app-status-info/10 via-app-status-info/5 to-transparent text-app-status-info dark:from-app-status-info/15 dark:to-transparent dark:text-app-status-info font-bold",
   breakout:
-    "border-amber-300 bg-gradient-to-br from-amber-50 via-amber-50/60 to-transparent text-amber-900 dark:from-amber-950/40 dark:to-transparent dark:text-amber-300 font-bold",
+    "border-app-status-warning/30 bg-gradient-to-br from-app-status-warning/10 via-app-status-warning/5 to-transparent text-app-status-warning dark:from-app-status-warning/15 dark:to-transparent dark:text-app-status-warning font-bold",
 };
 
 const TYPE_CARD_CLASS: Record<TimeBlockType, string> = {
-  strategic: "border-emerald-200 bg-emerald-50/20 dark:border-emerald-900/30 dark:bg-emerald-950/10",
-  buffer: "border-sky-200 bg-sky-50/20 dark:border-sky-900/30 dark:bg-sky-950/10",
-  breakout: "border-amber-200 bg-amber-50/20 dark:border-amber-900/30 dark:bg-amber-950/10",
+  strategic: "border-app-accent/30 bg-app-accent-soft/20 dark:border-app-accent/20 dark:bg-app-accent/10",
+  buffer: "border-app-status-info/30 bg-app-status-info/5 dark:border-app-status-info/20 dark:bg-app-status-info/5",
+  breakout: "border-app-status-warning/30 bg-app-status-warning/5 dark:border-app-status-warning/20 dark:bg-app-status-warning/5",
 };
 
 const DAY_LABELS: Record<TimeBlockDayOfWeek, string> = {
@@ -164,14 +164,14 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
           {blocksByDay.map(({ day, blocks }) => (
             <div
               key={day}
-              className="min-h-40 rounded-xl border border-slate-200/60 bg-slate-50/40 p-4 transition-all duration-300 hover:bg-slate-50/60 hover:shadow-sm"
+              className="min-h-40 rounded-xl border border-app-line/60 bg-app-bg-subtle/40 p-4 transition-all duration-300 hover:bg-app-bg-subtle/60 hover:shadow-sm"
             >
-              <p className="text-sm font-bold text-slate-900 tracking-wide border-b border-slate-200/50 pb-2 mb-3">
+              <p className="text-sm font-bold text-app-ink tracking-wide border-b border-app-line/50 pb-2 mb-3">
                 {DAY_LABELS[day]}
               </p>
               <div className="space-y-3">
                 {blocks.length === 0 ? (
-                  <p className="text-xs italic text-slate-400 py-1">Chưa có khung.</p>
+                  <p className="text-xs italic text-app-ink-muted py-1">Chưa có khung.</p>
                 ) : (
                   blocks.map((block) => (
                     <div
@@ -179,10 +179,10 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                       data-testid="weekly-time-block-chip"
                       className={`rounded-xl border p-3.5 text-xs shadow-sm hover:scale-[1.02] hover:shadow-md transition-all duration-200 ${TYPE_CHIP_CLASS[block.type]}`}
                     >
-                      <p className="font-bold tracking-wide text-slate-950 dark:text-inherit">
+                      <p className="font-bold tracking-wide text-app-ink dark:text-inherit">
                         {TYPE_LABELS[block.type]}
                       </p>
-                      <p className="mt-1.5 flex items-center gap-1.5 font-medium text-slate-800 dark:text-inherit/90">
+                      <p className="mt-1.5 flex items-center gap-1.5 font-medium text-app-ink-soft dark:text-inherit/90">
                         <Clock3 className="h-3.5 w-3.5" />
                         {block.startTime} · {formatDuration(block.durationMinutes)}
                       </p>
@@ -221,7 +221,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               >
                 {TYPE_LABELS[type]}
               </Badge>
-              <p className="mt-3 text-sm leading-relaxed font-medium text-slate-700 dark:text-slate-300">
+              <p className="mt-3 text-sm leading-relaxed font-medium text-app-ink-soft dark:text-app-ink-soft">
                 {TYPE_DESCRIPTIONS[type]}
               </p>
             </div>
@@ -312,7 +312,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               </div>
 
               {error ? (
-                <p role="alert" className="text-sm font-bold text-rose-600 animate-bounce">
+                <p role="alert" className="text-sm font-bold text-app-status-error animate-bounce">
                   ⚠️ {error}
                 </p>
               ) : null}

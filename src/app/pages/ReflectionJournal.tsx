@@ -1,8 +1,11 @@
-import { ArrowRight, Frown, Meh, MoreVertical, Plus, Search, Smile } from "lucide-react";
+import { ArrowRight, Flame, Frown, Meh, MoreVertical, Plus, Search, Smile } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { WeeklyReviewIllustration } from "@/app/components/illustrations";
+import { MotionCountUp } from "@/app/components/motion";
 import { EmptyState } from "@/app/components/states/EmptyState";
+import { emptyNarratives } from "../components/empty-states/narratives";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { PageHero } from "../components/layout/PageHero";
 import { ScreenGuide } from "../components/ScreenGuide";
@@ -49,6 +52,9 @@ import {
   deleteReflection,
   formatCalendarDate,
   formatDateInputValue,
+  getActiveTwelveWeekGoal,
+  getTwelveWeekCurrentWeek,
+  getTwelveWeekWeekCompletion,
   getUserData,
   parseCalendarDate,
   saveUserData,
@@ -277,6 +283,40 @@ function ReflectionJournalContent() {
   );
   const hasReflections = sortedReflections.length > 0;
 
+  const activeGoal = useMemo(
+    () => (userData ? getActiveTwelveWeekGoal(userData.goals) : null),
+    [userData],
+  );
+
+  const weekCompletion = useMemo(() => {
+    if (!activeGoal?.twelveWeekSystem) return null;
+    const system = activeGoal.twelveWeekSystem;
+    const weekNumber = getTwelveWeekCurrentWeek(system);
+    const completion = getTwelveWeekWeekCompletion(system, weekNumber);
+    return { weekNumber, ...completion };
+  }, [activeGoal]);
+
+  const journalStreak = useMemo(() => {
+    if (!userData || userData.reflections.length === 0) return 0;
+    const sorted = [...userData.reflections].sort((a, b) => b.date.localeCompare(a.date));
+    const dates = [...new Set(sorted.map((r) => r.date.slice(0, 10)))];
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+    if (dates[0] !== todayKey && dates[0] !== yesterdayKey) return 0;
+    let streak = 0;
+    const check = new Date(dates[0]);
+    for (const date of dates) {
+      const expected = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, "0")}-${String(check.getDate()).padStart(2, "0")}`;
+      if (date !== expected) break;
+      streak++;
+      check.setDate(check.getDate() - 1);
+    }
+    return streak;
+  }, [userData]);
+
   const filteredReflections = useMemo(() => {
     let result = sortedReflections;
     if (filterType !== "all") result = result.filter((r) => r.entryType === filterType);
@@ -331,6 +371,7 @@ function ReflectionJournalContent() {
         className="page-enter"
         eyebrow="PHẢN TƯ"
         title="Nhật ký phản tư"
+        serif
         description="Ghi lại điều bạn học được, biết ơn, và muốn cải thiện."
         primaryCta={
           hasReflections && (
@@ -410,6 +451,49 @@ function ReflectionJournalContent() {
           })}
         </div>
       </div>
+
+      {weekCompletion && (
+        <section className="mt-6">
+          <Card className="relative overflow-hidden rounded-2xl border-0 bg-grad-celebrate text-white shadow-lg">
+            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+            <div className="relative p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row items-start gap-6">
+                <div className="shrink-0 w-32 sm:w-40 text-white/90">
+                  <WeeklyReviewIllustration className="w-full h-auto" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-medium">
+                    TỔNG KẾT TUẦN {weekCompletion.weekNumber}
+                  </p>
+                  <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-medium text-white">
+                    Tuần này bạn đã làm được
+                  </h2>
+                  <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+                    <div>
+                      <p className="font-serif text-4xl sm:text-5xl font-medium tabular-nums">
+                        <MotionCountUp value={weekCompletion.completed} />
+                      </p>
+                      <p className="text-sm text-white/70">/ {weekCompletion.total} task hoàn thành</p>
+                    </div>
+                    <div>
+                      <p className="font-serif text-4xl sm:text-5xl font-medium tabular-nums">
+                        <MotionCountUp value={weekCompletion.percent} suffix="%" />
+                      </p>
+                      <p className="text-sm text-white/70">tiến độ tuần</p>
+                    </div>
+                  </div>
+                  {journalStreak > 0 && (
+                    <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-2">
+                      <Flame className="h-5 w-5 text-app-warm" aria-hidden="true" />
+                      <span className="text-sm font-semibold">{journalStreak} ngày viết liên tục</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </section>
+      )}
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
         <DialogContent className="max-w-3xl">
@@ -594,8 +678,8 @@ function ReflectionJournalContent() {
               />
             </div>
           }
-          title="Bắt đầu nhật ký của bạn"
-          description="Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển."
+          title={emptyNarratives.noJournalEntries.title}
+          description={emptyNarratives.noJournalEntries.body}
           actions={
             <Button
               onClick={() => setIsAddingReflection(true)}

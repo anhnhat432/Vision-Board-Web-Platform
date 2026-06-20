@@ -181,9 +181,9 @@ export function AppSidebar({
             aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
             {resolvedTheme === "dark" ? (
-              <Sun className="h-4 w-4 text-amber-500 animate-pulse" />
+              <Sun className="h-4 w-4 text-app-warm animate-pulse" />
             ) : (
-              <Moon className="h-4 w-4 text-slate-500" />
+              <Moon className="h-4 w-4 text-app-ink-muted" />
             )}
             {resolvedTheme === "dark" ? "Sáng" : "Tối"}
           </button>
@@ -206,7 +206,7 @@ export function AppSidebar({
                 className="flex w-full items-center gap-2.5 rounded-xl border border-app-line/80 bg-app-surface p-2.5 text-left transition-all duration-200 hover:bg-app-bg hover:border-app-accent/20 hover:shadow-xs active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
                 <div
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-green-600 text-xs font-bold text-white shadow-xs"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-app-accent to-app-accent-hover text-xs font-bold text-white shadow-xs"
                   aria-hidden="true"
                 >
                   {user.avatarLetter}
@@ -267,7 +267,7 @@ export function AppSidebar({
                   onSignOut();
                 }}
                 disabled={isSigningOut}
-                className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-600 transition-all duration-150 focus:bg-red-50 dark:focus:bg-red-950/20"
+                className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm text-app-status-error transition-all duration-150 focus:bg-app-status-error/10 dark:focus:bg-app-status-error/20"
               >
                 <LogOut className="h-4 w-4" />
                 {isSigningOut ? "Đang đăng xuất..." : "Đăng xuất"}

@@ -123,7 +123,7 @@ export function AutoCloudConflictDialog() {
     >
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
+          <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-status-warning/10 text-app-status-warning">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <DialogTitle>Dữ liệu giữa thiết bị và tài khoản đang khác nhau</DialogTitle>
@@ -136,7 +136,7 @@ export function AutoCloudConflictDialog() {
           </p>
         </DialogHeader>
 
-        <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900">
+        <div className="rounded-[var(--r-card)] border border-app-status-warning/20 bg-app-status-warning/10 p-4 text-sm text-app-status-warning">
           {conflicts.length > 0 ? (
             <ul className="space-y-2">
               {conflicts.map((conflict) => (
@@ -165,7 +165,7 @@ export function AutoCloudConflictDialog() {
         <button
           type="button"
           onClick={handleSettingsLink}
-          className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline"
+          className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-app-ink-muted underline-offset-4 hover:text-app-ink hover:underline"
         >
           Xem chi tiết trong Cài đặt
           <ExternalLink className="h-3.5 w-3.5" />

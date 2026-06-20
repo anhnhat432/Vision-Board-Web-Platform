@@ -64,7 +64,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
       className={cn(
         "rounded-[14px] border p-4 transition-all duration-200",
         variant === "antiPattern"
-          ? "border-amber-300/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
+          ? "border-app-status-warning/30 bg-app-status-warning/5 text-app-status-warning dark:text-app-status-warning"
           : variant === "metric"
             ? "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
             : "border-app-accent/20 bg-app-accent-soft/30 text-app-accent",
@@ -82,7 +82,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
           className={cn(
             "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
             variant === "antiPattern"
-              ? "border-amber-400/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning dark:text-app-status-warning"
               : variant === "metric"
                 ? "border-app-accent/30 bg-app-accent-soft text-app-accent"
                 : "border-app-accent/30 bg-app-accent-soft text-app-accent",

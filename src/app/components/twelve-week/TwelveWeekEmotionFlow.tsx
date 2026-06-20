@@ -140,13 +140,13 @@ export function TwelveWeekEmotionFlow({ system, currentWeekRange, currentWeek }:
       <div className="relative w-full h-[150px] bg-app-bg/40 rounded-xl border border-app-line/40 p-2 overflow-visible select-none flex items-center justify-center">
         {/* Lưới đường viền phụ ngang */}
         <div className="absolute inset-x-4 top-[30px] border-t border-dashed border-app-line/30 flex justify-between px-2 pointer-events-none">
-          <span className="text-[8px] font-bold text-amber-500/40 uppercase tracking-widest -mt-1.5">Tích cực</span>
+          <span className="text-[8px] font-bold text-app-status-warning/40 uppercase tracking-widest -mt-1.5">Tích cực</span>
         </div>
         <div className="absolute inset-x-4 top-[75px] border-t border-dashed border-app-line/30 flex justify-between px-2 pointer-events-none">
-          <span className="text-[8px] font-bold text-emerald-500/40 uppercase tracking-widest -mt-1.5">Bình ổn</span>
+          <span className="text-[8px] font-bold text-app-accent/40 uppercase tracking-widest -mt-1.5">Bình ổn</span>
         </div>
         <div className="absolute inset-x-4 top-[120px] border-t border-dashed border-app-line/30 flex justify-between px-2 pointer-events-none">
-          <span className="text-[8px] font-bold text-indigo-500/40 uppercase tracking-widest -mt-1.5">Trầm lắng</span>
+          <span className="text-[8px] font-bold text-app-status-info/40 uppercase tracking-widest -mt-1.5">Trầm lắng</span>
         </div>
 
         <svg

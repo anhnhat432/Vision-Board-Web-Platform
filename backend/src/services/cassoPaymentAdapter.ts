@@ -156,13 +156,15 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
       }
 
       const config = getCassoConfig();
-      if (!Number.isFinite(config.plusPriceVnd) || config.plusPriceVnd < 1000) {
+      const amount = input.amount && Number.isFinite(input.amount) && input.amount >= 1000
+        ? input.amount
+        : config.plusPriceVnd;
+      if (!Number.isFinite(amount) || amount < 1000) {
         throw new PaymentProviderNotConfiguredError("casso");
       }
 
       const bankBin = BANK_BIN_MAP[config.bankName] ?? config.bankName;
       const orderId = generateOrderId();
-      const amount = config.plusPriceVnd;
       const now = new Date();
       const expiresAt = new Date(now.getTime() + ORDER_EXPIRY_MINUTES * 60 * 1000);
 
@@ -174,6 +176,8 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
         config.accountName,
       );
 
+      const purpose = input.purpose ?? "plus_subscription";
+
       await PaymentOrderModel.create({
         orderId,
         userId: input.userId,
@@ -183,6 +187,7 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
         currency: "VND",
         status: "pending",
         provider: "casso",
+        purpose,
         bankAccount: config.bankAccount,
         bankName: config.bankName,
         accountName: config.accountName,
@@ -191,6 +196,9 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
         receiptEmail: input.receiptEmail || input.customerEmail,
         receiptName: input.receiptName,
         expiresAt,
+        metadata: input.physicalOrderId
+          ? { physicalOrderId: input.physicalOrderId }
+          : undefined,
       });
 
       return {

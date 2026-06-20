@@ -19,9 +19,9 @@ const DEFAULT_PREVIEW: GoalPreviewData = {
   id: "default",
   goalTitle: "Đọc 12 cuốn sách trong năm",
   visionIcons: [
-    { emoji: "📚", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
-    { emoji: "🏃‍♂️", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
-    { emoji: "💼", bgClass: "bg-blue-800/10", borderClass: "border-blue-800/20" },
+    { emoji: "📚", bgClass: "bg-app-accent/10", borderClass: "border-app-accent/20" },
+    { emoji: "🏃‍♂️", bgClass: "bg-app-accent/10", borderClass: "border-app-accent/20" },
+    { emoji: "💼", bgClass: "bg-app-accent-subtle/30", borderClass: "border-app-accent/15" },
   ],
   visionLabel: '"Khát vọng tương lai"',
   todayTasks: ['Đọc 30 trang "Atomic Habits"', "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
@@ -77,17 +77,17 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
   return (
     <div className="appear-fade-up mx-auto w-full max-w-[440px] lg:mx-0 lg:max-w-md lg:[animation-delay:120ms]">
       {/* SaaS Browser Shell Container */}
-      <div className="relative rounded-2xl border border-app-line/80 bg-white dark:bg-neutral-950 shadow-[0_24px_50px_-12px_rgba(47,93,80,0.12),0_8px_24px_-8px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-300">
+      <div className="relative rounded-2xl border border-app-line/80 bg-app-surface dark:bg-app-surface shadow-[0_24px_50px_-12px_rgba(47,93,80,0.12),0_8px_24px_-8px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-300">
         {/* Browser Header Bar */}
-        <div className="flex items-center justify-between bg-neutral-50/80 dark:bg-neutral-900/60 backdrop-blur-md px-4 py-3 border-b border-app-line/65 select-none">
+        <div className="flex items-center justify-between bg-app-bg-subtle/80 dark:bg-app-bg-subtle/60 backdrop-blur-md px-4 py-3 border-b border-app-line/65 select-none">
           {/* Mac-style Window Dot Controls */}
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-[#FF5F56]/90 shadow-sm" />
-            <span className="h-3 w-3 rounded-full bg-[#FFBD2E]/90 shadow-sm" />
-            <span className="h-3 w-3 rounded-full bg-[#27C93F]/90 shadow-sm" />
+            <span className="h-3 w-3 rounded-full bg-app-status-error/90 shadow-sm" />
+            <span className="h-3 w-3 rounded-full bg-app-status-warning/90 shadow-sm" />
+            <span className="h-3 w-3 rounded-full bg-app-status-success/90 shadow-sm" />
           </div>
           {/* Fake URL Bar */}
-          <div className="bg-white dark:bg-neutral-950 border border-app-line/60 rounded-md px-4 py-0.5 text-[10px] text-app-ink-muted/80 font-mono tracking-wide text-center w-48 truncate">
+          <div className="bg-app-surface dark:bg-app-surface border border-app-line/60 rounded-md px-4 py-0.5 text-[10px] text-app-ink-muted/80 font-mono tracking-wide text-center w-48 truncate">
             dearourfuture.com/dashboard
           </div>
           {/* Small Empty Space to Balance Dot controls */}
@@ -95,18 +95,18 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
         </div>
 
         {/* Browser Page Body: Dashboard Mockup */}
-        <div className="relative p-6 bg-gradient-to-b from-app-surface/40 via-white to-white dark:from-neutral-950 dark:to-neutral-950 min-h-[340px]">
+        <div className="relative p-6 bg-gradient-to-b from-app-surface/40 via-app-surface to-app-surface dark:from-app-surface dark:to-app-surface min-h-[340px]">
           {/* Floating Streak Badge - elegant glass badge popping from the corner */}
           <div
             aria-hidden="true"
-            className={`absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 shadow-sm border border-emerald-500/20 transition-all duration-500 ${
+            className={`absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft dark:bg-app-accent-soft px-3 py-1 text-[10px] font-semibold text-app-accent dark:text-app-accent shadow-sm border border-app-accent/20 transition-all duration-500 ${
               badgeVisible ? "translate-y-0 scale-100 opacity-100" : "-translate-y-2 scale-95 opacity-0"
             }`}
             style={{
               transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in",
             }}
           >
-            <Sparkles className="size-3 text-emerald-500 animate-spin-slow" />
+            <Sparkles className="size-3 text-app-accent animate-spin-slow" />
             Streak +1 Ngày!
           </div>
 
@@ -118,15 +118,15 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-app-accent mb-3">Tầm nhìn của tôi</p>
                 <div className="relative h-32 w-full select-none">
                   {/* Polaroid Card 1: Books */}
-                  <div className="absolute top-0 left-0 w-28 bg-white dark:bg-neutral-900 p-2 rounded shadow-md border border-app-line/50 -rotate-[6deg] transition-transform hover:rotate-0 duration-300">
-                    <div className="h-16 w-full rounded bg-emerald-800/10 flex items-center justify-center text-xl">
+                  <div className="absolute top-0 left-0 w-28 bg-app-surface dark:bg-app-surface p-2 rounded shadow-md border border-app-line/50 -rotate-[6deg] transition-transform hover:rotate-0 duration-300">
+                    <div className="h-16 w-full rounded bg-app-accent/10 flex items-center justify-center text-xl">
                       📚
                     </div>
                     <p className="text-[9px] text-center font-medium mt-1.5 text-app-ink-soft">12 cuốn sách</p>
                   </div>
                   {/* Polaroid Card 2: Runner */}
-                  <div className="absolute top-4 left-6 w-28 bg-white dark:bg-neutral-900 p-2 rounded shadow-lg border border-app-line/60 rotate-[4deg] transition-transform hover:rotate-0 duration-300">
-                    <div className="h-16 w-full rounded bg-amber-800/10 flex items-center justify-center text-xl">
+                  <div className="absolute top-4 left-6 w-28 bg-app-surface dark:bg-app-surface p-2 rounded shadow-lg border border-app-line/60 rotate-[4deg] transition-transform hover:rotate-0 duration-300">
+                    <div className="h-16 w-full rounded bg-app-accent/10 flex items-center justify-center text-xl">
                       🏃‍♂️
                     </div>
                     <p className="text-[9px] text-center font-medium mt-1.5 text-app-ink-soft">Chạy bộ 5km</p>
@@ -146,7 +146,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
             {/* Right Column (Span 7): Today Focus Execution */}
             <div className="xs:col-span-7 space-y-4">
               {/* Target & Week progress */}
-              <div className="p-3.5 bg-neutral-50 dark:bg-neutral-900/40 border border-app-line/65 rounded-xl">
+              <div className="p-3.5 bg-app-bg-subtle dark:bg-app-bg-subtle/40 border border-app-line/65 rounded-xl">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] font-bold uppercase tracking-widest text-app-ink-muted">
                     Chu kỳ hiện tại
@@ -166,7 +166,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                     <span className="font-semibold text-app-ink-soft">Tiến độ</span>
                     <span className="font-bold text-app-accent tabular-nums">{progressFilled ? 67 : 33}%</span>
                   </div>
-                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-neutral-200/70 dark:bg-neutral-800 overflow-hidden">
+                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-app-line/70 dark:bg-app-line overflow-hidden">
                     <div
                       className="h-full rounded-full bg-app-accent transition-all duration-1000 ease-out"
                       style={{ width: progressFilled ? "67%" : "33%" }}
@@ -188,7 +188,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
                 <div className="space-y-2">
                   {/* Task 1: Always completed */}
-                  <div className="flex items-center gap-2.5 p-2 bg-neutral-50/50 dark:bg-neutral-900/20 border border-app-line/40 rounded-lg">
+                  <div className="flex items-center gap-2.5 p-2 bg-app-bg-subtle/50 dark:bg-app-bg-subtle/20 border border-app-line/40 rounded-lg">
                     <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-sm">
                       <Check className="h-2.5 w-2.5" strokeWidth={3} />
                     </span>
@@ -198,7 +198,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                   </div>
 
                   {/* Task 2: Animates checking in/out */}
-                  <div className="flex items-center gap-2.5 p-2 bg-white dark:bg-neutral-950 border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-300">
+                  <div className="flex items-center gap-2.5 p-2 bg-app-surface dark:bg-app-surface border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-all duration-300">
                     <span
                       className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
                         taskTwoChecked
@@ -223,7 +223,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
                   </div>
 
                   {/* Task 3: Uncompleted */}
-                  <div className="flex items-center gap-2.5 p-2 bg-white dark:bg-neutral-950 border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
+                  <div className="flex items-center gap-2.5 p-2 bg-app-surface dark:bg-app-surface border border-app-line/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
                     <span
                       className="h-4 w-4 shrink-0 rounded-full border border-app-line bg-app-surface"
                       aria-hidden="true"

@@ -31,8 +31,8 @@ export class TabErrorBoundary extends Component<Props, State> {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
               {this.props.fallbackTitle ?? "Đã có lỗi xảy ra"}
             </p>
-            <p className="text-base font-semibold text-slate-900">Phần này không tải được. Hãy thử lại.</p>
-            <p className="mx-auto max-w-xl text-sm leading-7 text-slate-500">
+            <p className="text-base font-semibold text-app-ink">Phần này không tải được. Hãy thử lại.</p>
+            <p className="mx-auto max-w-xl text-sm leading-7 text-app-ink-muted">
               {this.state.error?.message ?? "Lỗi ngoài dự kiến."}
             </p>
             <Button

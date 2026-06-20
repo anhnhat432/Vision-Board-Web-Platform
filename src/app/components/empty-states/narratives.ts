@@ -1,4 +1,9 @@
 export const emptyNarratives = {
+  noLifeBalance: {
+    title: "Chưa có dữ liệu bánh xe",
+    body: "Bắt đầu bằng cách chấm điểm 8 lĩnh vực để nhìn rõ bức tranh hiện tại và biết mình đang mạnh ở đâu, mỏng ở đâu.",
+    cta: "Bắt đầu chấm điểm",
+  },
   noGoals: {
     title: "Hành trình chưa bắt đầu",
     body: "Mục tiêu lớn nào đang chờ bạn? Hãy chọn một việc bạn thật sự muốn làm trong 12 tuần tới.",

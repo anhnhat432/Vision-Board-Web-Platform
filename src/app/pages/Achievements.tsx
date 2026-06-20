@@ -14,8 +14,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { MotionCountUp } from "@/app/components/motion/MotionCountUp";
+import { MotionStaggerItem } from "@/app/components/motion/MotionStaggerItem";
+import { MotionStaggerList } from "@/app/components/motion/MotionStaggerList";
 import { celebrateLarge } from "@/lib/effects/celebrate";
 import { hasNewCelebrationIds } from "@/lib/effects/celebrationTriggers";
+import { CelebrationBurst } from "../components/illustrations/CelebrationBurst";
 import { emptyNarratives } from "../components/empty-states/narratives";
 import { Button } from "../components/ui/button";
 import { Skeleton } from "../components/ui/skeleton";
@@ -164,7 +168,7 @@ function AchievementsContent() {
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">THÀNH TỰU</p>
-        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
+        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink sm:text-5xl lg:text-display">
           Cột mốc của bạn
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
@@ -173,23 +177,41 @@ function AchievementsContent() {
       </header>
 
       <section className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Tổng quan thành tựu">
-        {[
-          { label: "Tổng thành tựu", value: totalAchievementCount, suffix: "huy hiệu" },
-          { label: "Đã mở khóa", value: unlockedCount, suffix: "cột mốc" },
-          { label: "Hoàn thành", value: `${completionRate}%`, suffix: "bộ sưu tập" },
-        ].map((stat) => (
-          <div key={stat.label} className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{stat.label}</p>
-            <p className="mt-2 text-3xl font-medium leading-none text-app-ink tabular-nums">{stat.value}</p>
-            <p className="mt-2 text-xs text-app-ink-muted">{stat.suffix}</p>
-          </div>
-        ))}
+        <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tổng thành tựu</p>
+          <MotionCountUp
+            value={totalAchievementCount}
+            duration={0.8}
+            className="mt-2 block text-3xl font-medium leading-none text-app-ink tabular-nums"
+          />
+          <p className="mt-2 text-xs text-app-ink-muted">huy hiệu</p>
+        </div>
+        <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đã mở khóa</p>
+          <MotionCountUp
+            value={unlockedCount}
+            duration={0.8}
+            className="mt-2 block text-3xl font-medium leading-none text-app-ink tabular-nums"
+          />
+          <p className="mt-2 text-xs text-app-ink-muted">cột mốc</p>
+        </div>
+        <div className="surface-raised rounded-xl border border-app-line bg-app-surface p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Hoàn thành</p>
+          <MotionCountUp
+            value={completionRate}
+            duration={0.8}
+            suffix="%"
+            className="mt-2 block text-3xl font-medium leading-none text-app-ink tabular-nums"
+          />
+          <p className="mt-2 text-xs text-app-ink-muted">bộ sưu tập</p>
+        </div>
       </section>
 
       {unlockedCount === 0 && (
         <EmptyState
           className="mt-6"
           as="section"
+          illustration={<CelebrationBurst className="text-app-accent" />}
           icon={<Award className="h-7 w-7" />}
           title={emptyNarratives.noAchievements.title}
           description={emptyNarratives.noAchievements.body}
@@ -213,27 +235,37 @@ function AchievementsContent() {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">BỘ HUY HIỆU</p>
           <h2 className="mt-1 text-base font-semibold text-app-ink">Những cột mốc đang mở dần</h2>
         </div>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <MotionStaggerList className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {achievementCards.map((achievement) => {
             const Icon = ICON_MAP[achievement.icon] ?? Trophy;
             const isUnlocked = achievement.unlocked;
 
             return (
-              // biome-ignore lint/a11y/useKeyWithClickEvents: click only achievement badge
+              <MotionStaggerItem key={achievement.key}>
               <article
                 key={achievement.key}
                 onClick={() => isUnlocked && setSelectedAchievement(achievement)}
-                className={`surface-raised relative rounded-xl border border-app-line bg-app-surface p-5 transition-all ${
-                  isUnlocked ? "cursor-pointer hover:scale-[1.02] hover:shadow-md" : "opacity-60"
+                className={`surface-raised relative rounded-xl border p-5 transition-all ${
+                  isUnlocked
+                    ? "cursor-pointer hover:scale-[1.02] hover:shadow-md border-app-warm-border/30"
+                    : "opacity-60 border-app-line bg-app-surface"
                 }`}
+                style={
+                  isUnlocked
+                    ? {
+                        background: "var(--grad-celebrate)",
+                        boxShadow: "var(--shadow-glow-success)",
+                      }
+                    : undefined
+                }
               >
                 {/* Wax Seal Stamp (Con dấu sáp đỏ) cho huy hiệu đã đạt */}
                 {isUnlocked && (
                   <div
-                    className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-red-700 to-red-900 shadow-md transform rotate-12 border border-red-800 animate-[bounce_0.6s_ease-out_1]"
+                    className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-app-status-error via-app-status-error to-app-warm shadow-md transform rotate-12 border border-app-status-error/80"
                     title="Đã đóng dấu chứng nhận"
                   >
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full border border-red-600/40 bg-red-800 text-[6px] font-bold text-red-200 select-none shadow-inner">
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full border border-app-status-error/40 bg-app-status-error/80 text-[6px] font-bold text-white select-none shadow-inner">
                       印
                     </div>
                   </div>
@@ -241,15 +273,19 @@ function AchievementsContent() {
 
                 <div
                   className={`flex h-12 w-12 items-center justify-center rounded-lg ${
-                    isUnlocked ? "bg-app-accent-soft text-app-accent" : "bg-app-bg text-app-ink-muted"
+                    isUnlocked ? "bg-white/20 text-white" : "bg-app-bg text-app-ink-muted"
                   }`}
                 >
                   <Icon className="h-6 w-6" />
                 </div>
-                <h3 className="mt-4 text-sm font-medium leading-5 text-app-ink">{achievement.title}</h3>
-                <p className="mt-1 text-xs leading-5 text-app-ink-soft">{achievement.description}</p>
+                <h3 className={`mt-4 text-sm font-medium leading-5 ${isUnlocked ? "text-white" : "text-app-ink"}`}>
+                  {achievement.title}
+                </h3>
+                <p className={`mt-1 text-xs leading-5 ${isUnlocked ? "text-white/80" : "text-app-ink-soft"}`}>
+                  {achievement.description}
+                </p>
                 {isUnlocked && achievement.earnedAt ? (
-                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-app-ink-muted">
+                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-white/70">
                     {formatAchievementDate(achievement.earnedAt)}
                   </p>
                 ) : (
@@ -259,9 +295,10 @@ function AchievementsContent() {
                   </p>
                 )}
               </article>
+              </MotionStaggerItem>
             );
           })}
-        </div>
+          </MotionStaggerList>
       </section>
 
       {selectedAchievement && (

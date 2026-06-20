@@ -92,13 +92,13 @@ export function TwelveWeekCycleSettingsPanel({
         </CardHeader>
         <CardContent className="stack-section">
           {/* Glassmorphism Hero Panel */}
-          <div className="rounded-xl border border-emerald-300/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent backdrop-blur-md p-6 shadow-md transition-all duration-300 hover:shadow-lg">
+          <div className="rounded-xl border border-app-accent/30 bg-gradient-to-br from-app-accent/10 via-app-accent/5 to-transparent backdrop-blur-md p-6 shadow-md transition-all duration-300 hover:shadow-lg">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent"></span>
                   </span>
                   Một lần chỉnh cho cả chu kỳ
                 </p>
@@ -108,7 +108,7 @@ export function TwelveWeekCycleSettingsPanel({
               </div>
               <Badge
                 variant="outline"
-                className="border-emerald-300/50 bg-app-surface/80 text-emerald-700 dark:text-emerald-400 font-bold px-3 py-1 text-xs tracking-wide shadow-sm rounded-full"
+                className="border-app-accent/30 bg-app-surface/80 text-app-accent font-bold px-3 py-1 text-xs tracking-wide shadow-sm rounded-full"
               >
                 {STATUS_OPTIONS.find((option) => option.value === system.status)?.label ?? system.status}
               </Badge>
@@ -252,8 +252,8 @@ export function TwelveWeekCycleSettingsPanel({
                     key={indicator.id || indicator.name}
                     className={`grid gap-4 rounded-xl border p-5 md:grid-cols-[minmax(0,1fr)_150px_140px] items-center hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 ${
                       isOptional
-                        ? "border-amber-200 bg-amber-50/30 dark:border-amber-950/20 dark:bg-amber-950/10"
-                        : "border-emerald-200 bg-emerald-50/30 dark:border-emerald-950/20 dark:bg-emerald-950/10"
+                        ? "border-app-status-warning/30 bg-app-status-warning/5 dark:border-app-status-warning/20 dark:bg-app-status-warning/5"
+                        : "border-app-accent/30 bg-app-accent-soft/30 dark:border-app-accent/20 dark:bg-app-accent/10"
                     }`}
                   >
                     <div>
@@ -263,8 +263,8 @@ export function TwelveWeekCycleSettingsPanel({
                           variant="outline"
                           className={
                             isOptional
-                              ? "border-amber-300 bg-amber-50/80 text-amber-700 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-400 font-bold px-2.5 py-0.5 rounded-full text-xs shadow-sm"
-                              : "border-emerald-300 bg-emerald-50/80 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full text-xs shadow-sm"
+                              ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning dark:border-app-status-warning/20 dark:bg-app-status-warning/10 dark:text-app-status-warning font-bold px-2.5 py-0.5 rounded-full text-xs shadow-sm"
+                              : "border-app-accent/30 bg-app-accent-soft text-app-accent dark:border-app-accent/20 dark:bg-app-accent/10 dark:text-app-accent font-bold px-2.5 py-0.5 rounded-full text-xs shadow-sm"
                           }
                         >
                           {isOptional ? "Tùy chọn" : "Cốt lõi"}
@@ -333,12 +333,12 @@ export function TwelveWeekCycleSettingsPanel({
 
           {/* Cycle Info Cards V2 */}
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-indigo-200/50 bg-gradient-to-br from-indigo-500/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-600 dark:text-indigo-400">
+            <div className="rounded-xl border border-app-status-info/30 bg-gradient-to-br from-app-status-info/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
+              <div className="p-3 bg-app-status-info/10 rounded-xl text-app-status-info">
                 <PlayCircle className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-app-status-info">
                   Bắt đầu
                 </p>
                 <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">
@@ -346,12 +346,12 @@ export function TwelveWeekCycleSettingsPanel({
                 </p>
               </div>
             </div>
-            <div className="rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-500/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+            <div className="rounded-xl border border-app-accent/30 bg-gradient-to-br from-app-accent/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
+              <div className="p-3 bg-app-accent-soft rounded-xl text-app-accent">
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-app-accent">
                   Kết thúc
                 </p>
                 <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">
@@ -359,12 +359,12 @@ export function TwelveWeekCycleSettingsPanel({
                 </p>
               </div>
             </div>
-            <div className="rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-500/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl text-amber-600 dark:text-amber-400">
+            <div className="rounded-xl border border-app-status-warning/30 bg-gradient-to-br from-app-status-warning/5 to-transparent p-5 hover:shadow-md transition-all duration-300 flex items-start gap-4">
+              <div className="p-3 bg-app-status-warning/10 rounded-xl text-app-status-warning">
                 <RotateCcw className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-app-status-warning">
                   Quay lại nhịp
                 </p>
                 <p className="mt-1 font-serif text-2xl font-bold text-app-ink tracking-tight">

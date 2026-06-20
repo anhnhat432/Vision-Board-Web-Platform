@@ -1,5 +1,6 @@
 import { Calendar, Lock, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { CelebrationBurst } from "@/app/components/illustrations/CelebrationBurst";
 
 interface Stoic3DCoinProps {
   achievement: {
@@ -204,7 +205,10 @@ export function Stoic3DCoin({ achievement, onClose }: Stoic3DCoinProps) {
 
         <div className="flex flex-col items-center p-6 md:p-8">
           {/* Header */}
-          <div className="text-center">
+          <div className="text-center relative">
+            {achievement.unlocked && (
+              <CelebrationBurst className="absolute -top-6 left-1/2 -translate-x-1/2 h-28 w-28 pointer-events-none opacity-60" />
+            )}
             <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-app-accent">
               {!achievement.unlocked && <Lock className="h-3 w-3" />}
               Huy hiệu cổ Stoic

@@ -61,7 +61,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
   const pathD = generateSmoothPath();
 
   return (
-    <div className="relative w-full rounded-3xl border border-app-line/50 bg-gradient-to-b from-app-surface via-[#FAF9F5]/40 to-app-surface p-5 shadow-sm pt-8 overflow-hidden">
+    <div className="relative w-full rounded-3xl border border-app-line/50 bg-gradient-to-b from-app-surface via-app-bg/40 to-app-surface p-5 shadow-sm pt-8 overflow-hidden">
       <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
       {/* Khung tiêu đề chánh niệm */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3 pt-1">
@@ -76,7 +76,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
         </div>
         <div className="flex flex-wrap gap-3 text-xs text-app-ink-muted font-semibold">
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-app-accent animate-pulse" />
             Đã hoàn thành review
           </span>
           <span className="flex items-center gap-1">
@@ -156,7 +156,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                       cx={coord.x}
                       cy={coord.y}
                       r="22"
-                      fill={isCurrent ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.1)"}
+                      fill={isCurrent ? "rgba(245, 158, 11, 0.15)" : "rgba(47, 163, 107, 0.1)"}
                       className={isCurrent ? "animate-[ping_2.5s_infinite]" : "animate-pulse"}
                     />
                   )}
@@ -170,10 +170,10 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                       isCurrent
                         ? "fill-amber-500 stroke-amber-200"
                         : isDone
-                          ? "fill-emerald-500 stroke-emerald-100 dark:fill-emerald-600"
+                          ? "fill-[var(--app-accent)] stroke-[var(--app-accent-soft)] dark:fill-[var(--app-accent)]"
                           : isFuture
                             ? "fill-app-bg stroke-app-line/60 opacity-50"
-                            : "fill-rose-500 stroke-rose-100 dark:fill-rose-600" // Cần review
+                            : "fill-[var(--app-status-error)] stroke-[var(--app-status-error)]/30 dark:fill-[var(--app-status-error)]" // Cần review
                     } ${
                       activeWeek?.weekNumber === week.weekNumber
                         ? "scale-125 stroke-app-ink ring-2 ring-offset-2 ring-app-ink"
@@ -255,7 +255,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                     textAnchor="middle"
                     className={`font-sans text-[10px] font-bold ${
                       isCurrent
-                        ? "fill-amber-600 dark:fill-amber-400 font-extrabold"
+                        ? "fill-app-status-warning dark:fill-app-status-warning font-extrabold"
                         : isFuture
                           ? "fill-app-ink-muted opacity-50"
                           : "fill-app-ink"
@@ -315,7 +315,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 <h4 className="font-serif text-base font-semibold text-app-ink flex items-center gap-2">
                   Trạm dừng chân: Tuần {activeWeek.weekNumber}
                   {activeWeek.weekNumber === currentWeek && (
-                    <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full animate-pulse border border-amber-500/20 flex items-center gap-0.5">
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-app-status-warning bg-app-status-warning/10 px-2 py-0.5 rounded-full animate-pulse border border-app-status-warning/20 flex items-center gap-0.5">
                       🔥 Hiện tại
                     </span>
                   )}
@@ -330,11 +330,11 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
               </div>
             </div>
             {activeWeek.weekNumber === currentWeek ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600 border border-amber-500/20 animate-pulse">
+              <span className="inline-flex items-center gap-1 rounded-full bg-app-status-warning/10 px-3 py-1 text-xs font-bold text-app-status-warning border border-app-status-warning/20 animate-pulse">
                 Đang thắp lửa
               </span>
             ) : activeWeek.reviewDone ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 rounded-full bg-app-accent/10 px-3 py-1 text-xs font-bold text-app-accent border border-app-accent/20">
                 Đã hoàn tất review
               </span>
             ) : (

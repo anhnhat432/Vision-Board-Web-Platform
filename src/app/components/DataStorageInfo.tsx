@@ -14,7 +14,7 @@ export function DataStorageInfo({ variant = "card", showSyncHint = false, classN
 
   if (variant === "inline") {
     return (
-      <p className={`flex items-center gap-1.5 text-xs text-slate-500 ${className}`}>
+      <p className={`flex items-center gap-1.5 text-xs text-app-ink-muted ${className}`}>
         <Monitor className="h-3 w-3 shrink-0" />
         {demoMode ? "Kế hoạch 12 tuần được lưu trên thiết bị này." : "Kế hoạch 12 tuần đang gắn với tài khoản của bạn."}
       </p>
@@ -42,32 +42,32 @@ export function DataStorageInfo({ variant = "card", showSyncHint = false, classN
   }
 
   return (
-    <div className={`rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-5 shadow-sm ${className}`}>
+    <div className={`rounded-[var(--r-card)] border border-app-line bg-app-surface/92 p-5 shadow-sm ${className}`}>
       <div className="flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] bg-slate-100">
-          <HardDrive className="h-4 w-4 text-slate-600" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] bg-app-bg-subtle">
+          <HardDrive className="h-4 w-4 text-app-ink-muted" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-900">Dữ liệu và quyền riêng tư</p>
-          <p className="text-xs text-slate-500">{demoMode ? "Dữ liệu lưu trên thiết bị" : "Dữ liệu tài khoản"}</p>
+          <p className="text-sm font-semibold text-app-ink">Dữ liệu và quyền riêng tư</p>
+          <p className="text-xs text-app-ink-muted">{demoMode ? "Dữ liệu lưu trên thiết bị" : "Dữ liệu tài khoản"}</p>
         </div>
       </div>
       <ul className="mt-4 space-y-2.5">
-        <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
-          <Monitor className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+        <li className="flex items-start gap-2.5 text-sm leading-6 text-app-ink-soft">
+          <Monitor className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" />
           {demoMode
             ? "Tiến trình được lưu trên thiết bị này. Đăng nhập để sao lưu vào tài khoản và dùng tiếp trên thiết bị khác."
             : "Dữ liệu được gắn với tài khoản; thiết bị vẫn giữ bản tạm để bạn dùng mượt khi mạng chập chờn."}
         </li>
-        <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+        <li className="flex items-start gap-2.5 text-sm leading-6 text-app-ink-soft">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" />
           {demoMode
             ? "Đổi thiết bị hoặc xóa dữ liệu trình duyệt sẽ mất tiến độ. Hãy đăng nhập hoặc tải bản dự phòng thường xuyên."
             : "Nếu đổi thiết bị, hãy đăng nhập cùng tài khoản để khôi phục dữ liệu. Bạn vẫn có thể tải bản dự phòng khi cần."}
         </li>
         {showSyncHint && (
-          <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-500">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
+          <li className="flex items-start gap-2.5 text-sm leading-6 text-app-ink-muted">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-disabled" />
             {demoMode
               ? "Đăng nhập để sao lưu dữ liệu giữa các thiết bị."
               : "Sao lưu vào tài khoản chạy nền và không xóa dữ liệu trên thiết bị nếu gặp lỗi."}

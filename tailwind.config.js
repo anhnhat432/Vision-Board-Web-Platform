@@ -33,6 +33,10 @@ export default {
         "app-accent-soft":   "var(--app-accent-soft)",
         "app-accent-subtle": "var(--app-accent-subtle)",
 
+        /* Highlight / Energy */
+        "app-highlight": "var(--app-highlight)",
+        "app-energy":    "var(--app-energy)",
+
         /* Warm — Terracotta (Reflection zone ONLY) */
         "app-warm":          "var(--app-warm)",
         "app-warm-hover":    "var(--app-warm-hover)",

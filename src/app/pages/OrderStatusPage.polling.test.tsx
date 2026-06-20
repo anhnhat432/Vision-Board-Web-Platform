@@ -12,6 +12,13 @@ const toastMock = vi.hoisted(() => ({
   success: vi.fn(),
 }));
 
+const createKitPaymentSessionMock = vi.hoisted(() => vi.fn());
+const getBackendOrderIdMock = vi.hoisted(() => vi.fn());
+const getOrdersMock = vi.hoisted(() => vi.fn());
+const getOrderByIdMock = vi.hoisted(() => vi.fn());
+const getLatestOrderMock = vi.hoisted(() => vi.fn());
+const isDemoModeMock = vi.hoisted(() => vi.fn());
+
 vi.mock("@/lib/api/apiClient", () => ({
   apiClient: apiClientMock,
 }));
@@ -22,6 +29,33 @@ vi.mock("@/lib/auth/AuthContext", () => ({
     authLoading: false,
   }),
 }));
+
+vi.mock("@/lib/api/orderLinkStore", () => ({
+  getBackendOrderId: getBackendOrderIdMock,
+}));
+
+vi.mock("@/services/orderService", () => ({
+  createKitPaymentSession: createKitPaymentSessionMock,
+  getOrder: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/app/utils/order-storage", () => ({
+  getOrders: getOrdersMock,
+  getOrderById: getOrderByIdMock,
+  getLatestOrder: getLatestOrderMock,
+  getOrderStatusLabel: vi.fn((s: string) => s),
+  getOrderStatusStepIndex: vi.fn(() => 0),
+  getNextOrderStatus: vi.fn(() => null),
+  updateOrderStatus: vi.fn(),
+}));
+
+vi.mock("@/app/utils/app-mode", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/app/utils/app-mode")>();
+  return {
+    ...actual,
+    isDemoMode: isDemoModeMock,
+  };
+});
 
 vi.mock("sonner", () => ({
   toast: toastMock,
@@ -135,5 +169,146 @@ describe("OrderStatusPage payment polling", () => {
     });
     expect(screen.getByText("Cảm ơn bạn! Chúng tôi đang xác nhận giao dịch (thường 1-2 phút).")).toBeInTheDocument();
     expect(screen.getByText("Đang chờ xác nhận chuyển khoản")).toBeInTheDocument();
+  });
+
+  it("kit payment completion shows kit-specific success message and redirects to /orders", async () => {
+    apiClientMock.get
+      .mockResolvedValueOnce(createPaymentOrder({ purpose: "physical_order" }))
+      .mockResolvedValueOnce(createPaymentOrder({ status: "completed", completedAt: new Date().toISOString(), purpose: "physical_order" }));
+
+    renderOrderStatus("/order-status/VBKIT0001");
+
+    expect(await screen.findByText("Đang chờ xác nhận chuyển khoản")).toBeInTheDocument();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Đơn kit đã thanh toán!")).toBeInTheDocument();
+    });
+    expect(screen.getByText("Đơn kit đã được xác nhận thanh toán. Đang chuyển bạn về danh sách đơn.")).toBeInTheDocument();
+    expect(toastMock.success).toHaveBeenCalledWith("Đơn kit đã thanh toán!");
+  });
+
+  it("plus payment completion keeps original Plus redirect", async () => {
+    apiClientMock.get
+      .mockResolvedValueOnce(createPaymentOrder({ purpose: "plus_subscription" }))
+      .mockResolvedValueOnce(createPaymentOrder({ status: "completed", completedAt: new Date().toISOString(), purpose: "plus_subscription" }));
+
+    const router = renderOrderStatus("/order-status/VBPLUS001");
+
+    expect(await screen.findByText("Đang chờ xác nhận chuyển khoản")).toBeInTheDocument();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Plus đã kích hoạt!")).toBeInTheDocument();
+    });
+    expect(toastMock.success).toHaveBeenCalledWith("Plus đã kích hoạt!");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_200);
+    });
+    expect(await screen.findByText("Billing plan page")).toBeInTheDocument();
+  });
+});
+
+describe("OrderStatusPage kit payment CTA", () => {
+  function createLocalOrder(overrides: Record<string, unknown> = {}) {
+    return {
+      id: "local-order-1",
+      createdAt: "2026-05-15T08:00:00.000Z",
+      updatedAt: "2026-05-15T08:00:00.000Z",
+      status: "pending" as const,
+      goalId: null,
+      goalTitle: "Test Goal",
+      focusArea: "Sức khỏe",
+      fullName: "Nguyen Van A",
+      email: "a@example.test",
+      phone: "0900000000",
+      shippingAddress: "123 Test St, Hanoi",
+      keywords: [],
+      note: "",
+      totalVnd: 250000,
+      lines: [{ itemId: "f1", label: "Frame", type: "frame" as const, qty: 1, unitPriceVnd: 150000, lineTotalVnd: 150000 }],
+      ...overrides,
+    };
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-05-15T08:00:00.000Z"));
+    apiClientMock.get.mockReset();
+    apiClientMock.post.mockReset();
+    createKitPaymentSessionMock.mockReset();
+    getBackendOrderIdMock.mockReset();
+    getOrdersMock.mockReset();
+    getOrderByIdMock.mockReset();
+    getLatestOrderMock.mockReset();
+    isDemoModeMock.mockReset();
+    isDemoModeMock.mockReturnValue(false);
+    toastMock.success.mockReset();
+    vi.stubEnv("VITE_BILLING_SUPPORT_EMAIL", "support@example.test");
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+  });
+
+  function renderOrderTracking(orderId: string) {
+    const order = createLocalOrder({ id: orderId });
+    getOrdersMock.mockReturnValue([order]);
+    getOrderByIdMock.mockReturnValue(order);
+    getLatestOrderMock.mockReturnValue(order);
+
+    const router = createMemoryRouter(
+      [
+        { path: "/order-status/:orderId", element: <OrderStatusPage /> },
+        { path: "/orders", element: <div>Orders list page</div> },
+      ],
+      { initialEntries: [`/order-status/${orderId}`] },
+    );
+    render(<RouterProvider router={router} />);
+    return router;
+  }
+
+  it("shows sync message when backend order ID is not available", async () => {
+    getBackendOrderIdMock.mockReturnValue(null);
+
+    renderOrderTracking("local-order-1");
+    expect(await screen.findByText("Đơn kit đang đồng bộ lên máy chủ. QR thanh toán trực tuyến sẽ khả dụng sau khi đồng bộ hoàn tất.")).toBeInTheDocument();
+  });
+
+  it("calls createKitPaymentSession and navigates to payment page on success", async () => {
+    getBackendOrderIdMock.mockReturnValue("507f1f77bcf86cd799439011");
+    createKitPaymentSessionMock.mockResolvedValue({
+      paymentOrderId: "VBKITPAY1",
+      checkoutUrl: "https://example.test/checkout",
+      provider: "casso",
+      amount: 250000,
+      currency: "VND",
+    });
+
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderOrderTracking("local-order-1");
+
+    const button = await screen.findByRole("button", { name: /Thanh toán ngay/ });
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(createKitPaymentSessionMock).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
+    });
+  });
+
+  it("displays totalVnd from the order in the CTA card", async () => {
+    getBackendOrderIdMock.mockReturnValue("507f1f77bcf86cd799439011");
+
+    renderOrderTracking("local-order-1");
+    const totalLabels = await screen.findAllByText("Tổng đơn");
+    expect(totalLabels.length).toBeGreaterThanOrEqual(1);
+    const priceElements = screen.getAllByText("250.000đ");
+    expect(priceElements.length).toBeGreaterThanOrEqual(1);
   });
 });

@@ -174,12 +174,12 @@ export function toSyncState(status: BackendConnectionStatus, online: boolean): S
 
 export function getSyncBadgeClass(backendConnectionStatus: BackendConnectionStatus): string {
   return backendConnectionStatus.syncStatus === "success"
-    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+    ? "border-app-status-success/30 bg-app-status-success/10 text-app-status-success"
     : backendConnectionStatus.syncStatus === "error" || backendConnectionStatus.syncStatus === "partial"
-      ? "border-amber-200 bg-amber-50 text-amber-800"
+      ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning"
       : backendConnectionStatus.syncing
-        ? "border-sky-200 bg-sky-50 text-sky-800"
-        : "border-slate-200 bg-slate-50 text-slate-600";
+        ? "border-app-status-info/30 bg-app-status-info/10 text-app-status-info"
+        : "border-app-line bg-app-bg-subtle text-app-ink-soft";
 }
 
 export function getSyncBadgeLabel(backendConnectionStatus: BackendConnectionStatus): string {

@@ -174,7 +174,7 @@ export function VisionBoardGallery() {
       : undefined;
 
   return (
-    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 bg-grad-vision rounded-[var(--r-soft)]">
       <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} autoOpen className="mb-4" />
       <AlertDialog
         open={Boolean(boardToDelete)}
@@ -270,7 +270,7 @@ export function VisionBoardGallery() {
 
             return (
               <div key={item.title}>
-                <Card className="relative gap-4 overflow-hidden rounded-xl">
+                <Card className="relative gap-4 overflow-hidden rounded-xl shadow-app-lg">
                   <div
                     className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
                   />
@@ -332,7 +332,7 @@ export function VisionBoardGallery() {
                   return (
                     <div key={board.id}>
                       <InteractiveSurface
-                        className="preview-hover-card group rounded-2xl"
+                        className="preview-hover-card group rounded-2xl shadow-app-lg"
                         intensity={4}
                         translate={8}
                         shine={false}

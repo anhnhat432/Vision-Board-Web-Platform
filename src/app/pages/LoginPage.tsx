@@ -303,30 +303,30 @@ export function LoginPage() {
           <div className="grid min-w-0 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block">
-              <div className="rounded-[14px] border border-app-line bg-app-surface p-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{captionText}</p>
-                <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink max-w-md">
+              <div className="rounded-[14px] border border-white/15 bg-grad-aspire p-8 text-white">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{captionText}</p>
+                <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-white max-w-md">
                   {heroTitle}
                 </h1>
-                <p className="mt-3 text-sm text-app-ink-soft max-w-md">{heroSubline}</p>
+                <p className="mt-3 text-sm text-white/80 max-w-md">{heroSubline}</p>
 
                 {/* Trust features */}
                 <div className="mt-8 grid grid-cols-1 gap-3 max-w-sm">
                   {TRUST_FEATURES.map(({ icon: Icon, title, sub }) => (
                     <div key={title} className="flex items-start gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent shrink-0">
+                      <div className="flex size-9 items-center justify-center rounded-lg bg-white/15 text-white shrink-0">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-app-ink">{title}</p>
-                        <p className="mt-0.5 text-xs text-app-ink-soft">{sub}</p>
+                        <p className="text-sm font-medium text-white">{title}</p>
+                        <p className="mt-0.5 text-xs text-white/70">{sub}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {/* Quote */}
-                <blockquote className="mt-10 font-serif italic text-sm text-app-ink-soft max-w-md leading-relaxed">
+                <blockquote className="mt-10 font-serif italic text-sm text-white/60 max-w-md leading-relaxed">
                   "Kỷ luật là cây cầu giữa mục tiêu và thành quả." — Jim Rohn
                 </blockquote>
               </div>

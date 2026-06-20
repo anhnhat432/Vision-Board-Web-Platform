@@ -188,9 +188,9 @@ export function LocalDataMigrationPrompt({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-700">
+        <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle/80 p-4 text-sm text-app-ink-soft">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-status-success" />
             <p className="leading-6">
               Dữ liệu cũ vẫn được giữ lại sau khi nhập. Bạn nên tải bản sao lưu trước khi tiếp tục.
             </p>
@@ -201,9 +201,9 @@ export function LocalDataMigrationPrompt({
           <div
             className={`rounded-[var(--r-card)] border p-4 text-sm leading-6 ${
               importSucceeded
-                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                ? "border-app-status-success/20 bg-app-status-success/10 text-app-status-success"
                 : importBlocked
-                  ? "border-amber-200 bg-amber-50 text-amber-800"
+                  ? "border-app-status-warning/20 bg-app-status-warning/10 text-app-status-warning"
                   : "border-red-200 bg-red-50 text-red-700"
             }`}
             role={importSucceeded ? "status" : "alert"}
@@ -232,23 +232,23 @@ export function LocalDataMigrationPrompt({
 
         {showReview ? (
           <section
-            className="rounded-[var(--r-card)] border border-slate-200 bg-app-surface p-4"
+            className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4"
             aria-label="Tóm tắt dữ liệu tìm thấy"
           >
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Eye className="h-4 w-4 text-slate-500" />
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-app-ink">
+              <Eye className="h-4 w-4 text-app-ink-muted" />
               Dữ liệu tìm thấy
             </div>
             {summaryItems.length > 0 ? (
-              <ul className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+              <ul className="grid gap-2 text-sm text-app-ink-soft sm:grid-cols-2">
                 {summaryItems.map((item) => (
-                  <li key={item} className="rounded-[var(--r-tile)] bg-slate-50 px-3 py-2">
+                  <li key={item} className="rounded-[var(--r-tile)] bg-app-bg-subtle px-3 py-2">
                     {item}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-600">Không có mục nào cần nhập trong bản dữ liệu này.</p>
+              <p className="text-sm text-app-ink-soft">Không có mục nào cần nhập trong bản dữ liệu này.</p>
             )}
           </section>
         ) : null}
@@ -262,24 +262,24 @@ export function LocalDataMigrationPrompt({
               <Cloud className="mt-0.5 h-4 w-4 shrink-0 text-sky-700" />
               <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Đồng bộ dữ liệu 12 tuần lên tài khoản</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                  <p className="text-sm font-semibold text-app-ink">Đồng bộ dữ liệu 12 tuần lên tài khoản</p>
+                  <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                     Sau khi nhập vào tài khoản trên thiết bị này, bạn có thể gửi dữ liệu 12 tuần lên hệ thống để dùng
                     lại khi đổi máy hoặc đăng nhập lại.
                   </p>
                 </div>
 
                 {!importSucceeded ? (
-                  <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-slate-600">
+                  <p className="rounded-[var(--r-tile)] bg-app-surface/75 px-3 py-2 text-xs font-medium text-app-ink-soft">
                     Hãy nhập dữ liệu trên thiết bị vào tài khoản trước, sau đó mới đồng bộ lên hệ thống.
                   </p>
                 ) : !cloudImportEnabled ? (
-                  <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-amber-700">
+                  <p className="rounded-[var(--r-tile)] bg-app-surface/75 px-3 py-2 text-xs font-medium text-app-status-warning">
                     {cloudImportUnavailableReason ??
                       "Đồng bộ dữ liệu tài khoản chưa được bật cho không gian làm việc này."}
                   </p>
                 ) : cloudImportAlreadyCompleted && !cloudWriteSucceeded ? (
-                  <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-emerald-700">
+                  <p className="rounded-[var(--r-tile)] bg-app-surface/75 px-3 py-2 text-xs font-medium text-app-status-success">
                     Dữ liệu này đã được đồng bộ lên tài khoản trước đó.
                   </p>
                 ) : null}
@@ -289,9 +289,9 @@ export function LocalDataMigrationPrompt({
                   <div
                     className={`rounded-[var(--r-tile)] border px-3 py-2 text-sm leading-6 ${
                       cloudWriteSucceeded
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-app-status-success/20 bg-app-status-success/10 text-app-status-success"
                         : cloudWriteResult.status === "partial"
-                          ? "border-amber-200 bg-amber-50 text-amber-800"
+                          ? "border-app-status-warning/20 bg-app-status-warning/10 text-app-status-warning"
                           : "border-red-200 bg-red-50 text-red-700"
                     }`}
                     role={cloudWriteSucceeded ? "status" : "alert"}
@@ -310,8 +310,8 @@ export function LocalDataMigrationPrompt({
                 {/* Confirmation dialog inline */}
                 {showCloudImportConfirm && canRunCloudImport && !cloudWriteLoading ? (
                   <div className="rounded-[var(--r-tile)] border border-sky-200 bg-app-surface p-3 space-y-3">
-                    <p className="text-sm font-medium text-slate-900">Xác nhận đồng bộ</p>
-                    <p className="text-xs leading-5 text-slate-600">
+                    <p className="text-sm font-medium text-app-ink">Xác nhận đồng bộ</p>
+                    <p className="text-xs leading-5 text-app-ink-soft">
                       Dữ liệu 12 tuần sẽ được gửi lên tài khoản. Bản trên thiết bị vẫn được giữ nguyên. Nên tải bản sao
                       lưu trước khi tiếp tục.
                     </p>
@@ -343,9 +343,9 @@ export function LocalDataMigrationPrompt({
                   <div
                     className={`rounded-[var(--r-tile)] border px-3 py-2 text-sm leading-6 ${
                       cloudImportResult.status === "valid"
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-app-status-success/20 bg-app-status-success/10 text-app-status-success"
                         : cloudImportResult.status === "invalid"
-                          ? "border-amber-200 bg-amber-50 text-amber-800"
+                          ? "border-app-status-warning/20 bg-app-status-warning/10 text-app-status-warning"
                           : "border-red-200 bg-red-50 text-red-700"
                     }`}
                     role={cloudImportResult.status === "valid" ? "status" : "alert"}

@@ -25,6 +25,7 @@ import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twe
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
+import { useCelebration } from "../components/celebration/useCelebration";
 import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
 import { PageHero } from "../components/layout/PageHero";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
@@ -443,7 +444,7 @@ function TodayFocusCard({
   };
 
   return (
-    <div className="rounded-[18px] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/30 via-white to-white dark:via-neutral-950 dark:to-neutral-950 p-5 shadow-app-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
+    <div className="rounded-[18px] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft/30 via-app-surface to-app-surface p-5 shadow-app-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
       {/* Washi tape decoration */}
       <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/15 dark:bg-app-accent/25 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/20 z-10" />
       <div className="absolute -left-12 -bottom-12 w-28 h-28 rounded-full bg-app-accent/5 blur-2xl pointer-events-none" />
@@ -575,6 +576,7 @@ function GoalTrackerContent({
   const [viewUserData, setViewUserData] = useState(userData);
   const [isGoalLimitPaywallOpen, setIsGoalLimitPaywallOpen] = useState(false);
   const [locallyUpdatedSystemGoalIds, setLocallyUpdatedSystemGoalIds] = useState<Set<string>>(new Set());
+  const celebrate = useCelebration();
 
   useEffect(() => {
     setViewUserData(userData);
@@ -787,6 +789,11 @@ function GoalTrackerContent({
         if (justCompletedGoal) {
           celebrateSpotlight({ x: 0.82, y: 0.14 });
           soundService.success();
+          celebrate("goal", {
+            id: goalId,
+            title: goal.title,
+            description: "Bạn vừa hoàn thành một mục tiêu lớn.",
+          });
         } else {
           celebrateSpark({ x: 0.82, y: 0.14 });
           soundService.click();
@@ -834,6 +841,11 @@ function GoalTrackerContent({
       if (justCompletedGoal) {
         celebrateSpotlight({ x: 0.82, y: 0.14 });
         soundService.success();
+        celebrate("goal", {
+          id: goalId,
+          title: goal.title,
+          description: "Bạn vừa hoàn thành một mục tiêu lớn.",
+        });
       } else {
         celebrateSpark({ x: 0.82, y: 0.14 });
         soundService.click();
@@ -1029,7 +1041,7 @@ function GoalTrackerContent({
           {/* Hero Section gọn gàng & chuyên nghiệp */}
           <PageHero
             tourId="goaltracker-hero"
-            className="bg-gradient-to-br from-white via-white to-app-accent-soft/20 dark:from-neutral-950 dark:via-neutral-950 dark:to-app-accent-soft/5 border-app-line/80 rounded-[18px]"
+            className="bg-gradient-to-br from-app-surface via-app-surface to-app-accent-soft/20 border-app-line/80 rounded-[18px]"
             eyebrow="MỤC TIÊU"
             title={
               <span className="font-serif text-3xl font-semibold leading-tight tracking-normal text-app-ink sm:text-4xl">
@@ -1606,7 +1618,7 @@ function GoalCard({
                       className="rounded-lg border border-app-status-success/30 text-app-status-success hover:bg-app-status-success/10 px-3.5 py-2 text-xs font-bold transition-all h-9 flex items-center gap-1.5 active:scale-[0.97]"
                       aria-pressed={isFlipped}
                     >
-                      <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <Award className="h-4 w-4 text-app-accent" />
                       Vinh danh
                     </Button>
                   )}
@@ -1692,10 +1704,10 @@ function GoalCard({
         >
           <SpotlightCard
             className={cn(
-              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
+              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-app-accent-soft/15 via-app-surface to-app-accent-soft/10 shadow-app-lg flex flex-col justify-between overflow-y-auto",
               progress === 100 &&
                 (prefersReducedMotion
-                  ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
+                  ? "border-app-accent/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
                   : "completed-goal-glow"),
             )}
           >
@@ -1856,7 +1868,7 @@ function GoalsSidebar({
             <div className="rounded-[18px] bg-app-status-warning/5 p-5 border border-app-status-warning/15">
               <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-app-status-warning mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-warning"></span>
                 </span>
                 Cần đánh giá trong tuần
               </h3>
@@ -1867,7 +1879,7 @@ function GoalsSidebar({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 rounded-md border-amber-200 dark:border-amber-900 bg-transparent text-amber-600 dark:text-amber-400 hover:bg-amber-100/30 px-3.5 text-xs font-bold"
+                      className="h-8 rounded-md border-app-status-warning/30 bg-transparent text-app-status-warning hover:bg-app-status-warning/10 px-3.5 text-xs font-bold"
                       onClick={() => openTwelveWeekCenter(goal.id)}
                     >
                       Mở Review ngay
@@ -1880,10 +1892,10 @@ function GoalsSidebar({
 
           {/* Widget 3: Mục tiêu cần chỉnh nhịp */}
           {atRiskGoals.length > 0 && (
-            <div className="rounded-[18px] bg-orange-50/30 dark:bg-orange-950/15 p-5 border border-transparent">
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-orange-700 dark:text-orange-400 mb-3.5 flex items-center gap-2">
+            <div className="rounded-[18px] bg-app-status-error/5 p-5 border border-transparent">
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-app-status-error mb-3.5 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-error"></span>
                 </span>
                 Cần chỉnh nhịp 🌊
               </h3>
@@ -1894,7 +1906,7 @@ function GoalsSidebar({
                     {goal.twelveWeekSystem && (
                       <button
                         type="button"
-                        className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline shrink-0"
+                        className="text-xs font-bold text-app-status-error hover:underline shrink-0"
                         onClick={() => openTwelveWeekCenter(goal.id)}
                       >
                         Xem kế hoạch
@@ -1909,7 +1921,7 @@ function GoalsSidebar({
       )}
 
       {/* Widget Nhắc nhở tĩnh tâm */}
-      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle dark:bg-neutral-900/20 p-4 shadow-app-sm opacity-90">
+      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle p-4 shadow-app-sm opacity-90">
         <p className="text-xs italic leading-relaxed text-app-ink-soft font-serif font-medium">
           “Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.”
         </p>
@@ -2014,14 +2026,14 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
         const dateKey = formatDateStr(targetDate);
         const stats = tasksMap.get(dateKey) || { total: 0, completed: 0 };
 
-        let colorClass = "bg-slate-100 dark:bg-neutral-800/40 border border-transparent";
+        let colorClass = "bg-app-bg-subtle border border-transparent";
         if (stats.total > 0) {
           if (stats.completed === stats.total) {
-            colorClass = "bg-emerald-500 border border-emerald-600/10";
+            colorClass = "bg-app-accent border border-app-accent/10";
           } else if (stats.completed > 0) {
-            colorClass = "bg-emerald-300 border border-emerald-400/10";
+            colorClass = "bg-app-accent/50 border border-app-accent/10";
           } else {
-            colorClass = "bg-rose-100/80 border border-rose-200/20 dark:bg-rose-950/20 dark:border-rose-900/10";
+            colorClass = "bg-app-status-error/20 border border-app-status-error/20";
           }
         }
 
@@ -2073,9 +2085,9 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
                     )}
                   />
                   {/* Custom CSS Tooltip */}
-                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-neutral-900 dark:bg-neutral-800 text-white text-[10px] font-sans rounded px-2 py-1 whitespace-nowrap shadow-md pointer-events-none transform -translate-y-0.5 border border-neutral-800/80 leading-normal">
+                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-app-ink text-app-surface text-[10px] font-sans rounded px-2 py-1 whitespace-nowrap shadow-md pointer-events-none transform -translate-y-0.5 border border-app-line leading-normal">
                     {day.label}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-neutral-900 dark:border-t-neutral-800" />
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink" />
                   </div>
                 </div>
               ))}
@@ -2259,18 +2271,18 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
         className={cn(
           "rounded-lg border px-3.5 py-2 text-xs font-bold transition-all inline-flex items-center gap-1.5 h-9",
           isUnlocked
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/75 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-400"
-            : "border-amber-200 bg-amber-50/70 text-amber-700 hover:bg-amber-100/70 dark:border-amber-900/40 dark:bg-amber-950/10 dark:text-amber-400",
+            ? "border-app-accent/30 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft/70"
+            : "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning hover:bg-app-status-warning/20",
         )}
       >
         {isUnlocked ? (
           <>
-            <MailOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <MailOpen className="h-4 w-4 text-app-accent" />
             Đọc thư
           </>
         ) : (
           <>
-            <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            <Lock className="h-3.5 w-3.5 text-app-status-warning" />
             Thư tuần 12 (Khóa)
           </>
         )}
@@ -2281,7 +2293,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
         <DialogContent className="max-w-lg p-5 sm:p-6 bg-app-surface border border-app-line rounded-[18px] shadow-app-lg">
           <DialogHeader className="space-y-1.5 text-left border-b border-app-line pb-3">
             <div className="flex items-center gap-2">
-              <MailOpen className="h-5 w-5 text-emerald-600 shrink-0" />
+              <MailOpen className="h-5 w-5 text-app-accent shrink-0" />
               <DialogTitle className="font-serif text-lg font-bold text-app-ink">Thư gửi từ quá khứ</DialogTitle>
             </div>
           </DialogHeader>
@@ -2289,7 +2301,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
           </DialogDescription>
 
-          <div className="bg-app-bg-subtle dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60 my-2">
+          <div className="bg-app-bg-subtle dark:bg-app-bg-subtle/40 rounded-xl p-4 border border-app-line/60 my-2">
             <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">“{letterText}”</p>
           </div>
 
@@ -2304,7 +2316,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             <Button
               size="sm"
               onClick={() => setIsReadOpen(false)}
-              className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 px-4 py-2 text-xs sm:text-sm"
+              className="rounded-lg bg-app-accent hover:bg-app-accent-hover text-white font-bold h-9 px-4 py-2 text-xs sm:text-sm"
             >
               Tuyệt vời
             </Button>

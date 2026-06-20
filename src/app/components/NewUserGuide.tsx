@@ -53,9 +53,9 @@ function StepList({ userData }: { userData: UserData }) {
           key={step.id}
           className={`rounded-[var(--r-control)] border px-4 py-4 ${
             step.completed
-              ? "border-emerald-200 bg-emerald-50/90"
+              ? "border-app-status-success/20 bg-app-status-success/10"
               : step.id === progress.nextStep?.id
-                ? "border-sky-200 bg-sky-50/90 shadow-lg"
+                ? "border-app-accent/20 bg-app-accent-soft shadow-lg"
                 : "border-app-line bg-app-surface"
           }`}
         >
@@ -63,7 +63,7 @@ function StepList({ userData }: { userData: UserData }) {
             <div
               className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-sm font-semibold ${
                 step.completed
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-app-status-success text-white"
                   : step.id === progress.nextStep?.id
                     ? "bg-app-accent text-white"
                     : "bg-app-bg text-app-ink-soft"
@@ -75,7 +75,7 @@ function StepList({ userData }: { userData: UserData }) {
               <p
                 className={`text-sm font-semibold ${
                   step.completed
-                    ? "text-emerald-900"
+                    ? "text-app-status-success"
                     : step.id === progress.nextStep?.id
                       ? "text-app-ink"
                       : "text-app-ink"
@@ -86,7 +86,7 @@ function StepList({ userData }: { userData: UserData }) {
               <p
                 className={`mt-1 text-sm leading-6 ${
                   step.completed
-                    ? "text-emerald-800/80"
+                    ? "text-app-status-success/80"
                     : step.id === progress.nextStep?.id
                       ? "text-app-ink-soft"
                       : "text-app-ink-soft"
@@ -237,7 +237,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         </DialogHeader>
 
         {userData.isHydratedFromDemo && (
-          <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-3 text-xs leading-5 text-amber-900">
+          <div className="rounded-[var(--r-control)] border border-app-status-warning/20 bg-app-status-warning/10 p-3 text-xs leading-5 text-app-status-warning">
             Luồng chuẩn khi dùng thật: Bánh xe cuộc sống → Chọn trọng tâm → SMART Goal → Kiểm tra khả thi → Chu kỳ 12
             tuần.
           </div>
@@ -249,7 +249,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
               {progress.completedCount}/{progress.totalSteps} bước đã xong
             </Badge>
             {progress.isComplete && (
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+              <Badge variant="outline" className="border-app-status-success/20 bg-app-status-success/10 text-app-status-success">
                 Đã đi hết lộ trình
               </Badge>
             )}

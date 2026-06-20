@@ -31,6 +31,7 @@ import {
   updateVisionBoard as backendUpdateVisionBoard,
 } from "@/services/visionBoardService";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { VisionMapIllustration } from "../components/illustrations";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -885,7 +886,7 @@ export function VisionBoardEditor() {
         </DialogContent>
       </Dialog>
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden shadow-app-lg border-app-line/60">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
             <div className="stack-section">
@@ -895,7 +896,7 @@ export function VisionBoardEditor() {
               </div>
 
               <div className="stack-stack">
-                <h1 className="max-w-3xl font-serif text-2xl font-medium tracking-tight text-app-ink mt-2 sm:text-3xl md:text-4xl">
+                <h1 className="max-w-3xl font-serif text-2xl font-medium tracking-tight text-app-ink mt-2 sm:text-3xl md:text-4xl lg:text-display">
                   {boardName || "Bức tranh tương lai"}
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-app-ink-soft">
@@ -1456,7 +1457,7 @@ export function VisionBoardEditor() {
       </Dialog>
 
       <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card className="min-w-0 overflow-hidden rounded-2xl">
+        <Card className="min-w-0 overflow-hidden rounded-2xl shadow-app-lg border-app-line/60">
           <CardContent className="p-0">
             <VisionBoardCanvas
               items={board.items}
@@ -1472,10 +1473,8 @@ export function VisionBoardEditor() {
               emptyStateSlot={
                 board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="surface-empty w-full max-w-md rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-6 text-center sm:p-8">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                        <Sparkles className="h-7 w-7" />
-                      </div>
+                    <div className="w-full max-w-md rounded-2xl border border-dashed border-app-line bg-app-surface/90 backdrop-blur-sm p-6 text-center sm:p-8 shadow-app-lg">
+                      <VisionMapIllustration className="mx-auto w-40 text-app-accent sm:w-48" />
                       <h2 className="mt-5 font-serif text-2xl font-medium text-app-ink sm:mt-6 sm:text-3xl">
                         Bảng của bạn đang chờ câu chuyện đầu tiên
                       </h2>

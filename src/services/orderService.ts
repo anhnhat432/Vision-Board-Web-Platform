@@ -85,6 +85,19 @@ export function createOrder(payload: CreateOrderPayload): Promise<ApiOrder> {
   return post<ApiOrder, CreateOrderPayload>("/orders", payload);
 }
 
+export interface KitPaymentSessionResponse {
+  paymentOrderId: string;
+  checkoutUrl: string;
+  provider: string;
+  expiresAt?: string;
+  amount: number;
+  currency: string;
+}
+
+export function createKitPaymentSession(orderId: string): Promise<KitPaymentSessionResponse> {
+  return post<KitPaymentSessionResponse>(`/orders/${orderId}/payment-session`);
+}
+
 // --- Admin endpoints ---
 
 export interface AdminUpdateStatusPayload {

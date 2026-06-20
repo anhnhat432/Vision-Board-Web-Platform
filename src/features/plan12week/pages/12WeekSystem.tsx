@@ -48,7 +48,7 @@ import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/
 import { applyPulledWorkspaceToUserData } from "@/features/plan12week/persistence/pulledWorkspaceApply";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { celebrateLarge } from "@/lib/effects/celebrate";
+import { useCelebration } from "@/app/components/celebration/useCelebration";
 import { claimCelebrationOnce, getCycleCelebrationStorageKey } from "@/lib/effects/celebrationTriggers";
 import { TwelveWeekDashboardHeader, TwelveWeekDashboardState, TwelveWeekGoalSwitcher } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
@@ -253,6 +253,7 @@ export function TwelveWeekSystem() {
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+  const celebrate = useCelebration();
 
   useEffect(() => {
     if (!isReady || !activeGoal || !system || hasCompletedFirstRunGuidance()) return;
@@ -265,7 +266,12 @@ export function TwelveWeekSystem() {
       setShowSuccessOverlay(true);
       localStorage.removeItem("show_12week_setup_success");
       const timer = setTimeout(() => {
-        celebrateLarge();
+        celebrate("week", {
+          id: `12week-setup-${activeGoal.id}`,
+          title: "Kế hoạch 12 tuần đã sẵn sàng",
+          description: "Bắt đầu hành trình 12 tuần với mục tiêu rõ ràng.",
+          palette: "accent",
+        });
       }, 500);
       return () => clearTimeout(timer);
     }
@@ -529,7 +535,12 @@ export function TwelveWeekSystem() {
     });
     refreshSnapshotMeta();
     if (claimCelebrationOnce(getCycleCelebrationStorageKey(cycleId))) {
-      celebrateLarge();
+      celebrate("week", {
+        id: cycleId,
+        title: `Hoàn thành cycle ${system.cycleNumber ?? 1}`,
+        description: "Bạn đã hoàn thành một chu kỳ 12 tuần.",
+        palette: "accent",
+      });
     }
     toastSuccess("Báo cáo cycle đã được lưu.");
   };
@@ -793,6 +804,14 @@ export function TwelveWeekSystem() {
     refreshBackendProgressOverlay,
     invalidateOverlay,
     refreshSnapshotMeta,
+    onWeekCompleted: (weekNumber, goalId) => {
+      celebrate("week", {
+        id: `${goalId}-week-${weekNumber}`,
+        title: `Hoàn thành tuần ${weekNumber}`,
+        description: "Bạn vừa chốt review tuần. Tiếp tục giữ nhịp!",
+        palette: "accent",
+      });
+    },
   });
 
   const {

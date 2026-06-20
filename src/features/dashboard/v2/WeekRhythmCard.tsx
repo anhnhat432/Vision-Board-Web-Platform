@@ -50,20 +50,20 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface border-app-line hover:border-app-accent/30 hover:bg-app-accent-subtle -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line",
   },
   "Tỷ lệ lead": {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface border-app-line hover:border-app-accent/30 hover:bg-app-accent-subtle rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line",
   },
   Nhịp: {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface border-app-line hover:border-app-accent/30 hover:bg-app-accent-subtle -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line",
   },
   Chuỗi: {
-    bg: "bg-white/70 dark:bg-neutral-950/30 border-neutral-200/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-white dark:hover:bg-neutral-950/80 rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-neutral-50 dark:bg-neutral-900 text-app-accent border border-neutral-200/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface border-app-line hover:border-app-accent/30 hover:bg-app-accent-subtle rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line",
   },
 };
 
@@ -115,7 +115,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
     if (day.isFuture) {
       return (
         <div
-          className="h-16 w-5 rounded-full bg-neutral-100 dark:bg-neutral-900 border border-transparent"
+          className="h-16 w-5 rounded-full bg-app-bg-subtle border border-transparent"
           aria-hidden="true"
         />
       );
@@ -125,11 +125,11 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
       const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
       return (
         <div
-          className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-app-accent/40 shadow-inner"
+          className="flex h-16 w-5 items-end rounded-full bg-app-bg-subtle border border-app-accent/40 shadow-inner"
           aria-hidden="true"
         >
           <div
-            className="w-full rounded-full bg-gradient-to-t from-app-accent to-[#5ba590] animate-pulse"
+            className="w-full rounded-full bg-app-accent"
             style={{ height: `${fillHeight}%` }}
           />
         </div>
@@ -139,14 +139,14 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
     const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
     return (
       <div
-        className="flex h-16 w-5 items-end rounded-full bg-neutral-100 dark:bg-neutral-900 border border-transparent shadow-inner"
+        className="flex h-16 w-5 items-end rounded-full bg-app-bg-subtle border border-transparent shadow-inner"
         aria-hidden="true"
       >
         <div
           className={`w-full rounded-full transition-all duration-300 ${
             day.percent === 100
-              ? "bg-gradient-to-t from-app-accent/80 to-[#5ba590]/90 group-hover:from-app-accent group-hover:to-[#5ba590]"
-              : "bg-gradient-to-t from-app-accent/40 to-[#5ba590]/40 group-hover:from-app-accent/60 group-hover:to-[#5ba590]/60"
+              ? "bg-app-accent group-hover:bg-app-accent"
+              : "bg-app-accent/40 group-hover:bg-app-accent/60"
           }`}
           style={{ height: `${fillHeight}%` }}
         />
@@ -156,12 +156,12 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
 
   return (
     <div className="group flex flex-col items-center gap-1.5 text-center transition-all duration-300 hover:scale-105">
-      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-neutral-400"}`}>
+      <span className={`text-[10px] font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-muted"}`}>
         {day.label}
       </span>
       {barContent}
       <span
-        className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-neutral-500"}`}
+        className={`text-[9px] tabular-nums font-bold ${day.isToday ? "text-app-accent font-extrabold" : "text-app-ink-muted"}`}
       >
         {day.completed}/{day.total}
       </span>
@@ -222,21 +222,15 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/80 bg-white/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
+      className="rounded-card border border-app-line bg-app-surface p-6 shadow-app-sm transition-all duration-300 hover:border-app-accent/25 hover:shadow-app-md overflow-hidden relative"
       aria-labelledby="dashboard-week-rhythm-title"
     >
-      {/* Grid Pattern overlay for texture */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808004_1px,transparent_1px),linear-gradient(to_bottom,#80808004_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
-
-      {/* Ambient glow mesh */}
-      <div className="pointer-events-none absolute -right-20 -bottom-20 h-48 w-48 rounded-full bg-app-accent/5 blur-[50px]" />
-
       {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
+      <span className="hidden sm:inline absolute -top-3 left-6 text-base opacity-70 select-none cursor-default z-10">
         📌
       </span>
 
-      <div className="flex flex-col gap-1 border-b border-neutral-200/50 dark:border-neutral-800/55 pb-4 mb-6 pt-2 relative z-10">
+      <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-6 pt-2 relative z-10">
         <h2
           id="dashboard-week-rhythm-title"
           className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2"
@@ -244,9 +238,9 @@ export function WeekRhythmCard({
           <Zap className="h-4.5 w-4.5 text-app-accent/80" />
           Nhịp tuần {safeWeek}
         </h2>
-        <p className="text-xs font-semibold tracking-wide text-neutral-500">
+        <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
           Đã hoàn thành <span className="text-app-accent font-extrabold">{completedCount}</span> trên tổng số{" "}
-          <span className="text-neutral-700 dark:text-neutral-300 font-extrabold">{totalCount}</span> việc tuần này
+          <span className="text-app-ink font-extrabold">{totalCount}</span> việc tuần này
         </p>
       </div>
 
@@ -266,9 +260,9 @@ export function WeekRhythmCard({
                 </div>
               </div>
 
-              <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.16em] text-neutral-400">{item.caption}</p>
+              <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">{item.caption}</p>
 
-              <p className="mt-1 font-serif text-2xl font-semibold leading-none text-neutral-800 dark:text-neutral-200">
+              <p className="mt-1 font-serif text-2xl font-semibold leading-none text-app-ink">
                 {item.numericValue !== undefined ? (
                   <CountUp value={item.numericValue} suffix={item.suffix ?? ""} precision={item.precision ?? 0} />
                 ) : (
@@ -276,15 +270,15 @@ export function WeekRhythmCard({
                 )}
               </p>
 
-              <p className="mt-2 text-[9px] font-semibold text-neutral-400">{item.subLine}</p>
+              <p className="mt-2 text-[9px] font-semibold text-app-ink-muted">{item.subLine}</p>
             </div>
           );
         })}
       </div>
 
       {/* Daily Checkins dots */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/60 dark:bg-neutral-900/20 px-5 py-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.005)]">
-        <span className="text-xs font-semibold text-neutral-500">Nhịp check-in hàng ngày:</span>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-control border border-app-line bg-app-bg-subtle px-5 py-3">
+        <span className="text-xs font-semibold text-app-ink-muted">Nhịp check-in hàng ngày:</span>
         <div className="flex items-center gap-3">
           {days.map((day) => {
             const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
@@ -292,13 +286,13 @@ export function WeekRhythmCard({
             let tooltipText = "";
 
             if (day.isFuture) {
-              dotClass = "bg-neutral-200/60 dark:bg-neutral-800 border-transparent";
+              dotClass = "bg-app-ink-disabled border-transparent";
               tooltipText = `${day.label}: Tương lai`;
             } else if (hasCheckIn) {
-              dotClass = "bg-app-accent border-transparent shadow-[0_2px_6px_rgba(47,93,80,0.2)]";
+              dotClass = "bg-app-accent border-transparent shadow-app-sm";
               tooltipText = `${day.label}: Đã check-in`;
             } else {
-              dotClass = "bg-transparent border border-neutral-200 dark:border-neutral-800";
+              dotClass = "bg-transparent border border-app-line";
               tooltipText = `${day.label}: Chưa check-in`;
             }
 
@@ -315,7 +309,7 @@ export function WeekRhythmCard({
                   />
                 </div>
                 <span
-                  className={`text-[9px] font-extrabold uppercase tracking-wider ${day.isToday ? "text-app-accent" : "text-neutral-400"}`}
+                  className={`text-[9px] font-extrabold uppercase tracking-wider ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}
                 >
                   {day.label}
                 </span>
@@ -325,8 +319,8 @@ export function WeekRhythmCard({
         </div>
       </div>
 
-      <div className="mt-6 border-t border-neutral-200/80 dark:border-neutral-800/80 pt-6">
-        <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+      <div className="mt-6 border-t border-app-line pt-6">
+        <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-app-ink-muted">
           <Clock3 className="h-4 w-4 text-app-accent/80" />
           Nhịp độ thực thi hàng ngày
         </div>

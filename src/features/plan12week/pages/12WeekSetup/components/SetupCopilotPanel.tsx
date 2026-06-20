@@ -83,13 +83,13 @@ export function SetupCopilotPanel({
           </div>
 
           {feasibility.bottleneck && (
-            <div className="rounded-lg border border-amber-200/50 bg-amber-500/[0.03] dark:bg-amber-950/15 p-3 flex gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <div className="rounded-lg border border-app-status-warning/20 bg-app-status-warning/5 p-3 flex gap-2">
+              <ShieldAlert className="h-4 w-4 text-app-status-warning shrink-0 mt-0.5" />
               <div>
-                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                <p className="text-[10px] font-bold text-app-status-warning uppercase tracking-wide">
                   Điểm cần chú ý (Bottleneck)
                 </p>
-                <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-350 leading-relaxed">
+                <p className="mt-0.5 text-xs text-app-ink-soft leading-relaxed">
                   {feasibility.bottleneck.label}
                 </p>
               </div>
@@ -135,7 +135,7 @@ export function SetupCopilotPanel({
 
             <div className="border-t border-app-line/60 pt-3">
               <p className="text-[9px] font-bold uppercase tracking-wider text-app-ink-muted flex items-center gap-1">
-                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                <Check className="h-3.5 w-3.5 text-app-accent" />
                 <span>Chiến thắng Tuần 1</span>
               </p>
               <p className="mt-1.5 text-xs font-bold text-app-ink leading-snug">{setupGuideSupport.week1Headline}</p>
@@ -171,8 +171,8 @@ export function SetupCopilotPanel({
           </p>
 
           <div className="grid gap-2.5">
-            <div className="rounded-lg border border-rose-200/30 bg-rose-500/[0.02] p-3">
-              <p className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 text-[11px] uppercase tracking-wide">
+            <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/5 p-3">
+              <p className="font-bold text-app-status-error flex items-center gap-1 text-[11px] uppercase tracking-wide">
                 <X className="h-3.5 w-3.5 shrink-0" />
                 <span>Chỉ số Kết quả (Lag) - Tránh ghi</span>
               </p>
@@ -183,8 +183,8 @@ export function SetupCopilotPanel({
               </ul>
             </div>
 
-            <div className="rounded-lg border border-emerald-200/30 bg-emerald-500/[0.02] p-3">
-              <p className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 text-[11px] uppercase tracking-wide">
+            <div className="rounded-lg border border-app-accent/30 bg-app-accent-soft/20 p-3">
+              <p className="font-bold text-app-accent flex items-center gap-1 text-[11px] uppercase tracking-wide">
                 <Check className="h-3.5 w-3.5 shrink-0" />
                 <span>Hành động Lặp lại (Lead) - Nên ghi</span>
               </p>

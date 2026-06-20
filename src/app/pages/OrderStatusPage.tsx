@@ -21,7 +21,7 @@ import { formatVnd } from "@/features/order/lib/pricing";
 import { apiClient } from "@/lib/api/apiClient";
 import { getBackendOrderId } from "@/lib/api/orderLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { type ApiOrder, getOrder as getBackendOrder } from "@/services/orderService";
+import { type ApiOrder, type KitPaymentSessionResponse, createKitPaymentSession, getOrder as getBackendOrder } from "@/services/orderService";
 import { PageHero } from "../components/layout/PageHero";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -70,6 +70,7 @@ interface PaymentOrderStatusResponse {
   completedAt?: string | null;
   createdAt?: string | null;
   description?: string | null;
+  purpose?: string | null;
 }
 
 function isPaymentOrderId(value: string | undefined): value is string {
@@ -97,11 +98,15 @@ function getPaymentExpiresAt(order: PaymentOrderStatusResponse | null): number |
   return null;
 }
 
-function createSupportMailto(orderId: string): string {
+function createSupportMailto(orderId: string, isKitOrder = false): string {
   const subject = encodeURIComponent(`Hỗ trợ thanh toán đơn ${orderId}`);
-  const body = encodeURIComponent(
-    `Chào đội hỗ trợ,\n\nTôi đã chuyển khoản cho đơn ${orderId} nhưng chưa nhận quyền Plus. Nhờ đội kiểm tra giúp.\n`,
-  );
+  const body = isKitOrder
+    ? encodeURIComponent(
+        `Chào đội hỗ trợ,\n\nTôi đã chuyển khoản cho đơn kit ${orderId} nhưng trạng thái chưa được cập nhật. Nhờ đội kiểm tra giúp.\n`,
+      )
+    : encodeURIComponent(
+        `Chào đội hỗ trợ,\n\nTôi đã chuyển khoản cho đơn ${orderId} nhưng chưa nhận quyền Plus. Nhờ đội kiểm tra giúp.\n`,
+      );
   return `mailto:${getSupportEmail()}?subject=${subject}&body=${body}`;
 }
 
@@ -204,8 +209,15 @@ export function OrderStatusPage() {
         if (data.status === "completed" && !paymentRedirectedRef.current) {
           paymentRedirectedRef.current = true;
           setSuccessRedirecting(true);
-          toast.success("Plus đã kích hoạt!");
-          window.setTimeout(() => navigate("/billing/plan", { replace: true }), REDIRECT_AFTER_SUCCESS_MS);
+          const isKitOrder = data.purpose === "physical_order";
+          if (isKitOrder) {
+            toast.success("Đơn kit đã thanh toán!");
+          } else {
+            toast.success("Plus đã kích hoạt!");
+          }
+          window.setTimeout(() => {
+            navigate(isKitOrder ? "/orders" : "/billing/plan", { replace: true });
+          }, REDIRECT_AFTER_SUCCESS_MS);
         }
       } catch (error: unknown) {
         if (toastBillingNetworkError(error, { surface: "OrderStatusPage", action: "fetch_payment_order", orderId })) {
@@ -385,15 +397,20 @@ export function OrderStatusPage() {
     if (!paymentOrder) return null;
 
     if (successRedirecting || paymentOrder.status === "completed") {
+      const isKitPayment = paymentOrder.purpose === "physical_order";
       return (
         <div className="mx-auto max-w-md px-4 py-12">
           <div className="rounded-card border border-app-accent-soft bg-app-accent-soft p-8 text-center">
             <div className="mx-auto flex h-20 w-20 animate-bounce items-center justify-center rounded-full bg-app-accent text-white">
               <CheckCircle2 className="h-10 w-10" />
             </div>
-            <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Plus đã kích hoạt!</h1>
+            <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">
+              {isKitPayment ? "Đơn kit đã thanh toán!" : "Plus đã kích hoạt!"}
+            </h1>
             <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-              Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus.
+              {isKitPayment
+                ? "Đơn kit đã được xác nhận thanh toán. Đang chuyển bạn về danh sách đơn."
+                : "Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus."}
             </p>
           </div>
         </div>
@@ -401,6 +418,7 @@ export function OrderStatusPage() {
     }
 
     if (paymentTimedOut || paymentOrder.status === "failed") {
+      const isKitPayment = paymentOrder.purpose === "physical_order";
       return (
         <div className="mx-auto max-w-2xl px-4 py-12">
           <div className="rounded-card border border-app-status-error/20 bg-app-status-error/8 p-8 text-center">
@@ -409,12 +427,13 @@ export function OrderStatusPage() {
             </div>
             <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Đơn hàng đã huỷ</h1>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-app-ink-soft">
-              Đơn hàng đã huỷ, không nhận được chuyển khoản. Nếu bạn đã chuyển khoản, liên hệ {getSupportEmail()} để đội
-              hỗ trợ kiểm tra.
+              {isKitPayment
+                ? `Đơn kit đã huỷ, không nhận được chuyển khoản. Nếu bạn đã chuyển khoản, liên hệ ${getSupportEmail()} để đội hỗ trợ kiểm tra.`
+                : `Đơn hàng đã huỷ, không nhận được chuyển khoản. Nếu bạn đã chuyển khoản, liên hệ ${getSupportEmail()} để đội hỗ trợ kiểm tra.`}
             </p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Button type="button" asChild className="bg-app-accent text-white hover:bg-app-accent">
-                <a href={createSupportMailto(paymentOrder.orderId)}>
+                <a href={createSupportMailto(paymentOrder.orderId, isKitPayment)}>
                   <Mail className="h-4 w-4" />
                   Liên hệ hỗ trợ
                 </a>
@@ -546,7 +565,9 @@ export function OrderStatusPage() {
             <div className="rounded-card border border-app-line bg-app-bg p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-app-ink">
-                  Cần biết cách xác nhận thanh toán, nhận Plus hoặc xử lý chuyển khoản sai?
+                  {paymentOrder.purpose === "physical_order"
+                    ? "Cần biết cách xác nhận thanh toán đơn kit hoặc xử lý chuyển khoản sai?"
+                    : "Cần biết cách xác nhận thanh toán, nhận Plus hoặc xử lý chuyển khoản sai?"}
                 </p>
                 <Button
                   type="button"
@@ -592,7 +613,9 @@ export function OrderStatusPage() {
               <div className="rounded-card border border-app-line bg-app-warm-soft p-6">
                 <h3 className="font-serif text-base font-medium text-app-ink">Quá lâu chưa thấy phản hồi?</h3>
                 <p className="mt-1 text-sm text-app-ink-muted">
-                  Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút chưa nhận quyền:
+                  {paymentOrder.purpose === "physical_order"
+                    ? "Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút trạng thái chưa được cập nhật:"
+                    : "Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút chưa nhận quyền:"}
                 </p>
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                   <Button
@@ -601,7 +624,7 @@ export function OrderStatusPage() {
                     variant="outline"
                     className="border-app-line text-app-ink hover:bg-app-bg"
                   >
-                    <a href={createSupportMailto(paymentOrder.orderId)}>
+                    <a href={createSupportMailto(paymentOrder.orderId, paymentOrder.purpose === "physical_order")}>
                       <Mail className="h-4 w-4" />
                       Liên hệ hỗ trợ
                     </a>
@@ -993,31 +1016,12 @@ export function OrderStatusPage() {
 
         <div className="stack-section">
           {shouldShowPaymentCta ? (
-            <Card className="border border-app-accent/20 bg-app-accent-soft/40 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <QrCode className="h-4 w-4 text-app-accent" />
-                  Thanh toán đơn kit
-                </CardTitle>
-                <CardDescription>
-                  Hoàn tất thanh toán để đội Dear Our Future xác nhận và chuẩn bị kit của bạn.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {typeof order.totalVnd === "number" && order.totalVnd > 0 ? (
-                  <div className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2 text-sm">
-                    <span className="text-app-ink-soft">Tổng tạm tính</span>
-                    <span className="font-semibold tabular-nums text-app-accent">{formatVnd(order.totalVnd)}</span>
-                  </div>
-                ) : null}
-                <Button type="button" className="w-full bg-app-accent text-white hover:bg-app-accent" asChild>
-                  <Link to="/billing/confirm">
-                    <QrCode className="h-4 w-4" />
-                    Thanh toán ngay / Xem mã QR
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <KitPaymentCta
+              order={order}
+              user={user}
+              demoMode={demoMode}
+              navigate={navigate}
+            />
           ) : null}
 
           <Card className="border-0 shadow-lg">
@@ -1080,6 +1084,94 @@ export function OrderStatusPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function KitPaymentCta({
+  order,
+  user,
+  demoMode,
+  navigate,
+}: {
+  order: LocalOrder;
+  user: { uid: string; email?: string | null; emailVerified?: boolean } | null;
+  demoMode: boolean;
+  navigate: (path: string) => void;
+}) {
+  const [creating, setCreating] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const backendOrderId = getBackendOrderId(order.id);
+
+  const handleCreatePayment = useCallback(async () => {
+    if (!backendOrderId || creating) return;
+    setCreating(true);
+    setPaymentError(null);
+    try {
+      const session: KitPaymentSessionResponse = await createKitPaymentSession(backendOrderId);
+      navigate(`/order-status/${session.paymentOrderId}`);
+    } catch (error: unknown) {
+      if (toastBillingNetworkError(error, { surface: "OrderStatusPage", action: "create_kit_payment", orderId: backendOrderId })) {
+        setPaymentError("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(error, { surface: "OrderStatusPage", action: "create_kit_payment", orderId: backendOrderId });
+        setPaymentError(error instanceof Error ? error.message : "Không tạo được phiên thanh toán.");
+      }
+    } finally {
+      setCreating(false);
+    }
+  }, [backendOrderId, creating, navigate]);
+
+  const canPayOnline = Boolean(user && backendOrderId);
+  const showLocalOnly = demoMode || (!user || !backendOrderId);
+
+  return (
+    <Card className="border border-app-accent/20 bg-app-accent-soft/40 shadow-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <QrCode className="h-4 w-4 text-app-accent" />
+          Thanh toán đơn kit
+        </CardTitle>
+        <CardDescription>
+          Hoàn tất thanh toán để đội Dear Our Future xác nhận và chuẩn bị kit của bạn.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {typeof order.totalVnd === "number" && order.totalVnd > 0 ? (
+          <div className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2 text-sm">
+            <span className="text-app-ink-soft">Tổng đơn</span>
+            <span className="font-semibold tabular-nums text-app-accent">{formatVnd(order.totalVnd)}</span>
+          </div>
+        ) : null}
+
+        {showLocalOnly ? (
+          <div className="rounded-lg border border-app-warm-border/30 bg-app-warm-soft p-3 text-sm text-app-warm-strong">
+            {!user
+              ? "Đăng nhập để tạo QR thanh toán trực tuyến cho đơn kit."
+              : "Đơn kit đang đồng bộ lên máy chủ. QR thanh toán trực tuyến sẽ khả dụng sau khi đồng bộ hoàn tất."}
+          </div>
+        ) : (
+          <Button
+            type="button"
+            className="w-full bg-app-accent text-white hover:bg-app-accent"
+            onClick={handleCreatePayment}
+            disabled={creating || !canPayOnline}
+          >
+            {creating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <QrCode className="h-4 w-4" />
+            )}
+            {creating ? "Đang tạo QR..." : "Thanh toán ngay / Xem mã QR"}
+          </Button>
+        )}
+
+        {paymentError && (
+          <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/8 p-3 text-sm text-app-status-error">
+            {paymentError}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

@@ -1,70 +1,18 @@
-import { ArrowRight, CalendarDays, Compass, HardDrive, Lock, LogIn, Palette, Smartphone, Target, UserPlus, Zap } from "lucide-react";
-import { useState } from "react";
+import { HardDrive, LogIn } from "lucide-react";
+import { type CSSProperties, useState } from "react";
 
-import { Link } from "react-router";
-
-import { RevealOnScroll } from "@/app/components/motion";
+import {
+  EditorialCard,
+  Eyebrow,
+  HighlightMark,
+  PillButton,
+  SectionHeader,
+  StatBadge,
+} from "@/app/components/ui/editorial";
+import { MindfulPlayer } from "@/app/components/ui/mindful-player";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 
-import { DreamToPlanPreview, type GoalPreviewData } from "./DreamToPlanPreview";
-
-const GOAL_PREVIEWS: GoalPreviewData[] = [
-  {
-    id: "reading",
-    goalTitle: "Đọc 12 cuốn sách trong năm",
-    visionIcons: [
-      { emoji: "📚", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
-      { emoji: "✍️", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
-      { emoji: "🧠", bgClass: "bg-violet-800/10", borderClass: "border-violet-800/20" },
-    ],
-    visionLabel: '"Phát triển tri thức"',
-    todayTasks: ['Đọc 30 trang "Atomic Habits"', "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
-    weekLabel: "Tuần 4/12",
-  },
-  {
-    id: "ielts",
-    goalTitle: "Đạt IELTS 7.0 trước tháng 9",
-    visionIcons: [
-      { emoji: "🎧", bgClass: "bg-sky-800/10", borderClass: "border-sky-800/20" },
-      { emoji: "📝", bgClass: "bg-rose-800/10", borderClass: "border-rose-800/20" },
-      { emoji: "🌍", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
-    ],
-    visionLabel: '"Tự tin giao tiếp quốc tế"',
-    todayTasks: ["Làm 1 bài Listening Practice", "Viết 1 essay Task 2", "Review 50 từ vựng"],
-    weekLabel: "Tuần 3/12",
-  },
-  {
-    id: "gym",
-    goalTitle: "Tập gym đều 3 buổi/tuần",
-    visionIcons: [
-      { emoji: "🏋️", bgClass: "bg-orange-800/10", borderClass: "border-orange-800/20" },
-      { emoji: "🥗", bgClass: "bg-green-800/10", borderClass: "border-green-800/20" },
-      { emoji: "😴", bgClass: "bg-indigo-800/10", borderClass: "border-indigo-800/20" },
-    ],
-    visionLabel: '"Sức khoẻ bền vững"',
-    todayTasks: ["Tập Upper Body 45 phút", "Uống 2L nước", "Ngủ trước 23h"],
-    weekLabel: "Tuần 6/12",
-  },
-  {
-    id: "portfolio",
-    goalTitle: "Hoàn thành Portfolio xin việc",
-    visionIcons: [
-      { emoji: "💻", bgClass: "bg-blue-800/10", borderClass: "border-blue-800/20" },
-      { emoji: "📄", bgClass: "bg-amber-800/10", borderClass: "border-amber-800/20" },
-      { emoji: "🤝", bgClass: "bg-teal-800/10", borderClass: "border-teal-800/20" },
-    ],
-    visionLabel: '"Sẵn sàng bước vào sự nghiệp"',
-    todayTasks: ["Code 1 feature project", "Viết 1 case study", "Update LinkedIn"],
-    weekLabel: "Tuần 2/12",
-  },
-];
-
-const PREVIEW_CHIPS = [
-  { id: "reading", label: "📚 Đọc sách" },
-  { id: "ielts", label: "🎧 IELTS 7.0" },
-  { id: "gym", label: "🏋️ Gym" },
-  { id: "portfolio", label: "💻 Portfolio" },
-] as const;
+import "./PublicVisitorView.css";
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -74,29 +22,144 @@ interface PublicVisitorViewProps {
   onSignUp: () => void;
 }
 
-const FEATURE_ROWS = [
+interface GoalPreview {
+  id: string;
+  chipLabel: string;
+  title: string;
+  vision: string;
+  icons: string[];
+  week: string;
+  tasks: string[];
+}
+
+const GOAL_PREVIEWS: GoalPreview[] = [
   {
+    id: "reading",
+    chipLabel: "📚 Đọc sách",
+    title: "Đọc 12 cuốn sách / năm",
+    vision: "“Phát triển tri thức”",
+    icons: ["📚", "✍️", "🧠"],
+    week: "Tuần 4/12",
+    tasks: ['Đọc 30 trang "Atomic Habits"', "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
+  },
+  {
+    id: "ielts",
+    chipLabel: "🎧 IELTS 7.0",
+    title: "Đạt IELTS 7.0 trước tháng 9",
+    vision: "“Tự tin giao tiếp quốc tế”",
+    icons: ["🎧", "📝", "🌍"],
+    week: "Tuần 3/12",
+    tasks: ["Làm 1 bài Listening", "Viết 1 essay Task 2", "Review 50 từ vựng"],
+  },
+  {
+    id: "gym",
+    chipLabel: "🏋️ Gym",
+    title: "Tập gym đều 3 buổi/tuần",
+    vision: "“Sức khoẻ bền vững”",
+    icons: ["🏋️", "🥗", "😴"],
+    week: "Tuần 6/12",
+    tasks: ["Tập Upper Body 45 phút", "Uống 2L nước", "Ngủ trước 23h"],
+  },
+  {
+    id: "portfolio",
+    chipLabel: "💻 Portfolio",
+    title: "Hoàn thành Portfolio xin việc",
+    vision: "“Sẵn sàng vào sự nghiệp”",
+    icons: ["💻", "📄", "🤝"],
+    week: "Tuần 2/12",
+    tasks: ["Code 1 feature project", "Viết 1 case study", "Update LinkedIn"],
+  },
+];
+
+const JOURNEY_STEPS = [
+  { n: "1", title: "Tầm nhìn", caption: "Bảng ước mơ trực quan", active: false },
+  { n: "2", title: "Mục tiêu", caption: "Chuẩn SMART đo được", active: false },
+  { n: "3", title: "Kế hoạch", caption: "Lộ trình 12 tuần", active: false },
+  { n: "4", title: "Hành động", caption: "Việc Today mỗi sáng", active: true },
+] as const;
+
+const ROADMAP_STEPS = [
+  {
+    num: "01",
+    tone: "light" as const,
+    glyph: "◎",
+    eyebrow: "Bước 1 · Nhìn nhận",
+    title: "Cân bằng cuộc sống",
+    body: "Đánh giá 8 khía cạnh cuộc sống để phát hiện điểm lệch nhịp cần cải thiện đầu tiên.",
+    footLeft: "● Radar cuộc sống",
+    footRight: "≈3 phút",
+  },
+  {
+    num: "02",
+    tone: "amber" as const,
+    glyph: "◆",
+    eyebrow: "Bước 2 · Định vị",
+    title: "Đặt mục tiêu SMART",
+    body: "Chọn lĩnh vực ưu tiên và đóng gói mong muốn thành mục tiêu SMART đo lường được.",
+    footLeft: "● 1 tiêu điểm sắc nét",
+    footRight: "≈5 phút",
+  },
+  {
+    num: "03",
+    tone: "light" as const,
+    glyph: "▤",
+    eyebrow: "Bước 3 · Thiết lập",
+    title: "Kế hoạch 12 tuần",
+    body: "Xây dựng thói quen lặp lại (tactics) và checkpoint đo lường tiến độ tự động.",
+    footLeft: "● Lộ trình 12 tuần",
+    footRight: "≈5 phút",
+  },
+  {
+    num: "04",
+    tone: "dark" as const,
+    glyph: "⚡",
+    eyebrow: "Bước 4 · Thực thi",
+    title: "Hành động mỗi ngày",
+    body: "Mở việc Today mỗi sáng, tick hoàn thành và phản tư ngắn vào cuối tuần.",
+    footLeft: "● Today & Kỷ luật",
+    footRight: "2 phút/ngày",
+  },
+];
+
+const FEATURE_CARDS = [
+  {
+    icon: "🔒",
     tag: "Miễn phí",
     title: "Bắt đầu không tốn xu nào",
-    description: "Dữ liệu lưu trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập.",
-    href: "/life-balance",
-    icon: Lock,
+    body: "Dữ liệu lưu trên thiết bị, đồng bộ giữa điện thoại và máy tính khi bạn đăng nhập.",
   },
   {
+    icon: "🧭",
     tag: "Đúng thứ tự",
-    title: "Không phải trang trắng như Notion",
-    description: "Dear Our Future dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.",
-    href: "/12-week-setup",
-    icon: Compass,
+    title: "Không rối như trang trắng",
+    body: "Dear Our Future dẫn bạn qua đúng các bước có nghiên cứu sau lưng, không bị rối khi mới bắt đầu.",
   },
   {
+    icon: "📱",
     tag: "Mobile-ready",
     title: "Đủ nhẹ cho buổi sáng vội",
-    description: "Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng.",
-    href: "/12-week-system?tab=today",
-    icon: Smartphone,
+    body: "Mở Today, tick xong việc, đóng lại. Không cần học UI phức tạp hay setup dài dòng.",
   },
-] as const;
+];
+
+const BEFORE_ITEMS = [
+  '"Muốn sống khỏe hơn" — mong muốn mơ hồ, không biết bắt đầu từ đâu.',
+  "Viết To-do list rồi nhanh chóng quên sạch sau 2 tuần.",
+  "Thiếu nhịp cam kết hằng ngày và ngày khóa review tuần.",
+];
+
+const AFTER_ITEMS = [
+  "Có 1 mục tiêu SMART xuất phát từ bảng tầm nhìn.",
+  "Chiến thuật 12 tuần chặt chẽ với chỉ số lead hoàn thành.",
+  "Mở việc Today tinh gọn mỗi sáng và hành động dứt khoát.",
+];
+
+const SECTION: CSSProperties = { maxWidth: 1200, margin: "0 auto" };
+const scrollAnchor: CSSProperties = { scrollMarginTop: 84 };
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 export function PublicVisitorView({
   isDemo: _isDemo,
@@ -105,426 +168,869 @@ export function PublicVisitorView({
   onSignIn,
   onSignUp,
 }: PublicVisitorViewProps) {
-  const primaryLabel = "Thiết lập chu kỳ 12 tuần ngay";
-  const heroStartLabel = "Thiết lập chu kỳ 12 tuần ngay";
-  const [selectedPreviewId, setSelectedPreviewId] = useState(GOAL_PREVIEWS[0].id);
-  const selectedPreview = GOAL_PREVIEWS.find((p) => p.id === selectedPreviewId) ?? GOAL_PREVIEWS[0];
+  const [selectedId, setSelectedId] = useState(GOAL_PREVIEWS[0].id);
+  const goal = GOAL_PREVIEWS.find((g) => g.id === selectedId) ?? GOAL_PREVIEWS[0];
 
-  const handlePreviewSelect = (id: string) => {
-    setSelectedPreviewId(id);
+  const handleSelect = (id: string) => {
+    setSelectedId(id);
     trackAnalyticsEvent("landing_goal_preview_selected", { preview_id: id, source: "dashboard" });
   };
 
-  const scrollToHowItWorks = () => {
-    document.getElementById("dashboard-how-it-works-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
-    <div className="space-y-16 md:space-y-24">
-      {/* 1. Hero Section - Light-first Editorial style */}
-      <section className="relative -mx-4 overflow-hidden bg-gradient-to-b from-[#fafaf9] to-white dark:from-neutral-950 dark:to-neutral-900 px-4 pb-16 pt-8 sm:-mx-6 sm:px-6 md:pt-14 lg:min-h-[80vh] lg:flex lg:items-center lg:py-20">
-
-        <div className="relative z-10 flex flex-col gap-12 lg:gap-16 max-w-6xl mx-auto w-full">
-          <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:items-center">
-            <div className="appear-fade-up space-y-6">
-              <div className="space-y-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-500/5 dark:border-emerald-900/30 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 shadow-3xs">
-                  DEAR OUR FUTURE
-                </span>
-
-                <p className="text-[11px] sm:text-xs font-medium tracking-wide text-app-ink-muted">
-                  Dành cho người trẻ có hoài bão nhưng dễ mất đà.
-                </p>
-
-                <h1 className="max-w-2xl font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-app-ink sm:text-4xl md:text-[3.5rem]">
-                  Thiết lập cuộc sống mơ ước qua <br className="hidden sm:inline" />
-                  <span className="underline decoration-app-accent/55 underline-offset-8">
-                    kế hoạch 12 tuần
-                  </span>{" "}
-                  bền bỉ
-                </h1>
-
-                {/* Problem-first caption — nêu nỗi đau rồi nối sang giá trị (under 3 lines on mobile) */}
-                <p className="max-w-[48ch] text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic">
-                  Có nhiều mục tiêu nhưng không biết bắt đầu từ đâu, và thường bỏ cuộc sau vài tuần? Dear Our Future biến
-                  mong muốn mơ hồ thành việc làm cụ thể mỗi ngày, theo lộ trình 12 tuần có cơ sở khoa học.
-                </p>
-              </div>
-
-              {/* Visual preview journey diagram: Vision -> Goal -> 12-week -> Action */}
-              <div className="bg-white/80 dark:bg-neutral-900/80 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 p-4 shadow-3xs max-w-xl">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-app-ink-muted mb-2.5">
-                  Hành trình 5 giây gặt hái kết quả:
-                </p>
-                <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
-                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                    <div className="text-base mb-1 flex justify-center"><Palette className="h-4 w-4" /></div>
-                    <div className="font-bold text-neutral-800 dark:text-neutral-200">1. Tầm nhìn</div>
-                    <div className="text-[9px] text-neutral-400 font-medium">Bảng ước mơ</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                    <div className="text-base mb-1 flex justify-center"><Target className="h-4 w-4" /></div>
-                    <div className="font-bold text-neutral-800 dark:text-neutral-200">2. Mục tiêu</div>
-                    <div className="text-[9px] text-neutral-400 font-medium">Chuẩn SMART</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-[#fafaf9] dark:bg-neutral-950 border border-neutral-200/50">
-                    <div className="text-base mb-1 flex justify-center"><CalendarDays className="h-4 w-4" /></div>
-                    <div className="font-bold text-neutral-800 dark:text-neutral-200">3. Kế hoạch</div>
-                    <div className="text-[9px] text-neutral-400 font-medium">Lộ trình 12 tuần</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-app-accent-soft text-app-accent border border-app-accent/15">
-                    <div className="text-base mb-1 flex justify-center"><Zap className="h-4 w-4" /></div>
-                    <div className="font-bold">4. Hành động</div>
-                    <div className="text-[9px] text-app-accent/80 font-medium">Việc Today</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Interactive Goal Preview Chips */}
-              <div className="space-y-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-app-ink-muted">
-                  Chọn xem ví dụ thực tế:
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {PREVIEW_CHIPS.map((chip) => (
-                    <button
-                      key={chip.id}
-                      type="button"
-                      aria-pressed={selectedPreviewId === chip.id}
-                      onClick={() => handlePreviewSelect(chip.id)}
-                      className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg cursor-pointer ${
-                        selectedPreviewId === chip.id
-                          ? "bg-app-accent text-white shadow-sm hover:bg-app-accent-hover"
-                          : "border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:border-app-accent/40 hover:text-app-accent hover:-translate-y-px"
-                      }`}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Buttons - Highly visible, min 44px on mobile */}
-              <div className="flex flex-col gap-3 sm:flex-row pt-2 max-w-xl">
-                <button
-                  type="button"
-                  onClick={onStart}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-emerald-700 hover:bg-emerald-800 px-8 py-3.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40 cursor-pointer w-full sm:w-auto"
-                >
-                  {heroStartLabel}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={scrollToHowItWorks}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-transparent px-8 py-3.5 text-xs font-bold text-neutral-700 dark:text-neutral-300 transition-all duration-200 hover:bg-neutral-50/50 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none cursor-pointer w-full sm:w-auto"
-                >
-                  Xem lộ trình ghim chu kỳ
-                </button>
-              </div>
-
-              <div className="pt-0.5 flex items-center gap-2">
-                <p className="text-[10px] font-medium text-app-ink-muted flex items-center gap-1.5">
-                  <span>•</span>
-                  Thiết lập nhanh trong 3 phút để nhận Bánh xe cuộc sống và gợi ý mục tiêu đầu tiên.
-                </p>
-              </div>
-            </div>
-
-            {/* Cozy planning corner generated image asset for public landing */}
-            <div className="hidden lg:block relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-sm aspect-[4/3] w-full group select-none transition-all duration-300 hover:shadow-md">
-              <img
-                src="/study_desk_hero.png"
-                alt="Góc học tập & lập kế hoạch ấm áp"
-                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-5">
-                <p className="text-xs font-medium text-white/90 italic font-serif leading-relaxed">
-                  "Một góc yên để nhìn lại mục tiêu và bắt đầu chu kỳ mới."
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* SaaS Mockup Centerpiece - Dream-to-Plan Preview */}
-          <div className="w-full">
-            <DreamToPlanPreview previewData={selectedPreview} />
-          </div>
-        </div>
-      </section>
-
-      {/* Local data restore banner if present */}
-      {hasLocalData ? (
-        <section
-          className="rounded-2xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 md:p-6 max-w-6xl mx-auto"
-          aria-labelledby="dashboard-local-data-title"
+    <div className="dof-landing">
+      {/* HEADER */}
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          background: "color-mix(in srgb, var(--app-bg) 82%, transparent)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          borderBottom: "1px solid var(--app-line)",
+        }}
+      >
+        <div
+          style={{
+            ...SECTION,
+            padding: "14px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+          }}
         >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex min-w-0 gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-surface text-app-status-warning shadow-sm">
-                <HardDrive className="h-4 w-4" />
+          <button
+            type="button"
+            onClick={() => scrollToId("top")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              padding: 0,
+              color: "var(--app-ink)",
+            }}
+            aria-label="Về đầu trang Dear Our Future"
+          >
+            <span
+              className="dof-display"
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 10,
+                background: "var(--app-accent)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--app-highlight)",
+                fontWeight: 800,
+                fontSize: 18,
+                transform: "rotate(-6deg)",
+              }}
+            >
+              D
+            </span>
+            <span className="dof-display" style={{ fontWeight: 700, fontSize: 17, letterSpacing: "-0.02em" }}>
+              Dear Our Future
+            </span>
+          </button>
+          <nav style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <span className="dof-nav-anchors" style={{ display: "flex", alignItems: "center", gap: 22 }}>
+              <button type="button" onClick={() => scrollToId("how")} style={navLinkStyle} className="dof-navlink">
+                Cách hoạt động
+              </button>
+              <button type="button" onClick={() => scrollToId("why")} style={navLinkStyle} className="dof-navlink">
+                Vì sao
+              </button>
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {/* Âm thanh tập trung — tính năng sẵn có của app, giữ trên landing */}
+              <MindfulPlayer />
+              <button type="button" onClick={onSignIn} style={navLinkStyle} className="dof-navlink">
+                Đăng nhập
+              </button>
+              <button type="button" onClick={onSignUp} style={signupPillStyle}>
+                Đăng ký
+              </button>
+            </span>
+          </nav>
+        </div>
+      </header>
+
+      <span id="top" />
+
+      <main>
+        {/* HERO */}
+        <section style={{ ...SECTION, padding: "56px 24px 40px" }}>
+          <div
+            className="dof-up"
+            style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22, flexWrap: "wrap" }}
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                background: "var(--app-accent)",
+                color: "var(--app-highlight)",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                padding: "7px 14px",
+                borderRadius: 999,
+              }}
+            >
+              ★ Dear Our Future
+            </span>
+            <span style={{ fontSize: 13, color: "var(--app-ink-soft)", fontWeight: 500 }}>
+              Dành cho người trẻ có hoài bão nhưng dễ mất đà.
+            </span>
+          </div>
+
+          <div className="dof-hero-grid">
+            <div className="dof-up" style={{ animationDelay: ".06s" }}>
+              <h1
+                className="dof-display dof-hero-title"
+                style={{ fontWeight: 800, lineHeight: 0.98, letterSpacing: "-0.035em", margin: "0 0 24px" }}
+              >
+                Biến ước mơ
+                <br />
+                thành{" "}
+                <HighlightMark>kế hoạch</HighlightMark>
+                <br />
+                <span style={{ color: "var(--app-accent)" }}>12 tuần bền bỉ.</span>
+              </h1>
+              <p
+                style={{
+                  maxWidth: "48ch",
+                  fontSize: 16.5,
+                  lineHeight: 1.6,
+                  color: "var(--app-ink-soft)",
+                  margin: "0 0 30px",
+                  fontWeight: 400,
+                }}
+              >
+                Có nhiều mục tiêu nhưng không biết bắt đầu từ đâu, và thường bỏ cuộc sau vài tuần? Dear Our Future biến
+                mong muốn mơ hồ thành việc làm cụ thể mỗi ngày — theo lộ trình 12 tuần có cơ sở khoa học.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", marginBottom: 26 }}>
+                <PillButton size="lg" onClick={onStart}>
+                  Thiết lập chu kỳ 12 tuần ngay →
+                </PillButton>
+                <PillButton variant="outline" size="lg" onClick={() => scrollToId("how")}>
+                  Xem lộ trình
+                </PillButton>
               </div>
-              <div>
-                <h2 id="dashboard-local-data-title" className="text-base font-semibold text-app-status-warning">
-                  Có dữ liệu đã lưu trên thiết bị này
-                </h2>
-                <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">
-                  Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài
-                  khoản nếu chưa có xác nhận của bạn.
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "var(--app-ink-soft)",
+                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  margin: 0,
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--app-energy)" }} />
+                Thiết lập trong 3 phút — nhận ngay Bánh xe cuộc sống & gợi ý mục tiêu đầu tiên.
+              </p>
+            </div>
+
+            <div className="dof-up dof-hero-art" style={{ animationDelay: ".14s", position: "relative" }}>
+              <div
+                className="dof-float"
+                style={{
+                  ["--r" as string]: "-2.5deg",
+                  position: "relative",
+                  background: "var(--app-surface)",
+                  transform: "rotate(-2.5deg)",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -13,
+                    left: "50%",
+                    transform: "translateX(-50%) rotate(3deg)",
+                    width: 92,
+                    height: 26,
+                    background: "color-mix(in srgb, var(--app-highlight) 70%, transparent)",
+                    border: "1px dashed color-mix(in srgb, var(--app-accent) 40%, transparent)",
+                  }}
+                />
+                <img
+                  src="/study_desk_hero.png"
+                  alt="Góc lập kế hoạch"
+                  style={{ width: "100%", height: 300, objectFit: "cover", borderRadius: 3, display: "block" }}
+                />
+                <p
+                  className="dof-display"
+                  style={{ fontSize: 15, fontWeight: 600, color: "var(--app-ink)", margin: "12px 4px 2px" }}
+                >
+                  "Một góc yên để bắt đầu chu kỳ mới."
                 </p>
               </div>
-            </div>
-            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={onSignIn}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-status-warning px-4 py-2.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-app-status-warning/90 focus-visible:outline-none"
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 34,
+                  right: -26,
+                  background: "var(--app-energy)",
+                  color: "#fff",
+                  padding: "12px 16px",
+                  borderRadius: 14,
+                  transform: "rotate(-7deg)",
+                  boxShadow: "0 12px 24px -8px rgba(255,92,62,0.6)",
+                }}
               >
-                <LogIn className="h-4 w-4" />
-                Đăng nhập để khôi phục
-              </button>
-              <button
-                type="button"
-                onClick={onSignUp}
-                className="inline-flex items-center justify-center rounded-lg border border-app-status-warning/30 bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-status-warning transition-colors duration-150 hover:bg-app-status-warning/10 focus-visible:outline-none"
-              >
-                Tạo tài khoản mới
-              </button>
-            </div>
+                <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.9, letterSpacing: "0.04em" }}>TUẦN</div>
+                <div className="dof-display" style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+                  04 / 12
+              </div>
+            </EditorialCard>
           </div>
         </section>
-      ) : null}
 
-      {/* Before → After Clarity Section */}
-      <RevealOnScroll
-        as="section"
-        className="grid gap-6 sm:grid-cols-2 max-w-6xl mx-auto px-4"
-        aria-label="So sánh trước và sau"
-      >
-        <div className="rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 bg-[#fbfbfa]/60 p-6 transition-all duration-300 hover:border-neutral-300">
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-neutral-500">
-            <span>✕</span> Trước khi sử dụng
-          </p>
-          <h3 className="mt-3 text-sm font-bold text-neutral-800 dark:text-neutral-200">Mục tiêu mơ hồ</h3>
-          <ul className="mt-4 space-y-2.5 text-xs font-medium leading-relaxed text-neutral-500">
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-neutral-400 font-bold">✕</span>
-              <span>"Muốn sống khỏe hơn" — ý muốn mơ hồ không biết bắt đầu từ đâu.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-neutral-400 font-bold">✕</span>
-              <span>Viết To-do list rồi nhanh chóng quên sạch sau 2 tuần.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-neutral-400 font-bold">✕</span>
-              <span>Thiếu nhịp điệu cam kết hàng ngày và ngày khóa review tuần.</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="relative rounded-2xl border border-emerald-500/15 border-t-2 border-t-emerald-600 bg-emerald-500/5 p-6 shadow-sm transition-all duration-300 hover:shadow-md">
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 border border-emerald-500/10">
-            <span>✓</span> Kế hoạch 12 tuần rõ nét
-          </p>
-          <h3 className="mt-3 text-sm font-bold text-neutral-800 dark:text-neutral-200">Kỷ luật & Trọng tâm</h3>
-          <ul className="mt-4 space-y-2.5 text-xs font-medium leading-relaxed text-emerald-800 dark:text-emerald-400">
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-emerald-600 font-bold">✓</span>
-              <span>Có 1 mục tiêu SMART xuất phát từ bảng tầm nhìn.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-emerald-600 font-bold">✓</span>
-              <span>Chiến thuật 12 tuần chặt chẽ và chỉ số lead hoàn thành.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <span className="mt-0.5 shrink-0 text-emerald-600 font-bold">✓</span>
-              <span>Mở danh sách việc Today tinh gọn mỗi sáng và hành động dứt khoát.</span>
-            </li>
-          </ul>
-        </div>
-      </RevealOnScroll>
-
-      {/* 4-step Roadmap Section - Vision Board Studio paper cards styled */}
-      <RevealOnScroll
-        as="section"
-        className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800 bg-[#fbfbfa]/40 p-6 md:p-10 shadow-3xs max-w-6xl mx-auto w-full"
-        aria-labelledby="dashboard-how-it-works-title"
-      >
-        <div className="flex flex-col gap-1.5 max-w-2xl">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-500">
-            Lộ trình của bạn
-          </p>
-          <h2
-            id="dashboard-how-it-works-title"
-            className="font-serif text-2xl font-normal leading-[1.25] text-app-ink sm:text-[2.25rem]"
-          >
-            Lộ trình 4 bước chuyển mình rõ nét
-          </h2>
-        </div>
-
-        {/* Polaroid/Paper Cards Stepper */}
-        <div className="relative mt-10 select-none">
-          <ol className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-4 z-10">
-            {/* Step 1 */}
-            <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
-                01
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
-                  Bước 1 · Nhìn nhận
-                </div>
-                <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Cân bằng cuộc sống</h4>
-                <p className="text-xs text-neutral-500 leading-relaxed font-medium">
-                  Đánh giá 8 khía cạnh cuộc sống để phát hiện điểm lệch nhịp cần cải thiện đầu tiên.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between text-[9px] font-bold text-emerald-700">
-                <span>● Radar cuộc sống</span>
-                <span>≈3 phút</span>
-              </div>
-            </li>
-
-            {/* Step 2 */}
-            <li className="bg-[#fffde7] text-neutral-800 p-6 rounded-2xl border border-yellow-200/80 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-yellow-300 select-none">
-                02
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-yellow-700 uppercase tracking-wider">Bước 2 · Định vị</div>
-                <h4 className="text-xs font-bold text-neutral-800">Đặt mục tiêu SMART</h4>
-                <p className="text-xs text-neutral-600 leading-relaxed font-medium">
-                  Chọn lĩnh vực ưu tiên và đóng gói mong muốn thành mục tiêu SMART đo lường được.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-yellow-200/40 flex items-center justify-between text-[9px] font-bold text-yellow-700">
-                <span>● 1 tiêu điểm sắc nét</span>
-                <span>≈5 phút</span>
-              </div>
-            </li>
-
-            {/* Step 3 */}
-            <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
-                03
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
-                  Bước 3 · Thiết lập
-                </div>
-                <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Kế hoạch 12 tuần</h4>
-                <p className="text-xs text-neutral-500 leading-relaxed font-medium">
-                  Xây dựng thói quen lặp lại (tactics) và checkpoint đo lường tiến độ tự động.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between text-[9px] font-bold text-app-accent">
-                <span>● Lộ trình 12 tuần</span>
-                <span>≈5 phút</span>
-              </div>
-            </li>
-
-            {/* Step 4 */}
-            <li className="bg-white dark:bg-neutral-950 p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-900 shadow-3xs relative space-y-4 duration-300 transition-transform flex flex-col justify-between">
-              <div className="absolute top-4 right-5 text-2xl font-serif font-semibold text-neutral-200 dark:text-neutral-800 select-none">
-                04
-              </div>
-              <div className="space-y-3 pt-2">
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-500 uppercase tracking-wider">
-                  Bước 4 · Thực thi
-                </div>
-                <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Hành động mỗi ngày</h4>
-                <p className="text-xs text-neutral-500 leading-relaxed font-medium">
-                  Mở việc Today mỗi sáng, tick hoàn thành và phản tư ngắn vào cuối tuần.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between text-[9px] font-bold text-app-accent">
-                <span>● Today & Kỷ luật</span>
-                <span>2 phút mỗi ngày</span>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </RevealOnScroll>
-
-      {/* Feature cards Grid */}
-      <RevealOnScroll
-        as="section"
-        className="grid gap-6 lg:grid-cols-3 max-w-6xl mx-auto px-4 w-full"
-        aria-label="Vì sao chọn Dear Our Future"
-      >
-        {FEATURE_ROWS.map((feature) => {
-          const Icon = feature.icon;
-
-          return (
-            <Link
-              key={feature.title}
-              to={feature.href}
-              className="group relative rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/40 dark:bg-neutral-900/20 backdrop-blur-sm p-6 shadow-3xs hover:-translate-y-px hover:border-app-accent/35 hover:shadow-2xs transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 cursor-pointer"
+        {/* LOCAL DATA RESTORE BANNER */}
+        {hasLocalData ? (
+          <section style={{ ...SECTION, padding: "0 24px 8px" }} aria-labelledby="dof-local-data-title">
+            <div
+              style={{
+                background: "var(--app-surface)",
+                border: "1px solid color-mix(in srgb, var(--app-energy) 35%, transparent)",
+                borderRadius: 18,
+                padding: "20px 22px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 16,
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
             >
-              <div className="flex flex-col gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent transition-all duration-300 group-hover:bg-app-accent group-hover:text-white">
-                  <Icon className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-wide text-app-accent/80">
-                    {feature.tag}
-                  </p>
-                  <h2 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 transition-colors duration-200 group-hover:text-app-accent">
-                    {feature.title}
+              <div style={{ display: "flex", gap: 14, alignItems: "flex-start", minWidth: 0 }}>
+                <span
+                  style={{
+                    display: "flex",
+                    width: 38,
+                    height: 38,
+                    flexShrink: 0,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 11,
+                    background: "color-mix(in srgb, var(--app-energy) 12%, transparent)",
+                    color: "var(--app-energy)",
+                  }}
+                >
+                  <HardDrive size={18} />
+                </span>
+                <div>
+                  <h2
+                    id="dof-local-data-title"
+                    style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--app-ink)" }}
+                  >
+                    Có dữ liệu đã lưu trên thiết bị này
                   </h2>
-                  <p className="text-xs font-semibold leading-relaxed text-neutral-500">{feature.description}</p>
-                  <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-app-accent transition-transform duration-200 group-hover:translate-x-0.5 mt-2">
-                    Tìm hiểu thêm
-                    <ArrowRight className="h-3 w-3" />
-                  </span>
+                  <p style={{ margin: "6px 0 0", fontSize: 13, lineHeight: 1.5, color: "var(--app-ink-soft)" }}>
+                    Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài
+                    khoản nếu chưa có xác nhận của bạn.
+                  </p>
                 </div>
               </div>
-            </Link>
-          );
-        })}
-      </RevealOnScroll>
-
-      {/* 5. Bottom CTA Section - Vision Board dark studio themed */}
-      <RevealOnScroll
-        as="section"
-        className="max-w-6xl mx-auto px-4 w-full"
-        aria-labelledby="dashboard-public-cta-title"
-      >
-        <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-emerald-950 text-white p-8 md:p-14 shadow-2xl text-center sm:text-left">
-
-          <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-4 max-w-2xl">
-              <span className="text-[9px] font-bold uppercase tracking-wide text-emerald-400 block">
-                Gửi lời chào tới tương lai
-              </span>
-              <h2
-                id="dashboard-public-cta-title"
-                className="font-serif text-3xl font-normal leading-[1.25] text-white sm:text-5xl"
-              >
-                Bắt đầu chu kỳ <br className="hidden sm:inline" /> 12 tuần của bạn
-              </h2>
-              <p className="text-xs font-normal leading-relaxed text-slate-300">
-                Dành vài phút thiết lập lộ trình hành động 12 tuần của bạn ngay hôm nay.
-              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={onSignIn}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    border: "none",
+                    cursor: "pointer",
+                    background: "var(--app-energy)",
+                    color: "#fff",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    padding: "11px 18px",
+                    borderRadius: 999,
+                  }}
+                >
+                  <LogIn size={16} />
+                  Đăng nhập để khôi phục
+                </button>
+                <button
+                  type="button"
+                  onClick={onSignUp}
+                  style={{
+                    border: "1.5px solid color-mix(in srgb, var(--app-energy) 40%, transparent)",
+                    cursor: "pointer",
+                    background: "var(--app-surface)",
+                    color: "var(--app-energy)",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    padding: "11px 18px",
+                    borderRadius: 999,
+                  }}
+                >
+                  Tạo tài khoản mới
+                </button>
+              </div>
             </div>
+          </section>
+        ) : null}
 
-            <div className="shrink-0 flex flex-col items-center lg:items-end gap-3.5">
-              <button
-                type="button"
-                onClick={onStart}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-400 hover:bg-amber-500 px-8 py-4 text-xs font-bold text-neutral-950 shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none"
-              >
-                <UserPlus className="h-4 w-4 text-neutral-950" />
-                {primaryLabel}
-              </button>
-              <p className="text-[10px] font-normal text-slate-400 flex items-center gap-1.5">
-                <span>•</span>
-                Nhận ngay việc làm hôm nay để khởi động
-              </p>
-            </div>
+        {/* INTERACTIVE GOAL PREVIEW */}
+        <section style={{ ...SECTION, padding: "40px 24px" }}>
+          <SectionHeader
+            eyebrow="Xem ví dụ thực tế"
+            title="Một mục tiêu, một lộ trình rõ ràng"
+            align="center"
+            className="mb-[30px]"
+          />
+          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 10, marginBottom: 30 }}>
+            {GOAL_PREVIEWS.map((preview) => {
+              const active = preview.id === selectedId;
+              return (
+                <button
+                  key={preview.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => handleSelect(preview.id)}
+                  style={{
+                    border: active ? "none" : "1px solid rgba(23,21,15,0.14)",
+                    background: active ? "var(--app-accent)" : "var(--app-surface)",
+                    color: active ? "#fff" : "var(--app-ink-soft)",
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    padding: "10px 18px",
+                    borderRadius: 999,
+                    cursor: "pointer",
+                    transition: "all .2s",
+                  }}
+                >
+                  {preview.chipLabel}
+                </button>
+              );
+            })}
           </div>
+          <EditorialCard
+            className="dof-preview-card max-w-[880px] mx-auto"
+            style={{ boxShadow: "0 24px 50px -28px rgba(23,21,15,0.3)" }}
+          >
+            <div className="dof-preview-left">
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "var(--app-ink-soft)",
+                  marginBottom: 14,
+                }}
+              >
+                Tầm nhìn của bạn
+              </div>
+              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                {goal.icons.map((icon, index) => (
+                  <span
+                    // biome-ignore lint/suspicious/noArrayIndexKey: emoji set ổn định theo mục tiêu
+                    key={`${goal.id}-${index}`}
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
+                      background: "var(--app-bg-subtle)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 24,
+                    }}
+                  >
+                    {icon}
+                  </span>
+                ))}
+              </div>
+              <div
+                className="dof-display"
+                style={{
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: "var(--app-accent)",
+                  fontStyle: "italic",
+                  lineHeight: 1.3,
+                }}
+              >
+                {goal.vision}
+              </div>
+              <div
+                style={{
+                  marginTop: 20,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "var(--app-accent)",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: "8px 14px",
+                  borderRadius: 999,
+                }}
+              >
+                🎯 {goal.title}
+              </div>
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "var(--app-ink-soft)",
+                  }}
+                >
+                  Việc hôm nay
+                </div>
+                <StatBadge>{goal.week}</StatBadge>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {goal.tasks.map((task) => (
+                  <div
+                    key={task}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      background: "var(--app-bg)",
+                      border: "1px solid rgba(23,21,15,0.06)",
+                      borderRadius: 13,
+                      padding: "13px 15px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 7,
+                        border: "2px solid var(--app-accent)",
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "var(--app-accent)",
+                        fontSize: 13,
+                        fontWeight: 700,
+                      }}
+                    >
+                      ✓
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: "var(--app-ink)" }}>{task}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </EditorialCard>
+        </section>
+
+        {/* BEFORE / AFTER */}
+        <section style={{ ...SECTION, padding: "48px 24px" }} aria-label="So sánh trước và sau">
+          <div className="dof-two-col">
+            <EditorialCard tone="muted">
+              <Eyebrow
+                tone="muted"
+                className="mb-0"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  background: "rgba(23,21,15,0.07)",
+                  color: "var(--app-ink-soft)",
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  letterSpacing: "0.1em",
+                  fontSize: 11,
+                  fontWeight: 700,
+                }}
+              >
+                ✕ Trước khi dùng
+              </Eyebrow>
+              <h3
+                className="dof-display"
+                style={{ fontSize: 24, fontWeight: 700, margin: "16px 0 18px", color: "var(--app-ink)" }}
+              >
+                Mục tiêu mơ hồ
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {BEFORE_ITEMS.map((item) => (
+                  <div
+                    key={item}
+                    style={{ display: "flex", gap: 12, fontSize: 14.5, lineHeight: 1.5, color: "var(--app-ink-soft)" }}
+                  >
+                    <span style={{ color: "#A8A296", fontWeight: 700 }}>✕</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </EditorialCard>
+            <EditorialCard
+              tone="accent"
+              style={{ boxShadow: "0 24px 50px -28px rgba(12,94,58,0.6)" }}
+            >
+              <Eyebrow
+                tone="muted"
+                className="mb-0"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  background: "var(--app-highlight)",
+                  color: "var(--app-ink)",
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  letterSpacing: "0.1em",
+                  fontSize: 11,
+                  fontWeight: 700,
+                }}
+              >
+                ✓ Kế hoạch 12 tuần rõ nét
+              </Eyebrow>
+              <h3
+                className="dof-display"
+                style={{ fontSize: 24, fontWeight: 700, margin: "16px 0 18px", color: "#fff" }}
+              >
+                Kỷ luật &amp; Trọng tâm
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {AFTER_ITEMS.map((item) => (
+                  <div
+                    key={item}
+                    style={{ display: "flex", gap: 12, fontSize: 14.5, lineHeight: 1.5, color: "var(--app-accent-soft)" }}
+                  >
+                    <span style={{ color: "var(--app-highlight)", fontWeight: 700 }}>✓</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </EditorialCard>
+          </div>
+        </section>
+
+        {/* ROADMAP */}
+        <section id="how" style={{ ...SECTION, padding: "48px 24px", ...scrollAnchor }}>
+          <SectionHeader
+            eyebrow="Lộ trình của bạn"
+            title="Bốn bước chuyển mình rõ nét"
+            className="mb-[34px]"
+          />
+          <div className="dof-quad-grid">
+            {ROADMAP_STEPS.map((step) => {
+              const dark = step.tone === "dark";
+              const amber = step.tone === "amber";
+              const cardBg = dark ? "var(--app-ink)" : amber ? "#FFFCE8" : "var(--app-surface)";
+              const cardBorder = dark
+                ? "none"
+                : amber
+                  ? "1px solid rgba(214,178,40,0.35)"
+                  : "1px solid var(--app-line)";
+              const numColor = dark ? "rgba(255,255,255,0.1)" : amber ? "#F0E4A8" : "#EAE5DA";
+              const glyphBg = dark ? "var(--app-highlight)" : amber ? "#E7B400" : "var(--app-accent)";
+              const glyphColor = dark ? "var(--app-ink)" : amber ? "#fff" : "var(--app-highlight)";
+              const eyebrowColor = dark ? "var(--app-highlight)" : amber ? "#9A7B00" : "var(--app-accent)";
+              const bodyColor = dark ? "#A8A89C" : amber ? "#6B5E2E" : "var(--app-ink-soft)";
+              const footColor = dark ? "var(--app-highlight)" : amber ? "#9A7B00" : "var(--app-accent)";
+              const footBorder = dark
+                ? "1px solid rgba(255,255,255,0.1)"
+                : amber
+                  ? "1px solid rgba(214,178,40,0.25)"
+                  : "1px solid rgba(23,21,15,0.07)";
+
+              return (
+                <div
+                  key={step.num}
+                  style={{
+                    background: cardBg,
+                    border: cardBorder,
+                    borderRadius: 20,
+                    padding: 24,
+                    position: "relative",
+                    color: dark ? "#fff" : undefined,
+                  }}
+                >
+                  <div
+                    className="dof-display"
+                    style={{
+                      fontSize: 40,
+                      fontWeight: 800,
+                      color: numColor,
+                      lineHeight: 1,
+                      position: "absolute",
+                      top: 18,
+                      right: 20,
+                    }}
+                  >
+                    {step.num}
+                  </div>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: glyphBg,
+                      color: glyphColor,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 20,
+                      marginBottom: 34,
+                    }}
+                  >
+                    {step.glyph}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: eyebrowColor,
+                      marginBottom: 7,
+                    }}
+                  >
+                    {step.eyebrow}
+                  </div>
+                  <h4
+                    className="dof-display"
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 700,
+                      margin: "0 0 8px",
+                      color: dark ? "#fff" : "var(--app-ink)",
+                    }}
+                  >
+                    {step.title}
+                  </h4>
+                  <p style={{ fontSize: 13.5, lineHeight: 1.55, color: bodyColor, margin: "0 0 16px" }}>{step.body}</p>
+                  <div
+                    style={{
+                      borderTop: footBorder,
+                      paddingTop: 12,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: footColor,
+                    }}
+                  >
+                    <span>{step.footLeft}</span>
+                    <span>{step.footRight}</span>
+              </div>
+            </EditorialCard>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* WHY / FEATURES */}
+        <section
+          id="why"
+          style={{ ...SECTION, padding: "48px 24px", ...scrollAnchor }}
+          aria-label="Vì sao chọn Dear Our Future"
+        >
+          <SectionHeader
+            eyebrow="Vì sao chọn Dear Our Future"
+            title="Không phải trang trắng — là người dẫn đường"
+            className="mb-[34px]"
+          />
+          <div className="dof-tri-grid">
+            {FEATURE_CARDS.map((feature) => (
+              <EditorialCard key={feature.title} tone="surface" style={{ borderRadius: 20, padding: 28 }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 13,
+                    background: "#EDF7E0",
+                    color: "var(--app-accent)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 20,
+                    marginBottom: 20,
+                  }}
+                >
+                  {feature.icon}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--app-accent)",
+                    marginBottom: 8,
+                  }}
+                >
+                  {feature.tag}
+                </div>
+                <h3
+                  className="dof-display"
+                  style={{ fontSize: 19, fontWeight: 700, margin: "0 0 10px", color: "var(--app-ink)" }}
+                >
+                  {feature.title}
+                </h3>
+                <p style={{ fontSize: 14, lineHeight: 1.55, color: "var(--app-ink-soft)", margin: 0 }}>
+                  {feature.body}
+                </p>
+              </EditorialCard>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section id="cta" style={{ ...SECTION, padding: "48px 24px 72px", ...scrollAnchor }}>
+          <EditorialCard
+            tone="accent"
+            padding="lg"
+            className="!p-14 overflow-hidden"
+            style={{ borderRadius: 28 }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: -40,
+                right: -30,
+                width: 200,
+                height: 200,
+                borderRadius: "50%",
+                background: "color-mix(in srgb, var(--app-highlight) 16%, transparent)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: -60,
+                left: "30%",
+                width: 160,
+                height: 160,
+                borderRadius: "50%",
+                background: "color-mix(in srgb, var(--app-energy) 14%, transparent)",
+              }}
+            />
+            <div
+              style={{
+                position: "relative",
+                zIndex: 1,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 32,
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ maxWidth: "30ch" }}>
+                <Eyebrow tone="muted" style={{ color: "var(--app-highlight)", marginBottom: 14 }}>
+                  Gửi lời chào tới tương lai
+                </Eyebrow>
+                <h2
+                  className="dof-display dof-cta-title"
+                  style={{ fontWeight: 800, lineHeight: 1, letterSpacing: "-0.03em", margin: "0 0 14px" }}
+                >
+                  Bắt đầu chu kỳ 12 tuần của bạn
+                </h2>
+                <p style={{ fontSize: 15, lineHeight: 1.55, color: "#D6E4CE", margin: 0 }}>
+                  Dành vài phút thiết lập lộ trình hành động 12 tuần ngay hôm nay.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <PillButton variant="highlight" size="lg" onClick={onStart}>
+                  Thiết lập chu kỳ 12 tuần ngay →
+                </PillButton>
+                <p
+                  style={{
+                    fontSize: 12.5,
+                    color: "#9CB89A",
+                    textAlign: "center",
+                    margin: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 7,
+                  }}
+                >
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--app-highlight)" }} />
+                  Nhận ngay việc làm hôm nay để khởi động
+                </p>
+              </div>
+            </div>
+          </EditorialCard>
+        </section>
+      </main>
+
+      {/* FOOTER */}
+      <footer style={{ borderTop: "1px solid var(--app-line)", padding: "40px 24px" }}>
+        <div
+          style={{
+            ...SECTION,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 20,
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              className="dof-display"
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 9,
+                background: "var(--app-accent)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--app-highlight)",
+                fontWeight: 800,
+                fontSize: 16,
+                transform: "rotate(-6deg)",
+              }}
+            >
+              D
+            </span>
+            <span style={{ fontSize: 13.5, color: "var(--app-ink-soft)", fontWeight: 500, maxWidth: "42ch" }}>
+              Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
+            </span>
+          </div>
+          <div style={{ fontSize: 12.5, color: "#A8A296" }}>© 2026 Dear Our Future · local-first 12-Week Year</div>
         </div>
-      </RevealOnScroll>
+      </footer>
     </div>
   );
 }
+
+const navLinkStyle: CSSProperties = {
+  border: "none",
+  background: "transparent",
+  cursor: "pointer",
+  padding: 0,
+  color: "var(--app-ink-soft)",
+  fontSize: 13.5,
+  fontWeight: 500,
+};
+
+const signupPillStyle: CSSProperties = {
+  border: "none",
+  cursor: "pointer",
+  background: "var(--app-accent)",
+  color: "#fff",
+  fontSize: 13,
+  fontWeight: 600,
+  padding: "10px 18px",
+  borderRadius: 999,
+};
+
