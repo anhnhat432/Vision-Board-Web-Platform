@@ -13,7 +13,8 @@ import {
 import type { CSSProperties, JSX } from "react";
 
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
-import { LIFE_AREA_LABELS } from "@/app/utils/storage-constants";
+import { AspectRatio } from "@/app/components/ui/aspect-ratio";
+import { LIFE_AREA_LABELS, LIFE_AREAS } from "@/app/utils/storage-constants";
 import type { VisionBoardItem, VisionBoardStickerId } from "@/app/utils/storage-types";
 import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS } from "@/app/utils/vision-board-config";
 import { GoalCardChip } from "./GoalCardChip";
@@ -34,10 +35,13 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
     const frameId = item.style?.imageFrame ?? "shadow";
     const frame = IMAGE_FRAME_STYLES.find((itemFrame) => itemFrame.id === frameId) ?? IMAGE_FRAME_STYLES[0];
     const areaLabel = item.lifeAreaId ? (LIFE_AREA_LABELS[item.lifeAreaId] ?? item.lifeAreaId) : null;
+    const areaColor = item.lifeAreaId
+      ? (LIFE_AREAS.find((a) => a.name === item.lifeAreaId)?.color ?? undefined)
+      : undefined;
 
     return (
       <div
-        className={`${frame.wrapperClassName} vision-frame-${frame.id}`}
+        className={`${frame.wrapperClassName} vision-frame-${frame.id} shadow-app-lg rounded-[var(--radius-card)] overflow-hidden`}
         data-frame-id={frame.id}
         style={{ width: `${width}px`, position: "relative" }}
       >
@@ -63,20 +67,33 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
         {frame.decorationsLayout === "watercolor" && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -top-2 -left-2 h-8 w-8 rounded-full bg-amber-200/30 blur-md"
+            className="pointer-events-none absolute -top-2 -left-2 h-8 w-8 rounded-full bg-app-highlight/30 blur-md"
           />
         )}
-        {!item.content && <ImageIcon className="mx-auto h-10 w-10 text-app-ink-muted" aria-hidden="true" />}
-        <ImageWithFallback
-          src={item.content}
-          alt="Phần tử vision board"
-          className={frame.imageClassName}
-          style={{ width: "100%" }}
-        />
+        {!item.content ? (
+          <ImageIcon className="mx-auto h-10 w-10 text-app-ink-muted" aria-hidden="true" />
+        ) : (
+          <AspectRatio ratio={1}>
+            <ImageWithFallback
+              src={item.content}
+              alt="Phần tử vision board"
+              className={frame.imageClassName}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </AspectRatio>
+        )}
         {frame.decorationsLayout === "polaroid" && (
           <div className="mt-2 px-1 pb-1 text-center text-xs uppercase tracking-widest text-app-ink-soft">
             {areaLabel ?? "Tầm nhìn"}
           </div>
+        )}
+        {areaLabel && frame.decorationsLayout !== "polaroid" && (
+          <span
+            className="absolute bottom-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-app-sm"
+            style={{ backgroundColor: areaColor }}
+          >
+            {areaLabel}
+          </span>
         )}
         {frame.decorationsLayout === "filmstrip" && (
           <div
@@ -96,6 +113,10 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
     const fontId = item.style?.quoteFont ?? "default";
     const font = QUOTE_FONT_STYLES.find((itemFont) => itemFont.id === fontId) ?? QUOTE_FONT_STYLES[0];
     const quoteBg = item.style?.quoteBackground ?? "none";
+    const areaLabel = item.lifeAreaId ? (LIFE_AREA_LABELS[item.lifeAreaId] ?? item.lifeAreaId) : null;
+    const areaColor = item.lifeAreaId
+      ? (LIFE_AREAS.find((a) => a.name === item.lifeAreaId)?.color ?? undefined)
+      : undefined;
 
     const quoteBackgroundStyle: CSSProperties = {};
     let quoteBackgroundOverlay: JSX.Element | null = null;
@@ -104,7 +125,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
       quoteBackgroundOverlay = (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-2xl"
+          className="pointer-events-none absolute inset-0 rounded-card-lg"
           style={{
             backgroundImage: "radial-gradient(circle, rgba(236,72,153,0.12) 1px, transparent 1px)",
             backgroundSize: "12px 12px",
@@ -118,10 +139,18 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 shadow-app-md"
+        className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-5 shadow-app-lg"
         style={{ width: `${width}px`, ...quoteBackgroundStyle }}
       >
         {quoteBackgroundOverlay}
+        {areaLabel && (
+          <span
+            className="absolute top-2 right-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-app-sm"
+            style={{ backgroundColor: areaColor }}
+          >
+            {areaLabel}
+          </span>
+        )}
         <div className="relative z-10 flex items-center gap-2 text-app-accent">
           <MessageSquareQuote className="h-4 w-4" />
           <span className="text-xs font-semibold uppercase tracking-[0.18em]">Câu nói</span>
@@ -149,7 +178,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="flex items-center justify-center rounded-2xl bg-app-accent text-white shadow-app-md"
+        className="flex items-center justify-center rounded-card-lg bg-app-accent text-white shadow-app-lg"
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         <Icon className="h-10 w-10" style={{ width: size * 0.4, height: size * 0.4 }} />

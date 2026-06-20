@@ -244,14 +244,14 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
       <div
         className={`absolute rounded-xl transition-all duration-500 pointer-events-none ${
           triggerGlow
-            ? `-inset-3.5 opacity-100 scale-125 ${config.glowBg.replace("/40", "/75")} shadow-lg ${config.shadowGlow}`
+            ? `-inset-3.5 opacity-100 scale-125 ${config.glowBg.replace("/40", "/75")} shadow-app-lg ${config.shadowGlow}`
             : `-inset-1.5 opacity-50 scale-100 motion-safe:animate-[pulse_3s_infinite] ${config.glowBg}`
         }`}
       />
 
       {/* Khối chứa Icon thắp sáng */}
       <div
-        className={`relative z-20 flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-500 shadow-md ${
+        className={`relative z-20 flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-500 shadow-app-md ${
           triggerGlow
             ? `${config.activeBg} text-white scale-110 ${config.shadowGlow} ring-4 ${config.activeRing}`
             : `${config.accentBg} hover:scale-105`

@@ -1,0 +1,273 @@
+{
+  "timestamp": "2026-06-18T10:51:43.139Z",
+  "baseUrl": "http://localhost:5173",
+  "viewport": "1280x900",
+  "baseline": {
+    "dashboard": {
+      "page": "/",
+      "name": "Dashboard",
+      "focusableInAriaHidden": 21,
+      "emptyButtons": 0
+    },
+    "vision-board": {
+      "page": "/vision-board",
+      "name": "Vision Board",
+      "focusableInAriaHidden": 39,
+      "emptyButtons": 8
+    },
+    "goals": {
+      "page": "/goals",
+      "name": "Goal Tracker",
+      "focusableInAriaHidden": 4,
+      "emptyButtons": 0,
+      "inertWarning": true
+    }
+  },
+  "checks": [
+    {
+      "id": "P2-01",
+      "name": "Dashboard - Focusable trong aria-hidden",
+      "before": 21,
+      "after": 0,
+      "fixed": true,
+      "status": "✅ FIXED"
+    },
+    {
+      "id": "P2-02a",
+      "name": "Vision Board - Focusable trong aria-hidden",
+      "before": 39,
+      "after": 0,
+      "fixed": true,
+      "status": "✅ FIXED"
+    },
+    {
+      "id": "P2-02b",
+      "name": "Vision Board - Empty buttons/links",
+      "before": 8,
+      "after": 0,
+      "fixed": true,
+      "status": "✅ FIXED"
+    },
+    {
+      "id": "P2-03",
+      "name": "Goal Tracker - Focusable trong aria-hidden",
+      "before": 4,
+      "after": 4,
+      "fixed": false,
+      "status": "❌ NOT FIXED"
+    },
+    {
+      "id": "P2-04",
+      "name": "Goal Tracker - inert warning",
+      "before": "Có warning",
+      "after": "Không warning",
+      "fixed": true,
+      "status": "✅ FIXED"
+    }
+  ],
+  "allFixed": false,
+  "results": [
+    {
+      "route": "/",
+      "name": "Dashboard (Trang chủ)",
+      "key": "dashboard",
+      "status": 200,
+      "redirectedTo": null,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "d:\\Projects\\Vision Board Web Platform\\qa-artifacts\\visual-verify-results\\verify-after-fix\\dashboard-desktop-postfix.png",
+      "analysis": {
+        "focusableInAriaHidden": {
+          "count": 0,
+          "elements": [],
+          "directQueryCount": 0
+        },
+        "emptyButtons": {
+          "count": 0,
+          "elements": []
+        },
+        "inertElements": {
+          "count": 0,
+          "elements": []
+        },
+        "dialogInfo": [
+          {
+            "tag": "div",
+            "id": "radix-:r8:",
+            "className": "bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[stat",
+            "ariaHidden": null,
+            "ariaModal": null,
+            "open": false,
+            "hasModalFalse": false
+          }
+        ]
+      },
+      "baseline": {
+        "page": "/",
+        "name": "Dashboard",
+        "focusableInAriaHidden": 21,
+        "emptyButtons": 0
+      },
+      "hasInertWarning": false,
+      "hasInertError": false
+    },
+    {
+      "route": "/vision-board",
+      "name": "Vision Board Editor",
+      "key": "vision-board",
+      "status": 200,
+      "redirectedTo": null,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "d:\\Projects\\Vision Board Web Platform\\qa-artifacts\\visual-verify-results\\verify-after-fix\\vision-board-desktop-postfix.png",
+      "analysis": {
+        "focusableInAriaHidden": {
+          "count": 0,
+          "elements": [],
+          "directQueryCount": 0
+        },
+        "emptyButtons": {
+          "count": 0,
+          "elements": []
+        },
+        "inertElements": {
+          "count": 0,
+          "elements": []
+        },
+        "dialogInfo": [
+          {
+            "tag": "div",
+            "id": "radix-:rb:",
+            "className": "text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=clo",
+            "ariaHidden": null,
+            "ariaModal": null,
+            "open": false,
+            "hasModalFalse": false
+          }
+        ]
+      },
+      "baseline": {
+        "page": "/vision-board",
+        "name": "Vision Board",
+        "focusableInAriaHidden": 39,
+        "emptyButtons": 8
+      },
+      "hasInertWarning": false,
+      "hasInertError": false
+    },
+    {
+      "route": "/goals",
+      "name": "Goal Tracker",
+      "key": "goals",
+      "status": 200,
+      "redirectedTo": null,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "d:\\Projects\\Vision Board Web Platform\\qa-artifacts\\visual-verify-results\\verify-after-fix\\goals-desktop-postfix.png",
+      "analysis": {
+        "focusableInAriaHidden": {
+          "count": 4,
+          "elements": [
+            {
+              "tag": "button",
+              "id": null,
+              "className": "relative justify-center whitespace-nowrap tracking-tight after:absolute after:top-1/2 after:left-1/2",
+              "text": "Quay lại mục tiêu",
+              "type": null,
+              "ariaLabel": null,
+              "role": null,
+              "ariaHiddenAncestor": {
+                "tag": "div",
+                "id": null,
+                "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10"
+              }
+            },
+            {
+              "tag": "button",
+              "id": null,
+              "className": "relative justify-center whitespace-nowrap tracking-tight after:absolute after:top-1/2 after:left-1/2",
+              "text": "Mở chu kỳ",
+              "type": null,
+              "ariaLabel": null,
+              "role": null,
+              "ariaHiddenAncestor": {
+                "tag": "div",
+                "id": null,
+                "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10"
+              }
+            },
+            {
+              "tag": "button",
+              "id": null,
+              "className": "relative justify-center whitespace-nowrap tracking-tight after:absolute after:top-1/2 after:left-1/2",
+              "text": "Quay lại mục tiêu",
+              "type": null,
+              "ariaLabel": null,
+              "role": null,
+              "ariaHiddenAncestor": {
+                "tag": "div",
+                "id": null,
+                "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10"
+              }
+            },
+            {
+              "tag": "button",
+              "id": null,
+              "className": "relative justify-center whitespace-nowrap tracking-tight after:absolute after:top-1/2 after:left-1/2",
+              "text": "Quay lại mục tiêu",
+              "type": null,
+              "ariaLabel": null,
+              "role": null,
+              "ariaHiddenAncestor": {
+                "tag": "div",
+                "id": null,
+                "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10"
+              }
+            }
+          ],
+          "directQueryCount": 4
+        },
+        "emptyButtons": {
+          "count": 0,
+          "elements": []
+        },
+        "inertElements": {
+          "count": 3,
+          "elements": [
+            {
+              "tag": "div",
+              "id": null,
+              "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10",
+              "inertAttribute": "",
+              "inertProperty": true
+            },
+            {
+              "tag": "div",
+              "id": null,
+              "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10",
+              "inertAttribute": "",
+              "inertProperty": true
+            },
+            {
+              "tag": "div",
+              "id": null,
+              "className": "backface-hidden rotate-y-180 absolute inset-0 w-full h-full z-10",
+              "inertAttribute": "",
+              "inertProperty": true
+            }
+          ]
+        },
+        "dialogInfo": []
+      },
+      "baseline": {
+        "page": "/goals",
+        "name": "Goal Tracker",
+        "focusableInAriaHidden": 4,
+        "emptyButtons": 0,
+        "inertWarning": true
+      },
+      "hasInertWarning": false,
+      "hasInertError": false
+    }
+  ]
+}

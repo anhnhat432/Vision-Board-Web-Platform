@@ -174,7 +174,7 @@ export function VisionBoardGallery() {
       : undefined;
 
   return (
-    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 bg-grad-vision rounded-[var(--r-soft)]">
       <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} autoOpen className="mb-4" />
       <AlertDialog
         open={Boolean(boardToDelete)}
@@ -223,7 +223,7 @@ export function VisionBoardGallery() {
           </Button>
         }
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+          <div className="relative overflow-hidden rounded-card-lg border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
             <img
               src="/gallery_templates.png"
               alt="Các mẫu bảng tầm nhìn phong phú"
@@ -270,7 +270,7 @@ export function VisionBoardGallery() {
 
             return (
               <div key={item.title}>
-                <Card className="relative gap-4 overflow-hidden rounded-xl">
+                <Card className="relative gap-4 overflow-hidden rounded-card shadow-app-lg">
                   <div
                     className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
                   />
@@ -332,7 +332,7 @@ export function VisionBoardGallery() {
                   return (
                     <div key={board.id}>
                       <InteractiveSurface
-                        className="preview-hover-card group rounded-2xl"
+                        className="preview-hover-card group rounded-card-lg shadow-app-lg"
                         intensity={4}
                         translate={8}
                         shine={false}
@@ -340,8 +340,8 @@ export function VisionBoardGallery() {
                         <Card
                           className={
                             isSpotlight
-                              ? "spotlight-card gap-5 overflow-hidden rounded-2xl"
-                              : "gap-5 overflow-hidden rounded-2xl"
+                              ? "spotlight-card gap-5 overflow-hidden rounded-card-lg"
+                              : "gap-5 overflow-hidden rounded-card-lg"
                           }
                         >
                           <CardHeader className="pb-0">
@@ -373,7 +373,7 @@ export function VisionBoardGallery() {
 
                           <CardContent className="stack-stack pt-0">
                             <div
-                              className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg-subtle"
+                              className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-bg-subtle"
                               style={{ aspectRatio: "16/10" }}
                             >
                               <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
@@ -396,16 +396,16 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-xl border border-app-line bg-app-surface p-1.5 shadow-[var(--shadow-1)]">
+                                        <div className="rounded-card border border-app-line bg-app-surface p-1.5 shadow-[var(--shadow-1)]">
                                           <ImageWithFallback
                                             src={item.content}
                                             alt="Phần tử bảng"
-                                            className="rounded-[var(--r-tile)] shadow-sm w-full h-auto"
+                                            className="rounded-[var(--r-tile)] shadow-app-sm w-full h-auto"
                                           />
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface px-3 py-2 text-xs italic leading-4 text-app-ink-soft shadow-sm">
+                                        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface px-3 py-2 text-xs italic leading-4 text-app-ink-soft shadow-app-sm">
                                           {item.content}
                                         </div>
                                       )}
@@ -415,17 +415,17 @@ export function VisionBoardGallery() {
                                 </div>
                               )}
 
-                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[var(--r-tile)] border border-white/18 bg-[color-mix(in_srgb,var(--app-ink)_72%,transparent)] px-4 py-3 text-white shadow-lg">
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[var(--r-tile)] border border-app-line/18 bg-[color-mix(in_srgb,var(--app-ink)_72%,transparent)] px-4 py-3 text-white shadow-app-lg">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
-                                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
+                                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-app-ink/58">
                                       Preview sống
                                     </p>
                                     <p className="mt-1 text-sm font-semibold">
                                       {imageCount} ảnh • {quoteCount} câu nói • {iconCount} biểu tượng
                                     </p>
                                   </div>
-                                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] border border-white/16 bg-white/10">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] border border-app-line/16 bg-app-surface/10">
                                     <Eye className="h-4 w-4" />
                                   </div>
                                 </div>
@@ -496,10 +496,10 @@ function VisionBoardGallerySkeleton() {
       aria-busy="true"
     >
       <span className="sr-only">Đang tải bộ sưu tập tầm nhìn...</span>
-      <Skeleton className="h-44 rounded-2xl bg-app-line/60" />
+      <Skeleton className="h-44 rounded-card-lg bg-app-line/60" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2, 3, 4, 5].map((index) => (
-          <Skeleton key={index} className="aspect-[4/5] rounded-xl bg-app-line/60" />
+          <Skeleton key={index} className="aspect-[4/5] rounded-card bg-app-line/60" />
         ))}
       </div>
     </div>

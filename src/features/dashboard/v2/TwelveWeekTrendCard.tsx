@@ -47,7 +47,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
   if (active && payload?.length) {
     const data = payload[0].payload as TrendPoint;
     return (
-      <div className="bg-white dark:bg-neutral-900 border border-app-line p-3 rounded-[12px] text-xs space-y-1">
+      <div className="bg-app-surface border border-app-line p-3 rounded-[12px] text-xs space-y-1">
         <p className="font-bold text-app-ink">Tuần {label}</p>
         <p className="text-app-accent font-extrabold text-[13px]">Tiến độ: {data.percent}%</p>
         <p className="text-app-ink-soft font-semibold">
@@ -68,20 +68,23 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
       className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-300 hover:border-app-accent/20"
       aria-labelledby="dashboard-trend-title"
     >
-      <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
-        <h2 id="dashboard-trend-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-app-accent" />
+      <div className="mb-5 border-b border-app-line pb-4">
+        <h2
+          id="dashboard-trend-title"
+          className="mb-1.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-app-ink"
+        >
+          <TrendingUp className="h-[15px] w-[15px] text-app-accent" />
           Đường 12 tuần
         </h2>
-        <p className="text-xs font-semibold tracking-wide text-app-ink-muted">Tiến độ % thực thi theo từng tuần</p>
+        <p className="text-[12.5px] text-app-ink-soft">Tiến độ % thực thi theo từng tuần</p>
       </div>
 
       <div className="mt-5 h-[180px] overflow-hidden relative">
         {currentWeek !== null && currentWeek < 3 ? (
-          <div className="absolute inset-0 bg-white/95 dark:bg-neutral-900/95 z-10 flex flex-col items-center justify-center text-center p-4 rounded-xl">
+          <div className="absolute inset-0 bg-app-surface z-10 flex flex-col items-center justify-center text-center p-4 rounded-xl">
             <span className="text-2xl mb-1 animate-pulse">📈</span>
-            <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Đường 12 tuần đang chuẩn bị</p>
-            <p className="text-[10px] text-neutral-500 leading-relaxed max-w-[28ch] mt-1 font-semibold">
+            <p className="text-xs font-bold text-app-ink">Đường 12 tuần đang chuẩn bị</p>
+            <p className="text-[10px] text-app-ink-muted leading-relaxed max-w-[28ch] mt-1 font-semibold">
               Biểu đồ sẽ tự động vẽ từ Tuần 3 khi bạn có đủ dữ liệu hành động tích lũy.
             </p>
           </div>
@@ -118,9 +121,9 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
                 x={activePoint.week}
                 y={activePoint.percent}
                 r={5}
-                stroke="var(--app-surface)"
-                strokeWidth={1}
-                fill="var(--app-accent)"
+                stroke="var(--app-accent)"
+                strokeWidth={2}
+                fill="var(--app-highlight)"
               />
             ) : null}
           </AreaChart>

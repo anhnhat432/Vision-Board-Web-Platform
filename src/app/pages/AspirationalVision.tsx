@@ -129,7 +129,7 @@ export function AspirationalVision() {
 
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">TẦM NHÌN</p>
-        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
+        <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink sm:text-5xl lg:text-display">
           Tầm nhìn 3 năm của bạn
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">

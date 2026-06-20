@@ -14,13 +14,12 @@ export function ProtectedRoute() {
       <div className="flex min-h-[60vh] items-center justify-center px-6">
         <div
           role="alert"
-          className="w-full max-w-md rounded-[var(--r-card)] border border-amber-200 bg-amber-50/90 p-8 text-center shadow-lg"
-        >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--r-pill)] bg-amber-100">
-            <AlertTriangle className="h-7 w-7 text-amber-600" />
+          className="w-full max-w-md rounded-[var(--r-card)] border border-app-status-warning/30 bg-app-status-warning/10 p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--r-pill)] bg-app-status-warning/15">
+            <AlertTriangle className="h-7 w-7 text-app-status-warning" />
           </div>
-          <h2 className="text-lg font-semibold text-amber-800">Lỗi cấu hình hệ thống</h2>
-          <p className="mt-2 text-sm leading-relaxed text-amber-700">
+          <h2 className="text-lg font-semibold text-app-status-warning">Lỗi cấu hình hệ thống</h2>
+          <p className="mt-2 text-sm leading-relaxed text-app-status-warning/80">
             Ứng dụng chưa được cấu hình đầy đủ. Vui lòng liên hệ quản trị viên để được hỗ trợ.
           </p>
         </div>
@@ -32,7 +31,7 @@ export function ProtectedRoute() {
   if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
       </div>
     );
   }

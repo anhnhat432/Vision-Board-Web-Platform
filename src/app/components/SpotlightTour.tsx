@@ -413,7 +413,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
           {targetRect ? (
             <div
               aria-hidden="true"
-              className="pointer-events-none fixed rounded-[18px] border border-app-line/85 bg-app-surface/8 shadow-[0_0_0_9999px_rgba(15,23,42,0.03),0_0_0_2px_rgba(91,165,144,0.06),0_12px_32px_rgba(15,23,42,0.10)] dark:border-app-line/70 dark:bg-white/4 dark:shadow-[0_0_0_9999px_rgba(0,0,0,0.14),0_0_0_2px_rgba(91,165,144,0.08),0_12px_32px_rgba(0,0,0,0.22)]"
+              className="pointer-events-none fixed rounded-[18px] border border-app-line/85 bg-app-surface/8 shadow-[0_0_0_9999px_rgba(15,23,42,0.03),0_0_0_2px_rgba(91,165,144,0.06),0_12px_32px_rgba(15,23,42,0.10)] dark:border-app-line/70 dark:bg-app-bg-subtle dark:shadow-[0_0_0_9999px_rgba(0,0,0,0.14),0_0_0_2px_rgba(91,165,144,0.08),0_12px_32px_rgba(0,0,0,0.22)]"
               style={{
                 height: targetRect.height,
                 left: targetRect.left,

@@ -18,11 +18,11 @@ interface AdminEmptyStateProps {
 export function AdminEmptyState({ title, description, icon: Icon = Inbox, action, className }: AdminEmptyStateProps) {
   return (
     <div className={cn(adminSurface.card, "flex flex-col items-center gap-3 px-6 py-10 text-center", className)}>
-      <span className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-white/5 text-slate-300">
+      <span className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-bg-subtle text-app-ink-soft">
         <Icon className="h-6 w-6" />
       </span>
-      <p className="text-base font-semibold text-white">{title}</p>
-      {description ? <p className="max-w-sm text-sm leading-6 text-slate-400">{description}</p> : null}
+      <p className="text-base font-semibold text-app-ink">{title}</p>
+      {description ? <p className="max-w-sm text-sm leading-6 text-app-ink-muted">{description}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>
   );

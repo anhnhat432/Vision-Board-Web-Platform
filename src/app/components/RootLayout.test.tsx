@@ -445,15 +445,14 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/goals");
   });
 
-  it("keeps signed-out visitors on the public home page with auth actions", async () => {
+  it("defers header chrome to the public landing for signed-out visitors on the home page", async () => {
     const { router } = renderAppShell("/");
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
-    expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Đăng ký" }).length).toBeGreaterThan(0);
-    expect(screen.getByText("12 tuần sống có chủ đích")).toBeInTheDocument();
-    expect(screen.getAllByText("Trang chính").length).toBeGreaterThan(0);
+    // Landing "Dear Our Future" dựng header riêng (gồm Đăng nhập/Đăng ký/âm thanh
+    // tập trung), nên shell ẩn chrome mặc định ở "/" để tránh trùng header.
+    expect(screen.queryByText("12 tuần sống có chủ đích")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Mục tiêu" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "12 tuần" })).not.toBeInTheDocument();
     expect(productionMock.maybeShowBrowserReminderNotification).not.toHaveBeenCalled();

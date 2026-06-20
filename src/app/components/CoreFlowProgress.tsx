@@ -78,11 +78,16 @@ export function CoreFlowProgress({
   const progressValue = ((currentIndex + 1) / CORE_FLOW_STEPS.length) * 100;
 
   return (
-    <section aria-label="Tiến độ đường chính" className={cn("mb-6 flex flex-col gap-2", className)}>
+    <section aria-label="Tiến độ đường chính" className={cn("flex flex-col gap-2.5", className)}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
-          Bước {currentIndex + 1} / {CORE_FLOW_STEPS.length} · {currentStep.label.toLocaleUpperCase("vi-VN")}
-        </p>
+        <div className="flex items-center gap-2.5">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-0.5 text-xs font-semibold tracking-wide text-app-accent">
+            Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}
+          </span>
+          <span className="text-sm font-medium tracking-tight text-app-ink">
+            {currentStep.label}
+          </span>
+        </div>
         {onExit ? (
           <button
             type="button"
@@ -102,14 +107,34 @@ export function CoreFlowProgress({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progressValue)}
-        className="flex gap-1"
+        className="relative h-2 overflow-hidden rounded-full bg-app-line"
       >
+        <span
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+          style={{
+            width: `${progressValue}%`,
+            background: "var(--grad-aspire)",
+          }}
+          aria-hidden="true"
+        />
+        <span
+          className="absolute top-0 bottom-0 w-2 rounded-full bg-app-surface/50 blur-[1px] transition-all duration-500 motion-safe:animate-pulse"
+          style={{ left: `calc(${progressValue}% - 4px)` }}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div className="hidden flex-wrap justify-between gap-x-1 sm:flex" aria-hidden="true">
         {CORE_FLOW_STEPS.map((step, index) => (
           <span
             key={step.id}
-            className={cn("h-1 flex-1 rounded-full", index <= currentIndex ? "bg-app-accent" : "bg-app-line")}
-            aria-hidden="true"
-          />
+            className={cn(
+              "text-[10px] font-medium transition-colors duration-200",
+              index <= currentIndex ? "text-app-accent" : "text-app-ink-muted",
+            )}
+          >
+            {step.label}
+          </span>
         ))}
       </div>
 

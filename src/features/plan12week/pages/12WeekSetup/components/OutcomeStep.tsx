@@ -97,7 +97,7 @@ export function OutcomeStep({
           <div className="mt-4 border-t border-app-line/60 pt-4">
             <ul className="grid gap-3 md:grid-cols-2">
               {planRationaleReasons.map((reason) => (
-                <li key={reason.id} className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+                <li key={reason.id} className="rounded-xl border border-app-line bg-app-surface p-4 shadow-app-sm">
                   <p className="text-sm font-bold text-app-ink">{reason.title}</p>
                   <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">{reason.detail}</p>
                 </li>
@@ -329,7 +329,7 @@ export function OutcomeStep({
                       className={cn(
                         "flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                         isActive
-                          ? "border-app-accent bg-app-accent text-white shadow-sm font-bold scale-105"
+                          ? "border-app-accent bg-app-accent text-white shadow-app-sm font-bold scale-105"
                           : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/40 hover:text-app-accent",
                       )}
                     >
@@ -480,7 +480,7 @@ export function OutcomeStep({
                   className={cn(
                     "rounded-xl border p-4.5 text-left transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                     isSelected &&
-                      "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-sm font-semibold",
+                      "border-app-accent bg-gradient-to-br from-app-accent-soft/30 to-app-accent-soft/10 text-app-accent shadow-app-sm font-semibold",
                     !isSelected &&
                       isLocked &&
                       "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/5",
@@ -506,11 +506,11 @@ export function OutcomeStep({
                   </div>
                   <p className="mt-3 text-xs leading-relaxed text-app-ink-soft">{template.description}</p>
                   <div className="mt-3.5 grid gap-2.5 text-xs leading-relaxed text-app-ink-soft sm:grid-cols-2">
-                    <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-sm">
+                    <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-app-sm">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Hợp khi</p>
                       <p className="mt-1 font-medium">{template.bestFor}</p>
                     </div>
-                    <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-sm">
+                    <div className="rounded-xl border border-app-line bg-app-surface px-3 py-2.5 shadow-app-sm">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Tuần 1</p>
                       <p className="mt-1 font-medium">{template.firstWeekWin}</p>
                     </div>
@@ -569,11 +569,11 @@ export function OutcomeStep({
           <ChevronDown className="h-4.5 w-4.5 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
         </summary>
         <div className="mt-4 border-t border-app-line/60 pt-4 grid gap-3.5">
-          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-app-sm">
             <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Mục tiêu cụ thể</p>
             <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{smartGoal.specific}</p>
           </div>
-          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-sm">
+          <div className="rounded-xl border border-app-line bg-app-surface p-4 shadow-app-sm">
             <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Cách đo kết quả</p>
             <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{smartGoal.measurable}</p>
           </div>

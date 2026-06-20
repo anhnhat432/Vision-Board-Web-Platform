@@ -25,7 +25,7 @@ export function SetupCopilotPanel({
   return (
     <section
       className={cn(
-        "flex flex-col rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 space-y-6 select-none shadow-sm",
+        "flex flex-col rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 space-y-6 select-none shadow-app-sm",
         className,
       )}
     >
@@ -48,7 +48,7 @@ export function SetupCopilotPanel({
           <Target className="h-4 w-4 text-app-accent" />
           <span>Mục tiêu SMART của bạn</span>
         </h4>
-        <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3 shadow-sm">
+        <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3 shadow-app-sm">
           <div>
             <p className="text-[9px] font-bold uppercase tracking-wider text-app-ink-muted">Mục tiêu cụ thể</p>
             <p className="mt-1 text-xs font-medium text-app-ink leading-relaxed">{smartGoal.specific}</p>
@@ -74,7 +74,7 @@ export function SetupCopilotPanel({
           <Compass className="h-4 w-4 text-app-accent" />
           <span>Đánh giá tính khả thi</span>
         </h4>
-        <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 shadow-sm">
+        <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 shadow-app-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs text-app-ink-soft">Điểm sẵn sàng:</span>
             <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-bold text-app-accent">
@@ -83,13 +83,13 @@ export function SetupCopilotPanel({
           </div>
 
           {feasibility.bottleneck && (
-            <div className="rounded-lg border border-amber-200/50 bg-amber-500/[0.03] dark:bg-amber-950/15 p-3 flex gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <div className="rounded-lg border border-app-status-warning/20 bg-app-status-warning/5 p-3 flex gap-2">
+              <ShieldAlert className="h-4 w-4 text-app-status-warning shrink-0 mt-0.5" />
               <div>
-                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                <p className="text-[10px] font-bold text-app-status-warning uppercase tracking-wide">
                   Điểm cần chú ý (Bottleneck)
                 </p>
-                <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-350 leading-relaxed">
+                <p className="mt-0.5 text-xs text-app-ink-soft leading-relaxed">
                   {feasibility.bottleneck.label}
                 </p>
               </div>
@@ -124,7 +124,7 @@ export function SetupCopilotPanel({
             <Award className="h-4 w-4 text-app-accent" />
             <span>Đề xuất từ chuyên gia 12 tuần</span>
           </h4>
-          <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 shadow-sm">
+          <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 shadow-app-sm">
             {setupGuideTemplate && (
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-wider text-app-ink-muted">Khung mẫu đề xuất</p>
@@ -135,7 +135,7 @@ export function SetupCopilotPanel({
 
             <div className="border-t border-app-line/60 pt-3">
               <p className="text-[9px] font-bold uppercase tracking-wider text-app-ink-muted flex items-center gap-1">
-                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                <Check className="h-3.5 w-3.5 text-app-accent" />
                 <span>Chiến thắng Tuần 1</span>
               </p>
               <p className="mt-1.5 text-xs font-bold text-app-ink leading-snug">{setupGuideSupport.week1Headline}</p>
@@ -164,15 +164,15 @@ export function SetupCopilotPanel({
         </h4>
 
         {/* So sánh trực quan */}
-        <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 shadow-sm text-xs">
+        <div className="rounded-xl border border-app-line bg-app-surface p-4 space-y-3.5 shadow-app-sm text-xs">
           <p className="text-[10px] text-app-ink-muted leading-relaxed">
             Đặt hành động lặp lại hằng tuần (Lead Indicators) là mấu chốt để thành công. Hãy tập trung chọn việc nhỏ bạn
             hoàn toàn kiểm soát được:
           </p>
 
           <div className="grid gap-2.5">
-            <div className="rounded-lg border border-rose-200/30 bg-rose-500/[0.02] p-3">
-              <p className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 text-[11px] uppercase tracking-wide">
+            <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/5 p-3">
+              <p className="font-bold text-app-status-error flex items-center gap-1 text-[11px] uppercase tracking-wide">
                 <X className="h-3.5 w-3.5 shrink-0" />
                 <span>Chỉ số Kết quả (Lag) - Tránh ghi</span>
               </p>
@@ -183,8 +183,8 @@ export function SetupCopilotPanel({
               </ul>
             </div>
 
-            <div className="rounded-lg border border-emerald-200/30 bg-emerald-500/[0.02] p-3">
-              <p className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 text-[11px] uppercase tracking-wide">
+            <div className="rounded-lg border border-app-accent/30 bg-app-accent-soft/20 p-3">
+              <p className="font-bold text-app-accent flex items-center gap-1 text-[11px] uppercase tracking-wide">
                 <Check className="h-3.5 w-3.5 shrink-0" />
                 <span>Hành động Lặp lại (Lead) - Nên ghi</span>
               </p>

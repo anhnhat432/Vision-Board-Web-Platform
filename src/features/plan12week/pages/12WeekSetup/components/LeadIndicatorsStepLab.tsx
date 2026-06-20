@@ -172,7 +172,7 @@ export function LeadIndicatorsStepLab({
             onAddIndicator();
           }}
           disabled={!canAddIndicator}
-          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-app-accent text-white hover:bg-app-accent-hover disabled:opacity-50 transition-all px-3.5 py-1.5 text-xs font-bold shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none font-sans"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-app-accent text-white hover:bg-app-accent-hover disabled:opacity-50 transition-all px-3.5 py-1.5 text-xs font-bold shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none"
         >
           <Plus className="h-4 w-4" />
           Thêm việc
@@ -205,7 +205,7 @@ export function LeadIndicatorsStepLab({
         {draft.leadIndicators.map((indicator, index) => (
           <article
             key={indicator.id}
-            className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-4 sm:p-4.5 shadow-sm space-y-3.5 animate-in fade-in-50 duration-200"
+            className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-4 sm:p-4.5 shadow-app-sm space-y-3.5 animate-in fade-in-50 duration-200"
             aria-labelledby={`tactic-card-title-${index}`}
           >
             {/* Header card gọn gàng */}
@@ -227,7 +227,7 @@ export function LeadIndicatorsStepLab({
                     soundService.click();
                     onRemoveIndicator(index);
                   }}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-app-ink-muted hover:text-app-status-error transition-colors py-0.5 rounded focus-visible:ring-2 focus-visible:ring-app-status-error focus-visible:ring-offset-1 focus:outline-none font-sans"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold text-app-ink-muted hover:text-app-status-error transition-colors py-0.5 rounded focus-visible:ring-2 focus-visible:ring-app-status-error focus-visible:ring-offset-1 focus:outline-none"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Xóa bỏ
@@ -288,7 +288,7 @@ export function LeadIndicatorsStepLab({
                 <label htmlFor={`tactic-target-${index}`} className={cn(labelClass, "text-xs font-bold text-app-ink")}>
                   Tần suất thực hiện
                 </label>
-                <div className="flex items-center justify-between bg-app-bg-subtle/50 border border-app-line rounded-xl p-1.5 w-full max-w-[140px] shadow-sm">
+                <div className="flex items-center justify-between bg-app-bg-subtle/50 border border-app-line rounded-xl p-1.5 w-full max-w-[140px] shadow-app-sm">
                   <button
                     type="button"
                     onClick={() => {

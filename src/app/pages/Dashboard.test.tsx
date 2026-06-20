@@ -70,9 +70,13 @@ describe("Dashboard public visitor state", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: /Thiết lập cuộc sống mơ ước qua.*kế hoạch 12 tuần/i,
+        name: /Biến ước mơ.*kế hoạch.*12 tuần bền bỉ/i,
       }),
     ).toBeInTheDocument();
+
+    // Header của landing phải có hành động đăng nhập/đăng ký cho khách.
+    expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Đăng ký" })).toBeInTheDocument();
 
     expect(screen.queryByText(/Luồng mục tiêu sau khi đăng ký/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Bánh xe cuộc sống là bước mở đầu/i)).not.toBeInTheDocument();

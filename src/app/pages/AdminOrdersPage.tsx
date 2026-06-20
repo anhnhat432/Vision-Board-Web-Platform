@@ -34,7 +34,7 @@ function OrderActions({
   onTransition: (orderId: string, nextStatus: ApiOrderStatus) => void;
 }) {
   const allowed = ADMIN_STATUS_TRANSITIONS[order.status] ?? [];
-  if (allowed.length === 0) return <span className="text-xs text-slate-500">Không có hành động</span>;
+  if (allowed.length === 0) return <span className="text-xs text-app-ink-muted">Không có hành động</span>;
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -46,7 +46,7 @@ function OrderActions({
             type="button"
             size="sm"
             variant="outline"
-            className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             disabled={busy}
             onClick={() => onTransition(order.id, nextStatus)}
           >
@@ -181,7 +181,7 @@ export function AdminOrdersPage() {
           <Button
             type="button"
             variant="outline"
-            className="gap-2 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             disabled={loading}
             onClick={() => void loadOrders()}
           >
@@ -198,7 +198,7 @@ export function AdminOrdersPage() {
           <Button
             type="button"
             variant="outline"
-            className="mt-4 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             onClick={() => void loadOrders()}
           >
             Thử lại
@@ -247,12 +247,12 @@ export function AdminOrdersPage() {
               onClick={() => setStatusFilter(status)}
               className={`inline-flex items-center gap-2 rounded-[var(--r-pill)] border px-3 py-1.5 text-xs font-medium transition-colors ${
                 active
-                  ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
-                  : "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06] hover:text-white"
+                  ? "border-app-accent/40 bg-app-accent-soft text-app-accent"
+                  : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
               }`}
             >
               <span>{label}</span>
-              <span className="rounded-[var(--r-pill)] bg-white/10 px-1.5 text-xs tabular-nums text-slate-200">
+              <span className="rounded-[var(--r-pill)] bg-app-accent-soft px-1.5 text-xs tabular-nums text-app-ink-soft">
                 {counts[status]}
               </span>
             </button>
@@ -268,18 +268,18 @@ export function AdminOrdersPage() {
               key={index}
               className={`${adminSurface.card} animate-pulse space-y-4 p-5 motion-reduce:animate-none motion-reduce:opacity-60`}
             >
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div className="flex items-center justify-between gap-3 border-b border-app-line pb-4">
                 <div className="space-y-2">
-                  <div className="h-4 w-40 rounded bg-white/10" />
-                  <div className="h-3 w-56 rounded bg-white/10" />
+                  <div className="h-4 w-40 rounded bg-app-accent-soft" />
+                  <div className="h-3 w-56 rounded bg-app-accent-soft" />
                 </div>
-                <div className="h-6 w-24 rounded bg-white/10" />
+                <div className="h-6 w-24 rounded bg-app-accent-soft" />
               </div>
               <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-5">
                 {[0, 1, 2, 3, 4].map((cell) => (
                   <div key={cell} className="space-y-2">
-                    <div className="h-3 w-16 rounded bg-white/10" />
-                    <div className="h-4 w-24 rounded bg-white/10" />
+                    <div className="h-3 w-16 rounded bg-app-accent-soft" />
+                    <div className="h-4 w-24 rounded bg-app-accent-soft" />
                   </div>
                 ))}
               </div>
@@ -303,10 +303,10 @@ export function AdminOrdersPage() {
             const themeCount = order.lines?.filter((line) => line.type === "theme").length ?? 0;
             return (
               <li key={order.id} className={`${adminSurface.card} p-5`}>
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-app-line pb-4">
                   <div className="min-w-0">
-                    <p className="text-base font-semibold text-white">{order.fullName}</p>
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="text-base font-semibold text-app-ink">{order.fullName}</p>
+                    <p className="mt-1 text-sm text-app-ink-muted">
                       {order.email} · {order.phone || "—"}
                     </p>
                   </div>
@@ -317,37 +317,37 @@ export function AdminOrdersPage() {
 
                 <div className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-5">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Mã đơn</p>
-                    <p className="mt-0.5 truncate font-mono text-xs text-slate-200">{order.id}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Mã đơn</p>
+                    <p className="mt-0.5 truncate font-mono text-xs text-app-ink-soft">{order.id}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Khung</p>
-                    <p className="mt-0.5 text-slate-200">{frameLabel}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Khung</p>
+                    <p className="mt-0.5 text-app-ink-soft">{frameLabel}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Số set ảnh</p>
-                    <p className="mt-0.5 text-slate-200">{themeCount}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Số set ảnh</p>
+                    <p className="mt-0.5 text-app-ink-soft">{themeCount}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Ngày tạo</p>
-                    <p className="mt-0.5 text-slate-200">{formatDate(order.createdAt)}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Ngày tạo</p>
+                    <p className="mt-0.5 text-app-ink-soft">{formatDate(order.createdAt)}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Mục tiêu</p>
-                    <p className="mt-0.5 truncate text-slate-200">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Mục tiêu</p>
+                    <p className="mt-0.5 truncate text-app-ink-soft">
                       {order.goalSnapshot?.title ?? "Không gắn mục tiêu"}
                     </p>
                   </div>
                 </div>
 
                 {order.note ? (
-                  <div className="mt-4 rounded-[var(--r-control)] border border-white/10 bg-white/5 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Ghi chú</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-200">{order.note}</p>
+                  <div className="mt-4 rounded-[var(--r-control)] border border-app-line bg-app-bg-subtle px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Ghi chú</p>
+                    <p className="mt-1 text-sm leading-6 text-app-ink-soft">{order.note}</p>
                   </div>
                 ) : null}
 
-                <div className="mt-4 flex items-center justify-end border-t border-white/10 pt-4">
+                <div className="mt-4 flex items-center justify-end border-t border-app-line pt-4">
                   <OrderActions order={order} busy={busyOrderId === order.id} onTransition={handleTransition} />
                 </div>
               </li>

@@ -31,6 +31,7 @@ import {
   updateVisionBoard as backendUpdateVisionBoard,
 } from "@/services/visionBoardService";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { VisionMapIllustration } from "../components/illustrations";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -824,7 +825,7 @@ export function VisionBoardEditor() {
                     key={tmpl.id}
                     type="button"
                     onClick={() => handleSelectTemplate(tmpl)}
-                    className="w-full text-left rounded-xl border border-app-line bg-app-surface p-3 transition hover:border-app-accent hover:bg-app-accent-soft group"
+                    className="w-full text-left rounded-card border border-app-line bg-app-surface p-3 transition hover:border-app-accent hover:bg-app-accent-soft group"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-bold text-app-ink group-hover:text-app-accent">{tmpl.name}</span>
@@ -845,7 +846,7 @@ export function VisionBoardEditor() {
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
                   2. Chế độ kể chuyện (Story Mode)
                 </h3>
-                <div className="rounded-xl border border-app-line bg-app-surface p-4 flex flex-col gap-3">
+                <div className="rounded-card border border-app-line bg-app-surface p-4 flex flex-col gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                     <Wand2 className="h-5 w-5" />
                   </div>
@@ -885,7 +886,7 @@ export function VisionBoardEditor() {
         </DialogContent>
       </Dialog>
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden shadow-app-lg border-app-line/60">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
             <div className="stack-section">
@@ -895,7 +896,7 @@ export function VisionBoardEditor() {
               </div>
 
               <div className="stack-stack">
-                <h1 className="max-w-3xl font-serif text-2xl font-medium tracking-tight text-app-ink mt-2 sm:text-3xl md:text-4xl">
+                <h1 className="max-w-3xl font-serif text-2xl font-medium tracking-tight text-app-ink mt-2 sm:text-3xl md:text-4xl lg:text-display">
                   {boardName || "Bức tranh tương lai"}
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-app-ink-soft">
@@ -992,7 +993,7 @@ export function VisionBoardEditor() {
               </p>
             </div>
 
-            <div className="surface-raised sticky top-6 hidden rounded-xl border border-app-line bg-app-surface p-5 xl:block">
+            <div className="surface-raised sticky top-6 hidden rounded-card border border-app-line bg-app-surface p-5 xl:block">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt bảng</p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -1005,7 +1006,7 @@ export function VisionBoardEditor() {
                     note: "điểm nhấn cảm xúc",
                   },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-xl border border-app-line bg-app-surface px-4 py-4">
+                  <div key={item.label} className="rounded-card border border-app-line bg-app-surface px-4 py-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
                     <p className="mt-2 text-3xl font-bold text-app-ink">{item.value}</p>
                     <p className="mt-1 text-sm text-app-ink-soft">{item.note}</p>
@@ -1098,7 +1099,7 @@ export function VisionBoardEditor() {
                     <button
                       key={img.label}
                       type="button"
-                      className="group relative overflow-hidden rounded-card border border-app-line transition-colors transition-shadow duration-150 hover:border-app-accent hover:shadow-sm"
+                      className="group relative overflow-hidden rounded-card border border-app-line transition-colors transition-shadow duration-150 hover:border-app-accent hover:shadow-app-sm"
                       onClick={() => handleAddCuratedImage(img.url)}
                     >
                       <ImageWithFallback src={img.url} alt={img.label} className="aspect-[4/3] w-full object-cover" />
@@ -1224,7 +1225,7 @@ export function VisionBoardEditor() {
                       key={font.id}
                       type="button"
                       onClick={() => setSelectedQuoteFont(font.id)}
-                      className={`rounded-xl border p-3 text-left transition ${
+                      className={`rounded-card border p-3 text-left transition ${
                         selectedQuoteFont === font.id
                           ? "border-app-accent bg-app-accent-soft"
                           : "border-app-line bg-app-surface hover:border-app-accent/50"
@@ -1278,9 +1279,9 @@ export function VisionBoardEditor() {
                       key={sticker.id}
                       type="button"
                       onClick={() => setSelectedStickerId(sticker.id)}
-                      className={`flex flex-col items-center gap-1 rounded-xl border p-3 transition-colors duration-150 ${
+                      className={`flex flex-col items-center gap-1 rounded-card border p-3 transition-colors duration-150 ${
                         isActive
-                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
+                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-app-sm"
                           : "border-app-line bg-app-surface hover:border-app-accent/50"
                       }`}
                     >
@@ -1321,7 +1322,7 @@ export function VisionBoardEditor() {
 
                 if (goals.length === 0) {
                   return (
-                    <div className="surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 p-6 text-center">
+                    <div className="surface-empty rounded-card border border-dashed border-app-line bg-app-bg/50 p-6 text-center">
                       <Target className="mx-auto h-10 w-10 text-app-ink-muted" />
                       <p className="mt-3 text-base font-semibold text-app-ink">
                         Bạn chưa có mục tiêu nào để ghim lên bảng
@@ -1364,7 +1365,7 @@ export function VisionBoardEditor() {
                             key={goal.id}
                             type="button"
                             onClick={() => setSelectedGoalId(goal.id)}
-                            className={`rounded-xl border p-3 text-left transition ${
+                            className={`rounded-card border p-3 text-left transition ${
                               isActive
                                 ? "border-app-accent bg-app-accent-soft ring-1 ring-app-accent/30"
                                 : "border-app-line bg-app-surface hover:bg-app-bg"
@@ -1390,7 +1391,7 @@ export function VisionBoardEditor() {
                         );
                       })}
                       {availableGoals.length === 0 && (
-                        <p className="col-span-full rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
+                        <p className="col-span-full rounded-card border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
                           Tất cả mục tiêu đã được ghim trên bảng này.
                         </p>
                       )}
@@ -1414,9 +1415,9 @@ export function VisionBoardEditor() {
                       key={item}
                       type="button"
                       onClick={() => setIconName(item)}
-                      className={`rounded-xl border p-4 transition-colors transition-shadow duration-150 ${
+                      className={`rounded-card border p-4 transition-colors transition-shadow duration-150 ${
                         isActive
-                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
+                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-app-sm"
                           : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:text-app-accent"
                       }`}
                     >
@@ -1456,7 +1457,7 @@ export function VisionBoardEditor() {
       </Dialog>
 
       <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card className="min-w-0 overflow-hidden rounded-2xl">
+        <Card className="min-w-0 overflow-hidden rounded-card-lg shadow-app-lg border-app-line/60">
           <CardContent className="p-0">
             <VisionBoardCanvas
               items={board.items}
@@ -1472,10 +1473,8 @@ export function VisionBoardEditor() {
               emptyStateSlot={
                 board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="surface-empty w-full max-w-md rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-6 text-center sm:p-8">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                        <Sparkles className="h-7 w-7" />
-                      </div>
+                    <div className="w-full max-w-md rounded-card-lg border border-dashed border-app-line bg-app-surface/90 backdrop-blur-sm p-6 text-center sm:p-8 shadow-app-lg">
+                      <VisionMapIllustration className="mx-auto w-40 text-app-accent sm:w-48" />
                       <h2 className="mt-5 font-serif text-2xl font-medium text-app-ink sm:mt-6 sm:text-3xl">
                         Bảng của bạn đang chờ câu chuyện đầu tiên
                       </h2>

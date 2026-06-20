@@ -170,7 +170,7 @@ export function TimeBoundStep({
               </div>
 
               {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng */}
-              <div className="rounded-xl border border-dashed border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C]/50 px-4 py-3 flex items-center gap-3 shadow-none">
+              <div className="rounded-xl border border-dashed border-app-line bg-app-surface dark:bg-app-surface/50 px-4 py-3 flex items-center gap-3 shadow-none">
                 <Calendar className="h-5 w-5 text-app-accent shrink-0" />
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.12em] text-app-accent font-extrabold">
@@ -223,7 +223,7 @@ export function TimeBoundStep({
           </div>
 
           {/* 1-Click Weeks Suggestions */}
-          <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3 rounded-xl border border-dashed border-app-line/80">
+          <div className="mt-4 bg-app-bg-subtle/30 dark:bg-app-bg-subtle/15 p-3 rounded-xl border border-dashed border-app-line/80">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
               <span>💡</span> Chọn nhanh số tuần:
             </p>
@@ -239,7 +239,7 @@ export function TimeBoundStep({
                   className={cn(
                     "inline-flex min-h-11 items-center justify-center text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer whitespace-nowrap snap-start flex-shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                     parsedTargetWeeks === Number(weeks)
-                      ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
+                      ? "bg-app-accent text-white border-app-accent shadow-app-md shadow-app-accent/20"
                       : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
                   )}
                 >
@@ -290,7 +290,7 @@ export function TimeBoundStep({
           ) : null}
 
           {/* 1-Click Date Suggestions */}
-          <div className="mt-4 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3 rounded-xl border border-dashed border-app-line/80">
+          <div className="mt-4 bg-app-bg-subtle/30 dark:bg-app-bg-subtle/15 p-3 rounded-xl border border-dashed border-app-line/80">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
               <span>💡</span> Chọn nhanh mốc thời gian:
             </p>
@@ -320,7 +320,7 @@ export function TimeBoundStep({
                     className={cn(
                       "inline-flex min-h-11 items-center justify-center text-xs px-3.5 sm:px-3 py-2.5 sm:py-2 rounded-full border transition-all duration-150 active:scale-[0.97] font-medium shadow-sm cursor-pointer whitespace-nowrap snap-start flex-shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none",
                       isSelected
-                        ? "bg-app-accent text-white border-app-accent shadow-md shadow-app-accent/20"
+                        ? "bg-app-accent text-white border-app-accent shadow-app-md shadow-app-accent/20"
                         : "bg-app-accent-soft/30 hover:bg-app-accent-soft/60 text-app-accent border-app-accent/10",
                     )}
                   >
@@ -333,7 +333,7 @@ export function TimeBoundStep({
 
           {/* Card mốc ngày dự kiến được thiết kế lại đẹp mắt, đầy cảm hứng cho chế độ chọn ngày */}
           {smartData.timeBound.target_date && (
-            <div className="rounded-xl border border-dashed border-[#E8E3D9] bg-[#FCFAF7] dark:bg-[#25221C]/50 px-4 py-3 flex items-center gap-3 shadow-none">
+            <div className="rounded-xl border border-dashed border-app-line bg-app-surface dark:bg-app-surface/50 px-4 py-3 flex items-center gap-3 shadow-none">
               <Calendar className="h-5 w-5 text-app-accent shrink-0" />
               <div>
                 <p className="text-[10px] uppercase tracking-[0.12em] text-app-accent font-extrabold">

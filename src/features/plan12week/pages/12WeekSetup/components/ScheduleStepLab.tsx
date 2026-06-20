@@ -128,7 +128,7 @@ export function ScheduleStepLab({
     <div className="space-y-6">
       {/* KHU VỰC 1: BIỂU MẪU LỊCH TRÌNH CHÍNH */}
       <section
-        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm space-y-6 animate-in fade-in duration-300"
+        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-app-sm space-y-6 animate-in fade-in duration-300"
         aria-labelledby="schedule-main-title"
       >
         <div className="flex items-center gap-2.5 border-b border-app-line/60 pb-3">
@@ -181,8 +181,8 @@ export function ScheduleStepLab({
               }}
               className={cn(
                 "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
-                !isCustomDate && draft.startDate === nextMondayKey
-                  ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-102"
+                 !isCustomDate && draft.startDate === nextMondayKey
+                  ? "border-app-accent bg-app-accent text-white shadow-app-sm shadow-app-accent/20 scale-102"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
@@ -202,7 +202,7 @@ export function ScheduleStepLab({
               className={cn(
                 "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                 !isCustomDate && draft.startDate === localTodayDateKey
-                  ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-102"
+                  ? "border-app-accent bg-app-accent text-white shadow-app-sm shadow-app-accent/20 scale-102"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
@@ -219,7 +219,7 @@ export function ScheduleStepLab({
               className={cn(
                 "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                 isCustomDate
-                  ? "border-app-accent bg-app-accent text-white shadow-sm scale-102"
+                  ? "border-app-accent bg-app-accent text-white shadow-app-sm scale-102"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
             >
@@ -303,7 +303,7 @@ export function ScheduleStepLab({
                   className={cn(
                     "flex-1 min-w-[70px] h-11 sm:h-10 items-center justify-center rounded-xl border text-xs font-bold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
                     isActive
-                      ? "border-app-accent bg-app-accent text-white shadow-sm shadow-app-accent/20 scale-105"
+                      ? "border-app-accent bg-app-accent text-white shadow-app-sm shadow-app-accent/20 scale-105"
                       : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30",
                   )}
                 >
@@ -365,7 +365,7 @@ export function ScheduleStepLab({
                         className={cn(
                           "flex flex-col items-center justify-center rounded-xl border bg-app-surface p-2.5 text-center text-xs transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",
                           isActive
-                            ? "border-app-accent bg-app-accent-soft/20 text-app-accent shadow-sm"
+                            ? "border-app-accent bg-app-accent-soft/20 text-app-accent shadow-app-sm"
                             : "border-app-line text-app-ink-soft hover:border-app-accent/30",
                         )}
                       >
@@ -401,7 +401,7 @@ export function ScheduleStepLab({
                         className={cn(
                           "flex flex-col items-start rounded-xl border bg-app-surface p-3 text-left transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",
                           isActive
-                            ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-sm"
+                            ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-app-sm"
                             : "border-app-line text-app-ink-soft hover:border-app-accent/30",
                         )}
                       >
@@ -421,7 +421,7 @@ export function ScheduleStepLab({
 
       {/* WIDGET LIVE PREVIEW: Xem trước tuần đầu tiên của bạn */}
       <section
-        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg-subtle/50 p-5 sm:p-6 shadow-sm space-y-4 select-none animate-in fade-in duration-400"
+        className="relative overflow-hidden rounded-2xl border border-app-line bg-app-bg-subtle/50 p-5 sm:p-6 shadow-app-sm space-y-4 select-none animate-in fade-in duration-400"
         aria-labelledby="week-preview-title"
       >
         <div className="flex items-center gap-2 mb-2 border-b border-app-line/60 pb-2">
@@ -456,7 +456,7 @@ export function ScheduleStepLab({
                     setSelectedMobileDay(day.index);
                   }}
                   className={cn(
-                    "flex-shrink-0 snap-center rounded-xl border px-3 py-2 flex flex-col items-center justify-center min-w-[70px] transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent font-sans",
+                    "flex-shrink-0 snap-center rounded-xl border px-3 py-2 flex flex-col items-center justify-center min-w-[70px] transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent",
                     isSelected
                       ? "border-app-accent bg-app-accent-soft/30 text-app-accent ring-2 ring-app-accent/25 font-extrabold"
                       : isReflectionDay
@@ -496,9 +496,9 @@ export function ScheduleStepLab({
               type="button"
               onClick={() => handleDayClick(selectedMobileDay)}
               className={cn(
-                "w-full rounded-xl py-2 px-3 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none font-sans",
+                "w-full rounded-xl py-2 px-3 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none",
                 draft.preferredDays.includes(selectedMobileDay)
-                  ? "bg-app-accent text-white border-app-accent shadow-sm shadow-app-accent/20"
+                  ? "bg-app-accent text-white border-app-accent shadow-app-sm shadow-app-accent/20"
                   : "bg-app-surface text-app-ink-soft border-app-line hover:border-app-accent/30",
               )}
             >
@@ -548,11 +548,11 @@ export function ScheduleStepLab({
                 type="button"
                 onClick={() => handleDayClick(day.index)}
                 className={cn(
-                  "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[85px] transition-all duration-300 hover:scale-102 hover:shadow-xs active:scale-[0.97] cursor-pointer text-left sm:text-center focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none font-sans",
+                  "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[85px] transition-all duration-300 hover:scale-102 hover:shadow-xs active:scale-[0.97] cursor-pointer text-left sm:text-center focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",
                   isReflectionDay
                     ? "border-app-status-warning/45 bg-app-status-warning/5 text-app-ink shadow-3xs"
                     : isPreferredDay
-                      ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-sm ring-2 ring-app-accent-soft/35"
+                      ? "border-app-accent bg-app-accent-soft/20 text-app-ink shadow-app-sm ring-2 ring-app-accent-soft/35"
                       : hasTactics
                         ? "border-app-line bg-app-surface text-app-ink shadow-3xs hover:border-app-accent/30"
                         : "border-app-line/40 bg-app-surface text-app-ink-muted opacity-60 hover:opacity-100 hover:border-app-line",

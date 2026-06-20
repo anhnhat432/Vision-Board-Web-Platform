@@ -4,6 +4,7 @@ import {
   adminGetOrders,
   adminUpdateOrderStatus,
   cancelOrder,
+  createKitPaymentSession,
   createOrder,
   getOrderById,
   getOrders,
@@ -23,6 +24,12 @@ orderRoutes.post("/orders", requireEmailVerified, validateJsonObjectBody, asyncH
 orderRoutes.get("/orders", asyncHandler(getOrders));
 orderRoutes.get("/orders/:id", validateObjectIdParam("id", "orderId"), asyncHandler(getOrderById));
 orderRoutes.patch("/orders/:id/cancel", validateObjectIdParam("id", "orderId"), asyncHandler(cancelOrder));
+orderRoutes.post(
+  "/orders/:id/payment-session",
+  requireEmailVerified,
+  validateObjectIdParam("id", "orderId"),
+  asyncHandler(createKitPaymentSession),
+);
 
 // Admin-only routes
 orderRoutes.get("/admin/orders", asyncHandler(requireAdmin), asyncHandler(adminGetOrders));

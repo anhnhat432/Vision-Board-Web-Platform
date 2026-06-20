@@ -85,7 +85,7 @@ export function FeasibilityStepShell({
                 ref={headingRef}
                 id={`feasibility-question-${currentQuestion.id}`}
                 tabIndex={-1}
-                className="mt-2.5 font-sans text-xl sm:text-2xl font-bold leading-normal text-app-ink focus:outline-none"
+                className="mt-2.5 font-serif text-xl sm:text-2xl font-bold leading-normal text-app-ink focus:outline-none"
               >
                 {currentQuestion.question}
               </h2>

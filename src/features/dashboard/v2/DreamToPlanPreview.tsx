@@ -17,7 +17,7 @@ const DEFAULT_PREVIEW: GoalPreviewData = {
   visionIcons: [
     { emoji: "🎧", bgClass: "bg-sky-800/10", borderClass: "border-sky-800/20" },
     { emoji: "📝", bgClass: "bg-rose-800/10", borderClass: "border-rose-800/20" },
-    { emoji: "🌍", bgClass: "bg-emerald-800/10", borderClass: "border-emerald-800/20" },
+    { emoji: "🌍", bgClass: "bg-app-accent-soft/50", borderClass: "border-app-accent/20" },
   ],
   visionLabel: '"Tự tin giao tiếp quốc tế"',
   todayTasks: ["Làm 1 bài Listening Practice", "Viết 1 essay Task 2", "Review 50 từ vựng"],
@@ -96,7 +96,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               ? "Tập Upper body"
               : "Tính năng mới",
       rotation: "-rotate-[6deg]",
-      bg: "from-rose-50 to-amber-50 dark:from-rose-950/20 dark:to-amber-950/10",
+      bg: "from-rose-50 to-amber-50",
       top: "top-2",
       left: "left-2",
     },
@@ -111,7 +111,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               ? "Ăn lành mạnh"
               : "Khám phá",
       rotation: "rotate-[5deg] z-10",
-      bg: "from-sky-50 to-teal-50 dark:from-sky-950/20 dark:to-teal-950/10",
+      bg: "from-sky-50 to-teal-50",
       top: "top-6",
       left: "left-24 sm:left-28",
     },
@@ -120,14 +120,14 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 select-none">
       {/* 📱 Mobile Tabs Switcher */}
-      <div className="flex md:hidden items-center justify-center p-1 bg-neutral-100 dark:bg-neutral-900 rounded-full border border-neutral-200/60 dark:border-neutral-800/80">
+      <div className="flex md:hidden items-center justify-center p-1 bg-app-bg-subtle rounded-full border border-app-line/60">
         <button
           type="button"
           onClick={() => setActiveMobileTab("vision")}
           className={`flex-1 text-center py-2 px-3 rounded-full text-[11px] font-bold transition-all duration-200 ${
             activeMobileTab === "vision"
               ? "bg-app-accent text-white shadow-xs"
-              : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+              : "text-app-ink-muted hover:text-app-ink"
           }`}
         >
           🎨 1. Tầm nhìn
@@ -138,7 +138,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
           className={`flex-1 text-center py-2 px-3 rounded-full text-[11px] font-bold transition-all duration-200 ${
             activeMobileTab === "smart"
               ? "bg-app-accent text-white shadow-xs"
-              : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+              : "text-app-ink-muted hover:text-app-ink"
           }`}
         >
           🎯 2. Chuẩn SMART
@@ -149,7 +149,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
           className={`flex-1 text-center py-2 px-3 rounded-full text-[11px] font-bold transition-all duration-200 ${
             activeMobileTab === "action"
               ? "bg-app-accent text-white shadow-xs"
-              : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+              : "text-app-ink-muted hover:text-app-ink"
           }`}
         >
           ⚡ 3. Việc Today
@@ -160,19 +160,19 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch relative">
         {/* Floating Streak Pop Badge */}
         <div
-          className={`absolute top-4 right-4 md:right-8 z-30 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-3.5 py-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 shadow-md border border-emerald-500/25 transition-all duration-500 backdrop-blur-xs ${
+          className={`absolute top-4 right-4 md:right-8 z-30 inline-flex items-center gap-1.5 rounded-full bg-app-accent/10 px-3.5 py-1 text-[10px] font-extrabold text-app-accent shadow-md border border-app-accent/30 transition-all duration-500 backdrop-blur-xs ${
             showStreakPop
               ? "translate-y-0 scale-100 opacity-100 animate-bounce"
               : "-translate-y-2 scale-95 opacity-0 pointer-events-none"
           }`}
         >
-          <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+          <Sparkles className="size-3 text-app-accent animate-pulse" />
           <span>Streak +1 Ngày! 🔥</span>
         </div>
 
         {/* 🎨 COLUMN 1: Dreamy Vision Board */}
         <div
-          className={`md:flex flex-col justify-between rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-gradient-to-br from-[#fafaf9] to-white/40 dark:from-neutral-900/30 dark:to-neutral-950/10 p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
+          className={`md:flex flex-col justify-between rounded-3xl border border-app-line/80 bg-gradient-to-br from-app-surface to-app-surface/40 p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
             activeMobileTab === "vision" ? "flex" : "hidden"
           }`}
         >
@@ -187,13 +187,13 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-accent">
                 Bảng tầm nhìn
               </span>
-              <h3 className="font-serif text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+              <h3 className="font-serif text-sm font-semibold text-app-ink">
                 1. Ước mơ mơ hồ
               </h3>
             </div>
 
             {/* Real Vision Board Detail Image */}
-            <div className="relative h-44 mt-4 rounded-2xl overflow-hidden border border-neutral-200/60 dark:border-neutral-800 shadow-inner transition-all duration-300 group-hover:scale-[1.01]">
+            <div className="relative h-44 mt-4 rounded-2xl overflow-hidden border border-app-line/60 shadow-inner transition-all duration-300 group-hover:scale-[1.01]">
               <img
                 src="/vision_board_detail.png"
                 alt="Bảng tầm nhìn chi tiết"
@@ -207,7 +207,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
             <span className="text-[8px] font-extrabold uppercase text-app-accent tracking-wider block">
               Tiếng gọi tâm hồn
             </span>
-            <p className="text-[11px] font-serif italic text-neutral-600 dark:text-neutral-400 leading-relaxed mt-0.5">
+            <p className="text-[11px] font-serif italic text-app-ink-soft leading-relaxed mt-0.5">
               {data.visionLabel}
             </p>
           </div>
@@ -215,49 +215,49 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
 
         {/* 🎯 COLUMN 2: SMART Goal Card */}
         <div
-          className={`md:flex flex-col justify-between rounded-3xl border border-neutral-200/80 dark:border-neutral-800/85 bg-white dark:bg-neutral-900/60 p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
+          className={`md:flex flex-col justify-between rounded-3xl border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
             activeMobileTab === "smart" ? "flex" : "hidden"
           }`}
         >
           {/* Subtle warm background glow */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/3 via-transparent to-amber-500/2 opacity-80 rounded-3xl" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-app-accent/3 via-transparent to-app-accent/2 opacity-80 rounded-3xl" />
 
           <div className="relative z-10 space-y-4">
             <span className="hidden sm:inline absolute -top-4 -left-2 text-xl filter drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.06)] z-20">
               📌
             </span>
             <div className="space-y-1 pl-4">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-energy">
                 Tiêu điểm sắc nét
               </span>
-              <h3 className="font-serif text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+              <h3 className="font-serif text-sm font-semibold text-app-ink">
                 2. Mục tiêu SMART
               </h3>
             </div>
 
             {/* Target Display Area */}
-            <div className="p-4 bg-neutral-50/70 dark:bg-neutral-950/40 border border-neutral-200/60 dark:border-neutral-800 rounded-2xl space-y-3.5 mt-3">
+            <div className="p-4 bg-app-bg-subtle/70 border border-app-line/60 rounded-2xl space-y-3.5 mt-3">
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-app-accent/10 px-2.5 py-0.5 text-[9px] font-bold text-app-accent border border-app-accent/10">
                   {data.weekLabel}
                 </span>
-                <span className="text-[8px] font-extrabold text-neutral-400 uppercase tracking-widest">SMART GOAL</span>
+                <span className="text-[8px] font-extrabold text-app-ink-muted uppercase tracking-widest">SMART GOAL</span>
               </div>
 
-              <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-100 leading-relaxed flex items-start gap-2">
+              <h4 className="text-xs font-bold text-app-ink leading-relaxed flex items-start gap-2">
                 <Target className="h-4.5 w-4.5 text-app-accent shrink-0 mt-0.5" />
                 <span>{data.goalTitle}</span>
               </h4>
 
               {/* Progress Slider */}
-              <div className="pt-2.5 border-t border-neutral-200/50 dark:border-neutral-800/80">
+              <div className="pt-2.5 border-t border-app-line/50">
                 <div className="flex items-center justify-between text-[10px]">
-                  <span className="font-bold text-neutral-500 dark:text-neutral-400">Tiến độ chu kỳ</span>
+                  <span className="font-bold text-app-ink-muted">Tiến độ chu kỳ</span>
                   <span className="font-extrabold text-app-accent tabular-nums transition-all duration-300">
                     {isProgressAdvanced ? 67 : 33}%
                   </span>
                 </div>
-                <div className="mt-1.5 h-2 w-full rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
+                <div className="mt-1.5 h-2 w-full rounded-full bg-app-bg-subtle overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-app-accent to-green-600 transition-all duration-500 ease-out"
                     style={{ width: isProgressAdvanced ? "67%" : "33%" }}
@@ -275,7 +275,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
                 className={`py-1.5 rounded-lg border text-[10px] font-extrabold transition-all duration-300 ${
                   idx < 3
                     ? "bg-app-accent/10 text-app-accent border-app-accent/20"
-                    : "bg-neutral-50/50 text-neutral-400 border-neutral-200/50 dark:bg-neutral-950/20 dark:border-neutral-800/60"
+                    : "bg-app-bg-subtle/50 text-app-ink-muted border-app-line/50"
                 }`}
                 title={
                   letter === "S"
@@ -297,7 +297,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
 
         {/* ⚡ COLUMN 3: First-Week Action Plan */}
         <div
-          className={`md:flex flex-col justify-between rounded-3xl border border-amber-200/50 dark:border-neutral-800/85 bg-[#fffdf9] dark:bg-neutral-900/60 p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
+          className={`md:flex flex-col justify-between rounded-3xl border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
             activeMobileTab === "action" ? "flex" : "hidden"
           }`}
         >
@@ -309,10 +309,10 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               📌
             </span>
             <div className="space-y-1">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 font-sans">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-app-ink-muted font-sans">
                 Kỷ luật tự thân
               </span>
-              <h3 className="font-serif text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+              <h3 className="font-serif text-sm font-semibold text-app-ink">
                 3. Kế hoạch hành động
               </h3>
             </div>
@@ -320,11 +320,11 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
             {/* Checklist */}
             <div className="space-y-3 pt-3 font-serif">
               {/* Task 1: Always completed */}
-              <div className="flex items-start gap-2.5 p-2 bg-neutral-100/40 dark:bg-neutral-950/30 border border-neutral-200/30 dark:border-neutral-800/20 rounded-xl">
+              <div className="flex items-start gap-2.5 p-2 bg-app-bg-subtle/40 border border-app-line/30 rounded-xl">
                 <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-app-accent text-white shadow-xs mt-0.5">
                   <Check className="h-3 w-3" strokeWidth={3.5} />
                 </span>
-                <span className="text-[11px] text-neutral-400 dark:text-neutral-500 line-through font-medium italic opacity-75 truncate">
+                <span className="text-[11px] text-app-ink-muted line-through font-medium italic opacity-75 truncate">
                   {data.todayTasks[0]}
                 </span>
               </div>
@@ -333,15 +333,15 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               <div
                 className={`flex items-start gap-2.5 p-2 rounded-xl border transition-all duration-500 ${
                   isTaskTwoCompleted
-                    ? "bg-neutral-100/40 dark:bg-neutral-950/30 border-neutral-200/30 dark:border-neutral-800/20"
-                    : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 shadow-[0_2px_12px_rgba(0,0,0,0.015)]"
+                    ? "bg-app-bg-subtle/40 border border-app-line/30"
+                    : "bg-app-surface border-app-line shadow-[0_2px_12px_rgba(0,0,0,0.015)]"
                 }`}
               >
                 <span
                   className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border transition-all duration-500 mt-0.5 ${
                     isTaskTwoCompleted
                       ? "border-transparent bg-app-accent text-white shadow-xs"
-                      : "border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 text-transparent"
+                      : "border-app-line-strong bg-app-surface text-transparent"
                   }`}
                 >
                   <Check
@@ -354,8 +354,8 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
                 <span
                   className={`text-[11px] italic transition-all duration-500 ${
                     isTaskTwoCompleted
-                      ? "text-neutral-400 dark:text-neutral-500 line-through opacity-75"
-                      : "text-neutral-800 dark:text-neutral-200 font-bold"
+                      ? "text-app-ink-muted line-through opacity-75"
+                      : "text-app-ink font-bold"
                   }`}
                 >
                   {data.todayTasks[1]}
@@ -363,16 +363,16 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               </div>
 
               {/* Task 3: Uncompleted */}
-              <div className="flex items-start gap-2.5 p-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
-                <span className="h-4.5 w-4.5 shrink-0 rounded-full border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 mt-0.5" />
-                <span className="text-[11px] font-bold text-neutral-800 dark:text-neutral-200 italic truncate">
+              <div className="flex items-start gap-2.5 p-2 bg-app-surface border border-app-line rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <span className="h-4.5 w-4.5 shrink-0 rounded-full border border-app-line-strong bg-app-surface mt-0.5" />
+                <span className="text-[11px] font-bold text-app-ink italic truncate">
                   {data.todayTasks[2]}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="relative z-10 pt-3 border-t border-neutral-200/50 dark:border-neutral-800/80 flex items-center justify-between text-[9px] font-sans text-neutral-400 font-bold mt-4">
+          <div className="relative z-10 pt-3 border-t border-app-line/50 flex items-center justify-between text-[9px] font-sans text-app-ink-muted font-bold mt-4">
             <span>● Today Checklist v2</span>
             <span className="text-app-accent font-extrabold">Dành 2 phút mỗi ngày</span>
           </div>
@@ -380,16 +380,16 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
       </div>
 
       {/* 🔗 Direction Indicator Line */}
-      <div className="hidden md:flex items-center justify-between px-16 text-neutral-300 dark:text-neutral-800 select-none py-1">
+      <div className="hidden md:flex items-center justify-between px-16 text-app-ink-muted select-none py-1">
         <div className="flex items-center gap-2">
-          <div className="h-px w-24 bg-gradient-to-r from-transparent to-neutral-300 dark:to-neutral-800" />
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Từ bảng ước mơ</span>
-          <ArrowRight className="size-3 text-neutral-400" />
+          <div className="h-px w-24 bg-gradient-to-r from-transparent to-app-line" />
+          <span className="text-[10px] font-bold text-app-ink-muted uppercase tracking-widest">Từ bảng ước mơ</span>
+          <ArrowRight className="size-3 text-app-ink-muted" />
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-px w-24 bg-gradient-to-r from-transparent to-neutral-300 dark:to-neutral-800" />
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Chuẩn hóa hành động</span>
-          <ArrowRight className="size-3 text-neutral-400" />
+          <div className="h-px w-24 bg-gradient-to-r from-transparent to-app-line" />
+          <span className="text-[10px] font-bold text-app-ink-muted uppercase tracking-widest">Chuẩn hóa hành động</span>
+          <ArrowRight className="size-3 text-app-ink-muted" />
         </div>
       </div>
     </div>

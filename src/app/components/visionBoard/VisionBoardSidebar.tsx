@@ -65,7 +65,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 
   return (
     <div className={`stack-stack ${className ?? ""}`}>
-      <Card className="rounded-xl border border-app-line bg-app-surface">
+      <Card className="rounded-xl border border-app-line bg-app-surface shadow-app-md">
         <CardContent className="p-5">
           <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             Câu chuyện theo life area
@@ -120,7 +120,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
         </CardContent>
       </Card>
 
-      <Card className="rounded-xl border border-app-line bg-app-surface">
+      <Card className="rounded-xl border border-app-line bg-app-surface shadow-app-md">
         <CardContent className="p-5">
           <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt nhanh</h3>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -136,7 +136,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
         </CardContent>
       </Card>
 
-      <Card className="rounded-xl border border-app-line bg-app-surface">
+      <Card className="rounded-xl border border-app-line bg-app-surface shadow-app-md">
         <CardContent className="p-5">
           <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Gợi ý bố cục</h3>
           <ul className="mt-3 space-y-2 text-sm leading-relaxed text-app-ink-soft">

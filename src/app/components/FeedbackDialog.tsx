@@ -116,7 +116,7 @@ export function FeedbackDialog({ source, context, triggerLabel = "Góp ý", trig
 
         {submitted ? (
           <div className="space-y-4">
-            <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
+            <div className="rounded-[var(--r-card)] border border-app-status-success/20 bg-app-status-success/10 px-4 py-4 text-sm leading-6 text-app-status-success">
               Cảm ơn bạn. Góp ý đã được ghi nhận trên thiết bị này.
             </div>
             <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg px-4 py-4 text-sm leading-6 text-app-ink-soft">

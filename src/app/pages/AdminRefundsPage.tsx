@@ -112,7 +112,7 @@ export function AdminRefundsPage() {
           <Button
             type="button"
             variant="outline"
-            className="gap-2 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             disabled={loading}
             onClick={() => void loadRefunds()}
           >
@@ -129,7 +129,7 @@ export function AdminRefundsPage() {
           <Button
             type="button"
             variant="outline"
-            className="mt-4 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             onClick={() => void loadRefunds()}
           >
             Thử lại
@@ -139,7 +139,7 @@ export function AdminRefundsPage() {
 
       {loading && items.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
         </div>
       ) : items.length === 0 ? (
         <AdminEmptyState
@@ -154,12 +154,12 @@ export function AdminRefundsPage() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-mono text-xs font-semibold text-white">{request.orderId}</p>
+                    <p className="font-mono text-xs font-semibold text-app-ink">{request.orderId}</p>
                     <AdminStatusBadge tone={REFUND_STATUS_TONES[request.status]}>
                       {REFUND_STATUS_LABELS[request.status]}
                     </AdminStatusBadge>
                   </div>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-app-ink-muted">
                     {request.contactEmail} · tạo {formatDate(request.createdAt)}
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export function AdminRefundsPage() {
                   <Button
                     type="button"
                     size="sm"
-                    className="bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                    className="bg-app-status-success text-white hover:bg-app-status-success/80"
                     disabled={busyId === request.id}
                     onClick={() => openConfirm(request, "completed")}
                   >
@@ -188,15 +188,15 @@ export function AdminRefundsPage() {
               </div>
 
               <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                <div className="rounded-[var(--r-control)] border border-white/10 bg-white/5 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Lý do user</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-200">{request.reason}</p>
+                <div className="rounded-[var(--r-control)] border border-app-line bg-app-bg-subtle p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Lý do user</p>
+                  <p className="mt-1 text-sm leading-6 text-app-ink-soft">{request.reason}</p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-amber-500/30 bg-amber-500/10 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">
+                <div className="rounded-[var(--r-control)] border border-app-status-warning/30 bg-app-status-warning/10 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-app-status-warning">
                     Tài khoản nhận hoàn tiền
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-amber-100">{request.refundAccount}</p>
+                  <p className="mt-1 text-sm leading-6 text-app-status-warning">{request.refundAccount}</p>
                 </div>
               </div>
             </li>
@@ -223,16 +223,16 @@ export function AdminRefundsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-3">
-            <div className="rounded-[var(--r-control)] bg-slate-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lý do user</p>
-              <p className="mt-1 text-sm leading-6 text-slate-700">{pending?.request.reason ?? "—"}</p>
+            <div className="rounded-[var(--r-control)] bg-app-bg-subtle p-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Lý do user</p>
+              <p className="mt-1 text-sm leading-6 text-app-ink-muted">{pending?.request.reason ?? "—"}</p>
             </div>
-            <div className="rounded-[var(--r-control)] bg-amber-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Tài khoản nhận hoàn tiền</p>
-              <p className="mt-1 text-sm leading-6 text-amber-900">{pending?.request.refundAccount ?? "—"}</p>
+            <div className="rounded-[var(--r-control)] bg-app-status-warning/10 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-app-status-warning">Tài khoản nhận hoàn tiền</p>
+              <p className="mt-1 text-sm leading-6 text-app-status-warning">{pending?.request.refundAccount ?? "—"}</p>
             </div>
             <div className="grid gap-2">
-              <label htmlFor="refund-admin-note" className="text-sm font-medium text-slate-700">
+              <label htmlFor="refund-admin-note" className="text-sm font-medium text-app-ink-muted">
                 Ghi chú admin
               </label>
               <Textarea

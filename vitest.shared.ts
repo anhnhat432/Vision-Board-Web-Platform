@@ -6,7 +6,9 @@ export const baseTestExclude = [
   "**/node_modules/**",
   "**/dist/**",
   "**/.codex-worktrees/**",
+  "**/.codex/**",
   "**/.claude/worktrees/**",
+  "**/.kilo/**",
   "backend/src/tests/**",
   "e2e/**",
 ];

@@ -196,7 +196,7 @@ export function MeasurableStep({
       </div>
 
       {/* 1-Click Suggestions trượt ngang */}
-      <div className="mt-3 bg-[#FAF7F2]/30 dark:bg-[#1E1D18]/15 p-3.5 rounded-xl border border-dashed border-app-line/80">
+      <div className="mt-3 bg-app-bg-subtle/30 dark:bg-app-bg-subtle/15 p-3.5 rounded-xl border border-dashed border-app-line/80">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-2 flex items-center gap-1.5 select-none">
           <span>📊</span> Gợi ý đo lường nhanh:
         </p>
@@ -353,12 +353,12 @@ export function MeasurableStep({
           )}
         >
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-950/5 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
-                <Check className="h-3.5 w-3.5" strokeWidth={3} />
+            <div className="rounded-2xl border border-app-accent/10 bg-app-accent-soft dark:bg-app-accent-soft/10 p-3.5 flex items-start gap-2.5 text-xs leading-relaxed transition-all duration-300 hover:shadow-sm">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent dark:text-app-accent mt-0.5">
+                💡
               </span>
               <div>
-                <p className="font-bold text-emerald-800 dark:text-emerald-400">Nên viết rõ (Đếm được):</p>
+                <p className="font-bold text-app-accent dark:text-app-accent">Nên viết rõ (Đếm được):</p>
                 <p className="text-app-ink-soft mt-0.5 font-serif italic">
                   "Số buổi vận động/tuần" (đơn vị: buổi), hoặc "Số tiền tích lũy" (đơn vị: triệu VNĐ).
                 </p>
@@ -525,7 +525,7 @@ export function MeasurableStep({
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className={cn("h-full rounded-full shadow-md", themeColor, glowColor)}
+                className={cn("h-full rounded-full shadow-app-md", themeColor, glowColor)}
               />
             </div>
             <div className="flex justify-between text-[11px] font-bold text-app-ink-muted select-none">

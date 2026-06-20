@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 
 import * as backendMonitoring from "../monitoring/sentry";
 import { PaymentOrderModel, type PaymentOrderDocument } from "../models/PaymentOrderModel";
+import { OrderModel } from "../models/OrderModel";
 import { billingService } from "../services/billingServiceInstance";
 import { deliverReceiptForOrder } from "../services/paymentReceiptDeliveryService";
 import {
@@ -133,6 +134,34 @@ function respondIgnored(res: Response, message: string, extra: Record<string, un
     message,
     ...extra,
   });
+}
+
+async function completePhysicalOrderPayment(
+  paymentOrder: { orderId: string; userId: string; metadata?: { physicalOrderId?: string | null } | null },
+  now: Date,
+): Promise<"confirmed" | "already_confirmed" | "no_physical_order"> {
+  const physicalOrderId = paymentOrder.metadata?.physicalOrderId;
+  if (!physicalOrderId) return "no_physical_order";
+
+  const physicalOrder = await OrderModel.findById(physicalOrderId);
+  if (!physicalOrder) return "no_physical_order";
+
+  if (physicalOrder.status === "confirmed" || physicalOrder.status === "printing" || physicalOrder.status === "shipping" || physicalOrder.status === "delivered") {
+    return "already_confirmed";
+  }
+
+  if (physicalOrder.status === "pending") {
+    await OrderModel.updateOne(
+      { _id: physicalOrderId, status: "pending" },
+      {
+        $set: { status: "confirmed" },
+        $push: { statusHistory: { status: "confirmed", changedAt: now, changedBy: `payment:${paymentOrder.orderId}` } },
+      },
+    );
+    return "confirmed";
+  }
+
+  return "no_physical_order";
 }
 
 export async function getPayosWebhookHealth(_req: Request, res: Response): Promise<void> {
@@ -308,19 +337,39 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
   }
 
   try {
-    const result = await billingService.upsertSubscriptionFromProviderEvent({
-      provider: "payos",
-      providerEventId: eventId,
-      eventType: "checkout_completed",
-      payloadHash,
-      userId: claimedOrder.userId,
-      planCode: "PLUS",
-      status: "active",
-      billingCycle: "twelve_week",
-      currentPeriodStart: now,
-      currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
-      providerSubscriptionId: claimedOrder.orderId,
-    });
+    const isPhysicalOrder = claimedOrder.purpose === "physical_order";
+
+    if (isPhysicalOrder) {
+      const physicalResult = await completePhysicalOrderPayment(claimedOrder, now);
+      if (physicalResult === "no_physical_order") {
+        console.warn(`[payos-webhook] Physical order payment received but no matching physical order found for "${claimedOrder.orderId}".`);
+      }
+    } else {
+      const result = await billingService.upsertSubscriptionFromProviderEvent({
+        provider: "payos",
+        providerEventId: eventId,
+        eventType: "checkout_completed",
+        payloadHash,
+        userId: claimedOrder.userId,
+        planCode: "PLUS",
+        status: "active",
+        billingCycle: "twelve_week",
+        currentPeriodStart: now,
+        currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
+        providerSubscriptionId: claimedOrder.orderId,
+      });
+
+      console.info({
+        event: "payos_webhook_success",
+        eventId,
+        orderId: claimedOrder.orderId,
+        amount: data.amount,
+        planCode: "PLUS",
+        userId: claimedOrder.userId,
+        subscriptionId: result.subscription.id,
+        eventStatus: result.eventStatus,
+      });
+    }
 
     const receiptResult = await deliverReceiptForOrder(claimedOrder.orderId);
     if (!receiptResult.sent) {
@@ -329,20 +378,20 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
       );
     }
 
-    console.info({
-      event: "payos_webhook_success",
-      eventId,
-      orderId: claimedOrder.orderId,
-      amount: data.amount,
-      planCode: "PLUS",
-      userId: claimedOrder.userId,
-      subscriptionId: result.subscription.id,
-      eventStatus: result.eventStatus,
-    });
+    if (!isPhysicalOrder) {
+      console.info({
+        event: "payos_webhook_physical_order_success",
+        eventId,
+        orderId: claimedOrder.orderId,
+        amount: data.amount,
+        purpose: claimedOrder.purpose,
+        userId: claimedOrder.userId,
+      });
+    }
 
     res.status(200).json({
       success: true,
-      status: result.eventStatus,
+      status: isPhysicalOrder ? "completed" : "processed",
       eventId,
       orderId: claimedOrder.orderId,
     });

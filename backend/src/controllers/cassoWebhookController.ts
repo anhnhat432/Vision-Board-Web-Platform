@@ -18,6 +18,7 @@ import type { Request, Response } from "express";
 import { billingService } from "../services/billingServiceInstance";
 import * as backendMonitoring from "../monitoring/sentry";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
+import { OrderModel } from "../models/OrderModel";
 import type { CassoWebhookPayload, CassoTransaction } from "../services/cassoPaymentAdapter";
 import { deliverReceiptForOrder } from "../services/paymentReceiptDeliveryService";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
@@ -112,6 +113,34 @@ function isMongoDuplicateKeyError(error: unknown): boolean {
       "code" in error &&
       (error as { code?: unknown }).code === 11000,
   );
+}
+
+async function completePhysicalOrderPayment(
+  paymentOrder: { orderId: string; userId: string; metadata?: { physicalOrderId?: string | null } | null },
+  now: Date,
+): Promise<"confirmed" | "already_confirmed" | "no_physical_order"> {
+  const physicalOrderId = paymentOrder.metadata?.physicalOrderId;
+  if (!physicalOrderId) return "no_physical_order";
+
+  const physicalOrder = await OrderModel.findById(physicalOrderId);
+  if (!physicalOrder) return "no_physical_order";
+
+  if (physicalOrder.status === "confirmed" || physicalOrder.status === "printing" || physicalOrder.status === "shipping" || physicalOrder.status === "delivered") {
+    return "already_confirmed";
+  }
+
+  if (physicalOrder.status === "pending") {
+    await OrderModel.updateOne(
+      { _id: physicalOrderId, status: "pending" },
+      {
+        $set: { status: "confirmed" },
+        $push: { statusHistory: { status: "confirmed", changedAt: now, changedBy: `payment:${paymentOrder.orderId}` } },
+      },
+    );
+    return "confirmed";
+  }
+
+  return "no_physical_order";
 }
 
 function logCassoWebhookReplayIgnored(transactionId: string, accountId: string, reason: string): void {
@@ -298,27 +327,35 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       continue;
     }
 
-    // Step 8: Upsert subscription via BillingService before marking the order
-    // completed. If this fails, Casso should retry and the order remains pending.
+    // Step 8: Complete payment based on purpose
     const now = new Date();
     const payloadHash = createHash("sha256")
       .update(JSON.stringify(tx))
       .digest("hex");
 
+    const isPhysicalOrder = order.purpose === "physical_order";
+
     try {
-      const result = await billingService.upsertSubscriptionFromProviderEvent({
-        provider: "casso",
-        providerEventId: `casso_${cassoTxId || orderId}`,
-        eventType: "checkout_completed",
-        payloadHash,
-        userId: order.userId,
-        planCode: "PLUS",
-        status: "active",
-        billingCycle: "twelve_week",
-        currentPeriodStart: now,
-        currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
-        providerSubscriptionId: orderId,
-      });
+      if (isPhysicalOrder) {
+        const physicalResult = await completePhysicalOrderPayment(order, now);
+        if (physicalResult === "no_physical_order") {
+          console.warn(`[casso-webhook] Physical order payment received but no matching physical order found for "${orderId}".`);
+        }
+      } else {
+        await billingService.upsertSubscriptionFromProviderEvent({
+          provider: "casso",
+          providerEventId: `casso_${cassoTxId || orderId}`,
+          eventType: "checkout_completed",
+          payloadHash,
+          userId: order.userId,
+          planCode: "PLUS",
+          status: "active",
+          billingCycle: "twelve_week",
+          currentPeriodStart: now,
+          currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
+          providerSubscriptionId: orderId,
+        });
+      }
 
       order.status = "completed";
       order.completedAt = now;
@@ -337,10 +374,10 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         transactionId: cassoTxId,
         accountId: orderId,
         amount,
-        planCode: "PLUS",
+        purpose: order.purpose,
+        planCode: order.planCode,
         userId: order.userId,
-        subscriptionId: result.subscription.id,
-        eventStatus: result.eventStatus,
+        ...(isPhysicalOrder ? {} : { subscriptionId: "physical_order_only" }),
       });
       processedCount++;
     } catch (error: unknown) {

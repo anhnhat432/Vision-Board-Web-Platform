@@ -10,11 +10,18 @@ import { Schema, model, type Document } from "mongoose";
  * 4. Backend matches transfer description → marks order "completed"
  * 5. BillingSubscription is upserted → entitlements granted
  *
+ * Purpose "physical_order" flow:
+ * 1. User initiates kit order payment → PaymentOrder created with purpose "physical_order"
+ * 2. User transfers money
+ * 3. Webhook marks PaymentOrder completed and updates physical Order to "confirmed"
+ * 4. No subscription/entitlement is granted for physical orders
+ *
  * The orderId doubles as the bank transfer description.
  * Format: "VB" + 8 uppercase alphanumeric chars (e.g. "VB3KF8M2NP").
  */
 
 export type PaymentOrderStatus = "pending" | "completed" | "expired" | "failed";
+export type PaymentOrderPurpose = "plus_subscription" | "physical_order";
 
 export interface PaymentOrderEntity {
   id: string;
@@ -26,6 +33,7 @@ export interface PaymentOrderEntity {
   currency: string;
   status: PaymentOrderStatus;
   provider: string;
+  purpose: PaymentOrderPurpose;
   bankAccount: string;
   bankName: string;
   accountName: string;
@@ -42,6 +50,7 @@ export interface PaymentOrderEntity {
   reconciliationLastError?: string | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
+    physicalOrderId?: string | null;
     payos?: {
       orderCode?: number;
       paymentLinkId?: string;
@@ -109,6 +118,12 @@ const paymentOrderSchema = new Schema(
     provider: {
       type: String,
       required: true,
+    },
+    purpose: {
+      type: String,
+      required: true,
+      enum: ["plus_subscription", "physical_order"],
+      default: "plus_subscription",
     },
     bankAccount: {
       type: String,
@@ -232,6 +247,7 @@ export type PaymentOrderDocument = Document & {
   currency: string;
   status: PaymentOrderStatus;
   provider: string;
+  purpose: PaymentOrderPurpose;
   bankAccount: string;
   bankName: string;
   accountName: string;
@@ -248,6 +264,7 @@ export type PaymentOrderDocument = Document & {
   reconciliationLastError?: string | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
+    physicalOrderId?: string | null;
     payos?: {
       orderCode?: number;
       paymentLinkId?: string;

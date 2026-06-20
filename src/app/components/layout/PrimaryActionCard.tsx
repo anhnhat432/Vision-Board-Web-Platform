@@ -41,14 +41,14 @@ interface PrimaryActionCardProps extends Omit<React.ComponentPropsWithoutRef<"di
 const toneClass: Record<PrimaryActionCardTone, string> = {
   primary: "border-app-accent/40",
   violet: "border-app-warm-border",
-  emerald: "border-emerald-200",
+  emerald: "border-app-accent/30",
   amber: "border-app-warm-border",
 };
 
 const eyebrowClass: Record<PrimaryActionCardTone, string> = {
   primary: "text-app-accent",
   violet: "text-app-warm-strong",
-  emerald: "text-emerald-700",
+  emerald: "text-app-accent",
   amber: "text-app-warm-strong",
 };
 

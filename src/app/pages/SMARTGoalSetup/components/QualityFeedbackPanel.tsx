@@ -18,31 +18,31 @@ function getClarityDetails(score: number) {
     return {
       label: "Rất rõ ràng",
       colorClass:
-        "text-emerald-700 bg-emerald-50/70 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/20 dark:border-emerald-900/30",
-      barClass: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]",
+        "text-app-status-success bg-app-status-success/10 border-app-status-success/20 dark:text-app-status-success dark:bg-app-status-success/10 dark:border-app-status-success/20",
+      barClass: "bg-app-status-success shadow-[0_0_8px_rgba(16,185,129,0.4)]",
     };
   }
   if (score >= 60) {
     return {
       label: "Khá rõ nét",
       colorClass:
-        "text-teal-700 bg-teal-50/70 border-teal-100 dark:text-teal-400 dark:bg-teal-950/20 dark:border-teal-900/30",
-      barClass: "bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.4)]",
+        "text-app-accent bg-app-accent-soft/70 border-app-accent/10 dark:text-app-accent dark:bg-app-accent-soft/20 dark:border-app-accent/20",
+      barClass: "bg-app-accent shadow-[0_0_8px_rgba(20,184,166,0.4)]",
     };
   }
   if (score >= 40) {
     return {
       label: "Đang hình thành",
       colorClass:
-        "text-amber-700 bg-amber-50/70 border-amber-100 dark:text-amber-400 dark:bg-amber-950/20 dark:border-amber-900/30",
-      barClass: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]",
+        "text-app-status-warning bg-app-status-warning/10 border-app-status-warning/20 dark:text-app-status-warning dark:bg-app-status-warning/10 dark:border-app-status-warning/20",
+      barClass: "bg-app-status-warning shadow-[0_0_8px_rgba(245,158,11,0.4)]",
     };
   }
   return {
     label: "Đang phác thảo",
     colorClass:
-      "text-rose-750 bg-rose-50/70 border-rose-100 dark:text-rose-450 dark:bg-rose-950/20 dark:border-rose-900/30",
-    barClass: "bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.4)]",
+      "text-app-status-error bg-app-status-error/10 border-app-status-error/20 dark:text-app-status-error dark:bg-app-status-error/10 dark:border-app-status-error/20",
+    barClass: "bg-app-status-error shadow-[0_0_8px_rgba(251,113,133,0.4)]",
   };
 }
 
@@ -115,7 +115,7 @@ export function QualityFeedbackPanel({
           return (
             <li key={item} className="flex items-start gap-2.5 text-xs sm:text-sm animate-[fade-in_0.2s_ease-out]">
               {isSuccessMessage ? (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-status-success/10 text-app-status-success dark:text-app-status-success mt-0.5">
                   <Check className="h-3.5 w-3.5" strokeWidth={3} />
                 </span>
               ) : (

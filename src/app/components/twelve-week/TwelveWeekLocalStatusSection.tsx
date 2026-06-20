@@ -17,7 +17,6 @@ type TwelveWeekLocalStatusSectionProps = Pick<
   | "mutationQueueSyncStatus"
   | "onExportLocalData"
   | "onExportCloudWorkspace"
-  | "onDeleteCloudWorkspace"
   | "onHydrateBackendPlans"
   | "onRunMutationQueueSync"
   | "onKeepLocalPlanForConflicts"
@@ -519,13 +518,13 @@ function MutationQueueConflictResolutionPanel({
       ) : null}
 
       {showCloudConfirm ? (
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
-          <p className="text-sm font-semibold text-red-900">Xác nhận dùng dữ liệu từ tài khoản</p>
-          <p className="mt-1 text-xs leading-5 text-red-800">
+        <div className="mt-3 rounded-lg border border-app-status-error/30 bg-app-status-error/10 p-3">
+          <p className="text-sm font-semibold text-app-status-error">Xác nhận dùng dữ liệu từ tài khoản</p>
+          <p className="mt-1 text-xs leading-5 text-app-status-error">
             Hành động này sẽ thay thế toàn bộ dữ liệu 12 tuần trên thiết bị này bằng bản từ tài khoản. Khuyên bạn tải
             bản sao trước khi tiếp tục.
           </p>
-          <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-red-800">
+          <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-app-status-error">
             <input
               type="checkbox"
               className="mt-0.5"
@@ -538,7 +537,7 @@ function MutationQueueConflictResolutionPanel({
             <Button
               type="button"
               variant="outline"
-              className="border-red-200 bg-app-surface text-red-800 hover:bg-red-50"
+              className="border-app-status-error/30 bg-app-surface text-app-status-error hover:bg-app-status-error/10"
               disabled={!confirmExported}
               onClick={handleConfirmUseCloud}
             >
@@ -579,7 +578,6 @@ export function TwelveWeekLocalStatusSection({
   mutationQueueSyncStatus,
   onExportLocalData,
   onExportCloudWorkspace,
-  onDeleteCloudWorkspace,
   onHydrateBackendPlans,
   onRunMutationQueueSync,
   onKeepLocalPlanForConflicts,

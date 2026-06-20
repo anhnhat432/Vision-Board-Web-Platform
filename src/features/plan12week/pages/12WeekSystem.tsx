@@ -48,7 +48,7 @@ import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/
 import { applyPulledWorkspaceToUserData } from "@/features/plan12week/persistence/pulledWorkspaceApply";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { celebrateLarge } from "@/lib/effects/celebrate";
+import { useCelebration } from "@/app/components/celebration/useCelebration";
 import { claimCelebrationOnce, getCycleCelebrationStorageKey } from "@/lib/effects/celebrationTriggers";
 import { TwelveWeekDashboardHeader, TwelveWeekDashboardState, TwelveWeekGoalSwitcher } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
@@ -253,6 +253,7 @@ export function TwelveWeekSystem() {
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+  const celebrate = useCelebration();
 
   useEffect(() => {
     if (!isReady || !activeGoal || !system || hasCompletedFirstRunGuidance()) return;
@@ -265,11 +266,16 @@ export function TwelveWeekSystem() {
       setShowSuccessOverlay(true);
       localStorage.removeItem("show_12week_setup_success");
       const timer = setTimeout(() => {
-        celebrateLarge();
+        celebrate("week", {
+          id: `12week-setup-${activeGoal.id}`,
+          title: "Kế hoạch 12 tuần đã sẵn sàng",
+          description: "Bắt đầu hành trình 12 tuần với mục tiêu rõ ràng.",
+          palette: "accent",
+        });
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isReady, activeGoal]);
+  }, [isReady, activeGoal, celebrate]);
   const [isDeletingData, setIsDeletingData] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
   const [weeklyReviewSnoozeUntil, setWeeklyReviewSnoozeUntil] = useState(readWeeklyReviewSnoozeUntil);
@@ -529,7 +535,12 @@ export function TwelveWeekSystem() {
     });
     refreshSnapshotMeta();
     if (claimCelebrationOnce(getCycleCelebrationStorageKey(cycleId))) {
-      celebrateLarge();
+      celebrate("week", {
+        id: cycleId,
+        title: `Hoàn thành cycle ${system.cycleNumber ?? 1}`,
+        description: "Bạn đã hoàn thành một chu kỳ 12 tuần.",
+        palette: "accent",
+      });
     }
     toastSuccess("Báo cáo cycle đã được lưu.");
   };
@@ -793,6 +804,14 @@ export function TwelveWeekSystem() {
     refreshBackendProgressOverlay,
     invalidateOverlay,
     refreshSnapshotMeta,
+    onWeekCompleted: (weekNumber, goalId) => {
+      celebrate("week", {
+        id: `${goalId}-week-${weekNumber}`,
+        title: `Hoàn thành tuần ${weekNumber}`,
+        description: "Bạn vừa chốt review tuần. Tiếp tục giữ nhịp!",
+        palette: "accent",
+      });
+    },
   });
 
   const {
@@ -1037,17 +1056,7 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 relative">
-      {/* Decorative dreamy gradient blobs for execution center feeling */}
-      <div
-        className="absolute top-0 left-1/4 -translate-x-1/2 w-80 h-80 bg-app-accent-soft/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
-        style={{ animationDuration: "8s" }}
-      />
-      <div
-        className="absolute top-1/3 right-1/4 translate-x-1/2 w-96 h-96 bg-app-status-warning/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"
-        style={{ animationDuration: "12s" }}
-      />
-
+    <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
       {/* 1. Subcomponent Dialogs Container */}
       <TwelveWeekSystemDialogs
         isUpgradeDialogOpen={isUpgradeDialogOpen}
@@ -1279,7 +1288,7 @@ export function TwelveWeekSystem() {
       {/* Success Overlay */}
       {showSuccessOverlay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-ink/40 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden animate-scale-up">
+          <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-app-xl relative overflow-hidden animate-scale-up">
             {/* Decorative soft gradient blobs inside the card */}
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-app-accent-soft/20 rounded-full blur-xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-status-warning/10 rounded-full blur-xl pointer-events-none" />
@@ -1369,7 +1378,7 @@ export function TwelveWeekSystem() {
 
             <button
               type="button"
-              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold py-3 px-5 rounded-xl shadow-app-md active:scale-[0.98] transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer"
               style={{ backgroundColor: "var(--color-accent)" }}
               onClick={() => {
                 setShowSuccessOverlay(false);

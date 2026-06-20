@@ -17,7 +17,7 @@ export function StepCard({ step, title, status = "pending", hint, errorText, chi
   return (
     <section
       id={id}
-      className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-sm sm:p-6"
+      className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-app-sm sm:p-6"
     >
       <header className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">

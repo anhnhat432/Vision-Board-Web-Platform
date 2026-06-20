@@ -214,7 +214,7 @@ export function BillingConfirm() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
+        <section className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
               <ReceiptText className="h-6 w-6" />
@@ -230,7 +230,7 @@ export function BillingConfirm() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 rounded-xl border border-app-line bg-app-bg p-4">
+          <div className="mt-6 grid gap-4 rounded-card border border-app-line bg-app-bg p-4">
             <ConfirmRow label="Tên gói" value={planName} />
             <ConfirmRow
               label="Số tiền"
@@ -242,7 +242,7 @@ export function BillingConfirm() {
 
           <BillingTrustSignals className="mt-6" supportEmail={BILLING_SUPPORT_EMAIL} />
 
-          <div className="mt-6 rounded-xl border border-app-line bg-app-bg p-4">
+          <div className="mt-6 rounded-card border border-app-line bg-app-bg p-4">
             <label htmlFor="receipt-email" className="flex items-center gap-2 text-sm font-semibold text-app-ink">
               <Mail className="h-4 w-4 text-app-accent" />
               Email sẽ nhận biên nhận
@@ -253,7 +253,7 @@ export function BillingConfirm() {
               value={receiptEmail}
               onChange={(event) => setReceiptEmail(event.target.value)}
               disabled={!canEditEmail}
-              className="mt-3 w-full rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2 text-sm text-app-ink shadow-sm outline-none transition focus:border-app-accent focus:ring-2 focus:ring-app-accent/20 disabled:bg-app-bg disabled:text-app-ink-muted"
+              className="mt-3 w-full rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2 text-sm text-app-ink shadow-app-sm outline-none transition focus:border-app-accent focus:ring-2 focus:ring-app-accent/20 disabled:bg-app-bg disabled:text-app-ink-muted"
               placeholder="you@example.com"
             />
             <p className="mt-2 text-xs leading-5 text-app-ink-soft">
@@ -268,7 +268,7 @@ export function BillingConfirm() {
             )}
           </div>
 
-          <label className="mt-6 flex items-start gap-3 surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft">
+          <label className="mt-6 flex items-start gap-3 surface-raised rounded-card border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft">
             <input
               type="checkbox"
               checked={agreed}
@@ -297,7 +297,7 @@ export function BillingConfirm() {
           {paidCheckoutDisabled ? (
             <div
               data-testid="paid-checkout-disabled-banner"
-              className="mt-4 rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong"
+              className="mt-4 rounded-card border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong"
             >
               <p className="flex items-center gap-2 font-semibold">
                 <LockKeyhole className="h-4 w-4 text-app-warm" />
@@ -318,7 +318,7 @@ export function BillingConfirm() {
           ) : null}
 
           {emailVerificationRequired ? (
-            <div className="mt-4 rounded-xl border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-sm text-[color:var(--color-warning-fg)]">
+            <div className="mt-4 rounded-card border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-sm text-[color:var(--color-warning-fg)]">
               <p className="font-semibold">Vui lòng xác thực email trước khi thanh toán.</p>
               <p className="mt-1 leading-6 text-app-ink-soft">
                 Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực:{" "}
@@ -336,7 +336,7 @@ export function BillingConfirm() {
           ) : null}
 
           {error && (
-            <div className="mt-4 rounded-xl border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">
+            <div className="mt-4 rounded-card border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">
               {error}
             </div>
           )}
@@ -346,7 +346,7 @@ export function BillingConfirm() {
               type="button"
               onClick={handleConfirm}
               disabled={!canSubmit}
-              className="inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-app-accent px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-app-ink disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none"
+              className="inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-app-accent px-5 py-3 text-sm font-semibold text-white shadow-app-sm transition hover:bg-app-ink disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -367,7 +367,7 @@ export function BillingConfirm() {
           </div>
         </section>
 
-        <aside className="surface-raised rounded-2xl border border-app-accent-soft bg-app-accent-soft/40 p-5 sm:p-6">
+        <aside className="surface-raised rounded-card-lg border border-app-accent-soft bg-app-accent-soft/40 p-5 sm:p-6">
           <BillingPlusIllustration className="mx-auto w-44 text-app-accent opacity-80" />
           <div className="mt-6 space-y-4">
             <div className="flex gap-3">

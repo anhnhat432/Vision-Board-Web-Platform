@@ -57,6 +57,12 @@ interface PageHeroProps {
   testId?: string;
   /** Forwarded `data-tour-id` so SpotlightTour can target the hero. */
   tourId?: string;
+  /**
+   * When true, the title heading uses `font-serif font-medium` instead of
+   * the default `font-bold` (sans-serif). Use on emotional/warm pages to
+   * match the hero typography system.
+   */
+  serif?: boolean;
 }
 
 const DENSITY_CLASS: Record<PageHeroDensity, string> = {
@@ -89,6 +95,7 @@ export function PageHero({
   contentClassName,
   testId,
   tourId,
+  serif = false,
 }: PageHeroProps) {
   const Heading = titleAs === 1 ? "h1" : "h2";
   const alignClass = align === "center" ? "text-center" : "text-left";
@@ -122,7 +129,10 @@ export function PageHero({
             ) : null}
             <Heading
               data-slot="page-hero-title"
-              className="text-3xl font-bold tracking-tight text-app-ink sm:text-4xl lg:text-5xl"
+              className={cn(
+                "text-3xl tracking-tight text-app-ink sm:text-4xl lg:text-5xl",
+                serif ? "font-serif font-medium" : "font-bold",
+              )}
             >
               {title}
             </Heading>

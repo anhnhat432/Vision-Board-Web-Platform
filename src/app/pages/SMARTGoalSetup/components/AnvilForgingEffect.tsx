@@ -324,7 +324,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center select-none">
       {/* Background overlay */}
-      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" />
+      <div className="absolute inset-0 bg-app-bg/90 backdrop-blur-xl" />
 
       {/* Canvas */}
       {!shouldReduceMotion && <canvas ref={canvasRef} className="absolute inset-0 h-full w-full pointer-events-none" />}
@@ -335,17 +335,17 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         <span
           className={`
             inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide
-            border shadow-lg transition-all duration-500
+            border shadow-app-lg transition-all duration-500
             ${
               phase === "crystallized"
-                ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 shadow-emerald-500/20"
+                ? "border-app-accent/40 bg-app-accent/15 text-app-accent shadow-app-accent/20"
                 : "border-indigo-400/30 bg-indigo-500/10 text-indigo-300 shadow-indigo-500/10"
             }
           `}
         >
           <Sparkles
             className={`h-3.5 w-3.5 transition-colors duration-500 ${
-              phase === "crystallized" ? "text-emerald-400" : "text-indigo-400"
+              phase === "crystallized" ? "text-app-accent" : "text-indigo-400"
             }`}
           />
           {phase === "gathering" ? "KẾT TINH MỤC TIÊU" : "MỤC TIÊU ĐÃ THÀNH HÌNH"}
@@ -358,8 +358,8 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
             transition-all duration-500
             ${
               phase === "crystallized"
-                ? "text-emerald-100 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-                : "text-slate-200 drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                ? "text-app-accent drop-shadow-[0_0_20px_var(--color-app-accent)]"
+                : "text-app-ink drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]"
             }
           `}
         >
@@ -374,7 +374,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
           `}
         >
           {displayGoal && (
-            <p className="font-serif text-base italic leading-relaxed text-slate-300/90">&ldquo;{displayGoal}&rdquo;</p>
+            <p className="font-serif text-base italic leading-relaxed text-app-ink-soft/90">&ldquo;{displayGoal}&rdquo;</p>
           )}
         </div>
 
@@ -382,20 +382,20 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         <p
           className={`
             text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-500
-            ${phase === "crystallized" ? "text-emerald-400/80" : "text-indigo-400/60"}
+            ${phase === "crystallized" ? "text-app-accent/80" : "text-indigo-400/60"}
           `}
         >
           {phase === "gathering" ? "Thu thập năng lượng từ mục tiêu của bạn" : "Chuyển sang đánh giá tính khả thi"}
         </p>
 
         {/* Progress bar */}
-        <div className="mt-2 h-1 w-32 overflow-hidden rounded-full bg-slate-800/60 border border-slate-700/40">
+        <div className="mt-2 h-1 w-32 overflow-hidden rounded-full bg-app-surface/60 border border-app-line/40">
           <div
             className={`
               h-full rounded-full transition-all duration-500
               ${
                 phase === "crystallized"
-                  ? "bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                  ? "bg-gradient-to-r from-app-accent via-app-accent-hover to-app-accent shadow-app-sm"
                   : "bg-gradient-to-r from-indigo-500 via-violet-400 to-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.3)]"
               }
             `}

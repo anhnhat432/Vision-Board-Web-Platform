@@ -44,7 +44,7 @@ export function AppErrorBoundary() {
   return (
     <div className="min-h-screen bg-app-bg">
       <main className="relative mx-auto flex min-h-screen max-w-5xl items-center px-4 py-12 sm:px-6 lg:px-8">
-        <Card className="w-full overflow-hidden rounded-card border border-app-line bg-app-surface shadow-sm">
+        <Card className="w-full overflow-hidden rounded-card border border-app-line bg-app-surface shadow-app-sm">
           <CardContent className="relative p-8 lg:p-10">
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
@@ -80,7 +80,7 @@ export function AppErrorBoundary() {
                 </div>
               </div>
 
-              <div className="rounded-card border border-app-line bg-app-surface p-6 shadow-sm">
+              <div className="rounded-card border border-app-line bg-app-surface p-6 shadow-app-sm">
                 <CelebrationBurst className="mx-auto mb-4 w-32 text-app-accent opacity-60" />
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">

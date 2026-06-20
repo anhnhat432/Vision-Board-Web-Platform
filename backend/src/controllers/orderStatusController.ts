@@ -31,12 +31,14 @@ function serializeOrder(order: {
   amount: number;
   currency: string;
   provider?: string | null;
+  purpose?: string | null;
   bankAccount: string;
   bankName: string;
   accountName: string;
   description?: string | null;
   qrDataUrl: string;
   metadata?: {
+    physicalOrderId?: string | null;
     payos?: {
       checkoutUrl?: string;
     } | null;
@@ -58,6 +60,8 @@ function serializeOrder(order: {
     amount: order.amount,
     currency: order.currency,
     provider: order.provider,
+    purpose: order.purpose ?? "plus_subscription",
+    physicalOrderId: order.metadata?.physicalOrderId ?? null,
     bankAccount: order.bankAccount,
     bankName: order.bankName,
     accountName: order.accountName,
@@ -83,6 +87,7 @@ function serializePublicOrder(order: Parameters<typeof serializeOrder>[0]) {
     amount: order.amount,
     currency: order.currency,
     provider: order.provider,
+    purpose: order.purpose ?? "plus_subscription",
     bankAccount: order.bankAccount,
     bankName: order.bankName,
     accountName: order.accountName,

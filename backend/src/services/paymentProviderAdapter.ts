@@ -41,6 +41,12 @@ export interface CreateCheckoutSessionInput {
   receiptEmail?: string;
   /** Optional recipient name for the post-payment receipt. */
   receiptName?: string;
+  /** Override checkout amount in VND. Defaults to PLUS_PRICE_VND for subscription checkout. */
+  amount?: number;
+  /** Payment purpose. Default "plus_subscription" if not provided. */
+  purpose?: "plus_subscription" | "physical_order";
+  /** Physical order ID when purpose is "physical_order". Server-authoritative, not from client. */
+  physicalOrderId?: string;
 }
 
 export interface CheckoutSessionResult {

@@ -1,3 +1,5 @@
+import { Save } from "lucide-react";
+
 interface DashboardFooterProps {
   lastSavedLabel: string;
 }
@@ -6,7 +8,10 @@ export function DashboardFooter({ lastSavedLabel }: DashboardFooterProps) {
   return (
     <footer className="border-t border-app-line py-5 text-xs text-app-ink-muted">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span>Đã lưu cục bộ · {lastSavedLabel}</span>
+        <span className="flex items-center gap-1.5">
+          <Save className="h-3.5 w-3.5" aria-hidden="true" />
+          Đã lưu cục bộ · {lastSavedLabel}
+        </span>
         <div className="flex items-center gap-1">
           <span>Trang chính · 12-Week Year</span>
           <span aria-hidden="true" className="mx-1">

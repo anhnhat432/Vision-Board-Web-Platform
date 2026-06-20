@@ -156,7 +156,7 @@ export function SetupStepShellLab({
                     className={cn(
                       "relative z-10 flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                       isActive
-                        ? "border-app-accent bg-app-accent text-white scale-110 shadow-md shadow-app-accent/20 ring-4 ring-app-accent-soft/35"
+                        ? "border-app-accent bg-app-accent text-white scale-110 shadow-app-md shadow-app-accent/20 ring-4 ring-app-accent-soft/35"
                         : isCompleted
                           ? "border-app-status-success bg-app-status-success/5 text-app-status-success hover:bg-app-status-success hover:text-white dark:bg-app-status-success/20 dark:text-app-status-success active:scale-[0.96]"
                           : "border-app-line bg-app-surface text-app-ink-muted",
@@ -255,7 +255,7 @@ export function SetupStepShellLab({
             whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
             whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
             type="button"
-            className="inline-flex min-h-12 flex-[1] sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2 font-sans"
+            className="inline-flex min-h-12 flex-[1] sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2"
             onClick={onBack}
             disabled={isSubmitting}
           >
@@ -269,7 +269,7 @@ export function SetupStepShellLab({
               whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
               type="button"
               aria-label="Lưu kế hoạch"
-              className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-control bg-app-accent hover:bg-app-accent-hover px-5 py-3 text-xs font-bold text-white transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2 font-sans"
+              className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-control bg-app-accent hover:bg-app-accent-hover px-5 py-3 text-xs font-bold text-white transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2"
               onClick={handleSubmitClick}
               disabled={isSubmitting || isSubmitDisabled}
               aria-busy={isSubmitting}
@@ -287,7 +287,7 @@ export function SetupStepShellLab({
               whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
               type="button"
               aria-label={nextButtonLabel}
-              className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2 font-sans"
+              className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-10 sm:py-2"
               onClick={onNext}
               disabled={isNextDisabled}
             >

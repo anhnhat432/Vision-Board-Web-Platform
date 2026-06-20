@@ -38,7 +38,7 @@ export function OrderSummary({
   const hasSelectedPreview = Boolean(selectedFrame || selectedThemes.length > 0 || selectedSticker);
 
   return (
-    <aside className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-sm">
+    <aside className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-app-sm">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--order-eyebrow)]">Kit của bạn</h3>
       <div className="mt-3">
         {!hasSelectedPreview ? (
@@ -125,7 +125,7 @@ export function OrderSummary({
         )}
         <Button
           type="button"
-          className="mt-4 w-full bg-[var(--order-accent)] text-white shadow-sm transition-all hover:-translate-y-[1px] hover:bg-[var(--order-accent)]/90 hover:shadow-md"
+          className="mt-4 w-full bg-[var(--order-accent)] text-white shadow-app-sm transition-all hover:-translate-y-[1px] hover:bg-[var(--order-accent)]/90 hover:shadow-app-md"
           disabled={isSubmitting}
           aria-disabled={!isSubmittable || isSubmitting}
           onClick={onSubmit}

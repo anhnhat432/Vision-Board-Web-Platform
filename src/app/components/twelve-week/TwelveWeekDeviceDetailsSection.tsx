@@ -683,7 +683,7 @@ export function TwelveWeekDangerZone({
           <Button
             variant="outline"
             size="sm"
-            className="shrink-0 border-red-300 bg-red-50/50 text-red-700 hover:bg-red-100 dark:border-red-950/30 dark:bg-red-950/20 dark:text-red-400 rounded-xl"
+            className="shrink-0 border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 rounded-xl"
             onClick={onOpenDeleteDataDialog}
           >
             {deleteActionLabel}

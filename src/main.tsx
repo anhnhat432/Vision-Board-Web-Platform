@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/source-serif-4/wght.css";
+import "@fontsource-variable/source-serif-4/wght-italic.css";
 import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
 import { getAppMode } from "./app/utils/app-mode";
 import { installChunkLoadRecovery } from "./app/utils/chunkLoad";

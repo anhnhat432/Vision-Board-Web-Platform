@@ -11,6 +11,7 @@ interface SimpleRadarChartProps {
   fill?: string;
   fillOpacity?: number;
   className?: string;
+  dotColors?: string[];
 }
 
 const VIEWBOX_SIZE = 560;
@@ -67,6 +68,7 @@ export function SimpleRadarChart({
   fill = "var(--app-accent)",
   fillOpacity = 0.15,
   className,
+  dotColors,
 }: SimpleRadarChartProps) {
   if (data.length === 0) return null;
 
@@ -143,7 +145,7 @@ export function SimpleRadarChart({
             cy={point.y}
             fill="var(--app-surface)"
             r={5}
-            stroke={stroke}
+            stroke={dotColors?.[index] ?? stroke}
             strokeWidth={2.5}
           />
         ))}

@@ -16,6 +16,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
+import { BillingPlusIllustration } from "../../app/components/illustrations/BillingPlusIllustration";
 import { BillingTrustSignals } from "../../app/components/BillingTrustSignals";
 import { PageHero } from "../../app/components/layout/PageHero";
 import { PrimaryActionCard } from "../../app/components/layout/PrimaryActionCard";
@@ -566,13 +567,8 @@ export function BillingPlan() {
         title="Chọn gói phù hợp với bạn"
         description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
-            <img
-              src="/plus_value.png"
-              alt="Gói nâng cấp Plus"
-              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              loading="lazy"
-            />
+          <div className="relative overflow-hidden rounded-card-lg border border-app-line dark:border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto flex items-center justify-center bg-app-surface p-6">
+            <BillingPlusIllustration className="h-full w-full max-h-48 text-app-accent" />
           </div>
         }
       />
@@ -580,7 +576,7 @@ export function BillingPlan() {
       {paidCheckoutDisabled && (
         <div
           data-testid="paid-checkout-disabled-banner"
-          className="rounded-xl border border-app-warm-border bg-app-warm-soft p-4"
+          className="rounded-card border border-app-warm-border bg-app-warm-soft p-4"
         >
           <div className="flex items-start gap-3">
             <LockKeyhole className="mt-0.5 h-5 w-5 text-app-warm" />
@@ -608,7 +604,7 @@ export function BillingPlan() {
 
       {/* Checkout return status */}
       {checkoutReturnStatus === "pending" && (
-        <div className="rounded-xl border border-app-line bg-app-warm-soft p-4">
+        <div className="rounded-card border border-app-line bg-app-warm-soft p-4">
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-app-warm" />
             <div>
@@ -621,7 +617,7 @@ export function BillingPlan() {
         </div>
       )}
       {checkoutReturnStatus === "confirmed" && (
-        <div className="rounded-xl border border-app-accent-soft bg-app-accent-soft p-4">
+        <div className="rounded-card border border-app-accent-soft bg-app-accent-soft p-4">
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-app-accent" />
             <div>
@@ -635,7 +631,7 @@ export function BillingPlan() {
         </div>
       )}
       {checkoutReturnStatus === "failed" && (
-        <div className="rounded-xl border border-app-status-error/20 bg-app-status-error/8 p-4">
+        <div className="rounded-card border border-app-status-error/20 bg-app-status-error/8 p-4">
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-app-status-error" />
             <div>
@@ -651,7 +647,7 @@ export function BillingPlan() {
 
       {shouldShowExpiryNotice && (
         <div
-          className={`rounded-xl p-4 ${isExpired ? "border-app-status-error/20 bg-app-status-error/8" : "border-app-line bg-app-warm-soft"}`}
+          className={`rounded-card p-4 ${isExpired ? "border-app-status-error/20 bg-app-status-error/8" : "border-app-line bg-app-warm-soft"}`}
         >
           <div className="flex items-start gap-3">
             <AlertTriangle className={`mt-0.5 h-5 w-5 ${isExpired ? "text-app-status-error" : "text-app-warm"}`} />
@@ -758,18 +754,18 @@ export function BillingPlan() {
 
           {isPaidPlan && (
             <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-app-line bg-app-bg p-4">
+              <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-app-ink-muted">Gia hạn</p>
                 <p className="font-medium text-app-ink">{renewalLabel}</p>
               </div>
-              <div className="rounded-xl border border-app-line bg-app-bg p-4">
+              <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-app-ink-muted">Đơn vị thanh toán</p>
                 <p className="flex items-center gap-2 font-medium text-app-ink">
                   <CreditCard className="h-4 w-4 text-app-ink-muted" />
                   Thanh toán qua {providerLabel}
                 </p>
               </div>
-              <div className="rounded-xl border border-app-line bg-app-bg p-4">
+              <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-app-ink-muted">Trạng thái</p>
                 <p className="font-medium text-app-ink">
                   {isInRenewalPriority
@@ -785,7 +781,7 @@ export function BillingPlan() {
                             : "Đang chuẩn bị"}
                 </p>
               </div>
-              <div className="rounded-xl border border-app-line bg-app-bg p-4">
+              <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-app-ink-muted">Chu kỳ</p>
                 <p className="font-medium text-app-ink">
                   {subscription?.billingCycle === "monthly"
@@ -866,14 +862,14 @@ export function BillingPlan() {
             </CardHeader>
             <CardContent className="stack-stack">
               {isLoadingPaymentHistory && (
-                <div className="flex items-center gap-3 rounded-xl border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
+                <div className="flex items-center gap-3 rounded-card border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Đang tải lịch sử thanh toán...
                 </div>
               )}
 
               {!isLoadingPaymentHistory && paymentHistoryError && (
-                <div className="flex flex-col gap-3 rounded-xl border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 rounded-card border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-app-status-error">{paymentHistoryError}</p>
                   <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
                     Thử lại
@@ -882,7 +878,7 @@ export function BillingPlan() {
               )}
 
               {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
-                <div className="rounded-xl border border-app-line bg-app-bg p-4">
+                <div className="rounded-card border border-app-line bg-app-bg p-4">
                   <p className="text-sm font-medium text-app-ink">Chưa có giao dịch nào.</p>
                   <p className="mt-1 text-sm text-app-ink-muted">
                     Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
@@ -988,7 +984,7 @@ export function BillingPlan() {
       {/* Billing support */}
       {realMode && (
         <SectionBlock title="Khu vực hỗ trợ thanh toán" headerVisuallyHidden>
-          <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
+          <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
             <div className="mb-4 flex items-center gap-2">
               <LifeBuoy className="h-5 w-5 text-app-accent" />
               <h2 className="text-lg font-semibold text-app-ink">Hỗ trợ thanh toán</h2>
@@ -997,7 +993,7 @@ export function BillingPlan() {
               Nếu đơn vị thanh toán đã xác nhận nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.
             </p>
             <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div className="rounded-xl border border-app-line bg-app-bg p-4">
+              <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-sm text-app-ink-muted">Email hỗ trợ</p>
                 <p className="mt-1 font-medium text-app-ink">{BILLING_SUPPORT_EMAIL || "Chưa cấu hình email hỗ trợ"}</p>
               </div>
@@ -1063,7 +1059,7 @@ export function BillingPlan() {
 
       {/* Entitlements */}
       <SectionBlock title="Khu vực quyền truy cập" headerVisuallyHidden>
-        <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
+        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
           <div className="mb-2 flex items-center gap-2">
             <Shield className="h-5 w-5 text-app-accent" />
             <h2 className="text-lg font-semibold text-app-ink">Quyền truy cập</h2>
@@ -1079,7 +1075,7 @@ export function BillingPlan() {
               return (
                 <div
                   key={key}
-                  className={`flex items-center gap-3 rounded-xl border p-4 ${
+                  className={`flex items-center gap-3 rounded-card border p-4 ${
                     isActive ? "border-app-accent-soft bg-app-accent-soft" : "border-app-line bg-app-bg"
                   }`}
                 >
@@ -1107,7 +1103,7 @@ export function BillingPlan() {
 
       {/* Actions */}
       <SectionBlock title="Khu vực thao tác gói" headerVisuallyHidden>
-        <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
+        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
           <h2 className="mb-2 text-lg font-semibold text-app-ink">Thao tác</h2>
           <p className="mb-6 text-sm text-app-ink-muted">
             Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.
@@ -1158,7 +1154,7 @@ export function BillingPlan() {
 
       {/* Billing provider info (debug only) */}
       {shouldShowBillingDebugUi() && (
-        <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
+        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
           <h2 className="mb-2 text-sm font-semibold text-app-ink">Thông tin nhà cung cấp thanh toán</h2>
           <div className="grid gap-2 text-xs text-app-ink-muted sm:grid-cols-2">
             <div>
@@ -1184,7 +1180,7 @@ export function BillingPlan() {
 
       {/* Compare plans */}
       <SectionBlock title="Khu vực so sánh gói" headerVisuallyHidden>
-        <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6">
+        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
           <h2 className="mb-2 text-lg font-semibold text-app-ink">So sánh các gói</h2>
           <p className="mb-6 text-sm text-app-ink-muted">Chọn gói phù hợp với nhu cầu của bạn.</p>
           <div className="grid gap-4 md:grid-cols-2">
@@ -1195,7 +1191,7 @@ export function BillingPlan() {
               return (
                 <div
                   key={plan.code}
-                  className={`relative overflow-hidden rounded-2xl border p-5 sm:p-6 ${
+                  className={`relative overflow-hidden rounded-card-lg border p-5 sm:p-6 ${
                     isRecommended
                       ? "border-app-accent/40 bg-app-surface bg-gradient-to-br from-app-accent-soft/30 to-transparent shadow-[var(--shadow-3)]"
                       : isCurrent

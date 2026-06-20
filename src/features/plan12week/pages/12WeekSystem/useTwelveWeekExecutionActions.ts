@@ -76,6 +76,7 @@ interface UseTwelveWeekExecutionActionsOptions {
   refreshBackendProgressOverlay: () => void;
   invalidateOverlay: () => void;
   refreshSnapshotMeta: () => void;
+  onWeekCompleted?: (weekNumber: number, goalId: string) => void;
 }
 
 function getClientPlanId(goalId: string): string {
@@ -212,6 +213,7 @@ export function useTwelveWeekExecutionActions({
   refreshBackendProgressOverlay,
   invalidateOverlay,
   refreshSnapshotMeta,
+  onWeekCompleted,
 }: UseTwelveWeekExecutionActionsOptions) {
   const getLatestActiveSystem = useCallback(() => {
     if (!activeGoal || !system) return system;
@@ -607,6 +609,7 @@ export function useTwelveWeekExecutionActions({
     });
     hapticSuccess();
     triggerWeeklyReviewConfetti();
+    onWeekCompleted?.(reviewWeekNumber, actionGoalId);
 
     const synced = await executionSyncActions.syncWeeklyReview({
       weekNumber: reviewWeekNumber,
@@ -639,6 +642,7 @@ export function useTwelveWeekExecutionActions({
     refreshBackendProgressOverlay,
     refreshSnapshotMeta,
     getLatestActiveSystem,
+    onWeekCompleted,
   ]);
 
   const handleReentry = useCallback(

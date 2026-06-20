@@ -279,7 +279,7 @@ export function SettingsPage() {
         title="Tuỳ chỉnh tài khoản"
         description="Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn."
         aside={
-          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
+          <div className="relative overflow-hidden rounded-card-lg border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
             <img
               src="/settings_safe_data.png"
               alt="Cài đặt an toàn dữ liệu"
@@ -293,7 +293,7 @@ export function SettingsPage() {
       <div className="mt-6 space-y-5">
         {firstRecoverySnapshot ? (
           <section
-            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
+            className="surface-raised rounded-card border border-app-line bg-app-surface p-5"
             aria-label="Khôi phục dữ liệu cũ"
           >
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -318,7 +318,7 @@ export function SettingsPage() {
 
         {shouldShowExpiryNotice ? (
           <section
-            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5"
+            className="surface-raised rounded-card border border-app-line bg-app-surface p-5"
             aria-label="Trạng thái gói Plus"
           >
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -346,7 +346,7 @@ export function SettingsPage() {
         ) : null}
 
         <section
-          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Tài khoản"
         >
           <div className="flex items-start gap-3">
@@ -439,7 +439,7 @@ export function SettingsPage() {
         </section>
 
         <section
-          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Tuỳ chọn trải nghiệm"
         >
           <div className="flex items-start gap-3">
@@ -556,7 +556,7 @@ export function SettingsPage() {
         </section>
 
         <section
-          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Dữ liệu"
         >
           <div className="flex items-start gap-3">
@@ -696,7 +696,7 @@ export function SettingsPage() {
         </section>
 
         <section
-          className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6"
+          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Thông tin ứng dụng"
         >
           <h2 className="font-serif text-xl font-medium text-app-ink">Thông tin</h2>

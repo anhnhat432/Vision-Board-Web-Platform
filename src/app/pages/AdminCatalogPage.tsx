@@ -167,31 +167,31 @@ export function AdminCatalogPage() {
 
     return (
       <Table
-        containerClassName="rounded-[var(--r-card)] border-white/10 bg-white/[0.02] shadow-none"
-        className="text-slate-200"
+        containerClassName="rounded-[var(--r-card)] border-app-line bg-app-surface shadow-none"
+        className="text-app-ink-soft"
       >
-        <TableHeader className="bg-white/[0.04] [&_tr]:border-b [&_tr]:border-white/10">
-          <TableRow className="border-white/10 hover:bg-transparent">
-            <TableHead className="text-slate-400">Ảnh</TableHead>
-            <TableHead className="text-slate-400">Item ID</TableHead>
-            <TableHead className="text-slate-400">Tên</TableHead>
-            <TableHead className="text-slate-400">Giá (đ)</TableHead>
-            <TableHead className="text-slate-400">Trạng thái</TableHead>
+        <TableHeader className="bg-app-bg-subtle [&_tr]:border-b [&_tr]:border-app-line">
+          <TableRow className="border-app-line hover:bg-transparent">
+            <TableHead className="text-app-ink-muted">Ảnh</TableHead>
+            <TableHead className="text-app-ink-muted">Item ID</TableHead>
+            <TableHead className="text-app-ink-muted">Tên</TableHead>
+            <TableHead className="text-app-ink-muted">Giá (đ)</TableHead>
+            <TableHead className="text-app-ink-muted">Trạng thái</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="divide-y divide-white/10">
+        <TableBody className="divide-y divide-app-line">
           {list.map((item) => (
-            <TableRow key={item.itemId} className="border-white/10 hover:bg-white/5">
+            <TableRow key={item.itemId} className="border-app-line hover:bg-app-bg-subtle">
               <TableCell>
                 <div className="flex items-center gap-3">
                   {item.thumbnail ? (
                     <img
                       src={item.thumbnail}
                       alt={item.label}
-                      className="h-12 w-12 rounded-[var(--r-tile)] border border-white/10 object-cover"
+                      className="h-12 w-12 rounded-[var(--r-tile)] border border-app-line object-cover"
                     />
                   ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-white/15 bg-white/5 text-xs text-slate-500">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-app-line-strong bg-app-bg-subtle text-xs text-app-ink-muted">
                       no img
                     </div>
                   )}
@@ -211,7 +211,7 @@ export function AdminCatalogPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
+                    className="border-app-line bg-app-bg-subtle text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
                     disabled={uploading === item.itemId}
                     onClick={() => fileInputs.current[item.itemId]?.click()}
                   >
@@ -225,8 +225,8 @@ export function AdminCatalogPage() {
                   </Button>
                 </div>
               </TableCell>
-              <TableCell className="font-mono text-xs text-slate-300">{item.itemId}</TableCell>
-              <TableCell className="text-slate-100">{item.label}</TableCell>
+              <TableCell className="font-mono text-xs text-app-ink-soft">{item.itemId}</TableCell>
+              <TableCell className="text-app-ink">{item.label}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Input
@@ -240,7 +240,7 @@ export function AdminCatalogPage() {
                       if (v !== item.priceVnd) void updatePrice(item.itemId, v);
                     }}
                   />
-                  <span className="text-xs text-slate-500">{formatVnd(item.priceVnd)}</span>
+                  <span className="text-xs text-app-ink-muted">{formatVnd(item.priceVnd)}</span>
                 </div>
               </TableCell>
               <TableCell>
@@ -251,7 +251,7 @@ export function AdminCatalogPage() {
                     onCheckedChange={(checked) => void toggleActive(item.itemId, Boolean(checked))}
                     aria-label={`${item.label}: ${item.isActive ? "đang bán" : "đã ẩn"}`}
                   />
-                  <span className={item.isActive ? "text-emerald-300" : "text-slate-500"}>
+                  <span className={item.isActive ? "text-app-accent" : "text-app-ink-muted"}>
                     {item.isActive ? "Đang bán" : "Đã ẩn"}
                   </span>
                 </div>
@@ -272,7 +272,7 @@ export function AdminCatalogPage() {
           <Button
             type="button"
             variant="outline"
-            className="gap-2 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             disabled={loading}
             onClick={() => void refresh()}
           >
@@ -290,11 +290,11 @@ export function AdminCatalogPage() {
 
       {loading && items.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
         </div>
       ) : (
         <Tabs defaultValue="frame">
-          <TabsList className="bg-white/5">
+          <TabsList className="bg-app-bg-subtle">
             <TabsTrigger value="frame">{TAB_LABELS.frame}</TabsTrigger>
             <TabsTrigger value="theme">{TAB_LABELS.theme}</TabsTrigger>
             <TabsTrigger value="sticker">{TAB_LABELS.sticker}</TabsTrigger>
