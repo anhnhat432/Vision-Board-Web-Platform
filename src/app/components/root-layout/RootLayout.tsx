@@ -3,9 +3,11 @@ import {
   ChevronRight,
   Compass,
   CreditCard,
+  Facebook,
   FileText,
   HardDrive,
   HelpCircle,
+  Instagram,
   LogIn,
   LogOut,
   Menu,
@@ -1555,23 +1557,56 @@ export function RootLayout() {
 
             {user ? (
               <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs tracking-tight text-app-ink-muted sm:px-6 md:pb-8 lg:px-8">
-                <div className="flex items-center justify-center gap-2 border-t border-app-line pt-4 md:justify-end">
-                  <span className="font-semibold">v1.0</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="hidden max-w-[260px] truncate md:inline">{accountEmail || accountLabel}</span>
-                  <span className="hidden md:inline" aria-hidden="true">
-                    ·
-                  </span>
-                  <a
-                    href="/settings"
-                    className="font-semibold text-app-ink underline-offset-4 transition-colors hover:underline"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      navigateAppRoute("/settings");
-                    }}
-                  >
-                    Cài đặt
-                  </a>
+                <div className="flex flex-col items-center gap-3 border-t border-app-line pt-4 md:flex-row md:justify-between">
+                  <div className="flex items-center justify-center gap-2 md:justify-start">
+                    <span className="font-semibold">v1.0</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="hidden max-w-[260px] truncate md:inline">{accountEmail || accountLabel}</span>
+                    <span className="hidden md:inline" aria-hidden="true">
+                      ·
+                    </span>
+                    <a
+                      href="/settings"
+                      className="font-semibold text-app-ink underline-offset-4 transition-colors hover:underline"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        navigateAppRoute("/settings");
+                      }}
+                    >
+                      Cài đặt
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      href="https://www.tiktok.com/@dofexe201"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="TikTok"
+                      className="inline-flex size-7 items-center justify-center rounded-full text-app-ink-muted transition-colors duration-150 hover:text-app-accent"
+                    >
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
+                      </svg>
+                    </a>
+                    <a
+                      href="https://www.instagram.com/dearourfuture"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      className="inline-flex size-7 items-center justify-center rounded-full text-app-ink-muted transition-colors duration-150 hover:text-app-accent"
+                    >
+                      <Instagram className="h-3.5 w-3.5" />
+                    </a>
+                    <a
+                      href="https://www.facebook.com/profile.php?id=61589773962146"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                      className="inline-flex size-7 items-center justify-center rounded-full text-app-ink-muted transition-colors duration-150 hover:text-app-accent"
+                    >
+                      <Facebook className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
                 </div>
               </footer>
             ) : null}

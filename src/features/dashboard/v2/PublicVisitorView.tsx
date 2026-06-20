@@ -1,4 +1,4 @@
-import { HardDrive, LogIn } from "lucide-react";
+import { Facebook, HardDrive, Instagram, LogIn } from "lucide-react";
 import { type CSSProperties, useState } from "react";
 
 import {
@@ -1056,7 +1056,44 @@ export function PublicVisitorView({
               Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
             </span>
           </div>
-          <div style={{ fontSize: 12.5, color: "#A8A296" }}>© 2026 Dear Our Future · local-first 12-Week Year</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <a
+              href="https://www.tiktok.com/@dofexe201"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok"
+              style={{ color: "#A8A296", display: "flex", transition: "color 0.15s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#A8A296")}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
+              </svg>
+            </a>
+            <a
+              href="https://www.instagram.com/dearourfuture"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              style={{ color: "#A8A296", display: "flex", transition: "color 0.15s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#A8A296")}
+            >
+              <Instagram size={18} />
+            </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=61589773962146"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              style={{ color: "#A8A296", display: "flex", transition: "color 0.15s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#A8A296")}
+            >
+              <Facebook size={18} />
+            </a>
+            <span style={{ fontSize: 12.5, color: "#A8A296" }}>© 2026 Dear Our Future · local-first 12-Week Year</span>
+          </div>
         </div>
       </footer>
     </div>
