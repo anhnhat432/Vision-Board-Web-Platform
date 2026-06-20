@@ -32,30 +32,30 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
   const searchActive = handler !== null;
 
   return (
-    <header className="sticky top-0 z-30 h-14 border-b border-white/10 bg-slate-950/92 backdrop-blur">
+    <header className="sticky top-0 z-30 h-14 border-b border-app-line bg-app-bg/92 backdrop-blur">
       <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="text-slate-300 hover:bg-white/10 hover:text-white lg:hidden"
+            className="text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink lg:hidden"
             onClick={onOpenSidebar}
             aria-label="Mở menu admin"
           >
             <Menu className="h-5 w-5" />
           </Button>
           <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-2 text-sm lg:flex">
-            <span className="text-slate-500">Admin</span>
-            <span className="text-slate-600">/</span>
-            <span className="truncate font-medium text-white">{label}</span>
+            <span className="text-app-ink-muted">Admin</span>
+            <span className="text-app-ink-muted">/</span>
+            <span className="truncate font-medium text-app-ink">{label}</span>
           </nav>
-          <span className="truncate text-sm font-semibold text-white lg:hidden">{label}</span>
+          <span className="truncate text-sm font-semibold text-app-ink lg:hidden">{label}</span>
         </div>
 
         <div className="hidden w-full max-w-xs md:block">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
             {searchActive && handler ? (
               <Input
                 type="search"
