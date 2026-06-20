@@ -952,7 +952,7 @@ export function Onboarding() {
                                 "flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 motion-reduce:transition-none",
                                 isCurrentScore
                                   ? "border-app-accent bg-app-accent text-white shadow-app-sm motion-safe:scale-105"
-                                  : "border-app-line bg-app-bg text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink",
+                                  : "border-app-line bg-app-bg-subtle text-app-ink-soft hover:bg-app-accent-subtle hover:text-app-ink",
                               )}
                               style={
                                 isCurrentScore
