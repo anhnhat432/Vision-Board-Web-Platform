@@ -1056,7 +1056,7 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1080px] px-4 pt-6 pb-16 md:px-9 flex flex-col gap-[18px]">
       {/* 1. Subcomponent Dialogs Container */}
       <TwelveWeekSystemDialogs
         isUpgradeDialogOpen={isUpgradeDialogOpen}

@@ -221,68 +221,97 @@ export function TwelveWeekDashboardHeader({
     Math.min(100, Math.round((currentWeek / Math.max(1, system.totalWeeks)) * 100)),
   );
   const weekPercent = Math.max(0, Math.min(100, Math.round(weekCompletion.percent)));
+  const gaugeOffset = 339.292 * (1 - cyclePercent / 100);
 
   return (
-    <header className="relative overflow-hidden rounded-3xl bg-app-accent p-6 text-white shadow-lg md:p-8">
-      {/* lớp sáng mảnh phía trên — tạo chiều sâu, không dùng blur/mesh */}
+    <header className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#0C5E3A] to-[#0A4E31] py-[30px] px-[34px] text-white">
+      {/* Dot pattern overlay */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)",
+          backgroundSize: "18px 18px",
+          opacity: 0.6,
+        }}
+      />
+      {/* Glow circle top-right */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-[60px] -right-[30px] h-[240px] w-[240px] rounded-full"
+        style={{ background: "rgba(198,242,78,0.1)" }}
+      />
+      {/* Decorative ring 1 */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-[90px] -right-[60px] h-[300px] w-[300px] rounded-full border"
+        style={{ borderColor: "rgba(198,242,78,0.12)" }}
+      />
+      {/* Decorative ring 2 */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-[120px] right-[120px] h-[260px] w-[260px] rounded-full border"
+        style={{ borderColor: "rgba(255,255,255,0.06)" }}
       />
 
-      <div className="relative grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
-        <div className="min-w-0 space-y-3">
+      <div className="relative grid gap-[30px] lg:grid-cols-[1fr_380px] lg:items-center">
+        {/* LEFT COLUMN */}
+        <div className="min-w-0">
+          {/* Pills row 1 */}
           <div
             data-testid="twelve-week-header-description"
-            className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider"
+            className="flex flex-wrap items-center gap-2 mb-4"
           >
-            <span className="rounded-md border border-white/20 bg-white/10 px-2 py-0.5 text-white/90">
+            <span className="rounded-full border border-white/[0.16] bg-white/[0.12] px-[11px] py-[5px] text-[10px] font-bold uppercase tracking-[0.1em] text-white/90">
               Hệ thống 12 tuần
             </span>
-            <span className="rounded-md border border-white/20 bg-white/10 px-2 py-0.5 text-white/90">
+            <span className="rounded-full border border-white/[0.16] bg-white/[0.12] px-[11px] py-[5px] text-[10px] font-bold uppercase tracking-[0.1em] text-white/90 font-mono">
               Tuần {currentWeek} / {system.totalWeeks}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-app-highlight px-2.5 py-0.5 text-app-ink">
-              <PhaseIcon className="h-3 w-3 shrink-0" />
+            <span className="inline-flex items-center gap-[6px] rounded-full bg-[#C6F24E] px-[11px] py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-[#17150F]">
+              <span className="inline-block h-[6px] w-[6px] animate-pulse rounded-full bg-app-accent" />
               <span>Nhịp {phaseInfo.label}</span>
             </span>
           </div>
 
+          {/* Title */}
+          <div className="mb-4">
           <InlineGoalTitleEdit
             title={activeGoal.title}
             fallbackTitle="Kế hoạch hiện tại"
             onSave={onRenameGoal}
             headingLevel={1}
-            titleClassName="break-words font-serif text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white"
-            inputClassName="h-auto rounded-lg bg-white/10 px-2 py-1 font-serif text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white"
+            titleClassName="break-words font-serif text-[clamp(24px,2.7vw,32px)] font-extrabold leading-[1.12] tracking-[-0.02em] max-w-[24ch] text-white"
+            inputClassName="h-auto rounded-lg bg-white/10 px-2 py-1 font-serif text-[clamp(24px,2.7vw,32px)] font-extrabold leading-[1.12] tracking-[-0.02em] text-white"
           />
+          </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-[10px] text-white/70">
-            <span className="rounded-md border border-white/15 px-1.5 py-0.5">Gói {getPlanLabel(activePlanCode)}</span>
-            <span>·</span>
-            <span
-              className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium border border-transparent ${syncBadgeClass}`}
-            >
+          {/* Pills row 2 */}
+          <div className="flex flex-wrap items-center gap-2 mb-[22px]">
+            <span className="rounded-full bg-white/[0.1] px-3 py-[5px] text-[11.5px] font-semibold">Gói {getPlanLabel(activePlanCode)}</span>
+            <span className="inline-flex items-center gap-2 text-[11.5px] font-medium text-[#9CB89A]">
+              <span className="inline-block h-1 w-1 rounded-full bg-[#9CB89A]" />
               {syncBadgeLabel}
             </span>
           </div>
 
+          {/* Buttons */}
           <div
             data-testid="twelve-week-header-actions"
-            className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:items-center"
+            className="flex flex-wrap gap-[10px]"
           >
             <button
               type="button"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-app-surface px-6 py-2.5 text-xs font-bold text-app-accent shadow-sm transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/50"
+              className="inline-flex items-center justify-center gap-[9px] rounded-full bg-white px-[20px] py-[12px] text-[13.5px] font-bold text-app-accent transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/50"
               onClick={onOpenFocusTab}
             >
               <span>{reviewDueToday ? "Review tuần này" : "Xem việc hôm nay"}</span>
-              <Target className="h-3.5 w-3.5" aria-hidden="true" />
+              <Target className="h-[15px] w-[15px]" aria-hidden="true" />
             </button>
 
             <button
               type="button"
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/30 bg-white/5 px-5 py-2.5 text-xs font-semibold text-white/90 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/[0.18] bg-white/[0.1] px-[20px] py-[12px] text-[13.5px] font-semibold text-white transition-colors hover:bg-white/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               onClick={onOpenGoals}
             >
               Mở mục tiêu
@@ -290,33 +319,64 @@ export function TwelveWeekDashboardHeader({
           </div>
         </div>
 
-        {/* Bảng tiến độ — điểm nhấn số liệu nổi bật */}
-        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/15 bg-black/20 p-4">
-          <div className="col-span-2">
-            <div className="flex items-end justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
-                Tiến độ chu kỳ
-              </span>
-              <span className="font-serif text-lg font-semibold tabular-nums text-white">
-                {currentWeek}
-                <span className="text-sm text-white/60">/{system.totalWeeks}</span>
-              </span>
+        {/* RIGHT COLUMN — gauge + stat cards */}
+        <div className="flex flex-col gap-[14px]">
+          {/* Gauge card */}
+          <div className="relative flex items-center gap-[18px] overflow-hidden rounded-[18px] border border-white/[0.12] bg-white/[0.06] p-[22px]">
+            {/* Glow behind gauge */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-[6px] top-[6px] h-[130px] w-[130px] rounded-full blur-[36px]"
+              style={{ background: "rgba(198,242,78,0.22)" }}
+            />
+            {/* SVG gauge */}
+            <div className="relative h-[128px] w-[128px] shrink-0">
+              <svg viewBox="0 0 128 128" className="h-[128px] w-[128px] -rotate-90" aria-hidden="true">
+                <circle cx="64" cy="64" r="54" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="10" />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="54"
+                  fill="none"
+                  stroke="#C6F24E"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray="339.29"
+                  strokeDashoffset={gaugeOffset}
+                  className="transition-all duration-1000"
+                />
+              </svg>
+              {/* Center text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-serif text-[32px] font-extrabold leading-none text-white">
+                  {currentWeek}
+                  <span className="text-[16px] text-[#9CB89A]">/{system.totalWeeks}</span>
+                </span>
+                <span className="mt-[3px] text-[9px] font-bold uppercase tracking-[0.06em] text-[#9CB89A]">tuần chu kỳ</span>
+              </div>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15" aria-hidden="true">
-              <div className="h-full rounded-full bg-app-highlight" style={{ width: `${cyclePercent}%` }} />
+            {/* Gauge text */}
+            <div className="relative min-w-0">
+              <div className="mb-[7px] text-[10px] font-bold uppercase tracking-[0.12em] text-[#C6F24E]">Tiến độ chu kỳ</div>
+              <p className="text-[12.5px] leading-[1.5] text-[#D6E4CE]">
+                Đang ở nhịp {phaseInfo.label.toLowerCase()} — giữ đều mỗi tuần một đầu ra thật.
+              </p>
             </div>
           </div>
 
-          <div className="rounded-xl bg-white/5 p-3">
-            <div className="font-serif text-2xl font-semibold tabular-nums text-white">{weekPercent}%</div>
-            <div className="mt-0.5 text-[10px] font-medium text-white/70">Tuần này</div>
-          </div>
-          <div className="rounded-xl bg-white/5 p-3">
-            <div className="font-serif text-2xl font-semibold tabular-nums text-white">
-              {todayCompletedCount}
-              <span className="text-sm text-white/60">/{todayCompletedCount + todayRemainingCount}</span>
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 gap-[12px]">
+            <div className="rounded-[13px] border border-white/[0.1] bg-white/[0.06] p-[14px]">
+              <div className="font-serif text-[26px] font-extrabold leading-none text-[#C6F24E]">{weekPercent}%</div>
+              <div className="mt-[5px] text-[11px] font-medium text-[#9CB89A]">Tuần này</div>
             </div>
-            <div className="mt-0.5 text-[10px] font-medium text-white/70">Việc hôm nay</div>
+            <div className="rounded-[13px] border border-white/[0.1] bg-white/[0.06] p-[14px]">
+              <div className="font-serif text-[26px] font-extrabold leading-none text-white">
+                {todayCompletedCount}
+                <span className="text-[15px] text-[#9CB89A]">/{todayCompletedCount + todayRemainingCount}</span>
+              </div>
+              <div className="mt-[5px] text-[11px] font-medium text-[#9CB89A]">Việc hôm nay</div>
+            </div>
           </div>
         </div>
       </div>
@@ -339,7 +399,7 @@ export function TwelveWeekGoalSwitcher({
     <div className="flex">
       <Select value={activeGoalId} onValueChange={onLoadGoal}>
         <SelectTrigger
-          className="h-auto w-full max-w-full rounded-2xl border-app-line/60 bg-app-surface px-4 py-2.5 text-sm font-semibold text-app-ink shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
+          className="h-auto w-full max-w-full rounded-[14px] border-[rgba(23,21,15,0.1)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[#17150F] shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
           aria-label="Chọn mục tiêu 12 tuần"
         >
           <SelectValue placeholder="Chọn mục tiêu" />

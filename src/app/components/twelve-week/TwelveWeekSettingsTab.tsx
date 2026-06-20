@@ -220,7 +220,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
             source="settings"
             context="12_week_settings"
             triggerLabel="Góp ý"
-            triggerClassName="border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning hover:bg-app-status-warning/20 font-semibold shadow-sm transition-all duration-200 rounded-xl px-4 py-2"
+            triggerClassName="border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning hover:bg-app-status-warning/20 font-semibold shadow-sm transition-all duration-200 rounded-[999px] px-4 py-2"
           />
         </div>
       </SectionBlock>

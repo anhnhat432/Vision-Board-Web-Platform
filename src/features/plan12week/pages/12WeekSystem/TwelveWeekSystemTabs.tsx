@@ -340,7 +340,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex min-h-[46px] rounded-2xl bg-app-bg-subtle/80 dark:bg-app-bg-subtle/60 p-1 border border-app-line/80 backdrop-blur-md shadow-3xs"
+            className="inline-flex rounded-[14px] bg-app-surface p-[5px] gap-1 border border-app-line w-fit"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
@@ -352,12 +352,10 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex-none rounded-xl px-4.5 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm transition-all duration-300 gap-2 flex items-center justify-center border border-transparent min-h-[38px] cursor-pointer active:scale-[0.96] group
-                    data-[state=active]:bg-app-surface data-[state=active]:text-app-accent data-[state=active]:font-serif data-[state=active]:italic data-[state=active]:font-bold data-[state=active]:shadow-2xs data-[state=active]:border-app-line/40
-                    data-[state=inactive]:text-app-ink-soft data-[state=inactive]:font-medium hover:data-[state=inactive]:text-app-ink hover:data-[state=inactive]:bg-app-surface/40`}
+                  className={`relative flex-none rounded-[10px] px-[18px] py-[10px] text-[13px] transition-all duration-150 gap-2 flex items-center justify-center min-h-[38px] cursor-pointer font-semibold data-[state=active]:bg-app-accent data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink`}
                 >
                   <Icon
-                    className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-app-accent"
+                    className="h-[15px] w-[15px] shrink-0 transition-transform duration-150 group-hover:scale-110"
                     aria-hidden="true"
                   />
                   <span>{label}</span>
