@@ -62,10 +62,12 @@ interface PaymentOrderStatusResponse {
   status: PaymentOrderStatus;
   amount: number;
   currency: string;
+  provider?: string | null;
   bankAccount: string;
   bankName: string;
   accountName: string;
   qrDataUrl: string;
+  checkoutUrl?: string | null;
   expiresAt: string | null;
   completedAt?: string | null;
   createdAt?: string | null;
@@ -96,6 +98,18 @@ function getPaymentExpiresAt(order: PaymentOrderStatusResponse | null): number |
     if (Number.isFinite(createdAtMs)) return createdAtMs + PAYMENT_TIMEOUT_MS;
   }
   return null;
+}
+
+function isRenderableQrImageSrc(value: string | null | undefined): value is string {
+  const trimmed = value?.trim();
+  if (!trimmed) return false;
+  return (
+    trimmed.startsWith("data:image/") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("//")
+  );
 }
 
 function createSupportMailto(orderId: string, isKitOrder = false): string {
@@ -196,6 +210,7 @@ export function OrderStatusPage() {
   const [transferConfirmedByUser, setTransferConfirmedByUser] = useState(false);
   const [confirmingTransfer, setConfirmingTransfer] = useState(false);
   const [successRedirecting, setSuccessRedirecting] = useState(false);
+  const [failedQrImageSrc, setFailedQrImageSrc] = useState<string | null>(null);
   const paymentPageOpenedAtRef = useRef(Date.now());
   const paymentRedirectedRef = useRef(false);
   const paymentMode = isPaymentOrderId(params.orderId);
@@ -282,6 +297,11 @@ export function OrderStatusPage() {
       .catch(() => setPaymentError("Không sao chép được. Bạn có thể chọn và sao chép thủ công."));
   }, []);
 
+  const openHostedCheckout = useCallback(() => {
+    if (!paymentOrder?.checkoutUrl) return;
+    window.location.assign(paymentOrder.checkoutUrl);
+  }, [paymentOrder?.checkoutUrl]);
+
   const handleUserConfirmedTransfer = useCallback(async () => {
     if (!paymentOrder || confirmingTransfer) return;
     setConfirmingTransfer(true);
@@ -334,6 +354,14 @@ export function OrderStatusPage() {
     paymentOrder?.status === "pending" && paymentElapsedOnPageMs >= PAYMENT_HELP_DELAY_MS && !paymentTimedOut,
   );
   const transferDescription = paymentOrder?.description?.trim() || paymentOrder?.orderId || "";
+  const hasHostedCheckout = Boolean(paymentOrder?.checkoutUrl);
+  const isHostedPayosCheckout = paymentOrder?.provider?.toLowerCase() === "payos" && hasHostedCheckout;
+  const shouldRenderQrImage = Boolean(
+    paymentOrder?.qrDataUrl &&
+      isRenderableQrImageSrc(paymentOrder.qrDataUrl) &&
+      paymentOrder.qrDataUrl !== failedQrImageSrc &&
+      !isHostedPayosCheckout,
+  );
 
   useEffect(() => {
     if (paymentMode) return;
@@ -478,15 +506,49 @@ export function OrderStatusPage() {
               </div>
 
               <div className="rounded-lg border border-app-line bg-app-bg p-4">
-                {paymentOrder.qrDataUrl ? (
+                {isHostedPayosCheckout ? (
+                  <div className="mx-auto flex aspect-square w-full max-w-[360px] flex-col items-center justify-center rounded-lg bg-app-surface p-6 text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+                      <QrCode className="h-7 w-7" />
+                    </div>
+                    <p className="mt-4 text-sm font-semibold text-app-ink">Mở cổng PayOS để quét QR</p>
+                    <p className="mt-2 text-xs leading-5 text-app-ink-muted">
+                      PayOS sẽ hiển thị mã QR hợp lệ và xác nhận giao dịch trên cổng thanh toán.
+                    </p>
+                    <Button
+                      type="button"
+                      className="mt-4 bg-app-accent text-white hover:bg-app-accent"
+                      onClick={openHostedCheckout}
+                    >
+                      <QrCode className="h-4 w-4" />
+                      Mở cổng PayOS
+                    </Button>
+                  </div>
+                ) : shouldRenderQrImage ? (
                   <img
                     src={paymentOrder.qrDataUrl}
                     alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`}
                     className="mx-auto aspect-square w-full max-w-[360px] rounded-lg bg-app-surface p-3"
+                    onError={() => setFailedQrImageSrc(paymentOrder.qrDataUrl)}
                   />
                 ) : (
-                  <div className="mx-auto flex aspect-square w-full max-w-[360px] items-center justify-center rounded-lg bg-app-surface text-app-ink-muted">
+                  <div className="mx-auto flex aspect-square w-full max-w-[360px] flex-col items-center justify-center rounded-lg bg-app-surface p-6 text-center text-app-ink-muted">
                     <QrCode className="h-16 w-16" />
+                    <p className="mt-3 text-sm font-medium text-app-ink">QR chưa khả dụng</p>
+                    <p className="mt-1 text-xs leading-5">
+                      Vui lòng dùng đúng số tiền và nội dung chuyển khoản ở cột bên phải.
+                    </p>
+                    {hasHostedCheckout && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="mt-4 border-app-line text-app-ink hover:bg-app-bg"
+                        onClick={openHostedCheckout}
+                      >
+                        <QrCode className="h-4 w-4" />
+                        Mở cổng thanh toán
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

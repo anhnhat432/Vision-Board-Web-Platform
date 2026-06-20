@@ -147,6 +147,22 @@ describe("OrderStatusPage payment polling", () => {
     expect(screen.getByText(/Nếu bạn đã chuyển khoản, liên hệ support@example.test/)).toBeInTheDocument();
   });
 
+  it("uses hosted PayOS checkout instead of rendering the raw PayOS qrCode as an image", async () => {
+    apiClientMock.get.mockResolvedValue(
+      createPaymentOrder({
+        provider: "payos",
+        checkoutUrl: "https://pay.payos.vn/web/pay/test-payment-link",
+        qrDataUrl: "00020101021238540010A000000727012400069704220110VQRQAJWLZ9808",
+      }),
+    );
+
+    renderOrderStatus();
+
+    expect((await screen.findAllByText(/PayOS.*QR/i)).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /PayOS/i })).toBeInTheDocument();
+    expect(screen.queryByAltText(/QR/i)).not.toBeInTheDocument();
+  });
+
   it("posts user confirmation without changing local status", async () => {
     apiClientMock.get.mockResolvedValue(createPaymentOrder());
     apiClientMock.post.mockResolvedValue({ orderId: "VBPOLL0001", userConfirmedTransferAt: new Date().toISOString() });
@@ -195,7 +211,7 @@ describe("OrderStatusPage payment polling", () => {
       .mockResolvedValueOnce(createPaymentOrder({ purpose: "plus_subscription" }))
       .mockResolvedValueOnce(createPaymentOrder({ status: "completed", completedAt: new Date().toISOString(), purpose: "plus_subscription" }));
 
-    const router = renderOrderStatus("/order-status/VBPLUS001");
+    renderOrderStatus("/order-status/VBPLUS001");
 
     expect(await screen.findByText("Đang chờ xác nhận chuyển khoản")).toBeInTheDocument();
     await act(async () => {
