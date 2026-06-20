@@ -1016,7 +1016,7 @@ export function SmartGoalStepShell({
                 {step.key === "timeBound" ? (
                   renderPolaroidCard(true)
                 ) : (
-                  <div className="rounded-xl border border-app-line bg-app-surface overflow-hidden shadow-sm">
+                  <div className="rounded-card border border-app-line bg-app-surface overflow-hidden shadow-sm">
                     <button
                       type="button"
                       onClick={() => setIsPolaroidExpanded(!isPolaroidExpanded)}
@@ -1168,20 +1168,21 @@ export function SmartGoalStepShell({
                   whileHover={{ scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer font-sans"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-card border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg hover:text-app-ink active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer font-sans"
                   onClick={onBack}
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   Quay lại
                 </motion.button>
-                {showFinalSecondaryCta ? (
-                  <motion.button
-                    whileHover={{ scale: 1.015 }}
-                    whileTap={{ scale: 0.985 }}
-                    type="button"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-5 py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg hover:text-app-accent active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer font-sans"
-                    onClick={handleFinalSecondaryClick}
-                  >
+
+              {showFinalSecondaryCta ? (
+                <motion.button
+                  whileHover={{ scale: 1.015 }}
+                  whileTap={{ scale: 0.985 }}
+                  type="button"
+                  onClick={handleFinalSecondaryClick}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-card border border-app-line bg-app-surface px-5 py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg hover:text-app-accent active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 sm:w-auto cursor-pointer font-sans"
+                >
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                     {finalSecondaryCtaLabel}
                   </motion.button>
@@ -1190,7 +1191,7 @@ export function SmartGoalStepShell({
                   whileHover={{ scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer font-sans"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-card bg-app-accent px-6 py-2.5 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:w-auto transition-all duration-200 cursor-pointer font-sans"
                   onClick={handleNextClick}
                 >
                   {primaryCtaLabel}
@@ -1203,7 +1204,7 @@ export function SmartGoalStepShell({
                 <div className="flex justify-between gap-3">
                   <button
                     type="button"
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface py-3 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-card border border-app-line bg-app-surface py-3 text-sm font-medium text-app-ink-soft transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
                     onClick={onBack}
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -1211,7 +1212,7 @@ export function SmartGoalStepShell({
                   </button>
                   <button
                     type="button"
-                    className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-app-accent py-3 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 transition-all duration-200 cursor-pointer font-sans"
+                    className="flex-[2] inline-flex items-center justify-center gap-2 rounded-card bg-app-accent py-3 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 transition-all duration-200 cursor-pointer font-sans"
                     onClick={handleNextClick}
                   >
                     {primaryCtaLabel}
@@ -1221,7 +1222,7 @@ export function SmartGoalStepShell({
                 {showFinalSecondaryCta ? (
                   <button
                     type="button"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-card border border-app-line bg-app-surface py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 cursor-pointer font-sans"
                     onClick={handleFinalSecondaryClick}
                   >
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
@@ -1242,7 +1243,7 @@ export function SmartGoalStepShell({
 
               {currentStepSoftWarning && (
                 <div
-                  className="rounded-xl border border-app-line bg-app-bg p-4 text-app-ink-soft shadow-sm animate-[fade-in_0.3s_ease-out]"
+                  className="rounded-card border border-app-line bg-app-bg p-4 text-app-ink-soft shadow-sm animate-[fade-in_0.3s_ease-out]"
                   role="note"
                 >
                   <div className="flex items-start gap-2.5">
@@ -1311,7 +1312,7 @@ export function SmartGoalStepShell({
                   type="button"
                   onClick={() => onJumpToStep(item.stepKey)}
                   className={cn(
-                    "group/btn flex items-center justify-between rounded-xl border px-3 py-2 text-left transition-all duration-200 text-xs w-full cursor-pointer",
+                    "group/btn flex items-center justify-between rounded-control border px-3 py-2 text-left transition-all duration-200 text-xs w-full cursor-pointer",
                     item.done
                       ? "border-app-accent/15 bg-app-accent-soft/20 text-app-accent"
                       : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-ink-muted",

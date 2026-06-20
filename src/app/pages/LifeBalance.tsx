@@ -360,7 +360,7 @@ export function LifeBalance() {
             </p>
             <Link
               to="/onboarding"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-app-accent"
+              className="mt-6 inline-flex items-center gap-2 rounded-card bg-app-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-app-accent-hover"
             >
               Bắt đầu chấm điểm
               <ArrowRight className="h-4 w-4" />
@@ -395,7 +395,7 @@ export function LifeBalance() {
                 toast.success("Đã lưu trước khi rời trang.");
                 blocker.proceed?.();
               }}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2 text-sm font-medium text-white hover:bg-app-accent"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-app-accent px-4 py-2 text-sm font-medium text-white hover:bg-app-accent-hover"
             >
               <Save className="h-4 w-4" />
               Lưu rồi rời trang
@@ -403,13 +403,13 @@ export function LifeBalance() {
             <button
               type="button"
               onClick={() => blocker.proceed?.()}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
+              className="inline-flex min-h-11 items-center justify-center rounded-control border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg-subtle"
             >
               Rời trang
             </button>
             <AlertDialogCancel
               onClick={() => blocker.reset?.()}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg"
+              className="inline-flex min-h-11 items-center justify-center rounded-control border border-app-line bg-app-surface px-4 py-2 text-sm text-app-ink hover:bg-app-bg-subtle"
             >
               Ở lại trang này
             </AlertDialogCancel>
@@ -619,9 +619,9 @@ export function LifeBalance() {
                                 >
                                   <AreaIcon className="h-4 w-4" />
                                 </span>
-                                <span className="text-xs font-bold text-neutral-700">{label}</span>
+                                <span className="text-xs font-bold text-app-ink">{label}</span>
                               </div>
-                              <span className="font-serif text-lg font-extrabold text-neutral-800">{area.score}đ</span>
+                              <span className="font-serif text-lg font-extrabold text-app-ink">{area.score}đ</span>
                             </MotionStaggerItem>
                           );
                         })}
@@ -696,21 +696,21 @@ export function LifeBalance() {
                                       <AreaIcon className="h-5 w-5" />
                                     </span>
                                     <div>
-                                      <h4 className="text-xs font-bold text-neutral-800">{label}</h4>
-                                      <p className="text-[10px] text-neutral-500 font-semibold leading-normal">
+                                      <h4 className="text-xs font-bold text-app-ink">{label}</h4>
+                                      <p className="text-[10px] text-app-ink-muted font-semibold leading-normal">
                                         {LIFE_AREA_DETAILS[area.name]}
                                       </p>
                                     </div>
                                   </div>
 
-                                  <div className="flex items-baseline gap-1 bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/50 px-2.5 py-1 rounded-lg">
+                                  <div className="flex items-baseline gap-1 bg-app-bg-subtle border border-app-line px-2.5 py-1 rounded-control">
                                     <span
-                                      className="font-serif text-lg font-extrabold text-neutral-800"
+                                      className="font-serif text-lg font-extrabold text-app-ink"
                                       style={{ color: colorConfig.accent }}
                                     >
                                       {area.score}
                                     </span>
-                                    <span className="text-[10px] text-neutral-400 font-bold">/10</span>
+                                    <span className="text-[10px] text-app-ink-muted font-bold">/10</span>
                                   </div>
                                 </div>
 
@@ -721,7 +721,7 @@ export function LifeBalance() {
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
                                       type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none font-sans"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg-subtle active:scale-95 transition-all select-none font-sans"
                                       onClick={() => handleScoreChange(areaIndex, [Math.max(1, area.score - 1)])}
                                       aria-label={`Giảm ${label}`}
                                     >
@@ -745,7 +745,7 @@ export function LifeBalance() {
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
                                       type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-lg font-bold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition-all select-none font-sans"
+                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg-subtle active:scale-95 transition-all select-none font-sans"
                                       onClick={() => handleScoreChange(areaIndex, [Math.min(10, area.score + 1)])}
                                       aria-label={`Tăng ${label}`}
                                     >
@@ -753,7 +753,7 @@ export function LifeBalance() {
                                     </motion.button>
                                   </div>
 
-                                  <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase tracking-wider px-1">
+                                  <div className="flex justify-between text-[9px] font-bold text-app-ink-muted uppercase tracking-wider px-1">
                                     {[
                                       { range: "1–2", label: "Rất chật vật" },
                                       { range: "3–4", label: "Thiếu ổn định" },
@@ -999,7 +999,7 @@ export function LifeBalance() {
                       whileTap={{ scale: 0.985 }}
                       type="button"
                       onClick={handleContinueToGoalSetup}
-                      className="mt-6 group inline-flex min-h-12 w-full items-center justify-center gap-2 bg-app-accent px-6 py-3 rounded-xl text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] transition-all cursor-pointer"
+                      className="mt-6 group inline-flex min-h-12 w-full items-center justify-center gap-2 bg-app-accent px-6 py-3 rounded-card text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] transition-all cursor-pointer"
                     >
                       Tạo mục tiêu SMART
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
