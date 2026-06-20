@@ -43,6 +43,7 @@ const ORDER_ID_IN_DESCRIPTION_REGEX = /VB[A-Z0-9]{8}/i;
 const ORDER_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const PAYOS_ORDER_CODE_OFFSET = 10_000_000_000;
 const ORDER_EXPIRY_MINUTES = 30;
+const CHECKOUT_SESSION_ID_PLACEHOLDER = "__session_id__";
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
 
 export interface PayosClientLike {
@@ -243,6 +244,10 @@ function assertPayosPlanSupported(input: CreateCheckoutSessionInput): void {
   }
 }
 
+function hydrateCheckoutSessionUrl(url: string, orderId: string): string {
+  return url.split(CHECKOUT_SESSION_ID_PLACEHOLDER).join(encodeURIComponent(orderId));
+}
+
 export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOptions = {}): PaymentProviderAdapter {
   return {
     providerId: "payos",
@@ -270,8 +275,8 @@ export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOpti
         orderCode,
         amount,
         description: orderId,
-        returnUrl: input.successUrl,
-        cancelUrl: input.cancelUrl,
+        returnUrl: hydrateCheckoutSessionUrl(input.successUrl, orderId),
+        cancelUrl: hydrateCheckoutSessionUrl(input.cancelUrl, orderId),
         buyerEmail: input.customerEmail || input.receiptEmail,
         buyerName: input.receiptName,
         expiredAt: Math.floor(expiresAt.getTime() / 1000),

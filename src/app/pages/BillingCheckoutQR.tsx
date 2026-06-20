@@ -1,4 +1,5 @@
 import { CheckCircle2, Clock, Copy, Loader2, LockKeyhole, QrCode, RefreshCw, XCircle } from "lucide-react";
+import * as QRCode from "qrcode";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -41,6 +42,61 @@ function formatCountdown(ms: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function isRenderableQrImageSrc(value: string | null | undefined): value is string {
+  const trimmed = value?.trim();
+  if (!trimmed) return false;
+  return (
+    trimmed.startsWith("data:image/") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("//")
+  );
+}
+
+const BANK_BIN_LABELS: Record<string, string> = {
+  "970422": "MB Bank",
+  "970436": "Vietcombank",
+  "970407": "Techcombank",
+  "970416": "ACB",
+  "970418": "BIDV",
+  "970432": "VPBank",
+  "970423": "TPBank",
+  "970403": "Sacombank",
+  "970441": "VIB",
+  "970426": "MSB",
+  "970443": "SHB",
+  "970448": "OCB",
+  "970437": "HDBank",
+  "970449": "LPBank",
+  "970429": "SCB",
+  "970431": "Eximbank",
+  "970425": "ABBANK",
+  "970440": "SeABank",
+  "970428": "Nam A Bank",
+  "970419": "NCB",
+  "970427": "VietABank",
+  "970452": "KienlongBank",
+};
+
+function formatPaymentBankName(bankName: string, provider: string | null | undefined): string {
+  const normalized = bankName.trim();
+  const bankLabel = BANK_BIN_LABELS[normalized];
+  if (bankLabel) return `${bankLabel} (${normalized})`;
+  if (provider?.toLowerCase() === "payos" && /^\d{6}$/.test(normalized)) {
+    return `Ngân hàng BIN ${normalized}`;
+  }
+  return normalized;
+}
+
+function getDisplayBankAccount(bankAccount: string, provider: string | null | undefined): string | null {
+  const normalized = bankAccount.trim();
+  if (!normalized || (provider?.toLowerCase() === "payos" && normalized.toLowerCase() === "payos")) {
+    return null;
+  }
+  return normalized;
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export function BillingCheckoutQR() {
@@ -55,6 +111,8 @@ export function BillingCheckoutQR() {
   const [copyMessage, setCopyMessage] = useState("");
   const [entitlementSyncStatus, setEntitlementSyncStatus] = useState<EntitlementSyncStatus>("idle");
   const [entitlementSyncMessage, setEntitlementSyncMessage] = useState<string | null>(null);
+  const [generatedQrDataUrl, setGeneratedQrDataUrl] = useState<string | null>(null);
+  const [failedQrImageSrc, setFailedQrImageSrc] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const paidCheckoutDisabled = isPaidCheckoutDisabled();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -144,11 +202,42 @@ export function BillingCheckoutQR() {
   }, []);
 
   const isHostedPayosCheckout = order?.provider?.toLowerCase() === "payos" && Boolean(order.checkoutUrl);
+  const paymentQrPayload = order?.qrDataUrl?.trim() || "";
+  const paymentQrImageSrc = isRenderableQrImageSrc(paymentQrPayload) ? paymentQrPayload : generatedQrDataUrl;
+  const shouldRenderQrImage = Boolean(paymentQrImageSrc && paymentQrImageSrc !== failedQrImageSrc);
+  const displayBankName = order ? formatPaymentBankName(order.bankName, order.provider) : "";
+  const displayBankAccount = order ? getDisplayBankAccount(order.bankAccount, order.provider) : null;
+  const bankAccountLabel = isHostedPayosCheckout ? "STK/Mã nhận PayOS" : "Số tài khoản";
 
   const openHostedCheckout = useCallback(() => {
     if (!order?.checkoutUrl) return;
     window.location.assign(order.checkoutUrl);
   }, [order?.checkoutUrl]);
+
+  useEffect(() => {
+    const qrPayload = order?.qrDataUrl?.trim();
+    if (!qrPayload || isRenderableQrImageSrc(qrPayload)) {
+      setGeneratedQrDataUrl(null);
+      return;
+    }
+
+    let cancelled = false;
+    QRCode.toDataURL(qrPayload, {
+      errorCorrectionLevel: "M",
+      margin: 1,
+      width: 360,
+    })
+      .then((dataUrl) => {
+        if (!cancelled) setGeneratedQrDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setGeneratedQrDataUrl(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [order?.qrDataUrl]);
 
   const syncCompletedOrderAccess = useCallback(async () => {
     if (!order || order.status !== "completed") return false;
@@ -399,32 +488,47 @@ export function BillingCheckoutQR() {
             </p>
 
             <div className="mt-6 flex justify-center">
-              {isHostedPayosCheckout ? (
+              {shouldRenderQrImage ? (
+                <div className="space-y-3 text-center">
+                  <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
+                    <img
+                      src={paymentQrImageSrc ?? undefined}
+                      alt="Mã thanh toán tự động"
+                      className="h-56 w-56 object-contain sm:h-64 sm:w-64"
+                      loading="eager"
+                      onError={() => setFailedQrImageSrc(paymentQrImageSrc)}
+                    />
+                  </div>
+                  {isHostedPayosCheckout && (
+                    <button
+                      type="button"
+                      onClick={openHostedCheckout}
+                      className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink hover:bg-app-bg"
+                    >
+                      <QrCode className="h-4 w-4" />
+                      Mở PayOS nếu quét không được
+                    </button>
+                  )}
+                </div>
+              ) : (
                 <div className="flex min-h-56 w-56 flex-col items-center justify-center rounded-lg border border-app-line bg-app-surface p-5 sm:min-h-64 sm:w-64">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                     <QrCode className="h-6 w-6" />
                   </div>
-                  <p className="mt-4 text-sm font-semibold text-app-ink">Mở cổng thanh toán PayOS</p>
+                  <p className="mt-4 text-sm font-semibold text-app-ink">Đang tạo mã QR</p>
                   <p className="mt-2 text-xs leading-5 text-app-ink-muted">
-                    Dùng liên kết thanh toán do PayOS cấp để quét mã hoặc xác nhận giao dịch.
+                    Nếu QR chưa hiện, hãy kiểm tra thông tin chuyển khoản bên cạnh hoặc mở cổng thanh toán.
                   </p>
-                  <button
-                    type="button"
-                    onClick={openHostedCheckout}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-app-accent px-4 py-2 text-sm font-semibold text-white hover:bg-app-accent"
-                  >
-                    <QrCode className="h-4 w-4" />
-                    Mở PayOS
-                  </button>
-                </div>
-              ) : (
-                <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
-                  <img
-                    src={order.qrDataUrl}
-                    alt="Mã thanh toán tự động"
-                    className="h-56 w-56 object-contain sm:h-64 sm:w-64"
-                    loading="eager"
-                  />
+                  {order.checkoutUrl && (
+                    <button
+                      type="button"
+                      onClick={openHostedCheckout}
+                      className="mt-4 inline-flex items-center gap-2 rounded-full bg-app-accent px-4 py-2 text-sm font-semibold text-white hover:bg-app-accent"
+                    >
+                      <QrCode className="h-4 w-4" />
+                      Mở cổng thanh toán
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -458,14 +562,14 @@ export function BillingCheckoutQR() {
               <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
                 <InfoRow
                   label="Ngân hàng"
-                  value={order.bankName}
-                  onCopy={() => copyToClipboard(order.bankName, "bank", "ngân hàng")}
+                  value={displayBankName}
+                  onCopy={() => copyToClipboard(displayBankName, "bank", "ngân hàng")}
                   isCopied={copied === "bank"}
                 />
                 <InfoRow
-                  label="Số tài khoản"
-                  value={order.bankAccount}
-                  onCopy={() => copyToClipboard(order.bankAccount, "account", "số tài khoản")}
+                  label={bankAccountLabel}
+                  value={displayBankAccount ?? "Quét QR hoặc mở cổng PayOS để lấy thông tin chuyển khoản chính xác"}
+                  onCopy={displayBankAccount ? () => copyToClipboard(displayBankAccount, "account", "số tài khoản") : undefined}
                   isCopied={copied === "account"}
                 />
                 <InfoRow
@@ -547,7 +651,7 @@ function InfoRow({
 }: {
   label: string;
   value: string;
-  onCopy: () => void;
+  onCopy?: () => void;
   isCopied: boolean;
   highlight?: boolean;
 }) {
@@ -562,15 +666,17 @@ function InfoRow({
         >
           {value}
         </span>
-        <button
-          type="button"
-          onClick={onCopy}
-          className="rounded-full p-1 text-app-ink-muted transition hover:bg-app-bg hover:text-app-ink"
-          title={`Sao chép ${label}`}
-          aria-label={`Sao chép ${label}`}
-        >
-          {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-app-accent" /> : <Copy className="h-3.5 w-3.5" />}
-        </button>
+        {onCopy && (
+          <button
+            type="button"
+            onClick={onCopy}
+            className="rounded-full p-1 text-app-ink-muted transition hover:bg-app-bg hover:text-app-ink"
+            title={`Sao chép ${label}`}
+            aria-label={`Sao chép ${label}`}
+          >
+            {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-app-accent" /> : <Copy className="h-3.5 w-3.5" />}
+          </button>
+        )}
       </div>
     </div>
   );

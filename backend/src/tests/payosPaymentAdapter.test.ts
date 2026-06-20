@@ -170,8 +170,8 @@ describe("PayOS payment adapter", () => {
       userId: "user_payos_create",
       planCode: "PLUS",
       billingCycle: "twelve_week",
-      successUrl: "https://example.com/success",
-      cancelUrl: "https://example.com/cancel",
+      successUrl: "https://example.com/billing/checkout/__session_id__?from=payos",
+      cancelUrl: "https://example.com/order-status/__session_id__?status=cancel",
       customerEmail: "buyer@example.test",
       receiptName: "Buyer",
     });
@@ -180,6 +180,8 @@ describe("PayOS payment adapter", () => {
     assert.equal(createdOrders.length, 1);
     assert.equal(session.sessionId, "VBABCDEFGH");
     assert.equal(session.checkoutUrl, "https://pay.payos.vn/web/pay/payos_link_created");
+    assert.equal(paymentRequests[0]?.returnUrl, "https://example.com/billing/checkout/VBABCDEFGH?from=payos");
+    assert.equal(paymentRequests[0]?.cancelUrl, "https://example.com/order-status/VBABCDEFGH?status=cancel");
 
     const createdOrder = createdOrders[0];
     assert.ok(createdOrder);

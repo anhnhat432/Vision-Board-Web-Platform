@@ -175,7 +175,7 @@ export function BillingConfirm() {
         {
           planCode: "PLUS",
           billingCycle: checkoutInfo?.billingCycle ?? "twelve_week",
-          returnUrl: `${window.location.origin}/billing/checkout`,
+          returnUrl: `${window.location.origin}/billing/checkout/__session_id__`,
           cancelUrl: `${window.location.origin}/billing/plan`,
           receiptEmail: receiptEmail.trim(),
           receiptName: user?.displayName ?? undefined,

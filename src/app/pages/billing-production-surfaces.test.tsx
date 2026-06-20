@@ -114,25 +114,29 @@ function stubRealBillingEnv(
 const UI_TEST_TIMEOUT_MS = 30_000;
 
 function stubAuthContext(user: { email: string; emailVerified?: boolean; uid?: string } | null) {
+  const authUser = user
+    ? {
+        uid: user.uid ?? "billing-test-user",
+        email: user.email,
+        emailVerified: user.emailVerified ?? true,
+      }
+    : null;
+  const optionalAuthContext = {
+    user: authUser,
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    authLoading: false,
+    error: null,
+    login: vi.fn(),
+    logout: vi.fn(),
+    refreshUserProfile: vi.fn(),
+    isConfigured: true,
+  };
+
   vi.doMock("@/lib/auth/AuthContext", () => ({
-    useOptionalAuthContext: () => ({
-      user: user
-        ? {
-            uid: user.uid ?? "billing-test-user",
-            email: user.email,
-            emailVerified: user.emailVerified ?? true,
-          }
-        : null,
-      userProfile: null,
-      userProfileLoading: false,
-      userProfileError: null,
-      authLoading: false,
-      error: null,
-      login: vi.fn(),
-      logout: vi.fn(),
-      refreshUserProfile: vi.fn(),
-      isConfigured: true,
-    }),
+    useOptionalAuthContext: () => optionalAuthContext,
+    useAuthContext: () => optionalAuthContext,
   }));
 }
 
@@ -141,6 +145,7 @@ describe("production billing surfaces", () => {
     vi.unstubAllEnvs();
     vi.doUnmock("@/lib/api/apiClient");
     vi.doUnmock("@/lib/auth/AuthContext");
+    vi.doUnmock("qrcode");
     localStorage.clear();
   });
 
@@ -174,6 +179,48 @@ describe("production billing surfaces", () => {
     ).toEqual({ kind: "external", url: "https://pay.payos.vn/web/pay/payos_link_created" });
   });
 
+  it("renders a visible PayOS QR on the internal checkout page when a PayOS order is opened directly", async () => {
+    const apiClient = stubRealBillingEnv("payos");
+    stubAuthContext(null);
+    vi.doMock("qrcode", () => ({
+      toDataURL: vi.fn().mockResolvedValue("data:image/png;base64,generated-payos-qr"),
+    }));
+    apiClient.get.mockImplementation((path: string) => {
+      if (path.startsWith("/billing/public-order-status/")) {
+        return Promise.resolve({
+          orderId: "VBPAYOS001",
+          status: "pending",
+          amount: 99000,
+          currency: "VND",
+          provider: "payos",
+          checkoutUrl: "https://pay.payos.vn/web/pay/payos_link_created",
+          bankAccount: "payos",
+          bankName: "970422",
+          accountName: "VISION BOARD",
+          qrDataUrl: "00020101021238540010A000000727012400069704220110PAYOSRAW",
+          expiresAt: "2099-05-10T10:30:00.000Z",
+          completedAt: null,
+          createdAt: "2026-05-10T10:00:00.000Z",
+        });
+      }
+      return Promise.resolve({ orders: [] });
+    });
+
+    const { BillingCheckoutQR } = await import("./BillingCheckoutQR");
+    const router = createMemoryRouter([{ path: "/billing/checkout/:orderId", element: <BillingCheckoutQR /> }], {
+      initialEntries: ["/billing/checkout/VBPAYOS001"],
+    });
+
+    render(<RouterProvider router={router} />);
+
+    const qrImage = await screen.findByAltText("Mã thanh toán tự động");
+    expect(qrImage).toHaveAttribute("src", "data:image/png;base64,generated-payos-qr");
+    expect(screen.getByText("MB Bank (970422)")).toBeInTheDocument();
+    expect(screen.getByText("STK/Mã nhận PayOS")).toBeInTheDocument();
+    expect(screen.getByText("Quét QR hoặc mở cổng PayOS để lấy thông tin chuyển khoản chính xác")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Mở PayOS nếu quét không được/i })).toBeInTheDocument();
+  });
+
   it(
     "renders the active Plus plan with renewal, provider, and subscription management copy",
     async () => {
@@ -189,7 +236,7 @@ describe("production billing surfaces", () => {
         status: "active",
         billingCycle: "monthly",
         startedAt: grantedAt,
-        renewsAt: "2026-06-01T00:00:00.000Z",
+        renewsAt: "2099-06-01T00:00:00.000Z",
         providerMode: "api_contract",
       };
       data.entitlements = [
@@ -205,7 +252,7 @@ describe("production billing surfaces", () => {
 
       await screen.findByRole("heading", { name: "Gói hiện tại" });
       expect(screen.getAllByText("Plus").length).toBeGreaterThan(0);
-      expect(screen.getByText(/Gia hạn ngày/i)).toHaveTextContent("01/06/2026");
+      expect(screen.getByText(/Gia hạn ngày/i)).toHaveTextContent("01/06/2099");
       expect(screen.getByText("Thanh toán qua Stripe")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Quản lý gói" })).toBeInTheDocument();
       expect(screen.queryByText(/\(mock\)|mô phỏng/i)).not.toBeInTheDocument();
@@ -392,6 +439,7 @@ describe("production billing surfaces", () => {
             planCode: "PLUS",
             clientUserId: expect.any(String),
             receiptEmail: "buyer@example.test",
+            returnUrl: "http://localhost:3000/billing/checkout/__session_id__",
           }),
         );
       });
@@ -410,7 +458,7 @@ describe("production billing surfaces", () => {
         planCode: "PLUS",
         status: "active",
         entitlements: ["premium_templates", "premium_review_insights"],
-        currentPeriodEnd: "2026-06-01T00:00:00.000Z",
+        currentPeriodEnd: "2099-06-01T00:00:00.000Z",
         cancelAtPeriodEnd: false,
       });
       const { BillingPlan } = await import("./BillingPlan");
