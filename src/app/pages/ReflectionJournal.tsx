@@ -1,13 +1,11 @@
-import { ArrowRight, Flame, Frown, Meh, MoreVertical, Plus, Search, Smile } from "lucide-react";
+import { ArrowRight, CalendarCheck, Clock, Flame, Frown, Meh, MoreVertical, Pencil, Plus, Search, Smile } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { WeeklyReviewIllustration } from "@/app/components/illustrations";
 import { MotionCountUp } from "@/app/components/motion";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { emptyNarratives } from "../components/empty-states/narratives";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
-import { PageHero } from "../components/layout/PageHero";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
@@ -367,65 +365,85 @@ function ReflectionJournalContent() {
       </AlertDialog>
 
       {/* Hero Section */}
-      <PageHero
-        className="page-enter"
-        eyebrow="PHẢN TƯ"
-        title="Nhật ký phản tư"
-        serif
-        description="Ghi lại điều bạn học được, biết ơn, và muốn cải thiện."
-        primaryCta={
-          hasReflections && (
+      <section className="relative overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-8 sm:p-9 grid grid-cols-1 md:grid-cols-[1fr_360px] gap-7 items-center page-enter">
+        <div>
+          <div className="flex items-center gap-2 mb-3.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-warm">
+            <span className="w-1.5 h-1.5 rounded-full bg-app-warm" />
+            Phản tư
+          </div>
+          <h1 className="font-serif text-[clamp(28px,3.2vw,40px)] font-bold leading-[1.02] tracking-[-0.02em] text-app-ink mb-3">
+            Nhật ký phản tư
+          </h1>
+          <p className="text-sm leading-relaxed text-app-ink-soft mb-6 max-w-[44ch] sm:text-[14.5px]">
+            Ghi lại điều bạn học được, điều biết ơn, và điều muốn cải thiện. Mỗi dòng là một dấu chân trên hành trình 12 tuần.
+          </p>
+          <div className="flex flex-wrap gap-2.5">
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.97] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shrink-0 self-start sm:self-center shadow-app-md shadow-app-warm/15"
+              className="bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-5 py-3 h-auto text-[13.5px] font-bold shadow-lg shadow-app-warm/25 gap-2.5"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Viết nhật ký mới
+              <Pencil className="h-4 w-4" />
+              Viết entry mới
             </Button>
-          )
-        }
-        aside={
-          <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
-            <img
-              src="/reflection_journal.png"
-              alt="Nhật ký phản tư chánh niệm"
-              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              loading="lazy"
-            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                const list = document.getElementById("journal-entries");
+                if (list) list.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="rounded-full px-5 py-3 h-auto text-[13.5px] font-semibold gap-2 border-app-line text-app-ink hover:bg-app-bg hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
+            >
+              <Clock className="h-[15px] w-[15px]" />
+              Dòng thời gian
+            </Button>
           </div>
-        }
-      />
+        </div>
+        <div className="relative rounded-[18px] overflow-hidden self-stretch min-h-[210px] shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite]">
+          <img
+            src="/reflection_journal.png"
+            alt="Nhật ký phản tư"
+            className="w-full h-full object-cover absolute inset-0 dark:brightness-[0.85] dark:contrast-[1.05]"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-app-warm/10 to-transparent" />
+        </div>
+      </section>
 
-      {/* Toolbar */}
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
+      {/* Search + Filters */}
+      <div className="flex flex-col gap-3.5">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A8A296]" aria-hidden="true" />
           <Input
             type="search"
             aria-label="Tìm kiếm nhật ký"
-            placeholder="Tìm kiếm nhật ký..."
+            placeholder="Tìm kiếm nhật ký…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="h-12 pl-[42px] rounded-[13px] border-app-line bg-app-surface text-[13.5px] placeholder:text-[#A8A296]"
           />
         </div>
-        <div className="flex flex-wrap gap-2">
-          {(["all", "weekly-review", "freeform"] as const).map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setFilterType(type)}
-              className={cn(
-                "inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
-                filterType === type
-                  ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-app-sm"
-                  : "text-app-ink-soft hover:bg-app-bg",
-              )}
-            >
-              {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
-            </button>
-          ))}
-          <span className="hidden sm:inline w-px h-5 bg-app-line" />
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296] mr-0.5">Loại</span>
+          {(["all", "weekly-review", "freeform"] as const).map((type) => {
+            const isActive = filterType === type;
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setFilterType(type)}
+                className={cn(
+                  "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.96]",
+                  isActive
+                    ? "border-app-warm bg-[#FBF4EE] text-app-warm"
+                    : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
+                )}
+              >
+                {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
+              </button>
+            );
+          })}
+          <span className="w-px h-[22px] bg-app-line mx-1.5" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296] mr-0.5">Tâm trạng</span>
           {(["", "happy", "neutral", "sad"] as const).map((mood) => {
             const labels: Record<string, string> = {
               "": "Mọi tâm trạng",
@@ -433,16 +451,17 @@ function ReflectionJournalContent() {
               neutral: "Bình thường",
               sad: "Suy tư",
             };
+            const isActive = filterMood === mood;
             return (
               <button
                 key={mood}
                 type="button"
                 onClick={() => setFilterMood(mood)}
                 className={cn(
-                  "inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
-                  filterMood === mood
-                    ? "bg-app-warm-soft text-app-warm font-semibold border-app-warm/30 shadow-app-sm"
-                    : "text-app-ink-soft hover:bg-app-bg",
+                  "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.96]",
+                  isActive
+                    ? "border-app-warm bg-[#FBF4EE] text-app-warm"
+                    : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
                 )}
               >
                 {labels[mood]}
@@ -453,45 +472,48 @@ function ReflectionJournalContent() {
       </div>
 
       {weekCompletion && (
-        <section className="mt-6">
-          <Card className="relative overflow-hidden rounded-2xl border-0 bg-grad-celebrate text-white shadow-lg">
-            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-            <div className="relative p-6 sm:p-8">
-              <div className="flex flex-col sm:flex-row items-start gap-6">
-                <div className="shrink-0 w-32 sm:w-40 text-white/90">
-                  <WeeklyReviewIllustration className="w-full h-auto" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-medium">
-                    TỔNG KẾT TUẦN {weekCompletion.weekNumber}
-                  </p>
-                  <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-medium text-white">
-                    Tuần này bạn đã làm được
-                  </h2>
-                  <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
-                    <div>
-                      <p className="font-serif text-4xl sm:text-5xl font-medium tabular-nums">
-                        <MotionCountUp value={weekCompletion.completed} />
-                      </p>
-                      <p className="text-sm text-white/70">/ {weekCompletion.total} task hoàn thành</p>
-                    </div>
-                    <div>
-                      <p className="font-serif text-4xl sm:text-5xl font-medium tabular-nums">
-                        <MotionCountUp value={weekCompletion.percent} suffix="%" />
-                      </p>
-                      <p className="text-sm text-white/70">tiến độ tuần</p>
-                    </div>
-                  </div>
-                  {journalStreak > 0 && (
-                    <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-2">
-                      <Flame className="h-5 w-5 text-app-warm" aria-hidden="true" />
-                      <span className="text-sm font-semibold">{journalStreak} ngày viết liên tục</span>
-                    </div>
-                  )}
-                </div>
+        <section className="relative overflow-hidden bg-[#F4ECE2] dark:bg-app-warm-soft/20 border border-app-warm/20 rounded-[20px] p-6 sm:p-7 flex flex-col sm:flex-row items-start gap-7">
+          <div className="relative w-[74px] h-[74px] shrink-0 rounded-2xl bg-app-surface border border-app-warm/20 flex items-center justify-center text-app-warm">
+            <CalendarCheck className="h-[34px] w-[34px]" strokeWidth={1.8} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-app-warm mb-1.5">
+              Tổng kết tuần {weekCompletion.weekNumber}
+            </div>
+            <h2 className="font-serif text-[21px] font-bold text-app-ink tracking-[-0.01em] mb-1">
+              Tuần này bạn đã làm được
+            </h2>
+            <p className="text-xs text-[#7A6E5E] dark:text-app-ink-soft">
+              Viết một dòng phản tư mỗi ngày để giữ chuỗi và nhìn lại tiến bộ.
+            </p>
+            {journalStreak > 0 && (
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-app-warm/10 px-4 py-1.5">
+                <Flame className="h-4 w-4 text-app-warm" aria-hidden="true" />
+                <span className="text-xs font-semibold text-app-warm">{journalStreak} ngày viết liên tục</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-end gap-8 sm:gap-10 shrink-0">
+            <div>
+              <div className="font-serif text-[40px] font-extrabold leading-none text-app-ink tabular-nums">
+                <MotionCountUp value={weekCompletion.completed} />
+                <span className="text-lg text-[#A8A296] font-bold"> / {weekCompletion.total}</span>
+              </div>
+              <div className="text-[11.5px] text-[#7A6E5E] dark:text-app-ink-soft font-medium mt-1.5">task hoàn thành</div>
+            </div>
+            <div>
+              <div className="font-serif text-[40px] font-extrabold leading-none text-app-warm tabular-nums">
+                <MotionCountUp value={weekCompletion.percent} suffix="%" />
+              </div>
+              <div className="text-[11.5px] text-[#7A6E5E] dark:text-app-ink-soft font-medium mt-1.5">tiến độ tuần</div>
+              <div className="w-[120px] h-1.5 rounded-full bg-app-warm/15 overflow-hidden mt-2">
+                <div
+                  className="h-full rounded-full bg-app-warm transition-all duration-700"
+                  style={{ width: `${Math.max(2, weekCompletion.percent)}%` }}
+                />
               </div>
             </div>
-          </Card>
+          </div>
         </section>
       )}
 
@@ -667,32 +689,90 @@ function ReflectionJournalContent() {
 
       {/* Empty State */}
       {sortedReflections.length === 0 ? (
-        <EmptyState
-          variant="card"
-          illustration={
-            <div className="relative overflow-hidden rounded-2xl border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto mb-4">
-              <img
-                src="/reflection_journal.png"
-                alt="Nhật ký phản tư chánh niệm"
-                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              />
+        <section className="flex flex-col items-center text-center bg-app-surface border border-app-line rounded-[20px] p-10 sm:p-11 sm:pt-12">
+          <div className="relative w-[150px] h-[108px] rounded-2xl overflow-hidden border-[3px] border-app-surface shadow-[0_16px_34px_-20px_rgba(23,21,15,0.55)] mb-5">
+            <img
+              src="/reflection_journal.png"
+              alt="Trang giấy còn trắng"
+              className="w-full h-full object-cover block dark:brightness-[0.85] dark:contrast-[1.05]"
+            />
+          </div>
+          <h3 className="font-serif text-[22px] font-bold text-app-ink tracking-[-0.01em] mb-2">
+            {emptyNarratives.noJournalEntries.title}
+          </h3>
+          <p className="text-[13.5px] text-app-ink-soft mb-6 max-w-[42ch] leading-relaxed">
+            {emptyNarratives.noJournalEntries.body} Bắt đầu từ một gợi ý bên dưới.
+          </p>
+          <Button
+            onClick={() => setIsAddingReflection(true)}
+            className="bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-6 py-3.5 h-auto text-sm font-bold shadow-lg shadow-app-warm/25 gap-2.5 mb-7"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.4} />
+            Viết entry đầu tiên
+          </Button>
+
+          {/* Prompt Cards */}
+          <div className="w-full max-w-[660px] border-t border-app-line pt-6">
+            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-3.5">Gợi ý mở đầu</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {([
+                {
+                  title: "Điều tôi học được",
+                  hint: "Một bài học hoặc nhận ra hôm nay.",
+                  iconBg: "#EDF7E0",
+                  iconColor: "#0C5E3A",
+                  prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
+                },
+                {
+                  title: "Điều tôi biết ơn",
+                  hint: "Một điều nhỏ khiến hôm nay nhẹ hơn.",
+                  iconBg: "#FBEAE0",
+                  iconColor: "#B0673C",
+                  prompt: "Một điều bạn muốn làm tốt hơn vào ngày mai là gì?",
+                },
+                {
+                  title: "Điều muốn cải thiện",
+                  hint: "Một việc tuần tới làm tốt hơn.",
+                  iconBg: "#FFF8DE",
+                  iconColor: "#9A7B00",
+                  prompt: "Bạn đang học được điều gì từ chặng đường hiện tại?",
+                },
+              ] as const).map((item) => (
+                <button
+                  key={item.title}
+                  type="button"
+                  onClick={() => {
+                    setIsAddingReflection(true);
+                    setNewReflection((prev) => ({
+                      ...prev,
+                      content: prev.content ? `${prev.content}\n\n${item.prompt}` : item.prompt,
+                    }));
+                    saveDraft(item.prompt);
+                  }}
+                  className="text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98]"
+                >
+                  <span
+                    className="flex w-[30px] h-[30px] rounded-[9px] items-center justify-center mb-2.5"
+                    style={{ backgroundColor: item.iconBg, color: item.iconColor }}
+                  >
+                    {item.title === "Điều tôi học được" ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                    ) : item.title === "Điều tôi biết ơn" ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17V7l6 5 6-9 6 14"/></svg>
+                    )}
+                  </span>
+                  <span className="block text-[13px] font-bold text-app-ink mb-1">{item.title}</span>
+                  <span className="block text-[11.5px] text-app-ink-soft leading-relaxed">{item.hint}</span>
+                </button>
+              ))}
             </div>
-          }
-          title={emptyNarratives.noJournalEntries.title}
-          description={emptyNarratives.noJournalEntries.body}
-          actions={
-            <Button
-              onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 shadow-app-md shadow-app-warm/15"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Viết entry đầu tiên
-            </Button>
-          }
-        />
+          </div>
+        </section>
       ) : (
         /* Past Entries List */
-        <section>
+        <section id="journal-entries">
           <div className="mb-4">
             <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">GHI CHÉP CŨ</p>
             <h2 className="mt-1 font-serif text-2xl font-medium text-app-ink">{filteredReflections.length} bài viết</h2>
@@ -705,7 +785,7 @@ function ReflectionJournalContent() {
               const phaseTone = getJournalPhaseTone();
 
               return (
-                <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+                <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-30px_rgba(23,21,15,0.34)]">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
