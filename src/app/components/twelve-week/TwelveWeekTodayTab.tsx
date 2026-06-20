@@ -146,9 +146,9 @@ function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
     case "low":
       return "border-app-status-info/40 bg-app-status-info/10 text-app-status-info dark:bg-app-status-info/20 dark:text-app-status-info font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-status-info/20";
     case "high":
-      return "border-app-status-warning/40 bg-app-status-warning/10 text-app-status-warning dark:bg-app-status-warning/20 dark:text-app-status-warning font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-status-warning/20";
+      return "border-app-energy/40 bg-app-energy/10 text-app-energy dark:bg-app-energy/20 dark:text-app-energy font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-energy/20";
     default:
-      return "border-app-status-success/40 bg-app-status-success/10 text-app-status-success dark:bg-app-status-success/20 dark:text-app-status-success font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-status-success/20";
+      return "border-app-accent/40 bg-app-accent-subtle text-app-accent dark:bg-app-accent/20 dark:text-app-accent font-bold shadow-app-sm transition-all duration-300 rounded-card-lg scale-[1.03] ring-2 ring-app-accent/20";
   }
 }
 
@@ -226,6 +226,10 @@ export function TwelveWeekTodayTab({
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
+  // Hover-lift nhẹ theo thiết kế editorial; tắt khi người dùng giảm chuyển động.
+  const cardLiftClass = prefersReducedMotion
+    ? ""
+    : "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-app-md";
   const loadingIconClassName = prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin";
 
   const canUseOverdueTaskActions = Boolean(
@@ -425,7 +429,7 @@ export function TwelveWeekTodayTab({
           }`}
         >
           <span
-            className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold tabular-nums ${
+            className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-mono text-[11px] font-bold tabular-nums ${
               overdueOpenCount > 0 ? "bg-app-warm text-white" : "bg-app-bg-subtle text-app-ink-muted"
             }`}
           >
@@ -672,7 +676,7 @@ export function TwelveWeekTodayTab({
           <div className={fadeInClassName}>
             <Card
               data-tour-id="system-today-queue"
-              className="h-full min-w-0 overflow-hidden rounded-card-lg border border-app-line/30 bg-app-surface shadow-2xs"
+              className={`h-full min-w-0 overflow-hidden rounded-card-lg border border-app-line/30 bg-app-surface shadow-2xs ${cardLiftClass}`}
             >
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3.5 sm:px-7 sm:pt-6 sm:pb-4 border-b border-app-line/20">
                 <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
@@ -681,7 +685,10 @@ export function TwelveWeekTodayTab({
                       Hàng việc hôm nay
                     </CardTitle>
                     <CardDescription className="mt-1 break-words text-[11px] text-app-ink-muted">
-                      {todayCompletedCount}/{checkInTotal} hoàn thành · Ưu tiên việc quan trọng nhất trước
+                      <span className="font-mono font-semibold text-app-accent">
+                        {todayCompletedCount}/{checkInTotal}
+                      </span>{" "}
+                      hoàn thành · Ưu tiên việc quan trọng nhất trước
                     </CardDescription>
                   </div>
                 </div>
@@ -756,7 +763,7 @@ export function TwelveWeekTodayTab({
                             taskCompleted ? "opacity-50" : ""
                           }`}
                         >
-                          <span className="font-sans text-xs font-medium text-app-ink-muted/30 tabular-nums mt-0.5 shrink-0 w-7 text-right">
+                          <span className="font-mono text-xs font-medium text-app-ink-muted/40 tabular-nums mt-0.5 shrink-0 w-7 text-right">
                             {taskNumber}
                           </span>
                           <Checkbox
@@ -919,7 +926,7 @@ export function TwelveWeekTodayTab({
                 <div className="rounded-card border border-app-line bg-app-bg/30 p-4">
                   <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-app-ink-soft">
                     <span>Tiến độ tuần {currentWeek}</span>
-                    <span className="text-app-ink">{weekCompletion.percent}%</span>
+                    <span className="font-mono text-app-accent">{weekCompletion.percent}%</span>
                   </div>
                   <Progress value={weekCompletion.percent} className="mt-2.5 h-2 shadow-none rounded-full" />
                 </div>
@@ -935,7 +942,7 @@ export function TwelveWeekTodayTab({
             </Card>
           </div>
           <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
-            <Card className="h-full min-w-0 overflow-hidden rounded-card-lg border border-app-line/30 bg-app-surface shadow-2xs">
+            <Card className={`h-full min-w-0 overflow-hidden rounded-card-lg border border-app-line/30 bg-app-surface shadow-2xs ${cardLiftClass}`}>
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-5 pt-5 pb-3.5 sm:px-7 sm:pt-6 sm:pb-4 border-b border-app-line/20">
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -988,7 +995,7 @@ export function TwelveWeekTodayTab({
                       {MOOD_OPTIONS.map((option) => {
                         const isActive = dailyMood === option.value;
                         const moodStyle = getMoodOptionStyle(option.value, isActive);
-                        const emoji = option.value === "low" ? "🧘‍♂️" : option.value === "high" ? "🔥" : "🌱";
+                        const emoji = option.value === "low" ? "🌙" : option.value === "high" ? "🔥" : "🌿";
 
                         return (
                           <Button
