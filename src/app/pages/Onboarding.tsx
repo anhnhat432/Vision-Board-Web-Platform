@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   ArrowRight,
   BookOpen,
   BriefcaseBusiness,
@@ -8,7 +7,6 @@ import {
   Compass,
   HeartPulse,
   Home,
-  Info,
   type LucideIcon,
   Smile,
   Sparkles,
@@ -27,7 +25,6 @@ import { PageShell } from "../components/PageShell";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
-import { Slider } from "../components/ui/slider";
 import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -111,6 +108,22 @@ const DESIGN_WEDGE_COLORS: Array<{ stroke: string; fill: string }> = [
 
 function getDesignWedgeColor(areaName: string, index: number) {
   return DESIGN_WEDGE_COLORS[index] ?? { stroke: "#A8A296", fill: "#F2EFE6" };
+}
+
+// Design-specific icon colors + backgrounds from Dear Our Future Clio design
+const AREA_DESIGN_ICON_STYLES: Array<{ accent: string; bg: string; border: string }> = [
+  { accent: "#2563EB", bg: "#EEF3FE", border: "rgba(37,99,235,0.3)" },   // Career
+  { accent: "#E7A400", bg: "#FDF6E3", border: "rgba(231,164,0,0.3)" },     // Finance
+  { accent: "#16A34A", bg: "#E9F7EE", border: "rgba(22,163,74,0.3)" },     // Health
+  { accent: "#7C5CFC", bg: "#F0EDFE", border: "rgba(124,92,252,0.3)" },    // Education
+  { accent: "#E8456B", bg: "#FDEBF0", border: "rgba(232,69,107,0.3)" },    // Relationships
+  { accent: "#0E9F8E", bg: "#E5F6F3", border: "rgba(14,159,142,0.3)" },    // Family
+  { accent: "#EA7A2B", bg: "#FDF1E7", border: "rgba(234,122,43,0.3)" },    // Personal Growth
+  { accent: "#2BA8E0", bg: "#E7F4FC", border: "rgba(43,168,224,0.3)" },    // Leisure
+];
+
+function getDesignIconStyle(index: number) {
+  return AREA_DESIGN_ICON_STYLES[index] ?? { accent: "#A8A296", bg: "#F2EFE6", border: "rgba(23,21,15,0.1)" };
 }
 
 const JOURNEY_STEPS = [
@@ -864,17 +877,18 @@ export function Onboarding() {
             />
           </aside>
 
-          <div className="order-2 min-w-0 space-y-5 lg:order-1">
-            <div className="rounded-card border border-app-line bg-app-surface p-4 shadow-app-sm">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+          <div className="order-2 min-w-0 space-y-[18px] lg:order-1">
+            {/* ---- AREA PICKER (Clio design) ---- */}
+            <div className="rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white px-6 py-[22px]">
+              <p className="mb-[14px] text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#A8A296]">
                 Chọn lĩnh vực đang rà
               </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-4 gap-[11px]">
                 {lifeAreas.map((area, index) => {
                   const AreaIcon = getCalmLifeAreaIcon(area.name);
                   const isSelected = activeAreaIndex === index;
                   const isReviewed = reviewedAreaIndices.has(index);
-                  const colorConfig = getAreaColorConfig(area.name);
+                  const designStyle = getDesignIconStyle(index);
                   const label = getLifeAreaLabel(area.name);
 
                   return (
@@ -882,32 +896,32 @@ export function Onboarding() {
                       key={area.name}
                       type="button"
                       onClick={() => setActiveAreaIndex(index)}
-                      className={cn(
-                        "min-h-12 rounded-control border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
-                        isSelected
-                          ? "border-app-accent bg-app-accent-soft text-app-accent"
-                          : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:text-app-ink",
-                      )}
-                      style={isSelected ? { borderColor: colorConfig.accent, color: colorConfig.accent } : undefined}
+                      className="dof-areachip cursor-pointer rounded-[14px] p-[13px_14px] text-left font-[inherit] transition-[transform,border-color,background] duration-[0.15s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                      style={{
+                        border: `1.5px solid ${isSelected ? designStyle.accent : "rgba(23,21,15,0.1)"}`,
+                        background: isSelected ? designStyle.bg : "#fff",
+                      }}
                       aria-pressed={isSelected}
                     >
-                      <span className="flex items-center gap-2">
+                      <span
+                        className="mb-[10px] flex h-[30px] w-[30px] items-center justify-center rounded-[9px]"
+                        style={{ background: designStyle.bg, color: designStyle.accent }}
+                      >
                         <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 text-xs font-semibold leading-5">
-                          {index + 1}. {label}
-                        </span>
                       </span>
-                      {isReviewed ? (
-                        <span className="mt-1 inline-flex rounded-pill bg-app-bg-subtle px-2 py-0.5 text-xs font-semibold text-app-status-success">
-                          Đã rà · {area.score}đ
-                        </span>
-                      ) : null}
+                      <span className="block text-[12.5px] font-bold leading-tight text-[#17150F]">
+                        {index + 1}. {label}
+                      </span>
+                      <span className="block text-[11px] text-[#8C887C]">
+                        {isReviewed ? `Đã rà · ${area.score}đ` : "Chưa rà"}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
+            {/* ---- RATING CARD (Clio design) ---- */}
             {(() => {
               const index = activeAreaIndex ?? 0;
               const area = lifeAreas[index];
@@ -915,197 +929,198 @@ export function Onboarding() {
 
               const AreaIcon = getCalmLifeAreaIcon(area.name);
               const areaLabel = getLifeAreaLabel(area.name);
-              const colorConfig = getAreaColorConfig(area.name);
+              const designStyle = getDesignIconStyle(index);
+              const sliderPct = (area.score / 10) * 100;
+              const sliderBadge =
+                area.score <= 2 ? "Rất thấp" : area.score <= 4 ? "Thấp" : area.score <= 6 ? "Tạm ổn" : area.score <= 8 ? "Ổn định" : "Rất tốt";
 
               return (
-                <div className="rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm motion-safe:animate-fade-in motion-reduce:animate-none sm:p-6 lg:p-7">
-                  <div className="flex flex-col gap-4 border-b border-app-line pb-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent"
-                        style={{ color: colorConfig.accent }}
+                <div className="rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white px-[26px] py-6">
+                  {/* Header: icon + name + score */}
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-[14px]">
+                      <span
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px]"
+                        style={{ background: designStyle.bg, color: designStyle.accent }}
                       >
-                        <AreaIcon className="h-7 w-7" aria-hidden="true" />
-                      </div>
+                        <AreaIcon className="h-[22px] w-[22px]" aria-hidden="true" />
+                      </span>
                       <div>
-                        <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+                        <p className="mb-[3px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
                           Lĩnh vực {index + 1} / 8
-                        </span>
+                        </p>
                         <h2
                           ref={activeAreaHeadingRef}
                           tabIndex={-1}
-                          className="mt-1 font-serif text-2xl font-semibold leading-tight text-app-ink focus:outline-none sm:text-3xl"
+                          className="text-[22px] font-bold leading-none -tracking-[0.01em] text-[#17150F] focus:outline-none"
+                          style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                         >
                           {areaLabel}
                         </h2>
                       </div>
                     </div>
-
-                    <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+                    <div
+                      className="rounded-[13px] border border-[rgba(23,21,15,0.08)] px-4 py-[11px] text-right"
+                      style={{ background: "#FAF8F3" }}
+                    >
+                      <p className="mb-[3px] text-[9.5px] font-bold uppercase tracking-[0.08em] text-[#A8A296]">
                         Điểm hiện tại
-                      </span>
+                      </p>
                       <p
-                        className="mt-1 font-serif text-3xl font-semibold leading-none tabular-nums"
-                        style={{ color: colorConfig.accent }}
+                        className="text-2xl font-extrabold leading-none"
+                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif", color: designStyle.accent }}
                       >
                         {area.score}
-                        <span className="text-sm font-normal text-app-ink-muted">/10</span>
+                        <span className="text-sm font-bold text-[#A8A296]">/10</span>
                       </p>
                     </div>
                   </div>
 
-                  {/* Câu hỏi chính - hiển thị trực tiếp */}
-                  <div className="mt-5 rounded-control border border-app-line bg-app-bg-subtle p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Câu hỏi đánh giá</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-app-ink">
+                  {/* Question card */}
+                  <div
+                    className="mb-[22px] rounded-[14px] border border-[rgba(23,21,15,0.07)] p-[18px_20px]"
+                    style={{ background: "#FAF8F3" }}
+                  >
+                    <p className="mb-[9px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
+                      Câu hỏi đánh giá
+                    </p>
+                    <p className="mb-[6px] text-[15px] font-bold leading-[1.4] text-[#17150F]">
                       {LIFE_AREA_QUESTIONS[area.name] ?? "Bạn hài lòng bao nhiêu với khía cạnh này?"}
                     </p>
-                    <p className="mt-1.5 text-xs leading-5 text-app-ink-muted">
+                    <p className="text-[12.5px] leading-[1.5] text-[#7A6E5E]">
                       {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
                     </p>
                   </div>
 
-                  <div className="mt-6 space-y-5">
-                    <div className="space-y-3">
-                      <span className="text-sm font-semibold text-app-ink">Chọn điểm theo cảm nhận hiện tại</span>
-                      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:flex lg:flex-wrap">
-                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((scoreVal) => {
-                          const isCurrentScore = area.score === scoreVal;
-                          return (
-                            <button
-                              key={scoreVal}
-                              type="button"
-                              onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
-                              className={cn(
-                                "flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 motion-reduce:transition-none",
-                                isCurrentScore
-                                  ? "border-app-accent bg-app-accent text-white shadow-app-sm motion-safe:scale-105"
-                                  : "border-app-line bg-app-bg-subtle text-app-ink-soft hover:bg-app-accent-subtle hover:text-app-ink",
-                              )}
-                              style={
-                                isCurrentScore
-                                  ? { backgroundColor: colorConfig.accent, borderColor: colorConfig.accent }
-                                  : undefined
-                              }
-                              aria-label={`Chấm ${scoreVal} điểm`}
-                              aria-pressed={isCurrentScore}
-                            >
-                              {scoreVal}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Mốc neo thang điểm - hiển thị luôn */}
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Mốc tham khảo</p>
-                      <div className="grid gap-1.5">
-                        {SCORE_ANCHORS.map((anchor) => {
-                          const activeAnchor = getActiveScoreAnchor(area.score);
-                          const isActive = activeAnchor === anchor;
-                          return (
-                            <div
-                              key={anchor.range}
-                              className={cn(
-                                "flex items-center gap-3 rounded-control border px-3 py-2 text-xs transition-colors",
-                                isActive
-                                  ? "border-app-accent/40 bg-app-accent-soft"
-                                  : "border-app-line bg-app-bg-subtle",
-                              )}
-                            >
-                              <span
-                                className={cn(
-                                  "shrink-0 rounded-pill px-2 py-0.5 font-bold tabular-nums",
-                                  isActive ? "bg-app-accent text-white" : "bg-app-surface text-app-ink-muted",
-                                )}
-                              >
-                                {anchor.range}
-                              </span>
-                              <div className="min-w-0">
-                                <span
-                                  className={cn("font-semibold", isActive ? "text-app-accent" : "text-app-ink-soft")}
-                                >
-                                  {anchor.label}
-                                </span>
-                                <span className="mx-1.5 text-app-ink-muted">·</span>
-                                <span className="text-app-ink-muted">{anchor.description}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="hidden space-y-2 border-t border-app-line pt-4 md:block">
-                      <div className="flex items-center justify-between gap-3 text-sm font-semibold">
-                        <span className="text-app-ink-muted">Hoặc kéo thanh trượt</span>
-                        <span
-                          className={cn(
-                            "inline-flex items-center rounded-pill px-3 py-1 text-xs font-semibold",
-                            getScaleGuidanceColor(area.score),
-                          )}
-                        >
-                          {area.score}đ · {getScaleGuidance(area.score)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 py-1">
+                  {/* Number buttons 0-10 */}
+                  <p className="mb-3 text-[13px] font-semibold text-[#17150F]">Chọn điểm theo cảm nhận hiện tại</p>
+                  <div className="mb-[22px] flex flex-wrap gap-[9px]">
+                    {Array.from({ length: 11 }, (_, scoreVal) => {
+                      const isCurrentScore = area.score === scoreVal;
+                      return (
                         <button
+                          key={scoreVal}
                           type="button"
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-semibold text-app-ink transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                          onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
-                          aria-label="Giảm 1 điểm"
+                          onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
+                          className="dof-num inline-flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                          style={{
+                            borderColor: isCurrentScore ? designStyle.accent : "rgba(23,21,15,0.12)",
+                            background: isCurrentScore ? designStyle.accent : "#FAF8F3",
+                            color: isCurrentScore ? "#fff" : "#5C574B",
+                            boxShadow: isCurrentScore
+                              ? `0 8px 18px -8px ${designStyle.accent}b3`
+                              : "none",
+                          }}
+                          aria-label={`Chấm ${scoreVal} điểm`}
+                          aria-pressed={isCurrentScore}
                         >
-                          -
+                          {scoreVal}
                         </button>
-
-                        <div className="grow px-1">
-                          <Slider
-                            value={[area.score]}
-                            onValueChange={(value) => handleScoreChangeWrapped(index, value)}
-                            min={0}
-                            max={10}
-                            step={1}
-                            trackColor={colorConfig.accent}
-                            className="w-full cursor-pointer"
-                            aria-label={`Điểm ${areaLabel}`}
-                          />
-                        </div>
-
-                        <button
-                          type="button"
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-sm font-semibold text-app-ink transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                          onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
-                          aria-label="Tăng 1 điểm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
 
-                  <div className="mt-6 flex flex-col gap-3 border-t border-app-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  {/* Reference bands */}
+                  <p className="mb-[11px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
+                    Mốc tham khảo
+                  </p>
+                  <div className="mb-6 flex flex-col gap-2">
+                    {SCORE_ANCHORS.map((anchor) => {
+                      const activeAnchor = getActiveScoreAnchor(area.score);
+                      const isActive = activeAnchor === anchor;
+                      return (
+                        <div
+                          key={anchor.range}
+                          className="flex items-center gap-[11px] rounded-[11px] border p-[11px_14px]"
+                          style={{
+                            borderColor: isActive ? "rgba(12,94,58,0.3)" : "rgba(23,21,15,0.08)",
+                            background: isActive ? "#EDF7E0" : "#fff",
+                          }}
+                        >
+                          <span
+                            className="shrink-0 rounded-[7px] px-[9px] py-[3px] font-['JetBrains_Mono',monospace] text-[11.5px] font-bold"
+                            style={{
+                              background: isActive ? "#0C5E3A" : "#F2EFE6",
+                              color: isActive ? "#fff" : "#8C887C",
+                            }}
+                          >
+                            {anchor.range}
+                          </span>
+                          <div className="min-w-0">
+                            <span
+                              className="text-[13px] font-bold"
+                              style={{ color: isActive ? "#0C5E3A" : "#17150F" }}
+                            >
+                              {anchor.label}
+                            </span>
+                            <span className="mx-1.5 text-[#8C887C]">·</span>
+                            <span className="text-[12.5px] text-[#8C887C]">{anchor.description}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Slider with -/+ buttons */}
+                  <div className="mb-[11px] flex items-center justify-between">
+                    <span className="text-[13px] font-semibold text-[#17150F]">Hoặc kéo thanh trượt</span>
+                    <span
+                      className="inline-flex items-center rounded-[999px] border border-[rgba(231,164,0,0.25)] px-[11px] py-1 font-['JetBrains_Mono',monospace] text-xs font-semibold"
+                      style={{ background: "#FFF8DE", color: "#9A7B00" }}
+                    >
+                      {area.score}đ · {sliderBadge}
+                    </span>
+                  </div>
+                  <div className="mb-[26px] flex items-center gap-[14px]">
                     <button
                       type="button"
-                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-pill border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-[38px] w-[38px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
+                      onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
+                      aria-label="Giảm 1 điểm"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="range"
+                      min={0}
+                      max={10}
+                      value={area.score}
+                      onChange={(e) => handleScoreChangeWrapped(index, [parseInt(e.target.value, 10)])}
+                      className="dof-range flex-1 cursor-pointer"
+                      style={{
+                        background: `linear-gradient(90deg, ${designStyle.accent} ${sliderPct}%, #E4E0D4 ${sliderPct}%)`,
+                      }}
+                      aria-label={`Điểm ${areaLabel}`}
+                    />
+                    <button
+                      type="button"
+                      className="flex h-[38px] w-[38px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
+                      onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
+                      aria-label="Tăng 1 điểm"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Area prev/next navigation */}
+                  <div className="flex items-center justify-between gap-3 border-t border-[rgba(23,21,15,0.08)] pt-5">
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-[11px] font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={index === 0}
                       onClick={() => setActiveAreaIndex(index - 1)}
                     >
-                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
                       Lĩnh vực trước
                     </button>
 
-                    <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="flex items-center gap-[14px]">
                       <button
                         type="button"
-                        className="inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                        className="cursor-pointer border-none bg-transparent font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
                         onClick={() => {
                           handleSkipArea(index);
-                          if (index < 7) {
-                            setActiveAreaIndex(index + 1);
-                          }
+                          if (index < 7) setActiveAreaIndex(index + 1);
                         }}
                       >
                         Bỏ qua
@@ -1113,8 +1128,11 @@ export function Onboarding() {
 
                       <button
                         type="button"
-                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                        style={{ backgroundColor: colorConfig.accent }}
+                        className="dof-primary inline-flex cursor-pointer items-center gap-[9px] rounded-[11px] border-none px-[22px] py-3 font-[inherit] text-[13.5px] font-bold text-white transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                        style={{
+                          background: designStyle.accent,
+                          boxShadow: `0 12px 26px -14px ${designStyle.accent}cc`,
+                        }}
                         onClick={() => {
                           markAreaReviewed(index);
                           if (index < 7) {
@@ -1127,10 +1145,13 @@ export function Onboarding() {
                         {index < 7 ? (
                           <>
                             Rà lĩnh vực tiếp theo
-                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                           </>
                         ) : (
-                          "Chọn trọng tâm"
+                          <>
+                            Chọn trọng tâm
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                          </>
                         )}
                       </button>
                     </div>
@@ -1143,55 +1164,46 @@ export function Onboarding() {
               <div
                 role="status"
                 aria-live="polite"
-                className="flex items-start gap-3 rounded-card border border-app-line bg-app-bg-subtle p-4 shadow-app-sm"
+                className="flex items-start gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] p-4"
               >
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
-                <p className="text-sm font-medium leading-6 text-app-ink-soft">
-                  Còn <strong>{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể chọn trọng tâm với điểm mặc
-                  định 5 cho phần còn lại.
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C5E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <p className="text-[13px] font-medium leading-[1.5] text-[#3F4A3F]">
+                  Còn <strong className="font-semibold text-[#0C5E3A]">{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể chọn trọng tâm với điểm mặc định 5 cho phần còn lại.
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        <footer className="mt-8 border-t border-app-line pt-6">
-          <div className="flex flex-col gap-4">
-            {!canCompleteAssessment && (
-              <p className="text-center text-sm font-medium leading-6 text-app-ink-soft sm:text-right">
-                Khía cạnh chưa chấm sẽ dùng điểm mặc định 5.
-              </p>
-            )}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="order-2 flex flex-col gap-2 sm:order-1 sm:flex-row sm:items-center">
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-pill border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                  onClick={() => setStep("welcome")}
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  Quay lại chào mừng
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center justify-center rounded-pill px-5 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
-                  onClick={handleDefer}
-                >
-                  Để sau
-                </button>
-              </div>
-              <button
-                id="btn-complete-onboarding"
-                type="button"
-                className="order-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:order-2 sm:w-auto"
-                onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
-              >
-                Chọn trọng tâm
-                {!canCompleteAssessment ? <span className="sr-only"> (Dùng điểm mặc định)</span> : null}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
+        {/* ---- BOTTOM NAV (Clio design) ---- */}
+        <footer className="flex items-center justify-between gap-[14px] border-t border-[rgba(23,21,15,0.08)] pt-[18px]">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-3 font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+              onClick={() => setStep("welcome")}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              Quay lại chào mừng
+            </button>
+            <button
+              type="button"
+              className="cursor-pointer border-none bg-transparent font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+              onClick={handleDefer}
+            >
+              Để sau
+            </button>
           </div>
+          <button
+            id="btn-complete-onboarding"
+            type="button"
+            className="dof-primary inline-flex cursor-pointer items-center gap-[9px] rounded-[13px] border-none bg-[#0C5E3A] px-[26px] py-[13px] font-[inherit] text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+            onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
+          >
+            Chọn trọng tâm
+            {!canCompleteAssessment ? <span className="sr-only"> (Dùng điểm mặc định)</span> : null}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
         </footer>
       </div>
     </PageShell>
