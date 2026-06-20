@@ -55,31 +55,23 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
   return (
     <section
-      className="rounded-3xl border border-app-line/70 bg-app-surface/70 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
+      className="rounded-[20px] border border-app-line bg-app-surface p-[22px]"
       aria-labelledby="dashboard-active-goals-title"
     >
-      {/* Grid Pattern overlay for texture */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:12px_12px] pointer-events-none" />
-
-      {/* Ambient glow mesh */}
-      <div className="pointer-events-none absolute -left-16 -bottom-16 h-40 w-40 rounded-full bg-app-accent/5 blur-[40px]" />
-
-      {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
-        📌
-      </span>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-app-line/50 pb-4 mb-6 pt-2 relative z-10">
+      <div className="mb-4 flex flex-col gap-3 border-b border-app-line pb-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2
             id="dashboard-active-goals-title"
-            className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2"
+            className="mb-1 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-app-ink"
           >
-            <Target className="h-4.5 w-4.5 text-app-accent/80" />
+            <Target className="h-[15px] w-[15px] text-app-accent" />
             Mục tiêu chu kỳ
           </h2>
-          <p className="mt-1 text-[10px] font-semibold text-app-ink-muted">
-            {Math.min(goals.length, maxGoals)} / {maxGoals} Mục tiêu đang chạy
+          <p className="text-[10.5px] font-semibold text-app-ink-muted">
+            <span className="font-mono">
+              {Math.min(goals.length, maxGoals)} / {maxGoals}
+            </span>{" "}
+            mục tiêu đang chạy
           </p>
         </div>
 
@@ -87,7 +79,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
           type="button"
           onClick={onAddGoal}
           disabled={isAtLimit}
-          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-4 py-2 text-[10px] font-bold text-app-accent hover:bg-app-accent hover:text-white disabled:cursor-not-allowed disabled:bg-app-bg-subtle disabled:text-app-ink-muted disabled:border-app-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-all duration-200 shadow-sm"
+          className="inline-flex items-center justify-center gap-1.5 self-start rounded-full border border-app-line bg-app-surface px-3.5 py-2 text-[11.5px] font-bold text-app-accent transition-all duration-200 hover:bg-app-accent hover:text-white disabled:cursor-not-allowed disabled:border-app-line disabled:bg-app-bg-subtle disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:self-auto"
           title={isAtLimit ? "Đã đạt giới hạn 3 mục tiêu trong chu kỳ" : "Thêm mục tiêu"}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -95,17 +87,13 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
         </button>
       </div>
 
-      <div className="space-y-4 relative z-10">
+      <div className="space-y-3">
         {visibleGoals.length > 0 ? (
-          visibleGoals.map((goal, index) => {
+          visibleGoals.map((goal) => {
             const progress = clampPercent(getLeadScore(goal));
             const domain = getLifeAreaLabel(goal.focusArea ?? goal.category);
             const theme = getAreaTheme(goal.focusArea ?? goal.category);
             const GoalIcon = theme.icon;
-
-            // Alternating subtle tilts to echo Variant B vision-board look
-            const tilts = ["-rotate-[0.5deg]", "rotate-[0.4deg]", "-rotate-[0.3deg]"];
-            const tiltClass = tilts[index % tilts.length];
 
             return (
               // biome-ignore lint/a11y/useSemanticElements: Card container acts as interactive block containing complex children
@@ -120,49 +108,49 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                     onSelectGoal(goal);
                   }
                 }}
-                className={`group flex gap-4 rounded-2xl border border-app-line/60 bg-app-surface/70 p-5 hover:border-app-accent/25 hover:bg-app-surface hover:shadow-xs transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${tiltClass} hover:rotate-0 hover:scale-[1.005]`}
+                className="group cursor-pointer rounded-[14px] border border-app-line p-4 transition-colors duration-200 hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
-                {/* Accent glow on hover */}
-                <div className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-app-accent/40 to-app-accent/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl" />
-
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-app-bg-subtle text-app-ink-muted border border-app-line/80 group-hover:scale-110 transition-all duration-300 group-hover:bg-app-accent-soft/20 group-hover:border-app-accent/20">
-                  <GoalIcon className="h-4.5 w-4.5 text-app-accent/80 transition-colors duration-300 group-hover:text-app-accent" />
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-app-accent-subtle text-app-accent"
+                      aria-hidden="true"
+                    >
+                      <GoalIcon className="h-[18px] w-[18px]" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="mb-1 line-clamp-2 break-words text-sm font-bold leading-snug text-app-ink">
+                        {goal.title}
+                      </h3>
+                      <p className="font-mono text-[11px] font-semibold text-app-ink-muted">
+                        {getWeekLabel(goal)} · <span className="text-app-accent">{domain}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 font-serif text-[18px] font-extrabold text-app-accent tabular-nums">
+                    {progress}%
+                  </span>
                 </div>
 
-                <div className="min-w-0 flex-1 space-y-2.5 pt-0.5">
-                  <h3 className="line-clamp-2 break-words text-xs font-bold leading-relaxed text-app-ink group-hover:text-app-accent transition-colors duration-200">
-                    {goal.title}
-                  </h3>
-
-                  <p className="text-[10px] font-semibold text-app-ink-muted">
-                    {getWeekLabel(goal)} · <span className="text-app-accent font-extrabold">{domain}</span>
-                  </p>
-
-                  <div
-                    className="h-1.5 w-full overflow-hidden rounded-full bg-app-bg-subtle shadow-inner"
-                    aria-hidden="true"
-                  >
+                <div className="flex items-center gap-3.5">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-app-bg-subtle" aria-hidden="true">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-app-accent to-[#5ba590] dark:from-[#3a6e60] dark:to-[#5ba590] transition-all duration-500 ease-out"
-                      style={{ width: `${progress}%` }}
+                      className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
+                      style={{ width: `${Math.max(progress, 2)}%` }}
                     />
                   </div>
-                </div>
-
-                <div className="flex shrink-0 flex-col items-end justify-between gap-3 text-right pt-0.5">
-                  <span className="text-xs font-extrabold text-app-accent tabular-nums">{progress}%</span>
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-app-accent group-hover:translate-x-0.5 transition-transform duration-200">
+                  <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-bold text-app-accent">
                     Chi tiết
-                    <ArrowRight className="h-3 w-3" />
+                    <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </span>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="rounded-2xl border border-dashed border-app-line bg-app-bg-subtle/10 p-8 text-center flex flex-col items-center justify-center gap-3">
-            <Target className="h-7 w-7 text-app-ink-muted stroke-[1.25]" />
-            <p className="text-xs font-semibold leading-relaxed text-app-ink-muted max-w-[36ch]">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-[14px] border border-dashed border-app-line bg-app-bg-subtle/20 p-8 text-center">
+            <Target className="h-7 w-7 stroke-[1.25] text-app-ink-muted" />
+            <p className="max-w-[36ch] text-xs font-semibold leading-relaxed text-app-ink-muted">
               Chưa có mục tiêu đang chạy. Hãy bắt đầu bằng Cân bằng cuộc sống để tìm ra trọng tâm ưu tiên nhất!
             </p>
           </div>

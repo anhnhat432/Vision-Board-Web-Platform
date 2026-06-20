@@ -39,7 +39,6 @@ import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../.
 import { startPageTour } from "../../hooks/usePageTour";
 import { useTheme } from "../../hooks/useTheme";
 import { isDemoMode, shouldEnable12WeekCloudImport, shouldEnable12WeekImportDryRun } from "../../utils/app-mode";
-import { hasCompletedFirstRunGuidance, hasSeenNewUserGuide, markNewUserGuideSeen } from "../../utils/new-user-guide";
 import {
   getAnonymousLocalDataMigrationCandidate,
   hasCompletedCloudImport,
@@ -49,6 +48,7 @@ import {
   markCloudImportCompleted,
   markLocalDataMigrationPromptSkipped,
 } from "../../utils/local-data-migration";
+import { hasCompletedFirstRunGuidance, hasSeenNewUserGuide, markNewUserGuideSeen } from "../../utils/new-user-guide";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../../utils/production";
 import {
   exportUserDataSnapshot,
@@ -977,7 +977,12 @@ export function RootLayout() {
     );
   }
 
-  const showSidebar = !isSignedOutVisitor;
+  // Landing public "Dear Our Future" dựng header + footer riêng (kèm Đăng nhập/
+  // Đăng ký/âm thanh tập trung), nên ẩn chrome mặc định của shell ở route "/".
+  // Dùng !user (không phụ thuộc isConfigured) để khớp điều kiện Dashboard hiển thị
+  // PublicVisitorView — tránh trùng header khi demo chưa cấu hình Firebase.
+  const isPublicLanding = !user && normalizePathname(location.pathname) === "/";
+  const showSidebar = !isSignedOutVisitor && !isPublicLanding;
 
   return (
     <AutoCloudSyncProvider>
@@ -1021,448 +1026,450 @@ export function RootLayout() {
             />
           ) : null}
 
-          <div className={showSidebar ? "flex-1 lg:pl-[272px]" : "flex-1"}>
-            <header
-              className={`sticky top-0 z-40 border-b border-app-line/80 bg-app-bg/85 backdrop-blur-md transition-all duration-200 ${
-                showSidebar ? "lg:hidden" : ""
-              }`}
-            >
-              <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
-                <div className="flex w-full items-center justify-between gap-3">
-                  <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => navigateAppRoute("/")}
-                      className="-mx-1.5 flex shrink-0 items-center gap-2.5 rounded-xl px-1.5 py-1 text-left transition-all duration-200 hover:bg-app-ink/5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
-                      aria-label="Về trang chủ Dear Our Future"
-                    >
-                      <img
-                        src="/favicon-512.png"
-                        alt=""
-                        aria-hidden="true"
-                        loading="eager"
-                        className="size-9 rounded-lg object-cover shadow-xs ring-1 ring-app-accent/20 transition-transform duration-200 group-hover:scale-105"
-                      />
-                      <div className="min-w-0">
-                        <span className="inline-block text-sm font-semibold tracking-tight text-app-ink">
-                          Dear Our Future
-                        </span>
-                      </div>
-                    </button>
-                  </div>
+          <div className={showSidebar ? "flex-1 lg:pl-[248px]" : "flex-1"}>
+            {isPublicLanding ? null : (
+              <header
+                className={`sticky top-0 z-40 border-b border-app-line/80 bg-app-bg/85 backdrop-blur-md transition-all duration-200 ${
+                  showSidebar ? "lg:hidden" : ""
+                }`}
+              >
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
+                  <div className="flex w-full items-center justify-between gap-3">
+                    <div className="flex min-w-0 shrink-0 items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => navigateAppRoute("/")}
+                        className="-mx-1.5 flex shrink-0 items-center gap-2.5 rounded-xl px-1.5 py-1 text-left transition-all duration-200 hover:bg-app-ink/5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+                        aria-label="Về trang chủ Dear Our Future"
+                      >
+                        <img
+                          src="/favicon-512.png"
+                          alt=""
+                          aria-hidden="true"
+                          loading="eager"
+                          className="size-9 rounded-lg object-cover shadow-xs ring-1 ring-app-accent/20 transition-transform duration-200 group-hover:scale-105"
+                        />
+                        <div className="min-w-0">
+                          <span className="inline-block text-sm font-semibold tracking-tight text-app-ink">
+                            Dear Our Future
+                          </span>
+                        </div>
+                      </button>
+                    </div>
 
-                  <nav aria-label="Chính" className="hidden flex-1 items-center justify-center md:flex">
-                    {isSignedOutVisitor ? (
-                      <span className="hidden text-xs text-app-ink-muted lg:inline">12 tuần sống có chủ đích</span>
-                    ) : (
-                      <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
-                        {primaryNavItems.map((item) => {
-                          const Icon = item.icon;
-                          const active = isActive(item.path);
+                    <nav aria-label="Chính" className="hidden flex-1 items-center justify-center md:flex">
+                      {isSignedOutVisitor ? (
+                        <span className="hidden text-xs text-app-ink-muted lg:inline">12 tuần sống có chủ đích</span>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
+                          {primaryNavItems.map((item) => {
+                            const Icon = item.icon;
+                            const active = isActive(item.path);
 
-                          return (
-                            <Button
-                              key={item.path}
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigateAppRoute(item.path)}
-                              onPointerEnter={() => handlePrefetch(item.path)}
-                              aria-current={active ? "page" : undefined}
-                              title={item.label}
-                              className={`h-8 shrink-0 rounded-full px-3 text-sm font-medium tracking-tight transition-colors duration-150 ${
-                                active
-                                  ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
-                                  : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
-                              }`}
-                            >
-                              <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
-                              <span>{item.compactLabel ?? item.label}</span>
-                            </Button>
-                          );
-                        })}
-
-                        {secondaryNavItems.length > 0 ? (
-                          <>
-                            <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
-
-                            <div ref={desktopMoreRef} className="relative">
+                            return (
                               <Button
+                                key={item.path}
                                 variant="ghost"
                                 size="sm"
-                                aria-current={
-                                  secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined
-                                }
-                                aria-expanded={desktopMoreOpen}
-                                aria-haspopup="menu"
+                                onClick={() => navigateAppRoute(item.path)}
+                                onPointerEnter={() => handlePrefetch(item.path)}
+                                aria-current={active ? "page" : undefined}
+                                title={item.label}
                                 className={`h-8 shrink-0 rounded-full px-3 text-sm font-medium tracking-tight transition-colors duration-150 ${
-                                  isDesktopMoreNavActive
+                                  active
                                     ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
                                     : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
                                 }`}
-                                onClick={() => setDesktopMoreOpen((open) => !open)}
                               >
-                                <Menu className="h-3.5 w-3.5" />
-                                <span>Khác</span>
-                                <ChevronDown
-                                  className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
-                                />
+                                <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
+                                <span>{item.compactLabel ?? item.label}</span>
                               </Button>
+                            );
+                          })}
 
-                              {desktopMoreOpen ? (
-                                <div
-                                  role="menu"
-                                  aria-label="Mục khác"
-                                  className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
+                          {secondaryNavItems.length > 0 ? (
+                            <>
+                              <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
+
+                              <div ref={desktopMoreRef} className="relative">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  aria-current={
+                                    secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined
+                                  }
+                                  aria-expanded={desktopMoreOpen}
+                                  aria-haspopup="menu"
+                                  className={`h-8 shrink-0 rounded-full px-3 text-sm font-medium tracking-tight transition-colors duration-150 ${
+                                    isDesktopMoreNavActive
+                                      ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                                      : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
+                                  }`}
+                                  onClick={() => setDesktopMoreOpen((open) => !open)}
                                 >
-                                  <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
-                                    Mục khác
+                                  <Menu className="h-3.5 w-3.5" />
+                                  <span>Khác</span>
+                                  <ChevronDown
+                                    className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                                  />
+                                </Button>
+
+                                {desktopMoreOpen ? (
+                                  <div
+                                    role="menu"
+                                    aria-label="Mục khác"
+                                    className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
+                                  >
+                                    <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
+                                      Mục khác
+                                    </div>
+                                    {secondaryNavItems.map((item) => {
+                                      const Icon = item.icon;
+                                      const active = isActive(item.path);
+
+                                      return (
+                                        <button
+                                          key={item.path}
+                                          type="button"
+                                          role="menuitem"
+                                          aria-current={active ? "page" : undefined}
+                                          onPointerEnter={() => handlePrefetch(item.path)}
+                                          onClick={() => {
+                                            setDesktopMoreOpen(false);
+                                            navigateAppRoute(item.path);
+                                          }}
+                                          className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm font-medium tracking-tight outline-none transition-colors ${
+                                            active
+                                              ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
+                                              : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
+                                          }`}
+                                        >
+                                          <Icon
+                                            className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
+                                          />
+                                          <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                        </button>
+                                      );
+                                    })}
                                   </div>
-                                  {secondaryNavItems.map((item) => {
-                                    const Icon = item.icon;
-                                    const active = isActive(item.path);
-
-                                    return (
-                                      <button
-                                        key={item.path}
-                                        type="button"
-                                        role="menuitem"
-                                        aria-current={active ? "page" : undefined}
-                                        onPointerEnter={() => handlePrefetch(item.path)}
-                                        onClick={() => {
-                                          setDesktopMoreOpen(false);
-                                          navigateAppRoute(item.path);
-                                        }}
-                                        className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm font-medium tracking-tight outline-none transition-colors ${
-                                          active
-                                            ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
-                                            : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
-                                        }`}
-                                      >
-                                        <Icon
-                                          className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
-                                        />
-                                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              ) : null}
-                            </div>
-                          </>
-                        ) : null}
-                      </div>
-                    )}
-                  </nav>
-
-                  <div className="hidden shrink-0 items-center gap-1.5 md:flex">
-                    {user ? renderAccountMenu("desktop") : null}
-                    {!user ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAuthNavigate("signin")}
-                          className="h-8 rounded-full px-3 text-sm text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
-                        >
-                          Đăng nhập
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAuthNavigate("signup")}
-                          className="h-8 rounded-full bg-app-accent px-3.5 text-sm text-white hover:bg-app-accent hover:text-white"
-                        >
-                          Đăng ký
-                        </Button>
-                      </>
-                    ) : null}
-                    <MindfulPlayer />
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                          aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-                        >
-                          {resolvedTheme === "dark" ? (
-                            <Sun className="h-3.5 w-3.5" />
-                          ) : (
-                            <Moon className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        {resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-
-                  <div className="md:hidden flex min-w-0 items-center gap-1.5">
-                    <MindfulPlayer />
-                    <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-tight text-app-ink sm:inline">
-                      {pageMeta.label}
-                    </span>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="hidden size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
-                          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                          aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
-                        >
-                          {resolvedTheme === "dark" ? (
-                            <Sun className="h-[1.05rem] w-[1.05rem]" />
-                          ) : (
-                            <Moon className="h-[1.05rem] w-[1.05rem]" />
-                          )}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        {resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
-                      </TooltipContent>
-                    </Tooltip>
-                    {isSignedOutVisitor ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-10 rounded-lg bg-app-accent px-3 text-sm text-white hover:bg-app-accent hover:text-white"
-                          onClick={() => handleAuthNavigate("signup")}
-                        >
-                          Đăng ký
-                        </Button>
-                        <DropdownMenu open={mobileVisitorMenuOpen} onOpenChange={setMobileVisitorMenuOpen}>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              type="button"
-                              className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                              aria-label="Mở menu"
-                            >
-                              <Menu className="h-[1.05rem] w-[1.05rem]" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuItem onSelect={() => handleAuthNavigate("signin")}>
-                              <LogIn className="mr-2 h-4 w-4" />
-                              Đăng nhập
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onSelect={() => {
-                                handleOpenGuide();
-                                setMobileVisitorMenuOpen(false);
-                              }}
-                            >
-                              <Compass className="mr-2 h-4 w-4" />
-                              Hướng dẫn sử dụng
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onSelect={() => {
-                                navigateAppRoute("/billing/faq");
-                                setMobileVisitorMenuOpen(false);
-                              }}
-                            >
-                              <HelpCircle className="mr-2 h-4 w-4" />
-                              Câu hỏi thường gặp
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onSelect={() => {
-                                navigateAppRoute("/terms");
-                                setMobileVisitorMenuOpen(false);
-                              }}
-                            >
-                              <FileText className="mr-2 h-4 w-4" />
-                              Điều khoản
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onSelect={() => {
-                                navigateAppRoute("/privacy");
-                                setMobileVisitorMenuOpen(false);
-                              }}
-                            >
-                              <Shield className="mr-2 h-4 w-4" />
-                              Chính sách bảo mật
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </>
-                    ) : user ? (
-                      <>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                              onClick={handleOpenGuide}
-                              aria-label="Mở hướng dẫn sử dụng"
-                            >
-                              <Compass className="h-[1.05rem] w-[1.05rem]" />
-                              {hasUnseenContextualGuide ? (
-                                <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
-                                  <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
-                                  <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
-                                </span>
-                              ) : null}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">Hướng dẫn sử dụng</TooltipContent>
-                        </Tooltip>
-                        {renderAccountMenu("mobile")}
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                        onClick={handleOpenGuide}
-                        aria-label="Mở hướng dẫn sử dụng"
-                      >
-                        <Compass className="h-[1.05rem] w-[1.05rem]" />
-                        {hasUnseenContextualGuide ? (
-                          <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
-                            <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
-                            <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
-                          </span>
-                        ) : null}
-                      </button>
-                    )}
-                    {!isSignedOutVisitor && (
-                      <button
-                        type="button"
-                        className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-                        onClick={() => setMobileMenuOpen((open) => !open)}
-                        aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
-                        aria-expanded={mobileMenuOpen}
-                        aria-controls="mobile-nav-menu"
-                      >
-                        {mobileMenuOpen ? (
-                          <X className="h-[1.05rem] w-[1.05rem]" />
-                        ) : (
-                          <Menu className="h-[1.05rem] w-[1.05rem]" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {mobileMenuOpen && (
-                <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl px-4 md:hidden">
-                  <div className="rounded-card border border-app-line bg-app-surface p-3 shadow-[0_4px_12px_rgba(15,23,42,0.06)]">
-                    <nav className="space-y-1" aria-label="Menu điều hướng">
-                      {user ? (
-                        <div className="mb-2 rounded-card border border-app-line bg-app-bg px-4 py-3 text-left">
-                          <div className="flex items-center gap-3">
-                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
-                              <User2 className="h-5 w-5" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-app-ink">{accountLabel}</p>
-                              <p className="mt-1 text-xs font-medium text-app-ink-muted">{accountStatus}</p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                navigateAppRoute("/settings");
-                              }}
-                              className="flex size-9 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink disabled:opacity-50"
-                              aria-label="Mở cài đặt tài khoản"
-                            >
-                              <Settings2 className="h-4 w-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={refreshUserProfile}
-                              disabled={!canRetryUserProfile}
-                              className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-ink-soft disabled:opacity-50"
-                              aria-label="Kiểm tra lại hồ sơ tài khoản"
-                            >
-                              <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                void handleSignOut();
-                              }}
-                              disabled={isSigningOut}
-                              className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-ink-soft disabled:opacity-50"
-                              aria-label="Đăng xuất"
-                            >
-                              <LogOut className="h-4 w-4" />
-                            </button>
-                          </div>
-                          {userProfileError ? (
-                            <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
+                                ) : null}
+                              </div>
+                            </>
                           ) : null}
                         </div>
-                      ) : null}
+                      )}
+                    </nav>
+
+                    <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+                      {user ? renderAccountMenu("desktop") : null}
                       {!user ? (
-                        <div className="mb-2 grid grid-cols-2 gap-2 rounded-card border border-app-line bg-app-bg p-2">
+                        <>
                           <Button
-                            variant="outline"
-                            className="w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                            onClick={() => {
-                              setMobileMenuOpen(false);
-                              handleAuthNavigate("signin");
-                            }}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleAuthNavigate("signin")}
+                            className="h-8 rounded-full px-3 text-sm text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
                           >
                             Đăng nhập
                           </Button>
                           <Button
                             variant="ghost"
-                            className="w-full bg-app-accent text-white hover:bg-app-accent hover:text-white"
-                            onClick={() => {
-                              setMobileMenuOpen(false);
-                              handleAuthNavigate("signup");
-                            }}
+                            size="sm"
+                            onClick={() => handleAuthNavigate("signup")}
+                            className="h-8 rounded-full bg-app-accent px-3.5 text-sm text-white hover:bg-app-accent hover:text-white"
                           >
                             Đăng ký
                           </Button>
-                        </div>
+                        </>
                       ) : null}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleOpenGuide();
-                          setMobileMenuOpen(false);
-                        }}
-                        className="mb-2 flex w-full items-center gap-3 rounded-lg border border-app-line bg-app-surface px-4 py-3 text-left text-sm font-medium tracking-normal text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink"
-                      >
-                        <Compass className="h-5 w-5" />
-                        <span>Hướng dẫn sử dụng</span>
-                      </button>
-                      {mobileMenuNavItems.map((item) => {
-                        const Icon = item.icon;
-                        const active = isActive(item.path);
-
-                        return (
+                      <MindfulPlayer />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
                           <button
-                            key={item.path}
                             type="button"
-                            onClick={() => {
-                              navigateAppRoute(item.path);
-                              setMobileMenuOpen(false);
-                            }}
-                            onFocus={() => handlePrefetch(item.path)}
-                            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-colors duration-150 ${
-                              active
-                                ? "bg-app-accent-soft text-app-accent"
-                                : "text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
-                            }`}
-                            aria-current={active ? "page" : undefined}
+                            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                            aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
                           >
-                            <Icon className="h-5 w-5 shrink-0" />
-                            <span>{item.label}</span>
+                            {resolvedTheme === "dark" ? (
+                              <Sun className="h-3.5 w-3.5" />
+                            ) : (
+                              <Moon className="h-3.5 w-3.5" />
+                            )}
                           </button>
-                        );
-                      })}
-                    </nav>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          {resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+
+                    <div className="md:hidden flex min-w-0 items-center gap-1.5">
+                      <MindfulPlayer />
+                      <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-tight text-app-ink sm:inline">
+                        {pageMeta.label}
+                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="hidden size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
+                            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                            aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                          >
+                            {resolvedTheme === "dark" ? (
+                              <Sun className="h-[1.05rem] w-[1.05rem]" />
+                            ) : (
+                              <Moon className="h-[1.05rem] w-[1.05rem]" />
+                            )}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          {resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                        </TooltipContent>
+                      </Tooltip>
+                      {isSignedOutVisitor ? (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-10 rounded-lg bg-app-accent px-3 text-sm text-white hover:bg-app-accent hover:text-white"
+                            onClick={() => handleAuthNavigate("signup")}
+                          >
+                            Đăng ký
+                          </Button>
+                          <DropdownMenu open={mobileVisitorMenuOpen} onOpenChange={setMobileVisitorMenuOpen}>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                                aria-label="Mở menu"
+                              >
+                                <Menu className="h-[1.05rem] w-[1.05rem]" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                              <DropdownMenuItem onSelect={() => handleAuthNavigate("signin")}>
+                                <LogIn className="mr-2 h-4 w-4" />
+                                Đăng nhập
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  handleOpenGuide();
+                                  setMobileVisitorMenuOpen(false);
+                                }}
+                              >
+                                <Compass className="mr-2 h-4 w-4" />
+                                Hướng dẫn sử dụng
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  navigateAppRoute("/billing/faq");
+                                  setMobileVisitorMenuOpen(false);
+                                }}
+                              >
+                                <HelpCircle className="mr-2 h-4 w-4" />
+                                Câu hỏi thường gặp
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  navigateAppRoute("/terms");
+                                  setMobileVisitorMenuOpen(false);
+                                }}
+                              >
+                                <FileText className="mr-2 h-4 w-4" />
+                                Điều khoản
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  navigateAppRoute("/privacy");
+                                  setMobileVisitorMenuOpen(false);
+                                }}
+                              >
+                                <Shield className="mr-2 h-4 w-4" />
+                                Chính sách bảo mật
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </>
+                      ) : user ? (
+                        <>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                                onClick={handleOpenGuide}
+                                aria-label="Mở hướng dẫn sử dụng"
+                              >
+                                <Compass className="h-[1.05rem] w-[1.05rem]" />
+                                {hasUnseenContextualGuide ? (
+                                  <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
+                                    <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
+                                    <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
+                                  </span>
+                                ) : null}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">Hướng dẫn sử dụng</TooltipContent>
+                          </Tooltip>
+                          {renderAccountMenu("mobile")}
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          onClick={handleOpenGuide}
+                          aria-label="Mở hướng dẫn sử dụng"
+                        >
+                          <Compass className="h-[1.05rem] w-[1.05rem]" />
+                          {hasUnseenContextualGuide ? (
+                            <span className="absolute -right-0.5 -top-0.5 flex size-2" aria-hidden="true">
+                              <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
+                              <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
+                            </span>
+                          ) : null}
+                        </button>
+                      )}
+                      {!isSignedOutVisitor && (
+                        <button
+                          type="button"
+                          className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          onClick={() => setMobileMenuOpen((open) => !open)}
+                          aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+                          aria-expanded={mobileMenuOpen}
+                          aria-controls="mobile-nav-menu"
+                        >
+                          {mobileMenuOpen ? (
+                            <X className="h-[1.05rem] w-[1.05rem]" />
+                          ) : (
+                            <Menu className="h-[1.05rem] w-[1.05rem]" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              )}
-            </header>
+
+                {mobileMenuOpen && (
+                  <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl px-4 md:hidden">
+                    <div className="rounded-card border border-app-line bg-app-surface p-3 shadow-[0_4px_12px_rgba(15,23,42,0.06)]">
+                      <nav className="space-y-1" aria-label="Menu điều hướng">
+                        {user ? (
+                          <div className="mb-2 rounded-card border border-app-line bg-app-bg px-4 py-3 text-left">
+                            <div className="flex items-center gap-3">
+                              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+                                <User2 className="h-5 w-5" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-app-ink">{accountLabel}</p>
+                                <p className="mt-1 text-xs font-medium text-app-ink-muted">{accountStatus}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMobileMenuOpen(false);
+                                  navigateAppRoute("/settings");
+                                }}
+                                className="flex size-9 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink disabled:opacity-50"
+                                aria-label="Mở cài đặt tài khoản"
+                              >
+                                <Settings2 className="h-4 w-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={refreshUserProfile}
+                                disabled={!canRetryUserProfile}
+                                className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-ink-soft disabled:opacity-50"
+                                aria-label="Kiểm tra lại hồ sơ tài khoản"
+                              >
+                                <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMobileMenuOpen(false);
+                                  void handleSignOut();
+                                }}
+                                disabled={isSigningOut}
+                                className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-ink-soft disabled:opacity-50"
+                                aria-label="Đăng xuất"
+                              >
+                                <LogOut className="h-4 w-4" />
+                              </button>
+                            </div>
+                            {userProfileError ? (
+                              <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        {!user ? (
+                          <div className="mb-2 grid grid-cols-2 gap-2 rounded-card border border-app-line bg-app-bg p-2">
+                            <Button
+                              variant="outline"
+                              className="w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                handleAuthNavigate("signin");
+                              }}
+                            >
+                              Đăng nhập
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              className="w-full bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                handleAuthNavigate("signup");
+                              }}
+                            >
+                              Đăng ký
+                            </Button>
+                          </div>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleOpenGuide();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="mb-2 flex w-full items-center gap-3 rounded-lg border border-app-line bg-app-surface px-4 py-3 text-left text-sm font-medium tracking-normal text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink"
+                        >
+                          <Compass className="h-5 w-5" />
+                          <span>Hướng dẫn sử dụng</span>
+                        </button>
+                        {mobileMenuNavItems.map((item) => {
+                          const Icon = item.icon;
+                          const active = isActive(item.path);
+
+                          return (
+                            <button
+                              key={item.path}
+                              type="button"
+                              onClick={() => {
+                                navigateAppRoute(item.path);
+                                setMobileMenuOpen(false);
+                              }}
+                              onFocus={() => handlePrefetch(item.path)}
+                              className={`flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-colors duration-150 ${
+                                active
+                                  ? "bg-app-accent-soft text-app-accent"
+                                  : "text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                              }`}
+                              aria-current={active ? "page" : undefined}
+                            >
+                              <Icon className="h-5 w-5 shrink-0" />
+                              <span>{item.label}</span>
+                            </button>
+                          );
+                        })}
+                      </nav>
+                    </div>
+                  </div>
+                )}
+              </header>
+            )}
 
             {showSidebar ? (
               <div className="sticky top-0 z-40 hidden border-b border-app-line bg-app-bg/95 backdrop-blur-sm lg:block">
@@ -1519,12 +1526,12 @@ export function RootLayout() {
                     <button
                       type="button"
                       onClick={() => setCommandPaletteOpen(true)}
-                      className="flex items-center gap-2 rounded-md border border-app-line bg-app-surface px-3 py-1.5 text-sm text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="flex items-center gap-2.5 rounded-[11px] border border-app-line bg-app-surface px-3.5 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                       aria-label="Mở command palette"
                     >
                       <Search className="h-3.5 w-3.5" />
                       <span>Tìm nhanh</span>
-                      <kbd className="ml-1 hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-xs font-medium text-app-ink-muted xl:inline-block">
+                      <kbd className="ml-0.5 hidden rounded-md border border-app-line bg-app-bg px-1.5 py-0.5 font-mono text-[11px] font-medium text-app-ink-muted sm:inline-block">
                         ⌘K
                       </kbd>
                     </button>
@@ -1534,7 +1541,7 @@ export function RootLayout() {
             ) : null}
 
             <main
-              className={`relative ${isSignedOutVisitor ? "" : "main-content-mobile-pad"}`}
+              className={`relative ${isSignedOutVisitor || isPublicLanding ? "" : "main-content-mobile-pad"}`}
               id="main-content"
               aria-label="Nội dung trang"
             >
@@ -1543,7 +1550,7 @@ export function RootLayout() {
                 {pageMeta.label}
               </div>
               {pageTransitionContent}
-              {isSignedOutVisitor ? <AppPublicFooter /> : null}
+              {isSignedOutVisitor && !isPublicLanding ? <AppPublicFooter /> : null}
             </main>
 
             {user ? (
@@ -1570,7 +1577,7 @@ export function RootLayout() {
             ) : null}
           </div>
 
-          {!isSignedOutVisitor ? (
+          {!isSignedOutVisitor && !isPublicLanding ? (
             <nav
               className="bottom-nav md:hidden"
               aria-label="Điều hướng dưới"

@@ -64,6 +64,7 @@ export default {
           "sans-serif",
         ],
         serif: [
+          "Bricolage Grotesque",
           "Source Serif 4 Variable",
           "Source Serif 4",
           "Georgia",
@@ -71,6 +72,13 @@ export default {
           "Times New Roman",
           "Times",
           "serif",
+        ],
+        mono: [
+          "JetBrains Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
         ],
       },
 

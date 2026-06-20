@@ -68,12 +68,15 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
       className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-300 hover:border-app-accent/20"
       aria-labelledby="dashboard-trend-title"
     >
-      <div className="flex flex-col gap-1 border-b border-app-line pb-4 mb-5">
-        <h2 id="dashboard-trend-title" className="text-base font-bold text-app-ink flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-app-accent" />
+      <div className="mb-5 border-b border-app-line pb-4">
+        <h2
+          id="dashboard-trend-title"
+          className="mb-1.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-app-ink"
+        >
+          <TrendingUp className="h-[15px] w-[15px] text-app-accent" />
           Đường 12 tuần
         </h2>
-        <p className="text-xs font-semibold tracking-wide text-app-ink-muted">Tiến độ % thực thi theo từng tuần</p>
+        <p className="text-[12.5px] text-app-ink-soft">Tiến độ % thực thi theo từng tuần</p>
       </div>
 
       <div className="mt-5 h-[180px] overflow-hidden relative">
@@ -118,9 +121,9 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
                 x={activePoint.week}
                 y={activePoint.percent}
                 r={5}
-                stroke="var(--app-surface)"
-                strokeWidth={1}
-                fill="var(--app-accent)"
+                stroke="var(--app-accent)"
+                strokeWidth={2}
+                fill="var(--app-highlight)"
               />
             ) : null}
           </AreaChart>

@@ -14,104 +14,60 @@ function clampScore(score: number): number {
   return Math.max(0, Math.min(10, Math.round(score)));
 }
 
-// Tailored gradients and colors for each distinct life area zone
-const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; textColor: string; iconBg: string }> = {
-  "Sức khoẻ": {
-    gradient: "from-emerald-500 to-teal-400 dark:from-emerald-600 dark:to-teal-500",
-    icon: Activity,
-    textColor: "text-emerald-600 dark:text-emerald-400",
-    iconBg: "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100/50 dark:border-emerald-900/30",
-  },
-  "Sức khỏe": {
-    gradient: "from-emerald-500 to-teal-400 dark:from-emerald-600 dark:to-teal-500",
-    icon: Activity,
-    textColor: "text-emerald-600 dark:text-emerald-400",
-    iconBg: "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100/50 dark:border-emerald-900/30",
-  },
-  "Sự nghiệp": {
-    gradient: "from-amber-500 to-orange-400 dark:from-amber-600 dark:to-orange-500",
-    icon: Briefcase,
-    textColor: "text-amber-600 dark:text-amber-400",
-    iconBg: "bg-amber-50 dark:bg-amber-950/30 border border-amber-100/50 dark:border-amber-900/30",
-  },
-  "Mối quan hệ": {
-    gradient: "from-rose-450 to-pink-400 dark:from-rose-500 dark:to-pink-500",
-    icon: Heart,
-    textColor: "text-rose-600 dark:text-rose-400",
-    iconBg: "bg-rose-50 dark:bg-rose-950/30 border border-rose-100/50 dark:border-rose-900/30",
-  },
-  "Tinh thần": {
-    gradient: "from-purple-500 to-indigo-400 dark:from-purple-600 dark:to-indigo-500",
-    icon: Compass,
-    textColor: "text-purple-600 dark:text-purple-400",
-    iconBg: "bg-purple-50 dark:bg-purple-950/30 border border-purple-100/50 dark:border-purple-900/30",
-  },
+// Màu theo từng lĩnh vực, bám sát thiết kế editorial (Dashboard.dc.html)
+const AREA_STYLES: Record<string, { bar: string; icon: typeof Activity; iconColor: string; iconBg: string }> = {
+  "Sức khoẻ": { bar: "#0C5E3A", icon: Activity, iconColor: "#0C5E3A", iconBg: "#EDF7E0" },
+  "Sức khỏe": { bar: "#0C5E3A", icon: Activity, iconColor: "#0C5E3A", iconBg: "#EDF7E0" },
+  "Sự nghiệp": { bar: "#E7B400", icon: Briefcase, iconColor: "#E7B400", iconBg: "#FFF8DE" },
+  "Mối quan hệ": { bar: "#FF5C3E", icon: Heart, iconColor: "#FF5C3E", iconBg: "#FFEDE8" },
+  "Tinh thần": { bar: "#6E8BFF", icon: Compass, iconColor: "#6E8BFF", iconBg: "#ECF0FF" },
 };
+
+const DEFAULT_STYLE = { bar: "#0C5E3A", icon: Activity, iconColor: "#0C5E3A", iconBg: "#EDF7E0" };
 
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
     <section
-      className="rounded-3xl border border-app-line/70 bg-app-surface/70 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 relative select-none overflow-hidden"
+      className="rounded-[20px] border border-app-line bg-app-surface p-[22px]"
       aria-labelledby="dashboard-balance-title"
     >
-      {/* Grid Pattern overlay for texture */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808004_1px,transparent_1px),linear-gradient(to_bottom,#80808004_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
-
-      {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
-        📌
-      </span>
-
-      <div className="flex flex-col gap-1 border-b border-app-line/50 pb-4 mb-5 pt-2 relative z-10">
+      <div className="mb-4 border-b border-app-line pb-3.5">
         <h2
           id="dashboard-balance-title"
-          className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2"
+          className="mb-1 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-app-ink"
         >
-          <Scale className="h-4.5 w-4.5 text-app-accent/80" />
+          <Scale className="h-[15px] w-[15px] text-app-accent" />
           Cân bằng cuộc sống
         </h2>
-        <p className="text-[10px] font-semibold text-app-ink-muted">Tỉ lệ thực tế so với bánh xe cuộc sống</p>
+        <p className="text-[10.5px] font-medium text-app-ink-muted">Tỉ lệ thực tế so với bánh xe cuộc sống</p>
       </div>
 
-      <div className="space-y-3.5 relative z-10">
+      <div className="space-y-[15px]">
         {rows.map((row) => {
           const score = clampScore(row.score);
-          const style = AREA_STYLES[row.label] ?? {
-            gradient: "from-app-accent to-emerald-450",
-            icon: Activity,
-            textColor: "text-app-accent",
-            iconBg: "bg-app-accent-soft/50 border border-app-accent/10",
-          };
+          const style = AREA_STYLES[row.label] ?? DEFAULT_STYLE;
           const Icon = style.icon;
 
           return (
-            <div
-              key={row.label}
-              className="group p-3 rounded-2xl border border-transparent hover:border-app-line/70 hover:bg-app-surface/50 transition-all duration-300 hover:scale-[1.01]"
-            >
-              <div className="mb-2.5 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={`p-2 rounded-xl transition-all duration-300 group-hover:scale-110 shadow-sm ${style.iconBg} ${style.textColor}`}
+            <div key={row.label}>
+              <div className="mb-[7px] flex items-center justify-between gap-3">
+                <span className="flex items-center gap-2 text-[12.5px] font-semibold text-app-ink">
+                  <span
+                    className="flex size-6 items-center justify-center rounded-[7px]"
+                    style={{ backgroundColor: style.iconBg, color: style.iconColor }}
+                    aria-hidden="true"
                   >
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <span className="text-xs font-bold text-app-ink-soft group-hover:text-app-ink transition-colors duration-200">
-                    {row.label}
+                    <Icon className="h-3.5 w-3.5" />
                   </span>
-                </div>
-                <span className="text-xs font-extrabold tabular-nums text-app-ink-muted group-hover:text-app-ink transition-colors duration-200">
-                  {score}/10
+                  {row.label}
                 </span>
+                <span className="font-mono text-xs font-extrabold tabular-nums text-app-ink">{score}/10</span>
               </div>
 
-              <div
-                className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle shadow-inner"
-                aria-hidden="true"
-              >
+              <div className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle" aria-hidden="true">
                 <div
-                  className={`h-full rounded-full bg-gradient-to-r ${style.gradient} transition-all duration-550 ease-out`}
-                  style={{ width: `${score * 10}%` }}
+                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${score * 10}%`, backgroundColor: style.bar }}
                 />
               </div>
             </div>
