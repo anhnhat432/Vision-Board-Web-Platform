@@ -12,19 +12,19 @@ export function FirstWeekPlanMockup() {
       {/* Content area with simulated writing style lines */}
       <div className="relative z-10 pl-6 space-y-4 font-serif">
         <div className="flex items-center justify-between border-b border-dashed border-neutral-200 dark:border-neutral-800 pb-2">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500 font-sans flex items-center gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted dark:text-neutral-500 font-sans flex items-center gap-1">
             <Info className="h-3 w-3 text-app-accent" />
             Ví dụ Kế hoạch Tuần 1
           </span>
-          <span className="text-[9px] font-semibold text-neutral-400 font-sans">Mục tiêu: Đạt IELTS 6.5</span>
+          <span className="text-[9px] font-semibold text-app-ink-muted font-sans">Mục tiêu: Đạt IELTS 6.5</span>
         </div>
 
-        <ul className="space-y-3.5 text-xs text-neutral-700 dark:text-neutral-300 font-medium italic">
+        <ul className="space-y-3.5 text-xs text-app-ink-soft dark:text-neutral-300 font-medium italic">
           <li className="flex items-start gap-3 border-b border-dashed border-neutral-100 dark:border-neutral-900 pb-2.5">
             <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md border border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
               <Check className="h-3 w-3" strokeWidth={3} />
             </span>
-            <span className="line-through text-neutral-400 dark:text-neutral-500">
+            <span className="line-through text-app-ink-muted dark:text-neutral-500">
               [Sáng] 🧘‍♀️ Ngồi thiền 5 phút & uống 1 ly nước ấm
             </span>
           </li>
@@ -33,7 +33,7 @@ export function FirstWeekPlanMockup() {
             <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md border border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5">
               <Check className="h-3 w-3" strokeWidth={3} />
             </span>
-            <span className="line-through text-neutral-400 dark:text-neutral-500">
+            <span className="line-through text-app-ink-muted dark:text-neutral-500">
               [Chiều] 📚 Luyện 1 đề Listening Practice (Tuần 1)
             </span>
           </li>
@@ -45,7 +45,7 @@ export function FirstWeekPlanMockup() {
         </ul>
 
         <div className="pt-2 text-center">
-          <p className="text-[9px] leading-relaxed text-neutral-400 dark:text-neutral-500 font-sans font-bold">
+          <p className="text-[9px] leading-relaxed text-app-ink-muted dark:text-neutral-500 font-sans font-bold">
             💡 Mỗi ngày chỉ cần hoàn thành 3 việc nhỏ để tích lũy Streak 12 tuần!
           </p>
         </div>

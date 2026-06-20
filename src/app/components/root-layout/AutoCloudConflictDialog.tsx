@@ -165,7 +165,7 @@ export function AutoCloudConflictDialog() {
         <button
           type="button"
           onClick={handleSettingsLink}
-          className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline"
+          className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-app-ink-soft underline-offset-4 hover:text-app-ink hover:underline"
         >
           Xem chi tiết trong Cài đặt
           <ExternalLink className="h-3.5 w-3.5" />

@@ -183,7 +183,7 @@ export function AppSidebar({
             {resolvedTheme === "dark" ? (
               <Sun className="h-4 w-4 text-amber-500 animate-pulse" />
             ) : (
-              <Moon className="h-4 w-4 text-slate-500" />
+              <Moon className="h-4 w-4 text-app-ink-muted" />
             )}
             {resolvedTheme === "dark" ? "Sáng" : "Tối"}
           </button>

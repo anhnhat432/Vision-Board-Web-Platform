@@ -79,10 +79,10 @@ const getStepTheme = (index: number): CardStepTheme => {
   const meta = stepsMeta[index] || { stage: "Thiết lập" };
 
   return {
-    border: "border-neutral-200/80 dark:border-neutral-800/80",
-    hoverBg: "hover:bg-neutral-50/50 dark:hover:bg-neutral-900/40 hover:border-app-accent/30",
-    iconBgPending: "bg-neutral-100 dark:bg-neutral-900",
-    iconTextPending: "text-neutral-500",
+    border: "border-app-line/80 dark:border-neutral-800/80",
+    hoverBg: "hover:bg-app-bg-subtle/50 dark:hover:bg-neutral-900/40 hover:border-app-accent/30",
+    iconBgPending: "bg-app-bg-subtle dark:bg-neutral-900",
+    iconTextPending: "text-app-ink-muted",
     badgeText: `Bước ${index + 1} · ${meta.stage}`,
     rotate: "",
   };
@@ -110,7 +110,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
   return (
     <div className="space-y-6 max-w-6xl mx-auto w-full">
       {/* 1. Editorial Greeting Banner - Premium Light-first Studio style */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs">
+      <section className="relative overflow-hidden rounded-3xl border border-app-line/70 dark:border-neutral-800/70 bg-gradient-to-br from-emerald-50/40 via-white to-amber-50/15 dark:from-emerald-950/10 dark:via-neutral-900/30 dark:to-neutral-950 p-6 md:p-10 shadow-3xs">
 
         {/* Ambient background Vision Map Illustration */}
         <div
@@ -133,12 +133,12 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
             đầu tiên
           </h1>
 
-          <p className="text-xs sm:text-sm font-medium leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif italic max-w-2xl">
+          <p className="text-xs sm:text-sm font-medium leading-relaxed text-app-ink-soft dark:text-neutral-400 font-serif italic max-w-2xl">
             Biến mục tiêu lớn thành kế hoạch 12 tuần và việc cần làm mỗi ngày, để bạn biết bắt đầu từ đâu.
           </p>
 
           <div className="pt-2 flex items-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 px-3.5 py-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-app-line dark:border-neutral-800 bg-app-surface/90 dark:bg-neutral-900/90 px-3.5 py-1 text-[11px] font-semibold text-app-ink-soft dark:text-neutral-300 shadow-sm">
               <Sparkles className="h-3.5 w-3.5 text-app-accent" />
               <span>Cần xem hướng dẫn nhanh?</span>
               <button
@@ -156,10 +156,10 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
       {/* 2. Setup Steps Panel - Guided studio layout */}
       <section
         data-testid="fresh-workspace-empty-state"
-        className="rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 bg-[#fbfbfa]/40 p-6 md:p-8 shadow-3xs w-full"
+        className="rounded-3xl border border-app-line/80 dark:border-neutral-800/80 bg-[#fbfbfa]/40 p-6 md:p-8 shadow-3xs w-full"
         aria-labelledby="dashboard-new-user-title"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-neutral-200/80 dark:border-neutral-800/60 pb-6 mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-app-line/80 dark:border-neutral-800/60 pb-6 mb-8">
           <div className="space-y-1">
             <h2
               id="dashboard-new-user-title"
@@ -168,7 +168,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
               <BookOpen className="h-4.5 w-4.5 text-app-accent" />
               Bản đồ ghim chu kỳ
             </h2>
-            <p className="text-[10px] font-semibold text-neutral-500">
+            <p className="text-[10px] font-semibold text-app-ink-muted">
               Hoàn thành 4 chặng cốt lõi để chuẩn hóa mục tiêu và kích hoạt nhịp Today.
             </p>
           </div>
@@ -195,10 +195,10 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                   onClick={() => onContinue(step.href)}
                   className={`group flex text-left gap-4 rounded-2xl border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${
                     step.completed
-                      ? "border-neutral-200 bg-neutral-50/20 dark:bg-neutral-900/5 opacity-55 hover:opacity-85 hover:border-neutral-300"
+                      ? "border-app-line bg-app-bg-subtle/20 dark:bg-neutral-900/5 opacity-55 hover:opacity-85 hover:border-app-line-strong"
                       : isNextStep
-                        ? "bg-white dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15"
-                        : `bg-white/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
+                        ? "bg-app-surface dark:bg-neutral-900 border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15"
+                        : `bg-app-surface/40 dark:bg-neutral-950/20 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
                   }`}
                 >
                   {/* Index / Check bubble */}
@@ -209,7 +209,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                           ? "bg-emerald-700 text-white shadow-sm"
                           : isNextStep
                             ? "border border-app-accent bg-app-accent-soft text-app-accent font-extrabold"
-                            : `border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-500`
+                            : `border border-app-line-strong dark:border-neutral-700 bg-app-surface dark:bg-neutral-900 text-app-ink-muted`
                       }`}
                     >
                       {step.completed ? <Check className="h-4 w-4" strokeWidth={3} /> : index + 1}
@@ -220,7 +220,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                   <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <h3
-                        className={`text-xs font-bold leading-none ${step.completed ? "text-neutral-400 line-through" : "text-neutral-800 dark:text-neutral-200"}`}
+                        className={`text-xs font-bold leading-none ${step.completed ? "text-app-ink-muted line-through" : "text-app-ink dark:text-neutral-200"}`}
                       >
                         {step.title}
                       </h3>
@@ -229,7 +229,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                         className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${
                           isNextStep && !step.completed
                             ? "bg-app-accent/10 text-app-accent border border-app-accent/10"
-                            : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
+                            : "bg-app-bg-subtle dark:bg-neutral-800 text-app-ink-muted"
                         }`}
                       >
                         {theme.badgeText}
@@ -243,7 +243,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                     </div>
 
                     <p
-                      className={`text-xs font-semibold leading-relaxed ${step.completed ? "text-neutral-400" : "text-neutral-500 dark:text-neutral-400"}`}
+                      className={`text-xs font-semibold leading-relaxed ${step.completed ? "text-app-ink-muted" : "text-app-ink-muted dark:text-neutral-400"}`}
                     >
                       {step.description}
                     </p>
@@ -253,11 +253,11 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
             })}
 
             {/* 💡 Accordion: First Week Plan Mockup */}
-            <div className="mt-4 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 bg-white/30 dark:bg-neutral-900/20 shadow-3xs overflow-hidden">
+            <div className="mt-4 rounded-2xl border border-app-line/60 dark:border-neutral-800 bg-app-surface/30 dark:bg-neutral-900/20 shadow-3xs overflow-hidden">
               <button
                 type="button"
                 onClick={() => setShowSamplePlan(!showSamplePlan)}
-                className="w-full flex items-center justify-between px-5 py-4 text-xs font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50/50 dark:hover:bg-neutral-900/40 transition-colors cursor-pointer select-none"
+                className="w-full flex items-center justify-between px-5 py-4 text-xs font-bold text-app-ink-soft dark:text-neutral-300 hover:bg-app-bg-subtle/50 dark:hover:bg-neutral-900/40 transition-colors cursor-pointer select-none"
               >
                 <span className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-app-accent" /> Xem cách một chu kỳ 12 tuần vận hành mẫu
@@ -276,7 +276,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           {/* Mini Wheel of Life Visual Anchor & Study Corner Image */}
           <div className="space-y-4">
             {hasLifeBalance && userData.currentWheelOfLife && userData.currentWheelOfLife.length > 0 ? (
-              <div className="rounded-3xl border border-neutral-200/80 bg-white/60 dark:bg-neutral-950/20 p-5 shadow-xs relative">
+              <div className="rounded-3xl border border-app-line/80 bg-app-surface/60 dark:bg-neutral-950/20 p-5 shadow-xs relative">
                 <p className="text-[10px] font-extrabold uppercase tracking-wide text-app-accent mb-4">
                   Kết quả chấm điểm của bạn
                 </p>
@@ -284,11 +284,11 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                   {userData.currentWheelOfLife.map((area) => (
                     <div key={area.name} className="space-y-1">
                       <div className="flex justify-between items-center text-xs font-bold">
-                        <span className="text-neutral-600 dark:text-neutral-400">{translateArea(area.name)}</span>
+                        <span className="text-app-ink-soft dark:text-neutral-400">{translateArea(area.name)}</span>
                         <span className="text-app-accent">{area.score}/10</span>
                       </div>
                       <div
-                        className="h-1.5 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800"
+                        className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle dark:bg-neutral-800"
                         aria-hidden="true"
                       >
                         <div
@@ -302,7 +302,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-square w-full group select-none transition-all duration-300 hover:shadow-md">
+                <div className="relative rounded-3xl border border-app-line/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-square w-full group select-none transition-all duration-300 hover:shadow-md">
                   <img
                     src="/vision_board_detail.png"
                     alt="Bảng tầm nhìn chi tiết mẫu"
@@ -315,12 +315,12 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-dashed border-neutral-200/80 dark:border-neutral-800 p-5 text-center space-y-2.5 bg-white/30">
+                <div className="rounded-2xl border border-dashed border-app-line/80 dark:border-neutral-800 p-5 text-center space-y-2.5 bg-app-surface/30">
                   <Target className="h-5 w-5 mx-auto text-app-accent" />
-                  <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                  <h4 className="text-xs font-bold text-app-ink dark:text-neutral-200">
                     Định hình cuộc sống bạn muốn
                   </h4>
-                  <p className="text-[10px] leading-relaxed text-neutral-500 dark:text-neutral-400 font-semibold">
+                  <p className="text-[10px] leading-relaxed text-app-ink-muted dark:text-neutral-400 font-semibold">
                     Dành 3 phút chấm Bánh xe cuộc sống để nhìn rõ các khía cạnh cần ưu tiên trước khi bước vào lập kế
                     hoạch hành động.
                   </p>
@@ -329,7 +329,7 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
             )}
 
             {/* 🎨 Cozy planning corner generated image asset */}
-            <div className="relative rounded-3xl border border-neutral-200/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none">
+            <div className="relative rounded-3xl border border-app-line/80 dark:border-neutral-800/80 overflow-hidden shadow-3xs aspect-video w-full group select-none">
               <img
                 src="/study_desk_hero.png"
                 alt="Góc học tập & lập kế hoạch ấm áp"

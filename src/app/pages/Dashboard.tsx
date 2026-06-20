@@ -768,7 +768,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
     bgClass =
       "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
     iconColor = "text-amber-600 dark:text-amber-400";
-    buttonColor = "bg-amber-500 hover:bg-amber-600 text-neutral-900";
+    buttonColor = "bg-amber-500 hover:bg-amber-600 text-app-ink";
   } else if (activeSystemTodayOpenTasks.length > 0) {
     title = `Còn ${activeSystemTodayOpenTasks.length} việc cần hoàn thành hôm nay`;
     description = "Kiên trì thực hiện các hành động nhỏ để giữ vững Streak và hoàn thành mục tiêu 12 tuần.";
@@ -811,7 +811,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
       </span>
 
       <div className="flex gap-4 items-start sm:items-center">
-        <div className="p-2.5 rounded-2xl bg-white dark:bg-neutral-900 shadow-3xs shrink-0 flex items-center justify-center">
+        <div className="p-2.5 rounded-2xl bg-app-surface shadow-3xs shrink-0 flex items-center justify-center">
           <Icon className={`h-5 w-5 animate-pulse ${iconColor}`} />
         </div>
         <div className="space-y-1">

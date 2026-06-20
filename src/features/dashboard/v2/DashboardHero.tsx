@@ -56,7 +56,7 @@ export function DashboardHero({
             <span className="h-1.5 w-1.5 rounded-full bg-app-accent shrink-0" />
             {caption}
           </p>
-          <span className="rounded-full border border-emerald-100/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/85 px-3.5 py-0.5 text-xs font-semibold text-app-accent flex items-center gap-1.5 shadow-[0_2px_8px_-4px_rgba(16,185,129,0.2)]">
+          <span className="rounded-full border border-emerald-100/80 dark:border-neutral-800/80 bg-app-surface/90 dark:bg-neutral-900/85 px-3.5 py-0.5 text-xs font-semibold text-app-accent flex items-center gap-1.5 shadow-[0_2px_8px_-4px_rgba(16,185,129,0.2)]">
             <Calendar className="h-3.5 w-3.5 text-app-accent/80" />
             {weekLabel}
           </span>
@@ -69,7 +69,7 @@ export function DashboardHero({
           </span>
         </h1>
 
-        <p className="text-xs sm:text-sm font-semibold text-neutral-500 max-w-xl leading-relaxed dark:text-neutral-400">
+        <p className="text-xs sm:text-sm font-semibold text-app-ink-muted max-w-xl leading-relaxed dark:text-neutral-400">
           Tập trung vào vài việc quan trọng nhất tuần này.
         </p>
 
@@ -84,7 +84,7 @@ export function DashboardHero({
       {/* Featured Goal focus card - premium dreamy polaroid layout */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/card relative z-10 rounded-3xl border border-neutral-200/50 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-900/95 p-6 shadow-app-md hover:shadow-app-lg transition-all duration-300 overflow-hidden"
+        className="group/card relative z-10 rounded-3xl border border-app-line/50 dark:border-neutral-800/80 bg-app-surface dark:bg-neutral-900/95 p-6 shadow-app-md hover:shadow-app-lg transition-all duration-300 overflow-hidden"
       >
         <p className="text-[9px] font-extrabold uppercase tracking-wide text-app-accent flex items-center gap-1.5 mt-2 relative z-10">
           <Sparkles className="h-3.5 w-3.5 text-app-accent" />
@@ -93,22 +93,22 @@ export function DashboardHero({
 
         {/* Visual Dreamy Vision Anchor */}
           <div className="relative my-3 h-20 w-full rounded-2xl bg-gradient-to-tr from-emerald-100/40 via-amber-100/30 to-violet-100/40 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden flex items-center justify-center border border-neutral-200/40 dark:border-neutral-800 shadow-inner z-10">
-            <ImageIcon className="h-6 w-6 text-neutral-400" />
+            <ImageIcon className="h-6 w-6 text-app-ink-muted" />
           <div className="absolute inset-0 bg-black/2 flex items-end p-2">
-            <span className="text-[8px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 bg-white/85 dark:bg-neutral-900/85 px-2 py-0.5 rounded-md backdrop-blur-xs">
+            <span className="text-[8px] font-bold tracking-widest text-app-ink-soft dark:text-neutral-400 bg-app-surface dark:bg-neutral-900/85 px-2 py-0.5 rounded-md backdrop-blur-xs">
               BẢNG TẦM NHÌN
             </span>
           </div>
         </div>
 
-        <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-neutral-800 dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200 relative z-10">
+        <p className="mt-2 line-clamp-2 break-words text-xs font-bold leading-relaxed text-app-ink dark:text-neutral-200 group-hover/card:text-app-accent transition-colors duration-200 relative z-10">
           {featuredGoalTitle}
         </p>
 
         {/* Slender modern progress line */}
         <div className="mt-4 flex items-center gap-3 relative z-10">
           <div
-            className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800"
+            className="h-1.5 w-full overflow-hidden rounded-full bg-app-bg-subtle dark:bg-neutral-800"
             aria-hidden="true"
           >
             <div
