@@ -510,7 +510,7 @@ function WeeklyQuestLine({ system }: WeeklyQuestLineProps) {
 
   if (!quest.hasSchedule) {
     return (
-      <div className="bg-app-bg-subtle/20 rounded-lg p-2.5 border border-app-line/20 text-[11px] text-app-ink-muted/80 italic font-sans">
+      <div className="bg-app-bg-subtle/20 rounded-lg p-2.5 border border-app-line/20 text-[11px] text-app-ink-muted/80 italic">
         Không có lịch trình tuần này.
       </div>
     );
@@ -1556,7 +1556,7 @@ function GoalCard({
                     </span>
                   </div>
                   <div
-                    className="h-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 overflow-hidden"
+                    className="h-1.5 rounded-full bg-app-line/40 overflow-hidden"
                     aria-hidden="true"
                   >
                     <div
@@ -1647,7 +1647,7 @@ function GoalCard({
                     ))}
 
                     {displayTasks.length === 0 && (
-                      <p className="text-xs italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1 font-sans">
+                      <p className="text-xs italic leading-relaxed text-app-ink-muted/70 mt-1 pl-1">
                         {system ? "Không có việc hôm nay." : "Đã chốt hết việc chưa xong."}
                       </p>
                     )}
@@ -1677,7 +1677,7 @@ function GoalCard({
         >
           <SpotlightCard
             className={cn(
-              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-neutral-950 dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
+              "h-full rounded-[18px] border p-5 sm:p-6 bg-gradient-to-br from-amber-50/15 via-app-surface to-emerald-50/10 dark:from-amber-950/5 dark:via-app-bg dark:to-emerald-950/5 shadow-app-lg flex flex-col justify-between overflow-y-auto",
               progress === 100 &&
                 (prefersReducedMotion
                   ? "border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
@@ -1687,7 +1687,7 @@ function GoalCard({
             <div className="space-y-4">
               {/* Certificate Header */}
               <div className="flex items-center gap-3 border-b border-app-line pb-3">
-                <div className="flex h-10 w-10 shrink-0 rounded-xl items-center justify-center bg-amber-500/10 text-amber-500 shadow-sm">
+                <div className="flex h-10 w-10 shrink-0 rounded-xl items-center justify-center bg-amber-500/10 text-amber-500 shadow-app-sm">
                   <Award className="h-5.5 w-5.5" />
                 </div>
                 <div>
@@ -1782,7 +1782,7 @@ function GoalsSidebar({
       {isSidebarEmpty ? (
         /* Widget Daily Overview tuyệt đẹp khi rỗng */
         <div className="rounded-[18px] border border-app-line bg-app-surface p-6 shadow-app-sm text-center py-10 space-y-4">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 shadow-app-sm">
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <div className="space-y-2">
@@ -1829,7 +1829,7 @@ function GoalsSidebar({
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-app-ink-muted/80 italic leading-relaxed font-sans">
+                <p className="text-xs text-app-ink-muted/80 italic leading-relaxed">
                   Tuyệt vời! Bạn không còn việc nào chưa chốt hôm nay.
                 </p>
               )}
@@ -1894,7 +1894,7 @@ function GoalsSidebar({
       )}
 
       {/* Widget Nhắc nhở tĩnh tâm */}
-      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle dark:bg-neutral-900/20 p-4 shadow-app-sm opacity-90">
+      <div className="rounded-[18px] border border-app-line bg-app-bg-subtle dark:bg-app-bg-subtle/20 p-4 shadow-app-sm opacity-90">
         <p className="text-xs italic leading-relaxed text-app-ink-soft font-serif font-medium">
           “Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.”
         </p>
@@ -1999,7 +1999,7 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
         const dateKey = formatDateStr(targetDate);
         const stats = tasksMap.get(dateKey) || { total: 0, completed: 0 };
 
-        let colorClass = "bg-slate-100 dark:bg-neutral-800/40 border border-transparent";
+        let colorClass = "bg-app-bg-subtle dark:bg-app-bg-subtle/40 border border-transparent";
         if (stats.total > 0) {
           if (stats.completed === stats.total) {
             colorClass = "bg-emerald-500 border border-emerald-600/10";
@@ -2033,7 +2033,7 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
     <div className="space-y-1.5 pt-1">
       <div className="flex items-center justify-between text-xs font-bold text-app-ink-soft">
         <span>Nhịp độ hành động</span>
-        <span className="text-xs text-app-ink-muted font-normal font-sans">Hover xem chi tiết</span>
+        <span className="text-xs text-app-ink-muted font-normal">Hover xem chi tiết</span>
       </div>
 
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
@@ -2058,9 +2058,9 @@ function StreakHeatmap({ system }: StreakHeatmapProps) {
                     )}
                   />
                   {/* Custom CSS Tooltip */}
-                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-neutral-900 dark:bg-neutral-800 text-white text-[10px] font-sans rounded px-2 py-1 whitespace-nowrap shadow-md pointer-events-none transform -translate-y-0.5 border border-neutral-800/80 leading-normal">
+                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-app-ink text-app-bg text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-app-md pointer-events-none transform -translate-y-0.5 border border-app-line/40 leading-normal">
                     {day.label}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-neutral-900 dark:border-t-neutral-800" />
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink dark:border-t-app-ink" />
                   </div>
                 </div>
               ))}
@@ -2192,7 +2192,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
                 <DialogTitle className="font-serif text-lg font-bold text-app-ink">Gửi tôi ở tuần thứ 12</DialogTitle>
               </div>
             </DialogHeader>
-            <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
+            <DialogDescription className="text-sm text-app-ink-soft leading-relaxed mt-2">
               Viết một vài dòng nhắn nhủ, cam kết hoặc khích lệ bản thân lúc này. Bức thư sẽ được khóa lại và chỉ mở ra
               khi bạn đạt 100% tiến độ hoặc hoàn thành chu kỳ 12 tuần.
             </DialogDescription>
@@ -2207,7 +2207,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               />
             </div>
 
-            <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
+            <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-3">
               <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
                 {tempText.length}/500 ký tự
               </span>
@@ -2270,15 +2270,15 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               <DialogTitle className="font-serif text-lg font-bold text-app-ink">Thư gửi từ quá khứ</DialogTitle>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-sm text-app-ink-soft font-sans mt-2">
+          <DialogDescription className="text-sm text-app-ink-soft mt-2">
             Bức thư bạn tự tay viết khi bắt đầu hành trình chinh phục mục tiêu này.
           </DialogDescription>
 
-          <div className="bg-app-bg-subtle dark:bg-neutral-900/40 rounded-xl p-4 border border-app-line/60 my-2">
+          <div className="bg-app-bg-subtle dark:bg-app-bg-subtle/40 rounded-xl p-4 border border-app-line/60 my-2">
             <p className="text-sm italic leading-relaxed text-app-ink whitespace-pre-wrap font-serif">“{letterText}”</p>
           </div>
 
-          <DialogFooter className="flex flex-row justify-between items-center gap-3 font-sans w-full mt-2">
+          <DialogFooter className="flex flex-row justify-between items-center gap-3 w-full mt-2">
             <button
               type="button"
               onClick={handleOpenWrite}
@@ -2306,7 +2306,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
               <DialogTitle className="font-serif text-lg font-bold text-app-ink">Chỉnh sửa thư gửi tuần 12</DialogTitle>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-sm text-app-ink-soft leading-relaxed font-sans mt-2">
+          <DialogDescription className="text-sm text-app-ink-soft leading-relaxed mt-2">
             Chỉnh sửa hoặc xóa bức thư gửi cho chính bạn ở cuối hành trình mục tiêu.
           </DialogDescription>
 
@@ -2320,7 +2320,7 @@ function FutureSelfLetter({ goalId, progress, system }: FutureSelfLetterProps) {
             />
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 font-sans mt-3">
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-3">
             <span className="text-xs sm:text-sm text-app-ink-muted w-full sm:w-auto text-left font-medium">
               {tempText.length}/500 ký tự
             </span>

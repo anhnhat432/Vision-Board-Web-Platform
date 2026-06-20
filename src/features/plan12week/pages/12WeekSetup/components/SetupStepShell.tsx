@@ -89,7 +89,7 @@ export function SetupStepShell({
   return (
     <section
       ref={stepShellRef}
-      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-sm"
+      className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6 shadow-app-sm"
       aria-labelledby="twelve-week-step-title"
     >
       <div>
@@ -135,7 +135,7 @@ export function SetupStepShell({
                   <button
                     type="button"
                     className={cn(
-                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold shadow-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold shadow-app-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                       isActive
                         ? "border-app-accent bg-app-accent text-white scale-110 ring-4 ring-app-accent-soft"
                         : isCompleted

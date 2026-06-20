@@ -45,7 +45,7 @@ const TIMELINE_PHASES = [
     weekEnd: 4,
     icon: PhaseRampChipIcon,
     tileClassName: "border-app-accent-soft bg-app-accent-soft/40 text-app-accent hover:border-app-accent/60",
-    activeClassName: "border-app-accent bg-app-accent text-white shadow-sm",
+    activeClassName: "border-app-accent bg-app-accent text-white shadow-app-sm",
   },
   {
     label: FEATURE_TERMS.peak,
@@ -53,7 +53,7 @@ const TIMELINE_PHASES = [
     weekEnd: 8,
     icon: PhasePeakChipIcon,
     tileClassName: "border-app-warm-border bg-app-warm/30 text-app-warm-strong hover:border-app-warm-strong/40",
-    activeClassName: "border-app-warm-strong bg-app-warm-strong text-white shadow-sm",
+    activeClassName: "border-app-warm-strong bg-app-warm-strong text-white shadow-app-sm",
   },
   {
     label: FEATURE_TERMS.harvest,
@@ -62,7 +62,7 @@ const TIMELINE_PHASES = [
     icon: PhaseHarvestChipIcon,
     tileClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100",
-    activeClassName: "border-emerald-600 bg-emerald-700 text-white shadow-sm",
+    activeClassName: "border-emerald-600 bg-emerald-700 text-white shadow-app-sm",
   },
 ];
 
@@ -279,7 +279,7 @@ export function PlanPreview({
                           <div
                             key={task.id}
                             className={`flex items-start gap-3 rounded-[var(--r-control)] border p-3 ${
-                              task.title.startsWith("[CỐT LÕI]") ? "border-orange-200 bg-orange-50" : "border-gray-200"
+                              task.title.startsWith("[CỐT LÕI]") ? "border-orange-200 bg-orange-50" : "border-app-line"
                             }`}
                           >
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-primary text-xs font-medium text-primary-foreground">
@@ -353,7 +353,7 @@ export function PlanPreview({
                 <div
                   key={indicator.id}
                   className={`flex items-center justify-between rounded-[var(--r-control)] border p-3 ${
-                    idx < 2 ? "border-green-200 bg-green-50" : "border-gray-200"
+                    idx < 2 ? "border-green-200 bg-green-50" : "border-app-line"
                   }`}
                 >
                   <div className="flex-1">

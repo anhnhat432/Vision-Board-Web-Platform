@@ -315,7 +315,7 @@ export function TwelveWeekGoalSwitcher({
         >
           <SelectValue placeholder="Chọn mục tiêu" />
         </SelectTrigger>
-        <SelectContent className="surface-raised rounded-2xl border border-app-line/60 bg-app-surface p-1.5 shadow-md backdrop-blur-none">
+        <SelectContent className="surface-raised rounded-2xl border border-app-line/60 bg-app-surface p-1.5 shadow-app-md backdrop-blur-none">
           {allGoals.map((goal) => (
             <SelectItem
               key={goal.id}
