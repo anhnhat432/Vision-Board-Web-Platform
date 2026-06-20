@@ -55,15 +55,21 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-6 shadow-app-sm transition-all duration-300 hover:border-app-accent/25 hover:shadow-app-md overflow-hidden relative"
+      className="rounded-3xl border border-app-line/70 dark:border-neutral-800/80 bg-app-surface/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
       aria-labelledby="dashboard-active-goals-title"
     >
+      {/* Grid Pattern overlay for texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:12px_12px] pointer-events-none" />
+
+      {/* Ambient glow mesh */}
+      <div className="pointer-events-none absolute -left-16 -bottom-16 h-40 w-40 rounded-full bg-app-accent/5 blur-[40px]" />
+
       {/* 📌 Floating wood pin at the header */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-base opacity-70 select-none cursor-default z-10">
+      <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:rotate-12 cursor-default z-10">
         📌
       </span>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-app-line pb-4 mb-6 pt-2 relative z-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-neutral-200/50 dark:border-neutral-800/55 pb-4 mb-6 pt-2 relative z-10">
         <div>
           <h2
             id="dashboard-active-goals-title"
@@ -81,7 +87,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
           type="button"
           onClick={onAddGoal}
           disabled={isAtLimit}
-          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-4 py-2 text-[10px] font-bold text-app-accent hover:bg-app-accent hover:text-[var(--app-ink-on-accent)] disabled:cursor-not-allowed disabled:bg-app-bg-subtle disabled:text-app-ink-disabled disabled:border-app-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-all duration-200 shadow-app-sm"
+          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-app-line dark:border-neutral-800 bg-app-surface dark:bg-neutral-900 px-4 py-2 text-[10px] font-bold text-app-accent hover:bg-app-accent hover:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 disabled:border-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-all duration-200 shadow-sm"
           title={isAtLimit ? "Đã đạt giới hạn 3 mục tiêu trong chu kỳ" : "Thêm mục tiêu"}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -114,17 +120,17 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                     onSelectGoal(goal);
                   }
                 }}
-                className={`group flex gap-4 rounded-control border border-app-line bg-app-bg-subtle p-5 hover:border-app-accent/25 hover:bg-app-surface hover:shadow-app-sm transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${tiltClass} hover:rotate-0 hover:scale-[1.005]}`}
+                className={`group flex gap-4 rounded-2xl border border-app-line/60 dark:border-neutral-800/70 bg-app-surface/70 dark:bg-neutral-950/20 p-5 hover:border-app-accent/25 hover:bg-app-surface dark:hover:bg-neutral-950 hover:shadow-xs transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${tiltClass} hover:rotate-0 hover:scale-[1.005]`}
               >
                 {/* Accent glow on hover */}
-                <div className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-app-accent/40 to-app-accent/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-control" />
+                <div className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-app-accent/40 to-emerald-500/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl" />
 
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-app-bg-subtle text-app-ink-muted border border-app-line group-hover:scale-110 transition-all duration-300 group-hover:bg-app-accent-soft/20 group-hover:border-app-accent/20">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-app-bg-subtle dark:bg-neutral-900 text-app-ink-muted border border-app-line/80 dark:border-neutral-800/85 group-hover:scale-110 transition-all duration-300 group-hover:bg-app-accent-soft/20 group-hover:border-app-accent/20">
                   <GoalIcon className="h-4.5 w-4.5 text-app-accent/80 transition-colors duration-300 group-hover:text-app-accent" />
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-2.5 pt-0.5">
-                  <h3 className="line-clamp-2 break-words text-xs font-bold leading-relaxed text-app-ink group-hover:text-app-accent transition-colors duration-200">
+                  <h3 className="line-clamp-2 break-words text-xs font-bold leading-relaxed text-app-ink dark:text-neutral-200 group-hover:text-app-accent transition-colors duration-200">
                     {goal.title}
                   </h3>
 
@@ -133,11 +139,11 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                   </p>
 
                   <div
-                    className="h-1.5 w-full overflow-hidden rounded-full bg-app-bg-subtle shadow-inner"
+                    className="h-1.5 w-full overflow-hidden rounded-full bg-app-bg-subtle dark:bg-neutral-800/80 shadow-inner"
                     aria-hidden="true"
                   >
                     <div
-                      className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
+                      className="h-full rounded-full bg-gradient-to-r from-app-accent to-[#5ba590] dark:from-[#3a6e60] dark:to-[#5ba590] transition-all duration-500 ease-out"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -154,7 +160,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
             );
           })
         ) : (
-          <div className="rounded-control border border-dashed border-app-line bg-app-bg-subtle p-8 text-center flex flex-col items-center justify-center gap-3">
+          <div className="rounded-2xl border border-dashed border-app-line dark:border-neutral-800 bg-neutral-50/10 p-8 text-center flex flex-col items-center justify-center gap-3">
             <Target className="h-7 w-7 text-app-ink-muted stroke-[1.25]" />
             <p className="text-xs font-semibold leading-relaxed text-app-ink-muted max-w-[36ch]">
               Chưa có mục tiêu đang chạy. Hãy bắt đầu bằng Cân bằng cuộc sống để tìm ra trọng tâm ưu tiên nhất!

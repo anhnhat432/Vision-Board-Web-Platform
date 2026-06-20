@@ -588,21 +588,6 @@ function DashboardContent({
   const dashboardTourSteps = isSignedOut ? [] : DASHBOARD_TOUR_STEPS;
   const showMobileStickyCTA = !isDesktopViewport && dashboardData.showMobileStickyCTA;
 
-  // Khách chưa đăng nhập: render landing "Dear Our Future" tràn viền, không bọc
-  // trong container max-w-6xl / lớp nền ambient / nút feedback của bản signed-in,
-  // để header + footer riêng của thiết kế hiển thị đúng full-bleed.
-  if (isSignedOut) {
-    return (
-      <PublicVisitorView
-        isDemo={demoMode}
-        hasLocalData={hasSignedOutRealLocalData}
-        onStart={handlePublicVisitorStart}
-        onSignIn={() => handleAuthNavigate("signin")}
-        onSignUp={() => handleAuthNavigate("signup")}
-      />
-    );
-  }
-
   return (
     <div
       className={
@@ -614,13 +599,13 @@ function DashboardContent({
       {/* Lớp nền Ambient & Texture nâng cấp (ui-design) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         {/* Lưới điểm mịn (Dot Grid) */}
-        <div className="absolute inset-0 bg-[radial-gradient(var(--app-line)_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(var(--app-line)_1.2px,transparent_1.2px)] bg-[size:24px_24px] opacity-70" />
+        <div className="absolute inset-0 bg-[radial-gradient(#8080800c_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#ffffff04_1.2px,transparent_1.2px)] bg-[size:24px_24px] opacity-70" />
 
         {/* Bóng sáng Forest Green (Top Right) */}
         <div className="absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen" />
 
         {/* Bóng sáng Amber (Bottom Left) */}
-        <div className="absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-app-accent/3 dark:bg-app-accent/6 blur-[130px] mix-blend-multiply dark:mix-blend-screen" />
+        <div className="absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 relative z-10">
@@ -640,7 +625,15 @@ function DashboardContent({
           onOpenPlan={() => navigate("/billing/plan")}
         />
 
-        {!dashboardData.activeSystem ? (
+        {isSignedOut ? (
+          <PublicVisitorView
+            isDemo={demoMode}
+            hasLocalData={hasSignedOutRealLocalData}
+            onStart={handlePublicVisitorStart}
+            onSignIn={() => handleAuthNavigate("signin")}
+            onSignUp={() => handleAuthNavigate("signup")}
+          />
+        ) : !dashboardData.activeSystem ? (
           <NewUserSetupView
             userData={userData}
             displayName={dashboardDisplayName}
@@ -652,7 +645,6 @@ function DashboardContent({
             userData={userData}
             displayName={dashboardDisplayName}
             caption={caption}
-            greeting={dashboardGreeting}
             balanceRows={balanceRows}
             topTrigger={topTrigger}
             planLoading={planLoading}
@@ -760,11 +752,11 @@ function NextBestAction({ data }: { data: DashboardData }) {
   let ctaLabel = "";
   let ctaPath = "";
   let Icon = Compass;
-  let borderLeftColor = "border-l-app-accent";
+  let borderLeftColor = "border-l-emerald-600 dark:border-l-emerald-400";
   let bgClass =
-    "bg-app-accent-subtle border-app-accent/15 text-app-accent";
-  let iconColor = "text-app-accent";
-  let buttonColor = "bg-app-accent text-[var(--app-ink-on-accent)] hover:bg-app-accent-hover";
+    "bg-emerald-500/10 border-emerald-500/15 dark:bg-emerald-950/20 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300";
+  let iconColor = "text-emerald-600 dark:text-emerald-400";
+  let buttonColor = "bg-emerald-700 hover:bg-emerald-800 text-white";
 
   if (!hasRadarData) {
     title = "Chưa thiết lập bánh xe cuộc sống";
@@ -772,11 +764,11 @@ function NextBestAction({ data }: { data: DashboardData }) {
     ctaLabel = "Chấm điểm ngay";
     ctaPath = "/onboarding";
     Icon = Compass;
-    borderLeftColor = "border-l-app-status-warning";
+    borderLeftColor = "border-l-amber-500 dark:border-l-amber-450";
     bgClass =
-      "bg-app-status-warning/10 border-app-status-warning/15 text-app-status-warning";
-    iconColor = "text-app-status-warning";
-    buttonColor = "bg-app-status-warning text-[var(--app-ink-on-accent)] hover:opacity-90";
+      "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
+    iconColor = "text-amber-600 dark:text-amber-400";
+    buttonColor = "bg-amber-500 hover:bg-amber-600 text-app-ink";
   } else if (activeSystemTodayOpenTasks.length > 0) {
     title = `Còn ${activeSystemTodayOpenTasks.length} việc cần hoàn thành hôm nay`;
     description = "Kiên trì thực hiện các hành động nhỏ để giữ vững Streak và hoàn thành mục tiêu 12 tuần.";
@@ -789,11 +781,11 @@ function NextBestAction({ data }: { data: DashboardData }) {
     ctaLabel = "Viết phản tư";
     ctaPath = "/12-week-system?tab=review";
     Icon = Award;
-    borderLeftColor = "border-l-app-status-info";
+    borderLeftColor = "border-l-purple-600 dark:border-l-purple-400";
     bgClass =
-      "bg-app-status-info/10 border-app-status-info/15 text-app-status-info";
-    iconColor = "text-app-status-info";
-    buttonColor = "bg-app-status-info text-[var(--app-ink-on-accent)] hover:opacity-90";
+      "bg-purple-500/10 border-purple-500/15 dark:bg-purple-950/20 dark:border-purple-800/30 text-purple-800 dark:text-purple-300";
+    iconColor = "text-purple-600 dark:text-purple-400";
+    buttonColor = "bg-purple-700 hover:bg-purple-800 text-white";
   } else if (activeSystemWeekOpenTasks.length > 0) {
     title = `Chu kỳ Tuần ${activeSystemWeek} đang chạy`;
     description = `Bạn còn ${activeSystemWeekOpenTasks.length} hành động chưa hoàn thành trong tuần này. Hãy tiếp tục nỗ lực!`;
@@ -810,17 +802,17 @@ function NextBestAction({ data }: { data: DashboardData }) {
 
   return (
     <section
-      className={`rounded-card border border-l-4 p-5 pl-4.5 shadow-app-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all duration-300 hover:shadow-app-md ${borderLeftColor} ${bgClass} relative`}
+      className={`rounded-3xl border border-l-4 p-5 pl-4.5 shadow-3xs backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all duration-300 hover:shadow-2xs ${borderLeftColor} ${bgClass} select-none relative`}
       aria-label="Hành động đề xuất tiếp theo"
     >
       {/* 📌 Floating pin for visual consistency */}
-      <span className="hidden sm:inline absolute -top-3 left-6 text-base opacity-70 select-none cursor-default z-10">
+      <span className="hidden sm:inline absolute -top-3 left-6 text-lg filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
         📌
       </span>
 
       <div className="flex gap-4 items-start sm:items-center">
-        <div className="p-2.5 rounded-control bg-app-surface shadow-app-sm shrink-0 flex items-center justify-center">
-          <Icon className={`h-5 w-5 ${iconColor}`} />
+        <div className="p-2.5 rounded-2xl bg-app-surface shadow-3xs shrink-0 flex items-center justify-center">
+          <Icon className={`h-5 w-5 animate-pulse ${iconColor}`} />
         </div>
         <div className="space-y-1">
           <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-60">Hành động đề xuất</span>
@@ -845,7 +837,6 @@ function DashboardActiveLayout({
   userData,
   displayName,
   caption,
-  greeting,
   balanceRows,
   topTrigger,
   planLoading,
@@ -860,7 +851,6 @@ function DashboardActiveLayout({
   userData: UserData;
   displayName: string;
   caption: string;
-  greeting: string;
   balanceRows: LifeBalanceRow[];
   topTrigger: ReturnType<typeof evaluateRescueTriggers>[number] | null;
   planLoading: boolean;
@@ -894,7 +884,6 @@ function DashboardActiveLayout({
       <div data-tour-id="dashboard-start-card" className="appear-fade-up" style={{ animationDelay: "0ms" }}>
         <DashboardHero
           caption={caption}
-          greeting={greeting}
           currentWeek={data.dashboardKpiCurrentWeek}
           totalWeeks={data.dashboardKpiTotalWeeks}
           displayName={displayName}
@@ -941,7 +930,7 @@ function DashboardActiveLayout({
 
           {/* Active Goals Card - Quieter border */}
           <div
-            className="appear-fade-up"
+            className="opacity-95 hover:opacity-100 transition-opacity duration-200 appear-fade-up"
             style={{ animationDelay: "300ms" }}
           >
             <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
@@ -952,7 +941,7 @@ function DashboardActiveLayout({
         <aside className="space-y-6">
           {data.reviewDueToday ? (
             <div className="relative appear-fade-up" style={{ animationDelay: "150ms" }}>
-              <span className="hidden sm:inline absolute -top-3 left-6 text-base opacity-70 select-none cursor-default z-10">
+              <span className="hidden sm:inline absolute -top-3 left-6 text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)] z-10">
                 📌
               </span>
               <ReflectionPrompt
@@ -999,7 +988,7 @@ function DashboardActiveLayout({
           <CollapsibleContent>
             <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-5 lg:col-span-2">
-                <div>
+                <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
                   <WeekRhythmCard
                     system={data.activeSystem}
                     currentWeek={data.dashboardKpiCurrentWeek}
@@ -1014,22 +1003,37 @@ function DashboardActiveLayout({
                   />
                 </div>
 
-                <div>
+                <div className="opacity-85 hover:opacity-100 transition-opacity duration-200">
                   <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
                 </div>
               </div>
 
               <div className="space-y-5">
-                <div>
+                <div className="opacity-95 hover:opacity-100 transition-opacity duration-200">
                   <BalanceCard rows={balanceRows} />
                 </div>
 
-                <div>
+                <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
                   <DailyStoicCard />
                 </div>
 
-                <div>
+                <div className="opacity-90 hover:opacity-100 transition-opacity duration-200">
                   <QuoteBlock />
+                </div>
+
+                <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-app-line shadow-3xs group select-none opacity-90 transition-opacity duration-200 hover:opacity-100">
+                  <img
+                    src="/study_desk_hero.png"
+                    alt="Góc học tập & lập kế hoạch ấm áp"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    width={320}
+                    height={180}
+                  />
+                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/50 via-transparent to-transparent p-4">
+                    <p className="font-serif text-[10px] font-medium italic text-white/90">
+                      "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét."
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1134,7 +1138,7 @@ function DashboardPlanStateNotice({
 
   if (planError && !dismissed) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-xl border border-app-status-warning/30 dark:border-app-status-warning/20 bg-app-status-warning/10 dark:bg-app-status-warning/10 backdrop-blur-sm p-3 text-xs text-app-status-warning dark:text-app-status-warning">
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-200/60 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 backdrop-blur-sm p-3 text-xs text-amber-800 dark:text-amber-300">
         <div className="flex items-center gap-2 min-w-0">
           <WifiOff className="h-3.5 w-3.5 shrink-0 opacity-70" />
           <span className="truncate">Không tải được kế hoạch từ máy chủ — dữ liệu hiển thị từ bộ nhớ cục bộ.</span>
@@ -1142,7 +1146,7 @@ function DashboardPlanStateNotice({
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md p-1 transition-colors hover:bg-app-status-warning/15 dark:hover:bg-app-status-warning/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md p-1 transition-colors hover:bg-amber-200/40 dark:hover:bg-amber-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40"
           aria-label="Đóng thông báo"
         >
           <X className="h-3.5 w-3.5" />
