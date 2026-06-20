@@ -3954,3 +3954,42 @@ html.dark .weekly-grain-overlay::before {
   .tab-pane .bar-fill { transform: none; }
   .tab-pane .dof-path { stroke-dashoffset: 0; }
 }
+
+/* ── Vision Board: animations & utilities ────────────────────── */
+@keyframes dof-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes dof-glow {
+  0%, 100% { opacity: 0.4; transform: scale(0.96); }
+  50% { opacity: 0.8; transform: scale(1.04); }
+}
+
+@keyframes dof-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dof-bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-2px) rotate(-4deg); }
+}
+
+/* Vision Board custom scrollbar */
+.dof-scroll-vb::-webkit-scrollbar {
+  width: 9px;
+}
+.dof-scroll-vb::-webkit-scrollbar-thumb {
+  background: rgba(23, 21, 15, 0.16);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dof-float,
+  .dof-glow,
+  .dof-rise,
+  .dof-bob {
+    animation: none !important;
+  }
+}
