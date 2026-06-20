@@ -4,5 +4,6 @@
     "../AGENTS.md",
     "../.roo/rules/00-project-agent-rules.md",
     "../.kilocode/rules/tool-call-safety.md"
-  ]
+  ],
+  "snapshot": false
 }

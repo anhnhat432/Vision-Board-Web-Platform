@@ -18,15 +18,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            "group toast rounded-[var(--r-card)] border border-app-line bg-app-surface text-sm font-medium text-app-ink shadow-2xl ring-1 ring-app-line/5 backdrop-blur-xl dark:border-app-line dark:bg-app-surface/88 dark:text-app-ink dark:ring-app-line/10",
+            "group toast rounded-[var(--r-card)] border border-app-line bg-app-surface text-sm font-medium text-app-ink shadow-2xl ring-1 ring-app-ink/5 backdrop-blur-xl dark:border-app-line dark:bg-app-bg dark:text-app-ink dark:ring-app-ink/10",
           description: "text-app-ink-muted text-[0.82rem]",
           actionButton: "rounded-[var(--r-pill)] bg-primary px-3 text-xs font-semibold text-primary-foreground",
           cancelButton:
-            "rounded-[var(--r-pill)] bg-app-surface/60 px-3 text-xs font-semibold text-app-ink-muted dark:bg-app-surface/10 dark:text-app-ink-disabled",
-          success: "border-app-status-success/30 bg-app-status-success/10 shadow-lg",
-          error: "border-app-status-error/30 bg-app-status-error/10 shadow-lg",
-          warning: "border-app-status-warning/30 bg-app-status-warning/10 shadow-lg",
-          info: "border-app-accent/30 bg-app-accent-soft shadow-lg",
+            "rounded-[var(--r-pill)] bg-app-surface/60 px-3 text-xs font-semibold text-app-ink-muted dark:bg-app-accent-soft dark:text-app-ink-soft",
+          success: "border-app-accent/30 bg-app-accent-soft/90 shadow-lg",
+          error: "border-app-warm/30 bg-app-warm-soft/90 shadow-lg",
+          warning: "border-app-highlight/30 bg-app-highlight/90 shadow-lg",
+          info: "border-app-line bg-app-surface/90 shadow-lg",
         },
       }}
       style={

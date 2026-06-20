@@ -155,7 +155,7 @@ export function AdminPaymentsPage() {
           <Button
             type="button"
             variant="outline"
-            className="gap-2 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             disabled={loading}
             onClick={() => void loadPayments(query, statusFilter)}
           >
@@ -172,7 +172,7 @@ export function AdminPaymentsPage() {
           <Button
             type="button"
             variant="outline"
-            className="mt-4 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             onClick={() => void loadPayments(query, statusFilter)}
           >
             Thử lại
@@ -193,8 +193,8 @@ export function AdminPaymentsPage() {
               onClick={() => setStatusFilter(status)}
               className={`rounded-[var(--r-pill)] border px-3 py-1.5 text-xs font-medium transition-colors ${
                 active
-                  ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
-                  : "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06] hover:text-white"
+                  ? "border-app-accent/40 bg-app-accent-soft text-app-accent"
+                  : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
               }`}
             >
               {label}
@@ -203,16 +203,16 @@ export function AdminPaymentsPage() {
         })}
       </div>
 
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-app-ink-muted">
         Hiển thị {items.length.toLocaleString("vi-VN")} / {total.toLocaleString("vi-VN")} đơn. Chỉ bấm{" "}
-        <span className="text-slate-200">Mở Plus thủ công</span> sau khi đối chiếu trong cổng thanh toán hoặc app ngân
+        <span className="text-app-ink-soft">Mở Plus thủ công</span> sau khi đối chiếu trong cổng thanh toán hoặc app ngân
         hàng.
-        {query ? <span className="ml-1 text-slate-500">Đang lọc theo "{query}".</span> : null}
+        {query ? <span className="ml-1 text-app-ink-muted">Đang lọc theo "{query}".</span> : null}
       </p>
 
       {loading && items.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
         </div>
       ) : items.length === 0 ? (
         <AdminEmptyState
@@ -222,17 +222,17 @@ export function AdminPaymentsPage() {
         />
       ) : (
         <Table
-          containerClassName="rounded-[var(--r-card)] border-white/10 bg-white/[0.02] shadow-none"
-          className="text-slate-200"
+          containerClassName="rounded-[var(--r-card)] border-app-line bg-app-surface shadow-none"
+          className="text-app-ink-soft"
         >
-          <TableHeader className="sticky top-0 bg-white/[0.04] text-slate-300 [&_tr]:border-b [&_tr]:border-white/10">
-            <TableRow className="border-white/10 hover:bg-transparent">
-              <TableHead className="text-slate-400">Mã đơn</TableHead>
-              <TableHead className="text-slate-400">Người dùng</TableHead>
-              <TableHead className="text-slate-400">Số tiền</TableHead>
-              <TableHead className="text-slate-400">Trạng thái</TableHead>
-              <TableHead className="text-slate-400">Tạo lúc</TableHead>
-              <TableHead className="text-right text-slate-400">Hành động</TableHead>
+          <TableHeader className="sticky top-0 bg-app-bg-subtle text-app-ink-soft [&_tr]:border-b [&_tr]:border-app-line">
+            <TableRow className="border-app-line hover:bg-transparent">
+              <TableHead className="text-app-ink-muted">Mã đơn</TableHead>
+              <TableHead className="text-app-ink-muted">Người dùng</TableHead>
+              <TableHead className="text-app-ink-muted">Số tiền</TableHead>
+              <TableHead className="text-app-ink-muted">Trạng thái</TableHead>
+              <TableHead className="text-app-ink-muted">Tạo lúc</TableHead>
+              <TableHead className="text-right text-app-ink-muted">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-white/10">
@@ -240,36 +240,36 @@ export function AdminPaymentsPage() {
               const canComplete =
                 payment.status === "pending" || payment.status === "expired" || payment.status === "failed";
               return (
-                <TableRow key={payment.orderId} className="border-white/10 hover:bg-white/5">
-                  <TableCell className="font-mono text-xs text-white">
+                <TableRow key={payment.orderId} className="border-app-line hover:bg-app-bg-subtle">
+                  <TableCell className="font-mono text-xs text-app-ink">
                     <p>{payment.orderId}</p>
                     {payment.cassoTransactionId ? (
-                      <p className="mt-1 truncate text-xs text-slate-500">TX: {payment.cassoTransactionId}</p>
+                      <p className="mt-1 truncate text-xs text-app-ink-muted">TX: {payment.cassoTransactionId}</p>
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-slate-200">
+                  <TableCell className="text-app-ink-soft">
                     <p className="truncate text-sm font-medium">{getPaymentOwnerLabel(payment)}</p>
-                    <p className="mt-0.5 truncate text-xs text-slate-500">{payment.userId}</p>
+                    <p className="mt-0.5 truncate text-xs text-app-ink-muted">{payment.userId}</p>
                   </TableCell>
-                  <TableCell className="text-slate-200">
-                    <p className="font-semibold text-white">{formatVnd(payment.amount)}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{payment.bankName ?? "Nhà cung cấp thanh toán"}</p>
+                  <TableCell className="text-app-ink-soft">
+                    <p className="font-semibold text-app-ink">{formatVnd(payment.amount)}</p>
+                    <p className="mt-0.5 text-xs text-app-ink-muted">{payment.bankName ?? "Nhà cung cấp thanh toán"}</p>
                   </TableCell>
                   <TableCell>
                     <AdminStatusBadge tone={PAYMENT_STATUS_TONES[payment.status]}>
                       {PAYMENT_STATUS_LABELS[payment.status]}
                     </AdminStatusBadge>
                     {payment.manualCompletedBy ? (
-                      <p className="mt-2 text-xs text-slate-500">Manual: {payment.manualCompletedBy}</p>
+                      <p className="mt-2 text-xs text-app-ink-muted">Manual: {payment.manualCompletedBy}</p>
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-xs text-slate-400">{formatDate(payment.createdAt)}</TableCell>
+                  <TableCell className="text-xs text-app-ink-muted">{formatDate(payment.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     {canComplete ? (
                       <Button
                         type="button"
                         size="sm"
-                        className="bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+                        className="bg-app-accent text-app-ink hover:bg-app-accent-hover"
                         disabled={busyOrderId === payment.orderId}
                         onClick={() => handleManualComplete(payment.orderId)}
                       >
@@ -277,7 +277,7 @@ export function AdminPaymentsPage() {
                         Mở Plus thủ công
                       </Button>
                     ) : (
-                      <span className="text-xs text-slate-500">Đã xử lý</span>
+                      <span className="text-xs text-app-ink-muted">Đã xử lý</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -304,7 +304,7 @@ export function AdminPaymentsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2">
-            <label htmlFor="manual-payment-note" className="text-sm font-medium text-slate-700">
+            <label htmlFor="manual-payment-note" className="text-sm font-medium text-app-ink-muted">
               Ghi chú đối chiếu
             </label>
             <Textarea

@@ -30,11 +30,11 @@ function StatSkeleton() {
   return (
     <div className={`${adminSurface.card} p-5`}>
       <div className="flex items-start gap-4">
-        <div className="h-10 w-10 shrink-0 animate-pulse rounded-[var(--r-tile)] bg-white/10" />
+        <div className="h-10 w-10 shrink-0 animate-pulse rounded-[var(--r-tile)] bg-app-accent-soft" />
         <div className="flex-1 space-y-2">
-          <div className="h-3 w-24 animate-pulse rounded bg-white/10" />
-          <div className="h-6 w-20 animate-pulse rounded bg-white/10" />
-          <div className="h-3 w-32 animate-pulse rounded bg-white/10" />
+          <div className="h-3 w-24 animate-pulse rounded bg-app-accent-soft" />
+          <div className="h-6 w-20 animate-pulse rounded bg-app-accent-soft" />
+          <div className="h-3 w-32 animate-pulse rounded bg-app-accent-soft" />
         </div>
       </div>
     </div>
@@ -56,26 +56,26 @@ function ReminderBanner({
   const expiringCount = overview?.summary.expiringSoonSubscriptions ?? 0;
 
   return (
-    <div className="rounded-[var(--r-card)] border border-cyan-500/30 bg-cyan-500/10 p-5">
+    <div className="rounded-[var(--r-card)] border border-app-accent/30 bg-app-accent-soft p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-cyan-500/20 text-cyan-200">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
             <Bell className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-base font-semibold text-white">Nhắc gia hạn Plus</p>
-            <p className="mt-1 text-sm leading-6 text-slate-300">
+            <p className="text-base font-semibold text-app-ink">Nhắc gia hạn Plus</p>
+            <p className="mt-1 text-sm leading-6 text-app-ink-soft">
               {expiringCount > 0
                 ? `${expiringCount.toLocaleString("vi-VN")} gói Plus sẽ hết hạn trong 7 ngày.`
                 : "Không có gói Plus nào sắp hết hạn trong 7 ngày."}{" "}
               Email:{" "}
-              <span className="text-slate-200">
+              <span className="text-app-ink-soft">
                 {emailConfigured ? "đã cấu hình" : (overview?.email.reason ?? "chưa cấu hình")}
               </span>
               .
             </p>
             {result ? (
-              <p className="mt-2 text-xs leading-5 text-slate-400">
+              <p className="mt-2 text-xs leading-5 text-app-ink-muted">
                 Lần chạy gần nhất: quét {result.scanned}, gửi {result.sent}, trùng {result.duplicate}, bỏ qua{" "}
                 {result.skipped}, lỗi {result.failed}.
               </p>
@@ -84,7 +84,7 @@ function ReminderBanner({
         </div>
         <Button
           type="button"
-          className="gap-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+          className="gap-2 bg-app-accent text-app-ink hover:bg-app-accent-hover"
           disabled={loading || !emailConfigured || expiringCount === 0}
           onClick={onRun}
         >
@@ -98,7 +98,7 @@ function ReminderBanner({
 
 function RecentPaymentList({ payments }: { payments: AdminPaymentOrderSummary[] }) {
   if (payments.length === 0) {
-    return <p className="text-sm text-slate-400">Chưa có đơn thanh toán tự động.</p>;
+    return <p className="text-sm text-app-ink-muted">Chưa có đơn thanh toán tự động.</p>;
   }
 
   return (
@@ -106,8 +106,8 @@ function RecentPaymentList({ payments }: { payments: AdminPaymentOrderSummary[] 
       {payments.slice(0, 5).map((payment) => (
         <li key={payment.orderId} className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0">
-            <p className="font-mono text-xs font-semibold text-white">{payment.orderId}</p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="font-mono text-xs font-semibold text-app-ink">{payment.orderId}</p>
+            <p className="mt-1 text-xs text-app-ink-muted">
               {formatVnd(payment.amount)} · {formatDate(payment.completedAt ?? payment.createdAt)}
             </p>
           </div>
@@ -122,7 +122,7 @@ function RecentPaymentList({ payments }: { payments: AdminPaymentOrderSummary[] 
 
 function RecentUserList({ users }: { users: AdminUserSummary[] }) {
   if (users.length === 0) {
-    return <p className="text-sm text-slate-400">Chưa có người dùng mới.</p>;
+    return <p className="text-sm text-app-ink-muted">Chưa có người dùng mới.</p>;
   }
 
   return (
@@ -130,10 +130,10 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
       {users.slice(0, 5).map((user) => (
         <li key={user.firebaseUid} className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">{user.displayName || user.email}</p>
-            <p className="mt-1 truncate text-xs text-slate-400">{user.email}</p>
+            <p className="truncate text-sm font-semibold text-app-ink">{user.displayName || user.email}</p>
+            <p className="mt-1 truncate text-xs text-app-ink-muted">{user.email}</p>
           </div>
-          <span className="text-right text-xs text-slate-500">
+          <span className="text-right text-xs text-app-ink-muted">
             {user.role === "admin" ? "Admin" : "User"}
             {user.subscription ? <span className="ml-1 text-emerald-300">· Plus</span> : null}
           </span>
@@ -148,28 +148,28 @@ function RecentOrdersPreview({ orders, onSeeAll }: { orders: ApiOrder[]; onSeeAl
     <div className={`${adminSurface.card} p-5`}>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <p className="text-base font-semibold text-white">Đơn in mới nhất</p>
-          <p className="text-xs text-slate-400">5 đơn gần đây nhất.</p>
+          <p className="text-base font-semibold text-app-ink">Đơn in mới nhất</p>
+          <p className="text-xs text-app-ink-muted">5 đơn gần đây nhất.</p>
         </div>
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="text-cyan-300 hover:bg-white/5 hover:text-cyan-200"
+          className="text-app-accent hover:bg-app-bg-subtle hover:text-app-accent"
           onClick={onSeeAll}
         >
           Xem tất cả →
         </Button>
       </div>
       {orders.length === 0 ? (
-        <p className="text-sm text-slate-400">Chưa có đơn in nào.</p>
+        <p className="text-sm text-app-ink-muted">Chưa có đơn in nào.</p>
       ) : (
         <ul className="divide-y divide-white/10">
           {orders.slice(0, 5).map((order) => (
             <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{order.fullName}</p>
-                <p className="mt-1 truncate text-xs text-slate-400">
+                <p className="truncate text-sm font-semibold text-app-ink">{order.fullName}</p>
+                <p className="mt-1 truncate text-xs text-app-ink-muted">
                   {order.email} · {formatDate(order.createdAt)}
                 </p>
               </div>
@@ -252,7 +252,7 @@ export function AdminDashboardPage() {
           <Button
             type="button"
             variant="outline"
-            className="gap-2 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             disabled={loading}
             onClick={() => void loadData()}
           >
@@ -269,7 +269,7 @@ export function AdminDashboardPage() {
           <Button
             type="button"
             variant="outline"
-            className="mt-4 border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
+            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             onClick={() => void loadData()}
           >
             Thử lại
@@ -323,16 +323,16 @@ export function AdminDashboardPage() {
       <section className="grid gap-4 lg:grid-cols-2">
         <div className={`${adminSurface.card} p-5`}>
           <div className="mb-4">
-            <p className="text-base font-semibold text-white">Thanh toán gần đây</p>
-            <p className="text-xs text-slate-400">Các đơn thanh toán tự động mới nhất.</p>
+            <p className="text-base font-semibold text-app-ink">Thanh toán gần đây</p>
+            <p className="text-xs text-app-ink-muted">Các đơn thanh toán tự động mới nhất.</p>
           </div>
           <RecentPaymentList payments={overview?.recentPayments ?? []} />
         </div>
 
         <div className={`${adminSurface.card} p-5`}>
           <div className="mb-4">
-            <p className="text-base font-semibold text-white">User mới</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-base font-semibold text-app-ink">User mới</p>
+            <p className="text-xs text-app-ink-muted">
               Email: {overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}
             </p>
           </div>

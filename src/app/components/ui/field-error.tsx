@@ -17,11 +17,11 @@ export function FieldError({ message, id, role = "alert", className }: FieldErro
       id={id}
       role={role}
       className={cn(
-        "mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-450",
+        "mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-app-warm dark:text-app-warm",
         className,
       )}
     >
-      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-500" aria-hidden="true" />
+      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-app-warm" aria-hidden="true" />
       <span>{message}</span>
     </div>
   );

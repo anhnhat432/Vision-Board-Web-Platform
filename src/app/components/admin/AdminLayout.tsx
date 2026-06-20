@@ -24,17 +24,17 @@ function AdminStatusCard({
   title: string;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10 text-slate-100">
+    <div className="flex min-h-screen items-center justify-center bg-app-bg px-4 py-10 text-app-ink">
       <Card
-        className="w-full max-w-md border-white/10 text-slate-100 shadow-lg backdrop-blur"
-        style={{ backgroundColor: "rgba(15, 23, 42, 0.96)" }}
+        className="w-full max-w-md border-app-line text-app-ink shadow-lg backdrop-blur"
+        style={{ backgroundColor: "var(--app-surface)" }}
       >
         <CardContent className="p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-white/10 text-white">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-ink">
             {icon}
           </div>
-          <h1 className="mt-5 text-xl font-bold text-white">{title}</h1>
-          <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-300">{description}</p>
+          <h1 className="mt-5 text-xl font-bold text-app-ink">{title}</h1>
+          <p className="mt-3 whitespace-pre-line text-sm leading-6 text-app-ink-soft">{description}</p>
           {action ? <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div> : null}
           {secondaryAction ? <div className="mt-3 flex flex-wrap justify-center gap-3">{secondaryAction}</div> : null}
         </CardContent>
@@ -73,7 +73,7 @@ export function AdminLayout() {
   if (authLoading) {
     return (
       <AdminStatusCard
-        icon={<Loader2 className="h-7 w-7 animate-spin text-slate-300" />}
+        icon={<Loader2 className="h-7 w-7 animate-spin text-app-ink-soft" />}
         title="Đang kiểm tra đăng nhập"
         description="Hệ thống đang xác thực phiên quản trị hiện tại."
       />
@@ -87,7 +87,7 @@ export function AdminLayout() {
   if (userProfileLoading) {
     return (
       <AdminStatusCard
-        icon={<Loader2 className="h-7 w-7 animate-spin text-slate-300" />}
+        icon={<Loader2 className="h-7 w-7 animate-spin text-app-ink-soft" />}
         title="Đang tải quyền quản trị"
         description="Hệ thống đang kiểm tra hồ sơ và vai trò của tài khoản này."
       />
@@ -113,7 +113,7 @@ export function AdminLayout() {
           <Button
             type="button"
             variant="ghost"
-            className="gap-2 text-slate-300 hover:bg-white/10 hover:text-white"
+            className="gap-2 text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
             onClick={() => void logout()}
           >
             <LogOut className="h-4 w-4" />
@@ -139,7 +139,7 @@ export function AdminLayout() {
             <Button
               type="button"
               variant="outline"
-              className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="border-app-line-strong bg-transparent text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
               onClick={() => void logout()}
             >
               Đăng xuất
@@ -188,7 +188,7 @@ function AdminLayoutShell({
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-app-bg text-app-ink">
       <div className="flex min-h-screen">
         <div className="hidden w-60 shrink-0 lg:block">
           <div className="sticky top-0 h-screen">
@@ -197,7 +197,7 @@ function AdminLayoutShell({
         </div>
 
         <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
-          <SheetContent side="left" className="w-72 border-r border-white/10 bg-slate-950 p-0 text-slate-100">
+          <SheetContent side="left" className="w-72 border-r border-app-line bg-app-bg p-0 text-app-ink">
             <AdminSidebar
               email={email}
               onLogout={onLogout}

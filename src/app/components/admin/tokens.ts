@@ -1,27 +1,27 @@
 /**
- * Shared dark-theme tokens for the admin redesign.
+ * Shared editorial tokens for the admin redesign.
  *
- * Use these instead of hard-coding `bg-white/[0.03]` etc. across pages so the
+ * Use these instead of hard-coding colours across pages so the
  * admin surfaces stay visually aligned. Tailwind reads strings literally so the
  * full class string must appear here for the JIT to keep them in the bundle.
  */
 
 export const adminSurface = {
-  card: "bg-white/[0.03] border border-white/10 rounded-[var(--r-card)]",
-  cardHover: "hover:bg-white/[0.05] transition-colors",
-  muted: "bg-white/5 border border-white/10 rounded-[var(--r-control)]",
-  divider: "border-white/10",
+  card: "bg-app-surface border border-app-line rounded-[var(--r-card)]",
+  cardHover: "hover:bg-app-accent-soft/30 transition-colors",
+  muted: "bg-app-bg-subtle border border-app-line rounded-[var(--r-control)]",
+  divider: "border-app-line",
 } as const;
 
 export const adminText = {
-  hi: "text-white",
-  body: "text-slate-200",
-  muted: "text-slate-400",
-  dim: "text-slate-500",
+  hi: "text-app-ink",
+  body: "text-app-ink-soft",
+  muted: "text-app-ink-muted",
+  dim: "text-app-ink-muted",
 } as const;
 
 export const adminInput =
-  "bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-cyan-500/40";
+  "bg-app-bg-subtle border-app-line text-app-ink placeholder:text-app-ink-muted focus-visible:ring-app-accent/40";
 
 export const adminFocusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/40 focus-visible:ring-offset-0";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-0";
