@@ -64,16 +64,16 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
       className={cn(
         "rounded-[14px] border p-4 transition-all duration-200",
         variant === "antiPattern"
-          ? "border-app-status-warning/30 bg-app-status-warning/5 text-app-status-warning dark:text-app-status-warning"
+          ? "border-[#D6B228]/30 bg-[#FFF8DE] text-[#7A5C00]"
           : variant === "metric"
-            ? "border-app-accent/20 bg-app-accent-soft/30 text-app-accent"
-            : "border-app-accent/20 bg-app-accent-soft/30 text-app-accent",
+            ? "border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] text-[#0C5E3A]"
+            : "border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] text-[#0C5E3A]",
       )}
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
     >
       {showArchetypeTag ? (
-        <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-app-ink-muted/80">
+        <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.06em] text-[#5C574B]">
           Loại mục tiêu: {archetypeLabel}
         </p>
       ) : null}
@@ -82,17 +82,17 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
           className={cn(
             "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
             variant === "antiPattern"
-              ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning dark:text-app-status-warning"
+              ? "border-[#D6B228]/40 bg-[#FFF8DE] text-[#9A7B00]"
               : variant === "metric"
-                ? "border-app-accent/30 bg-app-accent-soft text-app-accent"
-                : "border-app-accent/30 bg-app-accent-soft text-app-accent",
+                ? "border-[#0C5E3A]/30 bg-[#EDF7E0] text-[#0C5E3A]"
+                : "border-[#0C5E3A]/30 bg-[#EDF7E0] text-[#0C5E3A]",
           )}
         >
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>
-        <div className="min-w-0 text-sm leading-relaxed text-app-ink-soft">
-          <p className="font-bold text-app-ink">{VARIANT_TITLE[variant]}</p>
-          <div className="mt-2 text-app-ink-soft">{body}</div>
+        <div className="min-w-0 text-[13px] leading-relaxed text-[#5C574B]">
+          <p className="font-bold text-[#17150F]">{VARIANT_TITLE[variant]}</p>
+          <div className="mt-2 text-[#5C574B]">{body}</div>
         </div>
       </div>
     </div>

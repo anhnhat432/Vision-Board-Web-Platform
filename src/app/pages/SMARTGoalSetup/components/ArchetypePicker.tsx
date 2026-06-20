@@ -45,18 +45,18 @@ export function ArchetypePicker({
   onResetToInferred,
 }: ArchetypePickerProps) {
   return (
-    <div className="rounded-[14px] border border-app-line bg-app-surface p-3.5 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-app-line/40">
+    <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[rgba(23,21,15,0.06)]">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">Chọn loại mục tiêu</p>
-          <p className="text-[11px] text-app-ink-soft mt-0.5">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-[#0C5E3A]">Chọn loại mục tiêu</p>
+          <p className="text-[11.5px] text-[#5C574B] mt-1">
             Hệ thống tự động đoán loại để gợi ý chính xác hơn. Bạn có thể tự thay đổi nếu chưa đúng.
           </p>
         </div>
         {isUserOverridden ? (
           <button
             type="button"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 sm:px-2.5 py-1.5 sm:py-1 text-[10px] font-semibold text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 active:scale-[0.97] cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(23,21,15,0.1)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#5C574B] transition-colors duration-150 hover:bg-[#FAF8F3] hover:text-[#17150F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 active:scale-[0.97] cursor-pointer"
             onClick={onResetToInferred}
             aria-label={`Quay lại đoán tự động (${getGoalArchetypeLabel(inferredArchetype)})`}
           >
@@ -76,10 +76,10 @@ export function ArchetypePicker({
               key={option.value}
               type="button"
               className={cn(
-                "group inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 sm:px-2.5 py-2 sm:py-1 text-[11px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 cursor-pointer",
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[12px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 cursor-pointer hover:-translate-y-0.5",
                 active
-                  ? "border-app-accent bg-app-accent-soft/30 text-app-accent shadow-sm"
-                  : "border-app-line bg-app-bg text-app-ink-soft hover:border-app-accent/30 hover:bg-app-accent-soft/10 hover:text-app-accent",
+                  ? "border-[#0C5E3A] bg-[#E4EEDF] text-[#0C5E3A] shadow-sm"
+                  : "border-[rgba(23,21,15,0.12)] bg-white text-[#5C574B] hover:border-[rgba(12,94,58,0.35)] hover:bg-[#EDF7E0] hover:text-[#0C5E3A]",
               )}
               onClick={() => onChange(option.value)}
               aria-pressed={active}
@@ -87,11 +87,11 @@ export function ArchetypePicker({
               <Icon
                 className={cn(
                   "h-3.5 w-3.5 transition-colors duration-150",
-                  active ? "text-app-accent" : "text-app-ink-muted group-hover:text-app-accent",
+                  active ? "text-[#0C5E3A]" : "text-[#A8A296]",
                 )}
                 aria-hidden="true"
               />
-              <span className="leading-none">{getGoalArchetypeLabel(option.value)}</span>
+              <span>{getGoalArchetypeLabel(option.value)}</span>
             </button>
           );
         })}
