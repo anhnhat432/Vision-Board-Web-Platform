@@ -426,7 +426,8 @@ export function TwelveWeekProgressTab({
                   </Tooltip>
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-app-ink-soft">
-                  Tuần này: {currentWeekScoreValue}% · Điểm trung bình: {averageScore}%
+                  Tuần này: <span className="font-mono">{currentWeekScoreValue}%</span> · Điểm trung bình:{" "}
+                  <span className="font-mono">{averageScore}%</span>
                 </p>
               </CardContent>
             </Card>
@@ -477,7 +478,7 @@ export function TwelveWeekProgressTab({
                   </p>
                 </div>
                 <Badge className="bg-app-accent text-white hover:bg-app-accent rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs">
-                  {currentWeekScoreValue} điểm
+                  <span className="font-mono">{currentWeekScoreValue}</span> điểm
                 </Badge>
               </div>
             </div>
@@ -651,20 +652,22 @@ export function TwelveWeekProgressTab({
                               </Badge>
                             )}
                           </div>
-                          <span className="text-sm font-bold text-app-accent">{point.score} điểm</span>
+                          <span className="text-sm font-bold text-app-accent">
+                            <span className="font-mono">{point.score}</span> điểm
+                          </span>
                         </div>
                         <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
                           <div>
                             <div className="flex items-center justify-between text-xs font-medium text-app-ink-soft">
                               <span>Cốt lõi</span>
-                              <span className="font-semibold text-app-ink">{point.corePercent}%</span>
+                              <span className="font-mono font-semibold text-app-ink">{point.corePercent}%</span>
                             </div>
                             <Progress value={point.corePercent} className="mt-1.5 h-2 rounded-full" />
                           </div>
                           <div>
                             <div className="flex items-center justify-between text-xs font-medium text-app-ink-soft">
                               <span>Tùy chọn</span>
-                              <span className="font-semibold text-app-ink">{point.optionalPercent}%</span>
+                              <span className="font-mono font-semibold text-app-ink">{point.optionalPercent}%</span>
                             </div>
                             <Progress value={point.optionalPercent} className="mt-1.5 h-2 rounded-full" />
                           </div>
@@ -709,7 +712,7 @@ export function TwelveWeekProgressTab({
                       </div>
                       <div className="mt-2.5 flex items-center gap-3">
                         <Progress value={item.percent} className="h-2 flex-1 rounded-full" />
-                        <span className="text-sm font-bold text-app-ink">{item.percent}%</span>
+                        <span className="font-mono text-sm font-bold text-app-ink">{item.percent}%</span>
                       </div>
                       <p className="mt-1.5 text-xs text-app-ink-muted">
                         {item.completedTasks}/{item.totalTasks} lần hoàn thành
