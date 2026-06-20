@@ -61,7 +61,7 @@ describe("token-parser — parseTokens (tokens.css thật)", () => {
     expect(lightSet.get("--app-bg")?.rawValue).toBe("#F7F4ED");
     expect(darkSet.get("--app-bg")?.rawValue).toBe("#1C1A15");
     expect(lightSet.get("--app-accent")?.rawValue).toBe("#0C5E3A");
-    expect(darkSet.get("--app-accent")?.rawValue).toBe("#2FA36B");
+    expect(darkSet.get("--app-accent")?.rawValue).toBe("#5BA590");
   });
 });
 
