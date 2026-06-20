@@ -454,7 +454,7 @@ export function TwelveWeekWeekTab({
                 <span className="font-serif text-sm font-bold tracking-normal normal-case text-app-ink bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
                   Tuần {currentWeekLimit} / {system.totalWeeks}
                 </span>
-                <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-sans">
+                <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-mono text-[11px]">
                   {currentWeekRange
                     ? `${formatCalendarDate(currentWeekRange.start)} – ${formatCalendarDate(currentWeekRange.end)}`
                     : "Chu kỳ hiện tại"}
@@ -573,7 +573,7 @@ export function TwelveWeekWeekTab({
                               {completed}/{total || indicator.target || 1} {indicator.unit || "lần"}
                             </span>
                             {!weekCompletion.isEmpty && (
-                              <span className="font-bold text-app-accent bg-app-accent-soft/50 px-2 py-0.5 rounded-md text-[11px]">
+                              <span className="font-mono font-bold text-app-accent bg-app-accent-soft/50 px-2 py-0.5 rounded-md text-[11px]">
                                 {percent}%
                               </span>
                             )}
@@ -632,7 +632,7 @@ export function TwelveWeekWeekTab({
               <span className="font-serif text-sm font-semibold tracking-normal normal-case text-app-ink bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
                 Tuần {currentWeekLimit} / {system.totalWeeks}
               </span>
-              <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
+              <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-mono text-[11px]">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} – ${formatCalendarDate(currentWeekRange.end)}`
                   : "Chu kỳ hiện tại"}
@@ -1042,7 +1042,7 @@ export function TwelveWeekWeekTab({
                           className="flex items-center justify-between text-xs sm:text-sm text-app-ink bg-app-bg/5 p-3 rounded-card border border-app-line/10 hover:bg-app-accent-subtle/15 transition-colors duration-200"
                         >
                           <span className="truncate max-w-[70%] font-medium">· {indicator.name}</span>
-                          <span className="text-xs text-app-ink-soft font-bold shrink-0 bg-app-surface px-2 py-0.5 rounded-md border border-app-line/25">
+                          <span className="font-mono text-xs text-app-ink-soft font-bold shrink-0 bg-app-surface px-2 py-0.5 rounded-md border border-app-line/25">
                             {completed}/{total} ({percent}%)
                           </span>
                         </div>
