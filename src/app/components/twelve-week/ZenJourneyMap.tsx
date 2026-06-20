@@ -168,7 +168,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                     r="14"
                     className={`transition-all duration-300 stroke-[3px] ${
                       isCurrent
-                        ? "fill-amber-500 stroke-amber-200"
+                        ? "fill-app-energy stroke-app-energy/30"
                         : isDone
                           ? "fill-[var(--app-accent)] stroke-[var(--app-accent-soft)] dark:fill-[var(--app-accent)]"
                           : isFuture

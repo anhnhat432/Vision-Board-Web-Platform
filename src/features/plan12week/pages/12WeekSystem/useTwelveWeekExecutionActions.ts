@@ -642,6 +642,7 @@ export function useTwelveWeekExecutionActions({
     refreshBackendProgressOverlay,
     refreshSnapshotMeta,
     getLatestActiveSystem,
+    onWeekCompleted,
   ]);
 
   const handleReentry = useCallback(

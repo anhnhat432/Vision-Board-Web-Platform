@@ -1,15 +1,7 @@
-=== NEUTRAL VIOLATIONS (step screens): 9 ===
+=== NEUTRAL VIOLATIONS (step screens): 2 ===
 {
-  "src/app/pages/GoalTracker.tsx": 4,
-  "src/app/pages/LifeBalance.tsx": 5
+  "src/app/pages/GoalTracker.tsx": 2
 }
 
 src/app/pages/GoalTracker.tsx:446:129 [primitive-palette] via-neutral-950
 src/app/pages/GoalTracker.tsx:446:150 [primitive-palette] to-neutral-950
-src/app/pages/GoalTracker.tsx:1032:90 [primitive-palette] from-neutral-950
-src/app/pages/GoalTracker.tsx:1032:112 [primitive-palette] via-neutral-950
-src/app/pages/LifeBalance.tsx:570:47 [primitive-palette] text-neutral-500
-src/app/pages/LifeBalance.tsx:659:50 [primitive-palette] bg-neutral-100
-src/app/pages/LifeBalance.tsx:667:49 [primitive-palette] text-neutral-400
-src/app/pages/LifeBalance.tsx:813:138 [primitive-palette] text-neutral-500
-src/app/pages/LifeBalance.tsx:813:161 [primitive-palette] text-neutral-700

@@ -182,7 +182,7 @@ export function DailyStoicCard() {
 
         {/* MẶT TRƯỚC THẺ BÀI (CARD FRONT) - Hiển thị sau khi lật */}
         <div
-          className="absolute inset-0 w-full h-full rounded-3xl border border-app-line/80 dark:border-neutral-800/85 bg-app-surface text-app-ink dark:bg-neutral-950 dark:text-neutral-200 p-5 flex flex-col justify-between shadow-lg"
+          className="absolute inset-0 w-full h-full rounded-3xl border border-app-line/80 bg-app-surface text-app-ink p-5 flex flex-col justify-between shadow-lg"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
@@ -192,7 +192,7 @@ export function DailyStoicCard() {
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-neutral-200/80 dark:border-neutral-800/60 pb-3 pt-2">
+          <div className="flex items-center justify-between border-b border-app-line/80 pb-3 pt-2">
             <div className="flex items-center gap-1.5">
               <HelpCircle className="h-4 w-4 text-app-accent" />
               <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-app-ink-muted">
@@ -200,7 +200,7 @@ export function DailyStoicCard() {
               </span>
             </div>
             {isSaved && (
-              <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200/30">
+              <span className="flex items-center gap-1 text-[9px] font-bold text-app-accent bg-app-accent-soft px-2 py-0.5 rounded-full border border-app-accent/30">
                 <Check className="h-3 w-3" /> Đã ghi nhận
               </span>
             )}
@@ -208,7 +208,7 @@ export function DailyStoicCard() {
 
           {/* Nội dung chính */}
           <div className="flex-1 flex flex-col justify-center py-3 overflow-y-auto min-h-0">
-            <blockquote className="font-serif text-sm italic leading-relaxed text-app-ink-soft dark:text-neutral-400 text-center select-none">
+            <blockquote className="font-serif text-sm italic leading-relaxed text-app-ink-soft text-center select-none">
               “{currentQuote.quote}”
             </blockquote>
 
@@ -216,8 +216,8 @@ export function DailyStoicCard() {
               — {currentQuote.author}
             </p>
 
-            <div className="mt-4 pt-3 border-t border-neutral-200/80 dark:border-neutral-800/80">
-              <p className="text-xs font-bold text-app-ink dark:text-neutral-200 leading-relaxed mb-2">
+            <div className="mt-4 pt-3 border-t border-app-line/80">
+              <p className="text-xs font-bold text-app-ink leading-relaxed mb-2">
                 💡 {currentQuote.question}
               </p>
 
@@ -225,20 +225,20 @@ export function DailyStoicCard() {
                 value={reflection}
                 onChange={handleTextChange}
                 placeholder="Ghi lại câu trả lời hoặc suy ngẫm của bạn tại đây..."
-                className="w-full h-20 text-xs p-2.5 rounded-xl border border-app-line dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 focus:bg-app-surface dark:focus:bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-app-accent/30 text-app-ink dark:text-neutral-200 leading-relaxed placeholder:text-app-ink-muted resize-none font-semibold"
+                className="w-full h-20 text-xs p-2.5 rounded-xl border border-app-line bg-app-bg-subtle/50 focus:bg-app-surface focus:outline-none focus:ring-1 focus:ring-app-accent/30 text-app-ink leading-relaxed placeholder:text-app-ink-muted resize-none font-semibold"
               />
             </div>
           </div>
 
           {/* Footer nút hành động */}
-          <div className="mt-3 pt-2 border-t border-neutral-200/80 dark:border-neutral-800/80">
+          <div className="mt-3 pt-2 border-t border-app-line/80">
             <Button
               onClick={handleSave}
               disabled={!reflection.trim() || isSaved}
               className={`w-full text-xs font-bold py-2.5 rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 isSaved
-                  ? "bg-neutral-100 text-app-ink-muted dark:bg-neutral-900 dark:text-neutral-600 cursor-not-allowed border border-app-line dark:border-neutral-800"
-                  : "bg-emerald-700 text-white hover:bg-emerald-800 shadow-sm"
+                  ? "bg-app-bg-subtle text-app-ink-muted cursor-not-allowed border border-app-line"
+                  : "bg-app-accent text-white hover:bg-app-accent-hover shadow-sm"
               }`}
             >
               {isSaved ? "Đã lưu suy ngẫm" : "Lưu suy ngẫm"}

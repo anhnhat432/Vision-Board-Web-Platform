@@ -275,7 +275,7 @@ export function TwelveWeekSystem() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isReady, activeGoal]);
+  }, [isReady, activeGoal, celebrate]);
   const [isDeletingData, setIsDeletingData] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
   const [weeklyReviewSnoozeUntil, setWeeklyReviewSnoozeUntil] = useState(readWeeklyReviewSnoozeUntil);

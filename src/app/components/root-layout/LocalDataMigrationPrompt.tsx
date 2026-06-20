@@ -190,7 +190,7 @@ export function LocalDataMigrationPrompt({
 
         <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle p-4 text-sm text-app-ink-soft">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-status-success" />
             <p className="leading-6">
               Dữ liệu cũ vẫn được giữ lại sau khi nhập. Bạn nên tải bản sao lưu trước khi tiếp tục.
             </p>
@@ -201,9 +201,9 @@ export function LocalDataMigrationPrompt({
           <div
             className={`rounded-[var(--r-card)] border p-4 text-sm leading-6 ${
               importSucceeded
-                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                ? "border-app-status-success/30 bg-app-status-success/10 text-app-status-success"
                 : importBlocked
-                  ? "border-amber-200 bg-amber-50 text-amber-800"
+                  ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning"
                   : "border-red-200 bg-red-50 text-red-700"
             }`}
             role={importSucceeded ? "status" : "alert"}
@@ -274,12 +274,12 @@ export function LocalDataMigrationPrompt({
                     Hãy nhập dữ liệu trên thiết bị vào tài khoản trước, sau đó mới đồng bộ lên hệ thống.
                   </p>
                 ) : !cloudImportEnabled ? (
-                  <p className="rounded-[var(--r-tile)] bg-app-surface px-3 py-2 text-xs font-medium text-amber-700">
+                  <p className="rounded-[var(--r-tile)] bg-app-surface px-3 py-2 text-xs font-medium text-app-status-warning">
                     {cloudImportUnavailableReason ??
                       "Đồng bộ dữ liệu tài khoản chưa được bật cho không gian làm việc này."}
                   </p>
                 ) : cloudImportAlreadyCompleted && !cloudWriteSucceeded ? (
-                  <p className="rounded-[var(--r-tile)] bg-app-surface px-3 py-2 text-xs font-medium text-emerald-700">
+                  <p className="rounded-[var(--r-tile)] bg-app-surface px-3 py-2 text-xs font-medium text-app-status-success">
                     Dữ liệu này đã được đồng bộ lên tài khoản trước đó.
                   </p>
                 ) : null}
@@ -289,9 +289,9 @@ export function LocalDataMigrationPrompt({
                   <div
                     className={`rounded-[var(--r-tile)] border px-3 py-2 text-sm leading-6 ${
                       cloudWriteSucceeded
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-app-status-success/30 bg-app-status-success/10 text-app-status-success"
                         : cloudWriteResult.status === "partial"
-                          ? "border-amber-200 bg-amber-50 text-amber-800"
+                          ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning"
                           : "border-red-200 bg-red-50 text-red-700"
                     }`}
                     role={cloudWriteSucceeded ? "status" : "alert"}
@@ -343,9 +343,9 @@ export function LocalDataMigrationPrompt({
                   <div
                     className={`rounded-[var(--r-tile)] border px-3 py-2 text-sm leading-6 ${
                       cloudImportResult.status === "valid"
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-app-status-success/30 bg-app-status-success/10 text-app-status-success"
                         : cloudImportResult.status === "invalid"
-                          ? "border-amber-200 bg-amber-50 text-amber-800"
+                          ? "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning"
                           : "border-red-200 bg-red-50 text-red-700"
                     }`}
                     role={cloudImportResult.status === "valid" ? "status" : "alert"}

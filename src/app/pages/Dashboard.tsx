@@ -605,7 +605,7 @@ function DashboardContent({
         <div className="absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen" />
 
         {/* Bóng sáng Amber (Bottom Left) */}
-        <div className="absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-amber-500/2 dark:bg-amber-500/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen" />
+        <div className="absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-app-energy/2 dark:bg-app-energy/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 relative z-10">
@@ -752,11 +752,11 @@ function NextBestAction({ data }: { data: DashboardData }) {
   let ctaLabel = "";
   let ctaPath = "";
   let Icon = Compass;
-  let borderLeftColor = "border-l-emerald-600 dark:border-l-emerald-400";
+  let borderLeftColor = "border-l-app-accent";
   let bgClass =
-    "bg-emerald-500/10 border-emerald-500/15 dark:bg-emerald-950/20 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300";
-  let iconColor = "text-emerald-600 dark:text-emerald-400";
-  let buttonColor = "bg-emerald-700 hover:bg-emerald-800 text-white";
+    "bg-app-accent/10 border-app-accent/15 text-app-accent";
+  let iconColor = "text-app-accent";
+  let buttonColor = "bg-app-accent hover:bg-app-accent-hover text-app-ink-on-accent";
 
   if (!hasRadarData) {
     title = "Chưa thiết lập bánh xe cuộc sống";
@@ -764,11 +764,11 @@ function NextBestAction({ data }: { data: DashboardData }) {
     ctaLabel = "Chấm điểm ngay";
     ctaPath = "/onboarding";
     Icon = Compass;
-    borderLeftColor = "border-l-amber-500 dark:border-l-amber-450";
+    borderLeftColor = "border-l-app-status-warning";
     bgClass =
-      "bg-amber-500/10 border-amber-500/15 dark:bg-amber-950/20 dark:border-amber-800/30 text-amber-900 dark:text-amber-300";
-    iconColor = "text-amber-600 dark:text-amber-400";
-    buttonColor = "bg-amber-500 hover:bg-amber-600 text-app-ink";
+      "bg-app-status-warning/10 border-app-status-warning/15 text-app-status-warning";
+    iconColor = "text-app-status-warning";
+    buttonColor = "bg-app-status-warning hover:bg-app-status-warning/80 text-app-ink";
   } else if (activeSystemTodayOpenTasks.length > 0) {
     title = `Còn ${activeSystemTodayOpenTasks.length} việc cần hoàn thành hôm nay`;
     description = "Kiên trì thực hiện các hành động nhỏ để giữ vững Streak và hoàn thành mục tiêu 12 tuần.";
@@ -1138,7 +1138,7 @@ function DashboardPlanStateNotice({
 
   if (planError && !dismissed) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-200/60 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 backdrop-blur-sm p-3 text-xs text-amber-800 dark:text-amber-300">
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-app-status-warning/40 bg-app-status-warning/10 backdrop-blur-sm p-3 text-xs text-app-status-warning">
         <div className="flex items-center gap-2 min-w-0">
           <WifiOff className="h-3.5 w-3.5 shrink-0 opacity-70" />
           <span className="truncate">Không tải được kế hoạch từ máy chủ — dữ liệu hiển thị từ bộ nhớ cục bộ.</span>
@@ -1146,7 +1146,7 @@ function DashboardPlanStateNotice({
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md p-1 transition-colors hover:bg-amber-200/40 dark:hover:bg-amber-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md p-1 transition-colors hover:bg-app-status-warning/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/40"
           aria-label="Đóng thông báo"
         >
           <X className="h-3.5 w-3.5" />

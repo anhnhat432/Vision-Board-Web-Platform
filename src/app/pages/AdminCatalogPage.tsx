@@ -251,7 +251,7 @@ export function AdminCatalogPage() {
                     onCheckedChange={(checked) => void toggleActive(item.itemId, Boolean(checked))}
                     aria-label={`${item.label}: ${item.isActive ? "đang bán" : "đã ẩn"}`}
                   />
-                  <span className={item.isActive ? "text-emerald-300" : "text-app-ink-muted"}>
+                  <span className={item.isActive ? "text-app-accent" : "text-app-ink-muted"}>
                     {item.isActive ? "Đang bán" : "Đã ẩn"}
                   </span>
                 </div>

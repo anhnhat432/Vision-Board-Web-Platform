@@ -50,20 +50,20 @@ function clampPercent(value: number): number {
 
 const KPI_CARD_STYLES = {
   Tuần: {
-    bg: "bg-app-surface/70 dark:bg-neutral-950/30 border-app-line/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-app-surface dark:hover:bg-neutral-950/80 -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-app-bg-subtle dark:bg-neutral-900 text-app-accent border border-app-line/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface/70 border-app-line/50 hover:border-app-accent/30 hover:bg-app-surface -rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/50",
   },
   "Tỷ lệ lead": {
-    bg: "bg-app-surface/70 dark:bg-neutral-950/30 border-app-line/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-app-surface dark:hover:bg-neutral-950/80 rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-app-bg-subtle dark:bg-neutral-900 text-app-accent border border-app-line/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface/70 border-app-line/50 hover:border-app-accent/30 hover:bg-app-surface rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/50",
   },
   Nhịp: {
-    bg: "bg-app-surface/70 dark:bg-neutral-950/30 border-app-line/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-app-surface dark:hover:bg-neutral-950/80 -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-app-bg-subtle dark:bg-neutral-900 text-app-accent border border-app-line/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface/70 border-app-line/50 hover:border-app-accent/30 hover:bg-app-surface -rotate-[0.6deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/50",
   },
   Chuỗi: {
-    bg: "bg-app-surface/70 dark:bg-neutral-950/30 border-app-line/50 dark:border-neutral-850/60 hover:border-app-accent/30 hover:bg-app-surface dark:hover:bg-neutral-950/80 rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
-    iconBg: "bg-app-bg-subtle dark:bg-neutral-900 text-app-accent border border-app-line/50 dark:border-neutral-800/50",
+    bg: "bg-app-surface/70 border-app-line/50 hover:border-app-accent/30 hover:bg-app-surface rotate-[0.8deg] hover:rotate-0 hover:scale-[1.03] hover:shadow-app-sm transition-all duration-300",
+    iconBg: "bg-app-bg-subtle text-app-accent border border-app-line/50",
   },
 };
 
@@ -115,7 +115,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
     if (day.isFuture) {
       return (
         <div
-          className="h-16 w-5 rounded-full bg-app-bg-subtle dark:bg-neutral-900 border border-transparent"
+          className="h-16 w-5 rounded-full bg-app-bg-subtle border border-transparent"
           aria-hidden="true"
         />
       );
@@ -125,7 +125,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
       const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
       return (
         <div
-          className="flex h-16 w-5 items-end rounded-full bg-app-bg-subtle dark:bg-neutral-900 border border-app-accent/40 shadow-inner"
+          className="flex h-16 w-5 items-end rounded-full bg-app-bg-subtle border border-app-accent/40 shadow-inner"
           aria-hidden="true"
         >
           <div
@@ -139,7 +139,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
     const fillHeight = day.total === 0 ? 0 : clamp(day.percent, 12, 100);
     return (
       <div
-        className="flex h-16 w-5 items-end rounded-full bg-app-bg-subtle dark:bg-neutral-900 border border-transparent shadow-inner"
+        className="flex h-16 w-5 items-end rounded-full bg-app-bg-subtle border border-transparent shadow-inner"
         aria-hidden="true"
       >
         <div
@@ -222,7 +222,7 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-3xl border border-app-line/70 dark:border-neutral-800/80 bg-app-surface/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
+      className="rounded-3xl border border-app-line/70 bg-app-surface/70 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 hover:shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden relative select-none"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       {/* Grid Pattern overlay for texture */}
@@ -236,7 +236,7 @@ export function WeekRhythmCard({
         📌
       </span>
 
-      <div className="flex flex-col gap-1 border-b border-app-line/50 dark:border-neutral-800/55 pb-4 mb-6 pt-2 relative z-10">
+      <div className="flex flex-col gap-1 border-b border-app-line/50 pb-4 mb-6 pt-2 relative z-10">
         <h2
           id="dashboard-week-rhythm-title"
           className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-soft flex items-center gap-2"
@@ -246,7 +246,7 @@ export function WeekRhythmCard({
         </h2>
         <p className="text-xs font-semibold tracking-wide text-app-ink-muted">
           Đã hoàn thành <span className="text-app-accent font-extrabold">{completedCount}</span> trên tổng số{" "}
-          <span className="text-app-ink-soft dark:text-neutral-300 font-extrabold">{totalCount}</span> việc tuần này
+          <span className="text-app-ink-soft font-extrabold">{totalCount}</span> việc tuần này
         </p>
       </div>
 
@@ -268,7 +268,7 @@ export function WeekRhythmCard({
 
               <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">{item.caption}</p>
 
-              <p className="mt-1 font-serif text-2xl font-semibold leading-none text-app-ink dark:text-neutral-200">
+              <p className="mt-1 font-serif text-2xl font-semibold leading-none text-app-ink">
                 {item.numericValue !== undefined ? (
                   <CountUp value={item.numericValue} suffix={item.suffix ?? ""} precision={item.precision ?? 0} />
                 ) : (
@@ -283,7 +283,7 @@ export function WeekRhythmCard({
       </div>
 
       {/* Daily Checkins dots */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-app-line/80 dark:border-neutral-800/80 bg-app-surface/60 dark:bg-neutral-900/20 px-5 py-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.005)]">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-app-line/80 bg-app-surface/60 px-5 py-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.005)]">
         <span className="text-xs font-semibold text-app-ink-muted">Nhịp check-in hàng ngày:</span>
         <div className="flex items-center gap-3">
           {days.map((day) => {
@@ -292,13 +292,13 @@ export function WeekRhythmCard({
             let tooltipText = "";
 
             if (day.isFuture) {
-              dotClass = "bg-app-bg-subtle/60 dark:bg-neutral-800 border-transparent";
+              dotClass = "bg-app-bg-subtle/60 border-transparent";
               tooltipText = `${day.label}: Tương lai`;
             } else if (hasCheckIn) {
               dotClass = "bg-app-accent border-transparent shadow-[0_2px_6px_rgba(47,93,80,0.2)]";
               tooltipText = `${day.label}: Đã check-in`;
             } else {
-              dotClass = "bg-transparent border border-app-line dark:border-neutral-800";
+              dotClass = "bg-transparent border border-app-line";
               tooltipText = `${day.label}: Chưa check-in`;
             }
 
@@ -325,7 +325,7 @@ export function WeekRhythmCard({
         </div>
       </div>
 
-      <div className="mt-6 border-t border-app-line/80 dark:border-neutral-800/80 pt-6">
+      <div className="mt-6 border-t border-app-line/80 pt-6">
         <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-wider text-app-ink-muted">
           <Clock3 className="h-4 w-4 text-app-accent/80" />
           Nhịp độ thực thi hàng ngày

@@ -810,11 +810,11 @@ export function SmartGoalStepShell({
             href="https://deerflow.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline opacity-80 hover:opacity-100 transition-opacity font-bold text-[#5C3A2E] dark:text-[#A39B8C]"
+            className="hover:underline opacity-80 hover:opacity-100 transition-opacity font-bold text-app-ink-muted"
           >
             ✦ Deerflow
           </a>
-          <span className="font-bold text-[#5C3A2E] dark:text-[#A39B8C] flex items-center gap-0.5">
+          <span className="font-bold text-app-ink-muted flex items-center gap-0.5">
             <span>✦</span> {areaLabel} <span>✦</span>
           </span>
         </div>
@@ -1136,7 +1136,7 @@ export function SmartGoalStepShell({
 
                         {typedDraftText && (
                           <div className="relative rounded-lg border-l-2 border-app-accent bg-app-accent-soft/35 dark:bg-app-accent-soft/30 px-3.5 py-2.5 shadow-none">
-                            <p className="font-serif italic text-sm leading-relaxed text-[#5C3A2E] dark:text-[#F8D5C2] select-text">
+                            <p className="font-serif italic text-sm leading-relaxed text-app-ink-soft select-text">
                               “{typedDraftText}”
                             </p>
                           </div>

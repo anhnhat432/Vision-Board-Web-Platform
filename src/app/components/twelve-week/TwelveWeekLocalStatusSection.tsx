@@ -17,7 +17,6 @@ type TwelveWeekLocalStatusSectionProps = Pick<
   | "mutationQueueSyncStatus"
   | "onExportLocalData"
   | "onExportCloudWorkspace"
-  | "onDeleteCloudWorkspace"
   | "onHydrateBackendPlans"
   | "onRunMutationQueueSync"
   | "onKeepLocalPlanForConflicts"
@@ -579,7 +578,6 @@ export function TwelveWeekLocalStatusSection({
   mutationQueueSyncStatus,
   onExportLocalData,
   onExportCloudWorkspace,
-  onDeleteCloudWorkspace,
   onHydrateBackendPlans,
   onRunMutationQueueSync,
   onKeepLocalPlanForConflicts,

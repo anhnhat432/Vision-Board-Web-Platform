@@ -61,8 +61,8 @@ const TIMELINE_PHASES = [
     weekEnd: 12,
     icon: PhaseHarvestChipIcon,
     tileClassName:
-      "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100",
-    activeClassName: "border-emerald-600 bg-emerald-700 text-white shadow-app-sm",
+      "border-app-accent/30 bg-app-accent-soft text-app-accent hover:border-app-accent/50",
+    activeClassName: "border-app-accent bg-app-accent text-app-ink-on-accent shadow-app-sm",
   },
 ];
 
@@ -191,14 +191,14 @@ export function PlanPreview({
             <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-accent">Kết quả</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">1 mục tiêu 12 tuần</p>
           </div>
-          <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-500/30 dark:bg-emerald-950/30">
-            <Zap className="h-4 w-4 text-emerald-700 dark:text-emerald-200" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-200">Lead</p>
+          <div className="rounded-[var(--r-tile)] border border-app-accent/30 bg-app-accent-soft/50 p-3">
+            <Zap className="h-4 w-4 text-app-accent" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-accent">Lead</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">{weekOneLeadMetrics.length} việc lặp lại</p>
           </div>
-          <div className="rounded-[var(--r-tile)] border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/30">
-            <CalendarDays className="h-4 w-4 text-amber-700 dark:text-amber-200" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-amber-700 dark:text-amber-200">Week 1</p>
+          <div className="rounded-[var(--r-tile)] border border-app-status-warning/30 bg-app-status-warning/10 p-3">
+            <CalendarDays className="h-4 w-4 text-app-status-warning" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-app-status-warning">Week 1</p>
             <p className="mt-1 text-sm font-semibold text-app-ink">{totalWeekOneTasks} việc đầu tiên</p>
           </div>
         </div>

@@ -135,7 +135,7 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
           </div>
           <span className="text-right text-xs text-app-ink-muted">
             {user.role === "admin" ? "Admin" : "User"}
-            {user.subscription ? <span className="ml-1 text-emerald-300">· Plus</span> : null}
+            {user.subscription ? <span className="ml-1 text-app-accent">· Plus</span> : null}
           </span>
         </li>
       ))}

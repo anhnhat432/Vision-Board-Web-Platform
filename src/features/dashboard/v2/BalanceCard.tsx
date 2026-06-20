@@ -51,7 +51,7 @@ const AREA_STYLES: Record<string, { gradient: string; icon: typeof Activity; tex
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
     <section
-      className="rounded-3xl border border-app-line/70 dark:border-neutral-800/80 bg-app-surface/70 dark:bg-neutral-900/10 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 relative select-none overflow-hidden"
+      className="rounded-3xl border border-app-line/70 bg-app-surface/70 backdrop-blur-md p-6 shadow-[0_4px_24px_rgba(0,0,0,0.005)] transition-all duration-300 hover:border-app-accent/25 relative select-none overflow-hidden"
       aria-labelledby="dashboard-balance-title"
     >
       {/* Grid Pattern overlay for texture */}
@@ -62,7 +62,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
         📌
       </span>
 
-      <div className="flex flex-col gap-1 border-b border-app-line/50 dark:border-neutral-800/55 pb-4 mb-5 pt-2 relative z-10">
+      <div className="flex flex-col gap-1 border-b border-app-line/50 pb-4 mb-5 pt-2 relative z-10">
         <h2
           id="dashboard-balance-title"
           className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink flex items-center gap-2"
@@ -87,7 +87,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
           return (
             <div
               key={row.label}
-              className="group p-3 rounded-2xl border border-transparent hover:border-app-line/70 dark:hover:border-neutral-800/70 hover:bg-app-surface/50 dark:hover:bg-neutral-950/20 transition-all duration-300 hover:scale-[1.01]"
+              className="group p-3 rounded-2xl border border-transparent hover:border-app-line/70 hover:bg-app-surface/50 transition-all duration-300 hover:scale-[1.01]"
             >
               <div className="mb-2.5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
@@ -96,7 +96,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
                   >
                     <Icon className="h-4 w-4" />
                   </div>
-                  <span className="text-xs font-bold text-app-ink-soft dark:text-neutral-400 group-hover:text-app-ink dark:group-hover:text-neutral-200 transition-colors duration-200">
+                  <span className="text-xs font-bold text-app-ink-soft group-hover:text-app-ink transition-colors duration-200">
                     {row.label}
                   </span>
                 </div>
@@ -106,7 +106,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
               </div>
 
               <div
-                className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle dark:bg-neutral-800 shadow-inner"
+                className="h-1.5 overflow-hidden rounded-full bg-app-bg-subtle shadow-inner"
                 aria-hidden="true"
               >
                 <div

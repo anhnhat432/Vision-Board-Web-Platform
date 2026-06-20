@@ -516,15 +516,15 @@ export function LifeBalance() {
                 </section>
 
                 {/* Box Giải thích & Nhận định Tiêu điểm Chuyên sâu */}
-                <section className="surface-raised rounded-2xl border border-amber-500/10 bg-amber-500/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                <section className="surface-raised rounded-2xl border border-app-status-warning/10 bg-app-status-warning/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-app-status-warning/5 rounded-full blur-3xl pointer-events-none" />
 
                   <header className="flex items-center gap-2 pb-3 border-b border-app-line/20">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-status-warning/10 text-app-status-warning">
                       <Target className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-amber-700">
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-app-status-warning">
                         Trọng tâm Hành động đề xuất
                       </h2>
                       <p className="text-[10px] text-app-ink-muted font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
@@ -534,7 +534,7 @@ export function LifeBalance() {
                   <div className="mt-4 space-y-3">
                     <p className="text-xs font-bold text-app-ink-soft leading-normal">
                       Khía cạnh cần ưu tiên cải thiện:{" "}
-                      <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">
+                      <span className="text-app-status-warning bg-app-status-warning/10 px-2 py-0.5 rounded-md border border-app-status-warning/20">
                         {getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)
                       </span>
                     </p>
@@ -567,7 +567,7 @@ export function LifeBalance() {
                           <Compass className="h-5 w-5 text-app-accent animate-spin-slow" />
                           Cập nhật Bánh xe cuộc sống hằng tuần
                         </h3>
-                        <p className="text-xs text-neutral-500 leading-relaxed font-semibold">
+                        <p className="text-xs text-app-ink-soft leading-relaxed font-semibold">
                           Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh qua 3 chặng tương tác nhẹ để luôn làm
                           chủ nhịp điệu cuộc sống.
                         </p>
@@ -650,21 +650,21 @@ export function LifeBalance() {
                       >
                         {/* Progress Header */}
                         <header className="pb-4 border-b border-app-line/60 space-y-2">
-                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-app-accent">
                             <span>Chặng {activeClusterIndex + 1} / 3</span>
                             <span>{Math.round(((activeClusterIndex + 1) / 3) * 100)}% Hoàn thành</span>
                           </div>
 
                           {/* Progress Bar */}
-                          <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-app-line rounded-full h-1.5 overflow-hidden">
                             <div
-                              className="bg-emerald-600 h-1.5 rounded-full transition-all duration-300"
+                              className="bg-app-accent h-1.5 rounded-full transition-all duration-300"
                               style={{ width: `${((activeClusterIndex + 1) / 3) * 100}%` }}
                             />
                           </div>
 
                           <h3 className="font-serif text-lg font-bold text-app-ink mt-2">{cluster.title}</h3>
-                          <p className="text-xs text-neutral-400 font-semibold">{cluster.description}</p>
+                          <p className="text-xs text-app-ink-muted font-semibold">{cluster.description}</p>
                         </header>
 
                         {/* Danh sách thẻ slider trong cụm */}
@@ -810,7 +810,7 @@ export function LifeBalance() {
                               whileHover={{ scale: 1.015 }}
                               whileTap={{ scale: 0.985 }}
                               type="button"
-                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-500 hover:text-neutral-700 cursor-pointer font-sans"
+                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-app-ink-muted hover:text-app-ink cursor-pointer font-sans"
                               onClick={() => setIsCheckInMode(false)}
                             >
                               Hủy bỏ
