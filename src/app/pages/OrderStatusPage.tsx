@@ -13,6 +13,7 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
+import * as QRCode from "qrcode";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -110,6 +111,49 @@ function isRenderableQrImageSrc(value: string | null | undefined): value is stri
     trimmed.startsWith("https://") ||
     trimmed.startsWith("//")
   );
+}
+
+const BANK_BIN_LABELS: Record<string, string> = {
+  "970422": "MB Bank",
+  "970436": "Vietcombank",
+  "970407": "Techcombank",
+  "970416": "ACB",
+  "970418": "BIDV",
+  "970432": "VPBank",
+  "970423": "TPBank",
+  "970403": "Sacombank",
+  "970441": "VIB",
+  "970426": "MSB",
+  "970443": "SHB",
+  "970448": "OCB",
+  "970437": "HDBank",
+  "970449": "LPBank",
+  "970429": "SCB",
+  "970431": "Eximbank",
+  "970425": "ABBANK",
+  "970440": "SeABank",
+  "970428": "Nam A Bank",
+  "970419": "NCB",
+  "970427": "VietABank",
+  "970452": "KienlongBank",
+};
+
+function formatPaymentBankName(bankName: string, provider: string | null | undefined): string {
+  const normalized = bankName.trim();
+  const bankLabel = BANK_BIN_LABELS[normalized];
+  if (bankLabel) return `${bankLabel} (${normalized})`;
+  if (provider?.toLowerCase() === "payos" && /^\d{6}$/.test(normalized)) {
+    return `Ngân hàng BIN ${normalized}`;
+  }
+  return normalized;
+}
+
+function getDisplayBankAccount(bankAccount: string, provider: string | null | undefined): string | null {
+  const normalized = bankAccount.trim();
+  if (!normalized || (provider?.toLowerCase() === "payos" && normalized.toLowerCase() === "payos")) {
+    return null;
+  }
+  return normalized;
 }
 
 function createSupportMailto(orderId: string, isKitOrder = false): string {
@@ -210,6 +254,7 @@ export function OrderStatusPage() {
   const [transferConfirmedByUser, setTransferConfirmedByUser] = useState(false);
   const [confirmingTransfer, setConfirmingTransfer] = useState(false);
   const [successRedirecting, setSuccessRedirecting] = useState(false);
+  const [generatedQrDataUrl, setGeneratedQrDataUrl] = useState<string | null>(null);
   const [failedQrImageSrc, setFailedQrImageSrc] = useState<string | null>(null);
   const paymentPageOpenedAtRef = useRef(Date.now());
   const paymentRedirectedRef = useRef(false);
@@ -302,6 +347,31 @@ export function OrderStatusPage() {
     window.location.assign(paymentOrder.checkoutUrl);
   }, [paymentOrder?.checkoutUrl]);
 
+  useEffect(() => {
+    const qrPayload = paymentOrder?.qrDataUrl?.trim();
+    if (!qrPayload || isRenderableQrImageSrc(qrPayload)) {
+      setGeneratedQrDataUrl(null);
+      return;
+    }
+
+    let cancelled = false;
+    QRCode.toDataURL(qrPayload, {
+      errorCorrectionLevel: "M",
+      margin: 1,
+      width: 360,
+    })
+      .then((dataUrl) => {
+        if (!cancelled) setGeneratedQrDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setGeneratedQrDataUrl(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paymentOrder?.qrDataUrl]);
+
   const handleUserConfirmedTransfer = useCallback(async () => {
     if (!paymentOrder || confirmingTransfer) return;
     setConfirmingTransfer(true);
@@ -356,12 +426,12 @@ export function OrderStatusPage() {
   const transferDescription = paymentOrder?.description?.trim() || paymentOrder?.orderId || "";
   const hasHostedCheckout = Boolean(paymentOrder?.checkoutUrl);
   const isHostedPayosCheckout = paymentOrder?.provider?.toLowerCase() === "payos" && hasHostedCheckout;
-  const shouldRenderQrImage = Boolean(
-    paymentOrder?.qrDataUrl &&
-      isRenderableQrImageSrc(paymentOrder.qrDataUrl) &&
-      paymentOrder.qrDataUrl !== failedQrImageSrc &&
-      !isHostedPayosCheckout,
-  );
+  const paymentQrPayload = paymentOrder?.qrDataUrl?.trim() || "";
+  const paymentQrImageSrc = isRenderableQrImageSrc(paymentQrPayload) ? paymentQrPayload : generatedQrDataUrl;
+  const shouldRenderQrImage = Boolean(paymentQrImageSrc && paymentQrImageSrc !== failedQrImageSrc);
+  const displayBankName = paymentOrder ? formatPaymentBankName(paymentOrder.bankName, paymentOrder.provider) : "";
+  const displayBankAccount = paymentOrder ? getDisplayBankAccount(paymentOrder.bankAccount, paymentOrder.provider) : null;
+  const bankAccountLabel = isHostedPayosCheckout ? "STK/Mã nhận PayOS" : "STK ngân hàng nhận";
 
   useEffect(() => {
     if (paymentMode) return;
@@ -506,37 +576,32 @@ export function OrderStatusPage() {
               </div>
 
               <div className="rounded-lg border border-app-line bg-app-bg p-4">
-                {isHostedPayosCheckout ? (
-                  <div className="mx-auto flex aspect-square w-full max-w-[360px] flex-col items-center justify-center rounded-lg bg-app-surface p-6 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
-                      <QrCode className="h-7 w-7" />
-                    </div>
-                    <p className="mt-4 text-sm font-semibold text-app-ink">Mở cổng PayOS để quét QR</p>
-                    <p className="mt-2 text-xs leading-5 text-app-ink-muted">
-                      PayOS sẽ hiển thị mã QR hợp lệ và xác nhận giao dịch trên cổng thanh toán.
-                    </p>
-                    <Button
-                      type="button"
-                      className="mt-4 bg-app-accent text-white hover:bg-app-accent"
-                      onClick={openHostedCheckout}
-                    >
-                      <QrCode className="h-4 w-4" />
-                      Mở cổng PayOS
-                    </Button>
+                {shouldRenderQrImage ? (
+                  <div className="space-y-3 text-center">
+                    <img
+                      src={paymentQrImageSrc ?? undefined}
+                      alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`}
+                      className="mx-auto aspect-square w-full max-w-[360px] rounded-lg bg-app-surface p-3"
+                      onError={() => setFailedQrImageSrc(paymentQrImageSrc)}
+                    />
+                    {isHostedPayosCheckout && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-app-line text-app-ink hover:bg-app-bg"
+                        onClick={openHostedCheckout}
+                      >
+                        <QrCode className="h-4 w-4" />
+                        Mở cổng PayOS nếu quét không được
+                      </Button>
+                    )}
                   </div>
-                ) : shouldRenderQrImage ? (
-                  <img
-                    src={paymentOrder.qrDataUrl}
-                    alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`}
-                    className="mx-auto aspect-square w-full max-w-[360px] rounded-lg bg-app-surface p-3"
-                    onError={() => setFailedQrImageSrc(paymentOrder.qrDataUrl)}
-                  />
                 ) : (
                   <div className="mx-auto flex aspect-square w-full max-w-[360px] flex-col items-center justify-center rounded-lg bg-app-surface p-6 text-center text-app-ink-muted">
                     <QrCode className="h-16 w-16" />
-                    <p className="mt-3 text-sm font-medium text-app-ink">QR chưa khả dụng</p>
+                    <p className="mt-3 text-sm font-medium text-app-ink">Đang tạo QR</p>
                     <p className="mt-1 text-xs leading-5">
-                      Vui lòng dùng đúng số tiền và nội dung chuyển khoản ở cột bên phải.
+                      Nếu QR chưa hiện, vui lòng dùng đúng số tiền và nội dung chuyển khoản ở cột bên phải.
                     </p>
                     {hasHostedCheckout && (
                       <Button
@@ -583,20 +648,20 @@ export function OrderStatusPage() {
                 />
                 <PaymentInfoRow
                   label="Ngân hàng nhận"
-                  value={paymentOrder.bankName}
-                  copyValue={paymentOrder.bankName}
+                  value={displayBankName}
+                  copyValue={displayBankName}
                   copyKey="bank"
                   copiedKey={copiedPaymentField}
                   onCopy={copyPaymentValue}
                 />
                 <PaymentInfoRow
-                  label="STK ngân hàng nhận"
-                  value={paymentOrder.bankAccount}
-                  copyValue={paymentOrder.bankAccount}
+                  label={bankAccountLabel}
+                  value={displayBankAccount ?? "Quét QR hoặc mở cổng PayOS để lấy thông tin chuyển khoản chính xác"}
+                  copyValue={displayBankAccount}
                   copyKey="account"
                   copiedKey={copiedPaymentField}
                   onCopy={copyPaymentValue}
-                  highlight
+                  highlight={Boolean(displayBankAccount)}
                 />
                 <PaymentInfoRow
                   label="Chủ tài khoản"
@@ -1248,13 +1313,14 @@ function PaymentInfoRow({
 }: {
   label: string;
   value: string;
-  copyValue: string;
+  copyValue?: string | null;
   copyKey: string;
   copiedKey: string | null;
   onCopy: (value: string, key: string) => void;
   highlight?: boolean;
 }) {
-  const copied = copiedKey === copyKey;
+  const canCopy = Boolean(copyValue);
+  const copied = canCopy && copiedKey === copyKey;
 
   return (
     <div
@@ -1269,17 +1335,19 @@ function PaymentInfoRow({
             {value}
           </p>
         </div>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => onCopy(copyValue, copyKey)}
-          aria-label={`Sao chép ${label}`}
-          className="border-app-line text-app-ink-muted hover:bg-app-bg"
-        >
-          {copied ? <CheckCircle2 className="h-4 w-4 text-app-accent" /> : <Copy className="h-4 w-4" />}
-          {copied ? "Đã copy" : "Copy"}
-        </Button>
+        {canCopy && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => copyValue && onCopy(copyValue, copyKey)}
+            aria-label={`Sao chép ${label}`}
+            className="border-app-line text-app-ink-muted hover:bg-app-bg"
+          >
+            {copied ? <CheckCircle2 className="h-4 w-4 text-app-accent" /> : <Copy className="h-4 w-4" />}
+            {copied ? "Đã copy" : "Copy"}
+          </Button>
+        )}
       </div>
     </div>
   );

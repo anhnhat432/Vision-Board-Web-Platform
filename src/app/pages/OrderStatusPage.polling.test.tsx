@@ -18,6 +18,7 @@ const getOrdersMock = vi.hoisted(() => vi.fn());
 const getOrderByIdMock = vi.hoisted(() => vi.fn());
 const getLatestOrderMock = vi.hoisted(() => vi.fn());
 const isDemoModeMock = vi.hoisted(() => vi.fn());
+const qrCodeToDataUrlMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/api/apiClient", () => ({
   apiClient: apiClientMock,
@@ -59,6 +60,10 @@ vi.mock("@/app/utils/app-mode", async (importOriginal) => {
 
 vi.mock("sonner", () => ({
   toast: toastMock,
+}));
+
+vi.mock("qrcode", () => ({
+  toDataURL: qrCodeToDataUrlMock,
 }));
 
 import { OrderStatusPage } from "./OrderStatusPage";
@@ -103,6 +108,8 @@ describe("OrderStatusPage payment polling", () => {
     apiClientMock.get.mockReset();
     apiClientMock.post.mockReset();
     toastMock.success.mockReset();
+    qrCodeToDataUrlMock.mockReset();
+    qrCodeToDataUrlMock.mockResolvedValue("data:image/png;base64,generated-payos-qr");
   });
 
   afterEach(() => {
@@ -147,20 +154,30 @@ describe("OrderStatusPage payment polling", () => {
     expect(screen.getByText(/Nếu bạn đã chuyển khoản, liên hệ support@example.test/)).toBeInTheDocument();
   });
 
-  it("uses hosted PayOS checkout instead of rendering the raw PayOS qrCode as an image", async () => {
+  it("generates a visible QR image from PayOS payload and formats PayOS bank info", async () => {
+    const rawPayosQrPayload = "00020101021238540010A000000727012400069704220110VQRQAJWLZ9808";
     apiClientMock.get.mockResolvedValue(
       createPaymentOrder({
         provider: "payos",
         checkoutUrl: "https://pay.payos.vn/web/pay/test-payment-link",
-        qrDataUrl: "00020101021238540010A000000727012400069704220110VQRQAJWLZ9808",
+        bankName: "970422",
+        bankAccount: "1234567890",
+        qrDataUrl: rawPayosQrPayload,
       }),
     );
 
     renderOrderStatus();
 
-    expect((await screen.findAllByText(/PayOS.*QR/i)).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /PayOS/i })).toBeInTheDocument();
-    expect(screen.queryByAltText(/QR/i)).not.toBeInTheDocument();
+    const qrImage = await screen.findByAltText("QR chuyển khoản đơn VBPOLL0001");
+    expect(qrImage).toHaveAttribute("src", "data:image/png;base64,generated-payos-qr");
+    expect(qrCodeToDataUrlMock).toHaveBeenCalledWith(
+      rawPayosQrPayload,
+      expect.objectContaining({ errorCorrectionLevel: "M", width: 360 }),
+    );
+    expect(screen.getByRole("button", { name: /Mở cổng PayOS nếu quét không được/i })).toBeInTheDocument();
+    expect(screen.getByText("MB Bank (970422)")).toBeInTheDocument();
+    expect(screen.getByText("STK/Mã nhận PayOS")).toBeInTheDocument();
+    expect(screen.getByText("1234567890")).toBeInTheDocument();
   });
 
   it("posts user confirmation without changing local status", async () => {
@@ -265,6 +282,8 @@ describe("OrderStatusPage kit payment CTA", () => {
     isDemoModeMock.mockReset();
     isDemoModeMock.mockReturnValue(false);
     toastMock.success.mockReset();
+    qrCodeToDataUrlMock.mockReset();
+    qrCodeToDataUrlMock.mockResolvedValue("data:image/png;base64,generated-payos-qr");
     vi.stubEnv("VITE_BILLING_SUPPORT_EMAIL", "support@example.test");
   });
 
