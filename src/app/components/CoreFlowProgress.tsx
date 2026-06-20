@@ -57,18 +57,21 @@ interface CoreFlowProgressProps {
   className?: string;
   /** Optional escape hatch shown next to the progress caption. */
   onExit?: () => void;
-  /** Override the exit button label. Default `"Thoát →"`. */
+  /** Override the exit button label. Default `"Thoát"`. */
   exitLabel?: string;
   /** Override the accessible label / tooltip for the exit button. */
   exitTooltip?: string;
+  /** Optional save badge element rendered left of the exit button. */
+  saveBadge?: React.ReactNode;
 }
 
 export function CoreFlowProgress({
   currentStepId,
   className = "",
   onExit,
-  exitLabel = "Thoát →",
+  exitLabel = "Thoát",
   exitTooltip = "Quay lại Trang chính — tiến độ đã nhập tự lưu trên thiết bị này",
+  saveBadge,
 }: CoreFlowProgressProps) {
   const currentIndex = Math.max(
     0,
@@ -79,58 +82,56 @@ export function CoreFlowProgress({
 
   return (
     <section aria-label="Tiến độ đường chính" className={cn("flex flex-col gap-2.5", className)}>
+      {/* Header row */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-0.5 text-xs font-semibold tracking-wide text-app-accent">
-            Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}
-          </span>
-          <span className="text-sm font-medium tracking-tight text-app-ink">
-            {currentStep.label}
-          </span>
+        <div className="text-[14px] font-semibold text-[#17150F]">
+          <span className="font-bold text-[#0C5E3A]">Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}</span>
+          {" "}&nbsp;{currentStep.label}
         </div>
-        {onExit ? (
-          <button
-            type="button"
-            onClick={onExit}
-            title={exitTooltip}
-            aria-label={exitTooltip}
-            className="shrink-0 rounded-full min-h-11 px-3 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-          >
-            {exitLabel}
-          </button>
-        ) : null}
+        <div className="flex items-center gap-3.5">
+          {saveBadge ?? null}
+          {onExit ? (
+            <button
+              type="button"
+              onClick={onExit}
+              title={exitTooltip}
+              aria-label={exitTooltip}
+              className="inline-flex shrink-0 items-center gap-1.5 bg-transparent border-none text-[13px] font-semibold text-[#8C887C] cursor-pointer transition-colors duration-150 hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/30 rounded-md"
+            >
+              {exitLabel}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          ) : null}
+        </div>
       </div>
 
+      {/* Progress bar */}
       <div
         role="progressbar"
         aria-label={`Tiến độ đường chính: bước ${currentIndex + 1} trên ${CORE_FLOW_STEPS.length}`}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progressValue)}
-        className="relative h-2 overflow-hidden rounded-full bg-app-line"
+        className="relative h-[6px] overflow-hidden rounded-[999px] bg-[#E4E0D4]"
       >
         <span
-          className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+          className="dof-prog absolute inset-y-0 left-0 rounded-[999px]"
           style={{
             width: `${progressValue}%`,
-            background: "var(--grad-aspire)",
+            background: "linear-gradient(90deg, #0C5E3A, #16A34A)",
           }}
-          aria-hidden="true"
-        />
-        <span
-          className="absolute top-0 bottom-0 w-2 rounded-full bg-app-surface/50 blur-[1px] transition-all duration-500 motion-safe:animate-pulse"
-          style={{ left: `calc(${progressValue}% - 4px)` }}
           aria-hidden="true"
         />
       </div>
 
-      <div className="hidden flex-wrap justify-between gap-x-1 sm:flex" aria-hidden="true">
+      {/* Step labels */}
+      <div className="flex justify-between gap-x-1" aria-hidden="true">
         {CORE_FLOW_STEPS.map((step, index) => (
           <span
             key={step.id}
             className={cn(
-              "text-[10px] font-medium transition-colors duration-200",
-              index <= currentIndex ? "text-app-accent" : "text-app-ink-muted",
+              "text-[11.5px] font-medium transition-colors duration-200",
+              index <= currentIndex ? "font-bold text-[#0C5E3A]" : "text-[#A8A296]",
             )}
           >
             {step.label}

@@ -22,7 +22,6 @@ import { useNavigate } from "react-router";
 
 import { toast } from "sonner";
 
-import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { ScreenGuide } from "../components/ScreenGuide";
@@ -98,10 +97,26 @@ const LIFE_AREA_ICON_MAP: Record<string, LucideIcon> = {
   Leisure: Smile,
 };
 
+// Design color palette for the 8 life area wedges — exact from Dear Our Future design
+const DESIGN_WEDGE_COLORS: Array<{ stroke: string; fill: string }> = [
+  { stroke: "#2563EB", fill: "#D9E5FC" }, // Career
+  { stroke: "#E7A400", fill: "#FBEBC2" }, // Finance
+  { stroke: "#16A34A", fill: "#CDEBD8" }, // Health
+  { stroke: "#7C5CFC", fill: "#E2DAFE" }, // Education
+  { stroke: "#E8456B", fill: "#FAD3DE" }, // Relationships
+  { stroke: "#0E9F8E", fill: "#C9EDE7" }, // Family
+  { stroke: "#EA7A2B", fill: "#FBDEC4" }, // Personal Growth
+  { stroke: "#2BA8E0", fill: "#CDE9F8" }, // Leisure
+];
+
+function getDesignWedgeColor(areaName: string, index: number) {
+  return DESIGN_WEDGE_COLORS[index] ?? { stroke: "#A8A296", fill: "#F2EFE6" };
+}
+
 const JOURNEY_STEPS = [
-  { title: "Đánh giá", description: `Chấm ${LIFE_AREAS.length} lĩnh vực đủ thật.` },
-  { title: "Trọng tâm", description: "Nhìn ra nơi cần chăm sóc trước." },
-  { title: "Kế hoạch", description: "Biến insight thành nhịp 12 tuần." },
+  { number: "01", title: "Đánh giá", description: `Chấm ${LIFE_AREAS.length} lĩnh vực đủ thật.` },
+  { number: "02", title: "Trọng tâm", description: "Nhìn ra nơi cần chăm sóc trước." },
+  { number: "03", title: "Kế hoạch", description: "Biến insight thành nhịp 12 tuần." },
 ];
 
 export const ONBOARDING_DRAFT_STORAGE_KEY = "onboarding_draft";
@@ -257,23 +272,22 @@ function LifeAtlasPanel({
   return (
     <section
       aria-label={`Bản đồ cuộc sống ${areaCount} vùng`}
-      className="relative overflow-hidden rounded-card border border-app-line bg-app-surface p-4 shadow-app-md sm:p-5"
+      className="relative overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-6 shadow-app-md sm:p-7"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(0,0,0,0.035),transparent)] opacity-40 dark:opacity-20" />
-      <div className="relative space-y-4">
+      <div className="relative space-y-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-app-accent">Atlas gấp mở</p>
-            <h2 className="mt-1 font-serif text-2xl font-semibold leading-tight text-app-ink">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">Atlas gấp mở</p>
+            <h2 className="mt-1 font-serif text-[21px] font-bold leading-tight tracking-tight text-app-ink">
               Bản đồ cuộc sống của bạn
             </h2>
           </div>
-          <span className="shrink-0 rounded-pill border border-app-line bg-app-bg-subtle px-3 py-1 text-xs font-semibold text-app-ink-soft">
+          <span className="shrink-0 rounded-pill border border-app-line bg-app-bg-subtle px-3 py-1 text-[11.5px] font-semibold text-app-ink-soft">
             {showPreview ? `${areaCount} vùng` : `${reviewedAreaCount}/${areaCount}`}
           </span>
         </div>
 
-        <div className="relative mx-auto aspect-square w-full max-w-[360px] rounded-[28px] border border-app-line bg-app-bg-subtle p-3 shadow-app-sm">
+        <div className="relative mx-auto aspect-square w-full max-w-[360px] rounded-[18px] border border-app-line bg-app-bg-subtle p-3.5">
           <svg
             role="img"
             aria-label={`Atlas cuộc sống gồm ${areaCount} vùng, vùng đã chấm được tô rõ hơn`}
@@ -285,7 +299,7 @@ function LifeAtlasPanel({
             viewBox="0 0 280 280"
           >
             <title>{`Atlas cuộc sống ${areaCount} vùng`}</title>
-            <circle cx="140" cy="140" r="122" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
+            <circle cx="140" cy="140" r="122" fill="var(--app-surface)" stroke="rgba(23,21,15,0.07)" strokeWidth="1" />
             {[54, 84, 114].map((radius) => (
               <circle
                 key={radius}
@@ -293,8 +307,7 @@ function LifeAtlasPanel({
                 cy="140"
                 r={radius}
                 fill="none"
-                stroke="var(--app-line)"
-                strokeDasharray="4 7"
+                stroke="rgba(23,21,15,0.07)"
                 strokeWidth="1"
               />
             ))}
@@ -309,8 +322,7 @@ function LifeAtlasPanel({
                   x2={end.x}
                   y1={start.y}
                   y2={end.y}
-                  stroke="var(--app-line)"
-                  strokeDasharray={index % 2 === 0 ? "8 5" : "3 6"}
+                  stroke="rgba(23,21,15,0.07)"
                   strokeWidth="1"
                 />
               );
@@ -323,67 +335,74 @@ function LifeAtlasPanel({
               const isReviewed = reviewedAreaIndices.has(index);
               const isActive = activeAreaIndex === index;
               const visible = showPreview || isReviewed || isActive;
-              const accent = getAreaColorConfig(area.name).accent;
+              const wedgeColor = getDesignWedgeColor(area.name, index);
               const outerRadius = 42 + scoreRatio * 72;
               const labelPoint = polarPoint(140, 140, 134, index * segmentAngle);
 
               return (
-                <g key={area.name}>
+                <g key={area.name} className="dof-wheel-grp">
                   <path
                     d={buildAtlasWedgePath(startAngle, endAngle, 28, outerRadius)}
-                    fill={accent}
-                    fillOpacity={visible ? (isActive ? 0.34 : 0.22) : 0.07}
-                    stroke={accent}
-                    strokeOpacity={visible ? 0.8 : 0.2}
+                    fill={wedgeColor.fill}
+                    fillOpacity={visible ? (isActive ? 0.7 : 0.55) : 0.12}
+                    stroke={wedgeColor.stroke}
+                    strokeOpacity={visible ? 0.9 : 0.25}
                     strokeWidth={isActive ? 2.5 : 1.5}
+                    strokeLinejoin="round"
                     className="motion-safe:transition-all motion-reduce:transition-none"
                   />
                   <circle
                     cx={labelPoint.x}
                     cy={labelPoint.y}
-                    r={isActive ? 5 : 3.5}
-                    fill={visible ? accent : "var(--app-line)"}
+                    r={isActive ? 5 : 4.5}
+                    fill={visible ? wedgeColor.stroke : "rgba(23,21,15,0.15)"}
                     className="motion-safe:transition-all motion-reduce:transition-none"
                   />
                 </g>
               );
             })}
             <circle cx="140" cy="140" r="24" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
-            <text x="140" y="134" fill="var(--app-ink-muted)" fontSize="11" fontWeight="700" textAnchor="middle">
+            <text x="140" y="136" fill="#A8A296" fontSize="10" fontWeight="700" letterSpacing="0.12em" textAnchor="middle" fontFamily="'Be Vietnam Pro', sans-serif">
               LIFE
             </text>
-            <text x="140" y="151" fill="var(--app-accent)" fontSize="18" fontWeight="700" textAnchor="middle">
+            <text x="140" y="155" fill="#0C5E3A" fontSize="22" fontWeight="800" textAnchor="middle" fontFamily="'Bricolage Grotesque', sans-serif">
               {averageScore.toFixed(1)}
             </text>
-            <g className="motion-safe:transition-transform motion-reduce:transition-none">
+            <g className="dof-pin motion-safe:transition-transform motion-reduce:transition-none">
               <line
                 x1={pinPoint.x}
                 x2={pinPoint.x + 10}
                 y1={pinPoint.y + 6}
                 y2={pinPoint.y + 20}
-                stroke="var(--app-ink)"
+                stroke="#17150F"
                 strokeLinecap="round"
                 strokeWidth="2"
               />
-              <circle cx={pinPoint.x} cy={pinPoint.y} r="9" fill="var(--app-accent)" />
-              <circle cx={pinPoint.x} cy={pinPoint.y} r="3" fill="var(--app-surface)" />
+              <path
+                d={`M${pinPoint.x} ${pinPoint.y + 14} C${pinPoint.x - 7} ${pinPoint.y + 4} ${pinPoint.x - 10} ${pinPoint.y} ${pinPoint.x - 10} ${pinPoint.y - 5} A10 10 0 1 1 ${pinPoint.x + 10} ${pinPoint.y - 5} C${pinPoint.x + 10} ${pinPoint.y} ${pinPoint.x + 7} ${pinPoint.y + 4} ${pinPoint.x} ${pinPoint.y + 14} Z`}
+                fill="#0C5E3A"
+                stroke="#fff"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+              <circle cx={pinPoint.x} cy={pinPoint.y - 5} r="3.6" fill="#fff" />
             </g>
           </svg>
         </div>
 
         {showPreview ? (
-          <div className="grid gap-2 text-sm text-app-ink-soft sm:grid-cols-3">
-            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
-              <strong className="block text-app-ink">{`1. Rà ${areaCount} vùng`}</strong>
-              Chọn điểm đủ thật.
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-app-accent/30">
+              <strong className="block text-[13px] font-bold text-app-ink">{`1. Rà ${areaCount} vùng`}</strong>
+              <span className="mt-1 block text-[11.5px] leading-relaxed text-app-ink-muted">Chọn điểm đủ thật.</span>
             </div>
-            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
-              <strong className="block text-app-ink">2. Thấy insight</strong>
-              Biết nơi nên chăm trước.
+            <div className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-app-accent/30">
+              <strong className="block text-[13px] font-bold text-app-ink">2. Thấy Insight</strong>
+              <span className="mt-1 block text-[11.5px] leading-relaxed text-app-ink-muted">Biết nơi nên chăm sóc trước.</span>
             </div>
-            <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
-              <strong className="block text-app-ink">3. Lập kế hoạch</strong>
-              Đi tiếp 12 tuần.
+            <div className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-app-accent/30">
+              <strong className="block text-[13px] font-bold text-app-ink">3. Lập kế hoạch</strong>
+              <span className="mt-1 block text-[11.5px] leading-relaxed text-app-ink-muted">Đi tiếp 12 tuần.</span>
             </div>
           </div>
         ) : (
@@ -644,11 +663,14 @@ export function Onboarding() {
           }
           navigate("/");
         }}
-        className="mb-2"
+        saveBadge={
+          <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-[#7A6E5E] bg-white border border-[rgba(23,21,15,0.1)] px-3 py-1.5 rounded-[999px]">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+            Đã lưu cục bộ
+          </span>
+        }
+        className="mb-0"
       />
-      <div className="sticky top-2 z-20 flex justify-end">
-        <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} variant="prominent" />
-      </div>
     </div>
   );
 
@@ -679,8 +701,8 @@ export function Onboarding() {
   if (step === "welcome") {
     return (
       <PageShell maxWidth="xl" className="focus:outline-none">
-        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
-        <div ref={flowTopRef} tabIndex={-1} className="space-y-6 focus:outline-none">
+        <div ref={flowTopRef} tabIndex={-1} className="dof-stagger flex flex-col gap-5 focus:outline-none">
+          <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
           {progressHeader}
 
           {showBreathing ? (
@@ -690,52 +712,58 @@ export function Onboarding() {
           ) : (
             <>
               {isReturning ? (
-                <InlineStatusMessage tone="success" prefix="Cập nhật điểm hiện tại.">
-                  Điểm cũ đã được tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
-                </InlineStatusMessage>
+                <div className="flex items-center gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] px-[18px] py-3.5">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0C5E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+                  <span className="text-[13px] leading-relaxed text-[#3F4A3F]">
+                    <strong className="font-semibold text-[#0C5E3A]">Cập nhật điểm hiện tại.</strong>{" "}
+                    Điểm cũ đã được tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
+                  </span>
+                </div>
               ) : null}
 
               {draftBanner}
 
-              <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-                <div className="space-y-6 rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-7 lg:p-8">
-                  <div className="space-y-4">
-                    <span className="inline-flex rounded-pill bg-app-accent-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-app-accent">
-                      Bước 1 / 3 · Atlas cuộc sống · 3 phút
-                    </span>
-                    <div className="space-y-3">
-                      <h1 className="font-serif text-3xl font-semibold leading-tight text-app-ink sm:text-4xl lg:text-5xl">
-                        Mở bản đồ cuộc sống 12 tuần của bạn
-                      </h1>
-                      <p className="max-w-2xl text-sm leading-6 text-app-ink-soft sm:text-base">
-                        Rà 8 lĩnh vực để nhìn ra nơi cần chăm sóc đầu tiên, rồi chuyển thành Life Insight rõ ràng.
-                      </p>
-                    </div>
+              <section className="grid gap-5 lg:grid-cols-2 lg:items-start">
+                {/* LEFT: intro card */}
+                <div className="space-y-[22px] rounded-[22px] border border-[rgba(23,21,15,0.08)] bg-white p-7 sm:p-8">
+                  <span className="inline-flex items-center gap-2 rounded-[999px] bg-[#EDF7E0] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-[#0C5E3A]">
+                    Bước 1 / 3 · Atlas cuộc sống · 3 phút
+                  </span>
+                  <div className="space-y-[13px]">
+                    <h1 className="text-[clamp(26px,2.6vw,34px)] font-extrabold leading-[1.06] -tracking-[0.02em] text-[#17150F]" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>
+                      Mở bản đồ cuộc sống 12 tuần của bạn
+                    </h1>
+                    <p className="max-w-[46ch] text-[14px] leading-[1.55] text-[#5C574B]">
+                      Rà 8 lĩnh vực để nhìn ra nơi cần chăm sóc đầu tiên, rồi chuyển thành Life Insight rõ ràng.
+                    </p>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-3">
-                    {JOURNEY_STEPS.map((item, index) => (
-                      <div key={item.title} className="rounded-control border border-app-line bg-app-bg-subtle p-3">
-                        <span className="text-xs font-semibold text-app-accent">0{index + 1}</span>
-                        <h2 className="mt-1 text-base font-semibold leading-snug text-app-ink">{item.title}</h2>
-                        <p className="mt-1 text-sm leading-5 text-app-ink-soft">{item.description}</p>
+                    {JOURNEY_STEPS.map((item) => (
+                      <div
+                        key={item.title}
+                        className="group rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-[#FAF8F3] p-[15px] transition-[transform,border-color] duration-[0.15s] hover:-translate-y-0.5 hover:!border-[rgba(12,94,58,0.3)]"
+                      >
+                        <span className="text-[13px] font-semibold text-[#0C5E3A]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.number}</span>
+                        <h2 className="mt-2 text-[13.5px] font-bold leading-snug text-[#17150F]">{item.title}</h2>
+                        <p className="mt-1 text-[11.5px] leading-[1.45] text-[#7A6E5E]">{item.description}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="rounded-control border border-app-line bg-app-bg-subtle p-3">
+                  <div className="rounded-[13px] border border-[rgba(23,21,15,0.1)] bg-white">
                     <button
                       type="button"
-                      className="flex min-h-11 w-full items-center justify-between gap-3 text-left text-sm font-semibold text-app-ink transition-colors hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      className="flex min-h-[50px] w-full items-center justify-between gap-3 rounded-[13px] px-[17px] py-[15px] text-left text-[13.5px] font-semibold text-[#17150F] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                       aria-expanded={isHelpOpen}
                       aria-controls="onboarding-journey-help"
                     >
                       <span>Life Insight sẽ được tạo thế nào?</span>
                       {isHelpOpen ? (
-                        <ChevronUp className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <ChevronUp className="h-[17px] w-[17px] shrink-0 text-[#8C887C]" aria-hidden="true" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <ChevronDown className="h-[17px] w-[17px] shrink-0 text-[#8C887C]" aria-hidden="true" />
                       )}
                     </button>
                     <AnimatePresence initial={false}>
@@ -748,35 +776,35 @@ export function Onboarding() {
                           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18, ease: "easeOut" }}
                           className="overflow-hidden"
                         >
-                          <p className="pt-3 text-sm leading-6 text-app-ink-soft">
-                            Điểm số chỉ là cảm nhận hiện tại, không phải phán xét. Sau khi rà xong, màn tiếp theo sẽ gợi
-                            ý một trọng tâm để bạn viết mục tiêu 12 tuần.
+                          <p className="px-4 pb-4 text-[12.5px] leading-relaxed text-[#5C574B]">
+                            Sau khi bạn chấm 8 lĩnh vực, hệ thống so sánh với chu kỳ trước, tìm ra vùng tụt điểm nhất và
+                            đề xuất 1 hành động ưu tiên — đó chính là Life Insight để bắt đầu chu kỳ 12 tuần.
                           </p>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-pill bg-app-accent px-6 py-3 text-sm font-semibold text-white shadow-app-sm transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
+                      className="dof-primary inline-flex min-h-[50px] items-center justify-center gap-2 rounded-[13px] bg-[#0C5E3A] px-6 py-3.5 text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
                       onClick={handleStartAssessment}
                     >
                       Mở bản đồ cuộc sống
-                      <span className="sr-only"> - Bắt đầu rà 8 lĩnh vực</span>
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </button>
                     <button
                       type="button"
-                      className="inline-flex min-h-12 items-center justify-center rounded-pill border border-app-line bg-app-surface px-5 py-3 text-sm font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-[13px] border border-[rgba(23,21,15,0.14)] bg-white px-5 py-3.5 text-[13.5px] font-semibold text-[#17150F] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
                       onClick={() => setShowBreathing(true)}
                     >
+                      <Smile className="h-[15px] w-[15px]" aria-hidden="true" />
                       Tập thở thư giãn
                     </button>
                     <button
                       type="button"
-                      className="inline-flex min-h-11 items-center justify-center rounded-pill px-4 py-2.5 text-sm font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-[13px] px-2 py-3 text-[13.5px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
                       onClick={handleDefer}
                     >
                       Để sau
@@ -784,6 +812,7 @@ export function Onboarding() {
                   </div>
                 </div>
 
+                {/* RIGHT: wheel card */}
                 <LifeAtlasPanel
                   lifeAreas={lifeAreas}
                   reviewedAreaIndices={reviewedAreaIndices}
@@ -803,8 +832,8 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
-      <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
-      <div ref={flowTopRef} tabIndex={-1} className="w-full max-w-full space-y-6 focus:outline-none">
+      <div ref={flowTopRef} tabIndex={-1} className="dof-stagger flex w-full max-w-full flex-col gap-5 focus:outline-none">
+        <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
         {progressHeader}
         {draftBanner}
 
