@@ -50,34 +50,34 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
     case "on_track":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] bg-white rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] bg-white rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] bg-white rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] bg-white rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-[rgba(23,21,15,0.08)] bg-white rounded-card",
+        container: "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-line bg-app-bg text-app-ink-soft px-3 py-1 rounded-full",
         badgeLabel: "Chưa có dữ liệu",
       };
@@ -201,7 +201,7 @@ export function ProgressSummaryCard({
                 )}
               </div>
               {nextActionHandler && (
-                <div className="mt-4.5 rounded-card-lg border border-[rgba(23,21,15,0.08)] bg-app-bg/50 backdrop-blur-xs p-4">
+                <div className="mt-4.5 rounded-card-lg border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-bg/50 backdrop-blur-xs p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                     Tiếp theo nên làm
                   </p>
@@ -227,7 +227,7 @@ export function ProgressSummaryCard({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-card-lg border border-[rgba(23,21,15,0.08)] bg-white transition-all duration-300">
+        <Card className="rounded-card-lg border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface transition-all duration-300">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <CalendarDays className="h-3.5 w-3.5 text-app-accent-soft-strong" />
@@ -244,7 +244,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card className="rounded-card-lg border border-[rgba(23,21,15,0.08)] bg-white transition-all duration-300">
+        <Card className="rounded-card-lg border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface transition-all duration-300">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
@@ -255,7 +255,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card className="rounded-card-lg border border-[rgba(23,21,15,0.08)] bg-white transition-all duration-300">
+        <Card className="rounded-card-lg border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface transition-all duration-300">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
               <Flag className="h-3.5 w-3.5 text-app-accent" />
@@ -273,7 +273,7 @@ export function ProgressSummaryCard({
         </Card>
       </div>
 
-      <Card className="rounded-card border border-[rgba(23,21,15,0.08)] bg-white">
+      <Card className="rounded-card border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface">
         <CardContent className="stack-stack p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -289,13 +289,13 @@ export function ProgressSummaryCard({
             <div className="flex flex-wrap gap-2.5">
               <div
                 data-testid="progress-current-milestone"
-                className="rounded-card border border-[rgba(23,21,15,0.08)] bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft"
+                className="rounded-card border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft"
               >
                 Hiện tại: <span className="font-bold text-app-accent">{currentPhaseLabel}</span>
               </div>
               <div
                 data-testid="progress-next-milestone"
-                className="rounded-card border border-[rgba(23,21,15,0.08)] bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft"
+                className="rounded-card border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-bg/50 px-3.5 py-2 text-xs font-semibold text-app-ink-soft"
               >
                 Mốc tiếp theo: <span className="font-bold text-app-accent">{nextMilestoneLabel}</span>
               </div>
@@ -325,7 +325,7 @@ export function ProgressSummaryCard({
                   aria-label={weekLabel}
                   className={`min-h-14 rounded-card border px-2 py-2 text-center text-xs transition-all duration-200 hover:scale-105 ${
                     isCurrent
-                      ? "border-app-accent bg-app-accent text-white shadow-2xs font-bold"
+                      ? "border-app-accent bg-app-accent text-white shadow-2xs dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-bold"
                       : isReviewed
                         ? "border-app-accent/15 bg-app-accent-soft/80 text-app-accent"
                         : isMilestone
@@ -343,7 +343,7 @@ export function ProgressSummaryCard({
             })}
           </ol>
 
-          <div className="rounded-card-lg border border-[rgba(23,21,15,0.08)] bg-app-bg/50 px-4 py-3.5 text-sm leading-relaxed text-app-ink-soft">
+          <div className="rounded-card-lg border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-bg/50 px-4 py-3.5 text-sm leading-relaxed text-app-ink-soft">
             {reviewDueToday
               ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
               : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}

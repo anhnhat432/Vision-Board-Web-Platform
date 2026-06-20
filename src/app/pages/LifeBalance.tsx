@@ -437,17 +437,17 @@ export function LifeBalance() {
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {formattedLastSaved ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white dark:bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                 Cập nhật lần cuối: <span className="font-mono text-app-ink">{formattedLastSaved}</span>
               </span>
             ) : null}
             {historyCount > 0 ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EDF7E0] border border-[rgba(12,94,58,0.18)] px-3 py-1.5 text-xs font-semibold text-[#0C5E3A]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EDF7E0] dark:bg-[#1A2216] border border-[rgba(12,94,58,0.18)] dark:border-[rgba(91,165,144,0.25)] px-3 py-1.5 text-xs font-semibold text-[#0C5E3A] dark:text-[#5BA590]">
                 <span className="font-mono">{historyCount}</span> lần ghi nhận
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white dark:bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
               Đã lưu cục bộ
             </span>
@@ -456,7 +456,7 @@ export function LifeBalance() {
 
         {/* KPI ROW */}
         <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-[18px] border border-app-line bg-white p-5 md:p-6">
+          <div className="rounded-[18px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">Trung bình</p>
             <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-app-ink">
               <CountUp value={averageScore} precision={1} />
@@ -469,7 +469,7 @@ export function LifeBalance() {
               />
             </div>
           </div>
-          <div className="rounded-[18px] border border-app-line bg-white p-5 md:p-6">
+          <div className="rounded-[18px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">Lĩnh vực mạnh nhất</p>
             <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-app-ink">
               <CountUp value={strongestArea.score} />
@@ -480,7 +480,7 @@ export function LifeBalance() {
               {getLifeAreaLabel(strongestArea.name)}
             </p>
           </div>
-          <div className="rounded-[18px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-5 md:p-6">
+          <div className="rounded-[18px] border border-[rgba(176,103,60,0.22)] dark:border-app-line bg-[#F4ECDD] dark:bg-app-bg-subtle p-5 md:p-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A07A4A] mb-3.5">Lĩnh vực cần ưu tiên</p>
             <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-[#8A5A2B]">
               <CountUp value={weakestArea.score} />
@@ -495,7 +495,7 @@ export function LifeBalance() {
 
         {/* TABS */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-6">
-          <TabsList className="bg-white border border-app-line rounded-2xl p-1.5 gap-1 w-max">			
+          <TabsList className="bg-white dark:bg-app-surface border border-app-line rounded-2xl p-1.5 gap-1 w-max">			
             <TabsTrigger value="current" className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
               Hiện tại
             </TabsTrigger>
@@ -513,7 +513,7 @@ export function LifeBalance() {
               {/* LEFT COLUMN */}
               <div className="space-y-5 min-w-0">
                 {/* Radar chart card */}
-                <section className="rounded-[20px] border border-app-line bg-white p-5 md:p-6">
+                <section className="rounded-[20px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
                   <header className="mb-3">
                     <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink">Bản đồ Cân bằng cuộc sống</h2>
                     <p className="text-xs text-app-ink-muted mt-0.5">Trạng thái hiện tại của 8 khía cạnh cốt lõi</p>
@@ -526,10 +526,10 @@ export function LifeBalance() {
                 </section>
 
                 {/* Priority insight card */}
-                <section className="rounded-[20px] border border-[rgba(176,103,60,0.2)] bg-[#F4ECDD] p-5 md:p-6 relative overflow-hidden">
+                <section className="rounded-[20px] border border-[rgba(176,103,60,0.2)] dark:border-app-line bg-[#F4ECDD] dark:bg-app-bg-subtle p-5 md:p-6 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[rgba(176,103,60,0.06)] rounded-full blur-3xl pointer-events-none" />
                   <header className="flex items-start gap-3 mb-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[rgba(176,103,60,0.22)] text-[#B0673C]">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-app-surface border border-[rgba(176,103,60,0.22)] text-[#B0673C]">
                       <Target className="h-5 w-5" />
                     </span>
                     <div>
@@ -542,7 +542,7 @@ export function LifeBalance() {
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border"
                       style={{
                         color: getAreaColorConfig(weakestArea.name).accent,
-                        backgroundColor: `color-mix(in oklab, ${getAreaColorConfig(weakestArea.name).accent} 10%, white)`,
+                        backgroundColor: `color-mix(in oklab, ${getAreaColorConfig(weakestArea.name).accent} 10%, var(--app-bg))`,
                         borderColor: `color-mix(in oklab, ${getAreaColorConfig(weakestArea.name).accent} 25%, transparent)`,
                       }}
                     >
@@ -553,7 +553,7 @@ export function LifeBalance() {
                   <p className="text-[13px] leading-relaxed text-app-ink-muted mb-4">
                     {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).reason}
                   </p>
-                  <div className="flex items-start gap-3 bg-white border border-[rgba(12,94,58,0.16)] rounded-[13px] p-3.5">
+                  <div className="flex items-start gap-3 bg-white dark:bg-app-surface border border-[rgba(12,94,58,0.16)] rounded-[13px] p-3.5">
                     <Sparkles className="h-4.5 w-4.5 shrink-0 text-[#0C5E3A] mt-0.5" />
                     <p className="text-xs leading-relaxed text-[#3F4A3F]">
                       <strong className="text-[#0C5E3A]">Hành động đề xuất:</strong>{" "}
@@ -568,7 +568,7 @@ export function LifeBalance() {
                 {!isCheckInMode ? (
                   <>
                     {/* Check-in banner */}
-                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-[#EDF5EA] p-5 md:p-6">
+                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] dark:border-[rgba(91,165,144,0.25)] bg-[#EDF5EA] dark:bg-[#1A2218] p-5 md:p-6">
                       <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A] mb-3">Check-in cân bằng</p>
                       <div className="flex items-center gap-2.5 mb-3">
                         <Compass className="h-5 w-5 text-[#0C5E3A]" />
@@ -590,7 +590,7 @@ export function LifeBalance() {
                     </section>
 
                     {/* Area scores (static) */}
-                    <section className="rounded-[20px] border border-app-line bg-white p-5 md:p-6">
+                    <section className="rounded-[20px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
                       <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink mb-4">Điểm số hiện tại của 8 lĩnh vực</h3>
                       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         {lifeAreas.map((area) => {
@@ -603,7 +603,7 @@ export function LifeBalance() {
                               key={area.name}
                               className="flex items-center gap-2.5 rounded-[13px] border p-2.5 transition-transform hover:translate-y-[-1px]"
                               style={{
-                                backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 14%, white)`,
+                                backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 14%, var(--app-bg))`,
                                 borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
                               }}
                             >
@@ -637,7 +637,7 @@ export function LifeBalance() {
                   </>
                 ) : (
                   /* CHECK-IN EDIT MODE */
-                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white p-5 md:p-6 shadow-md">
+                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white dark:bg-app-surface p-5 md:p-6 shadow-md">
                     <header className="pb-4 mb-1 border-b border-app-line/60">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A]">Đang Check-in</h3>
@@ -669,7 +669,7 @@ export function LifeBalance() {
                                 ? `color-mix(in oklab, ${colorConfig.accent} 40%, transparent)`
                                 : "var(--app-line)",
                               backgroundColor: isChanged
-                                ? `color-mix(in oklab, ${colorConfig.accent} 14%, white)`
+                                ? `color-mix(in oklab, ${colorConfig.accent} 14%, var(--app-bg))`
                                 : "var(--app-bg)",
                             }}
                           >
@@ -692,7 +692,7 @@ export function LifeBalance() {
                                 className="flex items-baseline gap-1 px-2.5 py-1 rounded-lg border text-sm"
                                 style={{
                                   borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
-                                  backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 16%, white)`,
+                                  backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 16%, var(--app-bg))`,
                                 }}
                               >
                                 <span
@@ -710,7 +710,7 @@ export function LifeBalance() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink hover:bg-app-bg active:scale-95 transition-all select-none cursor-pointer"
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-line bg-white dark:bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg active:scale-95 transition-all select-none cursor-pointer"
                                 onClick={() => handleScoreChange(index, [Math.max(1, area.score - 1)])}
                                 aria-label={`Giảm ${label}`}
                               >
@@ -734,7 +734,7 @@ export function LifeBalance() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 type="button"
-                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink hover:bg-app-bg active:scale-95 transition-all select-none cursor-pointer"
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-line bg-white dark:bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg active:scale-95 transition-all select-none cursor-pointer"
                                 onClick={() => handleScoreChange(index, [Math.min(10, area.score + 1)])}
                                 aria-label={`Tăng ${label}`}
                               >
@@ -760,7 +760,7 @@ export function LifeBalance() {
                         whileTap={{ scale: 0.985 }}
                         type="button"
                         onClick={handleCancelCheckIn}
-                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-white px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-colors cursor-pointer"
+                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-white dark:bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-colors cursor-pointer"
                       >
                         Hủy bỏ
                       </motion.button>

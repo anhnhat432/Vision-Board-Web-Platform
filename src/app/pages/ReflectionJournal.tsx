@@ -434,7 +434,7 @@ function ReflectionJournalContent() {
                 className={cn(
                   "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.96]",
                   isActive
-                    ? "border-app-warm bg-[#FBF4EE] text-app-warm"
+                    ? "border-app-warm bg-[#FBF4EE] dark:bg-app-warm-soft/20 text-app-warm"
                     : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
                 )}
               >
@@ -460,7 +460,7 @@ function ReflectionJournalContent() {
                 className={cn(
                   "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.96]",
                   isActive
-                    ? "border-app-warm bg-[#FBF4EE] text-app-warm"
+                    ? "border-app-warm bg-[#FBF4EE] dark:bg-app-warm-soft/20 text-app-warm"
                     : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
                 )}
               >

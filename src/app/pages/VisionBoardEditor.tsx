@@ -913,7 +913,7 @@ export function VisionBoardEditor() {
                     setBoardName(event.target.value);
                     setHasUnsavedChanges(true);
                   }}
-                  className="h-[46px] rounded-[12px] border-app-line/20 bg-[#FAF8F3] text-[13.5px] font-medium"
+                  className="h-[46px] rounded-[12px] border-app-line/20 bg-[#FAF8F3] dark:bg-app-bg-subtle text-[13.5px] font-medium"
                 />
                 <Input
                   type="number"
@@ -923,7 +923,7 @@ export function VisionBoardEditor() {
                     setBoardYear(event.target.value);
                     setHasUnsavedChanges(true);
                   }}
-                  className="h-[46px] rounded-[12px] border-app-line/20 bg-[#FAF8F3] text-center font-mono text-[13.5px] font-semibold"
+                  className="h-[46px] rounded-[12px] border-app-line/20 bg-[#FAF8F3] dark:bg-app-bg-subtle text-center font-mono text-[13.5px] font-semibold"
                 />
               </div>
 
@@ -981,16 +981,14 @@ export function VisionBoardEditor() {
                 <button
                   type="button"
                   onClick={() => setShowZones((prev) => !prev)}
-                  className="ml-auto inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11.5px] font-bold transition-all duration-150"
-                  style={{
-                    borderColor: showZones ? "rgba(12,94,58,0.25)" : "rgba(23,21,15,0.12)",
-                    background: showZones ? "#EDF7E0" : "#fff",
-                    color: showZones ? "#0C5E3A" : "#5C574B",
-                  }}
+                  className={`ml-auto inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11.5px] font-bold transition-all duration-150 ${
+                    showZones
+                      ? "border-[rgba(12,94,58,0.25)] bg-[#EDF7E0] text-[#0C5E3A] dark:border-app-accent/25 dark:bg-app-accent-soft dark:text-app-accent"
+                      : "border-[rgba(23,21,15,0.12)] bg-white text-[#5C574B] dark:border-app-line dark:bg-app-surface dark:text-app-ink-soft"
+                  }`}
                 >
                   <span
-                    className="h-[7px] w-[7px] rounded-full"
-                    style={{ background: showZones ? "#0C5E3A" : "#C7C2B5" }}
+                    className={`h-[7px] w-[7px] rounded-full ${showZones ? "bg-[#0C5E3A] dark:bg-app-accent" : "bg-[#C7C2B5] dark:bg-app-ink-muted"}`}
                   />
                   {showZones ? "Ẩn vùng life area" : "Hiện vùng life area"}
                 </button>
@@ -1004,21 +1002,21 @@ export function VisionBoardEditor() {
             <div className="hidden flex-col gap-4 xl:flex">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-ink">Tóm tắt bảng</p>
               <div className="flex flex-col gap-3">
-                <div className="rounded-[13px] border border-app-line/10 bg-[#FAF8F3] px-4 py-4 flex items-center justify-between gap-3">
+                <div className="rounded-[13px] border border-app-line/10 dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle px-4 py-4 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">Tổng phần tử</p>
                     <p className="text-[11.5px] text-app-ink-soft">đang có trên bảng</p>
                   </div>
                   <span className="font-serif text-[30px] font-extrabold leading-none text-app-ink">{board.items.length}</span>
                 </div>
-                <div className="rounded-[13px] border border-app-line/10 bg-[#FAF8F3] px-4 py-4 flex items-center justify-between gap-3">
+                <div className="rounded-[13px] border border-app-line/10 dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle px-4 py-4 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">Hình ảnh</p>
                     <p className="text-[11.5px] text-app-ink-soft">nguồn cảm hứng trực quan</p>
                   </div>
                   <span className="font-serif text-[30px] font-extrabold leading-none text-app-accent">{boardStats.images}</span>
                 </div>
-                <div className="rounded-[13px] border border-app-line/10 bg-[#FAF8F3] px-4 py-4 flex items-center justify-between gap-3">
+                <div className="rounded-[13px] border border-app-line/10 dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle px-4 py-4 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">Trích dẫn + biểu tượng</p>
                     <p className="text-[11.5px] text-app-ink-soft">điểm nhấn cảm xúc</p>
@@ -1486,7 +1484,7 @@ export function VisionBoardEditor() {
               emptyStateSlot={
                 board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="relative z-10 w-full max-w-[380px] rounded-[18px] bg-white px-9 py-10 text-center shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)]">
+                    <div className="relative z-10 w-full max-w-[380px] rounded-[18px] dark:border-app-line bg-white dark:bg-app-surface px-9 py-10 text-center shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)] dark:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
                       <div className="mx-auto mb-5 flex h-[78px] w-[78px] items-center justify-center rounded-[20px] bg-app-accent-subtle text-app-accent animate-[dof-float_5s_ease-in-out_infinite]">
                         <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /><path d="M15 5.764v15" /><path d="M9 3.236v15" /></svg>
                       </div>

@@ -4161,6 +4161,9 @@ html.dark .achievements-badge.locked {
 .dof-acc:hover {
   background: #FAF8F3 !important;
 }
+.dark .dof-acc:hover {
+  background: var(--app-bg-subtle) !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .dof-stagger > *,

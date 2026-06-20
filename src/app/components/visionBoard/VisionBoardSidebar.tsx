@@ -65,7 +65,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
   return (
     <div className={`flex flex-col gap-4 ${className ?? ""}`}>
       {/* Life Areas */}
-      <div className="rounded-[18px] border border-app-line/10 bg-white p-5">
+      <div className="rounded-[18px] border border-app-line/10 dark:border-app-line bg-white dark:bg-app-surface p-5">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-ink">Câu chuyện theo life area</p>
         <p className="mt-1 text-[11.5px] leading-relaxed text-app-ink-soft">
           Mỗi vùng đại diện một mảng cuộc sống. Vùng trống = cảm hứng đang thiếu.
@@ -80,7 +80,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
               <button
                 key={area.name}
                 type="button"
-                className="w-full text-left rounded-[13px] border border-app-line/10 bg-[#FAF8F3] p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-26px_rgba(23,21,15,0.3)]"
+                className="w-full text-left rounded-[13px] border border-app-line/10 dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-26px_rgba(23,21,15,0.3)] dark:hover:shadow-[0_16px_32px_-26px_rgba(0,0,0,0.5)]"
                 style={{ animationDelay: `${0.05 + index * 0.04}s`, animation: "dof-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both" }}
                 data-testid={`life-area-row-${area.name}`}
               >
@@ -99,7 +99,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
                       </span>
                     )}
                   </span>
-                  <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-app-line/10 bg-white font-mono text-[11px] font-bold text-app-ink-muted">
+                  <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-app-line/10 dark:border-app-line bg-white dark:bg-app-surface font-mono text-[11px] font-bold text-app-ink-muted">
                     {count}
                   </span>
                 </div>
@@ -113,7 +113,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
       </div>
 
       {/* Quick Summary */}
-      <div className="rounded-[18px] border border-app-line/10 bg-white p-5">
+      <div className="rounded-[18px] border border-app-line/10 dark:border-app-line bg-white dark:bg-app-surface p-5">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-ink">Tóm tắt nhanh</p>
         <div className="mt-4 grid grid-cols-2 gap-2.5">
           <SummaryStat label="Hình ảnh" value={stats.counters.image} />
@@ -156,7 +156,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 
 function SummaryStat({ label, value }: { label: string; value: number }): JSX.Element {
   return (
-    <div className="rounded-[12px] border border-app-line/10 bg-[#FAF8F3] px-3 py-3">
+    <div className="rounded-[12px] border border-app-line/10 dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle px-3 py-3">
       <p className="text-[9.5px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">{label}</p>
       <p className="mt-1 font-serif text-[22px] font-extrabold leading-none text-app-ink">{value}</p>
     </div>

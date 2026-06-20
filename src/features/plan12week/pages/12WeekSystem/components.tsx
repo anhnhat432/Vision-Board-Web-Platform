@@ -399,7 +399,7 @@ export function TwelveWeekGoalSwitcher({
     <div className="flex">
       <Select value={activeGoalId} onValueChange={onLoadGoal}>
         <SelectTrigger
-          className="h-auto w-full max-w-full rounded-[14px] border-[rgba(23,21,15,0.1)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[#17150F] shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
+          className="h-auto w-full max-w-full rounded-[14px] border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface px-4 py-2.5 text-[14px] font-semibold text-[#17150F] dark:text-app-ink shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
           aria-label="Chọn mục tiêu 12 tuần"
         >
           <SelectValue placeholder="Chọn mục tiêu" />

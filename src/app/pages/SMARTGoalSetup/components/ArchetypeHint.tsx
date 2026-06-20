@@ -64,7 +64,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
       className={cn(
         "rounded-[14px] border p-4 transition-all duration-200",
         variant === "antiPattern"
-          ? "border-[#D6B228]/30 bg-[#FFF8DE] text-[#7A5C00]"
+          ? "border-[#D6B228]/30 bg-[#FFF8DE] dark:bg-[#2A2410] text-[#7A5C00] dark:text-[#E7B400]"
           : variant === "metric"
             ? "border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] text-[#0C5E3A]"
             : "border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] text-[#0C5E3A]",
@@ -82,7 +82,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
           className={cn(
             "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
             variant === "antiPattern"
-              ? "border-[#D6B228]/40 bg-[#FFF8DE] text-[#9A7B00]"
+              ? "border-[#D6B228]/40 bg-[#FFF8DE] dark:bg-[#2A2410] text-[#9A7B00] dark:text-[#E7B400]"
               : variant === "metric"
                 ? "border-[#0C5E3A]/30 bg-[#EDF7E0] text-[#0C5E3A]"
                 : "border-[#0C5E3A]/30 bg-[#EDF7E0] text-[#0C5E3A]",

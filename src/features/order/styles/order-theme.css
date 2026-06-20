@@ -7,3 +7,13 @@
   --order-text-muted: #7A6F5E;
   --order-eyebrow: #B8956F;
 }
+
+.dark .order-page {
+  --order-bg: #1C1A15;
+  --order-card: #26231D;
+  --order-border: #3A342B;
+  --order-accent: #5BA590;
+  --order-accent-soft: rgba(91,165,144,0.16);
+  --order-text-muted: #A39B8C;
+  --order-eyebrow: #A39B8C;
+}

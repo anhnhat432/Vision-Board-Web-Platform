@@ -449,7 +449,7 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 bg-white border border-[rgba(12,94,58,0.18)] border-l-4 border-l-[#0C5E3A] rounded-[18px] p-6 px-[26px]"
+          className="order-1 bg-white dark:bg-app-surface border border-[rgba(12,94,58,0.18)] border-l-4 border-l-[#0C5E3A] rounded-[18px] p-6 px-[26px]"
         >
           <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0C5E3A] mb-3">
             <Sparkles className="h-3 w-3" />
@@ -458,7 +458,7 @@ export function TwelveWeekTodayTab({
           <h2 className="font-serif text-[23px] font-bold tracking-[-0.01em] text-app-ink m-0 mb-2">
             {nextActionState.title}
           </h2>
-          <p className="text-[13.5px] leading-[1.5] text-[#5C574B] m-0 mb-[18px] max-w-[62ch]">
+          <p className="text-[13.5px] leading-[1.5] text-[#5C574B] dark:text-app-ink-soft m-0 mb-[18px] max-w-[62ch]">
             {nextActionState.description}
           </p>
           {nextActionState.onAction && nextActionState.actionLabel ? (
@@ -663,7 +663,7 @@ export function TwelveWeekTodayTab({
           <div className={fadeInClassName}>
             <Card
               data-tour-id="system-today-queue"
-              className={`h-full min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white min-h-[420px] p-6`}
+              className={`h-full min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface min-h-[420px] p-6`}
             >
               <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
                 <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
@@ -671,7 +671,7 @@ export function TwelveWeekTodayTab({
                     <CardTitle as="h2" className="break-words text-app-ink text-[18px] font-bold m-0 mb-1">
                       Hàng việc hôm nay
                     </CardTitle>
-                    <CardDescription className="break-words text-[12.5px] text-[#8C887C] m-0 mb-[22px]">
+                    <CardDescription className="break-words text-[12.5px] text-[#8C887C] dark:text-app-ink-muted m-0 mb-[22px]">
                       <span className="font-mono font-semibold text-[#0C5E3A]">
                         {todayCompletedCount}/{checkInTotal}
                       </span>{" "}
@@ -771,7 +771,7 @@ export function TwelveWeekTodayTab({
                                 >
                                   {task.title}
                                 </p>
-                                <p className="mt-[3px] text-[12px] text-[#8C887C]">
+                                <p className="mt-[3px] text-[12px] text-[#8C887C] dark:text-app-ink-muted">
                                   {task.leadIndicatorName}
                                   {task.isCore && (
                                     <span className="ml-1 inline-flex items-center bg-[#EDF7E0] text-[#0C5E3A] text-[9.5px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
@@ -908,9 +908,9 @@ export function TwelveWeekTodayTab({
                     )}
                   </details>
                 )}
-                <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-[#FAF8F3] p-[16px_18px]">
+                <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[16px_18px]">
                   <div className="flex items-center justify-between mb-[9px]">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296]">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted">
                       Tiến độ tuần {currentWeek}
                     </span>
                     <span className="font-mono text-[13px] font-bold text-[#0C5E3A]">{weekCompletion.percent}%</span>
@@ -929,7 +929,7 @@ export function TwelveWeekTodayTab({
             </Card>
           </div>
           <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
-            <Card className={`h-full min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-6`}>
+            <Card className={`h-full min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-6`}>
               <div className="min-w-0">
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -939,7 +939,7 @@ export function TwelveWeekTodayTab({
                       </span>
                       Check-in hôm nay
                     </h2>
-                    <p className="text-[12.5px] text-[#8C887C] m-0 mb-5">
+                    <p className="text-[12.5px] text-[#8C887C] dark:text-app-ink-muted m-0 mb-5">
                       30 giây · Lắng nghe bản thân
                     </p>
                   </div>
@@ -968,7 +968,7 @@ export function TwelveWeekTodayTab({
                   </div>
                 )}
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-2.5">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
                     Năng lượng
                   </div>
                   <div role="radiogroup" aria-label="Năng lượng" className="grid grid-cols-3 gap-2 mb-5">
@@ -996,7 +996,7 @@ export function TwelveWeekTodayTab({
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-2.5">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
                     Ghi chú nhanh
                   </div>
                   <Textarea
@@ -1005,7 +1005,7 @@ export function TwelveWeekTodayTab({
                     value={dailyNote}
                     onChange={(event) => onDailyNoteChange(event.target.value)}
                     placeholder="Bài học nhỏ hay cảm nhận hôm nay..."
-                    className="border-[rgba(23,21,15,0.12)] bg-[#FAF8F3] text-[#17150F] placeholder:text-app-ink-muted/50 focus:border-[#0C5E3A]/30 focus:ring-1 focus:ring-[#0C5E3A]/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
+                    className="border-[rgba(23,21,15,0.12)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle text-[#17150F] dark:text-app-ink placeholder:text-app-ink-muted/50 focus:border-[#0C5E3A]/30 focus:ring-1 focus:ring-[#0C5E3A]/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
                   />
                 </div>
                 <Button
@@ -1053,10 +1053,10 @@ export function TwelveWeekTodayTab({
                   {latestCheckIn && (
                     <div
                       aria-live="polite"
-                      className="rounded-[12px] border border-[rgba(23,21,15,0.06)] bg-[#FAF8F3] p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
+                      className="rounded-[12px] border border-[rgba(23,21,15,0.06)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
                     >
                       Gần nhất: {formatCalendarDate(latestCheckIn.date)} ·{" "}
-                      <span className="font-semibold text-[#17150F]">
+                      <span className="font-semibold text-[#17150F] dark:text-app-ink">
                         {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
                       </span>
                     </div>

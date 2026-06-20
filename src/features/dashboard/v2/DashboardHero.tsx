@@ -50,7 +50,7 @@ export function DashboardHero({
       className="grid w-full select-none gap-[18px] lg:grid-cols-[minmax(0,1fr)_312px]"
     >
       {/* Hero — forest green panel */}
-      <div className="relative overflow-hidden rounded-[22px] bg-app-accent p-7 text-white sm:p-8">
+      <div className="relative overflow-hidden rounded-[22px] bg-[#0C5E3A] dark:bg-[#1A3A2A] p-7 text-white sm:p-8">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-8 -top-12 h-52 w-52 rounded-full bg-app-highlight/[0.13]"

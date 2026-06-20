@@ -12,7 +12,7 @@ interface ReviewStepProps {
 export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, onJumpToStep }: ReviewStepProps) {
   return (
     <section
-      className="rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-white p-5 sm:p-6"
+      className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-5 sm:p-6"
       aria-labelledby="smart-review-title"
     >
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[rgba(23,21,15,0.06)] pb-3">
@@ -41,7 +41,7 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
               </div>
               <button
                 type="button"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[rgba(23,21,15,0.1)] bg-white px-3 py-1.5 text-xs font-bold text-[#5C574B] transition-all duration-150 hover:bg-[#FAF8F3] hover:text-[#17150F] hover:border-[#A8A296] active:scale-[0.97] cursor-pointer"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface px-3 py-1.5 text-xs font-bold text-[#5C574B] dark:text-app-ink-soft transition-all duration-150 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle hover:text-[#17150F] dark:hover:text-app-ink hover:border-[#A8A296] dark:hover:border-app-ink-muted active:scale-[0.97] cursor-pointer"
                 onClick={() => onJumpToStep(row.key)}
                 aria-label={`Sửa phần ${row.label}`}
               >

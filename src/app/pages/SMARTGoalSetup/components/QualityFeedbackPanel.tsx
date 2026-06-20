@@ -31,13 +31,13 @@ function getClarityDetails(score: number) {
   if (score >= 40) {
     return {
       label: "Đang hình thành",
-      badgeClass: "text-[#9A7B00] bg-[#FFF8DE] border-[#D6B228]/20",
+      badgeClass: "text-[#9A7B00] dark:text-[#E7B400] bg-[#FFF8DE] dark:bg-[#2A2410] border-[#D6B228]/20",
       barClass: "bg-[#9A7B00]",
     };
   }
   return {
     label: "Đang phác thảo",
-    badgeClass: "text-[#C2410C] bg-[#FBEAE2] border-[#C2410C]/20",
+      badgeClass: "text-[#C2410C] dark:text-[#FF8C66] bg-[#FBEAE2] dark:bg-[#2A1510] border-[#C2410C]/20",
     barClass: "bg-[#C2410C]",
   };
 }
@@ -74,7 +74,7 @@ export function QualityFeedbackPanel({
 
   return (
     <section
-      className="rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-white p-5 space-y-4"
+      className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-5 space-y-4"
       aria-label="Mức độ rõ ràng mục tiêu"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
@@ -95,7 +95,7 @@ export function QualityFeedbackPanel({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Độ rõ nét mục tiêu"
-        className="relative h-[9px] w-full rounded-full bg-[#E4E0D4] overflow-hidden"
+        className="relative h-[9px] w-full rounded-full bg-[#E4E0D4] dark:bg-app-line overflow-hidden"
       >
         <div
           className={cn("h-full rounded-full transition-all duration-500 ease-out", clarity.barClass)}
@@ -113,7 +113,7 @@ export function QualityFeedbackPanel({
                   <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
                 </span>
               ) : (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FFF8DE] text-[#9A7B00] mt-0.5">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FFF8DE] dark:bg-[#2A2410] text-[#9A7B00] dark:text-[#E7B400] mt-0.5">
                   <Sparkles className="h-3 w-3" />
                 </span>
               )}
