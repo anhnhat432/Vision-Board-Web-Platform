@@ -1,6 +1,5 @@
-import type { ComponentType } from "react";
+import type { ComponentType, SVGProps } from "react";
 
-import type { AmbientIllustrationProps } from "../utils";
 import {
   LifeAreaCareerIcon,
   LifeAreaFamilyIcon,
@@ -12,7 +11,7 @@ import {
   LifeAreaRelationshipIcon,
 } from "./LifeAreaIcons";
 
-type LifeAreaIconComponent = ComponentType<AmbientIllustrationProps>;
+type LifeAreaIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 const LIFE_AREA_ICON_MAP: Record<string, LifeAreaIconComponent> = {
   career: LifeAreaCareerIcon,

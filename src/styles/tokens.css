@@ -42,14 +42,14 @@
   --neutral-000: #FFFFFF;
 
   /* Life areas accents (Light Mode) */
-  --color-career-accent: #3b82f6;
-  --color-finance-accent: #f59e0b;
-  --color-health-accent: #10b981;
-  --color-education-accent: #6366f1;
-  --color-relationships-accent: #f43f5e;
-  --color-family-accent: #14b8a6;
-  --color-personal-growth-accent: #f97316;
-  --color-leisure-accent: #0ea5e9;
+  --color-career-accent: #2563EB;
+  --color-finance-accent: #E7A400;
+  --color-health-accent: #16A34A;
+  --color-education-accent: #7C5CFC;
+  --color-relationships-accent: #E8456B;
+  --color-family-accent: #0E9F8E;
+  --color-personal-growth-accent: #EA7A2B;
+  --color-leisure-accent: #2BA8E0;
   /* Status palette */
   --status-green:  #3A7D5E;
   --status-amber:  #9A6308;   /* deeper amber — ≥4.5:1 vs white */
@@ -168,14 +168,14 @@ html.dark {
   --app-overlay:     rgba(0, 0, 0, 0.60);
 
   /* Life areas accents (Dark Mode) */
-  --color-career-accent: #60a5fa;
-  --color-finance-accent: #fbbf24;
-  --color-health-accent: #34d399;
-  --color-education-accent: #818cf8;
-  --color-relationships-accent: #fb7185;
-  --color-family-accent: #2dd4bf;
-  --color-personal-growth-accent: #fb923c;
-  --color-leisure-accent: #38bdf8;
+    --color-career-accent: #60a5fa;
+    --color-finance-accent: #fbbf24;
+    --color-health-accent: #34d399;
+    --color-education-accent: #a78bfa;
+    --color-relationships-accent: #fb7185;
+    --color-family-accent: #2dd4bf;
+    --color-personal-growth-accent: #fb923c;
+    --color-leisure-accent: #38bdf8;
   --app-ink:         #F2EDE5;
   --app-ink-soft:    #C8C2B5;
   --app-ink-muted:   #A39B8C;  /* AA contrast ~6.9:1 trên #1C1A15 */

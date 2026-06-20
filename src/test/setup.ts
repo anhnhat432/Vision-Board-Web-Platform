@@ -1,5 +1,19 @@
 import "@testing-library/jest-dom/vitest";
 
+// jsdom does not implement AbortSignal used by motion-dom addEventListener
+const _origAddEventListener = EventTarget.prototype.addEventListener;
+EventTarget.prototype.addEventListener = function (
+  type: string,
+  listener: EventListenerOrEventListenerObject | null,
+  options?: boolean | AddEventListenerOptions,
+) {
+  if (options && typeof options === "object" && "signal" in options) {
+    const { signal, ...rest } = options;
+    return _origAddEventListener.call(this, type, listener, rest);
+  }
+  return _origAddEventListener.call(this, type, listener, options);
+};
+
 // jsdom does not implement URL.createObjectURL / revokeObjectURL
 if (typeof URL.createObjectURL !== "function") {
   URL.createObjectURL = () => "blob:mock";

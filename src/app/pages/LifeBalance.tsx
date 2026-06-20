@@ -1,10 +1,7 @@
 import {
   AlertTriangle,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   Compass,
-  RotateCcw,
   Save,
   Sparkles,
   Target,
@@ -16,7 +13,6 @@ import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { getLifeAreaIcon } from "../components/illustrations";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
-import { MotionFadeIn, MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { PageShell } from "../components/PageShell";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
@@ -61,27 +57,6 @@ const LIFE_AREA_DETAILS: Record<string, string> = {
   "Personal Growth": "Tự hiểu mình, thói quen cá nhân và khả năng giữ lời với bản thân.",
   Leisure: "Nghỉ ngơi, vui chơi, sở thích và khoảng trống để hồi phục.",
 };
-
-const CORE_CLUSTERS = [
-  {
-    id: "personal",
-    title: "Phát triển & Sự nghiệp",
-    description: "Sự nghiệp, tài chính và trí tuệ nâng tầm bản thân.",
-    areas: ["Career", "Finance", "Education"],
-  },
-  {
-    id: "vitality",
-    title: "Thân - Tâm - Trí",
-    description: "Sức khỏe thể chất, tinh thần và giải trí tái tạo.",
-    areas: ["Health", "Personal Growth", "Leisure"],
-  },
-  {
-    id: "social",
-    title: "Gia đình & Kết nối",
-    description: "Các mối quan hệ thân cận và tổ ấm gia đình.",
-    areas: ["Family", "Relationships"],
-  },
-];
 
 type FlushableDebouncedSave<T> = {
   schedule: (value: T) => void;
@@ -139,7 +114,7 @@ export function LifeBalance() {
   const hasChanges = lifeAreas.length > 0 && lastSavedSnapshot !== null && currentSnapshot !== lastSavedSnapshot;
   const debouncedSaveRef = useRef<FlushableDebouncedSave<LifeArea[]> | null>(null);
   const [isCheckInMode, setIsCheckInMode] = useState(false);
-  const [activeClusterIndex, setActiveClusterIndex] = useState(0);
+  const [initialScores, setInitialScores] = useState<Record<string, number>>({});
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<"current" | "focus" | "history">(() => {
     if (tabParam === "focus" || tabParam === "history") {
@@ -214,6 +189,11 @@ export function LifeBalance() {
   }, [lifeAreas, selectedFocusAreaName, weakestArea]);
 
   const focusSmartGoalStarter = useMemo(() => (focusArea ? getSmartGoalStarter(focusArea.name) : null), [focusArea]);
+
+  const changedAreaCount = useMemo(() => {
+    if (!isCheckInMode) return 0;
+    return lifeAreas.filter((area) => area.score !== (initialScores[area.name] ?? area.score)).length;
+  }, [isCheckInMode, lifeAreas, initialScores]);
 
   useEffect(() => {
     const nextTab = tabParam === "focus" || tabParam === "history" ? tabParam : "current";
@@ -314,6 +294,30 @@ export function LifeBalance() {
     });
   };
 
+  const handleStartCheckIn = () => {
+    const scores: Record<string, number> = {};
+    lifeAreas.forEach((area) => {
+      scores[area.name] = area.score;
+    });
+    setInitialScores(scores);
+    setIsCheckInMode(true);
+  };
+
+  const handleCancelCheckIn = () => {
+    const restored = lifeAreas.map((area) => ({
+      ...area,
+      score: initialScores[area.name] ?? area.score,
+    }));
+    setLifeAreas(restored);
+    setIsCheckInMode(false);
+  };
+
+  const handleFinishCheckIn = () => {
+    handleSave();
+    setIsCheckInMode(false);
+    handleTabChange("focus");
+  };
+
   const handleTabChange = useCallback(
     (value: string) => {
       const nextTab = value === "focus" || value === "history" ? value : "current";
@@ -344,7 +348,7 @@ export function LifeBalance() {
           <ScreenGuide {...SCREEN_GUIDES.lifeBalance} autoOpen />
           <header>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Bánh xe cuộc sống</p>
-            <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
+            <h1 className="mt-3 font-[family-name:var(--app-font-serif)] text-4xl font-extrabold leading-tight tracking-tight text-app-ink">
               Bức tranh hiện tại của bạn
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-app-ink-soft">
@@ -354,7 +358,7 @@ export function LifeBalance() {
 
           <section className="mt-8 surface-empty rounded-2xl border border-dashed border-app-line bg-app-bg/50 p-8 text-center">
             <Compass className="mx-auto h-12 w-12 text-app-accent" aria-hidden="true" />
-            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có dữ liệu bánh xe</h2>
+            <h2 className="mt-4 font-[family-name:var(--app-font-serif)] text-2xl font-bold text-app-ink">Chưa có dữ liệu bánh xe</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-app-ink-soft">
               Bắt đầu bằng cách chấm điểm 8 lĩnh vực để xem bức tranh.
             </p>
@@ -373,6 +377,7 @@ export function LifeBalance() {
 
   if (!strongestArea || !weakestArea) return null;
   const historyCount = userData.wheelOfLifeHistory.length;
+  const avgPercent = Math.round((averageScore / 10) * 100);
 
   return (
     <PageShell maxWidth="xl">
@@ -383,7 +388,7 @@ export function LifeBalance() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-status-warning/15 text-app-status-warning">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <AlertDialogTitle className="font-serif text-app-ink">Bạn có thay đổi chưa lưu</AlertDialogTitle>
+            <AlertDialogTitle className="font-[family-name:var(--app-font-serif)] text-app-ink">Bạn có thay đổi chưa lưu</AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-app-ink-soft">
               Nếu rời khỏi trang này, hệ thống sẽ cố lưu điểm vừa chỉnh trước khi đóng trang.
             </AlertDialogDescription>
@@ -418,447 +423,365 @@ export function LifeBalance() {
       </AlertDialog>
 
       <div ref={pageTopRef} className="pb-12">
+        {/* HERO */}
         <header className="page-enter">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Bánh xe cuộc sống</p>
-          <h1 className="mt-3 font-serif text-4xl font-medium leading-tight tracking-tight text-app-ink">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#0C5E3A]" />
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0C5E3A]">Bánh xe cuộc sống</p>
+          </div>
+          <h1 className="font-[family-name:var(--app-font-serif)] text-[clamp(28px,3.2vw,38px)] font-extrabold leading-[1.02] tracking-[-0.02em] text-app-ink mb-3">
             Bức tranh hiện tại của bạn
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-app-ink-soft">
+          <p className="text-sm leading-relaxed text-app-ink-soft mb-4 max-w-[54ch]">
             Nhìn 8 lĩnh vực để biết bạn đang mạnh ở đâu, mỏng ở đâu.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {formattedLastSaved ? (
-              <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs text-app-ink-soft">
-                Cập nhật lần cuối: {formattedLastSaved}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Cập nhật lần cuối: <span className="font-mono text-app-ink">{formattedLastSaved}</span>
               </span>
             ) : null}
             {historyCount > 0 ? (
-              <span className="inline-flex items-center rounded-full bg-app-accent-soft px-3 py-1 text-xs text-app-accent">
-                {historyCount} lần ghi nhận
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EDF7E0] border border-[rgba(12,94,58,0.18)] px-3 py-1.5 text-xs font-semibold text-[#0C5E3A]">
+                <span className="font-mono">{historyCount}</span> lần ghi nhận
               </span>
             ) : null}
-            <AutoSaveIndicator status={autoSaveStatus} lastSavedAt={lastSavedAt} variant="prominent" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+              Đã lưu cục bộ
+            </span>
           </div>
         </header>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <MotionFadeIn
-            delay={0.05}
-            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Trung bình</p>
-            <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
+        {/* KPI ROW */}
+        <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-[18px] border border-app-line bg-white p-5 md:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">Trung bình</p>
+            <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-app-ink">
               <CountUp value={averageScore} precision={1} />
-              <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
+              <span className="ml-1 text-lg font-bold text-app-ink-muted">/10</span>
             </p>
-          </MotionFadeIn>
-          <MotionFadeIn
-            delay={0.1}
-            className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 transition-all duration-300 hover:shadow-md hover:border-app-accent/30"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Lĩnh vực mạnh nhất</p>
-            <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
+            <div className="mt-3.5 h-[7px] rounded-full bg-app-bg overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[#0C5E3A] transition-all duration-700 ease-out"
+                style={{ width: `${avgPercent}%` }}
+              />
+            </div>
+          </div>
+          <div className="rounded-[18px] border border-app-line bg-white p-5 md:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">Lĩnh vực mạnh nhất</p>
+            <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-app-ink">
               <CountUp value={strongestArea.score} />
-              <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
+              <span className="ml-1 text-lg font-bold text-app-ink-muted">/10</span>
             </p>
-            <p className="mt-1.5 text-xs font-medium text-app-ink-soft">{getLifeAreaLabel(strongestArea.name)}</p>
-          </MotionFadeIn>
-          <MotionFadeIn
-            delay={0.15}
-            className="surface-raised rounded-xl border border-app-status-warning/30 bg-app-status-warning/10 p-5 transition-all duration-300 hover:shadow-md hover:border-app-status-warning/50"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-status-warning">
-              Lĩnh vực cần ưu tiên
+            <p className="mt-3.5 text-[13px] font-semibold text-[#0C5E3A] flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(strongestArea.name).accent }} />
+              {getLifeAreaLabel(strongestArea.name)}
             </p>
-            <p className="mt-3 font-serif text-4xl font-medium leading-none tabular-nums text-app-ink">
+          </div>
+          <div className="rounded-[18px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-5 md:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A07A4A] mb-3.5">Lĩnh vực cần ưu tiên</p>
+            <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-[#8A5A2B]">
               <CountUp value={weakestArea.score} />
-              <span className="ml-1 text-lg font-medium text-app-ink-muted">/10</span>
+              <span className="ml-1 text-lg font-bold text-[#B79B72]">/10</span>
             </p>
-            <p className="mt-1.5 text-xs font-medium text-app-status-warning">{getLifeAreaLabel(weakestArea.name)}</p>
-          </MotionFadeIn>
-        </div>
+            <p className="mt-3.5 text-[13px] font-semibold text-[#8A5A2B] flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }} />
+              {getLifeAreaLabel(weakestArea.name)}
+            </p>
+          </div>
+        </section>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-8">
-          <TabsList>
-            <TabsTrigger value="current">Hiện tại</TabsTrigger>
-            <TabsTrigger value="focus">
-              <Target className="mr-1 h-3.5 w-3.5" />
+        {/* TABS */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-6">
+          <TabsList className="bg-white border border-app-line rounded-2xl p-1.5 gap-1 w-max">			
+            <TabsTrigger value="current" className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
+              Hiện tại
+            </TabsTrigger>
+            <TabsTrigger value="focus" className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
+              <Target className="mr-1.5 h-3.5 w-3.5" />
               Trọng tâm
             </TabsTrigger>
-            <TabsTrigger value="history" disabled={historicalData.length === 0}>
+            <TabsTrigger value="history" disabled={historicalData.length === 0} className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
               Lịch sử
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="current" className="mt-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full max-w-full overflow-hidden">
-              <div className="space-y-6">
-                <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-sm">
-                  <header className="pb-3 border-b border-app-line/60 flex items-center justify-between">
-                    <div>
-                      <h2 className="text-sm font-bold text-app-ink uppercase tracking-wider">
-                        Bản đồ Cân bằng cuộc sống
-                      </h2>
-                      <p className="text-[10px] text-app-ink-muted mt-0.5">
-                        Trạng thái hiện tại của 8 khía cạnh cốt lõi
-                      </p>
-                    </div>
-                    {isCheckInMode && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-app-accent bg-app-accent-subtle border border-app-accent/15 px-2 py-0.5 rounded-full">
-                        <Sparkles className="h-3 w-3 animate-pulse" />
-                        Đang Check-in...
-                      </span>
-                    )}
+          <TabsContent value="current" className="mt-5">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_400px] items-start">
+              {/* LEFT COLUMN */}
+              <div className="space-y-5 min-w-0">
+                {/* Radar chart card */}
+                <section className="rounded-[20px] border border-app-line bg-white p-5 md:p-6">
+                  <header className="mb-3">
+                    <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink">Bản đồ Cân bằng cuộc sống</h2>
+                    <p className="text-xs text-app-ink-muted mt-0.5">Trạng thái hiện tại của 8 khía cạnh cốt lõi</p>
                   </header>
-                  <div className="mt-4">
-                    <SimpleRadarChart className="mx-auto max-w-[420px]" data={radarData} height={340} />
+                  <div className="flex justify-center">
+                    <SimpleRadarChart
+                      data={radarData}
+                    />
                   </div>
                 </section>
 
-                {/* Box Giải thích & Nhận định Tiêu điểm Chuyên sâu */}
-                <section className="surface-raised rounded-2xl border border-app-status-warning/10 bg-app-status-warning/[0.02] p-5 md:p-6 shadow-3xs relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-app-status-warning/5 rounded-full blur-3xl pointer-events-none" />
-
-                  <header className="flex items-center gap-2 pb-3 border-b border-app-line/20">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-status-warning/10 text-app-status-warning">
-                      <Target className="h-4.5 w-4.5" />
-                    </div>
+                {/* Priority insight card */}
+                <section className="rounded-[20px] border border-[rgba(176,103,60,0.2)] bg-[#F4ECDD] p-5 md:p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[rgba(176,103,60,0.06)] rounded-full blur-3xl pointer-events-none" />
+                  <header className="flex items-start gap-3 mb-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-[rgba(176,103,60,0.22)] text-[#B0673C]">
+                      <Target className="h-5 w-5" />
+                    </span>
                     <div>
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-app-status-warning">
-                        Trọng tâm Hành động đề xuất
-                      </h2>
-                      <p className="text-[10px] text-app-ink-muted font-semibold mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
+                      <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#8A5A2B]">Trọng tâm hành động đề xuất</h2>
+                      <p className="text-xs text-[#A07A4A] mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
                     </div>
                   </header>
-
-                  <div className="mt-4 space-y-3">
-                    <p className="text-xs font-bold text-app-ink-soft leading-normal">
-                      Khía cạnh cần ưu tiên cải thiện:{" "}
-                      <span className="text-app-status-warning bg-app-status-warning/10 px-2 py-0.5 rounded-md border border-app-status-warning/20">
-                        {getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)
-                      </span>
+                  <p className="text-[13.5px] text-app-ink-soft mb-3 flex items-center gap-2 flex-wrap">
+                    Khía cạnh cần ưu tiên cải thiện:{" "}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border"
+                      style={{
+                        color: getAreaColorConfig(weakestArea.name).accent,
+                        backgroundColor: `color-mix(in oklab, ${getAreaColorConfig(weakestArea.name).accent} 10%, white)`,
+                        borderColor: `color-mix(in oklab, ${getAreaColorConfig(weakestArea.name).accent} 25%, transparent)`,
+                      }}
+                    >
+                      <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }} />
+                      {getLifeAreaLabel(weakestArea.name)} ({weakestArea.score}đ)
+                    </span>
+                  </p>
+                  <p className="text-[13px] leading-relaxed text-app-ink-muted mb-4">
+                    {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).reason}
+                  </p>
+                  <div className="flex items-start gap-3 bg-white border border-[rgba(12,94,58,0.16)] rounded-[13px] p-3.5">
+                    <Sparkles className="h-4.5 w-4.5 shrink-0 text-[#0C5E3A] mt-0.5" />
+                    <p className="text-xs leading-relaxed text-[#3F4A3F]">
+                      <strong className="text-[#0C5E3A]">Hành động đề xuất:</strong>{" "}
+                      {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).tip}
                     </p>
-
-                    <p className="text-xs text-app-ink-muted leading-relaxed font-medium">
-                      {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).reason}
-                    </p>
-
-                    <div className="bg-app-surface border border-app-line rounded-xl p-3 text-[11px] text-app-accent font-semibold flex gap-2 items-start shadow-3xs">
-                      <Sparkles className="h-4 w-4 shrink-0 text-app-accent animate-pulse mt-0.5" />
-                      <p className="leading-relaxed">
-                        <strong>Hành động đề xuất:</strong> {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).tip}
-                      </p>
-                    </div>
                   </div>
                 </section>
               </div>
 
-              <div className="space-y-6 min-w-0 w-full max-w-full overflow-hidden">
+              {/* RIGHT COLUMN */}
+              <div className="space-y-5 min-w-0">
                 {!isCheckInMode ? (
-                  // BẢNG ĐIỀU KHIỂN DASHBOARD CHÍNH (Tĩnh, click để check-in)
-                  <div className="space-y-6 animate-fade-in w-full max-w-full overflow-hidden">
-                    {/* Banner Bắt đầu Check-in */}
-                    <div className="surface-raised rounded-2xl border border-app-accent/10 bg-gradient-to-br from-app-accent-subtle via-app-surface to-app-bg-subtle dark:from-app-accent-subtle dark:via-app-surface dark:to-app-bg p-6 shadow-3xs flex flex-col justify-between space-y-4">
-                      <div className="space-y-2">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-app-accent">
-                          Check-in Cân bằng
-                        </span>
-                        <h3 className="font-serif text-lg font-bold text-app-ink leading-tight flex items-center gap-1.5">
-                          <Compass className="h-5 w-5 text-app-accent animate-spin-slow" />
-                          Cập nhật Bánh xe cuộc sống hằng tuần
-                        </h3>
-                        <p className="text-xs text-app-ink-soft leading-relaxed font-semibold">
-                          Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh qua 3 chặng tương tác nhẹ để luôn làm
-                          chủ nhịp điệu cuộc sống.
-                        </p>
+                  <>
+                    {/* Check-in banner */}
+                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-[#EDF5EA] p-5 md:p-6">
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A] mb-3">Check-in cân bằng</p>
+                      <div className="flex items-center gap-2.5 mb-3">
+                        <Compass className="h-5 w-5 text-[#0C5E3A]" />
+                        <h3 className="font-[family-name:var(--app-font-serif)] text-lg font-bold text-app-ink tracking-[-0.01em]">Cập nhật Bánh xe cuộc sống hằng tuần</h3>
                       </div>
-
+                      <p className="text-[13px] leading-relaxed text-[#5C6B58] mb-4">
+                        Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh để luôn làm chủ nhịp điệu cuộc sống.
+                      </p>
                       <motion.button
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
                         type="button"
-                        onClick={() => {
-                          setIsCheckInMode(true);
-                          setActiveClusterIndex(0);
-                        }}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-app-accent hover:bg-app-accent-hover px-6 py-2.5 text-xs font-bold text-app-ink-on-accent shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer w-full sm:w-auto font-sans"
+                        onClick={handleStartCheckIn}
+                        className="w-full flex items-center justify-center gap-2.5 bg-[#0C5E3A] text-white text-sm font-bold py-3.5 rounded-[13px] hover:bg-[#0a4f30] transition-colors shadow-[0_12px_26px_-14px_rgba(12,94,58,0.75)]"
                       >
                         Bắt đầu Check-in nhanh
-                        <ChevronRight className="h-4 w-4" />
+                        <ArrowRight className="h-4 w-4" />
                       </motion.button>
-                    </div>
+                    </section>
 
-                    {/* Danh sách 8 khía cạnh tĩnh (đẹp mắt, màu pastel) */}
-                    <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-3xs">
-                      <header className="pb-3 border-b border-app-line/60">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">
-                          Điểm số hiện tại của 8 lĩnh vực
-                        </h3>
-                      </header>
-                      <MotionStaggerList className="mt-4 grid gap-2 sm:grid-cols-2">
+                    {/* Area scores (static) */}
+                    <section className="rounded-[20px] border border-app-line bg-white p-5 md:p-6">
+                      <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink mb-4">Điểm số hiện tại của 8 lĩnh vực</h3>
+                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         {lifeAreas.map((area) => {
                           const AreaIcon = getLifeAreaIcon(area.name);
                           const colorConfig = getAreaColorConfig(area.name);
                           const label = getLifeAreaLabel(area.name);
 
                           return (
-                            <MotionStaggerItem
-                              key={area.name}
-                              className={cn(
-                                "flex items-center justify-between p-3 rounded-xl border transition-colors shadow-3xs",
-                                colorConfig.bgLight,
-                                colorConfig.border,
-                              )}
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <span
-                                  className={cn(
-                                    "flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-xs",
-                                  )}
-                                  style={{ backgroundColor: colorConfig.accent }}
-                                >
-                                  <AreaIcon className="h-4 w-4" />
-                                </span>
-                                <span className="text-xs font-bold text-app-ink">{label}</span>
-                              </div>
-                              <span className="font-serif text-lg font-extrabold text-app-ink">{area.score}đ</span>
-                            </MotionStaggerItem>
-                          );
-                        })}
-                      </MotionStaggerList>
-
-                      <div className="mt-4 pt-4 border-t border-app-line/45 flex justify-end">
-                        <Link
-                          to="/onboarding"
-                          className="text-xs font-bold text-app-accent hover:text-app-accent-hover hover:underline"
-                        >
-                          Làm lại khảo sát toàn diện →
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  // WIZARD CHECK-IN 3 CHẶNG TƯƠNG TÁC
-                  (() => {
-                    const cluster = CORE_CLUSTERS[activeClusterIndex];
-                    if (!cluster) return null;
-
-                    return (
-                      <MotionFadeIn
-                        key={activeClusterIndex}
-                        className="surface-raised rounded-2xl border border-app-accent/20 bg-app-surface p-5 md:p-6 shadow-md w-full max-w-full overflow-hidden"
-                      >
-                        {/* Progress Header */}
-                        <header className="pb-4 border-b border-app-line/60 space-y-2">
-                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-app-accent">
-                            <span>Chặng {activeClusterIndex + 1} / 3</span>
-                            <span>{Math.round(((activeClusterIndex + 1) / 3) * 100)}% Hoàn thành</span>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div className="w-full bg-app-line rounded-full h-1.5 overflow-hidden">
                             <div
-                              className="bg-app-accent h-1.5 rounded-full transition-all duration-300"
-                              style={{ width: `${((activeClusterIndex + 1) / 3) * 100}%` }}
-                            />
-                          </div>
-
-                          <h3 className="font-serif text-lg font-bold text-app-ink mt-2">{cluster.title}</h3>
-                          <p className="text-xs text-app-ink-muted font-semibold">{cluster.description}</p>
-                        </header>
-
-                        {/* Danh sách thẻ slider trong cụm */}
-                        <div className="mt-5 space-y-4">
-                          {cluster.areas.map((areaName) => {
-                            const areaIndex = lifeAreas.findIndex((a) => a.name === areaName);
-                            const area = lifeAreas[areaIndex];
-                            if (!area) return null;
-
-                            const AreaIcon = getLifeAreaIcon(area.name);
-                            const colorConfig = getAreaColorConfig(area.name);
-                            const label = getLifeAreaLabel(area.name);
-
-                            return (
-                              <div
-                                key={area.name}
-                                className={cn(
-                                  "rounded-xl border p-4 shadow-3xs space-y-4",
-                                  colorConfig.bgLight,
-                                  colorConfig.border,
-                                )}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2.5">
-                                    <span
-                                      className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm"
-                                      style={{ backgroundColor: colorConfig.accent }}
-                                    >
-                                      <AreaIcon className="h-5 w-5" />
-                                    </span>
-                                    <div>
-                                      <h4 className="text-xs font-bold text-app-ink">{label}</h4>
-                                      <p className="text-[10px] text-app-ink-muted font-semibold leading-normal">
-                                        {LIFE_AREA_DETAILS[area.name]}
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-baseline gap-1 bg-app-bg-subtle border border-app-line px-2.5 py-1 rounded-control">
-                                    <span
-                                      className="font-serif text-lg font-extrabold text-app-ink"
-                                      style={{ color: colorConfig.accent }}
-                                    >
-                                      {area.score}
-                                    </span>
-                                    <span className="text-[10px] text-app-ink-muted font-bold">/10</span>
-                                  </div>
-                                </div>
-
-                                {/* Slider + Button di động */}
-                                <div className="space-y-3 pt-1">
-                                  <div className="flex items-center gap-3">
-                                    <motion.button
-                                      whileHover={{ scale: 1.05 }}
-                                      whileTap={{ scale: 0.95 }}
-                                      type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg-subtle active:scale-95 transition-all select-none font-sans"
-                                      onClick={() => handleScoreChange(areaIndex, [Math.max(1, area.score - 1)])}
-                                      aria-label={`Giảm ${label}`}
-                                    >
-                                      −
-                                    </motion.button>
-
-                                    <div className="grow px-1">
-                                      <Slider
-                                        value={[area.score]}
-                                        onValueChange={(value) => handleScoreChange(areaIndex, value)}
-                                        min={1}
-                                        max={10}
-                                        step={1}
-                                        trackColor={colorConfig.accent}
-                                        className="w-full cursor-pointer"
-                                        aria-label={`Điểm ${label}`}
-                                      />
-                                    </div>
-
-                                    <motion.button
-                                      whileHover={{ scale: 1.05 }}
-                                      whileTap={{ scale: 0.95 }}
-                                      type="button"
-                                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink hover:bg-app-bg-subtle active:scale-95 transition-all select-none font-sans"
-                                      onClick={() => handleScoreChange(areaIndex, [Math.min(10, area.score + 1)])}
-                                      aria-label={`Tăng ${label}`}
-                                    >
-                                      +
-                                    </motion.button>
-                                  </div>
-
-                                  <div className="flex justify-between text-[9px] font-bold text-app-ink-muted uppercase tracking-wider px-1">
-                                    {[
-                                      { range: "1–2", label: "Rất chật vật" },
-                                      { range: "3–4", label: "Thiếu ổn định" },
-                                      { range: "5–6", label: "Tạm ổn" },
-                                      { range: "7–8", label: "Khá tốt" },
-                                      { range: "9–10", label: "Rất tốt" },
-                                    ].map((anchor) => {
-                                      const isActive =
-                                        (area.score <= 2 && anchor.range === "1–2") ||
-                                        (area.score >= 3 && area.score <= 4 && anchor.range === "3–4") ||
-                                        (area.score >= 5 && area.score <= 6 && anchor.range === "5–6") ||
-                                        (area.score >= 7 && area.score <= 8 && anchor.range === "7–8") ||
-                                        (area.score >= 9 && anchor.range === "9–10");
-                                      return (
-                                        <span
-                                          key={anchor.range}
-                                          className={cn(
-                                            "rounded-full px-1.5 py-0.5 transition-colors",
-                                            isActive ? "bg-app-accent/15 text-app-accent" : "",
-                                          )}
-                                        >
-                                          {anchor.range} {anchor.label}
-                                        </span>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Chân Wizard */}
-                        <div className="mt-6 pt-4 border-t border-app-line/65 flex items-center justify-between gap-3">
-                          <motion.button
-                            whileHover={{ scale: 1.015 }}
-                            whileTap={{ scale: 0.985 }}
-                            type="button"
-                            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-app-line bg-app-surface px-5 py-2.5 text-xs font-bold text-app-ink-soft hover:bg-app-bg hover:text-app-ink active:scale-[0.97] transition-all cursor-pointer font-sans"
-                            onClick={() => {
-                              if (activeClusterIndex > 0) {
-                                setActiveClusterIndex(activeClusterIndex - 1);
-                              } else {
-                                setIsCheckInMode(false);
-                              }
-                            }}
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                            Quay lại
-                          </motion.button>
-
-                          <div className="flex gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.015 }}
-                              whileTap={{ scale: 0.985 }}
-                              type="button"
-                              className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold text-app-ink-muted hover:text-app-ink cursor-pointer font-sans"
-                              onClick={() => setIsCheckInMode(false)}
-                            >
-                              Hủy bỏ
-                            </motion.button>
-
-                            <motion.button
-                              whileHover={{ scale: 1.015 }}
-                              whileTap={{ scale: 0.985 }}
-                              type="button"
-                              className="inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-1.5 rounded-full bg-app-accent hover:bg-app-accent-hover px-6 py-2.5 text-xs font-bold text-white transition-all active:scale-[0.97] shadow-md cursor-pointer font-sans"
-                              onClick={() => {
-                                if (activeClusterIndex < 2) {
-                                  setActiveClusterIndex(activeClusterIndex + 1);
-                                  // Tự động cuộn lên đầu card wizard để người dùng không bị lệch focus
-                                  const cardHeader = document.querySelector("h3[class*='font-serif text-lg']");
-                                  if (cardHeader) {
-                                    cardHeader.scrollIntoView({ behavior: "smooth" });
-                                  }
-                                } else {
-                                  handleSave();
-                                  setIsCheckInMode(false);
-                                  handleTabChange("focus");
-                                }
+                              key={area.name}
+                              className="flex items-center gap-2.5 rounded-[13px] border p-2.5 transition-transform hover:translate-y-[-1px]"
+                              style={{
+                                backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 14%, white)`,
+                                borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
                               }}
                             >
-                              {activeClusterIndex < 2 ? (
-                                <>
-                                  Tiếp tục
-                                  <ChevronRight className="h-4 w-4" />
-                                </>
-                              ) : (
-                                <>
-                                  Lưu & Xem kết quả
-                                  <Save className="h-4 w-4" />
-                                </>
-                              )}
-                            </motion.button>
+                              <span
+                                className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-white"
+                                style={{ backgroundColor: colorConfig.accent }}
+                              >
+                                <AreaIcon className="h-4 w-4" />
+                              </span>
+                              <span className="text-xs font-semibold text-app-ink flex-1 leading-tight">{label}</span>
+                              <span
+                                className="font-[family-name:var(--app-font-serif)] text-base font-extrabold"
+                                style={{ color: colorConfig.accent }}
+                              >
+                                {area.score}đ
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-end mt-4 pt-3 border-t border-app-line/50">
+                        <Link
+                          to="/onboarding"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0C5E3A] hover:text-[#0a4f30] hover:underline"
+                        >
+                          Làm lại khảo sát toàn diện
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                    </section>
+                  </>
+                ) : (
+                  /* CHECK-IN EDIT MODE */
+                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white p-5 md:p-6 shadow-md">
+                    <header className="pb-4 mb-1 border-b border-app-line/60">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A]">Đang Check-in</h3>
+                        <span className="text-[10px] font-bold text-app-ink-muted font-mono">
+                          {changedAreaCount}/{lifeAreas.length} mục đã cập nhật
+                        </span>
+                      </div>
+                      <div className="w-full bg-app-line rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-[#0C5E3A] h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.round((changedAreaCount / lifeAreas.length) * 100)}%` }}
+                        />
+                      </div>
+                    </header>
+
+                    <div className="mt-5 space-y-4">
+                      {lifeAreas.map((area, index) => {
+                        const AreaIcon = getLifeAreaIcon(area.name);
+                        const colorConfig = getAreaColorConfig(area.name);
+                        const label = getLifeAreaLabel(area.name);
+                        const isChanged = area.score !== (initialScores[area.name] ?? area.score);
+
+                        return (
+                          <div
+                            key={area.name}
+                            className="rounded-xl border p-4 space-y-3 transition-all"
+                            style={{
+                              borderColor: isChanged
+                                ? `color-mix(in oklab, ${colorConfig.accent} 40%, transparent)`
+                                : "var(--app-line)",
+                              backgroundColor: isChanged
+                                ? `color-mix(in oklab, ${colorConfig.accent} 14%, white)`
+                                : "var(--app-bg)",
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                <span
+                                  className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm"
+                                  style={{ backgroundColor: colorConfig.accent }}
+                                >
+                                  <AreaIcon className="h-5 w-5" />
+                                </span>
+                                <div>
+                                  <h4 className="text-xs font-bold text-app-ink">{label}</h4>
+                                  <p className="text-[10px] text-app-ink-muted font-medium leading-normal mt-0.5">
+                                    {LIFE_AREA_DETAILS[area.name]}
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                className="flex items-baseline gap-1 px-2.5 py-1 rounded-lg border text-sm"
+                                style={{
+                                  borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
+                                  backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 16%, white)`,
+                                }}
+                              >
+                                <span
+                                  className="font-[family-name:var(--app-font-serif)] text-lg font-extrabold"
+                                  style={{ color: colorConfig.accent }}
+                                >
+                                  {area.score}
+                                </span>
+                                <span className="text-[10px] font-bold text-app-ink-muted">/10</span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 pt-1">
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                type="button"
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink hover:bg-app-bg active:scale-95 transition-all select-none cursor-pointer"
+                                onClick={() => handleScoreChange(index, [Math.max(1, area.score - 1)])}
+                                aria-label={`Giảm ${label}`}
+                              >
+                                −
+                              </motion.button>
+
+                              <div className="grow px-1">
+                                <Slider
+                                  value={[area.score]}
+                                  onValueChange={(value) => handleScoreChange(index, value)}
+                                  min={1}
+                                  max={10}
+                                  step={1}
+                                  trackColor={colorConfig.accent}
+                                  className="w-full cursor-pointer"
+                                  aria-label={`Điểm ${label}`}
+                                />
+                              </div>
+
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                type="button"
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink hover:bg-app-bg active:scale-95 transition-all select-none cursor-pointer"
+                                onClick={() => handleScoreChange(index, [Math.min(10, area.score + 1)])}
+                                aria-label={`Tăng ${label}`}
+                              >
+                                +
+                              </motion.button>
+                            </div>
+
+                            <div className="flex justify-between text-[9px] font-bold text-app-ink-muted uppercase tracking-wider px-1">
+                              <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score <= 2 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>1–2 Rất chật vật</span>
+                              <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score >= 3 && area.score <= 4 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>3–4 Thiếu ổn định</span>
+                              <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score >= 5 && area.score <= 6 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>5–6 Tạm ổn</span>
+                              <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score >= 7 && area.score <= 8 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>7–8 Khá tốt</span>
+                              <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score >= 9 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>9–10 Rất tốt</span>
+                            </div>
                           </div>
-                        </div>
-                      </MotionFadeIn>
-                    );
-                  })()
+                        );
+                      })}
+                    </div>
+
+                    <footer className="mt-5 pt-4 border-t border-app-line/60 flex items-center justify-end gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.015 }}
+                        whileTap={{ scale: 0.985 }}
+                        type="button"
+                        onClick={handleCancelCheckIn}
+                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-white px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-colors cursor-pointer"
+                      >
+                        Hủy bỏ
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.015 }}
+                        whileTap={{ scale: 0.985 }}
+                        type="button"
+                        onClick={handleFinishCheckIn}
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-[#0C5E3A] hover:bg-[#0a4f30] px-6 py-2.5 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                      >
+                        Lưu & Xem kết quả
+                        <Save className="h-4 w-4" />
+                      </motion.button>
+                    </footer>
+                  </section>
                 )}
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="history" className="mt-6">
+          <TabsContent value="history" className="mt-5">
             <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
               <header>
                 <h2 className="text-base font-semibold text-app-ink">Diễn biến 6 đợt gần nhất</h2>
@@ -884,13 +807,10 @@ export function LifeBalance() {
             </section>
           </TabsContent>
 
-          {/* 2B-1: Tab Trọng tâm — chọn lĩnh vực + CTA tới SMART Goal */}
-          <TabsContent value="focus" className="mt-6">
+          <TabsContent value="focus" className="mt-5">
             {focusArea && focusSmartGoalStarter ? (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                {/* Left: Chọn trọng tâm */}
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <div className="space-y-5">
-                  {/* Insight card cá nhân hóa */}
                   <section className="surface-raised rounded-2xl border border-app-status-success/20 bg-app-status-success/5 p-5">
                     <h3 className="text-sm font-bold text-app-ink flex items-center gap-2">
                       <Target className="h-4 w-4 text-app-status-success" />
@@ -904,7 +824,6 @@ export function LifeBalance() {
                     </p>
                   </section>
 
-                  {/* Picker chọn area khác */}
                   <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5">
                     <header className="pb-3 border-b border-app-line/60">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">
@@ -967,25 +886,22 @@ export function LifeBalance() {
                   </section>
                 </div>
 
-                {/* Right: CTA + gợi ý */}
                 <div className="space-y-5 lg:sticky lg:top-6">
-                  {/* Focus Card */}
                   <section className="surface-raised rounded-2xl border border-app-accent/20 bg-app-bg-subtle p-6 shadow-app-md relative overflow-hidden">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent">
                       LĨNH VỰC TRỌNG TÂM
                     </span>
-                    <h2 className="mt-2 font-serif text-2xl font-bold text-app-ink">
+                    <h2 className="mt-2 font-[family-name:var(--app-font-serif)] text-2xl font-bold text-app-ink">
                       {getLifeAreaLabel(focusArea.name)}
                     </h2>
                     <p className="mt-1 text-xs text-app-ink-soft">Điểm hiện tại: {focusArea.score}/10</p>
 
-                    {/* Gợi ý mục tiêu */}
                     <div className="mt-4 p-4 rounded-xl border border-app-line bg-app-surface space-y-2">
                       <span className="text-[9px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
                         <Sparkles className="h-3 w-3" />
                         Gợi ý mục tiêu 12 tuần
                       </span>
-                      <p className="text-xs font-serif italic text-app-ink leading-relaxed">
+                      <p className="text-xs font-[family-name:var(--app-font-serif)] italic text-app-ink leading-relaxed">
                         "{focusSmartGoalStarter.specificGoalStatement}"
                       </p>
                       <p className="text-xs text-app-ink-muted italic">
@@ -993,7 +909,6 @@ export function LifeBalance() {
                       </p>
                     </div>
 
-                    {/* CTA */}
                     <motion.button
                       whileHover={{ scale: 1.015 }}
                       whileTap={{ scale: 0.985 }}
@@ -1008,13 +923,11 @@ export function LifeBalance() {
                       Bước tiếp: biến trọng tâm thành mục tiêu 12 tuần rõ ràng.
                     </p>
 
-                    {/* Link sang LifeInsight đầy đủ */}
                     <div className="mt-4 pt-4 border-t border-app-line/60 flex justify-center">
                       <Link
                         to="/life-insight"
                         className="inline-flex min-h-11 items-center gap-1 px-3 py-2 text-xs font-medium text-app-ink-soft hover:text-app-ink transition-colors"
                       >
-                        <RotateCcw className="h-3.5 w-3.5" />
                         Xem bản đầy đủ trang Góc nhìn
                       </Link>
                     </div>

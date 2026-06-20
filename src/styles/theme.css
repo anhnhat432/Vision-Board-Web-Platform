@@ -3885,6 +3885,33 @@ html.dark .weekly-grain-overlay::before {
 .tab-pane > *:nth-child(8)  { animation-delay: 0.37s; }
 .tab-pane > *:nth-child(n+9) { animation-delay: 0.42s; }
 
+/* ── Life Balance: radar chart entrance animation ────────────── */
+@keyframes dof-radar-in {
+  from { opacity: 0; transform: scale(0.45); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.dof-radar-grp {
+  transform-origin: 220px 200px;
+  animation: dof-radar-in 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.45s both;
+}
+@keyframes dof-dot {
+  0%   { r: 0; }
+  100% { r: 4; }
+}
+.dof-radar-grp circle {
+  animation: dof-dot 0.5s ease-out 0.9s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dof-radar-grp,
+  .dof-radar-grp circle {
+    animation: none !important;
+  }
+  .dof-radar-grp {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ── 12 Week System: progress bar grow animation ────────────── */
 @keyframes dof-bar {
   from { transform: scaleX(0); }

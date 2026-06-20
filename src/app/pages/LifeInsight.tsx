@@ -436,14 +436,7 @@ export function LifeInsight() {
                 </div>
 
                 <div className="mt-4 flex items-center justify-center min-h-[300px] select-none">
-                  <SimpleRadarChart
-                    data={radarData}
-                    height={300}
-                    stroke="var(--app-accent)"
-                    fill="var(--app-accent)"
-                    fillOpacity={0.15}
-                    className="w-full max-w-[320px] transition-all duration-500 ease-out"
-                  />
+                  <SimpleRadarChart data={radarData} />
                 </div>
 
                 {/* Life Pattern Tóm tắt tích hợp dưới biểu đồ */}

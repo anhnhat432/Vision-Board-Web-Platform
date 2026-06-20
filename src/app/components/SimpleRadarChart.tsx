@@ -6,188 +6,141 @@ interface SimpleRadarChartPoint {
 
 interface SimpleRadarChartProps {
   data: SimpleRadarChartPoint[];
-  height?: number;
-  stroke?: string;
-  fill?: string;
-  fillOpacity?: number;
   className?: string;
-  dotColors?: string[];
 }
 
-const VIEWBOX_SIZE = 560;
-const CENTER = VIEWBOX_SIZE / 2;
-const OUTER_RADIUS = 155;
-const GRID_LEVELS = 5;
-const LABEL_RADIUS = OUTER_RADIUS + 38;
+const CX = 220;
+const CY = 200;
+const R = 140;
+const RING_FRACTIONS = [0.25, 0.5, 0.75, 1];
 
-function toRadians(index: number, total: number) {
-  return -Math.PI / 2 + (index / total) * Math.PI * 2;
+function pt(index: number, radius: number, total: number): [number, number] {
+  const angle = (-90 + index * (360 / total)) * (Math.PI / 180);
+  return [CX + radius * Math.cos(angle), CY + radius * Math.sin(angle)];
 }
 
-function toPoint(radius: number, angle: number) {
-  return {
-    x: CENTER + Math.cos(angle) * radius,
-    y: CENTER + Math.sin(angle) * radius,
-  };
-}
-
-function getLabelPoint(angle: number) {
-  const basePoint = toPoint(LABEL_RADIUS, angle);
-  const horizontalBias = Math.cos(angle);
-  const verticalBias = Math.sin(angle);
-
-  return {
-    x: basePoint.x + (Math.abs(horizontalBias) > 0.45 ? horizontalBias * 6 : 0),
-    y: basePoint.y + (verticalBias < -0.55 ? -8 : 0) + (verticalBias > 0.55 ? 10 : 0),
-  };
-}
-
-function buildPolygonPath(points: Array<{ x: number; y: number }>) {
-  if (points.length === 0) return "";
-  return `${points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")} Z`;
-}
-
-function getTextAnchor(x: number) {
-  if (x < CENTER - 18) return "end";
-  if (x > CENTER + 18) return "start";
-  return "middle";
-}
-
-function splitLabel(label: string) {
+function splitLabel(label: string): string[] {
   const words = label.trim().split(/\s+/);
   if (words.length <= 2) return [label];
-
-  const midpoint = Math.ceil(words.length / 2);
-  return [words.slice(0, midpoint).join(" "), words.slice(midpoint).join(" ")];
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")];
 }
 
-export function SimpleRadarChart({
-  data,
-  height,
-  stroke = "var(--app-accent)",
-  fill = "var(--app-accent)",
-  fillOpacity = 0.15,
-  className,
-  dotColors,
-}: SimpleRadarChartProps) {
+export function SimpleRadarChart({ data, className }: SimpleRadarChartProps) {
   if (data.length === 0) return null;
 
-  const levels = Array.from({ length: GRID_LEVELS }, (_, index) => index + 1);
   const total = data.length;
-  const fullMark = Math.max(...data.map((item) => item.fullMark ?? 10), 1);
-
-  const axisPoints = data.map((_, index) => {
-    const angle = toRadians(index, total);
-    return {
-      angle,
-      inner: toPoint(0, angle),
-      outer: toPoint(OUTER_RADIUS, angle),
-      label: getLabelPoint(angle),
-    };
-  });
-
-  const valuePoints = data.map((item, index) => {
-    const angle = axisPoints[index]?.angle ?? toRadians(index, total);
-    const ratio = Math.max(0, Math.min((item.value ?? 0) / (item.fullMark ?? fullMark), 1));
-    return toPoint(OUTER_RADIUS * ratio, angle);
-  });
 
   return (
-    <div
-      className={`w-full h-auto aspect-square max-h-[360px] ${className || ""}`}
-      style={height ? { maxHeight: height } : undefined}
-    >
+    <div className={`w-full ${className || ""}`}>
       <svg
         aria-label="Biểu đồ radar tổng quan"
-        className="h-full w-full"
-        preserveAspectRatio="xMidYMid meet"
+        viewBox="0 0 440 420"
+        width="100%"
+        style={{ maxWidth: 480, height: "auto", display: "block", margin: "0 auto" }}
         role="img"
-        viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
+        preserveAspectRatio="xMidYMid meet"
       >
-        {levels.map((level) => {
-          const radius = (OUTER_RADIUS / GRID_LEVELS) * level;
-          const points = axisPoints.map(({ angle }) => toPoint(radius, angle));
+        {RING_FRACTIONS.map((f) => {
+          const r = R * f;
+          const points = Array.from({ length: total }, (_, i) => {
+            const [x, y] = pt(i, r, total);
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          }).join(" ");
           return (
-            <path
-              key={`grid-${level}`}
-              d={buildPolygonPath(points)}
-              fill={level === GRID_LEVELS ? "var(--app-bg)" : "none"}
-              stroke="var(--app-line)"
+            <polygon
+              key={`ring-${f}`}
+              points={points}
+              fill={f === 1 ? "#FAFAF7" : "none"}
+              stroke="rgba(23,21,15,0.10)"
               strokeWidth={1}
             />
           );
         })}
 
-        {axisPoints.map(({ inner, outer }, index) => (
-          <line
-            key={`axis-${data[index]?.subject ?? index}`}
-            stroke="var(--app-line)"
-            strokeWidth={1}
-            x1={inner.x}
-            x2={outer.x}
-            y1={inner.y}
-            y2={outer.y}
-          />
-        ))}
+        {Array.from({ length: total }, (_, i) => {
+          const [x, y] = pt(i, R, total);
+          return (
+            <line
+              key={`spoke-${i}`}
+              x1={CX}
+              y1={CY}
+              x2={x.toFixed(1)}
+              y2={y.toFixed(1)}
+              stroke="rgba(23,21,15,0.08)"
+              strokeWidth={1}
+            />
+          );
+        })}
 
-        <path
-          d={buildPolygonPath(valuePoints)}
-          fill={fill}
-          fillOpacity={fillOpacity}
-          stroke={stroke}
-          strokeWidth={2.5}
-        />
-
-        {valuePoints.map((point, index) => (
-          <circle
-            key={`point-${data[index]?.subject ?? index}`}
-            cx={point.x}
-            cy={point.y}
-            fill="var(--app-surface)"
-            r={5}
-            stroke={dotColors?.[index] ?? stroke}
+        <g className="dof-radar-grp">
+          <polygon
+            points={data
+              .map((item, i) => {
+                const [x, y] = pt(i, R * ((item.value ?? 0) / (item.fullMark ?? 10)), total);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+              })
+              .join(" ")}
+            fill="rgba(12,94,58,0.16)"
+            stroke="#0C5E3A"
             strokeWidth={2.5}
+            strokeLinejoin="round"
           />
-        ))}
 
-        {axisPoints.map(({ label }, index) => {
-          const item = data[index];
-          if (!item) return null;
+          {data.map((item, i) => {
+            const [x, y] = pt(i, R * ((item.value ?? 0) / (item.fullMark ?? 10)), total);
+            return (
+              <circle
+                key={`dot-${item.subject}`}
+                cx={x.toFixed(1)}
+                cy={y.toFixed(1)}
+                r={4}
+                fill="#0C5E3A"
+                stroke="#fff"
+                strokeWidth={1.5}
+              />
+            );
+          })}
+        </g>
 
+        {data.map((item, i) => {
+          const [lx, ly] = pt(i, R + 24, total);
+          const anchor = i === 0 || i === total / 2 ? "middle" : i < total / 2 ? "start" : "end";
+          const yOff = i === 0 ? -6 : i === total / 2 ? 6 : 0;
           const lines = splitLabel(item.subject);
-          const anchor = getTextAnchor(label.x);
-          const scorePoint = {
-            x: label.x,
-            y: label.y + (lines.length > 1 ? 22 : 18),
-          };
+          const scoreDy = lines.length === 2 ? 13 + 12 : 13;
 
           return (
-            <g key={`label-${item.subject}`}>
-              <text
-                fill="var(--app-ink-soft)"
-                fontSize="16"
-                fontWeight="500"
-                textAnchor={anchor}
-                x={label.x}
-                y={label.y}
+            <text
+              key={`label-${item.subject}`}
+              x={lx.toFixed(1)}
+              y={(ly + yOff).toFixed(1)}
+              textAnchor={anchor}
+              fontFamily="'Be Vietnam Pro', sans-serif"
+            >
+              {lines.map((line, li) => (
+                <tspan
+                  key={`${item.subject}-${li}`}
+                  x={lx.toFixed(1)}
+                  dy={li === 0 ? 0 : li === 1 ? 12 : 13}
+                  fontSize={10.5}
+                  fontWeight={600}
+                  fill="#5C574B"
+                >
+                  {line}
+                </tspan>
+              ))}
+              <tspan
+                x={lx.toFixed(1)}
+                dy={scoreDy}
+                fontSize={9.5}
+                fontWeight={600}
+                fill="#A8A296"
+                fontFamily="'JetBrains Mono', monospace"
               >
-                {lines.map((line, lineIndex) => (
-                  <tspan dy={lineIndex === 0 ? 0 : 19} key={`${item.subject}-${line}`} x={label.x}>
-                    {line}
-                  </tspan>
-                ))}
-              </text>
-              <text
-                fill="var(--app-ink-muted)"
-                fontSize="14"
-                fontWeight="500"
-                textAnchor={anchor}
-                x={scorePoint.x}
-                y={scorePoint.y + (lines.length - 1) * 19}
-              >
-                {item.value}/{item.fullMark ?? fullMark}
-              </text>
-            </g>
+                {item.value}/{item.fullMark ?? 10}
+              </tspan>
+            </text>
           );
         })}
       </svg>
