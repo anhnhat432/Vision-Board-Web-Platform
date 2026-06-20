@@ -143,8 +143,7 @@ export function BillingCheckoutQR() {
           setError("Mạng có vấn đề, vui lòng thử lại");
         } else {
           logBillingUiError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid });
-          const msg = err instanceof Error ? err.message : "Lỗi khi kiểm tra đơn hàng";
-          setError(msg);
+          setError("Không thể tải trạng thái đơn hàng. Vui lòng thử lại.");
         }
       } finally {
         setLoading(false);
