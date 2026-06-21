@@ -6,8 +6,11 @@ import {
   completePaymentOrderManually,
   getAdminPaymentOrders,
   getAdminOverview,
+  getAdminUserDetail,
+  getAdminUsers,
   getReconciliationLastRun,
   sendExpiringBillingReminders,
+  updateAdminUserRole,
 } from "../controllers/adminController";
 import { getAdminAuditLogs } from "../controllers/auditLogController";
 import {
@@ -207,6 +210,19 @@ adminRoutes.post(
     handler: completePaymentOrderManually,
   }),
 );
+adminRoutes.get("/admin/users", asyncHandler(requireAdmin), asyncHandler(getAdminUsers));
+adminRoutes.get("/admin/users/:uid", asyncHandler(requireAdmin), asyncHandler(getAdminUserDetail));
+adminRoutes.patch(
+  "/admin/users/:uid/role",
+  auditedAdminAction({
+    action: "updateUserRole",
+    target: "user",
+    getTargetId: (req) => req.params.uid ?? null,
+    validators: [validateOptionalJsonObjectBody],
+    handler: updateAdminUserRole,
+  }),
+);
+
 adminRoutes.get("/admin/billing/refund-requests", asyncHandler(requireAdmin), asyncHandler(getAdminRefundRequests));
 adminRoutes.post(
   "/admin/billing/refund-requests/:requestId/complete",

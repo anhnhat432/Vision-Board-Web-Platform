@@ -213,6 +213,18 @@ export const appRoutes = [
             path: "discounts",
             ...lazyRoute(() => import("./pages/AdminDiscountsPage"), "AdminDiscountsPage"),
           },
+          {
+            path: "users",
+            ...lazyRoute(() => import("./pages/AdminUsersPage"), "AdminUsersPage"),
+          },
+          {
+            path: "users/:uid",
+            ...lazyRoute(() => import("./pages/AdminUserDetailPage"), "AdminUserDetailPage"),
+          },
+          {
+            path: "audit-logs",
+            ...lazyRoute(() => import("./pages/AdminAuditLogsPage"), "AdminAuditLogsPage"),
+          },
         ],
       },
       {
