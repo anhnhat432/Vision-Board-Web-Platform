@@ -984,7 +984,8 @@ export function RootLayout() {
   // Dùng !user (không phụ thuộc isConfigured) để khớp điều kiện Dashboard hiển thị
   // PublicVisitorView — tránh trùng header khi demo chưa cấu hình Firebase.
   const isPublicLanding = !user && normalizePathname(location.pathname) === "/";
-  const showSidebar = !isSignedOutVisitor && !isPublicLanding;
+  const isAdminRoute = location.pathname.startsWith("/admin/");
+  const showSidebar = !isSignedOutVisitor && !isPublicLanding && !isAdminRoute;
 
   return (
     <AutoCloudSyncProvider>

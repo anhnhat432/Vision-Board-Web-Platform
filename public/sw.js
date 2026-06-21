@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "vbweb-2026-05-16-favicon";
+const CACHE_NAME = "vbweb-2026-06-21-v2";
 const PRECACHE_URLS = ["/index.html"];
 
 self.addEventListener("install", (event) => {
@@ -8,17 +8,23 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_NAME)
       .then((cache) =>
-        cache.addAll(PRECACHE_URLS.map((url) => new Request(url, { cache: "reload" })))
-      )
+        cache.addAll(
+          PRECACHE_URLS.map((url) => new Request(url, { cache: "reload" })),
+        ),
+      ),
   );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
+        ),
+      ),
   );
   self.clients.claim();
 });
@@ -48,19 +54,38 @@ self.addEventListener("fetch", (event) => {
         .then((response) => {
           if (response.ok) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put("/index.html", clone));
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put("/index.html", clone));
           }
           return response;
         })
-        .catch(() => caches.match("/index.html"))
+        .catch(() => caches.match("/index.html")),
     );
     return;
   }
 
-  // Static assets (JS, CSS, images): cache-first
-  if (
-    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico)$/)
-  ) {
+  // Static assets (JS, CSS): stale-while-revalidate.
+  // Hashed filenames (Vite) ensure new deploys get new URLs, so a brief stale
+  // read is safe while we fetch the latest copy in the background.
+  if (url.pathname.match(/\.(js|css)$/)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const networkFetch = fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+        return cached || networkFetch;
+      }),
+    );
+    return;
+  }
+
+  // Images and fonts: cache-first (these rarely change and are expensive to re-fetch)
+  if (url.pathname.match(/\.(png|jpg|jpeg|svg|woff2?|ico)$/)) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>
@@ -68,11 +93,13 @@ self.addEventListener("fetch", (event) => {
           fetch(request).then((response) => {
             if (response.ok) {
               const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              caches
+                .open(CACHE_NAME)
+                .then((cache) => cache.put(request, clone));
             }
             return response;
-          })
-      )
+          }),
+      ),
     );
     return;
   }
