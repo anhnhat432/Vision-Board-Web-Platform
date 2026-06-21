@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { CouponUsageModel } from "../models/CouponUsageModel";
 import { DiscountModel } from "../models/DiscountModel";
 import type { DiscountAppliesTo, DiscountType, DiscountValueType } from "../models/DiscountModel";
-import { getActiveSaleEvent, validateCoupon } from "../services/discountService";
+import { calculateDiscountAmount, getActiveSaleEvent, validateCoupon } from "../services/discountService";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 
@@ -282,12 +282,27 @@ async function getCouponUsages(req: Request, res: Response): Promise<void> {
   );
 }
 
-async function getActiveSaleEventInfo(_req: Request, res: Response): Promise<void> {
-  const sale = await getActiveSaleEvent();
+function parsePositiveAmount(value: unknown): number | undefined {
+  if (typeof value !== "string") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+async function getActiveSaleEventInfo(req: Request, res: Response): Promise<void> {
+  const purpose = typeof req.query.purpose === "string" ? req.query.purpose.trim() : undefined;
+  const originalAmount = parsePositiveAmount(req.query.amount);
+  const sale = await getActiveSaleEvent(purpose, originalAmount);
   if (!sale) {
     res.status(200).json(successResponse({ active: false }));
     return;
   }
+
+  const discountAmount = originalAmount
+    ? calculateDiscountAmount(originalAmount, sale.discountType, sale.discountValue)
+    : undefined;
+  const finalAmount = originalAmount && discountAmount !== undefined
+    ? Math.max(originalAmount - discountAmount, 1000)
+    : undefined;
 
   res.status(200).json(
     successResponse({
@@ -297,6 +312,9 @@ async function getActiveSaleEventInfo(_req: Request, res: Response): Promise<voi
       name: sale.name,
       discountType: sale.discountType,
       discountValue: sale.discountValue,
+      discountAmount,
+      originalAmount,
+      finalAmount,
       startsAt: sale.startsAt,
       endsAt: sale.endsAt,
     }),
@@ -323,7 +341,8 @@ async function validateCouponHandler(req: Request, res: Response): Promise<void>
   const purpose = typeof body.purpose === "string" ? body.purpose.trim() : undefined;
 
   const userId = req.user?.uid;
-  const result = await validateCoupon(code, planCode, purpose, userId);
+  const originalAmount = parsePositiveAmount(body.originalAmount);
+  const result = await validateCoupon(code, planCode, purpose, userId, originalAmount);
 
   if (!result.valid) {
     result.reason = "Mã giảm giá không hợp lệ hoặc đã hết hạn.";

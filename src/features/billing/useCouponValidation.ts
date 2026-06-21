@@ -25,10 +25,11 @@ export interface CouponValidationState {
 export interface UseCouponValidationOptions {
   planCode?: string;
   purpose?: "plus_subscription" | "physical_order";
+  originalAmount?: number;
 }
 
 export function useCouponValidation(options: UseCouponValidationOptions = {}) {
-  const { planCode = "PLUS", purpose } = options;
+  const { planCode = "PLUS", purpose, originalAmount } = options;
   const [state, setState] = useState<CouponValidationState>({
     status: "idle",
     discount: null,
@@ -53,7 +54,7 @@ export function useCouponValidation(options: UseCouponValidationOptions = {}) {
       try {
         const result = await apiClient.post<{ valid: boolean } & DiscountInfo>(
           "/billing/validate-coupon",
-          { code: trimmed, planCode, purpose },
+          { code: trimmed, planCode, purpose, ...(Number.isFinite(originalAmount) && originalAmount && originalAmount > 0 ? { originalAmount } : {}) },
           { signal: controller.signal },
         );
 
@@ -71,7 +72,7 @@ export function useCouponValidation(options: UseCouponValidationOptions = {}) {
         setState({ status: "invalid", discount: null, error: message });
       }
     },
-    [planCode, purpose],
+    [originalAmount, planCode, purpose],
   );
 
   useEffect(() => {
@@ -81,6 +82,8 @@ export function useCouponValidation(options: UseCouponValidationOptions = {}) {
   }, []);
 
   const reset = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     setState({ status: "idle", discount: null, error: null });
   }, []);
 

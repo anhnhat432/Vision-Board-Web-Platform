@@ -1,5 +1,6 @@
-import { Check, Loader2, Tag, X } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+﻿import { Check, Loader2, Tag, X } from "lucide-react";
+import { useState, useCallback, useEffect, useId } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { formatVndAmount, ENV_DISCOUNT_PERCENT } from "@/app/utils/billing-pricing";
@@ -17,7 +18,53 @@ export interface BillingDiscountSectionProps {
     discountPercent?: number;
     discountValue?: number;
     discountType?: "percentage" | "fixed";
+    discountAmount?: number;
+    finalAmount?: number;
   } | null;
+}
+
+function getDiscountAmountFromInfo(discount: DiscountInfo | null, originalAmount: number): number {
+  if (!discount) return 0;
+  if (Number.isFinite(discount.discountAmount) && discount.discountAmount !== undefined) {
+    return Math.max(0, discount.discountAmount);
+  }
+  if (discount.discountType === "percentage" && Number.isFinite(discount.discountValue)) {
+    return Math.round(originalAmount * (discount.discountValue ?? 0) / 100);
+  }
+  if (discount.discountType === "fixed" && Number.isFinite(discount.discountValue)) {
+    return Math.min(discount.discountValue ?? 0, originalAmount);
+  }
+  if (Number.isFinite(discount.discountPercent)) {
+    return Math.round(originalAmount * (discount.discountPercent ?? 0) / 100);
+  }
+  return 0;
+}
+
+function getSaleDiscountAmount(
+  saleEvent: BillingDiscountSectionProps["saleEvent"],
+  originalAmount: number,
+): number {
+  if (!saleEvent) return 0;
+  if (Number.isFinite(saleEvent.discountAmount) && saleEvent.discountAmount !== undefined) {
+    return Math.max(0, saleEvent.discountAmount);
+  }
+  if (Number.isFinite(saleEvent.discountPercent) && saleEvent.discountPercent) {
+    return Math.round(originalAmount * saleEvent.discountPercent / 100);
+  }
+  if (Number.isFinite(saleEvent.discountValue) && saleEvent.discountValue) {
+    return Math.min(saleEvent.discountValue, originalAmount);
+  }
+  return 0;
+}
+
+function getFinalAmount(originalAmount: number, discountAmount: number): number {
+  return discountAmount > 0 ? Math.max(originalAmount - discountAmount, 1000) : originalAmount;
+}
+
+function getSaleLabel(saleEvent: NonNullable<BillingDiscountSectionProps["saleEvent"]>, saleAmount: number): string {
+  if (saleEvent.discountPercent) return `Gi?m ${saleEvent.discountPercent}%`;
+  if (saleEvent.discountValue) return `Gi?m ${formatVndAmount(saleEvent.discountValue)}`;
+  return `Gi?m ${formatVndAmount(saleAmount)}`;
 }
 
 export function BillingDiscountSection({
@@ -28,8 +75,11 @@ export function BillingDiscountSection({
   onCouponChange,
   saleEvent,
 }: BillingDiscountSectionProps) {
+  const inputId = useId();
+  const errorId = `${inputId}-error`;
+  const statusId = `${inputId}-status`;
   const [inputValue, setInputValue] = useState(externalCouponCode ?? "");
-  const { status, discount, error, validate, reset } = useCouponValidation({ planCode, purpose });
+  const { status, discount, error, validate, reset } = useCouponValidation({ planCode, purpose, originalAmount });
 
   const handleApply = useCallback(() => {
     validate(inputValue);
@@ -38,6 +88,10 @@ export function BillingDiscountSection({
   useEffect(() => {
     if (status === "valid" && discount?.discountCode) {
       onCouponChange?.(discount);
+      return;
+    }
+    if (status === "idle" || status === "invalid") {
+      onCouponChange?.(null);
     }
   }, [status, discount, onCouponChange]);
 
@@ -47,9 +101,21 @@ export function BillingDiscountSection({
     onCouponChange?.(null);
   }, [reset, onCouponChange]);
 
+  const handleInputChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value.toUpperCase());
+      if (status !== "idle") {
+        reset();
+        onCouponChange?.(null);
+      }
+    },
+    [onCouponChange, reset, status],
+  );
+
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
+        e.preventDefault();
         handleApply();
       }
     },
@@ -57,59 +123,58 @@ export function BillingDiscountSection({
   );
 
   const effectiveDiscount = status === "valid" ? discount : null;
-  const hasSaleEvent = saleEvent && (saleEvent.discountPercent || saleEvent.discountValue);
+  const saleAmount = getSaleDiscountAmount(saleEvent, originalAmount);
+  const hasSaleEvent = Boolean(saleEvent && saleAmount > 0);
+  const saleFinalAmount = saleEvent?.finalAmount ?? getFinalAmount(originalAmount, saleAmount);
 
-  const couponAmount = effectiveDiscount?.discountAmount ?? 0;
-  const saleAmount = saleEvent?.discountPercent
-    ? Math.round(originalAmount * saleEvent.discountPercent / 100)
-    : saleEvent?.discountValue
-      ? Math.min(saleEvent.discountValue, originalAmount)
-      : 0;
-
+  const couponAmount = getDiscountAmountFromInfo(effectiveDiscount, originalAmount);
+  const couponFinalAmount = getFinalAmount(originalAmount, couponAmount);
   const discountAmount = Math.max(couponAmount, saleAmount) || null;
   const bestSource = couponAmount >= saleAmount ? (effectiveDiscount ? "coupon" : "sale_event") : "sale_event";
 
-  const finalAmount = discountAmount ? Math.max(originalAmount - discountAmount, 1000) : originalAmount;
+  const finalAmount = getFinalAmount(originalAmount, discountAmount ?? 0);
   const hasDiscount = discountAmount !== null && discountAmount > 0;
 
   const envPercent = !effectiveDiscount && !hasSaleEvent ? ENV_DISCOUNT_PERCENT : null;
   const envAmount = envPercent ? Math.round(originalAmount * envPercent / 100) : 0;
-  const envFinal = envAmount ? Math.max(originalAmount - envAmount, 1000) : originalAmount;
+  const envFinal = getFinalAmount(originalAmount, envAmount);
+  const describedBy = [status === "invalid" && error ? errorId : null, status === "valid" ? statusId : null]
+    .filter(Boolean)
+    .join(" ") || undefined;
 
   return (
     <div className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Tag className="h-4 w-4 text-app-accent" />
-        <h3 className="text-sm font-semibold text-app-ink">Mã giảm giá / Ưu đãi</h3>
+      <div className="mb-4 flex items-center gap-2">
+        <Tag className="h-4 w-4 text-app-accent" aria-hidden="true" />
+        <h3 className="text-sm font-semibold text-app-ink">M? gi?m gi? / ?u ??i</h3>
       </div>
 
-      {hasSaleEvent && (
+      {hasSaleEvent && saleEvent && (
         <div className="mb-4 rounded-card border border-app-accent/30 bg-app-accent-soft/40 p-3">
-          <p className="flex items-center gap-2 text-sm font-medium text-app-accent">
-            <Check className="h-4 w-4" />
-            {saleEvent.name}
+          <p className="flex items-start gap-2 text-sm font-medium text-app-accent">
+            <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 break-words">{saleEvent.name}</span>
           </p>
-          {saleEvent.discountPercent && (
-            <p className="mt-1 text-xs text-app-ink-muted">
-              Giảm {saleEvent.discountPercent}% — còn {formatVndAmount(finalAmount)}
-            </p>
-          )}
-          {saleEvent.discountValue && !saleEvent.discountPercent && (
-            <p className="mt-1 text-xs text-app-ink-muted">
-              Giảm {formatVndAmount(saleEvent.discountValue)} — còn {formatVndAmount(finalAmount)}
-            </p>
-          )}
+          <p className="mt-1 text-xs text-app-ink-muted">
+            {getSaleLabel(saleEvent, saleAmount)} ? c?n {formatVndAmount(saleFinalAmount)}
+          </p>
         </div>
       )}
 
-      <div className="flex gap-2">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="relative min-w-0 flex-1">
+          <label htmlFor={inputId} className="sr-only">
+            Nh?p m? gi?m gi?
+          </label>
           <Input
-            placeholder="Nhập mã giảm giá"
+            id={inputId}
+            placeholder="Nh?p m? gi?m gi?"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value.toUpperCase())}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             disabled={status === "loading"}
+            aria-invalid={status === "invalid"}
+            aria-describedby={describedBy}
             className={`pr-8 uppercase ${
               status === "valid"
                 ? "border-app-status-success/50 focus-visible:ring-app-status-success/30"
@@ -119,53 +184,65 @@ export function BillingDiscountSection({
             }`}
           />
           {status === "loading" && (
-            <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-app-ink-muted" />
+            <Loader2
+              className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-app-ink-muted"
+              aria-hidden="true"
+            />
           )}
           {status === "valid" && (
-            <Check className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-app-status-success" />
+            <Check
+              className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-app-status-success"
+              aria-hidden="true"
+            />
           )}
           {status === "invalid" && (
-            <X className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-app-status-error" />
+            <X
+              className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-app-status-error"
+              aria-hidden="true"
+            />
           )}
         </div>
-        {status === "valid" || (inputValue && status !== "loading") ? (
-          <Button variant="outline" size="sm" onClick={handleClear} className="shrink-0">
-            Xóa
+        {status === "valid" ? (
+          <Button type="button" variant="outline" size="sm" onClick={handleClear} className="shrink-0 sm:w-auto">
+            X?a
           </Button>
         ) : (
           <Button
+            type="button"
             size="sm"
             onClick={handleApply}
             disabled={!inputValue.trim() || status === "loading"}
-            className="shrink-0"
+            className="shrink-0 sm:w-auto"
           >
-            {status === "loading" ? "Đang kiểm tra…" : "Áp dụng"}
+            {status === "loading" ? "?ang ki?m tra?" : "?p d?ng"}
           </Button>
         )}
       </div>
 
       {status === "invalid" && error && (
-        <p className="mt-2 text-xs text-app-status-error">{error}</p>
+        <p id={errorId} className="mt-2 text-xs text-app-status-error" aria-live="polite">
+          {error}
+        </p>
       )}
 
       {status === "valid" && effectiveDiscount && bestSource === "coupon" && (
-        <div className="mt-3 rounded-card border border-app-status-success/30 bg-app-status-success/8 p-3">
-          <p className="flex items-center gap-2 text-sm font-medium text-app-status-success">
-            <Check className="h-4 w-4" />
-            {effectiveDiscount.discountName ?? "Mã giảm giá hợp lệ"}
+        <div id={statusId} className="mt-3 rounded-card border border-app-status-success/30 bg-app-status-success/8 p-3" aria-live="polite">
+          <p className="flex items-start gap-2 text-sm font-medium text-app-status-success">
+            <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 break-words">{effectiveDiscount.discountName ?? "M? gi?m gi? h?p l?"}</span>
           </p>
           {effectiveDiscount.discountPercent !== undefined && (
             <p className="mt-1 text-xs text-app-ink-muted">
-              Giảm {effectiveDiscount.discountPercent}%
+              Gi?m {effectiveDiscount.discountPercent}%
             </p>
           )}
-          {effectiveDiscount.discountAmount && (
-            <div className="mt-2 flex items-baseline gap-2">
+          {couponAmount > 0 && (
+            <div className="mt-2 flex flex-wrap items-baseline gap-2">
               <span className="text-sm text-app-ink-muted line-through">
                 {formatVndAmount(originalAmount)}
               </span>
               <span className="text-lg font-semibold text-app-status-success">
-                {formatVndAmount(finalAmount)}
+                {formatVndAmount(couponFinalAmount)}
               </span>
             </div>
           )}
@@ -173,12 +250,12 @@ export function BillingDiscountSection({
       )}
 
       {status === "valid" && effectiveDiscount && bestSource === "sale_event" && hasSaleEvent && (
-        <div className="mt-3 rounded-card border border-app-accent/30 bg-app-accent-soft/40 p-3">
-          <p className="flex items-center gap-2 text-sm font-medium text-app-accent">
-            <Check className="h-4 w-4" />
-            {saleEvent?.name} (áp dụng thay mã giảm giá)
+        <div id={statusId} className="mt-3 rounded-card border border-app-accent/30 bg-app-accent-soft/40 p-3" aria-live="polite">
+          <p className="flex items-start gap-2 text-sm font-medium text-app-accent">
+            <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 break-words">{saleEvent?.name} ?ang c? gi? t?t h?n m? v?a nh?p.</span>
           </p>
-          <div className="mt-2 flex items-baseline gap-2">
+          <div className="mt-2 flex flex-wrap items-baseline gap-2">
             <span className="text-sm text-app-ink-muted line-through">
               {formatVndAmount(originalAmount)}
             </span>
@@ -190,7 +267,7 @@ export function BillingDiscountSection({
       )}
 
       {hasDiscount && !effectiveDiscount && hasSaleEvent && (
-        <div className="mt-3 flex items-baseline gap-2">
+        <div className="mt-3 flex flex-wrap items-baseline gap-2">
           <span className="text-sm text-app-ink-muted line-through">
             {formatVndAmount(originalAmount)}
           </span>
@@ -203,10 +280,10 @@ export function BillingDiscountSection({
       {envPercent && (
         <div className="mt-3 rounded-card border border-app-accent/30 bg-app-accent-soft/40 p-3">
           <p className="flex items-center gap-2 text-sm font-medium text-app-accent">
-            <Check className="h-4 w-4" />
-            Đang có ưu đãi {envPercent}%
+            <Check className="h-4 w-4" aria-hidden="true" />
+            ?ang c? ?u ??i {envPercent}%
           </p>
-          <div className="mt-2 flex items-baseline gap-2">
+          <div className="mt-2 flex flex-wrap items-baseline gap-2">
             <span className="text-sm text-app-ink-muted line-through">
               {formatVndAmount(originalAmount)}
             </span>
@@ -219,3 +296,4 @@ export function BillingDiscountSection({
     </div>
   );
 }
+

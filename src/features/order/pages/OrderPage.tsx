@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
 import {
   AlertDialog,
@@ -147,18 +148,15 @@ export function OrderPage() {
     if (isRateLimitError(err)) {
       return "Hệ thống đang bận, vui lòng thử lại sau giây lát.";
     }
-    const status = (err as { status?: number }).status;
-    if (status === 401 || status === 403) {
+    const e = err as { status?: number; message?: unknown };
+    if (e.status === 401 || e.status === 403) {
       return "Bạn không có quyền hoặc phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
     }
-    if (status !== undefined && status >= 500) {
+    if (e.status !== undefined && e.status >= 500) {
       return "Máy chủ đang gặp sự cố. Đơn của bạn đã được lưu cục bộ, có thể thử lại sau.";
     }
-    if (err && typeof err === "object" && "message" in err) {
-      const message = String((err as { message: unknown }).message);
-      if (message.length < 120 && /[àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(message)) {
-        return message;
-      }
+    if (e.message && typeof e.message === "string" && e.message.length < 80 && e.status !== undefined) {
+      return e.message;
     }
     return "Không thể gửi đơn lên máy chủ. Vui lòng thử lại.";
   }
@@ -211,7 +209,6 @@ export function OrderPage() {
 
   /** Thực sự gửi đơn sau khi user xác nhận trong dialog. */
   async function handleConfirmSubmit() {
-    setShowConfirmDialog(false);
     setSubmitting(true);
     setSubmitError(null);
 
@@ -235,6 +232,7 @@ export function OrderPage() {
     } catch {
       setSubmitError("Không thể tạo đơn lúc này. Vui lòng thử lại.");
       setSubmitting(false);
+      setShowConfirmDialog(false);
       return;
     }
 
@@ -246,11 +244,15 @@ export function OrderPage() {
       const backendOrder = await createOrder(payload);
       saveOrderLink(order.id, backendOrder.id);
       setSubmitting(false);
-      navigateToOrderStatus(order.id);
+      setShowConfirmDialog(false);
+      toast.success("Đặt đơn thành công!");
+      setTimeout(() => navigateToOrderStatus(order.id), 600);
     } catch (err: unknown) {
       if (isOfflineError(err)) {
         setSubmitting(false);
-        navigateToOrderStatus(order.id);
+        setShowConfirmDialog(false);
+        toast.info("Đơn đã được lưu cục bộ. Sẽ tự động đồng bộ khi có kết nối mạng.");
+        setTimeout(() => navigateToOrderStatus(order.id), 400);
         return;
       }
       handleBackendError(err);
@@ -403,7 +405,7 @@ export function OrderPage() {
           </div>
         </div>
 
-        <div className="mx-auto mt-4 max-w-6xl">
+        <div className="mx-auto mt-4 max-w-6xl min-h-[80px]">
           <BillingDiscountSection
             originalAmount={total}
             purpose="physical_order"
@@ -455,7 +457,7 @@ export function OrderPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận đặt đơn</AlertDialogTitle>
             <AlertDialogDescription>
-              Vui lòng kiểm tra lại thông tin đơn hàng trước khi xác nhận.
+              Vui lòng kiểm tra kỹ thông tin — đơn hàng sẽ được gửi đi và không thể thay đổi sau khi xác nhận.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2 text-sm">
@@ -485,9 +487,24 @@ export function OrderPage() {
               <span className="text-app-ink-soft">Vận chuyển</span>
               <span className="font-medium text-app-ink">{formatVnd(shippingCost)}</span>
             </div>
+            {couponDiscount?.discountAmount && couponDiscount.discountAmount > 0 && (
+              <div className="flex justify-between text-app-status-success">
+                <span className="flex items-center gap-1">
+                  Giảm giá
+                  {couponDiscount.discountCode && (
+                    <span className="rounded bg-app-status-success/15 px-1 text-[11px] font-mono uppercase">
+                      {couponDiscount.discountCode}
+                    </span>
+                  )}
+                </span>
+                <span className="font-medium">-{formatVnd(couponDiscount.discountAmount)}</span>
+              </div>
+            )}
             <div className="flex justify-between border-t border-[var(--order-border)] pt-2">
               <span className="font-semibold text-app-ink">Tổng cộng</span>
-              <span className="font-semibold text-[var(--order-accent)]">{formatVnd(total)}</span>
+              <span className="font-semibold text-[var(--order-accent)]">
+                {formatVnd(Math.max(total - (couponDiscount?.discountAmount ?? 0), 1000))}
+              </span>
             </div>
             {shipping.shippingAddress && (
               <div className="text-xs text-app-ink-muted">

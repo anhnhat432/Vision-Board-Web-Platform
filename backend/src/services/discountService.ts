@@ -44,8 +44,25 @@ function mapAppliesTo(purpose?: string): DiscountAppliesTo {
   return "PLUS";
 }
 
+function isPositiveAmount(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+export function calculateDiscountAmount(
+  originalAmount: number,
+  discountType: "percentage" | "fixed",
+  discountValue: number,
+): number {
+  if (!isPositiveAmount(originalAmount) || !Number.isFinite(discountValue) || discountValue <= 0) return 0;
+  if (discountType === "percentage") {
+    return Math.round(originalAmount * discountValue / 100);
+  }
+  return Math.min(discountValue, originalAmount);
+}
+
 export async function getActiveSaleEvent(
   purpose?: string,
+  originalAmount?: number,
 ): Promise<DiscountDocument | null> {
   const now = new Date();
   const appliesTo = purpose ? mapAppliesTo(purpose) : undefined;
@@ -61,21 +78,22 @@ export async function getActiveSaleEvent(
   }
 
   const candidates = await DiscountModel.find(filter)
-    .sort({ discountValue: -1 })
+    .sort({ startsAt: -1 })
     .lean<DiscountDocument[]>();
 
-  return candidates.find((s) => isDateActive(s.startsAt, s.endsAt, now)) ?? null;
-}
+  const active = candidates.filter((s) => isDateActive(s.startsAt, s.endsAt, now));
+  if (!active.length) return null;
 
-function calculateDiscountAmount(
-  originalAmount: number,
-  discountType: "percentage" | "fixed",
-  discountValue: number,
-): number {
-  if (discountType === "percentage") {
-    return Math.round(originalAmount * discountValue / 100);
+  if (isPositiveAmount(originalAmount)) {
+    return active
+      .map((sale) => ({
+        sale,
+        discountAmount: calculateDiscountAmount(originalAmount, sale.discountType, sale.discountValue),
+      }))
+      .sort((a, b) => b.discountAmount - a.discountAmount || b.sale.startsAt.getTime() - a.sale.startsAt.getTime())[0]?.sale ?? null;
   }
-  return Math.min(discountValue, originalAmount);
+
+  return active[0] ?? null;
 }
 
 export function resolveBestDiscount(
@@ -108,6 +126,7 @@ export async function validateCoupon(
   planCode: string,
   purpose?: string,
   userId?: string,
+  originalAmount?: number,
 ): Promise<DiscountInfo> {
   const normalizedCode = code.trim().toUpperCase();
   if (!normalizedCode) {
@@ -152,6 +171,33 @@ export async function validateCoupon(
     }
   }
 
+  const minAmount = discount.minAmount ?? 0;
+  const amountAwareFields: Pick<DiscountInfo, "discountAmount" | "originalAmount" | "finalAmount"> = {};
+
+  if (isPositiveAmount(originalAmount)) {
+    if (originalAmount < minAmount) {
+      return {
+        valid: false,
+        reason: `??n h?ng t?i thi?u ${minAmount.toLocaleString("vi-VN")} ? ?? ?p d?ng m? n?y.`,
+        minAmount,
+      };
+    }
+
+    const discountAmount = calculateDiscountAmount(originalAmount, discount.discountType, discount.discountValue);
+    const finalAmount = Math.max(originalAmount - discountAmount, 1000);
+
+    if (originalAmount - discountAmount < 1000) {
+      return {
+        valid: false,
+        reason: "S? ti?n sau gi?m kh?ng ???c th?p h?n 1.000 ?.",
+      };
+    }
+
+    amountAwareFields.discountAmount = discountAmount;
+    amountAwareFields.originalAmount = originalAmount;
+    amountAwareFields.finalAmount = finalAmount;
+  }
+
   return {
     valid: true,
     discountPercent: discount.discountType === "percentage" ? discount.discountValue : undefined,
@@ -161,6 +207,7 @@ export async function validateCoupon(
     discountId: String(discount._id),
     discountName: discount.name,
     minAmount: discount.minAmount ?? undefined,
+    ...amountAwareFields,
   };
 }
 
@@ -171,7 +218,7 @@ export async function resolveDiscountForCheckout(
   couponCode?: string,
   userId?: string,
 ): Promise<{ appliedDiscount: AppliedDiscount; finalAmount: number; discountInfo?: DiscountInfo }> {
-  const sale = await getActiveSaleEvent(purpose);
+  const sale = await getActiveSaleEvent(purpose, originalAmount);
   const envPercent = getEnvDiscountPercent();
 
   let saleApplied: AppliedDiscount | null = null;
@@ -200,7 +247,7 @@ export async function resolveDiscountForCheckout(
   let discountInfo: DiscountInfo | undefined;
 
   if (couponCode) {
-    const validation = await validateCoupon(couponCode, planCode, purpose, userId);
+    const validation = await validateCoupon(couponCode, planCode, purpose, userId, originalAmount);
     if (validation.valid && validation.discountType && validation.discountValue !== undefined) {
       const minAmount = validation.minAmount ?? 0;
       if (originalAmount < minAmount) {
